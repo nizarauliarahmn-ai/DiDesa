@@ -1,0 +1,1362 @@
+import { fetchResidentsCached } from '../../../utils/apiCache';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import PrintSuccessDialog from './PrintSuccessDialog';
+import { FileText, ArrowLeft, Printer, Save, Search, User, 
+  MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
+  ZoomIn, ZoomOut
+} from 'lucide-react';
+import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
+import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
+import { getPrintSignatureHTML } from '../../../utils/signature';
+import { showToast } from '../../../utils/toast';
+import { useDragScroll } from '../../../hooks/useDragScroll';
+
+
+interface Pengikut {
+  nik: string;
+  nama: string;
+  jk: string;
+  umur: string;
+  shdk: string;
+  selected?: boolean;
+}
+interface Resident {
+  nik: string;
+  name: string;
+  gender: string;
+  birthPlace: string;
+  birthDate: string;
+  job: string;
+  address: string;
+  desa: string;
+  fatherName: string;
+  motherName: string;
+  noKk?: string;
+  no_kk?: string;
+  familyRelation?: string;
+  family_relation?: string;
+}
+
+export default function AdminSuratSPH({ 
+  onBack,
+  editData,
+  editLetterId
+}: { 
+  onBack: () => void;
+  editData?: any;
+  editLetterId?: string | null;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [residents, setResidents] = useState<Resident[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedChild, setSelectedChild] = useState<Resident | null>(null);
+  const [showRiwayat, setShowRiwayat] = useState(false);
+  const [riwayat, setRiwayat] = useState<any[]>([]);
+
+  const [pengikutList, setPengikutList] = useState<Pengikut[]>([]);
+  const [searchPengikutQuery, setSearchPengikutQuery] = useState('');
+  const [filteredPengikutResidents, setFilteredPengikutResidents] = useState<Resident[]>([]);
+
+  // Prefill in edit mode
+  useEffect(() => {
+    if (editData) {
+      setFormData(editData);
+      if (editData.pengikutList) {
+        setPengikutList(editData.pengikutList);
+      }
+    }
+  }, [editData]);
+
+
+  // Form Data
+  const [formData, setFormData] = useState({
+    nomorSurat: '',
+    
+    // Data Penduduk
+    nama: '',
+    nik: '',
+    tempatLahir: '',
+    tanggalLahir: '',
+    jenisKelamin: 'Laki-Laki',
+    agama: 'Islam',
+    pekerjaan: 'Wiraswasta',
+    kewarganegaraan: 'Indonesia',
+    statusPerkawinan: 'Belum Kawin',
+    rt: '001',
+    rw: '001',
+    alamat: '',
+    
+    // Data Pindah
+    tanggalPindah: '',
+    alasanPindah: 'Pekerjaan',
+    alamatTujuan: '',
+    rtTujuan: '001',
+    rwTujuan: '001',
+    desaTujuan: '',
+    kecamatanTujuan: '',
+    kabupatenTujuan: '',
+    provinsiTujuan: '',
+    pengikut: '',
+    
+    keperluan: 'Persyaratan Administrasi Kependudukan',
+    
+    // Pejabat
+    namaPejabat: localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD',
+    jabatanPejabat: 'Kepala Desa',
+    includeCamat: false,
+    
+    // Kop Settings
+    namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
+    namaKecamatan: localStorage.getItem('kop_kecamatan') || 'Simpur',
+    namaKabupaten: localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan',
+    namaProvinsi: localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan',
+    alamatKantor: localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261',
+    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesawasahhilir@gmail.com',
+  });
+
+  
+  useEffect(() => {
+    if (searchPengikutQuery.trim().length > 0) {
+      const lower = searchPengikutQuery.toLowerCase();
+      const filtered = residents.filter(r => 
+        (r.name.toLowerCase().includes(lower) || r.nik.includes(lower)) && 
+        r.nik !== formData.nik &&
+        !pengikutList.some(p => p.nik === r.nik)
+      ).slice(0, 5);
+      setFilteredPengikutResidents(filtered);
+    } else {
+      setFilteredPengikutResidents([]);
+    }
+  }, [searchPengikutQuery, residents, formData.nik, pengikutList]);
+
+  const [previewZoom, setPreviewZoom] = useState(0.45);
+  const dragProps = useDragScroll();
+  const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  const jobs = [
+    'Belum/Tidak Bekerja', 'Mengurus Rumah Tangga', 'Pelajar/Mahasiswa', 'Pensiunan', 
+    'Pegawai Negeri Sipil', 'Tentara Nasional Indonesia', 'Kepolisian RI', 'Perdagangan', 
+    'Petani/Pekebun', 'Peternak', 'Nelayan/Perikanan', 'Industri', 'Konstruksi', 'Transportasi', 
+    'Karyawan Swasta', 'Karyawan BUMN', 'Karyawan BUMD', 'Karyawan Honorer', 'Buruh Harian Lepas', 
+    'Buruh Tani/Perkebunan', 'Buruh Nelayan/Perikanan', 'Buruh Peternakan', 'Pembantu Rumah Tangga', 
+    'Tukang Cukur', 'Tukang Listrik', 'Tukang Batu', 'Tukang Kayu', 'Tukang Sol Sepatu', 
+    'Tukang Las/Pandai Besi', 'Tukang Jahit', 'Tukang Masak', 'Penata Rambut', 'Penata Rias', 
+    'Penata Busana', 'Mekanik', 'Seniman', 'Tabib', 'Paraji', 'Perancang Busana', 'Penterjemah', 
+    'Imam Masjid', 'Pendeta', 'Pastor', 'Wartawan', 'Ustadz/Mubaligh', 'Juru Masak', 'Promotor Acara', 
+    'Anggota DPR-RI', 'Anggota DPD', 'Anggota BPK', 'Presiden', 'Wakil Presiden', 'Anggota Mahkamah Konstitusi', 
+    'Anggota Kabinet/Kementerian', 'Duta Besar', 'Gubernur', 'Wakil Gubernur', 'Bupati', 'Wakil Bupati', 
+    'Walikota', 'Wakil Walikota', 'Anggota DPRD Provinsi', 'Anggota DPRD Kabupaten/Kota', 'Dosen', 
+    'Guru', 'Pilot', 'Pengacara', 'Notaris', 'Arsitek', 'Akuntan', 'Konsultan', 'Dokter', 'Bidan', 
+    'Perawat', 'Apoteker', 'Psikiater/Psikolog', 'Penyiar Televisi', 'Penyiar Radio', 'Pelaut', 
+    'Peneliti', 'Sopir', 'Pialang', 'Paranormal', 'Pedagang', 'Perangkat Desa', 'Kepala Desa', 
+    'Biarawati', 'Wiraswasta'
+  ];
+
+  const updateResidentData = async (nik: string, data: any) => {
+    if (!nik || nik === '-') return;
+
+    try {
+      const checkRes = await fetch(`/api/residents`);
+      const allResidents = await checkRes.json();
+      const existing = allResidents.find((r: any) => r.nik === nik);
+
+      const residentData = {
+        name: data.name,
+        birthPlace: data.birthPlace,
+        birthDate: data.birthDate,
+        gender: data.gender,
+        religion: data.religion,
+        job: data.job,
+        address: data.address,
+        rt_rw: `${data.rt}/${data.rw}`,
+        status: 'Pindah',
+        statusColor: 'yellow'
+      };
+
+      if (existing) {
+        await fetch(`/api/residents/${nik}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...existing, ...residentData })
+        });
+      } else {
+        await fetch(`/api/residents`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nik, ...residentData })
+        });
+      }
+
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Data Penduduk Diperbarui (Pindah)',
+          message: `Status data penduduk atas nama ${data.name} telah diupdate menjadi Pindah melalui pembuatan SK Pindah.`,
+          category: 'Residents'
+        })
+      });
+    } catch (e) {
+      console.error('Failed to sync resident data', e);
+    }
+  };
+
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const res = await fetchResidentsCached();
+        if (res.ok) {
+          const data = await res.json();
+          setResidents(data);
+        }
+      } catch (e) {}
+    };
+
+    fetchResidents();
+
+    const configs = getLetterClassifications();
+    const sph = configs.find(c => c.klasifikasi === 'SPH') || { id: 'fallback_sph', jenis: 'SURAT PENGANTAR PINDAH', klasifikasi: 'SPH', kodeKlasifikasi: '475', noUrutTerakhir: 0 };
+    
+    if (!editData) {
+      const generatedNo = generateLetterNumber(sph.klasifikasi, sph.kodeKlasifikasi || '475');
+      setFormData(prev => ({
+        ...prev,
+        nomorSurat: generatedNo
+      }));
+    }
+
+    const savedRiwayat = localStorage.getItem('riwayat_surat_sph');
+    if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
+
+    const activePejabat = localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD';
+    try {
+      const stored = localStorage.getItem('village_officers');
+      if (stored) {
+        const list = JSON.parse(stored);
+        const found = list.find((o: any) => o.name === activePejabat);
+        if (found) {
+          setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
+        }
+      }
+    } catch (e) {}
+  }, []);
+
+  const handleSelectResident = (res: Resident) => {
+    setSelectedChild(res);
+    const rt_rw = (res as any).rt_rw || '001/001';
+    const [rt, rw] = rt_rw.split('/');
+
+    setFormData(prev => ({
+      ...prev,
+      nama: res.name,
+      nik: res.nik,
+      tempatLahir: res.birthPlace,
+      tanggalLahir: res.birthDate,
+      jenisKelamin: res.gender || 'Laki-Laki',
+      agama: (res as any).religion || 'Islam',
+      pekerjaan: res.job || 'Wiraswasta',
+      alamat: res.address,
+      rt: rt || '001',
+      rw: rw || '001',
+    }));
+    
+    const resNoKk = (res as any).noKk || (res as any).no_kk;
+    if (resNoKk) {
+      const family = residents.filter(r => ((r as any).noKk || (r as any).no_kk) === resNoKk && r.nik !== res.nik);
+      const pengikut = family.map(r => {
+        let age = '';
+        if (r.birthDate) {
+          const birthYear = new Date(r.birthDate).getFullYear();
+          const currentYear = new Date().getFullYear();
+          age = (currentYear - birthYear).toString();
+        }
+        return {
+          nik: r.nik,
+          nama: r.name,
+          jk: r.gender || '-',
+          umur: age || '-',
+          shdk: (r as any).familyRelation || (r as any).family_relation || '-',
+          selected: false
+        };
+      });
+      setPengikutList(pengikut);
+    } else {
+      setPengikutList([]);
+    }
+    setSearchQuery('');
+  };
+
+  const handlePrint = async () => {
+    if (!formData.nama || !formData.nama.trim()) {
+      showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
+      return;
+    }
+    setLoading(true);
+
+    await updateResidentData(formData.nik, { 
+      name: formData.nama, 
+      birthPlace: formData.tempatLahir, 
+      birthDate: formData.tanggalLahir, 
+      gender: formData.jenisKelamin,
+      religion: formData.agama,
+      job: formData.pekerjaan,
+      address: formData.alamat,
+      rt: formData.rt,
+      // We do not need tanggalMeninggal for SPH
+    });
+
+    const content = generateHTML();
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
+
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(el => el.outerHTML)
+      .join('\n');
+
+    doc.open();
+    doc.write(`
+      <html>
+        <head>
+          <title>Cetak SPH - ${formData.nama}</title>
+          ${styles}
+          <style>
+            @page { size: A4; margin: 0 !important; }
+            body { 
+              margin: 0; 
+              padding: 0; 
+              background: white; 
+              -webkit-print-color-adjust: exact; 
+              print-color-adjust: exact; 
+            }
+            .page { 
+              width: 210mm; 
+              height: 297mm; 
+              margin: 0; 
+              box-sizing: border-box; 
+              background: white; 
+              position: relative; 
+              overflow: hidden;
+            }
+            .printable-area {
+              position: absolute !important;
+              left: 0 !important;
+              top: 0 !important;
+              width: 210mm !important;
+              height: 297mm !important;
+              margin: 0 !important;
+              padding: 56px 75px !important; /* matches preview's padding precisely */
+              box-sizing: border-box !important;
+              background: white !important;
+              color: black !important;
+              box-shadow: none !important;
+              border: none !important;
+              display: block !important;
+              transform: none !important;
+              visibility: visible !important;
+              font-family: ${letterFont};
+              font-size: 13px;
+              line-height: 1.5;
+            }
+            .printable-area * {
+              visibility: visible !important;
+            }
+            /* Hide crop marks in print */
+            .crop-mark { 
+              display: none !important; 
+            }
+            @media print {
+              body, .page { 
+                width: 210mm; 
+                height: 297mm; 
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="page">
+            <div class="printable-area bg-white text-black">
+              ${content}
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    // Record to global history
+    const updatedFields = {
+      nomor: formData.nomorSurat,
+      nik: formData.nik,
+      nama: formData.nama,
+      keperluan: formData.keperluan,
+      data: {
+        ...formData,
+        pengikutList
+      }
+    };
+
+    if (editLetterId) {
+      updateLetterHistory(editLetterId, updatedFields);
+    } else {
+      addLetterHistory({
+        ...updatedFields,
+        jenis: 'SPH',
+        tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        status: 'Selesai'
+      });
+      incrementSequenceNumber('SPH');
+    }
+
+    const newEntry = {
+      id: Date.now(),
+      nama: formData.nama,
+      nomor: formData.nomorSurat,
+      tanggal: new Date().toISOString(),
+      data: {
+        ...formData,
+        pengikutList
+      }
+    };
+    const updatedRiwayat = [newEntry, ...riwayat].slice(0, 50);
+    setRiwayat(updatedRiwayat);
+    localStorage.setItem('riwayat_surat_sph', JSON.stringify(updatedRiwayat));
+    setLoading(false);
+    setSuccess(true);
+  };
+
+  const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? val : fallback);
+  
+  const generateHTML = () => {
+    const today = new Date();
+    const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
+
+    const activeKabupaten = localStorage.getItem('kop_kabupaten') || formData.namaKabupaten || 'Hulu Sungai Selatan';
+    const activeKecamatan = localStorage.getItem('kop_kecamatan') || formData.namaKecamatan || 'Simpur';
+    const activeDesa = localStorage.getItem('kop_desa') || formData.namaDesa || 'Wasah Hilir';
+    const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
+    const activeProvinsi = localStorage.getItem('kop_provinsi') || formData.namaProvinsi || 'Kalimantan Selatan';
+
+    const fmtDate = (d: string) => {
+      if (!d) return '';
+      try {
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return d;
+        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      } catch (e) { return d; }
+    };
+
+    const cleanStr = (s: string, prefixRegex: RegExp) => {
+      if (!s) return '';
+      return s.replace(prefixRegex, '');
+    };
+
+
+    return `
+      <!-- KOP SURAT -->
+      <div style="border-bottom:3px solid #000;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;padding-bottom:6px;border-bottom:1px solid #000;margin-bottom:1px;font-family:${letterFont};">
+          <div style="display:flex;width:100%;align-items:center;">
+            <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
+              <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
+            </div>
+            <div style="text-align:center;flex:1;padding-right:90px;">
+              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKabupaten.toUpperCase()}</div>
+              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKecamatan.toUpperCase()}</div>
+              <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${activeDesa.toUpperCase()}</div>
+              <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${activeAlamat}</div>
+              <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${formData.kontakKantor || '0813 4686 7519, pemdeswasahhilir@gmail.com'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JUDUL SURAT -->
+      <div style="text-align:center;margin-bottom:15px;">
+        <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN PINDAH</h3>
+        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
+      </div>
+
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:5px;font-size:13px;">
+        Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa :
+      </p>
+
+      <!-- DATA PENDUDUK -->
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:5px;margin-left:40px;line-height:1.15;font-size:13px;">
+        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.nama)}</strong></td></tr>
+        <tr><td>NIK</td><td>:</td><td>${v(formData.nik)}</td></tr>
+        <tr><td>Tempat, Tanggal lahir</td><td>:</td><td>${v(formData.tempatLahir)}, ${fmtDate(formData.tanggalLahir)}</td></tr>
+        <tr><td>Jenis Kelamin</td><td>:</td><td>${v(formData.jenisKelamin)}</td></tr>
+        <tr><td>Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
+        <tr><td>Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
+        <tr><td>Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
+        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
+      </table>
+
+      <!-- PERNYATAAN KEPINDAHAN -->
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:5px;font-size:13px;">
+        Nama tersebut di atas adalah benar-benar penduduk Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)} Kabupaten ${cleanStr(v(formData.namaKabupaten), /^(kabupaten|kota)\s+/i)}, yang mana yang bersangkutan mengajukan permohonan pindah domisili dengan rincian sebagai berikut:
+      </p>
+
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:5px;margin-left:40px;line-height:1.15;font-size:13px;">
+        <tr><td style="width:30%;">Tanggal Pindah</td><td style="width:3%;">:</td><td>${fmtDate(formData.tanggalPindah)}</td></tr>
+        <tr><td>Alasan Pindah</td><td>:</td><td>${v(formData.alasanPindah)}</td></tr>
+        <tr><td style="vertical-align:top;">Alamat Tujuan</td><td style="vertical-align:top;">:</td><td>${v(formData.alamatTujuan)} RT.${v(formData.rtTujuan)} RW.${v(formData.rwTujuan)}<br/>Desa ${cleanStr(v(formData.desaTujuan), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.kecamatanTujuan), /^kecamatan\s+/i)}<br/>Kab. ${cleanStr(v(formData.kabupatenTujuan), /^(kabupaten|kota)\s+/i)} Prov. ${cleanStr(v(formData.provinsiTujuan), /^provinsi\s+/i)}</td></tr>
+        
+      </table>
+
+
+      <p style="margin-top:5px;margin-bottom:3px;font-size:13px;font-weight:bold;">Keluarga yang Ikut Pindah:</p>
+      <table style="width:100%;border-collapse:collapse;margin-bottom:5px;font-size:11px;border:1px solid #000;" border="1">
+        <thead>
+           <tr>
+             <th style="border:1px solid #000;padding:3px;text-align:center;">No</th>
+             <th style="border:1px solid #000;padding:3px 4px;text-align:left;">Nama Lengkap</th>
+             <th style="border:1px solid #000;padding:3px;text-align:center;">L/P</th>
+             <th style="border:1px solid #000;padding:3px;text-align:center;">NIK</th>
+             <th style="border:1px solid #000;padding:3px;text-align:center;">SHDK</th>
+           </tr>
+        </thead>
+        <tbody>
+           ${pengikutList.filter(p => p.selected !== false).length > 0 ? pengikutList.filter(p => p.selected !== false).map((p, i) => `
+             <tr>
+               <td style="border:1px solid #000;padding:2px;text-align:center;">${i+1}</td>
+               <td style="border:1px solid #000;padding:2px 4px;">${p.nama}</td>
+               <td style="border:1px solid #000;padding:2px;text-align:center;">${p.jk === 'Laki-Laki' ? 'L' : p.jk === 'Perempuan' ? 'P' : p.jk}</td>
+               <td style="border:1px solid #000;padding:2px;text-align:center;">${p.nik === "-" ? "" : p.nik}</td>
+               <td style="border:1px solid #000;padding:2px;text-align:center;">${p.shdk}</td>
+             </tr>
+           `).join('') : `
+             <tr>
+               <td colspan="5" style="border:1px solid #000;padding:6px;text-align:center;font-style:italic;">- Tidak ada anggota keluarga yang ikut pindah -</td>
+             </tr>
+           `}
+        </tbody>
+      </table>
+
+      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;margin-top:15px;">
+        Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas benar berstatus sebagai warga kami yang bermaksud melakukan perpindahan alamat domisili ke tujuan yang baru.
+      </p>
+
+
+      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+        Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
+      </p>
+
+      <!-- TANDA TANGAN -->
+      ${getPrintSignatureHTML(
+        formData.namaDesa,
+        tglFormatted,
+        formData.namaPejabat,
+        formData.jabatanPejabat,
+        // Optional NIP lookup from officers
+        (() => {
+          try {
+            const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+            const found = officersList.find((o: any) => o.name === formData.namaPejabat);
+            return found?.nip || '-';
+          } catch(e) {
+            return '-';
+          }
+        })(),
+        formData.includeCamat
+      )}
+      <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
+        ${SAAS_CONFIG.globalFooterHTML}
+      </div>
+    `;
+  };
+
+  const filteredResidents = residents.filter(r => 
+    r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    r.nik.includes(searchQuery)
+  ).slice(0, 5);
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-6 pb-20">
+      {/* Header */}
+      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-md sticky top-16 z-30">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
+            <ArrowLeft className="w-5 h-5 text-slate-600" />
+          </button>
+          <div>
+            <h1 className="text-lg font-bold text-slate-800">Buat SPH</h1>
+            <p className="text-xs text-slate-500">Surat Keterangan Pindah</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          
+          <button 
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/20 active:scale-95"
+          >
+            <Printer className="w-4 h-4" />
+            Cetak Surat
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {showRiwayat && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-slate-800 flex items-center gap-2">
+                <History className="w-4 h-4 text-emerald-600" />
+                Riwayat Pembuatan SPH
+              </h2>
+              <button 
+                onClick={() => {
+                  if (confirm('Kosongkan riwayat?')) {
+                    setRiwayat([]);
+                    localStorage.removeItem('riwayat_surat_sph');
+                  }
+                }}
+                className="text-xs text-rose-500 font-bold hover:underline"
+              >
+                Hapus Semua
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {riwayat.length === 0 ? (
+                <p className="text-sm text-slate-400 italic">Belum ada riwayat cetak.</p>
+              ) : riwayat.map((item) => (
+                <div 
+                  key={item.id}
+                  onClick={() => setFormData(item.data)}
+                  className="p-3 border border-slate-100 rounded-xl hover:border-emerald-200 hover:bg-emerald-50 cursor-pointer transition-all group"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-bold text-slate-700 text-sm">{item.nama}</p>
+                      <p className="text-[10px] text-slate-400">{item.nomor || 'No Nomor'}</p>
+                    </div>
+                    <span className="text-[10px] text-slate-400">{new Date(item.tanggal).toLocaleDateString('id-ID')}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Form Column */}
+        <div className="lg:col-span-7 space-y-6">
+          
+          {/* Pencarian Warga */}
+          <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider">
+              <Search className="w-4 h-4 text-emerald-600" />
+              Pilih Penduduk (Warga)
+            </h3>
+            <div className="relative">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input 
+                  type="text"
+                  placeholder="Cari NIK atau Nama Warga..."
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <p className="mt-2 text-emerald-600 font-medium text-[10px]">* Pencarian otomatis melengkapi biodata, alamat, KK, pendidikan, dan pekerjaan warga desa terpilih</p>
+              {searchQuery && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-20">
+                  {filteredResidents.length > 0 ? (
+                    filteredResidents.map(res => (
+                      <button
+                        key={res.nik}
+                        onClick={() => handleSelectResident(res)}
+                        className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 text-left transition-colors border-b border-slate-100 last:border-0"
+                      >
+                        <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 font-bold shrink-0">
+                          {res.name[0]}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-800">{res.name}</p>
+                          <p className="text-xs text-slate-500">NIK: {res.nik} • {res.desa}</p>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="p-4 text-sm text-slate-500 italic text-center">Warga tidak ditemukan.</p>
+                  )}
+                </div>
+              )}
+            </div>
+            {selectedChild && (
+              <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-bold text-emerald-900">{selectedChild.name}</p>
+                    <p className="text-[10px] text-emerald-700">Warga Terpilih</p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedChild(null)} className="text-xs font-bold text-emerald-600 hover:underline">Ganti</button>
+              </div>
+            )}
+          </section>
+
+          {/* Form Detail */}
+          <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
+            {/* Informasi Surat */}
+            <div>
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-slate-600" />
+                </div>
+                <h3 className="font-bold text-slate-800">Informasi Surat</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    Nomor Surat
+                  </label>
+                  <input 
+                    type="text"
+                    placeholder="Contoh: SPH/064/WHi/2026"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                    value={formData.nomorSurat}
+                    onChange={(e) => setFormData({...formData, nomorSurat: e.target.value})}
+                  />
+                  <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Format: [Kode]/[No]/[Tahun]. Dapat diubah manual jika perlu.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Penduduk */}
+            <div>
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <User className="w-4 h-4 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Data Penduduk</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Nama Lengkap</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.nama}
+                    onChange={(e) => setFormData({...formData, nama: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">NIK</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.nik}
+                    onChange={(e) => setFormData({...formData, nik: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Jenis Kelamin</label>
+                  <select 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.jenisKelamin}
+                    onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
+                  >
+                    <option value="Laki-Laki">Laki-Laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Agama</label>
+                  <select 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.agama}
+                    onChange={(e) => setFormData({...formData, agama: e.target.value})}
+                  >
+                    <option value="Islam">Islam</option>
+                    <option value="Kristen">Kristen</option>
+                    <option value="Katolik">Katolik</option>
+                    <option value="Hindu">Hindu</option>
+                    <option value="Budha">Budha</option>
+                    <option value="Khonghucu">Khonghucu</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Pekerjaan</label>
+                  <select 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    value={formData.pekerjaan}
+                    onChange={(e) => setFormData({...formData, pekerjaan: e.target.value})}
+                  >
+                    <option value="">Pilih Pekerjaan</option>
+                    {jobs.map((j, i) => <option key={i} value={j}>{j}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Status Perkawinan</label>
+                  <select 
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.statusPerkawinan}
+                    onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
+                  >
+                    <option value="Belum Kawin">Belum Kawin</option>
+                    <option value="Kawin">Kawin</option>
+                    <option value="Cerai Hidup">Cerai Hidup</option>
+                    <option value="Cerai Mati">Cerai Mati</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Tempat Lahir</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.tempatLahir}
+                    onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Tanggal Lahir</label>
+                  <input 
+                    type="date"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.tanggalLahir}
+                    onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700">RT</label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      value={formData.rt}
+                      onChange={(e) => setFormData({...formData, rt: e.target.value})}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700">RW</label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      value={formData.rw}
+                      onChange={(e) => setFormData({...formData, rw: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Alamat Lengkap</label>
+                  <textarea 
+                    rows={2}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none"
+                    value={formData.alamat}
+                    onChange={(e) => setFormData({...formData, alamat: e.target.value})}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* DATA PINDAH */}
+            <div>
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <MapPin className="w-4 h-4 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Data Pindah</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Tanggal Pindah</label>
+                  <input 
+                    type="date"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.tanggalPindah}
+                    onChange={(e) => setFormData({...formData, tanggalPindah: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Alasan Pindah</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.alasanPindah}
+                    onChange={(e) => setFormData({...formData, alasanPindah: e.target.value})}
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Alamat Tujuan Lengkap (Jalan / Gang / Blok / RT / RW)</label>
+                  <div className="flex gap-4">
+                    <input 
+                      type="text"
+                      placeholder="Jalan / Perumahan"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      value={formData.alamatTujuan}
+                      onChange={(e) => setFormData({...formData, alamatTujuan: e.target.value})}
+                    />
+                    <input 
+                      type="text"
+                      placeholder="RT"
+                      className="w-24 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-center"
+                      value={formData.rtTujuan}
+                      onChange={(e) => setFormData({...formData, rtTujuan: e.target.value})}
+                    />
+                    <input 
+                      type="text"
+                      placeholder="RW"
+                      className="w-24 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-center"
+                      value={formData.rwTujuan}
+                      onChange={(e) => setFormData({...formData, rwTujuan: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Desa/Kelurahan Tujuan</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.desaTujuan}
+                    onChange={(e) => setFormData({...formData, desaTujuan: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Kecamatan Tujuan</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.kecamatanTujuan}
+                    onChange={(e) => setFormData({...formData, kecamatanTujuan: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Kabupaten/Kota Tujuan</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.kabupatenTujuan}
+                    onChange={(e) => setFormData({...formData, kabupatenTujuan: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Provinsi Tujuan</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.provinsiTujuan}
+                    onChange={(e) => setFormData({...formData, provinsiTujuan: e.target.value})}
+                  />
+                </div>
+                
+                <div className="md:col-span-2 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-bold text-slate-700">Pengikut / Anggota Keluarga yang Pindah (Opsional)</label>
+                  </div>
+                  
+                  
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex gap-3 text-blue-800 text-sm">
+                    <AlertCircle className="w-5 h-5 shrink-0 text-blue-600" />
+                    <p>
+                      Jika warga terdaftar di database, daftar keluarga satu KK akan otomatis muncul di bawah. Anda cukup mencentang nama yang ikut pindah.
+                      <br/>Untuk warga luar atau yang tidak ada di database, gunakan pencarian di bawah untuk menambah manual.
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
+                    <div className="relative">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                      <input 
+                        type="text"
+                        placeholder="Cari NIK atau Nama untuk ditambahkan sebagai pengikut..."
+                        className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                        value={searchPengikutQuery}
+                        onChange={(e) => setSearchPengikutQuery(e.target.value)}
+                      />
+                    </div>
+                      {searchPengikutQuery && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-20">
+                          {filteredPengikutResidents.length > 0 ? (
+                            filteredPengikutResidents.map(res => (
+                              <button
+                                key={res.nik}
+                                onClick={() => {
+                                  // calculate age roughly
+                                  let age = '';
+                                  if (res.birthDate) {
+                                    const birthYear = new Date(res.birthDate).getFullYear();
+                                    const currentYear = new Date().getFullYear();
+                                    age = (currentYear - birthYear).toString();
+                                  }
+                                  
+                                  setPengikutList([...pengikutList, {
+                                    nik: res.nik,
+                                    nama: res.name,
+                                    jk: res.gender || '-',
+                                    umur: age || '-',
+                                    shdk: 'Anak', selected: true
+                                  }]);
+                                  setSearchPengikutQuery('');
+                                }}
+                                className="w-full p-3 flex items-center gap-3 hover:bg-slate-50 text-left transition-colors border-b border-slate-100 last:border-0"
+                              >
+                                <div>
+                                  <p className="font-bold text-slate-800 text-sm">{res.name}</p>
+                                  <p className="text-xs text-slate-500">NIK: {res.nik}</p>
+                                </div>
+                              </button>
+                            ))
+                          ) : (
+                            <div className="p-3">
+                              <p className="text-sm text-slate-500 italic mb-2">Warga tidak ditemukan.</p>
+                              <button
+                                onClick={() => {
+                                  setPengikutList([...pengikutList, {
+                                    nik: '-',
+                                    nama: searchPengikutQuery,
+                                    jk: 'Laki-Laki',
+                                    umur: '',
+                                    shdk: '', selected: true
+                                  }]);
+                                  setSearchPengikutQuery('');
+                                }}
+                                className="text-xs text-emerald-600 font-bold hover:underline"
+                              >
+                                + Tambah manual "{searchPengikutQuery}"
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {pengikutList.length > 0 && (
+                      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                        <table className="w-full text-left text-sm">
+                          <thead className="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                              <th className="p-3 font-semibold text-slate-700 w-10 text-center"><CheckCircle2 className="w-4 h-4 mx-auto text-slate-400" /></th>
+                              <th className="p-3 font-semibold text-slate-700">Nama Lengkap</th>
+                              <th className="p-3 font-semibold text-slate-700 w-24">L/P</th>
+                              <th className="p-3 font-semibold text-slate-700 w-32">NIK</th>
+                              <th className="p-3 font-semibold text-slate-700 w-32">SHDK</th>
+                              <th className="p-3 font-semibold text-slate-700 w-12"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {pengikutList.map((p, idx) => (
+                              <tr key={idx} className="border-b border-slate-50 last:border-0">
+                                <td className="p-2 text-center">
+                                  <input type="checkbox" checked={p.selected !== false} onChange={(e) => {
+                                      const newList = [...pengikutList];
+                                      newList[idx].selected = e.target.checked;
+                                      setPengikutList(newList);
+                                  }} className="w-4 h-4 text-emerald-600 rounded cursor-pointer" />
+                                </td>
+                                <td className="p-2">
+                                  <input 
+                                    className="w-full px-2 py-1.5 bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-500 rounded outline-none"
+                                    value={p.nama}
+                                    onChange={(e) => {
+                                      const newList = [...pengikutList];
+                                      newList[idx].nama = e.target.value;
+                                      setPengikutList(newList);
+                                    }}
+                                  />
+                                  
+                                </td>
+                                <td className="p-2">
+                                  <select
+                                    className="w-full px-2 py-1.5 bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-500 rounded outline-none"
+                                    value={p.jk}
+                                    onChange={(e) => {
+                                      const newList = [...pengikutList];
+                                      newList[idx].jk = e.target.value;
+                                      setPengikutList(newList);
+                                    }}
+                                  >
+                                    <option value="Laki-Laki">L</option>
+                                    <option value="Perempuan">P</option>
+                                    <option value="-">-</option>
+                                  </select>
+                                </td>
+                                <td className="p-2">
+                                  <input 
+                                    className="w-full px-2 py-1.5 bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-500 rounded outline-none text-center font-mono text-xs"
+                                    value={p.nik === '-' ? '' : p.nik}
+                                    placeholder="NIK"
+                                    onChange={(e) => {
+                                      const newList = [...pengikutList];
+                                      newList[idx].nik = e.target.value || '-';
+                                      setPengikutList(newList);
+                                    }}
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <select
+                                    className="w-full px-2 py-1.5 bg-transparent border border-transparent hover:border-slate-200 focus:border-emerald-500 rounded outline-none"
+                                    value={p.shdk}
+                                    onChange={(e) => {
+                                      const newList = [...pengikutList];
+                                      newList[idx].shdk = e.target.value;
+                                      setPengikutList(newList);
+                                    }}
+                                  >
+                                    <option value="Istri">Istri</option>
+                                    <option value="Suami">Suami</option>
+                                    <option value="Anak">Anak</option>
+                                    <option value="Famili Lain">Famili Lain</option>
+                                    <option value="">-</option>
+                                  </select>
+                                </td>
+                                <td className="p-2 text-center">
+                                  <button
+                                    onClick={() => {
+                                      setPengikutList(pengikutList.filter((_, i) => i !== idx));
+                                    }}
+                                    className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Keperluan Surat (Diberikan Untuk...)</label>
+                  <input 
+                    type="text"
+                    placeholder="Contoh: Persyaratan Administrasi Kepindahan"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    value={formData.keperluan}
+                    onChange={(e) => setFormData({...formData, keperluan: e.target.value})}
+                  />
+                  <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Pejabat Penandatangan */}
+            <div className="pt-6 border-t border-slate-100">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                  <FileSignature className="w-4 h-4 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-slate-800">Pejabat Penandatangan</h3>
+              </div>
+              <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
+                    <select 
+                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                      value={formData.namaPejabat}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        setFormData(prev => ({ ...prev, namaPejabat: name }));
+                        // Update role if found
+                        try {
+                          const stored = localStorage.getItem('village_officers');
+                          if (stored) {
+                            const list = JSON.parse(stored);
+                            const found = list.find((o: any) => o.name === name);
+                            if (found) setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
+                          }
+                        } catch (e) {}
+                      }}
+                    >
+                      {(() => {
+                        try {
+                          const stored = localStorage.getItem('village_officers');
+                          if (stored) {
+                            const list = JSON.parse(stored);
+                            return list.map((o: any, i: number) => (
+                              <option key={i} value={o.name}>{o.name} ({o.role})</option>
+                            ));
+                          }
+                        } catch (e) {}
+                        return <option value="FAZAKKIR RAHMAD">FAZAKKIR RAHMAD (Kepala Desa)</option>;
+                      })()}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-amber-900">Jabatan</label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl outline-none font-medium"
+                      value={formData.jabatanPejabat}
+                      onChange={(e) => setFormData({...formData, jabatanPejabat: e.target.value})}
+                    />
+                  </div>
+                
+                </div>
+                
+                <div className="mt-6 pt-6 border-t border-amber-100">
+                  <label className="flex items-center gap-3 p-3 bg-white border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 transition-colors">
+                    <input 
+                      type="checkbox"
+                      checked={formData.includeCamat}
+                      onChange={(e) => setFormData({...formData, includeCamat: e.target.checked})}
+                      className="w-5 h-5 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
+                    />
+                    <div>
+                      <div className="font-bold text-slate-800 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                      <div className="text-xs text-slate-500 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                    </div>
+                  </label>
+                </div>
+
+                <p className="mt-4 text-[10px] text-amber-700 font-medium italic">
+                  * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* Preview Column */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-bold text-emerald-900 text-xs">Informasi Penting & Cetak</h4>
+              <p className="text-[11px] text-emerald-700 mt-1 leading-relaxed">
+                Pastikan data penduduk sudah sesuai dengan KTP/KK terbaru. 
+                Gunakan fitur pencarian untuk meminimalkan kesalahan pengetikan. Jika tombol cetak tidak merespon, silakan gunakan menu <strong>Buka di Tab Baru</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-xs font-bold text-slate-700 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+              </div>
+              
+              <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-100">
+                <button 
+                  onClick={() => setPreviewZoom(prev => Math.max(0.3, prev - 0.05))} 
+                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  title="Zoom Out"
+                >
+                  <ZoomOut size={16} />
+                </button>
+                <span className="text-xs font-mono font-bold text-slate-600 px-2 w-14 text-center">
+                  {Math.round(previewZoom * 100)}%
+                </span>
+                <button 
+                  onClick={() => setPreviewZoom(prev => Math.min(1.2, prev + 0.05))} 
+                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  title="Zoom In"
+                >
+                  <ZoomIn size={16} />
+                </button>
+                <div className="w-px h-5 bg-slate-200 mx-1"></div>
+                <button 
+                  onClick={() => setPreviewZoom(0.45)} 
+                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-[10px] font-bold"
+                  title="Reset Zoom"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+            
+            <div 
+              ref={dragProps.ref}
+              onMouseDown={dragProps.onMouseDown}
+              onMouseLeave={dragProps.onMouseLeave}
+              onMouseUp={dragProps.onMouseUp}
+              onMouseMove={dragProps.onMouseMove}
+              style={{ ...dragProps.style }}
+              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
+            >
+              <div 
+                style={{
+                  width: `${794 * previewZoom}px`,
+                  height: `${1123 * previewZoom}px`,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                  borderRadius: '12px',
+                  transition: 'width 0.2s ease-out, height 0.2s ease-out'
+                }}
+                className="bg-white m-auto shrink-0 relative"
+              >
+                {/* Visual Crop Marks */}
+                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 pointer-events-none z-10"></div>
+                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 pointer-events-none z-10"></div>
+                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 pointer-events-none z-10"></div>
+                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 pointer-events-none z-10"></div>
+
+                <div 
+                  className="bg-white shrink-0"
+                  style={{ 
+                    width: '794px', 
+                    height: '1123px', 
+                    padding: '56px 75px',
+                    transform: `scale(${previewZoom})`,
+                    transformOrigin: 'top left',
+                    fontFamily: letterFont,
+                    fontSize: '13px',
+                    lineHeight: '1.45',
+                    position: 'relative',
+                    color: 'black',
+                    boxSizing: 'border-box'
+                  }}
+                  dangerouslySetInnerHTML={{ __html: generateHTML() }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Hidden Iframe for Printing */}
+      <iframe 
+        ref={iframeRef} 
+        style={{ 
+          position: 'absolute', 
+          width: '0', 
+          height: '0', 
+          border: 'none', 
+          opacity: '0', 
+          pointerEvents: 'none' 
+        }} 
+        title="Print Frame" 
+      />
+
+      {/* Pop-up Dialog Success Printing */}
+      <PrintSuccessDialog
+        isOpen={success}
+        onClose={() => setSuccess(false)}
+        nomorSurat={formData.nomorSurat}
+        namaWarga={formData.nama}
+        jenisSurat="Surat Pernyataan Hibah (SPH)"
+        onBackToTemplates={onBack}
+      />
+    </div>
+  );
+}

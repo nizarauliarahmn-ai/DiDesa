@@ -1,0 +1,6 @@
+{
+  "name": "DiDesa",
+  "description": "Sistem informasi manajemen desa terintegrasi meliputi data penduduk, persuratan otomatis, bantuan sosial, dan pengaduan warga.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

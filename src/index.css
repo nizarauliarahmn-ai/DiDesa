@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-tertiary: #0054a7;
+  --color-on-tertiary-fixed-variant: #00468c;
+  --color-surface-variant: #e2e2e2;
+  --color-on-secondary: #ffffff;
+  --color-on-primary: #ffffff;
+  --color-surface: #f9f9f9;
+  --color-tertiary-container: #246dc8;
+  --color-on-tertiary-container: #edf1ff;
+  --color-surface-container: #eeeeee;
+  --color-secondary-fixed: #ffdf93;
+  --color-on-error: #ffffff;
+  --color-inverse-on-surface: #f0f1f1;
+  --color-surface-tint: #1b6d24;
+  --color-background: #f9f9f9;
+  --color-surface-container-low: #f3f3f3;
+  --color-inverse-surface: #2f3131;
+  --color-tertiary-fixed: #d6e3ff;
+  --color-on-background: #1a1c1c;
+  --color-tertiary-fixed-dim: #a9c7ff;
+  --color-surface-bright: #f9f9f9;
+  --color-on-secondary-container: #6e5400;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-primary-fixed: #002204;
+  --color-on-secondary-fixed: #241a00;
+  --color-on-primary-container: #cbffc2;
+  --color-secondary-container: #fdc825;
+  --color-secondary: #765b00;
+  --color-on-error-container: #93000a;
+  --color-error: #ba1a1a;
+  --color-primary: #0d631b;
+  --color-surface-container-highest: #e2e2e2;
+  --color-primary-container: #2e7d32;
+  --color-on-surface-variant: #40493d;
+  --color-on-primary-fixed-variant: #005312;
+  --color-outline-variant: #bfcaba;
+  --color-primary-fixed-dim: #88d982;
+  --color-surface-container-high: #e8e8e8;
+  --color-on-tertiary: #ffffff;
+  --color-primary-fixed: #a3f69c;
+  --color-on-secondary-fixed-variant: #594400;
+  --color-inverse-primary: #88d982;
+  --color-on-surface: #1a1c1c;
+  --color-surface-dim: #dadada;
+  --color-outline: #707a6c;
+  --color-secondary-fixed-dim: #f3c01a;
+  --color-on-tertiary-fixed: #001b3d;
+  --color-error-container: #ffdad6;
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  --font-body-md: "Plus Jakarta Sans";
+  --font-body-lg: "Plus Jakarta Sans";
+  --font-label-md: "Plus Jakarta Sans";
+  --font-display-lg: "Plus Jakarta Sans";
+  --font-headline-lg: "Plus Jakarta Sans";
+  --font-headline-md: "Plus Jakarta Sans";
+  --font-title-lg: "Plus Jakarta Sans";
+
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Custom scrollbar hiding helper */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+@media print {
+  @page {
+    margin: 0mm !important;
+  }
+
+  html, body {
+    margin: 0mm !important;
+    padding: 0mm !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Force light theme colors on printing */
+  :root, html, body, [data-theme], html.dark, [data-theme="dark"] {
+    --bg-canvas: #ffffff !important;
+    --bg-surface: #ffffff !important;
+    --bg-main: #ffffff !important;
+    --text-main: #000000 !important;
+    --text-muted: #4b5563 !important;
+    --border-color: #cbd5e1 !important;
+    --glass-bg: #ffffff !important;
+    --glass-border: #94a3b8 !important;
+    --glass-shadow: none !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Hide all regular web page elements */
+  body * {
+    visibility: hidden !important;
+  }
+  
+  /* Make only the designated printable-area visible */
+  .printable-area, .printable-area * {
+    visibility: visible !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Format and position the printable area perfectly for A4 paper */
+  .printable-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 20mm !important;
+    box-sizing: border-box !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+    display: block !important;
+    transform: none !important;
+  }
+
+  /* Specific handling for elements using print:block */
+  .print\:block {
+    display: block !important;
+  }
+  
+  /* Preserve colors and logos on high-quality prints but print safely */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+@layer base {
+  button {
+    @apply transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] active:scale-[0.95];
+  }
+}
+
+:root {
+  --bg-canvas: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-main: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.7);
+  --glass-shadow: rgba(0, 0, 0, 0.05);
+}
+
+html, body, #root {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+@layer components {
+  .glass-card, .liquid-glass {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: 0px 4px 12px var(--glass-shadow) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .standard-card {
+    background: var(--bg-surface) !important;
+    border-radius: 10px;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0px 4px 12px var(--glass-shadow) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .donut-segment {
+    transition: stroke-dashoffset 1s ease-in-out;
+  }
+}
+
+

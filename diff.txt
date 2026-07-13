@@ -1,0 +1,382 @@
+--- src/components/admin/surat/AdminSuratSKTM.tsx	2026-07-11 23:12:43.011903878 +0000
++++ src/components/admin/surat/AdminSuratSKP.tsx	2026-07-11 23:12:52.812259093 +0000
+@@ -24,7 +24,7 @@
+   motherName: string;
+ }
+ 
+-export default function AdminSuratSKTM({ onBack }: { onBack: () => void }) {
++export default function AdminSuratSKP({ onBack }: { onBack: () => void }) {
+   const [loading, setLoading] = useState(false);
+   const [success, setSuccess] = useState(false);
+   const [residents, setResidents] = useState<Resident[]>([]);
+@@ -50,7 +50,20 @@
+     rt: '001',
+     rw: '001',
+     alamat: '',
+-    keperluan: 'Bantuan Beasiswa',
++    
++    // Data Pindah
++    tanggalPindah: '',
++    alasanPindah: 'Pekerjaan',
++    alamatTujuan: '',
++    rtTujuan: '001',
++    rwTujuan: '001',
++    desaTujuan: '',
++    kecamatanTujuan: '',
++    kabupatenTujuan: '',
++    provinsiTujuan: '',
++    pengikut: '',
++    
++    keperluan: 'Persyaratan Administrasi Kependudukan',
+     
+     // Pejabat
+     namaPejabat: localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD',
+@@ -91,6 +104,7 @@
+ 
+   const updateResidentData = async (nik: string, data: any) => {
+     if (!nik || nik === '-') return;
++
+     try {
+       const checkRes = await fetch(`/api/residents`);
+       const allResidents = await checkRes.json();
+@@ -104,7 +118,9 @@
+         religion: data.religion,
+         job: data.job,
+         address: data.address,
+-        rt_rw: `${data.rt}/${data.rw}`
++        rt_rw: `${data.rt}/${data.rw}`,
++        status: 'Pindah',
++        statusColor: 'yellow'
+       };
+ 
+       if (existing) {
+@@ -117,7 +133,7 @@
+         await fetch(`/api/residents`, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+-          body: JSON.stringify({ nik, status: 'Aktif', statusColor: 'green', ...residentData })
++          body: JSON.stringify({ nik, ...residentData })
+         });
+       }
+ 
+@@ -125,8 +141,8 @@
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+-          title: 'Data Penduduk Diperbarui',
+-          message: `Data penduduk atas nama ${data.name} telah diperbarui secara otomatis melalui pembuatan SKTM.`,
++          title: 'Data Penduduk Diperbarui (Pindah)',
++          message: `Status data penduduk atas nama ${data.name} telah diupdate menjadi Pindah melalui pembuatan SK Pindah.`,
+           category: 'Residents'
+         })
+       });
+@@ -149,9 +165,9 @@
+     fetchResidents();
+ 
+     const configs = getLetterClassifications();
+-    const sktm = configs.find(c => c.klasifikasi === 'SKTM');
++    const skp = configs.find(c => c.klasifikasi === 'SKP');
+     
+-    if (sktm) {
++    if (skp) {
+       const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]';
+       
+       const date = new Date();
+@@ -167,7 +183,7 @@
+       
+       const getDesaInitial = (name: string) => {
+         if (name.toLowerCase().includes('wasah hilir')) return 'WHi';
+-        if (name.toLowerCase().includes('sukamaju')) return 'DS-SKM';
++        if (name.toLowerCase().includes('sukamaju')) return 'DS-SKP';
+         const words = name.replace(/desa|kelurahan/gi, '').trim().split(/\s+/);
+         if (words.length >= 2) {
+           return words.map(w => w[0]).join('').toUpperCase();
+@@ -177,15 +193,15 @@
+         return 'DS';
+       };
+       const desaInitial = getDesaInitial(villageName);
+-      const nextNo = String(sktm.noUrutTerakhir + 1).padStart(3, '0');
++      const nextNo = String(skp.noUrutTerakhir + 1).padStart(3, '0');
+ 
+       const generatedNo = formatTemplate
+-        .replace(/\[NO KODE SURAT\]/g, sktm.kodeKlasifikasi || '140')
+-        .replace(/\[KODE KLASIFIKASI\]/g, sktm.kodeKlasifikasi || '140')
++        .replace(/\[NO KODE SURAT\]/g, skp.kodeKlasifikasi || '140')
++        .replace(/\[KODE KLASIFIKASI\]/g, skp.kodeKlasifikasi || '140')
+         .replace(/\[NO URUT SURAT\]/g, nextNo)
+         .replace(/\[NO\]/g, nextNo)
+-        .replace(/\[KODE\]/g, sktm.klasifikasi)
+-        .replace(/\[SINGKATAN SURAT\]/g, sktm.klasifikasi)
++        .replace(/\[KODE\]/g, skp.klasifikasi)
++        .replace(/\[SINGKATAN SURAT\]/g, skp.klasifikasi)
+         .replace(/\[BULAN\]/g, romanMonth)
+         .replace(/\[BULAN_ANGKA\]/g, numericMonth)
+         .replace(/\[TAHUN\]/g, String(year))
+@@ -201,7 +217,7 @@
+       }));
+     }
+ 
+-    const savedRiwayat = localStorage.getItem('riwayat_surat_sktm');
++    const savedRiwayat = localStorage.getItem('riwayat_surat_skp');
+     if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
+ 
+     const activePejabat = localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD';
+@@ -244,7 +260,7 @@
+     // Update numbering in global classifications
+     const currentConfigs = getLetterClassifications();
+     const updatedConfigs = currentConfigs.map(c => 
+-      c.klasifikasi === 'SKTM' ? { ...c, noUrutTerakhir: c.noUrutTerakhir + 1 } : c
++      c.klasifikasi === 'SKP' ? { ...c, noUrutTerakhir: c.noUrutTerakhir + 1 } : c
+     );
+     saveLetterClassifications(updatedConfigs);
+     window.dispatchEvent(new Event('letter_classifications_updated'));
+@@ -258,7 +274,7 @@
+       job: formData.pekerjaan,
+       address: formData.alamat,
+       rt: formData.rt,
+-      rw: formData.rw
++      // We do not need tanggalMeninggal for SKP
+     });
+ 
+     const content = generateHTML();
+@@ -276,7 +292,7 @@
+     doc.write(`
+       <html>
+         <head>
+-          <title>Cetak SKTM - ${formData.nama}</title>
++          <title>Cetak SKP - ${formData.nama}</title>
+           ${styles}
+           <style>
+             @page { 
+@@ -355,7 +371,7 @@
+     // Record to global history
+     addLetterHistory({
+       nomor: formData.nomorSurat,
+-      jenis: 'SKTM',
++      jenis: 'SKP',
+       nik: formData.nik,
+       nama: formData.nama,
+       tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+@@ -372,7 +388,7 @@
+     };
+     const updatedRiwayat = [newEntry, ...riwayat].slice(0, 50);
+     setRiwayat(updatedRiwayat);
+-    localStorage.setItem('riwayat_surat_sktm', JSON.stringify(updatedRiwayat));
++    localStorage.setItem('riwayat_surat_skp', JSON.stringify(updatedRiwayat));
+     setLoading(false);
+   };
+ 
+@@ -416,17 +432,17 @@
+       </div>
+ 
+       <!-- JUDUL SURAT -->
+-      <div style="text-align:center;margin-bottom:30px;">
+-        <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN TIDAK MAMPU</h3>
++      <div style="text-align:center;margin-bottom:20px;">
++        <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN PINDAH</h3>
+         <p style="margin:4px 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
+       </div>
+ 
+-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
++      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
+         Yang bertanda tangan di bawah ini Kepala Desa ${activeDesa} Kecamatan ${activeKecamatan} Kabupaten ${activeKabupaten} Provinsi ${activeProvinsi}, menerangkan dengan sebenarnya bahwa :
+       </p>
+ 
+       <!-- DATA PENDUDUK -->
+-      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:20px;margin-left:40px;line-height:2;font-size:14px;">
++      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.3;font-size:14px;">
+         <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.nama)}</strong></td></tr>
+         <tr><td>NIK</td><td>:</td><td>${v(formData.nik)}</td></tr>
+         <tr><td>Tempat, Tanggal lahir</td><td>:</td><td>${v(formData.tempatLahir)}, ${fmtDate(formData.tanggalLahir)}</td></tr>
+@@ -437,17 +453,24 @@
+         <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${v(formData.namaDesa)} Kecamatan ${v(formData.namaKecamatan)}</td></tr>
+       </table>
+ 
+-      <!-- PERNYATAAN -->
+-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
+-        Nama tersebut di atas adalah benar-benar warga / penduduk yang berdomisili di Desa ${v(formData.namaDesa)} Kecamatan ${v(formData.namaKecamatan)} Kabupaten ${v(formData.namaKabupaten)} dan yang bersangkutan benar-benar tergolong keluarga <strong style="font-style:italic;">Kurang Mampu (Miskin)</strong>.
++      <!-- PERNYATAAN KEPINDAHAN -->
++      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
++        Nama tersebut di atas adalah benar-benar penduduk Desa ${v(formData.namaDesa)} Kecamatan ${v(formData.namaKecamatan)} Kabupaten ${v(formData.namaKabupaten)}, yang mana yang bersangkutan mengajukan permohonan pindah domisili dengan rincian sebagai berikut:
+       </p>
+ 
+-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
+-        Surat Keterangan Tidak Mampu ini diberikan atas dasar permohonan yang bersangkutan, untuk dipergunakan sebagai persyaratan administrasi <strong>${v(formData.keperluan)}</strong>.
++      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.3;font-size:14px;">
++        <tr><td style="width:30%;">Tanggal Pindah</td><td style="width:3%;">:</td><td>${fmtDate(formData.tanggalPindah)}</td></tr>
++        <tr><td>Alasan Pindah</td><td>:</td><td>${v(formData.alasanPindah)}</td></tr>
++        <tr><td style="vertical-align:top;">Alamat Tujuan</td><td style="vertical-align:top;">:</td><td>${v(formData.alamatTujuan)} RT.${v(formData.rtTujuan)} RW.${v(formData.rwTujuan)}<br/>Desa ${v(formData.desaTujuan)} Kecamatan ${v(formData.kecamatanTujuan)}<br/>Kab. ${v(formData.kabupatenTujuan)} Prov. ${v(formData.provinsiTujuan)}</td></tr>
++        <tr><td>Pengikut/Keluarga</td><td>:</td><td>${v(formData.pengikut) || '-'}</td></tr>
++      </table>
++
++      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
++        Surat Keterangan Pindah ini dibuat untuk dipergunakan sebagai persyaratan administrasi kepindahan domisili maupun keperluan lain yang berkaitan dengan kependudukan.
+       </p>
+ 
+-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+-        Demikian Surat Keterangan Tidak Mampu ini dibuat dengan sebenarnya dan untuk dipergunakan sebagaimana mestinya.
++      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
++        Demikian Surat Keterangan Pindah ini dibuat dengan sebenarnya dan untuk dipergunakan sebagaimana mestinya.
+       </p>
+ 
+       <!-- TANDA TANGAN -->
+@@ -487,8 +510,8 @@
+             <ArrowLeft className="w-5 h-5 text-slate-600" />
+           </button>
+           <div>
+-            <h1 className="text-lg font-bold text-slate-800">Buat SKTM</h1>
+-            <p className="text-xs text-slate-500">Surat Keterangan Tidak Mampu / Miskin</p>
++            <h1 className="text-lg font-bold text-slate-800">Buat SKP</h1>
++            <p className="text-xs text-slate-500">Surat Keterangan Pindah</p>
+           </div>
+         </div>
+         <div className="flex gap-2">
+@@ -520,13 +543,13 @@
+             <div className="flex items-center justify-between mb-4">
+               <h2 className="font-bold text-slate-800 flex items-center gap-2">
+                 <History className="w-4 h-4 text-emerald-600" />
+-                Riwayat Pembuatan SKTM
++                Riwayat Pembuatan SKP
+               </h2>
+               <button 
+                 onClick={() => {
+                   if (confirm('Kosongkan riwayat?')) {
+                     setRiwayat([]);
+-                    localStorage.removeItem('riwayat_surat_sktm');
++                    localStorage.removeItem('riwayat_surat_skp');
+                   }
+                 }}
+                 className="text-xs text-rose-500 font-bold hover:underline"
+@@ -632,7 +655,7 @@
+                   </label>
+                   <input 
+                     type="text"
+-                    placeholder="Contoh: SKTM/064/WHi/2026"
++                    placeholder="Contoh: SKP/064/WHi/2026"
+                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                     value={formData.nomorSurat}
+                     onChange={(e) => setFormData({...formData, nomorSurat: e.target.value})}
+@@ -766,11 +789,113 @@
+                     onChange={(e) => setFormData({...formData, alamat: e.target.value})}
+                   />
+                 </div>
++              </div>
++            </div>
++            
++            {/* DATA PINDAH */}
++            <div>
++              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
++                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
++                  <MapPin className="w-4 h-4 text-emerald-600" />
++                </div>
++                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Data Pindah</h3>
++              </div>
++              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
++                <div className="space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Tanggal Pindah</label>
++                  <input 
++                    type="date"
++                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
++                    value={formData.tanggalPindah}
++                    onChange={(e) => setFormData({...formData, tanggalPindah: e.target.value})}
++                  />
++                </div>
++                <div className="space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Alasan Pindah</label>
++                  <input 
++                    type="text"
++                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
++                    value={formData.alasanPindah}
++                    onChange={(e) => setFormData({...formData, alasanPindah: e.target.value})}
++                  />
++                </div>
++                <div className="md:col-span-2 space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Alamat Tujuan Lengkap (Jalan / Gang / Blok / RT / RW)</label>
++                  <div className="flex gap-4">
++                    <input 
++                      type="text"
++                      placeholder="Jalan / Perumahan"
++                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
++                      value={formData.alamatTujuan}
++                      onChange={(e) => setFormData({...formData, alamatTujuan: e.target.value})}
++                    />
++                    <input 
++                      type="text"
++                      placeholder="RT"
++                      className="w-24 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-center"
++                      value={formData.rtTujuan}
++                      onChange={(e) => setFormData({...formData, rtTujuan: e.target.value})}
++                    />
++                    <input 
++                      type="text"
++                      placeholder="RW"
++                      className="w-24 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-center"
++                      value={formData.rwTujuan}
++                      onChange={(e) => setFormData({...formData, rwTujuan: e.target.value})}
++                    />
++                  </div>
++                </div>
++                <div className="space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Desa/Kelurahan Tujuan</label>
++                  <input 
++                    type="text"
++                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
++                    value={formData.desaTujuan}
++                    onChange={(e) => setFormData({...formData, desaTujuan: e.target.value})}
++                  />
++                </div>
++                <div className="space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Kecamatan Tujuan</label>
++                  <input 
++                    type="text"
++                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
++                    value={formData.kecamatanTujuan}
++                    onChange={(e) => setFormData({...formData, kecamatanTujuan: e.target.value})}
++                  />
++                </div>
++                <div className="space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Kabupaten/Kota Tujuan</label>
++                  <input 
++                    type="text"
++                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
++                    value={formData.kabupatenTujuan}
++                    onChange={(e) => setFormData({...formData, kabupatenTujuan: e.target.value})}
++                  />
++                </div>
++                <div className="space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Provinsi Tujuan</label>
++                  <input 
++                    type="text"
++                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
++                    value={formData.provinsiTujuan}
++                    onChange={(e) => setFormData({...formData, provinsiTujuan: e.target.value})}
++                  />
++                </div>
++                <div className="md:col-span-2 space-y-2">
++                  <label className="text-sm font-bold text-slate-700">Pengikut / Anggota Keluarga yang Pindah (Opsional)</label>
++                  <textarea 
++                    rows={2}
++                    placeholder="Contoh: Istri (Siti Aminah), Anak (Budi) - pisahkan dengan koma atau biarkan kosong"
++                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none"
++                    value={formData.pengikut}
++                    onChange={(e) => setFormData({...formData, pengikut: e.target.value})}
++                  />
++                </div>
+                 <div className="md:col-span-2 space-y-2">
+                   <label className="text-sm font-bold text-slate-700">Keperluan Surat (Diberikan Untuk...)</label>
+                   <input 
+                     type="text"
+-                    placeholder="Contoh: Bantuan Beasiswa"
++                    placeholder="Contoh: Persyaratan Administrasi Kepindahan"
+                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                     value={formData.keperluan}
+                     onChange={(e) => setFormData({...formData, keperluan: e.target.value})}
+@@ -848,7 +973,7 @@
+             <div>
+               <h4 className="font-bold text-emerald-900 text-xs">Informasi Penting & Cetak</h4>
+               <p className="text-[11px] text-emerald-700 mt-1 leading-relaxed">
+-                Pastikan data orang tua dan anak sudah sesuai dengan KTP/KK terbaru. 
++                Pastikan data penduduk sudah sesuai dengan KTP/KK terbaru. 
+                 Gunakan fitur pencarian untuk meminimalkan kesalahan pengetikan. Jika tombol cetak tidak merespon, silakan gunakan menu <strong>Buka di Tab Baru</strong>.
+               </p>
+             </div>
