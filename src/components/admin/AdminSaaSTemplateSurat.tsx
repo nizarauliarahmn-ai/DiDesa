@@ -10,6 +10,9 @@ export default function AdminSaaSTemplateSurat() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
+  // SaaS requests state
+  const [requests, setRequests] = useState<any[]>([]);
+  
   const [formData, setFormData] = useState({
     jenis: '',
     klasifikasi: '',
@@ -29,6 +32,11 @@ export default function AdminSaaSTemplateSurat() {
         setTemplates(initial);
         localStorage.setItem('saas_global_letter_catalog', JSON.stringify(initial));
       });
+    }
+
+    const storedReqs = localStorage.getItem('saas_letter_requests');
+    if (storedReqs) {
+      setRequests(JSON.parse(storedReqs));
     }
   }, []);
 
@@ -180,6 +188,47 @@ export default function AdminSaaSTemplateSurat() {
           </p>
         </div>
       </div>
+
+      {requests.length > 0 && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50 rounded-3xl p-6">
+          <h3 className="font-bold text-blue-900 dark:text-blue-400 mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5" /> Pengajuan Tambah Surat ({requests.length})
+          </h3>
+          <div className="space-y-3">
+            {requests.map(req => (
+              <div key={req.id} className="bg-white dark:bg-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-blue-50 dark:border-blue-900/30 shadow-sm">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold text-sm text-gray-900 dark:text-white">{req.letterName}</span>
+                    <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-bold">Dari: {req.villageName}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400">
+                    Lampiran: <span className="font-medium text-blue-600 dark:text-blue-400 underline cursor-pointer">{req.fileName}</span> • {new Date(req.timestamp).toLocaleString('id-ID')}
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                     setFormData({
+                       jenis: req.letterName,
+                       klasifikasi: '',
+                       kodeKlasifikasi: '',
+                       noUrutTerakhir: 0
+                     });
+                     // Mark as resolved
+                     const newReqs = requests.filter((r: any) => r.id !== req.id);
+                     setRequests(newReqs);
+                     localStorage.setItem("saas_letter_requests", JSON.stringify(newReqs));
+                     setIsModalOpen(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shrink-0"
+                >
+                  Tinjau & Tambahkan
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50">

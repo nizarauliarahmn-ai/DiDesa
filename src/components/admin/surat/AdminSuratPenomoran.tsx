@@ -244,6 +244,19 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
     showToast("Nama surat dan file contoh wajib diisi!", "error");
     return;
   }
+
+  // Save request to localStorage for SaaS view
+  const existingReqs = JSON.parse(localStorage.getItem("saas_letter_requests") || "[]");
+  const newReq = {
+    id: Date.now().toString(),
+    villageName: localStorage.getItem("village_name") || "Desa Wasah Hilir",
+    letterName: saasLetterName.toUpperCase().trim(),
+    fileName: saasLetterFile.name,
+    timestamp: new Date().toISOString(),
+    status: "pending"
+  };
+  localStorage.setItem("saas_letter_requests", JSON.stringify([newReq, ...existingReqs]));
+
   showToast(
     "Permintaan penambahan jenis surat beserta contoh file telah dikirim ke tim SaaS untuk ditinjau.",
     "success"
