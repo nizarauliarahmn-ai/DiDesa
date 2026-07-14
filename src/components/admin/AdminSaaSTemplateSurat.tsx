@@ -23,17 +23,28 @@ export default function AdminSaaSTemplateSurat() {
 
   useEffect(() => {
     // We fetch global templates from localStorage or fallback
-    const stored = localStorage.getItem('saas_global_letter_catalog');
-    if (stored) {
-      setTemplates(JSON.parse(stored));
-    } else {
-      // Seed with initial from classifications
-      import('../../utils/letterClassifications').then((mod) => {
-        const initial = mod.INITIAL_CLASSIFICATIONS;
+    import('../../utils/letterClassifications').then((mod) => {
+      const initial = mod.INITIAL_CLASSIFICATIONS;
+      const stored = localStorage.getItem('saas_global_letter_catalog');
+      
+      if (stored) {
+        const parsedStored = JSON.parse(stored);
+        const missingTemplates = initial.filter(initItem => 
+          !parsedStored.some((storedItem: any) => storedItem.klasifikasi === initItem.klasifikasi)
+        );
+        
+        if (missingTemplates.length > 0) {
+          const merged = [...parsedStored, ...missingTemplates];
+          setTemplates(merged);
+          localStorage.setItem('saas_global_letter_catalog', JSON.stringify(merged));
+        } else {
+          setTemplates(parsedStored);
+        }
+      } else {
         setTemplates(initial);
         localStorage.setItem('saas_global_letter_catalog', JSON.stringify(initial));
-      });
-    }
+      }
+    });
 
     const storedReqs = localStorage.getItem('saas_letter_requests');
     if (storedReqs) {

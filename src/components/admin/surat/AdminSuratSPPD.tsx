@@ -5,7 +5,6 @@ import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { getLetterClassifications, generateLetterNumber } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
-import { getVillageSettings } from '../../../utils/villageSettings';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
@@ -74,19 +73,22 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
   const scrollRef = useDragScroll();
 
   useEffect(() => {
-    const settings = getVillageSettings();
-    setDesaName(settings.name);
-    setNamaKades(settings.kadesName);
-    setRoleKades(settings.kadesRole || 'Kepala Desa');
-    setNipKades(settings.kadesNip || '');
-    setIncludeCamat(settings.includeCamat || false);
+    setDesaName(localStorage.getItem('kop_desa') || 'Wasah Hilir');
+    setNamaKades(localStorage.getItem('kop_kades') || 'NIZAR AULIA RAHMAN');
+    setRoleKades('Kepala Desa');
+    
+    const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+    const activeKades = localStorage.getItem('kop_kades');
+    const found = officersList.find((o: any) => o.name === activeKades);
+    setNipKades(found?.nip || '');
+    setIncludeCamat(false);
 
     if (editData?.nomorSurat) {
       setNomorSurat(editData.nomorSurat.split('/').pop() || '');
     } else {
-      setNomorSurat(generateLetterNumber());
+      setNomorSurat(generateLetterNumber('SPPD', kodeKlasifikasi));
     }
-  }, [editData]);
+  }, [editData, kodeKlasifikasi]);
 
   const handlePrint = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {

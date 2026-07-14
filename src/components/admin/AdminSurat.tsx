@@ -223,6 +223,13 @@ export default function AdminSurat({
             onBack={() => changeTab('buat')} 
           />
         )}
+        {activeTab === 'sppd' && (
+          <AdminSuratSPPD 
+            editData={editData}
+            editLetterId={editLetterId}
+            onBack={() => changeTab('buat')} 
+          />
+        )}
         {activeTab === 'penomoran' && <AdminSuratPenomoran />}
       </div>
     </div>
