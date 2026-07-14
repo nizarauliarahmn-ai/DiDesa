@@ -45,8 +45,7 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
 export function getSaaSTemplates(): LetterClassification[] {
   const stored = localStorage.getItem('saas_global_letter_catalog');
   if (stored) {
-    const parsed = JSON.parse(stored) as LetterClassification[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
-];
+    const parsed = JSON.parse(stored) as LetterClassification[];
     let updated = false;
     
     // Merge any missing defaults that might have been added in newer versions
@@ -82,8 +81,7 @@ export function getGlobalSequenceNumber(): number {
   let maxVal = 56; // default fallback matching the screenshot
   if (storedClass) {
     try {
-      const parsed = JSON.parse(storedClass) as any[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
-];
+      const parsed = JSON.parse(storedClass) as any[];
       if (Array.isArray(parsed) && parsed.length > 0) {
         maxVal = parsed.reduce((max, c) => Math.max(max, Number(c.noUrutTerakhir) || 0), 0);
       }
@@ -100,8 +98,7 @@ export function saveGlobalSequenceNumber(num: number) {
   const stored = localStorage.getItem('letter_classifications');
   if (stored) {
     try {
-      const parsed = JSON.parse(stored) as any[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
-];
+      const parsed = JSON.parse(stored) as any[];
       if (Array.isArray(parsed)) {
         const updated = parsed.map(c => ({ ...c, noUrutTerakhir: num }));
         localStorage.setItem('letter_classifications', JSON.stringify(updated));
@@ -117,8 +114,7 @@ export function getLetterClassifications(): LetterClassification[] {
   
   if (stored) {
     try {
-      const parsed = JSON.parse(stored) as any[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
-];
+      const parsed = JSON.parse(stored) as any[];
       let mapped = parsed.map(item => {
         return {
           ...item,
