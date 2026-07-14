@@ -203,7 +203,13 @@ export default function AdminSaaSTemplateSurat() {
                     <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-bold">Dari: {req.villageName}</span>
                   </div>
                   <div className="text-xs text-gray-500 dark:text-slate-400">
-                    Lampiran: <span className="font-medium text-blue-600 dark:text-blue-400 underline cursor-pointer">{req.fileName}</span> • {new Date(req.timestamp).toLocaleString('id-ID')}
+                    Lampiran: {req.fileData ? (
+                      <a href={req.fileData} download={req.fileName} className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 underline cursor-pointer" title="Download Lampiran">
+                        {req.fileName}
+                      </a>
+                    ) : (
+                      <span className="font-medium text-slate-500">{req.fileName}</span>
+                    )} • {new Date(req.timestamp).toLocaleString('id-ID')}
                   </div>
                 </div>
                 <button 

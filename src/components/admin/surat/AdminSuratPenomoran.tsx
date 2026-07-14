@@ -245,23 +245,35 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
     return;
   }
 
-  // Save request to localStorage for SaaS view
-  const existingReqs = JSON.parse(localStorage.getItem("saas_letter_requests") || "[]");
-  const newReq = {
-    id: Date.now().toString(),
-    villageName: localStorage.getItem("village_name") || "Desa Wasah Hilir",
-    letterName: saasLetterName.toUpperCase().trim(),
-    fileName: saasLetterFile.name,
-    timestamp: new Date().toISOString(),
-    status: "pending"
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const fileData = event.target?.result;
+    
+    // Save request to localStorage for SaaS view
+    const existingReqs = JSON.parse(localStorage.getItem("saas_letter_requests") || "[]");
+    const newReq = {
+      id: Date.now().toString(),
+      villageName: localStorage.getItem("village_name") || "Desa Wasah Hilir",
+      letterName: saasLetterName.toUpperCase().trim(),
+      fileName: saasLetterFile.name,
+      fileData: fileData, // Base64 content for downloading
+      timestamp: new Date().toISOString(),
+      status: "pending"
+    };
+    
+    try {
+      localStorage.setItem("saas_letter_requests", JSON.stringify([newReq, ...existingReqs]));
+      showToast(
+        "Permintaan penambahan jenis surat beserta contoh file telah dikirim ke tim SaaS untuk ditinjau.",
+        "success"
+      );
+      setShowModal(false);
+    } catch(err) {
+      showToast("Gagal menyimpan, file contoh mungkin terlalu besar! Maksimal ukuran file disarankan di bawah 2MB.", "error");
+    }
   };
-  localStorage.setItem("saas_letter_requests", JSON.stringify([newReq, ...existingReqs]));
-
-  showToast(
-    "Permintaan penambahan jenis surat beserta contoh file telah dikirim ke tim SaaS untuk ditinjau.",
-    "success"
-  );
-  setShowModal(false);
+  
+  reader.readAsDataURL(saasLetterFile);
 };
 const authUser = JSON.parse(localStorage.getItem("didesa_auth_user") || "{}");
 const isSuperAdmin = authUser?.role === "kades" || authUser?.isImpersonated;
