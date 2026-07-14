@@ -709,22 +709,33 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     <div className="p-2 bg-emerald-50/50 rounded-lg group-hover:scale-110 transition-transform shrink-0">
                       {getTemplateIcon(t.klasifikasi, t.jenis)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <span className="text-[9px] font-bold font-mono bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+                    <div className="flex-1 min-w-0 py-0.5">
+                      <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+                        <span className="text-[10px] font-bold font-mono bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full">
                           {t.klasifikasi}
                         </span>
-                        {(usageCounts[t.klasifikasi] || 0) > 0 && (
-                          <span className="text-[8px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">
-                            Sering Dipakai
+                        {t.kodeKlasifikasi && (
+                          <span className="bg-slate-100 dark:bg-slate-800/50 px-2 py-0.5 rounded-full text-[10px] text-slate-500 dark:text-slate-400 font-bold border border-slate-200/60 dark:border-slate-700/60">
+                            Kode: {t.kodeKlasifikasi}
                           </span>
                         )}
-                        <span className="text-[9px] text-gray-400 font-mono flex items-center gap-1">
-                          {t.kodeKlasifikasi && <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 font-bold">Kode: {t.kodeKlasifikasi}</span>}
-                          <span>No: {String(t.noUrutTerakhir).padStart(3, '0')}</span>
+                        <span className="text-[10px] text-gray-400 font-mono ml-1">
+                          No: {String(t.noUrutTerakhir).padStart(3, '0')}
                         </span>
+                        {(usageCounts[t.klasifikasi] || 0) > 0 && (
+                          <span className="ml-auto text-[9px] bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide border border-amber-200/50">
+                            🔥 Sering
+                          </span>
+                        )}
                       </div>
-                      <h4 className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-emerald-800 transition-colors truncate">{t.jenis}</h4>
+                      <h4 className="font-bold text-[13px] leading-snug text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors truncate uppercase">
+                        {t.jenis}
+                      </h4>
+                      {t.deskripsi && (
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5 group-hover:text-emerald-600/70 transition-colors">
+                          {t.deskripsi}
+                        </p>
+                      )}
                     </div>
                   </div>
                 );

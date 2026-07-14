@@ -2,7 +2,8 @@ export interface LetterClassification {
   id: string;
   jenis: string;
   klasifikasi: string; // The abbreviation (e.g. SKD, SKU)
-  kodeKlasifikasi: string; // The numeric archive classification (e.g. "145", "400")
+  kodeKlasifikasi: string;
+    deskripsi?: string; // The numeric archive classification (e.g. "145", "400")
   noUrutTerakhir: number;
   isVisible?: boolean;
   deskripsi?: string;
@@ -12,18 +13,18 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '1', jenis: 'SURAT UMUM', klasifikasi: 'SU', kodeKlasifikasi: '000', noUrutTerakhir: 5, isVisible: true },
   { id: '2', jenis: 'UNDANGAN', klasifikasi: 'UND', kodeKlasifikasi: '005', noUrutTerakhir: 12, isVisible: true },
   { id: '3', jenis: 'SK KEMATIAN', klasifikasi: 'SKM', kodeKlasifikasi: '474.2', noUrutTerakhir: 3, isVisible: true },
-  { id: '4', jenis: 'SK AHLI WARIS', klasifikasi: 'SKAW', kodeKlasifikasi: '474', noUrutTerakhir: 2, isVisible: true },
+  { id: '4', jenis: 'SK AHLI WARIS', klasifikasi: 'SKAW', kodeKlasifikasi: '474', deskripsi: 'Surat Keterangan & Pernyataan Ahli Waris', noUrutTerakhir: 2, isVisible: true },
   { id: '5', jenis: 'SK DOMISILI PERORANGAN', klasifikasi: 'SDP', kodeKlasifikasi: '145', noUrutTerakhir: 18, isVisible: true },
   { id: '6', jenis: 'SURAT KETERANGAN UMUM', klasifikasi: 'SKUM', kodeKlasifikasi: '400', noUrutTerakhir: 4, isVisible: true },
   { id: '7', jenis: 'SK NIKAH', klasifikasi: 'SKN', kodeKlasifikasi: '474', noUrutTerakhir: 8, isVisible: true },
   { id: '8', jenis: 'SKTM', klasifikasi: 'SKTM', kodeKlasifikasi: '400', noUrutTerakhir: 15, isVisible: true },
   { id: '9', jenis: 'SK KEPEMILIKAN TANAH', klasifikasi: 'SKKT', kodeKlasifikasi: '593', noUrutTerakhir: 1, isVisible: true },
-  { id: '10', jenis: 'SK BELUM MENIKAH', klasifikasi: 'SKBM', kodeKlasifikasi: '474', noUrutTerakhir: 6, isVisible: true },
-  { id: '11', jenis: 'SK KEHILANGAN', klasifikasi: 'SKH', kodeKlasifikasi: '331', noUrutTerakhir: 9, isVisible: true },
-  { id: '12', jenis: 'SURAT KETERANGAN PINDAH', klasifikasi: 'SKP', kodeKlasifikasi: '475', noUrutTerakhir: 0, isVisible: true },
-  { id: '14', jenis: 'SURAT REKOMENDASI', klasifikasi: 'SRI', kodeKlasifikasi: '100', noUrutTerakhir: 3, isVisible: true },
-  { id: '15', jenis: 'SK USAHA', klasifikasi: 'SKU', kodeKlasifikasi: '500', noUrutTerakhir: 11, isVisible: true },
-  { id: '16', jenis: 'KEUANGAN', klasifikasi: 'KEU', kodeKlasifikasi: '900', noUrutTerakhir: 5, isVisible: true },
+  { id: '10', jenis: 'SK BELUM MENIKAH', klasifikasi: 'SKBM', kodeKlasifikasi: '474', deskripsi: 'Surat Keterangan Belum Pernah Menikah', noUrutTerakhir: 6, isVisible: true },
+  { id: '11', jenis: 'SK KEHILANGAN', klasifikasi: 'SKH', kodeKlasifikasi: '331', deskripsi: 'Surat Pengantar Keterangan Kehilangan', noUrutTerakhir: 9, isVisible: true },
+  { id: '12', jenis: 'SURAT KETERANGAN PINDAH', klasifikasi: 'SKP', kodeKlasifikasi: '475', deskripsi: 'Surat Pengantar Keterangan Pindah Antar Daerah', noUrutTerakhir: 0, isVisible: true },
+  { id: '14', jenis: 'SURAT REKOMENDASI', klasifikasi: 'SRI', kodeKlasifikasi: '100', deskripsi: 'Surat Rekomendasi / Pengantar Izin', noUrutTerakhir: 3, isVisible: true },
+  { id: '15', jenis: 'SK USAHA', klasifikasi: 'SKU', kodeKlasifikasi: '500', deskripsi: 'Surat Keterangan Tempat Usaha', noUrutTerakhir: 11, isVisible: true },
+  { id: '16', jenis: 'KEUANGAN', klasifikasi: 'KEU', kodeKlasifikasi: '900', deskripsi: 'Surat Keterangan Laporan Keuangan', noUrutTerakhir: 5, isVisible: true },
   { id: '17', jenis: 'SK LAHIR', klasifikasi: 'SKL', kodeKlasifikasi: '474.1', noUrutTerakhir: 4, isVisible: true },
   { id: '18', jenis: 'JUAL BELI TANAH', klasifikasi: 'JBT', kodeKlasifikasi: '593', noUrutTerakhir: 1, isVisible: true },
   { id: '19', jenis: 'SK PERAWAN', klasifikasi: 'PRW', kodeKlasifikasi: '400', noUrutTerakhir: 0, isVisible: true },
@@ -258,3 +259,4 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
     .replace(/\[KABUPATEN\]/g, kabupaten)
     .replace(/\[DESA\]/g, desaInitial);
 }
+
