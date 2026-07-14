@@ -307,14 +307,7 @@ return (
           surat.
         </p>
       </div>
-      {isSuperAdmin ? (
-        <button
-          onClick={handleOpenAdd}
-          className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm dark:shadow-none hover:scale-102 transition-all flex items-center gap-2 self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" /> Tambah Jenis Surat
-        </button>
-      ) : (
+      {!isSuperAdmin && (
         <div className="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 px-3 py-2 rounded-xl border border-amber-100 font-extrabold self-start sm:self-auto">
           Mode Baca-Saja (Admin)
         </div>
@@ -330,8 +323,7 @@ return (
           </p>
           <p className="text-[11px] text-amber-700 leading-relaxed mt-0.5">
             Anda masuk sebagai Admin biasa. Hanya Kepala Desa (Super Admin) yang
-            memiliki wewenang penuh untuk mengubah format penomoran surat,
-            menambah jenis surat baru, mengedit kode klasifikasi, maupun
+            memiliki wewenang penuh untuk mengubah format penomoran surat maupun
             menentukan surat mana saja yang aktif/tampil di portal layanan
             mandiri warga.
           </p>
