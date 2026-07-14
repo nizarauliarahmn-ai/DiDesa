@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Printer, Save, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Printer, Save, Plus, Trash2, Search } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { getLetterClassifications, generateLetterNumber } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
@@ -27,6 +28,20 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
   const [kodeKlasifikasi, setKodeKlasifikasi] = useLetterKode('SPPD');
   const [nomorSurat, setNomorSurat] = useState('');
   
+  // Resident Data for Search
+  const [residents, setResidents] = useState<any[]>([]);
+  const [showPegawaiDropdown, setShowPegawaiDropdown] = useState(false);
+  const [activePengikutDropdown, setActivePengikutDropdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetchResidentsCached()
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+      .then(data => {
+        if (Array.isArray(data)) setResidents(data);
+      })
+      .catch(err => console.error("Failed to load residents for SPPD:", err));
+  }, []);
+
   // Pegawai / Yang Diperintah
   const [namaPegawai, setNamaPegawai] = useState(editData?.namaPegawai || '');
   const [nipPegawai, setNipPegawai] = useState(editData?.nipPegawai || '');
@@ -212,15 +227,42 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Identitas Yang Ditugaskan</h3>
             <div className="space-y-4">
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
-                <input 
-                  type="text" 
-                  value={namaPegawai}
-                  onChange={(e) => setNamaPegawai(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  placeholder="Misal: Budi Santoso"
-                />
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    value={namaPegawai}
+                    onChange={(e) => {
+                      setNamaPegawai(e.target.value);
+                      setShowPegawaiDropdown(true);
+                    }}
+                    onFocus={() => setShowPegawaiDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowPegawaiDropdown(false), 200)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    placeholder="Ketik nama untuk mencari penduduk / isi manual..."
+                  />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                </div>
+                {showPegawaiDropdown && namaPegawai.length > 1 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 max-h-60 overflow-y-auto z-50">
+                    {residents.filter(r => r.name.toLowerCase().includes(namaPegawai.toLowerCase()) || r.nik.includes(namaPegawai)).slice(0, 5).map(res => (
+                      <button
+                        key={res.nik}
+                        onClick={() => {
+                          setNamaPegawai(res.name);
+                          setNipPegawai(res.nik);
+                          setJabatanPegawai(res.pekerjaan || '');
+                          setShowPegawaiDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 dark:border-slate-700/50 last:border-0"
+                      >
+                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{res.name}</div>
+                        <div className="text-xs text-gray-500 dark:text-slate-400">NIK: {res.nik} &bull; {res.pekerjaan || 'Tidak ada pekerjaan'}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -373,13 +415,40 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
                 {pengikut.map((p, index) => (
                   <div key={index} className="flex gap-2 items-start bg-gray-50 dark:bg-slate-800/50 p-3 rounded-xl border border-gray-100 dark:border-slate-700">
                     <div className="flex-1 space-y-2">
-                      <input 
-                        type="text" 
-                        value={p.nama}
-                        onChange={(e) => handlePengikutChange(index, 'nama', e.target.value)}
-                        className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                        placeholder="Nama Pengikut"
-                      />
+                      <div className="relative">
+                        <input 
+                          type="text" 
+                          value={p.nama}
+                          onChange={(e) => {
+                            handlePengikutChange(index, 'nama', e.target.value);
+                            setActivePengikutDropdown(index);
+                          }}
+                          onFocus={() => setActivePengikutDropdown(index)}
+                          onBlur={() => setTimeout(() => setActivePengikutDropdown(null), 200)}
+                          className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 pr-8"
+                          placeholder="Cari penduduk / isi nama manual..."
+                        />
+                        <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" />
+                        {activePengikutDropdown === index && p.nama.length > 1 && (
+                          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 max-h-40 overflow-y-auto z-50">
+                            {residents.filter(r => r.name.toLowerCase().includes(p.nama.toLowerCase()) || r.nik.includes(p.nama)).slice(0, 5).map(res => (
+                              <button
+                                key={res.nik}
+                                onClick={() => {
+                                  handlePengikutChange(index, 'nama', res.name);
+                                  handlePengikutChange(index, 'umur', res.umur || res.nik);
+                                  handlePengikutChange(index, 'keterangan', res.pekerjaan || '');
+                                  setActivePengikutDropdown(null);
+                                }}
+                                className="w-full text-left px-3 py-2 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 dark:border-slate-700/50 last:border-0"
+                              >
+                                <div className="font-semibold text-gray-900 dark:text-white text-xs">{res.name}</div>
+                                <div className="text-[10px] text-gray-500 dark:text-slate-400">NIK: {res.nik}</div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <div className="flex gap-2">
                         <input 
                           type="text" 
@@ -731,3 +800,4 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
     </div>
   );
 }
+
