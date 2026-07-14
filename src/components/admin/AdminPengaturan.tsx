@@ -38,6 +38,22 @@ export default function AdminPengaturan() {
   const [isImporting, setIsImporting] = useState(false);
   const [importStatus, setImportStatus] = useState('');
 
+  const handleImageUpload = (file: File | undefined, setUrl: React.Dispatch<React.SetStateAction<string>>) => {
+    if (!file || !file.type.startsWith('image/')) {
+      alert('Pilih file gambar yang valid (PNG, JPG, dll).');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran gambar terlalu besar (Maks. 2MB).');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) setUrl(e.target.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const decimalToDMS = (lat: number, lng: number) => {
     const toDMS = (deg: number, isLat: boolean) => {
       const absolute = Math.abs(deg);
@@ -237,8 +253,23 @@ export default function AdminPengaturan() {
             <div className="p-6 space-y-8">
               {/* Logo */}
               <div className="flex gap-6 items-center">
-                <div className="w-20 h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 border-2 border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center p-2 shrink-0">
-                  <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150'; }} />
+                <div 
+                  className="w-20 h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 border-2 border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center p-2 shrink-0 relative group cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                      handleImageUpload(e.dataTransfer.files[0], setLogoUrl);
+                    }
+                  }}
+                  onClick={() => document.getElementById('logo-upload')?.click()}
+                >
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-contain pointer-events-none" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150'; }} />
+                  <div className="absolute inset-0 bg-black/50 rounded-xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Upload className="w-4 h-4 mb-1" />
+                    <span className="text-[8px] font-bold">UBAH</span>
+                  </div>
+                  <input type="file" id="logo-upload" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files && e.target.files[0]) handleImageUpload(e.target.files[0], setLogoUrl); }} />
                 </div>
                 <div className="flex-1 space-y-1.5">
                   <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">URL Logo Resmi</label>
@@ -258,17 +289,34 @@ export default function AdminPengaturan() {
                   <span>Banner Halaman Utama</span>
                   <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md">Pratinjau Asli</span>
                 </label>
-                <div className="relative h-32 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800">
+                <div 
+                  className="relative h-32 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 cursor-pointer group"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                      handleImageUpload(e.dataTransfer.files[0], setWelcomeBannerUrl);
+                    }
+                  }}
+                  onClick={() => document.getElementById('banner-upload')?.click()}
+                >
                   <img 
                     src={welcomeBannerUrl} 
                     alt="Banner Utama" 
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                     style={{ 
                       objectPosition: `50% ${welcomeBannerYOffset}%`,
                       transform: `scale(${parseInt(welcomeBannerZoom) / 100})`
                     }}
                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000'; }}
                   />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex flex-col items-center">
+                      <Upload className="w-6 h-6 mb-2" />
+                      <span className="text-xs font-bold uppercase tracking-widest">Klik atau Tarik Gambar Ke Sini</span>
+                    </div>
+                  </div>
+                  <input type="file" id="banner-upload" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files && e.target.files[0]) handleImageUpload(e.target.files[0], setWelcomeBannerUrl); }} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <input 
