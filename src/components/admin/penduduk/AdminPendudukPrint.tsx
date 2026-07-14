@@ -141,7 +141,7 @@ export default function AdminPendudukPrint({ onBack, data }: AdminPendudukPrintP
             <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
               <span className="material-symbols-outlined text-xl">location_on</span> Alamat & Tempat Tinggal
             </h5>
-            <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 grid grid-cols-3 gap-4 bg-gray-50/50 mt-2">
+            <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 grid grid-cols-3 gap-4 bg-gray-50/50 dark:bg-slate-800/50 mt-2">
               <div className="col-span-2">
                 <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alamat Lengkap</p>
                 <p className="text-sm font-medium text-gray-900 dark:text-white">Jl. Melati No. 12, RT 004/RW 002, Desa Sukasari, Desa Digital</p>

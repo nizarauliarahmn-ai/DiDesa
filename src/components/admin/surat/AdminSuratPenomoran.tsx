@@ -297,7 +297,7 @@ const isSuperAdmin = authUser?.role === "kades" || authUser?.isImpersonated;
 return (
   <div className="max-w-5xl mx-auto space-y-6">
     {/* Header */}
-    <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Pengaturan Penomoran Surat
@@ -362,7 +362,7 @@ return (
                 disabled={!isSuperAdmin}
                 onChange={(e) => setFormat(e.target.value)}
                 placeholder="Contoh: [NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]"
-                className={`w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono text-gray-900 dark:text-white font-bold bg-gray-50/50 ${!isSuperAdmin ? "opacity-60 cursor-not-allowed" : ""}`}
+                className={`w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono text-gray-900 dark:text-white font-bold bg-gray-50/50 dark:bg-slate-800/50 ${!isSuperAdmin ? "opacity-60 cursor-not-allowed" : ""}`}
               />
             </div>
 
@@ -521,7 +521,7 @@ return (
                   filteredItems.map((item) => (
                     <tr
                       key={item.id}
-                      className="hover:bg-gray-50/50 transition-colors"
+                      className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors"
                     >
                       <td className="px-6 py-3.5">
                         <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 font-mono text-xs font-extrabold border border-emerald-100">

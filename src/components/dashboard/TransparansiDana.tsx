@@ -229,7 +229,7 @@ export default function TransparansiDana() {
                 filteredItems.map(item => {
                   const percent = (item.realized / item.budget) * 100;
                   return (
-                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={item.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                       <td className="py-4">
                         <div className="flex items-center gap-2.5">
                           <div className={`w-2 h-2 rounded-full ${item.category === 'pendapatan' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
@@ -271,7 +271,7 @@ export default function TransparansiDana() {
 function SectorProgress({ label, budget, realized, color }: { label: string, budget: number, realized: number, color: string }) {
   const percent = (realized / budget) * 100;
   return (
-    <div className="space-y-2 p-4 bg-gray-50/50 rounded-2xl border border-gray-100/50">
+    <div className="space-y-2 p-4 bg-gray-50/50 dark:bg-slate-800/50 rounded-2xl border border-gray-100/50">
       <div className="flex justify-between items-start">
         <span className="text-xs font-bold text-gray-800 dark:text-slate-100 block max-w-[70%]">{label}</span>
         <span className="text-xs font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full">{percent.toFixed(1)}%</span>

@@ -306,7 +306,7 @@ export default function LayananMandiri() {
                 placeholder="Masukkan 16 digit NIK Anda..." 
                 value={nikInput}
                 onChange={(e) => setNikInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50/50"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50/50 dark:bg-slate-800/50"
               />
             </div>
             <button 
@@ -466,7 +466,7 @@ export default function LayananMandiri() {
                     <tbody className="divide-y divide-gray-50">
                       {personalLetters.length > 0 ? (
                         personalLetters.map(letter => (
-                          <tr key={letter.id} className="hover:bg-gray-50/50 transition-colors">
+                          <tr key={letter.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                             <td className="py-4">
                               {letter.status === 'Selesai' ? (
                                 <span className="font-mono font-bold text-gray-900 dark:text-white">{letter.nomor}</span>

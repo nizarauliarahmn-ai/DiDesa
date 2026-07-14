@@ -204,7 +204,7 @@ export default function AdminNotifikasi({
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-24">
       {/* Header Section */}
-      <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
             <Bell className="text-emerald-700 w-7 h-7" />

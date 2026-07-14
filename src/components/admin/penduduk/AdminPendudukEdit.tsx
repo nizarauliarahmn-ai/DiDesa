@@ -212,7 +212,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   return (
     <div className="pt-6 pb-12 px-4 md:px-8 max-w-6xl mx-auto animate-in fade-in duration-300">
       {/* Breadcrumb & Sticky Header */}
-      <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 mb-2 font-medium">
             <button onClick={onBack} className="hover:text-emerald-700 transition-colors">Daftar Penduduk</button>

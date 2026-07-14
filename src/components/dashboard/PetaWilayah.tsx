@@ -197,7 +197,7 @@ export default function PetaWilayah() {
                 );
               })}
 
-              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-md dark:shadow-none text-[10px] space-y-1 z-10 font-bold">
+              <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-md dark:shadow-none text-[10px] space-y-1 z-10 font-bold">
                 <p className="text-gray-400 uppercase tracking-widest text-[8px] mb-1.5">LEGENDA PETA</p>
                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-700" /> <span>Fasilitas Publik / Administrasi</span></div>
                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> <span>Titik Terpilih</span></div>
@@ -238,7 +238,7 @@ export default function PetaWilayah() {
               </div>
             </div>
           ) : (
-            <div className="bg-gray-50/50 rounded-3xl border border-dashed border-gray-200 dark:border-slate-700 p-8 text-center text-gray-400 text-xs font-semibold">
+            <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-gray-200 dark:border-slate-700 p-8 text-center text-gray-400 text-xs font-semibold">
               Silakan klik salah satu pin penanda di peta untuk melihat rincian informasi wilayah.
             </div>
           )}

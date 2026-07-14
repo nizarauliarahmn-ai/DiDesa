@@ -191,7 +191,7 @@ export default function AdminGlobalUpdates() {
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50">
+            <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Buat Pengumuman Update</h3>
                 <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Luncurkan info fitur baru ke seluruh ekosistem DiDesa</p>

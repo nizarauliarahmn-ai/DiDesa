@@ -520,7 +520,7 @@ export default function AdminPenduduk({
         </div>
         
         {/* Pagination */}
-        <div className="bg-gray-50/50 px-6 py-4 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-gray-50/50 dark:bg-slate-800/50 px-6 py-4 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-500 dark:text-slate-400 font-medium">
             Menampilkan <span className="font-bold text-gray-900 dark:text-white">
               {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredData.length)}
@@ -601,7 +601,7 @@ export default function AdminPenduduk({
                 <FilterX size={20} />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto bg-gray-50/50">
+            <div className="p-6 overflow-y-auto bg-gray-50/50 dark:bg-slate-800/50">
               <div className="space-y-4">
                 <div className="p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl shadow-sm dark:shadow-none">
                   <h4 className="text-sm font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">

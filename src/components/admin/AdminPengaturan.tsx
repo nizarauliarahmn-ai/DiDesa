@@ -143,7 +143,7 @@ export default function AdminPengaturan() {
           
           {/* Identitas Desa */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-            <div className="p-5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
+            <div className="p-5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
               <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-emerald-600" />
                 Informasi & Identitas Desa
@@ -227,7 +227,7 @@ export default function AdminPengaturan() {
 
           {/* Banner Images */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-             <div className="p-5 border-b border-gray-50 bg-gray-50/50">
+             <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
               <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-emerald-600" />
                 Visual & Banner Web
@@ -295,7 +295,7 @@ export default function AdminPengaturan() {
         {/* Sidebar Settings */}
         <div className="space-y-6">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-            <div className="p-5 border-b border-gray-50 bg-gray-50/50">
+            <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
               <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-emerald-600" />
                 Peta & Geospasial
@@ -334,7 +334,7 @@ export default function AdminPengaturan() {
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-            <div className="p-5 border-b border-gray-50 bg-gray-50/50">
+            <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
               <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <Palette className="w-5 h-5 text-emerald-600" />
                 Tema Aplikasi

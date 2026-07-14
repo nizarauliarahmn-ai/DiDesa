@@ -117,7 +117,7 @@ export default function AdminApprovalQueue() {
   return (
     <div className="max-w-7xl mx-auto pb-24 space-y-6">
       {/* Header section */}
-      <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Antrean Konfirmasi (Maker-Checker)</h1>
@@ -168,7 +168,7 @@ export default function AdminApprovalQueue() {
                   const isStatus = actionType === 'status_change';
 
                   return (
-                    <motion.tr key={item.nik} initial={{ opacity: 0, height: 0, scale: 0.95 }} animate={{ opacity: 1, height: "auto", scale: 1 }} exit={{ opacity: 0, scale: 0.9, height: 0, transition: { duration: 0.3 } }} className="hover:bg-gray-50/50 transition-colors">
+                    <motion.tr key={item.nik} initial={{ opacity: 0, height: 0, scale: 0.95 }} animate={{ opacity: 1, height: "auto", scale: 1 }} exit={{ opacity: 0, scale: 0.9, height: 0, transition: { duration: 0.3 } }} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm ${item.gender === 'Perempuan' ? 'bg-pink-400' : 'bg-blue-400'}`}>

@@ -308,7 +308,7 @@ export default function AdminBantuan({
     return (
       <div className="max-w-5xl mx-auto pb-24 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
         {/* Header Section */}
-        <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <button 
               type="button"
@@ -754,7 +754,7 @@ export default function AdminBantuan({
       )}
 
       {/* Welcome Header */}
-      <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
           <h3 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Program Bantuan Aktif</h3>
           <p className="text-gray-500 dark:text-slate-400 mt-1">Kelola dan validasi penerima bantuan sosial Desa Sukamaju secara langsung.</p>
@@ -922,7 +922,7 @@ export default function AdminBantuan({
         
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-gray-50/50 border-b border-gray-100 dark:border-slate-800">
+            <thead className="bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
               <tr>
                 <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">NIK / NAMA</th>
                 <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">DUSUN / RT / RW</th>
@@ -952,7 +952,7 @@ export default function AdminBantuan({
                   const isOverlap = (resident.activeAids || []).length > 1;
 
                   return (
-                    <tr key={resident.nik} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={resident.nik} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                       <td className="px-6 py-4">
                         <p className="font-bold text-sm text-gray-900 dark:text-white">{resident.nik}</p>
                         <p className="text-sm font-semibold text-gray-600 dark:text-slate-400">{resident.name}</p>
@@ -1019,7 +1019,7 @@ export default function AdminBantuan({
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
           <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-6 flex justify-between items-center border-b border-gray-100 dark:border-slate-800 bg-gray-50/50">
+            <div className="p-6 flex justify-between items-center border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
               <h3 className="font-bold text-xl text-emerald-800">Tambah Penerima Bantuan</h3>
               <button 
                 onClick={() => setShowModal(false)}
@@ -1127,7 +1127,7 @@ export default function AdminBantuan({
               )}
             </div>
             
-            <div className="p-6 bg-gray-50/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+            <div className="p-6 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
               <button 
                 onClick={() => setShowModal(false)}
                 className="px-6 py-2.5 font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-200 rounded-xl transition-all text-sm"

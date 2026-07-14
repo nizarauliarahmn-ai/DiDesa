@@ -754,7 +754,7 @@ export default function AdminSuratSPT({
 
             <div className="space-y-3">
               {heirCandidates.map((c, idx) => (
-                <div key={idx} className={`rounded-2xl border transition-all ${c.included ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-100 dark:border-slate-800 bg-slate-50/60 opacity-60'}`}>
+                <div key={idx} className={`rounded-2xl border transition-all ${c.included ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/80 opacity-60'}`}>
                   {/* Header row */}
                   <div className="flex items-center gap-2.5 px-4 py-2.5">
                     {/* Checkbox: include/exclude */}

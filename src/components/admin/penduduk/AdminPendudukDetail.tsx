@@ -334,7 +334,7 @@ export default function AdminPendudukDetail({
       )}
 
       {/* Header Actions & Navigation */}
-      <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <button 
             onClick={onBack}
@@ -699,7 +699,7 @@ export default function AdminPendudukDetail({
                 <tbody className="divide-y divide-gray-100">
                   {residentLetters.length > 0 ? (
                     residentLetters.map((letter) => (
-                      <tr key={letter.id} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={letter.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                         <td className="px-4 py-4 text-sm font-medium text-gray-600 dark:text-slate-400">{letter.tanggal}</td>
                         <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">{letter.jenis}</td>
                         <td className="px-4 py-4 text-sm text-gray-600 dark:text-slate-400">{letter.keperluan}</td>
@@ -713,7 +713,7 @@ export default function AdminPendudukDetail({
                       </tr>
                     ))
                   ) : (
-                    <tr className="hover:bg-gray-50/50 transition-colors">
+                    <tr className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                       <td colSpan={4} className="px-4 py-8 text-sm text-gray-400 text-center italic">
                         Belum ada riwayat penerbitan surat untuk warga ini.
                       </td>
@@ -758,7 +758,7 @@ export default function AdminPendudukDetail({
                 <tbody className="divide-y divide-gray-100">
                   {data?.activeAids && data.activeAids.length > 0 ? (
                     data.activeAids.map((aid: string, idx: number) => (
-                      <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
+                      <tr key={idx} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                         <td className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400">Aktif</td>
                         <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">{aid}</td>
                         <td className="px-4 py-4 text-sm text-gray-600 dark:text-slate-400">Terdaftar sebagai penerima aktif</td>
@@ -768,7 +768,7 @@ export default function AdminPendudukDetail({
                       </tr>
                     ))
                   ) : (
-                    <tr className="hover:bg-gray-50/50 transition-colors">
+                    <tr className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                       <td className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400">-</td>
                       <td className="px-4 py-4 text-sm font-bold text-gray-400">Tidak Ada Bantuan Aktif</td>
                       <td className="px-4 py-4 text-sm text-gray-400">Penduduk ini tidak terdaftar di program bansos aktif</td>

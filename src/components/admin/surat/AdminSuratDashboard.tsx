@@ -1037,7 +1037,7 @@ export default function AdminSuratDashboard({
       )}
 
       {/* Header */}
-      <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Arsip Surat</h2>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Kelola dan lihat riwayat surat yang telah diterbitkan.</p>
@@ -1216,7 +1216,7 @@ export default function AdminSuratDashboard({
           )}
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-100 dark:border-slate-800">
+              <tr className="bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
                 <th className="px-6 py-4 w-12 text-center print:hidden">
                   <input 
                     type="checkbox"
@@ -1364,9 +1364,9 @@ export default function AdminSuratDashboard({
              {/* Content & Sidebar */}
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
               {/* Paper Preview Area */}
-              <div className="flex-1 bg-gray-200/80 p-6 overflow-auto no-scrollbar flex justify-center items-start min-h-[400px] relative">
+              <div className="flex-1 bg-gray-200/80 dark:bg-slate-900/80 p-6 overflow-auto no-scrollbar flex justify-center items-start min-h-[400px] relative">
                 {/* Floating Document Zoom Controls */}
-                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm border border-gray-200 dark:border-slate-700 shadow-lg dark:shadow-none rounded-xl p-1.5 flex items-center gap-1 z-30">
+                <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border border-gray-200 dark:border-slate-700 shadow-lg dark:shadow-none rounded-xl p-1.5 flex items-center gap-1 z-30">
                   <button 
                     onClick={() => setZoomLevel(prev => Math.max(0.3, prev - 0.1))} 
                     className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors"

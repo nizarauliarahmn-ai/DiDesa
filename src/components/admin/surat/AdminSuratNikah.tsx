@@ -918,7 +918,7 @@ export default function AdminSuratNikah({
       </div>
 
       {/* Header - Hidden on Print */}
-      <div className="print:hidden px-8 pt-4 pb-3 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:border-slate-800 sticky top-16 z-30 shadow-sm dark:shadow-none">
+      <div className="print:hidden px-8 pt-4 pb-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-b border-slate-100 dark:border-slate-800 sticky top-16 z-30 shadow-sm dark:shadow-none">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <button 

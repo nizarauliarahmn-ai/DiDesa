@@ -1331,7 +1331,7 @@ export default function AdminSuratSKP({
                   </div>
 
                   {manualFollowers.length > 0 ? (
-                    <div className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-200/50">
+                    <div className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
                       {manualFollowers.map((follower, index) => (
                         <div key={follower.id} className="flex flex-wrap md:flex-nowrap gap-3 items-center bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none relative group">
                           <div className="flex-1 min-w-[140px]">

@@ -341,7 +341,7 @@ export default function AdminTenants() {
         <AdminGlobalUpdates />
       ) : activeTab === 'feedback' ? (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
-          <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 flex justify-between items-center">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 flex justify-between items-center">
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <MessageSquare className="text-emerald-600" />
@@ -356,7 +356,7 @@ export default function AdminTenants() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50/50 text-gray-500 dark:text-slate-400 font-medium border-b border-gray-100 dark:border-slate-800">
+              <thead className="bg-gray-50/50 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 font-medium border-b border-gray-100 dark:border-slate-800">
                 <tr>
                   <th className="px-6 py-4">Pengirim</th>
                   <th className="px-6 py-4">Kategori</th>
@@ -368,7 +368,7 @@ export default function AdminTenants() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {feedbacks.map(f => (
-                  <tr key={f.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={f.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-bold text-gray-900 dark:text-white">{f.nama}</div>
                       <div className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">{f.desa}</div>
@@ -482,7 +482,7 @@ export default function AdminTenants() {
 
           {/* Tenant List */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
-            <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 gap-4">
+            <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 gap-4">
               <div className="relative w-full sm:w-80">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input 
@@ -502,7 +502,7 @@ export default function AdminTenants() {
             
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50/50 text-gray-500 dark:text-slate-400 font-bold border-b border-gray-100 dark:border-slate-800 uppercase text-[11px] tracking-wider">
+                <thead className="bg-gray-50/50 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 font-bold border-b border-gray-100 dark:border-slate-800 uppercase text-[11px] tracking-wider">
                   <tr>
                     <th className="px-6 py-4">Instansi Klien</th>
                     <th className="px-6 py-4">Domain / Subdomain</th>
@@ -540,7 +540,7 @@ export default function AdminTenants() {
                     const kadPass = tenant.kades_password || 'kades123';
 
                     return (
-                      <tr key={tenant.id} className="hover:bg-gray-50/50 transition-colors group">
+                      <tr key={tenant.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors group">
                         {/* Tenant Info */}
                         <td className="px-6 py-4">
                           <div className="flex items-start gap-2.5">
@@ -733,7 +733,7 @@ export default function AdminTenants() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
               <div>
                 <h3 className="font-extrabold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                   <Building2 className="text-emerald-600" />
@@ -857,7 +857,7 @@ export default function AdminTenants() {
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
               <div>
                 <h3 className="font-extrabold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                   <Key className="text-emerald-600" />

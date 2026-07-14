@@ -297,7 +297,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50/50 text-gray-900 dark:text-white font-sans overflow-hidden">
+    <div className="flex h-screen bg-gray-50/50 dark:bg-slate-800/50 text-gray-900 dark:text-white font-sans overflow-hidden">
       <div className="lg:hidden">
         <Sidebar onLogout={handleLogout} activeTab={publicTab} setActiveTab={setPublicTab} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
       </div>

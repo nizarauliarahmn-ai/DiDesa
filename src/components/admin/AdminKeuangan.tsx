@@ -62,7 +62,7 @@ export default function AdminKeuangan() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-24">
       {/* Header Info */}
-      <section className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200/50 pb-6 mb-6">
+      <section className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200/50 dark:border-slate-700/50 pb-6 mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Manajemen Keuangan & APBDes</h2>
           <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">Upload laporan Siskeudes, biarkan AI DiDesa mengekstrak dan mempublikasikannya otomatis.</p>

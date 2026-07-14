@@ -301,7 +301,7 @@ export default function AdminHeader({
   };
 
   return (
-    <header className={`h-16 bg-slate-50/60 backdrop-blur-xl border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-6 z-50 ${className}`}>
+    <header className={`h-16 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-6 z-50 ${className}`}>
       <div className="flex items-center gap-4 flex-1">
         <button onClick={toggleMobileMenu} className="lg:hidden p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
           <Menu size={24} />
