@@ -341,9 +341,10 @@ export default function AdminSuratSPT({
           body { margin:0; }
         </style></head><body>
           ${generatePage1HTML()}
-          ${activeHeirs.length > 5 ? `<div class="page-break"></div>\n          ${generatePage3HTML()}` : ''}
+          ${activeHeirs.length > 5 ? `<div class="page-break"></div>\n          ${generateLampiranKuasaHTML()}` : ''}
           <div class="page-break"></div>
           ${generatePage2HTML()}
+          ${activeHeirs.length > 5 ? `<div class="page-break"></div>\n          ${generateLampiranPernyataanHTML()}` : ''}
           <script>window.onload=function(){window.print();}<\/script>
         </body></html>`);
         doc.close();
@@ -403,7 +404,7 @@ export default function AdminSuratSPT({
             </div>
           </div>`).join('')}
       </div>
-      ${activeHeirs.length > 5 ? `<div style="margin-left:40px;margin-bottom:12px;font-style:italic;font-size:12px;">(* Lanjutan daftar ahli waris No. 6 dst. dilanjutkan pada Lembar Lampiran)</div>` : ''}
+      ${activeHeirs.length > 5 ? `<div style="margin-left:40px;margin-bottom:12px;font-style:italic;font-size:12px;">(* Lanjutan daftar ahli waris No. 6 dst. dilanjutkan pada Lampiran Surat Kuasa)</div>` : ''}
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:12px;font-size:13.5px;">
         Kami sepakat menunjuk atau memberikan Kuasa kepada salah satu orang dari kami yang bernama
@@ -425,7 +426,7 @@ export default function AdminSuratSPT({
             Pemberi Kuasa (Ahli Waris):<br/><br/>
             ${activeHeirs.length > 5 ? `
               <div style="font-style:italic;font-size:11px;margin-top:10px;text-align:center;">
-                (Seluruh Tanda Tangan Pemberi Kuasa Terlampir pada Lembar Lampiran)
+                (Seluruh Tanda Tangan Pemberi Kuasa Terlampir pada Lampiran Surat Kuasa)
               </div>
             ` : activeHeirs.map((h, i) => `
               <div style="margin-bottom:12px;display:flex;justify-content:space-between;">
@@ -492,7 +493,7 @@ export default function AdminSuratSPT({
             </tr>`).join('')}
         </tbody>
       </table>
-      ${activeHeirs.length > 5 ? `<div style="font-style:italic;font-size:11.5px;margin-bottom:10px;">(* Lanjutan tabel ahli waris No. 6 dst. terdapat pada Lembar Lampiran)</div>` : ''}
+      ${activeHeirs.length > 5 ? `<div style="font-style:italic;font-size:11.5px;margin-bottom:10px;">(* Lanjutan tabel ahli waris No. 6 dst. terdapat pada Lampiran Surat Pernyataan Waris)</div>` : ''}
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:8px;font-size:13px;">
         Kami tersebut di atas adalah satu-satunya ahli waris, tidak ada lagi ahli waris yang lain.
@@ -509,7 +510,7 @@ export default function AdminSuratSPT({
               <strong>Para Ahli Waris:</strong><br/><br/>
               ${activeHeirs.length > 5 ? `
                 <div style="font-style:italic;font-size:11px;margin-top:10px;">
-                  (Seluruh Tanda Tangan Para Ahli Waris Terlampir pada Lembar Lampiran)
+                  (Seluruh Tanda Tangan Para Ahli Waris Terlampir pada Lampiran Surat Pernyataan Waris)
                 </div>
               ` : activeHeirs.map((h, i) => `
                 <div style="margin-bottom:8px;display:flex;justify-content:space-between;width:90%;">
@@ -570,11 +571,49 @@ export default function AdminSuratSPT({
       </div>
     </div>`;
 
-  const generatePage3HTML = () => `
+  const generateLampiranKuasaHTML = () => `
     <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;background:white;font-family:${letterFont};">
       <div style="text-align:center;margin-bottom:20px;">
-        <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">LAMPIRAN LANJUTAN AHLI WARIS</h3>
+        <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">LAMPIRAN SURAT KUASA AHLI WARIS</h3>
         <p style="margin:2px 0 0 0;font-size:13.5px;">Nomor : ${v(formData.nomorSurat)}</p>
+      </div>
+
+      <h4 style="font-size:13px;margin-bottom:10px;">A. Lanjutan Daftar Ahli Waris (No. 6 dst)</h4>
+      <div style="margin-left:20px;margin-bottom:25px;font-size:13px;line-height:1.25;">
+        ${activeHeirs.slice(5).map((h, i) => `
+          <div style="margin-bottom:8px;">
+            <span style="display:inline-block;width:20px;vertical-align:top;font-weight:bold;">${i + 6}.</span>
+            <div style="display:inline-block;width:calc(100% - 25px);vertical-align:top;">
+              <table style="width:100%;border-collapse:collapse;line-height:1.15;font-size:13px;">
+                <tr><td style="width:28%;">Nama</td><td style="width:2%;">:</td><td><strong>${h.editedName}</strong></td></tr>
+                <tr><td>NIK</td><td>:</td><td style="font-family:monospace;">${h.editedNik}</td></tr>
+                <tr><td>Tempat, Tgl Lahir</td><td>:</td><td>${h.editedBirthPlace}, ${fmtDate(h.editedBirthDate)}</td></tr>
+                <tr><td>Alamat</td><td>:</td><td>${h.editedAddress}</td></tr>
+              </table>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <h4 style="font-size:13px;margin-bottom:10px;margin-top:30px;">B. Seluruh Tanda Tangan Pemberi Kuasa</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:15px;margin-bottom:30px;">
+        ${activeHeirs.map((h, i) => `
+          <div style="width:45%;margin-bottom:20px;">
+            <div style="margin-bottom:30px;font-size:13px;">${i + 1}. ${h.editedName}</div>
+            <div style="font-size:13px;">(...................................)</div>
+          </div>
+        `).join('')}
+      </div>
+      
+      <div style="margin-top:50px;">
+        ${SAAS_CONFIG.globalFooterHTML}
+      </div>
+    </div>`;
+
+  const generateLampiranPernyataanHTML = () => `
+    <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;background:white;font-family:${letterFont};">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">LAMPIRAN SURAT PERNYATAAN WARIS</h3>
+        <p style="margin:2px 0 0 0;font-size:13.5px;">Tanggal : ${tglFormatted}</p>
       </div>
 
       <h4 style="font-size:13px;margin-bottom:10px;">A. Lanjutan Tabel Ahli Waris (No. 6 dst)</h4>
@@ -600,17 +639,7 @@ export default function AdminSuratSPT({
         </tbody>
       </table>
 
-      <h4 style="font-size:13px;margin-bottom:10px;margin-top:30px;">B. Tanda Tangan Pemberi Kuasa (Surat Kuasa)</h4>
-      <div style="display:flex;flex-wrap:wrap;gap:15px;margin-bottom:30px;">
-        ${activeHeirs.map((h, i) => `
-          <div style="width:45%;margin-bottom:20px;">
-            <div style="margin-bottom:30px;font-size:13px;">${i + 1}. ${h.editedName}</div>
-            <div style="font-size:13px;">(...................................)</div>
-          </div>
-        `).join('')}
-      </div>
-
-      <h4 style="font-size:13px;margin-bottom:10px;margin-top:20px;">C. Tanda Tangan Para Ahli Waris (Surat Pernyataan Waris)</h4>
+      <h4 style="font-size:13px;margin-bottom:10px;margin-top:30px;">B. Seluruh Tanda Tangan Para Ahli Waris</h4>
       <div style="display:flex;flex-wrap:wrap;gap:15px;">
         ${activeHeirs.map((h, i) => `
           <div style="width:45%;margin-bottom:20px;">
@@ -660,7 +689,7 @@ export default function AdminSuratSPT({
             className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg dark:shadow-none shadow-emerald-900/20 active:scale-95 disabled:opacity-60"
           >
             <Printer className="w-4 h-4" />
-            {loading ? 'Memproses...' : `Cetak ${activeHeirs.length > 5 ? '3' : '2'} Lembar`}
+            {loading ? 'Memproses...' : `Cetak ${activeHeirs.length > 5 ? '4' : '2'} Lembar`}
           </button>
         </div>
       </div>
@@ -738,7 +767,16 @@ export default function AdminSuratSPT({
             <div className="grid grid-cols-2 gap-2.5 pt-1">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Hari Wafat</label>
-                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.hariMeninggal} onChange={e => setFormData(p => ({...p, hariMeninggal: e.target.value}))} placeholder="Selasa" />
+                <select className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.hariMeninggal} onChange={e => setFormData(p => ({...p, hariMeninggal: e.target.value}))}>
+                  <option value="">-- Pilih --</option>
+                  <option value="Senin">Senin</option>
+                  <option value="Selasa">Selasa</option>
+                  <option value="Rabu">Rabu</option>
+                  <option value="Kamis">Kamis</option>
+                  <option value="Jumat">Jumat</option>
+                  <option value="Sabtu">Sabtu</option>
+                  <option value="Minggu">Minggu</option>
+                </select>
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tanggal</label>
@@ -746,7 +784,7 @@ export default function AdminSuratSPT({
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Jam</label>
-                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.jamMeninggal} onChange={e => setFormData(p => ({...p, jamMeninggal: e.target.value}))} placeholder="17:49" />
+                <input type="time" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.jamMeninggal} onChange={e => setFormData(p => ({...p, jamMeninggal: e.target.value}))} />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</label>
@@ -754,7 +792,14 @@ export default function AdminSuratSPT({
               </div>
               <div className="space-y-1 col-span-2">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tempat Wafat</label>
-                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.tempatMeninggal} onChange={e => setFormData(p => ({...p, tempatMeninggal: e.target.value}))} placeholder="RSUD ..." />
+                <input type="text" list="tempat-wafat-list" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.tempatMeninggal} onChange={e => setFormData(p => ({...p, tempatMeninggal: e.target.value}))} placeholder="Pilih atau ketik tempat..." />
+                <datalist id="tempat-wafat-list">
+                  <option value="Rumah Sakit Umum Daerah (RSUD)" />
+                  <option value="Rumah Kediaman" />
+                  <option value="Puskesmas" />
+                  <option value="Rumah Sakit Ibu dan Anak (RSIA)" />
+                  <option value="Klinik" />
+                </datalist>
               </div>
               <div className="space-y-1 col-span-2">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Alamat Terakhir</label>
@@ -972,7 +1017,7 @@ export default function AdminSuratSPT({
           <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">LIVE PREVIEW — {activeHeirs.length > 5 ? '3' : '2'} LEMBAR A4</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">LIVE PREVIEW — {activeHeirs.length > 5 ? '4' : '2'} LEMBAR A4</span>
             </div>
             <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border rounded-xl p-1">
               <button onClick={() => setPreviewZoom(z => Math.max(0.18, z - 0.05))} className="p-1.5 hover:bg-white rounded-lg text-slate-600 dark:text-slate-400 transition-all"><ZoomOut className="w-3.5 h-3.5" /></button>
@@ -990,23 +1035,33 @@ export default function AdminSuratSPT({
               </div>
             </div>
 
-            {/* Lembar 2 (Conditional: Lampiran Lanjutan) */}
+            {/* Lembar 2 (Conditional: Lampiran Kuasa) */}
             {activeHeirs.length > 5 && (
               <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
-                <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 2: LAMPIRAN LANJUTAN —</p>
+                <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 2: LAMPIRAN SURAT KUASA —</p>
                 <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
-                  <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage3HTML() }} />
+                  <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generateLampiranKuasaHTML() }} />
                 </div>
               </div>
             )}
 
-            {/* Lembar Terakhir: Surat Pernyataan Waris */}
+            {/* Lembar 3: Surat Pernyataan Waris */}
             <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
               <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR {activeHeirs.length > 5 ? '3' : '2'}: SURAT PERNYATAAN WARIS —</p>
               <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
                 <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage2HTML() }} />
               </div>
             </div>
+
+            {/* Lembar 4 (Conditional: Lampiran Pernyataan) */}
+            {activeHeirs.length > 5 && (
+              <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
+                <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 4: LAMPIRAN SURAT PERNYATAAN —</p>
+                <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
+                  <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generateLampiranPernyataanHTML() }} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
