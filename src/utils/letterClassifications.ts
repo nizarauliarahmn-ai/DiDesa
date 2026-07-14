@@ -21,7 +21,6 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '10', jenis: 'SK BELUM MENIKAH', klasifikasi: 'SKBM', kodeKlasifikasi: '474', noUrutTerakhir: 6, isVisible: true },
   { id: '11', jenis: 'SK KEHILANGAN', klasifikasi: 'SKH', kodeKlasifikasi: '331', noUrutTerakhir: 9, isVisible: true },
   { id: '12', jenis: 'SURAT KETERANGAN PINDAH', klasifikasi: 'SKP', kodeKlasifikasi: '475', noUrutTerakhir: 0, isVisible: true },
-  { id: '13', jenis: 'SURAT PINDAH', klasifikasi: 'SPH', kodeKlasifikasi: '475', noUrutTerakhir: 7, isVisible: true },
   { id: '14', jenis: 'SURAT REKOMENDASI', klasifikasi: 'SRI', kodeKlasifikasi: '100', noUrutTerakhir: 3, isVisible: true },
   { id: '15', jenis: 'SK USAHA', klasifikasi: 'SKU', kodeKlasifikasi: '500', noUrutTerakhir: 11, isVisible: true },
   { id: '16', jenis: 'KEUANGAN', klasifikasi: 'KEU', kodeKlasifikasi: '900', noUrutTerakhir: 5, isVisible: true },

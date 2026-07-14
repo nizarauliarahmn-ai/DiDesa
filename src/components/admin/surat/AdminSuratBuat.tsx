@@ -50,8 +50,8 @@ const formatMonthYearInIndonesian = (monthYearStr: string): string => {
   return monthYearStr;
 };
 
-export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSPH, onOpenSKP, onOpenSKH, onOpenSDU, onOpenSPT }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
-  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSPH?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void }) {
+export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSDU, onOpenSPT }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
+  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void }) {
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
@@ -542,7 +542,6 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     if (k === 'SKN' || k === 'PRW') return <Heart className="w-6 h-6 text-emerald-700" />;
     if (j.includes('TANAH') || k === 'JBT' || k === 'SJBT' || k === 'SKKT') return <Landmark className="w-6 h-6 text-emerald-700" />;
     if (k === 'SKP' || k === 'SPJN' || k === 'SKKB') return <FileCheck className="w-6 h-6 text-emerald-700" />;
-    if (k === 'SPH') return <MapPin className="w-6 h-6 text-emerald-700" />;
     if (k === 'SRI' || k === 'SKBM') return <Award className="w-6 h-6 text-emerald-700" />;
     if (k === 'SKL') return <Calendar className="w-6 h-6 text-emerald-700" />;
     return <FileText className="w-6 h-6 text-emerald-700" />;
@@ -659,14 +658,11 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                         if (onOpenSKU) onOpenSKU();
                         return;
                       }
-                      if (t.klasifikasi === 'SKH') {
-                        if (onOpenSKH) onOpenSKH();
-                        return;
-                      }
-                      if (t.klasifikasi === 'SKPH') {
-                        if (onOpenSKPH) onOpenSKPH();
-                        return;
-                      }
+                      
+                        if (t.klasifikasi === 'SKPH') {
+                          if (onOpenSKPH) onOpenSKPH();
+                          return;
+                        }
                       if (t.klasifikasi === 'SKD' || t.klasifikasi === 'SKDPR' || t.klasifikasi === 'SDP') {
                         if (onOpenSKD) onOpenSKD();
                         return;
@@ -677,10 +673,6 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       }
                       if (t.klasifikasi === 'SKM') {
                         if (onOpenSKM) onOpenSKM();
-                        return;
-                      }
-                      if (t.klasifikasi === 'SPH') {
-                        if (onOpenSPH) onOpenSPH();
                         return;
                       }
                       if (t.klasifikasi === 'SKP') {
@@ -1472,8 +1464,6 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       } else if (selectedTemplate === 'SKL') {
                         leadingParagraph = `Yang bertanda tangan di bawah ini Kepala ${desaName}, menerangkan bahwa dari pasangan warga kami telah lahir seorang anak dengan identitas kependudukan terlampir di bawah ini. Adapun orang tua anak tersebut adalah:`;
                         middleParagraph = `Surat keterangan kelahiran ini dibuat sebagai bukti pengantar utama pengurusan akta kelahiran resmi anak pada instansi pencatatan sipil:`;
-                      } else if (selectedTemplate === 'SPH') {
-                        middleParagraph = `Yang bersangkutan mengajukan permohonan pindah domisili keluar daerah secara sadar. Surat keterangan pengantar pindah ini diberikan untuk pengurusan dokumen perpindahan wilayah kependudukan secara resmi:`;
                       } else if (selectedTemplate === 'SKH') {
                         middleParagraph = `Adalah benar yang bersangkutan telah melaporkan kehilangan dokumen penting non-pidana. Surat pengantar kehilangan ini diberikan untuk pengurusan dokumen baru ke instansi berwenang:`;
                       } else if (selectedTemplate === 'SKPH') {
@@ -1580,3 +1570,4 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     </div>
   );
 }
+

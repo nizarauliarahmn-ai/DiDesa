@@ -7,7 +7,6 @@ import AdminSuratSKTM from './surat/AdminSuratSKTM';
 import AdminSuratSKBM from './surat/AdminSuratSKBM';
 import AdminSuratSKH from './surat/AdminSuratSKH';
 import AdminSuratSKM from './surat/AdminSuratSKM';
-import AdminSuratSPH from './surat/AdminSuratSPH';
 import AdminSuratSKU from './surat/AdminSuratSKU';
 import AdminSuratSKPH from './surat/AdminSuratSKPH';
 import AdminSuratSKD from './surat/AdminSuratSKD';
@@ -29,7 +28,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skm' | 'sph' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
 
@@ -71,8 +70,6 @@ export default function AdminSurat({
       setActiveTab('skh');
     } else if (jenis === 'SK PENGHASILAN' || jenis === 'SKPH') {
       setActiveTab('skph');
-    } else if (jenis === 'SPH' || jenis === 'SURAT PENGANTAR PINDAH') {
-      setActiveTab('sph');
     } else if (jenis === 'SURAT PENGANTAR NIKAH' || jenis === 'SKN') {
       setActiveTab('nikah');
     } else if (jenis === 'SPT' || jenis === 'SURAT PENGURUSAN TASPEN') {
@@ -135,7 +132,6 @@ export default function AdminSurat({
             onOpenSKTM={() => changeTab('sktm')}
             onOpenSKBM={() => changeTab('skbm')}
             onOpenSKM={() => changeTab('skm')}
-            onOpenSPH={() => changeTab('sph')}
             onOpenSKU={() => changeTab('sku')}
             onOpenSKPH={() => changeTab('skph')}
             onOpenSKD={() => changeTab('skd')}
@@ -176,13 +172,6 @@ export default function AdminSurat({
         )}
         {activeTab === 'skm' && (
           <AdminSuratSKM 
-            editData={editData}
-            editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
-          />
-        )}
-        {activeTab === 'sph' && (
-          <AdminSuratSPH 
             editData={editData}
             editLetterId={editLetterId}
             onBack={() => changeTab('buat')} 
