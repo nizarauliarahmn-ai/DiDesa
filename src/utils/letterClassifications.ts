@@ -5,6 +5,7 @@ export interface LetterClassification {
   kodeKlasifikasi: string; // The numeric archive classification (e.g. "145", "400")
   noUrutTerakhir: number;
   isVisible?: boolean;
+  deskripsi?: string;
 }
 
 export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
@@ -36,7 +37,8 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '26', jenis: 'SURAT JUAL BELI TANAH', klasifikasi: 'SJBT', kodeKlasifikasi: '593', noUrutTerakhir: 0, isVisible: true },
   { id: '27', jenis: 'SURAT KUASA', klasifikasi: 'SKS', kodeKlasifikasi: '100', noUrutTerakhir: 2, isVisible: true },
   { id: '28', jenis: 'SK PENGHASILAN', klasifikasi: 'SKPH', kodeKlasifikasi: '400', noUrutTerakhir: 4, isVisible: true },
-  { id: '29', jenis: 'SURAT PENGURUSAN TASPEN', klasifikasi: 'SPT', kodeKlasifikasi: '474', noUrutTerakhir: 0, isVisible: true }
+  { id: '29', jenis: 'SURAT PENGURUSAN TASPEN', klasifikasi: 'SPT', kodeKlasifikasi: '474', noUrutTerakhir: 0, isVisible: true },
+  { id: '30', jenis: 'SK DOMISILI USAHA', klasifikasi: 'SDU', kodeKlasifikasi: '500', noUrutTerakhir: 0, isVisible: true, deskripsi: 'Surat Keterangan Domisili Usaha' }
 ];
 
 export function getSaaSTemplates(): LetterClassification[] {
