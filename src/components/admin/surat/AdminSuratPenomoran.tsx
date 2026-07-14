@@ -271,7 +271,7 @@ return (
           onClick={handleOpenSaaSRequest}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm dark:shadow-none hover:scale-102 transition-all flex items-center gap-2 self-start sm:self-auto"
         >
-          <FileText className="w-4 h-4" /> Ajukan Penambahan ke SaaS
+          <FileText className="w-4 h-4" /> Minta Tambah Surat
         </button>
       ) : (
         <div className="flex items-center gap-1.5 text-xs text-amber-800 bg-amber-50 px-3 py-2 rounded-xl border border-amber-100 font-extrabold self-start sm:self-auto">
@@ -555,7 +555,7 @@ return (
           <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
             <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
-              Ajukan Penambahan Jenis Surat
+              Minta Tambah Surat
             </h3>
             <button
               onClick={() => setShowModal(false)}
