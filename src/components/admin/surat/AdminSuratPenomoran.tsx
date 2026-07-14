@@ -69,14 +69,10 @@ export default function AdminSuratPenomoran() {
     localStorage.getItem("kop_logo_url") ||
     "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png";
 
-  // Modal / Form state for Add/Edit
+  // Modal / Form state for SaaS Request
   const [showModal, setShowModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<LetterClassification | null>(
-    null,
-  );
-  const [formJenis, setFormJenis] = useState("");
-  const [formKlasifikasi, setFormKlasifikasi] = useState("");
-  const [formKodeKlasifikasi, setFormKodeKlasifikasi] = useState("");
+  const [saasLetterName, setSaasLetterName] = useState("");
+  const [saasLetterFile, setSaasLetterFile] = useState<File | null>(null);
 
   useEffect(() => {
     setClassifications(getLetterClassifications());
@@ -229,11 +225,9 @@ const filteredItems = classifications.filter(
       item.kodeKlasifikasi.toLowerCase().includes(searchQuery.toLowerCase())),
 );
 
-const handleOpenAdd = () => {
-  setEditingItem(null);
-  setFormJenis("");
-  setFormKlasifikasi("");
-  setFormKodeKlasifikasi("");
+const handleOpenSaaSRequest = () => {
+  setSaasLetterName("");
+  setSaasLetterFile(null);
   setShowModal(true);
 };
 const handleToggleVisibility = (id: string, currentVal: boolean) => {
@@ -244,51 +238,16 @@ const handleToggleVisibility = (id: string, currentVal: boolean) => {
   saveLetterClassifications(updated);
   showToast("Status visibilitas berhasil diubah", "success");
 };
-const handleSaveClassification = (e: React.FormEvent) => {
+const handleSaaSSubmit = (e: React.FormEvent) => {
   e.preventDefault();
-  if (
-    !formJenis.trim() ||
-    !formKlasifikasi.trim() ||
-    !formKodeKlasifikasi.trim()
-  ) {
-    showToast(
-      "Nama jenis, kode, dan nomor klasifikasi tidak boleh kosong!",
-      "error",
-    );
+  if (!saasLetterName.trim() || !saasLetterFile) {
+    showToast("Nama surat dan file contoh wajib diisi!", "error");
     return;
   }
-
-  let updated: LetterClassification[];
-  if (editingItem) {
-    updated = classifications.map((c) =>
-      c.id === editingItem.id
-        ? {
-            ...c,
-            jenis: formJenis.toUpperCase().trim(),
-            klasifikasi: formKlasifikasi.toUpperCase().trim(),
-            kodeKlasifikasi: formKodeKlasifikasi.trim(),
-          }
-        : c,
-    );
-    showToast(`Klasifikasi "${formJenis}" berhasil diperbarui!`, "success");
-  } else {
-    const newItem: LetterClassification = {
-      id: Date.now().toString(),
-      jenis: formJenis.toUpperCase().trim(),
-      klasifikasi: formKlasifikasi.toUpperCase().trim(),
-      kodeKlasifikasi: formKodeKlasifikasi.trim(),
-      noUrutTerakhir: getGlobalSequenceNumber(),
-    };
-
-    updated = [newItem, ...classifications];
-    showToast(
-      `Klasifikasi baru "${formJenis}" berhasil ditambahkan!`,
-      "success",
-    );
-  }
-
-  setClassifications(updated);
-  saveLetterClassifications(updated);
+  showToast(
+    "Permintaan penambahan jenis surat beserta contoh file telah dikirim ke tim SaaS untuk ditinjau.",
+    "success"
+  );
   setShowModal(false);
 };
 const authUser = JSON.parse(localStorage.getItem("didesa_auth_user") || "{}");
@@ -309,7 +268,7 @@ return (
       </div>
       {isSuperAdmin ? (
         <button
-          onClick={() => showToast("Permintaan penambahan jenis surat telah dikirim ke tim SaaS untuk ditinjau.", "success")}
+          onClick={handleOpenSaaSRequest}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm dark:shadow-none hover:scale-102 transition-all flex items-center gap-2 self-start sm:self-auto"
         >
           <FileText className="w-4 h-4" /> Ajukan Penambahan ke SaaS
@@ -589,14 +548,14 @@ return (
       </div>
     </div>
 
-    {/* Add / Edit Modal */}
+    {/* Request SaaS Modal */}
     {showModal && (
       <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
         <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
             <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-emerald-700" />
-              {editingItem ? "Edit Jenis Surat" : "Tambah Jenis Surat"}
+              <FileText className="w-5 h-5 text-blue-600" />
+              Ajukan Penambahan Jenis Surat
             </h3>
             <button
               onClick={() => setShowModal(false)}
@@ -606,47 +565,39 @@ return (
             </button>
           </div>
 
-          <form onSubmit={handleSaveClassification} className="p-6 space-y-4">
+          <form onSubmit={handleSaaSSubmit} className="p-6 space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Nama Jenis Surat
+                Nama Lengkap Surat <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                value={formJenis}
-                onChange={(e) => setFormJenis(e.target.value)}
-                placeholder="Contoh: SK KEMATIAN, SK BELUM MENIKAH"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
+                value={saasLetterName}
+                onChange={(e) => setSaasLetterName(e.target.value)}
+                placeholder="Contoh: SURAT KETERANGAN USAHA (SKU)"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold bg-white dark:bg-slate-900"
                 required
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                No. Kode Surat (Klasifikasi Arsip)
+                File Contoh / Referensi (Wajib) <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                value={formKodeKlasifikasi}
-                onChange={(e) => setFormKodeKlasifikasi(e.target.value)}
-                placeholder="Contoh: 145, 400, 500"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono font-bold text-emerald-800"
+                type="file"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setSaasLetterFile(e.target.files[0]);
+                  }
+                }}
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium bg-white dark:bg-slate-900 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Singkatan Jenis Surat (Abbreviation)
-              </label>
-              <input
-                type="text"
-                value={formKlasifikasi}
-                onChange={(e) => setFormKlasifikasi(e.target.value)}
-                placeholder="Contoh: SKM, SKBM, SKS"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono font-semibold"
-                required
-              />
+              <p className="text-[10px] text-gray-500 mt-2">
+                Format: PDF, Word, atau Gambar (Max. 2MB)
+              </p>
             </div>
 
             <div className="pt-4 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-slate-800 mt-6">
@@ -659,9 +610,9 @@ return (
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all flex items-center gap-2"
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all flex items-center gap-2"
               >
-                <Check className="w-4 h-4" /> Simpan
+                <FileText className="w-4 h-4" /> Kirim Pengajuan
               </button>
             </div>
           </form>
