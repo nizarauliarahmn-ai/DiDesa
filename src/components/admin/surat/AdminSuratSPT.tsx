@@ -956,7 +956,7 @@ export default function AdminSuratSPT({
           <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">LIVE PREVIEW — 2 LEMBAR A4</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">LIVE PREVIEW — {activeHeirs.length > 5 ? '3' : '2'} LEMBAR A4</span>
             </div>
             <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border rounded-xl p-1">
               <button onClick={() => setPreviewZoom(z => Math.max(0.18, z - 0.05))} className="p-1.5 hover:bg-white rounded-lg text-slate-600 dark:text-slate-400 transition-all"><ZoomOut className="w-3.5 h-3.5" /></button>
@@ -981,6 +981,16 @@ export default function AdminSuratSPT({
                 <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage2HTML() }} />
               </div>
             </div>
+
+            {/* Lembar 3 (Conditional) */}
+            {activeHeirs.length > 5 && (
+              <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
+                <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 3: LAMPIRAN LANJUTAN —</p>
+                <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
+                  <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage3HTML() }} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
