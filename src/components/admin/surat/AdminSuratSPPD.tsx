@@ -48,6 +48,11 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
   const [pangkatGolongan, setPangkatGolongan] = useState(editData?.pangkatGolongan || '');
   const [jabatanPegawai, setJabatanPegawai] = useState(editData?.jabatanPegawai || '');
 
+  // Dasar & Pelaporan
+  const [dasarPenugasan, setDasarPenugasan] = useState(editData?.dasarPenugasan || 'surat undangan dengan nomor surat: ........ tanggal ........');
+  const [namaPPTK, setNamaPPTK] = useState(editData?.namaPPTK || '');
+  const [kepadaYth, setKepadaYth] = useState(editData?.kepadaYth || 'Kepala Desa Wasah Hilir');
+
   // Detail Perjalanan
   const [maksudPerjalanan, setMaksudPerjalanan] = useState(editData?.maksudPerjalanan || '');
   const [alatAngkut, setAlatAngkut] = useState(editData?.alatAngkut || '');
@@ -76,48 +81,34 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
     setNipKades(settings.kadesNip || '');
     setIncludeCamat(settings.includeCamat || false);
 
-    if (!editLetterId && sppdClass) {
-      setNomorSurat(generateLetterNumber(sppdClass.klasifikasi, kodeKlasifikasi || '094'));
-    } else if (editData?.nomorSurat) {
-      setNomorSurat(editData.nomorSurat);
+    if (editData?.nomorSurat) {
+      setNomorSurat(editData.nomorSurat.split('/').pop() || '');
+    } else {
+      setNomorSurat(generateLetterNumber());
+    }
+  }, [editData]);
+
+  const handlePrint = () => {
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.contentWindow.print();
+    }
+  };
+
+  const handleRecord = () => {
+    if (!nomorSurat) {
+      showToast('error', 'Nomor surat wajib diisi');
+      return;
     }
     
-    // Set default dates if empty
-    if (!tanggalBerangkat) {
-      const now = new Date();
-      setTanggalBerangkat(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
-      setTanggalKembali(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
-    }
-  }, [sppdClass, editLetterId, kodeKlasifikasi]);
-
-  const addPengikut = () => {
-    setPengikut([...pengikut, { nama: '', umur: '', keterangan: '' }]);
-  };
-
-  const removePengikut = (index: number) => {
-    setPengikut(pengikut.filter((_, i) => i !== index));
-  };
-
-  const handlePengikutChange = (index: number, field: string, value: string) => {
-    const updated = [...pengikut];
-    updated[index] = { ...updated[index], [field]: value } as any;
-    setPengikut(updated);
-  };
-
-  const recordLetterToHistory = () => {
-    if (hasRecorded) return;
-    
-    const letterType = 'Surat Perjalanan Dinas (SPPD)';
-    
-    const payload = {
-      nomor: nomorSurat,
-      jenis: letterType,
-      nama: namaPegawai || 'Tidak disebutkan',
-      keperluan: `Tujuan: ${tempatTujuan} - ${maksudPerjalanan}`,
-      tanggal: new Date().toISOString(),
-      status: 'Selesai' as const,
-      data: {
-        nomorSurat,
+    setIsSaving(true);
+    try {
+      const fullNomor = `${kodeKlasifikasi}/${nomorSurat}`;
+      const payload = {
+        klasifikasi: 'SPPD',
+        nomorSurat: fullNomor,
+        tanggal: new Date().toISOString(),
+        pemohon: namaPegawai,
+        nikPemohon: nipPegawai || '-',
         namaPegawai,
         nipPegawai,
         pangkatGolongan,
@@ -131,44 +122,47 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
         tanggalKembali,
         bebanAnggaran,
         mataAnggaran,
+        dasarPenugasan,
+        namaPPTK,
+        kepadaYth,
         pengikut
+      };
+
+      if (editLetterId) {
+        updateLetterHistory(editLetterId, payload);
+        showToast('success', 'Surat SPPD berhasil diperbarui!');
+      } else {
+        addLetterHistory(payload);
+        showToast('success', 'Surat SPPD berhasil dicatat!');
       }
-    };
-
-    if (editLetterId) {
-      updateLetterHistory(editLetterId, payload);
-    } else {
-      addLetterHistory(payload);
-    }
-    
-    setHasRecorded(true);
-  };
-
-  const handleSave = () => {
-    setIsSaving(true);
-    
-    recordLetterToHistory();
-
-    setTimeout(() => {
+      setHasRecorded(true);
+    } catch (e) {
+      showToast('error', 'Gagal mencatat surat');
+    } finally {
       setIsSaving(false);
-      showToast(editLetterId ? 'Perubahan surat SPPD berhasil disimpan!' : 'Surat SPPD berhasil dibuat!', 'success');
-      onBack();
-    }, 1000);
-  };
-
-  const handlePrint = () => {
-    recordLetterToHistory();
-
-    const iframe = iframeRef.current;
-    if (iframe) {
-      iframe.contentWindow?.print();
     }
   };
 
-  const currentDateFormatted = () => {
+  const addPengikut = () => {
+    setPengikut([...pengikut, { nama: '', umur: '', keterangan: '' }]);
+  };
+
+  const removePengikut = (index: number) => {
+    setPengikut(pengikut.filter((_, i) => i !== index));
+  };
+
+  const handlePengikutChange = (index: number, field: string, value: string) => {
+    const newPengikut = [...pengikut];
+    newPengikut[index] = { ...newPengikut[index], [field]: value };
+    setPengikut(newPengikut);
+  };
+
+  const formatDateFull = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    const date = new Date();
-    return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
   const formatDate = (dateStr: string) => {
@@ -178,54 +172,542 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
-  return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 flex items-center justify-between sticky top-0 z-40">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-gray-500" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Surat Perjalanan Dinas (SPPD)</h2>
-              <span className="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-bold font-mono">Kode: {kodeKlasifikasi}</span>
+  const currentDateFormatted = () => {
+    const d = new Date();
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  };
+
+  const generateHTML = () => {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Surat Perjalanan Dinas (SPPD)</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&display=swap');
+            body { font-family: 'Times New Roman', Times, serif; background: white; margin: 0; padding: 0; }
+            .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; }
+            .page-landscape { width: 330mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; }
+            .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+            .print-table th, .print-table td { border: 1px solid black; padding: 4px 8px; vertical-align: top; }
+            
+            @media print {
+              body { background: white; }
+              .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; }
+              
+              ${printLayout === 'spt' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
+              ${printLayout === 'sppd' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: none; }` : ''}
+              ${printLayout === 'laporan' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: none; } .page-sppd { display: none; } .page-laporan { display: block; }` : ''}
+              ${printLayout === 'semua' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
+            }
+
+            /* Non-print layout visibility */
+            ${printLayout !== 'semua' ? `
+              .page-spt { display: ${printLayout === 'spt' ? 'block' : 'none'}; }
+              .page-sppd { display: ${printLayout === 'sppd' ? 'block' : 'none'}; }
+              .page-laporan { display: ${printLayout === 'laporan' ? 'block' : 'none'}; }
+            ` : ''}
+          </style>
+        </head>
+        <body>
+
+          <!-- HALAMAN 1: SURAT TUGAS -->
+          <div class="page-a4 page-spt bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
+            ${SAAS_CONFIG.globalHeaderHTML}
+            
+            <div class="text-[14px] text-black">
+              <div class="text-center mb-6">
+                <h6 class="font-bold underline uppercase text-[16px] tracking-wide">SURAT TUGAS</h6>
+                <p class="font-bold">${kodeKlasifikasi} / ${nomorSurat}</p>
+              </div>
+
+              <div class="mb-4 text-justify">
+                Berdasarkan ${dasarPenugasan},
+              </div>
+
+              <div class="text-center font-bold mb-4">MEMERINTAHKAN</div>
+              
+              <table class="print-table mb-6">
+                <thead>
+                  <tr>
+                    <th class="w-12 text-center">NO</th>
+                    <th class="text-center">NAMA</th>
+                    <th class="text-center">JABATAN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-center">1</td>
+                    <td>${namaPegawai}</td>
+                    <td>${jabatanPegawai}</td>
+                  </tr>
+                  ${pengikut.map((p, i) => `
+                    <tr>
+                      <td class="text-center">${i+2}</td>
+                      <td>${p.nama}</td>
+                      <td>${p.keterangan || '-'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+
+              <div class="grid grid-cols-[120px_10px_1fr] gap-1 mb-8">
+                <span>Hari/Tanggal</span><span>:</span>
+                <span>${formatDateFull(tanggalBerangkat)}</span>
+                
+                <span>Perihal</span><span>:</span>
+                <span>${maksudPerjalanan}</span>
+
+                <span>Tempat</span><span>:</span>
+                <span>${tempatTujuan}</span>
+              </div>
+
+              <div class="mb-8">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
+
+              ${getReactSignaturePreview(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
             </div>
-            <p className="text-sm text-gray-500 dark:text-slate-400">Pencetakan SPT, SPPD Visum, dan Lembar Laporan.</p>
           </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-xl font-medium transition-all"
-          >
-            {isSaving ? (
-              <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <Save className="w-5 h-5" />
-            )}
-            Simpan Draft
-          </button>
-          <button 
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl font-medium shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-95"
-          >
-            <Printer className="w-5 h-5" />
-            Cetak Surat
-          </button>
+
+          <!-- HALAMAN 2: VISUM SPPD (LANDSCAPE) -->
+          <div class="page-landscape page-sppd bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
+            <div class="flex gap-4 h-full">
+              
+              <!-- Kiri -->
+              <div class="w-[53%] pr-4 border-r border-gray-400">
+                ${SAAS_CONFIG.globalHeaderHTML}
+                <div class="flex justify-center my-4">
+                  <div class="w-full h-px bg-black"></div>
+                </div>
+                
+                <div class="text-center text-[12px] mb-4">
+                  <div class="grid grid-cols-[120px_10px_1fr] text-left mx-auto max-w-[200px]">
+                    <span>Kode Nomor</span><span>:</span><span>${kodeKlasifikasi}</span>
+                    <span>Nomor</span><span>:</span><span>${kodeKlasifikasi}/${nomorSurat}</span>
+                  </div>
+                  <h6 class="font-bold underline uppercase text-[14px] mt-2">SURAT PERJALANAN DINAS</h6>
+                </div>
+
+                <table class="print-table text-[11px] mb-4">
+                  <tbody>
+                    <tr>
+                      <td class="w-6 text-center">1</td>
+                      <td class="w-[140px]">Pejabat berwenang yang memberi perintah</td>
+                      <td>Kepala ${desaName}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">2</td>
+                      <td>Nama / NIP Pegawai yang diperintahkan</td>
+                      <td class="font-bold">${namaPegawai} ${nipPegawai ? '/ ' + nipPegawai : ''}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">3</td>
+                      <td>a. Pangkat dan golongan ruang gaji<br>b. Jabatan<br>c. Tingkat menurut peraturan perjalanan</td>
+                      <td>a. ${pangkatGolongan || '-'}<br>b. ${jabatanPegawai || '-'}<br>c. -</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">4</td>
+                      <td>Maksud perjalanan dinas</td>
+                      <td>${maksudPerjalanan}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">5</td>
+                      <td>Alat angkut yang dipergunakan</td>
+                      <td>${alatAngkut}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">6</td>
+                      <td>a. Tempat berangkat<br>b. Tempat tujuan</td>
+                      <td>a. ${tempatBerangkat}<br>b. ${tempatTujuan}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">7</td>
+                      <td>a. Lamanya perjalanan dinas<br>b. Tanggal berangkat<br>c. Tanggal harus kembali</td>
+                      <td>a. ${lamaPerjalanan}<br>b. ${formatDateFull(tanggalBerangkat)}<br>c. ${formatDateFull(tanggalKembali)}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">8</td>
+                      <td colspan="2">
+                        <div class="grid grid-cols-[1fr_80px_1fr] font-bold border-b border-black pb-1 mb-1">
+                          <div>Pengikut Nama</div>
+                          <div>Umur/Tgl Lahir</div>
+                          <div>Keterangan</div>
+                        </div>
+                        ${pengikut.length > 0 ? pengikut.map((p, i) => `
+                          <div class="grid grid-cols-[15px_1fr_80px_1fr]">
+                            <div>${i+1}.</div>
+                            <div>${p.nama}</div>
+                            <div>${p.umur}</div>
+                            <div>${p.keterangan}</div>
+                          </div>
+                        `).join('') : '<div class="text-center italic">-</div>'}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">9</td>
+                      <td>Pembebanan anggaran<br>a. Instansi<br>b. Mata anggaran</td>
+                      <td>a. ${bebanAnggaran}<br>b. ${mataAnggaran || '-'}</td>
+                    </tr>
+                    <tr>
+                      <td class="text-center">10</td>
+                      <td>Keterangan lain-lain</td>
+                      <td>-</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <div class="flex justify-end text-[11px] mt-4">
+                  <div class="w-[200px]">
+                    <div class="grid grid-cols-[80px_10px_1fr]">
+                      <span>Dikeluarkan di</span><span>:</span><span>${desaName.replace(/desa|kelurahan/gi, '').trim()}</span>
+                      <span>Pada tanggal</span><span>:</span><span>${currentDateFormatted()}</span>
+                    </div>
+                    <div class="mt-2 font-bold">${roleKades},</div>
+                    <div class="h-12"></div>
+                    <div class="font-bold underline">${namaKades}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Kanan -->
+              <div class="w-[47%] pl-4 text-[11px] flex flex-col">
+                
+                <!-- Box I -->
+                <div class="grid grid-cols-[1fr_auto] mb-2">
+                  <div></div>
+                  <div>
+                    <div class="grid grid-cols-[20px_100px_10px_1fr]">
+                      <span>I.</span><span>SPPD Nomor</span><span>:</span><span>${kodeKlasifikasi}/${nomorSurat}</span>
+                      <span></span><span>Berangkat dari</span><span>:</span><span>${tempatBerangkat}</span>
+                      <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
+                      <span></span><span>Ke</span><span>:</span><span>${tempatTujuan}</span>
+                    </div>
+                    <div class="mt-4 mb-8 text-center">Pejabat Pelaksana Teknis Kegiatan,</div>
+                    <div class="text-center font-bold">${namaPPTK || '................................'}</div>
+                  </div>
+                </div>
+
+                <!-- Box II -->
+                <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
+                  <div>
+                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                      <span>II.</span><span>Tiba di</span><span>:</span><span>${tempatTujuan}</span>
+                      <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
+                      <span></span><span>Kepala</span><span>:</span><span></span>
+                    </div>
+                    <div class="h-10"></div>
+                    <div class="text-center">(.......................................)</div>
+                  </div>
+                  <div>
+                    <div class="grid grid-cols-[80px_10px_1fr]">
+                      <span>Berangkat dari</span><span>:</span><span>${tempatTujuan}</span>
+                      <span>Ke</span><span>:</span><span>${tempatBerangkat}</span>
+                      <span>Pada Tanggal</span><span>:</span><span>${formatDateFull(tanggalKembali)}</span>
+                    </div>
+                    <div class="h-10"></div>
+                    <div class="text-center">(.......................................)</div>
+                  </div>
+                </div>
+
+                <!-- Box III -->
+                <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
+                  <div>
+                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                      <span>III.</span><span>Tiba di</span><span>:</span><span></span>
+                      <span></span><span>Pada tanggal</span><span>:</span><span></span>
+                      <span></span><span>Kepala</span><span>:</span><span></span>
+                    </div>
+                    <div class="h-10"></div>
+                    <div class="text-center">(.......................................)</div>
+                  </div>
+                  <div>
+                    <div class="grid grid-cols-[80px_10px_1fr]">
+                      <span>Berangkat dari</span><span>:</span><span></span>
+                      <span>Ke</span><span>:</span><span></span>
+                      <span>Pada Tanggal</span><span>:</span><span></span>
+                    </div>
+                    <div class="h-10"></div>
+                    <div class="text-center">(.......................................)</div>
+                  </div>
+                </div>
+
+                <!-- Box IV -->
+                <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
+                  <div>
+                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                      <span>IV.</span><span>Tiba di</span><span>:</span><span></span>
+                      <span></span><span>Pada tanggal</span><span>:</span><span></span>
+                      <span></span><span>Kepala</span><span>:</span><span></span>
+                    </div>
+                    <div class="h-10"></div>
+                    <div class="text-center">(.......................................)</div>
+                  </div>
+                  <div>
+                    <div class="grid grid-cols-[80px_10px_1fr]">
+                      <span>Berangkat dari</span><span>:</span><span></span>
+                      <span>Ke</span><span>:</span><span></span>
+                      <span>Pada Tanggal</span><span>:</span><span></span>
+                    </div>
+                    <div class="h-10"></div>
+                    <div class="text-center">(.......................................)</div>
+                  </div>
+                </div>
+
+                <!-- Box V -->
+                <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
+                  <div>
+                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                      <span>V.</span><span>Tiba di</span><span>:</span><span>${tempatBerangkat}</span>
+                      <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalKembali)}</span>
+                    </div>
+                    <div class="col-span-2 mt-2">
+                      Telah diperiksa dengan keterangan bahwa perjalanan tersebut di atas benar dilakukan atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.
+                    </div>
+                  </div>
+                  <div>
+                    <div class="mt-8 text-center font-bold">${roleKades},</div>
+                    <div class="h-10"></div>
+                    <div class="text-center font-bold">${namaKades}</div>
+                  </div>
+                </div>
+
+                <!-- Box VI & VII -->
+                <div class="border-t border-black mt-auto pt-1 grid grid-cols-[20px_1fr]">
+                  <span>VI.</span><span class="font-bold underline">CATATAN LAIN-LAIN</span>
+                </div>
+                <div class="border-t border-black mt-1 pt-1 grid grid-cols-[20px_1fr]">
+                  <span>VII.</span>
+                  <div>
+                    <span class="font-bold underline">PERHATIAN</span>
+                    <div class="text-[9px] mt-1 text-justify">
+                      Pejabat yang berwenang menerbitkan SPPD, pegawai yang melakukan perjalanan dinas, para pejabat yang mengesahkan tanggal berangkat/tiba serta Bendaharawan bertanggung jawab berdasarkan peraturan-peraturan Keuangan Negara apabila Negara menderita kerugian akibat kesalahan, kelalaian dan kealpaannya.
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- HALAMAN 3: LEMBAR LAPORAN -->
+          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto">
+            <div class="text-[14px] text-black pt-12">
+              <div class="text-center mb-10">
+                <h6 class="font-bold uppercase text-[16px] tracking-wide">LAPORAN PERJALANAN DINAS</h6>
+              </div>
+
+              <div class="grid grid-cols-[150px_10px_1fr] gap-2 mb-8 max-w-xl mx-auto">
+                <span>Kepada Yth</span><span>:</span><span>${kepadaYth}</span>
+                <span>Dari</span><span>:</span><span></span>
+                <span>Nama</span><span>:</span><span>${namaPegawai}</span>
+                <span>Jabatan</span><span>:</span><span>${jabatanPegawai}</span>
+                <span>Hari/Tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
+                <span>Perihal</span><span>:</span><span>${maksudPerjalanan}</span>
+                <span>Tempat</span><span>:</span><span>${tempatTujuan}</span>
+              </div>
+
+              <div class="grid grid-cols-[150px_10px_1fr] gap-2 mb-8 max-w-xl mx-auto">
+                <span>HASIL PERJALANAN</span><span>:</span><span></span>
+              </div>
+
+              <div class="flex justify-end pr-10 mt-32">
+                <div class="text-center w-[250px]">
+                  <p>Yang Melaporkan,</p>
+                  <div class="h-24"></div>
+                  <p class="font-bold underline">${namaPegawai}</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </body>
+      </html>
+    `;
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Header */}
+      <div className="flex-none bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={onBack}
+              className="p-2 text-gray-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+                {editData ? 'Edit SPPD' : 'Buat SPPD'}
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-slate-400">
+                Surat Perjalanan Dinas
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl font-mono text-sm font-semibold border border-emerald-100 dark:border-emerald-500/20">
+              {kodeKlasifikasi}/{nomorSurat}
+            </div>
+            <button
+              onClick={handleRecord}
+              disabled={isSaving}
+              className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-sm shadow-emerald-200 dark:shadow-none font-medium disabled:opacity-50"
+            >
+              <Save size={18} />
+              {isSaving ? 'Menyimpan...' : (hasRecorded ? 'Perbarui Data' : 'Catat & Simpan')}
+            </button>
+            <button
+              onClick={handlePrint}
+              disabled={!nomorSurat}
+              className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 dark:bg-slate-700 hover:bg-gray-800 dark:hover:bg-slate-600 text-white rounded-xl transition-all shadow-sm disabled:opacity-50 font-medium"
+            >
+              <Printer size={18} />
+              Cetak SPPD
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Form Inputs */}
-        <div className="lg:col-span-5 space-y-6 h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Editor Form */}
+        <div className="w-[500px] flex-none overflow-y-auto bg-slate-50 dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 p-6 custom-scrollbar">
           
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Identitas Yang Ditugaskan</h3>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Identitas Surat</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nomor Surat Akhir</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400">
+                    {kodeKlasifikasi} / 
+                  </div>
+                  <input 
+                    type="text" 
+                    value={nomorSurat}
+                    onChange={(e) => setNomorSurat(e.target.value)}
+                    className="w-32 px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    placeholder="001"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Detail Perjalanan Dinas & Dasar</h3>
+            <div className="space-y-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Dasar Penugasan (Berdasarkan...)</label>
+                <input 
+                  type="text" 
+                  value={dasarPenugasan}
+                  onChange={(e) => setDasarPenugasan(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
+                  placeholder="Misal: surat undangan dengan nomor surat: ... tanggal ..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Pelaksana Teknis (PPTK)</label>
+                  <input 
+                    type="text" 
+                    value={namaPPTK}
+                    onChange={(e) => setNamaPPTK(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
+                    placeholder="Nama PPTK (Jika Ada)"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Laporan Ditujukan Kepada</label>
+                  <input 
+                    type="text" 
+                    value={kepadaYth}
+                    onChange={(e) => setKepadaYth(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
+                    placeholder="Misal: Kepala Desa Wasah Hilir"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="h-px bg-gray-200 dark:bg-slate-700 my-4"></div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Maksud Perjalanan</label>
+                <textarea 
+                  value={maksudPerjalanan}
+                  onChange={(e) => setMaksudPerjalanan(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 min-h-[80px]"
+                  placeholder="Misal: Konsultasi terkait dana desa..."
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tempat Tujuan</label>
+                  <input 
+                    type="text" 
+                    value={tempatTujuan}
+                    onChange={(e) => setTempatTujuan(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    placeholder="Tujuan"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alat Angkut</label>
+                  <input 
+                    type="text" 
+                    value={alatAngkut}
+                    onChange={(e) => setAlatAngkut(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    placeholder="Misal: Kendaraan Dinas"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tanggal Berangkat</label>
+                  <input 
+                    type="date" 
+                    value={tanggalBerangkat}
+                    onChange={(e) => setTanggalBerangkat(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tanggal Kembali</label>
+                  <input 
+                    type="date" 
+                    value={tanggalKembali}
+                    onChange={(e) => setTanggalKembali(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Lama Perjalanan (Hari)</label>
+                <input 
+                  type="text" 
+                  value={lamaPerjalanan}
+                  onChange={(e) => setLamaPerjalanan(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  placeholder="Misal: 2 (Dua) Hari"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pegawai yang Diperintah</h3>
             <div className="space-y-4">
               <div className="relative">
                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
@@ -239,7 +721,7 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
                     }}
                     onFocus={() => setShowPegawaiDropdown(true)}
                     onBlur={() => setTimeout(() => setShowPegawaiDropdown(false), 200)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 pr-8"
                     placeholder="Ketik nama untuk mencari penduduk / isi manual..."
                   />
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -266,156 +748,60 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">NIP (Jika Ada)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">NIP/NIK (Opsional)</label>
                   <input 
                     type="text" 
                     value={nipPegawai}
                     onChange={(e) => setNipPegawai(e.target.value)}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    placeholder="NIP / NIK"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pangkat/Golongan</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pangkat/Gol (Opsional)</label>
                   <input 
                     type="text" 
                     value={pangkatGolongan}
                     onChange={(e) => setPangkatGolongan(e.target.value)}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    placeholder="Misal: II/a"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Jabatan / Pekerjaan</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Jabatan</label>
                 <input 
                   type="text" 
                   value={jabatanPegawai}
                   onChange={(e) => setJabatanPegawai(e.target.value)}
                   className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  placeholder="Misal: Sekretaris Desa / Anggota BPD"
+                  placeholder="Misal: Kaur Keuangan"
                 />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Detail Perjalanan Dinas</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Maksud Perjalanan Dinas</label>
-                <textarea 
-                  value={maksudPerjalanan}
-                  onChange={(e) => setMaksudPerjalanan(e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 resize-none"
-                  placeholder="Misal: Konsultasi penyusunan RKP Desa"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tempat Tujuan</label>
-                  <input 
-                    type="text" 
-                    value={tempatTujuan}
-                    onChange={(e) => setTempatTujuan(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="Kantor Dinas PMD"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alat Angkut</label>
-                  <input 
-                    type="text" 
-                    value={alatAngkut}
-                    onChange={(e) => setAlatAngkut(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="Kendaraan Pribadi/Dinas"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tanggal Berangkat</label>
-                  <input 
-                    type="date" 
-                    value={tanggalBerangkat}
-                    onChange={(e) => setTanggalBerangkat(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tanggal Kembali</label>
-                  <input 
-                    type="date" 
-                    value={tanggalKembali}
-                    onChange={(e) => setTanggalKembali(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Lama Perjalanan</label>
-                <input 
-                  type="text" 
-                  value={lamaPerjalanan}
-                  onChange={(e) => setLamaPerjalanan(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  placeholder="Misal: 1 (Satu) Hari"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Beban Anggaran</label>
-                  <select
-                    value={bebanAnggaran}
-                    onChange={(e) => setBebanAnggaran(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  >
-                    <option value="APBDes">APBDes</option>
-                    <option value="Dana Desa (DD)">Dana Desa (DD)</option>
-                    <option value="Alokasi Dana Desa (ADD)">Alokasi Dana Desa (ADD)</option>
-                    <option value="Bantuan Keuangan Kabupaten">Bantuan Keuangan Kabupaten</option>
-                    <option value="Ditanggung Instansi Lain">Ditanggung Instansi Lain</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Mata Anggaran</label>
-                  <input 
-                    type="text" 
-                    value={mataAnggaran}
-                    onChange={(e) => setMataAnggaran(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="Misal: 01.02.03"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Pengikut</h3>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Pengikut (Opsional)</h3>
               <button 
                 onClick={addPengikut}
-                className="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-lg transition-colors"
               >
                 <Plus size={14} /> Tambah Pengikut
               </button>
             </div>
             
             {pengikut.length === 0 ? (
-              <div className="text-center py-6 text-sm text-gray-500 border-2 border-dashed border-gray-200 dark:border-slate-700 rounded-xl">
-                Tidak ada pengikut.
+              <div className="text-center py-6 text-sm text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-gray-200 dark:border-slate-700">
+                Tidak ada pengikut. Klik tambah untuk memasukkan.
               </div>
             ) : (
               <div className="space-y-3">
                 {pengikut.map((p, index) => (
                   <div key={index} className="flex gap-2 items-start bg-gray-50 dark:bg-slate-800/50 p-3 rounded-xl border border-gray-100 dark:border-slate-700">
-                    <div className="flex-1 space-y-2">
-                      <div className="relative">
+                    <div className="flex-1 grid grid-cols-12 gap-2">
+                      <div className="col-span-5 relative">
                         <input 
                           type="text" 
                           value={p.nama}
@@ -426,7 +812,7 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
                           onFocus={() => setActivePengikutDropdown(index)}
                           onBlur={() => setTimeout(() => setActivePengikutDropdown(null), 200)}
                           className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 pr-8"
-                          placeholder="Cari penduduk / isi nama manual..."
+                          placeholder="Cari penduduk / isi nama..."
                         />
                         <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5 pointer-events-none" />
                         {activePengikutDropdown === index && p.nama.length > 1 && (
@@ -449,26 +835,28 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
                           </div>
                         )}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="col-span-3">
                         <input 
                           type="text" 
                           value={p.umur}
                           onChange={(e) => handlePengikutChange(index, 'umur', e.target.value)}
-                          className="w-1/3 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                          placeholder="Umur/NIP"
+                          className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                          placeholder="Umur/NIK"
                         />
+                      </div>
+                      <div className="col-span-4">
                         <input 
                           type="text" 
                           value={p.keterangan}
                           onChange={(e) => handlePengikutChange(index, 'keterangan', e.target.value)}
-                          className="w-2/3 px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                          placeholder="Jabatan/Hubungan"
+                          className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                          placeholder="Keterangan"
                         />
                       </div>
                     </div>
                     <button 
                       onClick={() => removePengikut(index)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors mt-0.5"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -478,33 +866,59 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
             )}
           </div>
 
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pembebanan Anggaran</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Instansi / Beban Anggaran</label>
+                <input 
+                  type="text" 
+                  value={bebanAnggaran}
+                  onChange={(e) => setBebanAnggaran(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  placeholder="Misal: Pemerintah Desa Wasah Hilir"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Mata Anggaran</label>
+                <input 
+                  type="text" 
+                  value={mataAnggaran}
+                  onChange={(e) => setMataAnggaran(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  placeholder="Misal: APBDes Tahun 2025"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Print Preview */}
-        <div className="lg:col-span-7 bg-gray-100 dark:bg-slate-800 rounded-2xl overflow-hidden flex flex-col h-[calc(100vh-200px)] border border-gray-200 dark:border-slate-700 relative">
+        {/* Preview Panel */}
+        <div className="flex-1 bg-slate-200/40 dark:bg-slate-800/20 flex flex-col relative overflow-hidden">
           
-          <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 p-3 flex justify-center gap-2">
-            <button 
+          {/* Print Layout Selector */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-1 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 flex z-10">
+            <button
               onClick={() => setPrintLayout('semua')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors ${printLayout === 'semua' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'semua' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
             >
               Semua Halaman
             </button>
-            <button 
+            <button
               onClick={() => setPrintLayout('spt')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors ${printLayout === 'spt' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'spt' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
             >
-              1. Lembar SPT
+              1. Surat Tugas
             </button>
-            <button 
+            <button
               onClick={() => setPrintLayout('sppd')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors ${printLayout === 'sppd' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'sppd' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
             >
               2. Visum SPPD
             </button>
-            <button 
+            <button
               onClick={() => setPrintLayout('laporan')}
-              className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors ${printLayout === 'laporan' ? 'bg-emerald-100 text-emerald-700' : 'text-gray-500 hover:bg-gray-100'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'laporan' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
             >
               3. Lembar Laporan
             </button>
@@ -516,288 +930,17 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
           >
             <iframe
               ref={iframeRef}
-              className="w-full max-w-[210mm] bg-white shadow-xl pointer-events-none"
+              className="w-full max-w-[330mm] bg-white shadow-xl pointer-events-none"
               style={{ 
                 minHeight: '297mm', // A4 min height
-                height: printLayout === 'semua' ? '910mm' : '297mm'
+                height: printLayout === 'semua' ? '1000mm' : '320mm'
               }}
-              srcDoc={`
-                <!DOCTYPE html>
-                <html>
-                  <head>
-                    <meta charset="utf-8">
-                    <title>Surat Perjalanan Dinas (SPPD)</title>
-                    <script src="https://cdn.tailwindcss.com"></script>
-                    <style>
-                      @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&display=swap');
-                      body { 
-                        font-family: 'Times New Roman', Times, serif; 
-                        background: white; 
-                        margin: 0; 
-                        padding: 0; 
-                      }
-                      .a4-page {
-                        width: 210mm;
-                        min-height: 297mm;
-                        padding: 15mm 20mm;
-                        background: white;
-                        box-sizing: border-box;
-                        position: relative;
-                        page-break-after: always;
-                      }
-                      .a4-page:last-child {
-                        page-break-after: auto;
-                      }
-                      .print-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        font-size: 14px;
-                      }
-                      .print-table th, .print-table td {
-                        border: 1px solid black;
-                        padding: 4px 8px;
-                      }
-                      @media print {
-                        body { background: white; }
-                        .a4-page { padding: 0 !important; min-height: auto; box-shadow: none; }
-                        @page { margin: 15mm 20mm; size: A4; }
-                        
-                        /* Layout visibility logic */
-                        ${printLayout !== 'semua' ? `
-                          .page-spt { display: ${printLayout === 'spt' ? 'block' : 'none'}; }
-                          .page-sppd { display: ${printLayout === 'sppd' ? 'block' : 'none'}; }
-                          .page-laporan { display: ${printLayout === 'laporan' ? 'block' : 'none'}; }
-                        ` : ''}
-                      }
-                      /* Non-print layout visibility */
-                      ${printLayout !== 'semua' ? `
-                        .page-spt { display: ${printLayout === 'spt' ? 'block' : 'none'}; }
-                        .page-sppd { display: ${printLayout === 'sppd' ? 'block' : 'none'}; }
-                        .page-laporan { display: ${printLayout === 'laporan' ? 'block' : 'none'}; }
-                      ` : ''}
-                    </style>
-                  </head>
-                  <body>
-
-                    <!-- HALAMAN 1: SURAT PERINTAH TUGAS (SPT) -->
-                    <div class="a4-page page-spt">
-                      ${SAAS_CONFIG.globalHeaderHTML}
-                      
-                      <div class="text-[14px] text-black">
-                        <div class="text-center mb-6">
-                          <h6 class="font-bold underline uppercase text-[16px] tracking-wide">SURAT PERINTAH TUGAS</h6>
-                          <p class="font-mono">Nomor: ${nomorSurat}</p>
-                        </div>
-
-                        <div class="grid grid-cols-[120px_10px_1fr] gap-1 mb-4">
-                          <span>Dasar</span>
-                          <span>:</span>
-                          <span class="text-justify">Peraturan Desa / Keputusan Kepala Desa ${desaName} mengenai pelaksanaan kegiatan pembangunan dan pemberdayaan masyarakat.</span>
-                        </div>
-
-                        <div class="text-center font-bold mb-4">MEMERINTAHKAN</div>
-                        
-                        <div class="grid grid-cols-[120px_10px_1fr] gap-1 mb-4">
-                          <span>Kepada</span>
-                          <span>:</span>
-                          <span>
-                            <div class="grid grid-cols-[30px_100px_10px_1fr] gap-1">
-                              <span>1.</span>
-                              <span>Nama</span>
-                              <span>:</span>
-                              <span class="font-bold">${namaPegawai || '.........................'}</span>
-                              <span></span>
-                              <span>Jabatan</span>
-                              <span>:</span>
-                              <span>${jabatanPegawai || '.........................'}</span>
-                            </div>
-                            ${pengikut.map((p, i) => `
-                              <div class="grid grid-cols-[30px_100px_10px_1fr] gap-1 mt-1">
-                                <span>${i+2}.</span>
-                                <span>Nama</span>
-                                <span>:</span>
-                                <span>${p.nama}</span>
-                                <span></span>
-                                <span>Keterangan</span>
-                                <span>:</span>
-                                <span>${p.keterangan || p.umur}</span>
-                              </div>
-                            `).join('')}
-                          </span>
-                        </div>
-
-                        <div class="grid grid-cols-[120px_10px_1fr] gap-1 mb-6">
-                          <span>Untuk</span>
-                          <span>:</span>
-                          <span>
-                            <div class="flex gap-2"><span>1.</span><span class="text-justify">${maksudPerjalanan || '.........................'}</span></div>
-                            <div class="flex gap-2"><span>2.</span><span>Tempat Tujuan: ${tempatTujuan || '.........................'}</span></div>
-                            <div class="flex gap-2"><span>3.</span><span>Waktu: ${lamaPerjalanan || '........'}, mulai tanggal ${formatDate(tanggalBerangkat)} s/d ${formatDate(tanggalKembali)}</span></div>
-                            <div class="flex gap-2"><span>4.</span><span>Setelah selesai melaksanakan tugas diharap segera melaporkan hasilnya.</span></div>
-                          </span>
-                        </div>
-
-                        ${getReactSignaturePreview(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
-                      </div>
-                    </div>
-
-                    <!-- HALAMAN 2: VISUM SPPD -->
-                    <div class="a4-page page-sppd">
-                      <div class="text-[14px] text-black">
-                        <div class="flex justify-between items-start mb-6">
-                          <div></div>
-                          <div class="w-[300px]">
-                            <div class="grid grid-cols-[80px_10px_1fr]">
-                              <span>Lembar Ke</span><span>:</span><span>1 (Satu)</span>
-                              <span>Kode No</span><span>:</span><span>${kodeKlasifikasi || '094'}</span>
-                              <span>Nomor</span><span>:</span><span class="font-mono font-bold">${nomorSurat}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="text-center mb-6">
-                          <h6 class="font-bold underline uppercase text-[16px] tracking-wide">SURAT PERINTAH PERJALANAN DINAS</h6>
-                          <h6 class="font-bold uppercase text-[16px] tracking-wide">( S P P D )</h6>
-                        </div>
-
-                        <table class="print-table mb-8">
-                          <tbody>
-                            <tr>
-                              <td class="w-8 text-center">1</td>
-                              <td class="w-[200px]">Pejabat yang memberi perintah</td>
-                              <td colspan="2">Kepala ${desaName}</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">2</td>
-                              <td>Nama pegawai yang diperintah</td>
-                              <td colspan="2" class="font-bold">${namaPegawai || '.........................'}</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">3</td>
-                              <td>a. Pangkat / Golongan<br>b. Jabatan / Instansi<br>c. Tingkat menurut peraturan perjalanan</td>
-                              <td colspan="2">a. ${pangkatGolongan || '-'}<br>b. ${jabatanPegawai || '-'}<br>c. -</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">4</td>
-                              <td>Maksud Perjalanan Dinas</td>
-                              <td colspan="2">${maksudPerjalanan || '.........................'}</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">5</td>
-                              <td>Alat Angkutan yang dipergunakan</td>
-                              <td colspan="2">${alatAngkut || '.........................'}</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">6</td>
-                              <td>a. Tempat Berangkat<br>b. Tempat Tujuan</td>
-                              <td colspan="2">a. ${tempatBerangkat || '.........................'}<br>b. ${tempatTujuan || '.........................'}</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">7</td>
-                              <td>a. Lamanya perjalanan dinas<br>b. Tanggal Berangkat<br>c. Tanggal harus kembali</td>
-                              <td colspan="2">a. ${lamaPerjalanan || '.........................'}<br>b. ${formatDate(tanggalBerangkat) || '.........................'}<br>c. ${formatDate(tanggalKembali) || '.........................'}</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">8</td>
-                              <td>Pengikut (Nama, Umur, Hubungan/Keterangan)</td>
-                              <td colspan="2">
-                                ${pengikut.length > 0 ? pengikut.map((p, i) => `${i+1}. ${p.nama} (${p.umur}) - ${p.keterangan}`).join('<br>') : '-'}
-                              </td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">9</td>
-                              <td>Pembebanan Anggaran<br>a. Instansi<br>b. Mata Anggaran</td>
-                              <td colspan="2">a. ${bebanAnggaran || '.........................'}<br>b. ${mataAnggaran || '.........................'}</td>
-                            </tr>
-                            <tr>
-                              <td class="text-center">10</td>
-                              <td>Keterangan lain-lain</td>
-                              <td colspan="2"></td>
-                            </tr>
-                          </tbody>
-                        </table>
-                        
-                        <div class="flex justify-end pr-10">
-                          <div class="text-center w-[250px]">
-                            <p>Dikeluarkan di : ${desaName.replace(/desa|kelurahan/gi, '').trim()}</p>
-                            <p>Pada tanggal : ${currentDateFormatted()}</p>
-                            <div class="h-[1px] bg-black my-2"></div>
-                            <p class="font-bold">${roleKades}</p>
-                            <div class="h-16"></div>
-                            <p class="font-bold underline">${namaKades}</p>
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-
-                    <!-- HALAMAN 3: LEMBAR LAPORAN -->
-                    <div class="a4-page page-laporan">
-                      ${SAAS_CONFIG.globalHeaderHTML}
-                      
-                      <div class="text-[14px] text-black mt-8">
-                        <div class="text-center mb-8">
-                          <h6 class="font-bold underline uppercase text-[16px] tracking-wide">LAPORAN HASIL PERJALANAN DINAS</h6>
-                        </div>
-
-                        <div class="grid grid-cols-[150px_10px_1fr] gap-2 mb-8">
-                          <span>1. Dasar Penugasan</span>
-                          <span>:</span>
-                          <span>Surat Perintah Tugas Nomor: ${nomorSurat}</span>
-
-                          <span>2. Yang Melaksanakan</span>
-                          <span>:</span>
-                          <span>
-                            ${namaPegawai} (${jabatanPegawai})
-                            ${pengikut.length > 0 ? `<br>Beserta ${pengikut.length} pengikut.` : ''}
-                          </span>
-
-                          <span>3. Tempat Tujuan</span>
-                          <span>:</span>
-                          <span>${tempatTujuan}</span>
-
-                          <span>4. Waktu Pelaksanaan</span>
-                          <span>:</span>
-                          <span>${formatDate(tanggalBerangkat)} s/d ${formatDate(tanggalKembali)}</span>
-
-                          <span>5. Maksud Perjalanan</span>
-                          <span>:</span>
-                          <span>${maksudPerjalanan}</span>
-                        </div>
-
-                        <div class="mb-2 font-bold">6. Hasil Kegiatan / Laporan:</div>
-                        <div class="space-y-6 mt-6">
-                          <div class="border-b border-black w-full h-4"></div>
-                          <div class="border-b border-black w-full h-4"></div>
-                          <div class="border-b border-black w-full h-4"></div>
-                          <div class="border-b border-black w-full h-4"></div>
-                          <div class="border-b border-black w-full h-4"></div>
-                          <div class="border-b border-black w-full h-4"></div>
-                          <div class="border-b border-black w-full h-4"></div>
-                          <div class="border-b border-black w-full h-4"></div>
-                        </div>
-
-                        <div class="flex justify-end pr-10 mt-16">
-                          <div class="text-center w-[250px]">
-                            <p>${desaName.replace(/desa|kelurahan/gi, '').trim()}, ............................ ${new Date().getFullYear()}</p>
-                            <p>Pelapor,</p>
-                            <div class="h-20"></div>
-                            <p class="font-bold underline">${namaPegawai || '..............................'}</p>
-                          </div>
-                        </div>
-
-                      </div>
-                    </div>
-
-                  </body>
-                </html>
-              `}
+              srcDoc={generateHTML()}
+              title="Print Preview SPPD"
             />
           </div>
         </div>
-
       </div>
     </div>
   );
 }
-
