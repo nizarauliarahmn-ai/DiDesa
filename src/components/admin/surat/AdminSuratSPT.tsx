@@ -341,9 +341,9 @@ export default function AdminSuratSPT({
           body { margin:0; }
         </style></head><body>
           ${generatePage1HTML()}
+          ${activeHeirs.length > 5 ? `<div class="page-break"></div>\n          ${generatePage3HTML()}` : ''}
           <div class="page-break"></div>
           ${generatePage2HTML()}
-          ${activeHeirs.length > 5 ? `<div class="page-break"></div>\n          ${generatePage3HTML()}` : ''}
           <script>window.onload=function(){window.print();}<\/script>
         </body></html>`);
         doc.close();
@@ -403,7 +403,7 @@ export default function AdminSuratSPT({
             </div>
           </div>`).join('')}
       </div>
-      ${activeHeirs.length > 5 ? `<div style="margin-left:40px;margin-bottom:12px;font-style:italic;font-size:12px;">(* Lanjutan daftar ahli waris No. 6 dst. dilanjutkan pada Lembar Lampiran ke-3)</div>` : ''}
+      ${activeHeirs.length > 5 ? `<div style="margin-left:40px;margin-bottom:12px;font-style:italic;font-size:12px;">(* Lanjutan daftar ahli waris No. 6 dst. dilanjutkan pada Lembar Lampiran)</div>` : ''}
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:12px;font-size:13.5px;">
         Kami sepakat menunjuk atau memberikan Kuasa kepada salah satu orang dari kami yang bernama
@@ -489,7 +489,7 @@ export default function AdminSuratSPT({
             </tr>`).join('')}
         </tbody>
       </table>
-      ${activeHeirs.length > 5 ? `<div style="font-style:italic;font-size:11.5px;margin-bottom:10px;">(* Lanjutan tabel ahli waris No. 6 dst. terdapat pada Lembar Lampiran ke-3)</div>` : ''}
+      ${activeHeirs.length > 5 ? `<div style="font-style:italic;font-size:11.5px;margin-bottom:10px;">(* Lanjutan tabel ahli waris No. 6 dst. terdapat pada Lembar Lampiran)</div>` : ''}
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:8px;font-size:13px;">
         Kami tersebut di atas adalah satu-satunya ahli waris, tidak ada lagi ahli waris yang lain.
@@ -974,23 +974,23 @@ export default function AdminSuratSPT({
               </div>
             </div>
 
-            {/* Lembar 2 */}
-            <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
-              <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 2: SURAT PERNYATAAN WARIS —</p>
-              <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
-                <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage2HTML() }} />
-              </div>
-            </div>
-
-            {/* Lembar 3 (Conditional) */}
+            {/* Lembar 2 (Conditional: Lampiran Lanjutan) */}
             {activeHeirs.length > 5 && (
               <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
-                <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 3: LAMPIRAN LANJUTAN —</p>
+                <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 2: LAMPIRAN LANJUTAN —</p>
                 <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
                   <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage3HTML() }} />
                 </div>
               </div>
             )}
+
+            {/* Lembar Terakhir: Surat Pernyataan Waris */}
+            <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
+              <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR {activeHeirs.length > 5 ? '3' : '2'}: SURAT PERNYATAAN WARIS —</p>
+              <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
+                <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage2HTML() }} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
