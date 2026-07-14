@@ -52,7 +52,23 @@ if (
       localStorage.setItem('local_residents', JSON.stringify(DEFAULT_RESIDENTS));
       return DEFAULT_RESIDENTS;
     }
-    return JSON.parse(data);
+    try {
+      const list = JSON.parse(data);
+      let updated = false;
+      DEFAULT_RESIDENTS.forEach(res => {
+        if (!list.some((r: any) => r.nik === res.nik)) {
+          list.push(res);
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem('local_residents', JSON.stringify(list));
+      }
+      return list;
+    } catch (e) {
+      localStorage.setItem('local_residents', JSON.stringify(DEFAULT_RESIDENTS));
+      return DEFAULT_RESIDENTS;
+    }
   };
 
   const saveLocalResidents = (list: any[]) => {
