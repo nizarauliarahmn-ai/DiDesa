@@ -849,24 +849,15 @@ export default function AdminSuratSKU({
 
                 <div className="relative space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Mulai Berdiri Sejak</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={formData.usahaMulai}
-                      onChange={(e) => setFormData({...formData, usahaMulai: e.target.value})}
-                      placeholder="Contoh: Januari 2021"
-                      className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      onClick={() => setShowMulaiPicker(true)}
-                    />
-                    <button 
-                      type="button"
-                      onClick={() => setShowMulaiPicker(!showMulaiPicker)}
-                      className="px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors flex items-center justify-center gap-1.5 font-bold text-xs"
-                    >
-                      <Calendar className="w-4 h-4 text-emerald-600 shrink-0" />
-                      Pilih
-                    </button>
-                  </div>
+                  <input 
+                    type="text" 
+                    value={formData.usahaMulai}
+                    onChange={(e) => setFormData({...formData, usahaMulai: e.target.value})}
+                    placeholder="Contoh: Januari 2021"
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none cursor-pointer"
+                    onClick={() => setShowMulaiPicker(true)}
+                    readOnly
+                  />
 
                   {showMulaiPicker && (
                     <div className="absolute right-0 mt-2 p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl z-50 w-72 animate-in fade-in zoom-in-95 duration-150">
