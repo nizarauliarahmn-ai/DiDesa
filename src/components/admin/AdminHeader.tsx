@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Menu, Database, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon } from 'lucide-react';
+import { Search, Bell, Menu, Database, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon, Sun } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 import { showToast } from '../../utils/toast';
 
@@ -21,6 +21,20 @@ export default function AdminHeader({
   const [dbStatus, setDbStatus] = useState<{ engine: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [appTheme, setAppTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
+
+  useEffect(() => {
+    const syncTheme = () => setAppTheme(localStorage.getItem('app_theme') || 'light');
+    window.addEventListener('app_theme_updated', syncTheme);
+    return () => window.removeEventListener('app_theme_updated', syncTheme);
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = appTheme === 'light' ? 'dark' : 'light';
+    setAppTheme(newTheme);
+    localStorage.setItem('app_theme', newTheme);
+    window.dispatchEvent(new Event('app_theme_updated'));
+  };
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState(globalSearch);
@@ -287,9 +301,9 @@ export default function AdminHeader({
   };
 
   return (
-    <header className={`h-16 bg-slate-50/60 backdrop-blur-xl border-b border-gray-200 flex items-center justify-between px-6 z-50 ${className}`}>
+    <header className={`h-16 bg-slate-50/60 backdrop-blur-xl border-b border-gray-200 dark:border-slate-700 flex items-center justify-between px-6 z-50 ${className}`}>
       <div className="flex items-center gap-4 flex-1">
-        <button onClick={toggleMobileMenu} className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+        <button onClick={toggleMobileMenu} className="lg:hidden p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
           <Menu size={24} />
         </button>
         <div ref={searchRef} className="hidden md:flex relative w-full max-w-md">
@@ -307,13 +321,13 @@ export default function AdminHeader({
               setShowSearchDropdown(true);
             }}
             onFocus={() => setShowSearchDropdown(true)}
-            className="pl-10 pr-4 py-2 bg-gray-100 border-none rounded-full w-full focus:ring-2 focus:ring-emerald-500 text-sm outline-none transition-all"
+            className="pl-10 pr-4 py-2 bg-gray-100 dark:bg-slate-800 border-none rounded-full w-full focus:ring-2 focus:ring-emerald-500 text-sm outline-none transition-all"
           />
 
           {showSearchDropdown && searchQuery.trim().length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150">
               {/* Header */}
-              <div className="p-3 bg-slate-50 border-b border-gray-100 flex items-center justify-between">
+              <div className="p-3 bg-slate-50 dark:bg-slate-800 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
                 <span className="text-[10px] font-extrabold text-gray-400 tracking-wider uppercase">Pencarian Global</span>
                 {loadingResidents && (
                   <span className="text-[10px] text-emerald-600 font-semibold animate-pulse">Memuat data...</span>
@@ -338,9 +352,9 @@ export default function AdminHeader({
                       <button
                         key={link.tab}
                         onClick={() => handleQuickLinkClick(link.tab)}
-                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center gap-2"
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center gap-2"
                       >
-                        <div className="p-1 rounded-lg bg-gray-100 text-gray-500">
+                        <div className="p-1 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400">
                           {link.icon}
                         </div>
                         <span>{link.name}</span>
@@ -359,14 +373,14 @@ export default function AdminHeader({
                       <button
                         key={r.nik}
                         onClick={() => handleResidentClick(r)}
-                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <div className="p-1 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px] flex-shrink-0">
                             NIK
                           </div>
                           <div className="truncate">
-                            <div className="font-bold text-gray-800">{r.name}</div>
+                            <div className="font-bold text-gray-800 dark:text-slate-100">{r.name}</div>
                             <div className="text-[10px] text-gray-400">NIK: {r.nik}</div>
                           </div>
                         </div>
@@ -388,13 +402,13 @@ export default function AdminHeader({
                         <button
                           key={item.id}
                           onClick={() => handleNotificationSearchClick(item)}
-                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center gap-2"
+                          className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center gap-2"
                         >
                           <div className={`p-1 rounded border flex-shrink-0 ${meta.colorBg}`}>
                             {meta.icon}
                           </div>
                           <div className="truncate flex-1">
-                            <div className="font-bold text-gray-800 truncate">{item.title}</div>
+                            <div className="font-bold text-gray-800 dark:text-slate-100 truncate">{item.title}</div>
                             <div className="text-[10px] text-gray-400 truncate">{item.message}</div>
                           </div>
                         </button>
@@ -434,16 +448,13 @@ export default function AdminHeader({
           </div>
         )}
 
-        {/* Dark Mode Toggle - Under Development */}
+        {/* Dark Mode Toggle */}
         <button 
-          onClick={() => showToast('Fitur Mode Gelap sedang dalam tahap pengembangan 🛠️', 'info')}
-          title="Mode Gelap (Tahap Pengembangan)"
-          className="relative p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all cursor-pointer flex items-center justify-center hover:scale-105"
+          onClick={toggleTheme}
+          title={appTheme === 'light' ? "Aktifkan Mode Gelap" : "Aktifkan Mode Terang"}
+          className="relative p-2 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 rounded-full transition-all cursor-pointer flex items-center justify-center hover:scale-105"
         >
-          <Moon size={20} />
-          <span className="absolute -top-1 -right-2 bg-amber-500 text-white text-[8px] font-black px-1 rounded-full border border-white shadow-sm">
-            DEV
-          </span>
+          {appTheme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
         <div className="relative" ref={notifRef}>
@@ -462,9 +473,9 @@ export default function AdminHeader({
 
           {/* Notification Dropdown */}
           {showNotifDropdown && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
-              <div className="p-4 border-b border-gray-100 bg-slate-50/50 flex items-center justify-between">
-                <h3 className="text-sm font-extrabold text-gray-800 flex items-center gap-2">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="p-4 border-b border-gray-100 dark:border-slate-800 bg-slate-50/50 flex items-center justify-between">
+                <h3 className="text-sm font-extrabold text-gray-800 dark:text-slate-100 flex items-center gap-2">
                   <Bell className="w-4 h-4 text-emerald-700" />
                   Notifikasi Baru
                 </h3>
@@ -507,7 +518,7 @@ export default function AdminHeader({
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1.5 mb-1">
-                            <h4 className={`text-xs truncate ${!item.isRead ? 'text-gray-900 font-bold' : 'text-gray-500 font-semibold'}`}>
+                            <h4 className={`text-xs truncate ${!item.isRead ? 'text-gray-900 dark:text-white font-bold' : 'text-gray-500 dark:text-slate-400 font-semibold'}`}>
                               {item.title}
                             </h4>
                             <div className="flex items-center gap-1 flex-shrink-0 text-[10px] text-gray-400">
@@ -515,7 +526,7 @@ export default function AdminHeader({
                               <span>{item.time || new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                           </div>
-                          <p className={`text-[11px] leading-normal ${!item.isRead ? 'text-gray-800' : 'text-gray-500'}`}>
+                          <p className={`text-[11px] leading-normal ${!item.isRead ? 'text-gray-800 dark:text-slate-100' : 'text-gray-500 dark:text-slate-400'}`}>
                             {item.message}
                           </p>
                           <div className="mt-2 flex items-center justify-between">
@@ -532,7 +543,7 @@ export default function AdminHeader({
                   })
                 )}
               </div>
-              <div className="p-3 border-t border-gray-100 bg-white text-center">
+              <div className="p-3 border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-center">
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
@@ -548,7 +559,7 @@ export default function AdminHeader({
           )}
         </div>
         <div className="h-6 w-[1px] bg-gray-200"></div>
-        <span className="text-sm font-medium text-gray-500 hidden sm:block">{getFormattedDate()}</span>
+        <span className="text-sm font-medium text-gray-500 dark:text-slate-400 hidden sm:block">{getFormattedDate()}</span>
       </div>
     </header>
   );

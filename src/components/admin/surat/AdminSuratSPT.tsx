@@ -569,14 +569,14 @@ export default function AdminSuratSPT({
   return (
     <div className="max-w-7xl mx-auto space-y-5 pb-20">
       {/* ─── Header ─── */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-md sticky top-16 z-30">
+      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-16 z-30">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <button onClick={onBack} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           </button>
           <div>
-            <h1 className="text-lg font-bold text-slate-800">Surat Pengurusan Taspen (SPT)</h1>
-            <p className="text-xs text-slate-500">Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk</p>
+            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Surat Pengurusan Taspen (SPT)</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -591,7 +591,7 @@ export default function AdminSuratSPT({
           <button
             onClick={handlePrint}
             disabled={loading}
-            className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/20 active:scale-95 disabled:opacity-60"
+            className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg dark:shadow-none shadow-emerald-900/20 active:scale-95 disabled:opacity-60"
           >
             <Printer className="w-4 h-4" />
             {loading ? 'Memproses...' : 'Cetak 2 Lembar'}
@@ -604,17 +604,17 @@ export default function AdminSuratSPT({
         <div className="space-y-4 max-h-[88vh] overflow-y-auto pr-2 pb-10">
 
           {/* ─ 1. Pencarian Pewaris ─ */}
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
               <ShieldAlert className="w-5 h-5 text-rose-600" />
-              <h2 className="font-bold text-slate-800 text-sm">Data Pewaris (Almarhum)</h2>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Data Pewaris (Almarhum)</h2>
               <span className="ml-auto text-[10px] bg-rose-50 text-rose-600 border border-rose-100 font-bold px-2 py-0.5 rounded-full">Terintegrasi Data Penduduk</span>
             </div>
 
             {/* Pewaris Search Box */}
             <div className="relative">
-              <label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block mb-1.5">Cari Pewaris dari Data Penduduk</label>
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 border-2 border-emerald-400 rounded-xl focus-within:border-emerald-500 transition-colors">
+              <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Cari Pewaris dari Data Penduduk</label>
+              <div className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border-2 border-emerald-400 rounded-xl focus-within:border-emerald-500 transition-colors">
                 <Search className="w-4 h-4 text-emerald-500 shrink-0" />
                 <input
                   className="flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -632,20 +632,20 @@ export default function AdminSuratSPT({
 
               {/* Dropdown results */}
               {pewarisSearchOpen && pewarisQuery.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 max-h-64 overflow-y-auto">
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl z-50 max-h-64 overflow-y-auto">
                   {filteredPewaris.length === 0
                     ? <p className="text-xs text-slate-400 text-center py-4 italic">Tidak ditemukan.</p>
                     : filteredPewaris.map(r => (
                       <div key={r.nik} onClick={() => handleSelectPewaris(r)} className="px-4 py-2.5 hover:bg-emerald-50 cursor-pointer border-b border-slate-50 last:border-none">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-bold text-slate-800">{r.name}</span>
-                          <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-0.5 rounded-lg">{r.nik}</span>
+                          <span className="text-sm font-bold text-slate-800 dark:text-slate-100">{r.name}</span>
+                          <span className="text-[10px] font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg">{r.nik}</span>
                         </div>
-                        <p className="text-[10px] text-slate-500 mt-0.5">{r.address} · {r.familyRelation}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{r.address} · {r.familyRelation}</p>
                       </div>
                     ))
                   }
-                  <div className="px-4 py-2 border-t border-slate-100">
+                  <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-800">
                     <button onClick={() => setPewarisSearchOpen(false)} className="text-[10px] text-rose-500 hover:underline font-bold">Tutup</button>
                   </div>
                 </div>
@@ -671,37 +671,37 @@ export default function AdminSuratSPT({
             {/* Death details */}
             <div className="grid grid-cols-2 gap-2.5 pt-1">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Hari Wafat</label>
-                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={formData.hariMeninggal} onChange={e => setFormData(p => ({...p, hariMeninggal: e.target.value}))} placeholder="Selasa" />
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Hari Wafat</label>
+                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.hariMeninggal} onChange={e => setFormData(p => ({...p, hariMeninggal: e.target.value}))} placeholder="Selasa" />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Tanggal</label>
-                <input type="date" className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={formData.tanggalMeninggal} onChange={e => setFormData(p => ({...p, tanggalMeninggal: e.target.value}))} />
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tanggal</label>
+                <input type="date" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.tanggalMeninggal} onChange={e => setFormData(p => ({...p, tanggalMeninggal: e.target.value}))} />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Jam</label>
-                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={formData.jamMeninggal} onChange={e => setFormData(p => ({...p, jamMeninggal: e.target.value}))} placeholder="17:49" />
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Jam</label>
+                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.jamMeninggal} onChange={e => setFormData(p => ({...p, jamMeninggal: e.target.value}))} placeholder="17:49" />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Nomor Surat</label>
-                <input type="text" className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none font-mono" value={formData.nomorSurat} onChange={e => setFormData(p => ({...p, nomorSurat: e.target.value}))} />
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</label>
+                <input type="text" className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" value={formData.nomorSurat} onChange={e => setFormData(p => ({...p, nomorSurat: e.target.value}))} />
               </div>
               <div className="space-y-1 col-span-2">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Tempat Wafat</label>
-                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={formData.tempatMeninggal} onChange={e => setFormData(p => ({...p, tempatMeninggal: e.target.value}))} placeholder="RSUD ..." />
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tempat Wafat</label>
+                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.tempatMeninggal} onChange={e => setFormData(p => ({...p, tempatMeninggal: e.target.value}))} placeholder="RSUD ..." />
               </div>
               <div className="space-y-1 col-span-2">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Alamat Terakhir</label>
-                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={formData.alamatTerakhir} onChange={e => setFormData(p => ({...p, alamatTerakhir: e.target.value}))} />
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Alamat Terakhir</label>
+                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.alamatTerakhir} onChange={e => setFormData(p => ({...p, alamatTerakhir: e.target.value}))} />
               </div>
             </div>
           </div>
 
           {/* ─ 2. Dokumen Legalitas ─ */}
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
               <FileText className="w-4.5 h-4.5 text-emerald-600" />
-              <h2 className="font-bold text-slate-800 text-sm">Dokumen Legalitas & Keperluan</h2>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Dokumen Legalitas & Keperluan</h2>
             </div>
             <div className="grid grid-cols-2 gap-2.5">
               {[
@@ -713,22 +713,22 @@ export default function AdminSuratSPT({
                 { key: 'keperluanKlaim', label: 'Keperluan Klaim', span: 2 },
               ].map(({ key, label, span, type }) => (
                 <div key={key} className={`space-y-1 col-span-${span}`}>
-                  <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{label}</label>
-                  <input type={type || 'text'} className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={(formData as any)[key]} onChange={e => setFormData(p => ({...p, [key]: e.target.value}))} />
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{label}</label>
+                  <input type={type || 'text'} className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={(formData as any)[key]} onChange={e => setFormData(p => ({...p, [key]: e.target.value}))} />
                 </div>
               ))}
             </div>
           </div>
 
           {/* ─ 3. Daftar Ahli Waris ─ */}
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <User className="w-4.5 h-4.5 text-emerald-600" />
-                <h2 className="font-bold text-slate-800 text-sm">Daftar Ahli Waris</h2>
+                <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Daftar Ahli Waris</h2>
                 <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold px-2 py-0.5 rounded-full">{activeHeirs.length} dipilih</span>
               </div>
-              <button onClick={addManualHeir} className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-100 transition-colors">
+              <button onClick={addManualHeir} className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                 <Plus className="w-3 h-3" /> Tambah Manual
               </button>
             </div>
@@ -754,24 +754,24 @@ export default function AdminSuratSPT({
 
             <div className="space-y-3">
               {heirCandidates.map((c, idx) => (
-                <div key={idx} className={`rounded-2xl border transition-all ${c.included ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-100 bg-slate-50/60 opacity-60'}`}>
+                <div key={idx} className={`rounded-2xl border transition-all ${c.included ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-100 dark:border-slate-800 bg-slate-50/60 opacity-60'}`}>
                   {/* Header row */}
                   <div className="flex items-center gap-2.5 px-4 py-2.5">
                     {/* Checkbox: include/exclude */}
                     <button
                       onClick={() => updateCandidate(idx, { included: !c.included })}
-                      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${c.included ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 bg-white'}`}
+                      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${c.included ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900'}`}
                     >
                       {c.included && <Check className="w-3 h-3 text-white" />}
                     </button>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`text-sm font-bold truncate ${c.included ? 'text-slate-800' : 'text-slate-400'}`}>{c.editedName || <em className="font-normal text-slate-400">Nama belum diisi</em>}</span>
+                        <span className={`text-sm font-bold truncate ${c.included ? 'text-slate-800 dark:text-slate-100' : 'text-slate-400'}`}>{c.editedName || <em className="font-normal text-slate-400">Nama belum diisi</em>}</span>
                         {c.isManual && <span className="text-[9px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded-full">MANUAL</span>}
                         {!c.isManual && <span className="text-[9px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.5 rounded-full">KK</span>}
                       </div>
-                      <p className="text-[10px] text-slate-500">{c.editedRelationship} · NIK: {c.editedNik || '-'}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{c.editedRelationship} · NIK: {c.editedNik || '-'}</p>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -780,7 +780,7 @@ export default function AdminSuratSPT({
                         <button
                           onClick={() => setProxy(idx)}
                           title="Jadikan penerima kuasa"
-                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-colors ${c.isProxy ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200'}`}
+                          className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-colors ${c.isProxy ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200'}`}
                         >
                           {c.isProxy ? '★ Kuasa' : 'Beri Kuasa'}
                         </button>
@@ -788,7 +788,7 @@ export default function AdminSuratSPT({
                       {/* Edit toggle */}
                       <button
                         onClick={() => updateCandidate(idx, { isEditing: !c.isEditing })}
-                        className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-emerald-700 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-colors"
                       >
                         {c.isEditing ? <Save className="w-3.5 h-3.5" /> : <Edit2 className="w-3.5 h-3.5" />}
                       </button>
@@ -804,18 +804,18 @@ export default function AdminSuratSPT({
 
                   {/* Inline edit form */}
                   {c.isEditing && (
-                    <div className="px-4 pb-4 pt-1 border-t border-slate-100 grid grid-cols-2 gap-2">
+                    <div className="px-4 pb-4 pt-1 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2">
                       <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Nama Lengkap</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-sm bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-400 font-bold" value={c.editedName} onChange={e => updateCandidate(idx, { editedName: e.target.value })} />
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Nama Lengkap</label>
+                        <input type="text" className="w-full px-3 py-1.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-400 font-bold" value={c.editedName} onChange={e => updateCandidate(idx, { editedName: e.target.value })} />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">NIK</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl outline-none focus:border-emerald-400 font-mono" value={c.editedNik} onChange={e => updateCandidate(idx, { editedNik: e.target.value })} />
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">NIK</label>
+                        <input type="text" className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-400 font-mono" value={c.editedNik} onChange={e => updateCandidate(idx, { editedNik: e.target.value })} />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Hubungan</label>
-                        <select className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl outline-none" value={c.editedRelationship} onChange={e => updateCandidate(idx, { editedRelationship: e.target.value })}>
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hubungan</label>
+                        <select className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={c.editedRelationship} onChange={e => updateCandidate(idx, { editedRelationship: e.target.value })}>
                           <option value="Istri">Istri</option>
                           <option value="Suami">Suami</option>
                           <option value="Anak Kandung">Anak Kandung</option>
@@ -823,16 +823,16 @@ export default function AdminSuratSPT({
                         </select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Tempat Lahir</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl outline-none" value={c.editedBirthPlace} onChange={e => updateCandidate(idx, { editedBirthPlace: e.target.value })} />
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Tempat Lahir</label>
+                        <input type="text" className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={c.editedBirthPlace} onChange={e => updateCandidate(idx, { editedBirthPlace: e.target.value })} />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Tanggal Lahir</label>
-                        <input type="date" className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl outline-none" value={c.editedBirthDate} onChange={e => updateCandidate(idx, { editedBirthDate: e.target.value })} />
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Tanggal Lahir</label>
+                        <input type="date" className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={c.editedBirthDate} onChange={e => updateCandidate(idx, { editedBirthDate: e.target.value })} />
                       </div>
                       <div className="col-span-2 space-y-1">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Alamat</label>
-                        <input type="text" className="w-full px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl outline-none" value={c.editedAddress} onChange={e => updateCandidate(idx, { editedAddress: e.target.value })} />
+                        <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Alamat</label>
+                        <input type="text" className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={c.editedAddress} onChange={e => updateCandidate(idx, { editedAddress: e.target.value })} />
                       </div>
                       {!c.isManual && (
                         <div className="col-span-2">
@@ -849,40 +849,40 @@ export default function AdminSuratSPT({
           </div>
 
           {/* ─ 4. Saksi & RT/RW ─ */}
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-4">
+            <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
               <FileSignature className="w-4.5 h-4.5 text-emerald-600" />
-              <h2 className="font-bold text-slate-800 text-sm">Saksi & Verifikasi RT/RW/Camat</h2>
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Saksi & Verifikasi RT/RW/Camat</h2>
             </div>
 
             <div className="grid grid-cols-3 gap-2.5">
               {(['saksi1', 'saksi2', 'saksi3'] as const).map((key, i) => (
                 <div key={key} className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Saksi {i + 1}</label>
-                  <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-400" value={(formData as any)[key]} onChange={e => setFormData(p => ({...p, [key]: e.target.value}))} placeholder={`Nama ${i + 1}`} />
+                  <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Saksi {i + 1}</label>
+                  <input type="text" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-400" value={(formData as any)[key]} onChange={e => setFormData(p => ({...p, [key]: e.target.value}))} placeholder={`Nama ${i + 1}`} />
                 </div>
               ))}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Ketua RT</label>
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Ketua RT</label>
                 {rtList.length > 0
-                  ? <select className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={selectedRtIndex} onChange={e => setSelectedRtIndex(Number(e.target.value))}>
+                  ? <select className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={selectedRtIndex} onChange={e => setSelectedRtIndex(Number(e.target.value))}>
                       <option value={-1}>-- Pilih RT --</option>
                       {rtList.map((rt, i) => <option key={i} value={i}>RT {rt.no} — {rt.name}</option>)}
                     </select>
-                  : <div className="px-3 py-2 text-xs text-slate-400 bg-slate-50 border border-slate-200 rounded-xl italic">Atur di Pengaturan → Daftar RT/RW</div>
+                  : <div className="px-3 py-2 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl italic">Atur di Pengaturan → Daftar RT/RW</div>
                 }
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">Ketua RW</label>
+                <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Ketua RW</label>
                 {rwList.length > 0
-                  ? <select className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none" value={selectedRwIndex} onChange={e => setSelectedRwIndex(Number(e.target.value))}>
+                  ? <select className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={selectedRwIndex} onChange={e => setSelectedRwIndex(Number(e.target.value))}>
                       <option value={-1}>-- Pilih RW --</option>
                       {rwList.map((rw, i) => <option key={i} value={i}>RW {rw.no} — {rw.name}</option>)}
                     </select>
-                  : <div className="px-3 py-2 text-xs text-slate-400 bg-slate-50 border border-slate-200 rounded-xl italic">Atur di Pengaturan → Daftar RT/RW</div>
+                  : <div className="px-3 py-2 text-xs text-slate-400 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl italic">Atur di Pengaturan → Daftar RT/RW</div>
                 }
               </div>
             </div>
@@ -902,16 +902,16 @@ export default function AdminSuratSPT({
         </div>
 
         {/* ═══════ RIGHT: PREVIEW ═══════ */}
-        <div className="flex flex-col bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl h-[88vh] sticky top-[76px]">
-          <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+        <div className="flex flex-col bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl h-[88vh] sticky top-[76px]">
+          <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wide">LIVE PREVIEW — 2 LEMBAR A4</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">LIVE PREVIEW — 2 LEMBAR A4</span>
             </div>
-            <div className="flex items-center gap-1 bg-slate-50 border rounded-xl p-1">
-              <button onClick={() => setPreviewZoom(z => Math.max(0.18, z - 0.05))} className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-all"><ZoomOut className="w-3.5 h-3.5" /></button>
-              <span className="text-[10px] font-bold text-slate-600 px-1 select-none">{Math.round(previewZoom * 100)}%</span>
-              <button onClick={() => setPreviewZoom(z => Math.min(0.80, z + 0.05))} className="p-1.5 hover:bg-white rounded-lg text-slate-600 transition-all"><ZoomIn className="w-3.5 h-3.5" /></button>
+            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 border rounded-xl p-1">
+              <button onClick={() => setPreviewZoom(z => Math.max(0.18, z - 0.05))} className="p-1.5 hover:bg-white rounded-lg text-slate-600 dark:text-slate-400 transition-all"><ZoomOut className="w-3.5 h-3.5" /></button>
+              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 px-1 select-none">{Math.round(previewZoom * 100)}%</span>
+              <button onClick={() => setPreviewZoom(z => Math.min(0.80, z + 0.05))} className="p-1.5 hover:bg-white rounded-lg text-slate-600 dark:text-slate-400 transition-all"><ZoomIn className="w-3.5 h-3.5" /></button>
             </div>
           </div>
 
@@ -920,7 +920,7 @@ export default function AdminSuratSPT({
             <div>
               <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 1: SURAT KUASA —</p>
               <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
-                <div className="bg-white text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage1HTML() }} />
+                <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage1HTML() }} />
               </div>
             </div>
 
@@ -928,7 +928,7 @@ export default function AdminSuratSPT({
             <div style={{ marginTop: `calc(${297 * (previewZoom - 1)}mm)` }}>
               <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase mb-2 text-center">— LEMBAR 2: SURAT PERNYATAAN WARIS —</p>
               <div style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top center', width: '210mm', boxShadow: '0 4px 24px #0003' }}>
-                <div className="bg-white text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage2HTML() }} />
+                <div className="bg-white dark:bg-slate-900 text-black select-none" style={{ width: '210mm', minHeight: '297mm' }} dangerouslySetInnerHTML={{ __html: generatePage2HTML() }} />
               </div>
             </div>
           </div>

@@ -63,8 +63,8 @@ export default function ProfilDesa() {
       variants={containerVariants}
     >
       <motion.div variants={itemVariants} className="text-center py-8">
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Profil & Informasi Desa</h1>
-        <p className="text-gray-500 mt-2">Mengenal lebih dekat pemerintahan dan kelembagaan desa</p>
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Profil & Informasi Desa</h1>
+        <p className="text-gray-500 dark:text-slate-400 mt-2">Mengenal lebih dekat pemerintahan dan kelembagaan desa</p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -91,37 +91,37 @@ export default function ProfilDesa() {
 
         {/* Info Geografis */}
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center h-full">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 flex flex-col justify-center h-full">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-600">
                 <MapPin className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Lokasi & Demografi</h3>
-                <p className="text-sm text-gray-500">Informasi geografis wilayah</p>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Lokasi & Demografi</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400">Informasi geografis wilayah</p>
               </div>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Luas Wilayah</p>
-                <p className="text-xl font-black text-gray-900">4.5 <span className="text-sm font-medium text-gray-500">km²</span></p>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Luas Wilayah</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">4.5 <span className="text-sm font-medium text-gray-500 dark:text-slate-400">km²</span></p>
               </div>
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Total Penduduk</p>
-                <p className="text-xl font-black text-gray-900">1,245 <span className="text-sm font-medium text-gray-500">Jiwa</span></p>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Total Penduduk</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">1,245 <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Jiwa</span></p>
               </div>
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Ketinggian</p>
-                <p className="text-xl font-black text-gray-900">45 <span className="text-sm font-medium text-gray-500">mdpl</span></p>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Ketinggian</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">45 <span className="text-sm font-medium text-gray-500 dark:text-slate-400">mdpl</span></p>
               </div>
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-1">Batas Utara</p>
-                <p className="text-sm font-black text-gray-900">Desa Sukamaju</p>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Batas Utara</p>
+                <p className="text-sm font-black text-gray-900 dark:text-white">Desa Sukamaju</p>
               </div>
             </div>
             
-            <div className="mt-4 bg-gray-100 rounded-2xl h-32 overflow-hidden relative flex items-center justify-center border border-gray-200">
+            <div className="mt-4 bg-gray-100 dark:bg-slate-800 rounded-2xl h-32 overflow-hidden relative flex items-center justify-center border border-gray-200 dark:border-slate-700">
                <span className="text-sm font-bold text-gray-400">Peta Interaktif Dimatikan</span>
                <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")'}}></div>
             </div>
@@ -129,14 +129,14 @@ export default function ProfilDesa() {
         </motion.div>
       </div>
 
-      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Perangkat Desa & Staf</h3>
-            <p className="text-sm text-gray-500">Struktur organisasi pemerintahan desa</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Perangkat Desa & Staf</h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Struktur organisasi pemerintahan desa</p>
           </div>
         </div>
         
@@ -145,38 +145,38 @@ export default function ProfilDesa() {
             <motion.div 
               key={idx}
               whileHover={{ y: -5 }}
-              className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex flex-col items-center text-center group transition-colors hover:bg-emerald-50 hover:border-emerald-100"
+              className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center group transition-colors hover:bg-emerald-50 hover:border-emerald-100"
             >
-              <img src={person.photo} alt={person.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm mb-3 group-hover:border-emerald-200 transition-colors" />
-              <h4 className="font-bold text-gray-900 text-sm">{person.name}</h4>
-              <p className="text-xs text-gray-500 mt-0.5">{person.role}</p>
+              <img src={person.photo} alt={person.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm dark:shadow-none mb-3 group-hover:border-emerald-200 transition-colors" />
+              <h4 className="font-bold text-gray-900 dark:text-white text-sm">{person.name}</h4>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{person.role}</p>
             </motion.div>
           ))}
         </div>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+      <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Lembaga Desa</h3>
-            <p className="text-sm text-gray-500">Badan dan lembaga pendukung operasional desa</p>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Lembaga Desa</h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Badan dan lembaga pendukung operasional desa</p>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {lembagaDesa.map((lembaga, idx) => (
-            <div key={idx} onClick={() => setSelectedLembaga(lembaga)} className="flex gap-4 p-4 rounded-2xl border border-gray-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-colors cursor-pointer group">
-              <div className="w-12 h-12 bg-gray-50 group-hover:bg-white rounded-xl flex items-center justify-center text-gray-400 group-hover:text-emerald-600 shrink-0 transition-colors">
+            <div key={idx} onClick={() => setSelectedLembaga(lembaga)} className="flex gap-4 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 hover:border-emerald-200 hover:bg-emerald-50/50 transition-colors cursor-pointer group">
+              <div className="w-12 h-12 bg-gray-50 dark:bg-slate-800 group-hover:bg-white rounded-xl flex items-center justify-center text-gray-400 group-hover:text-emerald-600 shrink-0 transition-colors">
                 <Building className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <h4 className="font-bold text-gray-900">{lembaga.name}</h4>
-                <p className="text-xs text-gray-500 mt-1 leading-relaxed">{lembaga.description}</p>
+                <h4 className="font-bold text-gray-900 dark:text-white">{lembaga.name}</h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">{lembaga.description}</p>
                 <div className="mt-3 flex items-center gap-2">
-                  <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full group-hover:bg-emerald-100 group-hover:text-emerald-700 transition-colors">
+                  <span className="text-[10px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-2 py-0.5 rounded-full group-hover:bg-emerald-100 group-hover:text-emerald-700 transition-colors">
                     {lembaga.members} Anggota Aktif
                   </span>
                 </div>
@@ -203,11 +203,11 @@ export default function ProfilDesa() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative"
+              className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl relative"
             >
               <button 
                 onClick={() => setSelectedLembaga(null)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -217,7 +217,7 @@ export default function ProfilDesa() {
                   <Building className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900">{selectedLembaga.name}</h3>
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">{selectedLembaga.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <Users className="w-4 h-4 text-emerald-500" />
                     <span className="text-sm font-medium text-emerald-600">{selectedLembaga.members} Anggota Aktif</span>
@@ -227,12 +227,12 @@ export default function ProfilDesa() {
               
               <div className="space-y-4">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900 mb-1">Deskripsi Singkat</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed">{selectedLembaga.description}</p>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Deskripsi Singkat</h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{selectedLembaga.description}</p>
                 </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <h4 className="text-sm font-bold text-slate-900 mb-2">Tugas & Fungsi Utama</h4>
-                  <p className="text-sm text-slate-600 leading-relaxed">{selectedLembaga.longDescription}</p>
+                <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-2">Tugas & Fungsi Utama</h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{selectedLembaga.longDescription}</p>
                 </div>
               </div>
               

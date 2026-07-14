@@ -40,7 +40,7 @@ export default function ToastContainer() {
           transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
           className="fixed bottom-5 right-5 z-[9999]"
         >
-          <div className={`flex items-center gap-3 px-4.5 py-3.5 rounded-2xl border shadow-xl bg-white max-w-sm ${
+          <div className={`flex items-center gap-3 px-4.5 py-3.5 rounded-2xl border shadow-xl bg-white dark:bg-slate-900 max-w-sm ${
             toast.type === 'success' ? 'border-emerald-200 text-emerald-800' :
             toast.type === 'error' ? 'border-rose-200 text-rose-800' :
             'border-blue-200 text-blue-800'
@@ -65,7 +65,7 @@ export default function ToastContainer() {
             </div>
             <button 
               onClick={() => setToast(null)} 
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors ml-2 flex-shrink-0"
+              className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors ml-2 flex-shrink-0"
             >
               <X className="w-4 h-4 text-gray-400 hover:text-gray-600" />
             </button>

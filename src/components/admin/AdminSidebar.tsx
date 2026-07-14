@@ -54,9 +54,9 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsMobileMenuOpen?.(false)} />
       )}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200 flex-col h-full shadow-sm transition-transform duration-300 lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 flex-col h-full shadow-sm dark:shadow-none transition-transform duration-300 lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex`}>
         {isMobileMenuOpen && (
-          <button onClick={() => setIsMobileMenuOpen?.(false)} className="absolute top-4 right-4 p-2 text-gray-500 hover:bg-gray-100 rounded-lg lg:hidden">
+          <button onClick={() => setIsMobileMenuOpen?.(false)} className="absolute top-4 right-4 p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg lg:hidden">
             <X size={18} />
           </button>
         )}
@@ -76,9 +76,9 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: globalColor }}>{globalName}</h1>
-            <span className="text-[9px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">v3.0</span>
+            <span className="text-[9px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-1.5 py-0.5 rounded-full">v3.0</span>
           </div>
-          <p className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mt-1">
+          <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1">
             {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
           </p>
         </div>
@@ -118,10 +118,10 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
           </>
         )}
         
-        <div className="pt-4 mt-6 border-t border-gray-100">
+        <div className="pt-4 mt-6 border-t border-gray-100 dark:border-slate-800">
           <button 
             onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('ai_assistant'); }}
-            className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all relative overflow-hidden group ${activeTab === 'ai_assistant' ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50 border border-transparent'}`}
+            className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all relative overflow-hidden group ${activeTab === 'ai_assistant' ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50 dark:hover:bg-slate-800 border border-transparent'}`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center gap-3 relative z-10">
@@ -130,8 +130,8 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
               </div>
               <div className="flex flex-col items-start">
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-sm font-bold ${activeTab === 'ai_assistant' ? 'text-indigo-900' : 'text-gray-700'}`}>Asisten AI</span>
-                  <span className="bg-amber-500 text-white text-[8px] font-black px-1 py-0.2 rounded-full border border-white shadow-sm">DEV</span>
+                  <span className={`text-sm font-bold ${activeTab === 'ai_assistant' ? 'text-indigo-900' : 'text-gray-700 dark:text-slate-300'}`}>Asisten AI</span>
+                  <span className="bg-amber-500 text-white text-[8px] font-black px-1 py-0.2 rounded-full border border-white shadow-sm dark:shadow-none">DEV</span>
                 </div>
                 <span className="text-[9px] text-indigo-500 font-bold tracking-wider uppercase flex items-center gap-1">
                   <Sparkles size={8} /> Pintar
@@ -146,10 +146,10 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       </nav>
 
       {/* Profile */}
-      <div className="p-4 border-t border-gray-100 flex flex-col gap-3 mt-auto bg-white">
+      <div className="p-4 border-t border-gray-100 dark:border-slate-800 flex flex-col gap-3 mt-auto bg-white dark:bg-slate-900">
         <div className="flex items-center gap-3 px-1">
           <div className="relative shrink-0">
-            <img src={authUser?.avatar || "https://i.pravatar.cc/150?img=12"} alt="Admin" className="w-11 h-11 rounded-full border-2 border-gray-100 shadow-sm object-cover" />
+            <img src={authUser?.avatar || "https://i.pravatar.cc/150?img=12"} alt="Admin" className="w-11 h-11 rounded-full border-2 border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none object-cover" />
             <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${authUser?.role === 'saas_admin' ? 'bg-purple-500' : authUser?.role === 'kades' ? 'bg-amber-500' : 'bg-emerald-500'}`} title={authUser?.role === 'saas_admin' ? 'SaaS Admin' : authUser?.role === 'kades' ? 'Super Admin' : 'Admin'}>
               {authUser?.role === 'saas_admin' ? (
                 <Building2 size={10} className="text-white" />
@@ -161,7 +161,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             </div>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold text-gray-900 line-clamp-2 leading-tight mb-1">{authUser?.name || "Admin Desa"}</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-1">{authUser?.name || "Admin Desa"}</p>
             <div className="flex items-center gap-1.5">
               <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
                 authUser?.role === 'saas_admin' ? 'bg-purple-100 text-purple-700' : 
@@ -177,14 +177,14 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setView('public')}
-            className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-50 hover:bg-emerald-50 border border-gray-100 hover:border-emerald-100 rounded-xl text-xs font-bold text-gray-600 hover:text-emerald-700 transition-colors shadow-sm"
+            className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-50 dark:bg-slate-800 hover:bg-emerald-50 border border-gray-100 dark:border-slate-800 hover:border-emerald-100 rounded-xl text-xs font-bold text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors shadow-sm dark:shadow-none"
           >
             <LayoutDashboard size={14} />
             <span>Portal Publik</span>
           </button>
           <button 
             onClick={onLogout}
-            className="w-9 h-9 flex items-center justify-center bg-gray-50 hover:bg-rose-50 border border-gray-100 hover:border-rose-100 rounded-xl text-gray-500 hover:text-rose-600 transition-colors shrink-0 shadow-sm"
+            className="w-9 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-800 hover:bg-rose-50 border border-gray-100 dark:border-slate-800 hover:border-rose-100 rounded-xl text-gray-500 dark:text-slate-400 hover:text-rose-600 transition-colors shrink-0 shadow-sm dark:shadow-none"
             title="Keluar Sesi"
           >
             <LogOut size={16} />
@@ -205,7 +205,7 @@ function NavItem({ icon, label, active = false, onClick, badgeCount = 0, id }: {
       className={`flex items-center justify-between px-3.5 py-2 rounded-xl transition-all duration-200 font-semibold text-[13px] relative overflow-hidden group ${
         active
           ? 'bg-emerald-50/80 text-emerald-700'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+          : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900'
       }`}
     >
       <div className="flex items-center gap-2.5">

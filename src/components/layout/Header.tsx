@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, Bell, Menu, LayoutDashboard, Building2, PieChart, Newspaper, Map, ShieldCheck, MessageSquareText, LogOut, Moon } from 'lucide-react';
+import { Globe, Bell, Menu, LayoutDashboard, Building2, PieChart, Newspaper, Map, ShieldCheck, MessageSquareText, LogOut, Moon, Sun } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 import { showToast } from '../../utils/toast';
 
@@ -17,14 +17,11 @@ export default function Header({
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
+  const [appTheme, setAppTheme] = React.useState(() => localStorage.getItem('app_theme') || 'light');
 
   React.useEffect(() => {
-    // Ensure light theme is forced when dark mode is removed
-    const root = document.documentElement;
-    root.classList.remove('dark');
-    root.removeAttribute('data-theme');
-    localStorage.setItem('app_theme', 'light');
-    localStorage.setItem('theme', 'light');
+    const syncTheme = () => setAppTheme(localStorage.getItem('app_theme') || 'light');
+    window.addEventListener('app_theme_updated', syncTheme);
     
     const handleSettingsUpdate = () => {
       setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
@@ -38,8 +35,16 @@ export default function Header({
     return () => {
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
       window.removeEventListener('global_branding_updated', handleBrandingUpdate);
+      window.removeEventListener('app_theme_updated', syncTheme);
     };
   }, []);
+
+  const toggleTheme = () => {
+    const newTheme = appTheme === 'light' ? 'dark' : 'light';
+    setAppTheme(newTheme);
+    localStorage.setItem('app_theme', newTheme);
+    window.dispatchEvent(new Event('app_theme_updated'));
+  };
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
@@ -52,9 +57,9 @@ export default function Header({
   ];
 
   return (
-    <header className="h-20 bg-white/90 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-6 z-40 sticky top-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+    <header className="h-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-gray-100 dark:border-slate-800 flex items-center justify-between px-6 z-40 sticky top-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
       <div className="flex items-center gap-4 shrink-0">
-        <button onClick={toggleMobileMenu} className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+        <button onClick={toggleMobileMenu} className="lg:hidden p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
           <Menu size={24} />
         </button>
         <div className="flex items-center gap-3">
@@ -69,7 +74,7 @@ export default function Header({
             )}
           </div>
           <div className="leading-tight">
-            <h2 className="text-sm font-bold text-gray-900">{desaName}</h2>
+            <h2 className="text-sm font-bold text-gray-900 dark:text-white">{desaName}</h2>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Portal Warga</p>
           </div>
         </div>
@@ -77,7 +82,7 @@ export default function Header({
       
       {/* Desktop Horizontal Navigation */}
       {setActiveTab && activeTab && (
-        <nav className="hidden lg:flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-150/50">
+        <nav className="hidden lg:flex items-center gap-1 bg-gray-50 dark:bg-slate-800 p-1 rounded-xl border border-gray-150/50">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -86,8 +91,8 @@ export default function Header({
                 onClick={() => setActiveTab(item.id)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   isActive 
-                    ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-150/40 text-emerald-800' 
-                    : 'text-gray-500 hover:text-gray-900 hover:bg-white/50 border border-transparent'
+                    ? 'bg-white dark:bg-slate-900 shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-gray-150/40 text-emerald-800' 
+                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 hover:bg-white/50 border border-transparent'
                 }`}
                 style={isActive ? { color: globalColor } : {}}
               >
@@ -100,21 +105,18 @@ export default function Header({
       )}
       
       <div className="flex items-center gap-4 shrink-0">
-        <span className="text-xs font-bold text-gray-400 hidden xl:block font-mono bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">{getFormattedDate()}</span>
+        <span className="text-xs font-bold text-gray-400 hidden xl:block font-mono bg-gray-50 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-slate-800">{getFormattedDate()}</span>
 
-        {/* Dark Mode Toggle - Under Development */}
+        {/* Dark Mode Toggle */}
         <button 
-          onClick={() => showToast('Fitur Mode Gelap sedang dalam tahap pengembangan 🛠️', 'info')}
-          title="Mode Gelap (Tahap Pengembangan)"
-          className="relative p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-full transition-all cursor-pointer flex items-center justify-center hover:scale-105"
+          onClick={toggleTheme}
+          title={appTheme === 'light' ? "Aktifkan Mode Gelap" : "Aktifkan Mode Terang"}
+          className="relative p-2 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 rounded-full transition-all cursor-pointer flex items-center justify-center hover:scale-105"
         >
-          <Moon size={20} />
-          <span className="absolute -top-1 -right-2 bg-amber-500 text-white text-[8px] font-black px-1 rounded-full border border-white shadow-sm">
-            DEV
-          </span>
+          {appTheme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
-        <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-full transition-colors">
+        <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-full transition-colors">
           <Bell size={20} />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
         </button>

@@ -37,11 +37,11 @@ export default function BudgetSummary() {
   const persentase = ((belanja / pendapatan) * 100).toFixed(1);
 
   return (
-    <section className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+    <section className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h4 className="text-xl font-bold text-gray-900 mb-1">Ringkasan APBDes {apbdesData ? apbdesData.tahun : getCurrentYear()}</h4>
-          <p className="text-sm text-gray-500 font-medium">Transparansi Anggaran Pendapatan & Belanja Desa</p>
+          <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Ringkasan APBDes {apbdesData ? apbdesData.tahun : getCurrentYear()}</h4>
+          <p className="text-sm text-gray-500 dark:text-slate-400 font-medium">Transparansi Anggaran Pendapatan & Belanja Desa</p>
         </div>
         <div className="p-3 bg-amber-50 rounded-xl shrink-0">
           <Wallet className="text-amber-600 w-6 h-6" />
@@ -49,26 +49,26 @@ export default function BudgetSummary() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div className="p-5 rounded-2xl bg-gray-50/80 border border-gray-100 hover:bg-gray-50 transition-colors">
-          <p className="text-sm font-semibold text-gray-500 mb-1">Pendapatan</p>
+        <div className="p-5 rounded-2xl bg-gray-50/80 border border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+          <p className="text-sm font-semibold text-gray-500 dark:text-slate-400 mb-1">Pendapatan</p>
           <p className="text-xl font-bold text-emerald-700">{formatRupiahShort(pendapatan)}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-gray-50/80 border border-gray-100 hover:bg-gray-50 transition-colors">
-          <p className="text-sm font-semibold text-gray-500 mb-1">Belanja</p>
+        <div className="p-5 rounded-2xl bg-gray-50/80 border border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+          <p className="text-sm font-semibold text-gray-500 dark:text-slate-400 mb-1">Belanja</p>
           <p className="text-xl font-bold text-red-600">{formatRupiahShort(belanja)}</p>
         </div>
-        <div className="p-5 rounded-2xl bg-gray-50/80 border border-gray-100 hover:bg-gray-50 transition-colors">
-          <p className="text-sm font-semibold text-gray-500 mb-1">Realisasi</p>
+        <div className="p-5 rounded-2xl bg-gray-50/80 border border-gray-100 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+          <p className="text-sm font-semibold text-gray-500 dark:text-slate-400 mb-1">Realisasi</p>
           <p className="text-xl font-bold text-amber-600">{persentase}%</p>
         </div>
       </div>
 
       <div className="space-y-3">
-        <div className="flex justify-between text-sm font-bold text-gray-700">
+        <div className="flex justify-between text-sm font-bold text-gray-700 dark:text-slate-300">
           <span>Penyaluran Dana Desa</span>
           <span className="text-emerald-700">{persentase}%</span>
         </div>
-        <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-3 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden">
           <div className="bg-emerald-600 h-full rounded-full transition-all duration-1000" style={{ width: `${persentase}%` }}></div>
         </div>
       </div>

@@ -44,7 +44,7 @@ export const SAAS_CONFIG = {
   get globalFooterHTML() {
     const customFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     return `
-      <div class="saas-global-footer w-full bg-white select-none" style="border-top: 0.5px solid #cbd5e1; padding-top: 5px; font-family: 'Inter', sans-serif; line-height: 1.5; font-size: 8px; color: #94a3b8; text-align: left;">
+      <div class="saas-global-footer w-full bg-white dark:bg-slate-900 select-none" style="border-top: 0.5px solid #cbd5e1; padding-top: 5px; font-family: 'Inter', sans-serif; line-height: 1.5; font-size: 8px; color: #94a3b8; text-align: left;">
         ${customFooter}
       </div>
     `;
@@ -126,10 +126,10 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
                 <img src="${logoKop}" class="max-w-full max-h-full object-contain" />
               </div>
               <div class="text-center flex-1 pr-[90px]">
-              <p class="font-extrabold text-[14px] uppercase tracking-wider text-slate-800 leading-tight mb-0.5">${dataWarga.kabupaten.toUpperCase()}</p>
-              <p class="font-bold text-[14px] uppercase tracking-wider text-slate-800 leading-tight mb-0.5">${dataWarga.kecamatan.toUpperCase()}</p>
+              <p class="font-extrabold text-[14px] uppercase tracking-wider text-slate-800 dark:text-slate-100 leading-tight mb-0.5">${dataWarga.kabupaten.toUpperCase()}</p>
+              <p class="font-bold text-[14px] uppercase tracking-wider text-slate-800 dark:text-slate-100 leading-tight mb-0.5">${dataWarga.kecamatan.toUpperCase()}</p>
               <p class="font-black text-[26px] tracking-wide text-emerald-950 uppercase mt-1 leading-tight mb-1">${dataWarga.village.toUpperCase()}</p>
-              <p class="text-[10.5px] text-slate-500 leading-snug mt-1">Alamat Kantor Pelayanan: Jl. Keramat No. 12 Wasah Hilir, Kode Pos 71253</p>
+              <p class="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug mt-1">Alamat Kantor Pelayanan: Jl. Keramat No. 12 Wasah Hilir, Kode Pos 71253</p>
               </div>
             </div>
           </div>
@@ -137,45 +137,45 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
           <!-- SURAT TITLE -->
           <div class="text-center my-6">
             <p class="font-extrabold text-[15px] uppercase tracking-wide border-b border-black inline-block px-4 pb-0.5">${tipeSurat}</p>
-            <p class="text-[11px] font-mono font-medium text-slate-600 mt-1">Nomor: 474/023/WHi-PEM/${currentYear}</p>
+            <p class="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-1">Nomor: 474/023/WHi-PEM/${currentYear}</p>
           </div>
 
           <!-- SURAT LEADING -->
-          <p class="text-[12px] text-slate-800 text-justify leading-[1.15] mb-2">
+          <p class="text-[12px] text-slate-800 dark:text-slate-100 text-justify leading-[1.15] mb-2">
             Yang bertanda tangan di bawah ini Kepala ${dataWarga.village}, ${dataWarga.kecamatan}, ${dataWarga.kabupaten}, dengan ini menerangkan secara sah bahwa warga negara di bawah ini:
           </p>
 
           <!-- RESIDENT METADATA -->
           <div class="pl-8 my-6 space-y-2.5 text-[12px]">
             <div class="grid grid-cols-[160px_15px_1fr]">
-              <span class="text-slate-600 font-medium">Nama Lengkap</span>
-              <span class="text-slate-600">:</span>
-              <span class="font-bold text-slate-900 uppercase">${dataWarga.name}</span>
+              <span class="text-slate-600 dark:text-slate-400 font-medium">Nama Lengkap</span>
+              <span class="text-slate-600 dark:text-slate-400">:</span>
+              <span class="font-bold text-slate-900 dark:text-white uppercase">${dataWarga.name}</span>
             </div>
             <div class="grid grid-cols-[160px_15px_1fr]">
-              <span class="text-slate-600 font-medium">Nomor Induk Penduduk (NIK)</span>
-              <span class="text-slate-600">:</span>
-              <span class="font-semibold text-slate-900 font-mono">${dataWarga.nik}</span>
+              <span class="text-slate-600 dark:text-slate-400 font-medium">Nomor Induk Penduduk (NIK)</span>
+              <span class="text-slate-600 dark:text-slate-400">:</span>
+              <span class="font-semibold text-slate-900 dark:text-white font-mono">${dataWarga.nik}</span>
             </div>
             <div class="grid grid-cols-[160px_15px_1fr]">
-              <span class="text-slate-600 font-medium">Tempat, Tanggal Lahir</span>
-              <span class="text-slate-600">:</span>
-              <span class="text-slate-800">${dataWarga.birthPlace}, ${dataWarga.birthDate}</span>
+              <span class="text-slate-600 dark:text-slate-400 font-medium">Tempat, Tanggal Lahir</span>
+              <span class="text-slate-600 dark:text-slate-400">:</span>
+              <span class="text-slate-800 dark:text-slate-100">${dataWarga.birthPlace}, ${dataWarga.birthDate}</span>
             </div>
             <div class="grid grid-cols-[160px_15px_1fr]">
-              <span class="text-slate-600 font-medium">Jenis Kelamin</span>
-              <span class="text-slate-600">:</span>
-              <span class="text-slate-800">${dataWarga.gender}</span>
+              <span class="text-slate-600 dark:text-slate-400 font-medium">Jenis Kelamin</span>
+              <span class="text-slate-600 dark:text-slate-400">:</span>
+              <span class="text-slate-800 dark:text-slate-100">${dataWarga.gender}</span>
             </div>
             <div class="grid grid-cols-[160px_15px_1fr]">
-              <span class="text-slate-600 font-medium">Alamat / Domisili</span>
-              <span class="text-slate-600">:</span>
-              <span class="text-slate-800">${dataWarga.address} ${dataWarga.rtRw}</span>
+              <span class="text-slate-600 dark:text-slate-400 font-medium">Alamat / Domisili</span>
+              <span class="text-slate-600 dark:text-slate-400">:</span>
+              <span class="text-slate-800 dark:text-slate-100">${dataWarga.address} ${dataWarga.rtRw}</span>
             </div>
           </div>
 
           <!-- SURAT CONTENT (Admin Desa specific text) -->
-          <div class="text-[12px] text-slate-800 text-justify leading-[1.15] space-y-2">
+          <div class="text-[12px] text-slate-800 dark:text-slate-100 text-justify leading-[1.15] space-y-2">
             ${kontenSurat}
           </div>
 
@@ -185,7 +185,7 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
               <p class="m-0">${dataWarga.village.replace(/desa|kelurahan/gi, '').trim()}, ${dateFormatted()}</p>
               <p class="font-bold m-0 mt-1 mb-12">${signatureKadesRole} ${dataWarga.village}</p>
               <p class="font-bold uppercase text-[12px] m-0 tracking-wide border-b border-slate-900 inline-block pb-0.5">${signatureKades.toUpperCase()}</p>
-              ${signatureKadesNip && signatureKadesNip !== '-' ? `<p class="text-[10px] text-slate-500 font-mono mt-0.5">NIP. ${signatureKadesNip}</p>` : ''}
+              ${signatureKadesNip && signatureKadesNip !== '-' ? `<p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">NIP. ${signatureKadesNip}</p>` : ''}
             </div>
           </div>
         </div>
@@ -356,14 +356,14 @@ export default function AdminSuratMasterTemplate() {
       </div>
 
       {/* Role and Mode Toggles */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-slate-50 border border-slate-100 rounded-3xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-3xl">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700">
             <Sliders size={22} />
           </div>
           <div>
-            <h4 className="font-extrabold text-slate-900 text-sm">Simulasi Hak Akses Sistem</h4>
-            <p className="text-xs text-slate-500">Pilih peran untuk melihat pembatasan otoritas cetak</p>
+            <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">Simulasi Hak Akses Sistem</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Pilih peran untuk melihat pembatasan otoritas cetak</p>
           </div>
         </div>
 
@@ -372,8 +372,8 @@ export default function AdminSuratMasterTemplate() {
             onClick={() => setRole('admin_desa')}
             className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
               role === 'admin_desa' 
-                ? 'bg-white text-emerald-800 shadow-sm' 
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <Building2 size={15} />
@@ -383,8 +383,8 @@ export default function AdminSuratMasterTemplate() {
             onClick={() => setRole('saas_admin')}
             className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
               role === 'saas_admin' 
-                ? 'bg-slate-900 text-white shadow-md shadow-slate-950/20' 
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-slate-900 text-white shadow-md dark:shadow-none shadow-slate-950/20' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <ShieldCheck size={15} className="text-indigo-400" />
@@ -425,12 +425,12 @@ export default function AdminSuratMasterTemplate() {
                     className="w-full bg-slate-950 text-slate-100 font-mono text-xs p-4 rounded-2xl border border-slate-800 outline-none focus:border-indigo-500 transition-all resize-none focus:ring-4 focus:ring-indigo-500/10"
                     placeholder="HTML Footer disini..."
                   />
-                  <p className="text-[10px] text-slate-500 mt-2">Dukung teks terformat HTML ringan. Contoh: &lt;strong&gt;, &lt;br&gt;, dll.</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2">Dukung teks terformat HTML ringan. Contoh: &lt;strong&gt;, &lt;br&gt;, dll.</p>
                 </div>
 
                 <button
                   onClick={handleSaveFooterText}
-                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md dark:shadow-none transition-colors flex items-center justify-center gap-2"
                 >
                   <CheckCircle size={15} />
                   Simpan & Kunci Footer Global
@@ -449,13 +449,13 @@ export default function AdminSuratMasterTemplate() {
             </div>
           ) : (
             /* 2. ADMIN DESA PANEL */
-            <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm space-y-6">
+            <div className="bg-white dark:bg-slate-900 rounded-[32px] p-6 border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-6">
               <div className="flex justify-between items-start">
                 <div>
                   <span className="text-[10px] font-black bg-emerald-50 text-emerald-800 border border-emerald-100 px-3 py-1 rounded-full uppercase tracking-wider">
                     Terminal Pelayanan Desa
                   </span>
-                  <h3 className="text-lg font-extrabold text-slate-900 mt-3 flex items-center gap-2">
+                  <h3 className="text-lg font-extrabold text-slate-900 dark:text-white mt-3 flex items-center gap-2">
                     <FileText className="text-emerald-700" />
                     Penyiapan Surat Pengantar
                   </h3>
@@ -464,24 +464,24 @@ export default function AdminSuratMasterTemplate() {
 
               {/* Template Selectors */}
               <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest">Jenis Layanan Surat</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Jenis Layanan Surat</label>
                 <div className="grid grid-cols-1 gap-2">
                   <button
                     onClick={() => setSelectedTemplate('KTP')}
                     className={`p-4 rounded-2xl text-left border-2 transition-all flex items-center justify-between ${
                       selectedTemplate === 'KTP' 
                         ? 'border-emerald-600 bg-emerald-50/20' 
-                        : 'border-slate-100 hover:border-slate-200 bg-white'
+                        : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 bg-white dark:bg-slate-900'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${
-                        selectedTemplate === 'KTP' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'
+                        selectedTemplate === 'KTP' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}>
                         ID
                       </div>
                       <div>
-                        <p className="font-bold text-xs text-slate-800">Surat Pengantar KTP-el</p>
+                        <p className="font-bold text-xs text-slate-800 dark:text-slate-100">Surat Pengantar KTP-el</p>
                         <p className="text-[10px] text-slate-400">Kode Klasifikasi: 474 / KTP</p>
                       </div>
                     </div>
@@ -493,17 +493,17 @@ export default function AdminSuratMasterTemplate() {
                     className={`p-4 rounded-2xl text-left border-2 transition-all flex items-center justify-between ${
                       selectedTemplate === 'SKTM' 
                         ? 'border-emerald-600 bg-emerald-50/20' 
-                        : 'border-slate-100 hover:border-slate-200 bg-white'
+                        : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 bg-white dark:bg-slate-900'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${
-                        selectedTemplate === 'SKTM' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'
+                        selectedTemplate === 'SKTM' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}>
                         SS
                       </div>
                       <div>
-                        <p className="font-bold text-xs text-slate-800">Sertifikat Tidak Mampu (SKTM)</p>
+                        <p className="font-bold text-xs text-slate-800 dark:text-slate-100">Sertifikat Tidak Mampu (SKTM)</p>
                         <p className="text-[10px] text-slate-400">Kode Klasifikasi: 400 / SKTM</p>
                       </div>
                     </div>
@@ -515,17 +515,17 @@ export default function AdminSuratMasterTemplate() {
                     className={`p-4 rounded-2xl text-left border-2 transition-all flex items-center justify-between ${
                       selectedTemplate === 'SKU' 
                         ? 'border-emerald-600 bg-emerald-50/20' 
-                        : 'border-slate-100 hover:border-slate-200 bg-white'
+                        : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 bg-white dark:bg-slate-900'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${
-                        selectedTemplate === 'SKU' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700'
+                        selectedTemplate === 'SKU' ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                       }`}>
                         UM
                       </div>
                       <div>
-                        <p className="font-bold text-xs text-slate-800">Keterangan Usaha Mikro (SKU)</p>
+                        <p className="font-bold text-xs text-slate-800 dark:text-slate-100">Keterangan Usaha Mikro (SKU)</p>
                         <p className="text-[10px] text-slate-400">Kode Klasifikasi: 593 / SKU</p>
                       </div>
                     </div>
@@ -536,7 +536,7 @@ export default function AdminSuratMasterTemplate() {
 
               {/* Resident Selectors */}
               <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest">Pilih Data Penduduk Pemohon</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Pilih Data Penduduk Pemohon</label>
                 <div className="flex gap-2">
                   {mockResidents.map((r, idx) => (
                     <button
@@ -545,10 +545,10 @@ export default function AdminSuratMasterTemplate() {
                       className={`flex-1 p-3.5 rounded-2xl border text-left transition-all relative overflow-hidden ${
                         selectedResidentIndex === idx 
                           ? 'border-emerald-600 bg-emerald-50/10' 
-                          : 'border-slate-100 bg-slate-50 hover:bg-slate-100'
+                          : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
-                      <p className="font-extrabold text-[11px] text-slate-900">{r.name}</p>
+                      <p className="font-extrabold text-[11px] text-slate-900 dark:text-white">{r.name}</p>
                       <p className="font-mono text-[9px] text-slate-400 mt-0.5">NIK: {r.nik}</p>
                     </button>
                   ))}
@@ -556,11 +556,11 @@ export default function AdminSuratMasterTemplate() {
               </div>
 
               {/* Immutable Info message */}
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex gap-3">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 flex gap-3">
                 <Lock size={18} className="text-indigo-600 shrink-0 mt-0.5" />
                 <div>
                   <h5 className="font-bold text-[11px] text-indigo-950 uppercase tracking-wider">Footer Cetak Terkunci</h5>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                     Sesuai kesepakatan lisensi SaaS Cloud, sistem menyuntikkan footer platform secara permanen. Anda tidak dapat menyembunyikan branding DiDesa pada cetakan fisik maupun ekspor PDF.
                   </p>
                 </div>
@@ -568,7 +568,7 @@ export default function AdminSuratMasterTemplate() {
 
               <button
                 onClick={handlePrintAction}
-                className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm rounded-2xl shadow-lg hover:shadow-emerald-700/10 active:scale-95 transition-all flex items-center justify-center gap-2"
+                className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-sm rounded-2xl shadow-lg dark:shadow-none hover:shadow-emerald-700/10 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
                 <Printer size={18} />
                 Cetak Surat Sekarang
@@ -591,29 +591,29 @@ export default function AdminSuratMasterTemplate() {
         </div>
 
         {/* Right High-Fidelity A4 Paper Preview */}
-        <div className="lg:col-span-7 flex flex-col min-w-0 bg-slate-100 rounded-[32px] border border-slate-200 overflow-hidden shadow-inner">
+        <div className="lg:col-span-7 flex flex-col min-w-0 bg-slate-100 dark:bg-slate-800 rounded-[32px] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-inner">
           
           {/* Preview Controls */}
-          <div className="bg-white border-b border-slate-200/60 px-6 py-4 flex items-center justify-between shadow-sm">
+          <div className="bg-white dark:bg-slate-900 border-b border-slate-200/60 px-6 py-4 flex items-center justify-between shadow-sm dark:shadow-none">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-              <p className="font-extrabold text-xs text-slate-700 uppercase tracking-wider">Live A4 Engine Preview</p>
+              <p className="font-extrabold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider">Live A4 Engine Preview</p>
             </div>
             
             <div className="flex items-center gap-2">
               <button 
                 onClick={() => setZoomLevel(prev => Math.max(0.3, prev - 0.05))} 
-                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                 title="Zoom Out"
               >
                 <ZoomOut size={16} />
               </button>
-              <span className="text-xs font-mono font-bold text-slate-600 px-2 w-14 text-center">
+              <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
                 {Math.round(zoomLevel * 100)}%
               </span>
               <button 
                 onClick={() => setZoomLevel(prev => Math.min(1.2, prev + 0.05))} 
-                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                 title="Zoom In"
               >
                 <ZoomIn size={16} />
@@ -621,7 +621,7 @@ export default function AdminSuratMasterTemplate() {
               <div className="w-px h-5 bg-slate-200 mx-1"></div>
               <button 
                 onClick={() => setZoomLevel(0.5)} 
-                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-[10px] font-bold"
+                className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-[10px] font-bold"
                 title="Reset Zoom"
               >
                 Reset
@@ -649,10 +649,10 @@ export default function AdminSuratMasterTemplate() {
                 borderRadius: '12px',
                 transition: 'width 0.2s ease-out, height 0.2s ease-out'
               }}
-              className="bg-white m-auto shrink-0 relative"
+              className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
             >
               <div 
-                className="bg-white p-12 relative text-black shrink-0 printable-area select-none" 
+                className="bg-white dark:bg-slate-900 p-12 relative text-black shrink-0 printable-area select-none" 
                 style={{ 
                   width: '794px',
                   height: '1123px',
@@ -666,10 +666,10 @@ export default function AdminSuratMasterTemplate() {
               >
                 <div>
                   {/* Visual Crop Marks */}
-                  <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300"></div>
-                  <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300"></div>
-                  <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300"></div>
-                  <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300"></div>
+                  <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600"></div>
+                  <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600"></div>
+                  <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600"></div>
+                  <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600"></div>
 
                   {/* Letter Header */}
                   <div style={{ display: 'flex', gap: '15px', alignItems: 'center', borderBottom: '2.5px solid #111', paddingBottom: '8px', marginBottom: '20px' }}>
@@ -693,54 +693,54 @@ export default function AdminSuratMasterTemplate() {
                           ? 'SURAT KETERANGAN TIDAK MAMPU' 
                           : 'SURAT KETERANGAN USAHA'}
                     </p>
-                    <p className="text-[10px] font-mono font-bold text-slate-500 mt-1">Nomor: 474/023/WHi-PEM/2026</p>
+                    <p className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 mt-1">Nomor: 474/023/WHi-PEM/2026</p>
                   </div>
 
                   {/* Intro */}
-                  <p className="text-[11px] text-slate-800 text-justify leading-[1.15] mb-2">
+                  <p className="text-[11px] text-slate-800 dark:text-slate-100 text-justify leading-[1.15] mb-2">
                     Yang bertanda tangan di bawah ini Kepala {selectedResident.village}, {selectedResident.kecamatan}, {selectedResident.kabupaten}, dengan ini menerangkan secara sah bahwa warga negara di bawah ini:
                   </p>
 
                   {/* Metadata fields */}
                   <div className="pl-6 my-4 space-y-1.5 text-[11px]">
                     <div className="grid grid-cols-[140px_10px_1fr]">
-                      <span className="text-slate-500 font-medium">Nama Lengkap</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Nama Lengkap</span>
                       <span className="text-slate-400">:</span>
-                      <span className="font-bold text-slate-900 uppercase">{selectedResident.name}</span>
+                      <span className="font-bold text-slate-900 dark:text-white uppercase">{selectedResident.name}</span>
                     </div>
                     <div className="grid grid-cols-[140px_10px_1fr]">
-                      <span className="text-slate-500 font-medium">Nomor Induk (NIK)</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Nomor Induk (NIK)</span>
                       <span className="text-slate-400">:</span>
-                      <span className="font-semibold text-slate-800 font-mono">{selectedResident.nik}</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-100 font-mono">{selectedResident.nik}</span>
                     </div>
                     <div className="grid grid-cols-[140px_10px_1fr]">
-                      <span className="text-slate-500 font-medium">Tempat, Tgl Lahir</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Tempat, Tgl Lahir</span>
                       <span className="text-slate-400">:</span>
-                      <span className="text-slate-800">{selectedResident.birthPlace}, {selectedResident.birthDate}</span>
+                      <span className="text-slate-800 dark:text-slate-100">{selectedResident.birthPlace}, {selectedResident.birthDate}</span>
                     </div>
                     <div className="grid grid-cols-[140px_10px_1fr]">
-                      <span className="text-slate-500 font-medium">Jenis Kelamin</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Jenis Kelamin</span>
                       <span className="text-slate-400">:</span>
-                      <span className="text-slate-800">{selectedResident.gender}</span>
+                      <span className="text-slate-800 dark:text-slate-100">{selectedResident.gender}</span>
                     </div>
                     <div className="grid grid-cols-[140px_10px_1fr]">
-                      <span className="text-slate-500 font-medium">Alamat Lengkap</span>
+                      <span className="text-slate-500 dark:text-slate-400 font-medium">Alamat Lengkap</span>
                       <span className="text-slate-400">:</span>
-                      <span className="text-slate-800">{selectedResident.address} {selectedResident.rtRw}</span>
+                      <span className="text-slate-800 dark:text-slate-100">{selectedResident.address} {selectedResident.rtRw}</span>
                     </div>
                   </div>
 
                   {/* Body HTML */}
                   <div 
-                    className="text-[11px] text-slate-800 text-justify leading-[1.15] mt-2 space-y-2"
+                    className="text-[11px] text-slate-800 dark:text-slate-100 text-justify leading-[1.15] mt-2 space-y-2"
                     dangerouslySetInnerHTML={{ __html: getTemplateContent() }}
                   />
 
                   {/* Signature block */}
                   <div className="mt-8 flex justify-end">
                     <div className="text-center w-[200px] text-[11px]">
-                      <p className="m-0 text-slate-600">{selectedResident.village.replace(/desa|kelurahan/gi, '').trim()}, {new Date().getDate()} {['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][new Date().getMonth()]} {new Date().getFullYear()}</p>
-                      <p className="font-bold m-0 mt-0.5 mb-12 text-slate-800">{dynamicKadesRole} {selectedResident.village}</p>
+                      <p className="m-0 text-slate-600 dark:text-slate-400">{selectedResident.village.replace(/desa|kelurahan/gi, '').trim()}, {new Date().getDate()} {['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][new Date().getMonth()]} {new Date().getFullYear()}</p>
+                      <p className="font-bold m-0 mt-0.5 mb-12 text-slate-800 dark:text-slate-100">{dynamicKadesRole} {selectedResident.village}</p>
                       <p className="font-bold uppercase text-[11px] m-0 tracking-wide border-b border-slate-900 inline-block pb-0.5">{dynamicKadesName.toUpperCase()}</p>
                       {dynamicKadesNip && dynamicKadesNip !== '-' && (
                         <p className="text-[9px] text-slate-400 font-mono mt-0.5">NIP. {dynamicKadesNip}</p>
@@ -770,18 +770,18 @@ export default function AdminSuratMasterTemplate() {
       </div>
 
       {/* Under the fold: Technical details & Code demonstration */}
-      <div className="bg-white rounded-[32px] border border-slate-100 p-8 space-y-6">
+      <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 p-8 space-y-6">
         <div>
-          <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <Code className="text-indigo-600" />
             Centralized Print Engine Blueprint Code
           </h3>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Penjelasan arsitektur kode program di balik validitas pencetakan satu pintu (Centralized Print Service).
           </p>
         </div>
 
-        <div className="flex border-b border-slate-100">
+        <div className="flex border-b border-slate-100 dark:border-slate-800">
           <button
             onClick={() => setActiveCodeTab('all')}
             className={`px-4 py-2 font-bold text-xs border-b-2 transition-all ${

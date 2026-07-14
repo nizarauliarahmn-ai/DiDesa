@@ -120,14 +120,14 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
       <div className="h-[55px] px-4 md:px-8 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center gap-3 transition-transform duration-500 group-hover:translate-y-[-2px]">
           <div 
-            className="w-5 h-5 rounded flex items-center justify-center text-white font-black text-[8px] shadow-sm shrink-0"
+            className="w-5 h-5 rounded flex items-center justify-center text-white font-black text-[8px] shadow-sm dark:shadow-none shrink-0"
             style={{ backgroundColor: globalColor }}
           >
             {globalLogo ? <img src={globalLogo} className="w-3.5 h-3.5 object-contain" /> : globalName.charAt(0)}
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-[11px] font-black tracking-tight text-slate-800 uppercase">{globalName} Indonesia</span>
-            <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider hidden sm:inline">© {new Date().getFullYear()} • HAK CIPTA DILINDUNGI</span>
+            <span className="text-[11px] font-black tracking-tight text-slate-800 dark:text-slate-100 uppercase">{globalName} Indonesia</span>
+            <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider hidden sm:inline">© {new Date().getFullYear()} • HAK CIPTA DILINDUNGI</span>
           </div>
         </div>
 
@@ -143,7 +143,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
             const scrollContainer = document.querySelector('.overflow-y-auto');
             if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className={`text-[9px] font-black text-slate-500 hover:text-emerald-700 transition-all duration-300 uppercase tracking-widest flex items-center gap-1 ${isAtBottom ? 'opacity-100 translate-y-[-2px]' : 'opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-[-2px] group-hover:pointer-events-auto'}`}
+          className={`text-[9px] font-black text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-all duration-300 uppercase tracking-widest flex items-center gap-1 ${isAtBottom ? 'opacity-100 translate-y-[-2px]' : 'opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-[-2px] group-hover:pointer-events-auto'}`}
         >
           KEMBALI KE ATAS
         </button>
@@ -155,7 +155,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           
           {/* Info Section */}
           <div className="lg:col-span-3">
-            <p className="text-[10px] text-slate-600 font-bold leading-relaxed opacity-80 text-center sm:text-left">
+            <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed opacity-80 text-center sm:text-left">
               Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.
             </p>
           </div>
@@ -164,10 +164,10 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           <div className="lg:col-span-3 flex flex-col gap-1.5 items-center sm:items-start">
             <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Kontak Hubungi</h4>
             <div className="flex flex-col gap-1 items-center sm:items-start">
-              <a href="mailto:info@didesa.id" className="flex items-center gap-2 text-[11px] text-slate-700 hover:text-emerald-700 font-bold transition-colors">
+              <a href="mailto:info@didesa.id" className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
                 <Mail className="w-3 h-3 text-emerald-600" /> info@didesa.id
               </a>
-              <a href="tel:+6281346867519" className="flex items-center gap-2 text-[11px] text-slate-700 hover:text-emerald-700 font-bold transition-colors">
+              <a href="tel:+6281346867519" className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
                 <Phone className="w-3 h-3 text-emerald-600" /> +62 813-4686-7519
               </a>
               <button 
@@ -182,7 +182,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
             {/* Saran Fitur Modal */}
             {isModalOpen && createPortal(
               <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-                <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
+                <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
                   <div className="bg-emerald-700 p-6 text-white flex justify-between items-center">
                     <div>
                        <h3 className="text-xl font-bold">Kirim Saran & Kritik</h3>
@@ -194,24 +194,24 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                    </div>
                    <form onSubmit={handleSubmitFeedback} className="p-6 space-y-4">
                      <div className="space-y-2">
-                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nama Anda (Opsional)</label>
+                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama Anda (Opsional)</label>
                        <input 
                          type="text" 
                          value={feedbackForm.nama}
                          onChange={e => setFeedbackForm({...feedbackForm, nama: e.target.value})}
-                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all"
+                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all"
                          placeholder="Nama Anda..."
                        />
                      </div>
                      <div className="space-y-2">
-                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Kategori</label>
+                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Kategori</label>
                        <div className="grid grid-cols-3 gap-2">
                          {(['Saran', 'Kritik', 'Bug'] as const).map(cat => (
                            <button
                              key={cat}
                              type="button"
                              onClick={() => setFeedbackForm({...feedbackForm, kategori: cat})}
-                             className={`py-2 rounded-lg text-[10px] font-bold uppercase transition-all border ${feedbackForm.kategori === cat ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200' : 'bg-white border-slate-200 text-slate-600 hover:border-emerald-200'}`}
+                             className={`py-2 rounded-lg text-[10px] font-bold uppercase transition-all border ${feedbackForm.kategori === cat ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg dark:shadow-none shadow-emerald-200' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-emerald-200'}`}
                            >
                              {cat}
                            </button>
@@ -219,13 +219,13 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                        </div>
                      </div>
                      <div className="space-y-2">
-                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pesan</label>
+                       <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pesan</label>
                        <textarea 
                          required
                          value={feedbackForm.pesan}
                          onChange={e => setFeedbackForm({...feedbackForm, pesan: e.target.value})}
                          rows={4}
-                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all resize-none"
+                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all resize-none"
                          placeholder="Tuliskan saran, kritik, atau bug yang Anda temukan di sini..."
                        />
                      </div>
@@ -251,13 +251,13 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
              {/* Success Modal */}
              {isSuccessModalOpen && createPortal(
                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-                 <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-sm overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
+                 <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-sm overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
                    <div className="p-8 text-center flex flex-col items-center">
                      <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
                        <Send className="w-8 h-8 text-emerald-600" />
                      </div>
-                     <h3 className="text-2xl font-black text-slate-800 mb-2">Terima Kasih!</h3>
-                     <p className="text-sm text-slate-500 font-medium leading-relaxed mb-8">
+                     <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mb-2">Terima Kasih!</h3>
+                     <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-8">
                        Saran dan masukan Anda sangat berharga untuk membuat <strong>{globalName}</strong> menjadi lebih baik lagi di masa depan.
                      </p>
                      <button 
@@ -275,7 +275,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
 
           {/* Affiliator Card */}
           <div className="lg:col-span-4">
-            <div className="bg-emerald-700/80 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-600/30 shadow-lg shadow-emerald-900/5 group/card relative overflow-hidden">
+            <div className="bg-emerald-700/80 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-600/30 shadow-lg dark:shadow-none shadow-emerald-900/5 group/card relative overflow-hidden">
               <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full -mr-8 -mt-8 transition-transform group-hover/card:scale-150 duration-700" />
               <div className="flex-1 space-y-0.5 relative z-10">
                 <h4 className="text-[9px] font-black text-emerald-100 uppercase tracking-widest leading-none">AFFILIATOR</h4>
@@ -287,7 +287,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                 href="https://wa.me/6281346867519?text=Affiliator" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="whitespace-nowrap px-4 py-1.5 bg-white text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 transition-all shadow-sm active:scale-95 relative z-10"
+                className="whitespace-nowrap px-4 py-1.5 bg-white dark:bg-slate-900 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 transition-all shadow-sm dark:shadow-none active:scale-95 relative z-10"
               >
                 GABUNG
               </a>
@@ -296,10 +296,10 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
 
           {/* Social Icons */}
           <div className="lg:col-span-2 flex justify-center lg:justify-end gap-2">
-            <a href="https://instagram.com/didesa.id" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 hover:text-pink-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm">
+            <a href="https://instagram.com/didesa.id" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-pink-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none">
               <Instagram className="w-4 h-4" />
             </a>
-            <a href="https://tiktok.com/@didesa.id" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 hover:text-slate-900 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm">
+            <a href="https://tiktok.com/@didesa.id" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none">
               <Music className="w-4 h-4" />
             </a>
           </div>

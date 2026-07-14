@@ -298,7 +298,7 @@ export default function AdminSuratDashboard({
         </div>
         <p className={`font-bold uppercase text-xs m-0 decoration-1 ${nameUnderlineClass} ${textAlignClass}`}>{namaPejabat}</p>
         {nipPejabat && nipPejabat !== '-' && nipPejabat !== '' && (
-          <p className={`text-[10px] font-mono mt-0.5 text-gray-700 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
+          <p className={`text-[10px] font-mono mt-0.5 text-gray-700 dark:text-slate-300 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
         )}
       </div>
     );
@@ -353,10 +353,10 @@ export default function AdminSuratDashboard({
             <div className={`w-[230px] ${textAlignClass}`}>
               <p className={`font-bold text-xs m-0 decoration-1 ${nameUnderlineClass} ${textAlignClass}`}>{sig.sigLeftName}</p>
               {sig.sigLeftPangkat && (
-                <p className={`text-[11px] mt-0.5 text-gray-800 m-0 ${textAlignClass}`}>{sig.sigLeftPangkat}</p>
+                <p className={`text-[11px] mt-0.5 text-gray-800 dark:text-slate-100 m-0 ${textAlignClass}`}>{sig.sigLeftPangkat}</p>
               )}
               {sig.sigLeftNip && sig.sigLeftNip !== '-' && (
-                <p className={`text-[11px] mt-0.5 text-gray-800 m-0 ${textAlignClass}`}>NIP : {sig.sigLeftNip}</p>
+                <p className={`text-[11px] mt-0.5 text-gray-800 dark:text-slate-100 m-0 ${textAlignClass}`}>NIP : {sig.sigLeftNip}</p>
               )}
             </div>
 
@@ -364,7 +364,7 @@ export default function AdminSuratDashboard({
             <div className={`w-[230px] ${textAlignClass}`}>
               <p className={`font-bold uppercase text-xs m-0 decoration-1 ${nameUnderlineClass} ${textAlignClass}`}>{namaPejabat}</p>
               {nipPejabat && nipPejabat !== '-' && nipPejabat !== '' && (
-                <p className={`text-[10px] font-mono mt-0.5 text-gray-700 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
+                <p className={`text-[10px] font-mono mt-0.5 text-gray-700 dark:text-slate-300 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
               )}
             </div>
           </div>
@@ -1039,27 +1039,27 @@ export default function AdminSuratDashboard({
       {/* Header */}
       <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Arsip Surat</h2>
-          <p className="text-sm text-gray-500 mt-1">Kelola dan lihat riwayat surat yang telah diterbitkan.</p>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Arsip Surat</h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Kelola dan lihat riwayat surat yang telah diterbitkan.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button 
             onClick={handleExportExcel}
-            className="bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 transition-all flex items-center gap-2"
+            className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-gray-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
             Excel
           </button>
           <button 
             onClick={() => setShowPrintModal(true)}
-            className="bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 transition-all flex items-center gap-2"
+            className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-gray-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2"
           >
             <Printer className="w-4 h-4" />
             Cetak Daftar
           </button>
           <button 
             onClick={onBuatSurat}
-            className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-emerald-800 transition-all flex items-center gap-2"
+            className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Buat Surat Baru
@@ -1068,14 +1068,14 @@ export default function AdminSuratDashboard({
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="relative w-full md:w-96">
           <input 
             type="text" 
             placeholder="Cari nomor surat atau nama..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm outline-none transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm outline-none transition-all"
           />
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
         </div>
@@ -1083,7 +1083,7 @@ export default function AdminSuratDashboard({
           <select 
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 flex-1 md:flex-none cursor-pointer"
+            className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 flex-1 md:flex-none cursor-pointer"
           >
             <option value="">Semua Jenis Surat</option>
             <option value="domisili">Domisili</option>
@@ -1100,7 +1100,7 @@ export default function AdminSuratDashboard({
             className={`p-2.5 border rounded-xl transition-colors ${
               searchQuery || selectedType
                 ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                : 'border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'
+                : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 bg-white dark:bg-slate-900'
             }`}
             title="Reset Pencarian & Filter"
           >
@@ -1129,7 +1129,7 @@ export default function AdminSuratDashboard({
           </div>
           <button 
             onClick={() => setShowBulkDeleteModal(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm dark:shadow-none transition-all"
           >
             <Trash2 className="w-3.5 h-3.5" />
             Hapus Masal
@@ -1139,23 +1139,23 @@ export default function AdminSuratDashboard({
 
       {showPrintModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-bold text-gray-900">Cetak Daftar Arsip</h3>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="font-bold text-gray-900 dark:text-white">Cetak Daftar Arsip</h3>
               <button onClick={() => setShowPrintModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="text-sm font-bold text-gray-700 block mb-1.5">Dari Tanggal</label>
-                <input type="date" value={printStartDate} onChange={(e) => setPrintStartDate(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" />
+                <label className="text-sm font-bold text-gray-700 dark:text-slate-300 block mb-1.5">Dari Tanggal</label>
+                <input type="date" value={printStartDate} onChange={(e) => setPrintStartDate(e.target.value)} className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
-                <label className="text-sm font-bold text-gray-700 block mb-1.5">Sampai Tanggal</label>
-                <input type="date" value={printEndDate} onChange={(e) => setPrintEndDate(e.target.value)} className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" />
+                <label className="text-sm font-bold text-gray-700 dark:text-slate-300 block mb-1.5">Sampai Tanggal</label>
+                <input type="date" value={printEndDate} onChange={(e) => setPrintEndDate(e.target.value)} className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
-              <p className="text-xs text-gray-500">* Kosongkan tanggal jika ingin mencetak semua data.</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400">* Kosongkan tanggal jika ingin mencetak semua data.</p>
             </div>
 
             {/* Panduan Cetak Singkat */}
@@ -1186,9 +1186,9 @@ export default function AdminSuratDashboard({
               </div>
             </div>
 
-            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3">
-              <button onClick={() => setShowPrintModal(false)} className="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-xl">Batal</button>
-              <button onClick={handlePrintAll} className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl flex items-center gap-2 shadow-sm">
+            <div className="px-6 py-4 bg-gray-50 dark:bg-slate-800 flex justify-end gap-3">
+              <button onClick={() => setShowPrintModal(false)} className="px-4 py-2 text-gray-600 dark:text-slate-400 font-bold hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl">Batal</button>
+              <button onClick={handlePrintAll} className="px-4 py-2 bg-emerald-600 text-white font-bold rounded-xl flex items-center gap-2 shadow-sm dark:shadow-none">
                 <Printer className="w-4 h-4" /> Cetak Sekarang
               </button>
             </div>
@@ -1198,7 +1198,7 @@ export default function AdminSuratDashboard({
       )}
 
       {/* Table */}
-      <div ref={componentRef} className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden ${isPrintingTable ? 'printable-table-area' : ''}`}>
+      <div ref={componentRef} className={`bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden ${isPrintingTable ? 'printable-table-area' : ''}`}>
         <div className={`overflow-x-auto ${isPrintingTable ? 'printable-table-content' : ''}`}>
           {/* Official Kop Surat on printed list */}
           {isPrintingTable && (
@@ -1206,21 +1206,21 @@ export default function AdminSuratDashboard({
               <h1 className="text-xl font-black tracking-wider uppercase text-black">
                 DAFTAR NOMOR SURAT
               </h1>
-              <p className="text-sm font-bold uppercase tracking-wide text-gray-800 mt-1">
+              <p className="text-sm font-bold uppercase tracking-wide text-gray-800 dark:text-slate-100 mt-1">
                 DESA {kopSettings.desa.toUpperCase()}
               </p>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600 mt-0.5 border-b-2 border-black pb-4 inline-block w-full">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-slate-400 mt-0.5 border-b-2 border-black pb-4 inline-block w-full">
                 KECAMATAN {kopSettings.kecamatan.toUpperCase()}
               </p>
             </div>
           )}
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-gray-50/50 border-b border-gray-100">
+              <tr className="bg-gray-50/50 border-b border-gray-100 dark:border-slate-800">
                 <th className="px-6 py-4 w-12 text-center print:hidden">
                   <input 
                     type="checkbox"
-                    className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-4 w-4"
+                    className="rounded border-gray-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-4 w-4"
                     checked={filteredSurat.length > 0 && filteredSurat.every(s => selectedSuratIds.includes(s.id))}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -1233,12 +1233,12 @@ export default function AdminSuratDashboard({
                     }}
                   />
                 </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Nomor Surat</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Jenis Surat</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Pemohon</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Keperluan</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center print:hidden">Aksi</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Surat</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pemohon</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keperluan</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center print:hidden">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -1246,11 +1246,11 @@ export default function AdminSuratDashboard({
                 filteredSurat.map((surat) => {
                   const isCancelled = surat.status === 'Dibatalkan';
                   return (
-                  <tr key={surat.id} className={`hover:bg-gray-50/80 transition-colors group ${isCancelled ? 'opacity-70 bg-gray-50' : ''}`}>
+                  <tr key={surat.id} className={`hover:bg-gray-50/80 transition-colors group ${isCancelled ? 'opacity-70 bg-gray-50 dark:bg-slate-800' : ''}`}>
                     <td className="px-6 py-4 print:hidden text-center">
                       <input 
                         type="checkbox"
-                        className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-4 w-4"
+                        className="rounded border-gray-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-4 w-4"
                         checked={selectedSuratIds.includes(surat.id)}
                         onChange={() => {
                           setSelectedSuratIds(prev => 
@@ -1262,8 +1262,8 @@ export default function AdminSuratDashboard({
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition-colors flex items-center gap-2">
-                        <span className={isCancelled ? 'line-through text-gray-500' : ''}>{surat.nomor}</span>
+                      <span className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
+                        <span className={isCancelled ? 'line-through text-gray-500 dark:text-slate-400' : ''}>{surat.nomor}</span>
                         {isCancelled && (
                           <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">DIBATALKAN</span>
                         )}
@@ -1272,16 +1272,16 @@ export default function AdminSuratDashboard({
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <FileText className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm font-medium text-gray-700">{getFullLetterName(surat.jenis)}</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300">{getFullLetterName(surat.jenis)}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-sm font-medium text-gray-900">{surat.nama}</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{surat.nama}</span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700 max-w-[200px] truncate" title={surat.keperluan || '-'}>
+                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-slate-300 max-w-[200px] truncate" title={surat.keperluan || '-'}>
                       {surat.keperluan || '-'}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
+                    <td className="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">
                       {surat.tanggal}
                     </td>
                     <td className="px-6 py-4 print:hidden text-center">
@@ -1326,7 +1326,7 @@ export default function AdminSuratDashboard({
                 );})
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-slate-400">
                     Tidak ada data surat yang sesuai dengan pencarian atau filter.
                   </td>
                 </tr>
@@ -1346,16 +1346,16 @@ export default function AdminSuratDashboard({
       {/* Detail Viewer Modal */}
       {selectedSurat && !isPrintingSingle && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-gray-100 rounded-2xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-200">
+          <div className="bg-gray-100 dark:bg-slate-800 rounded-2xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-200 dark:border-slate-700">
             {/* Header */}
-            <div className="bg-white px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-gray-900 text-lg">Detail Arsip Surat</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Melihat dokumen resmi yang telah diterbitkan</p>
+                <h3 className="font-bold text-gray-900 dark:text-white text-lg">Detail Arsip Surat</h3>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Melihat dokumen resmi yang telah diterbitkan</p>
               </div>
               <button 
                 onClick={() => setSelectedSurat(null)}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1366,20 +1366,20 @@ export default function AdminSuratDashboard({
               {/* Paper Preview Area */}
               <div className="flex-1 bg-gray-200/80 p-6 overflow-auto no-scrollbar flex justify-center items-start min-h-[400px] relative">
                 {/* Floating Document Zoom Controls */}
-                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm border border-gray-200 shadow-lg rounded-xl p-1.5 flex items-center gap-1 z-30">
+                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm border border-gray-200 dark:border-slate-700 shadow-lg dark:shadow-none rounded-xl p-1.5 flex items-center gap-1 z-30">
                   <button 
                     onClick={() => setZoomLevel(prev => Math.max(0.3, prev - 0.1))} 
-                    className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-emerald-700 transition-colors"
+                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors"
                     title="Perkecil (Zoom Out)"
                   >
                     <ZoomOut className="w-4.5 h-4.5" />
                   </button>
-                  <span className="text-xs font-bold text-gray-700 min-w-[50px] text-center">
+                  <span className="text-xs font-bold text-gray-700 dark:text-slate-300 min-w-[50px] text-center">
                     {Math.round(zoomLevel * 100)}%
                   </span>
                   <button 
                     onClick={() => setZoomLevel(prev => Math.min(1.5, prev + 0.1))} 
-                    className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-emerald-700 transition-colors"
+                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors"
                     title="Perbesar (Zoom In)"
                   >
                     <ZoomIn className="w-4.5 h-4.5" />
@@ -1387,14 +1387,14 @@ export default function AdminSuratDashboard({
                   <div className="w-px h-4 bg-gray-200 mx-1"></div>
                   <button 
                     onClick={() => setZoomLevel(0.65)} 
-                    className="px-2 py-1 hover:bg-gray-100 rounded-lg text-[10px] font-bold text-gray-600 hover:text-emerald-700 transition-colors"
+                    className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-[10px] font-bold text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors"
                     title="Sesuaikan Halaman (Fit)"
                   >
                     Fit
                   </button>
                   <button 
                     onClick={() => setZoomLevel(1.0)} 
-                    className="px-2 py-1 hover:bg-gray-100 rounded-lg text-[10px] font-bold text-gray-600 hover:text-emerald-700 transition-colors"
+                    className="px-2 py-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-[10px] font-bold text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors"
                     title="Ukuran Asli (100%)"
                   >
                     100%
@@ -1402,7 +1402,7 @@ export default function AdminSuratDashboard({
                 </div>
 
                 <div 
-                  className="bg-white shadow-lg border border-gray-300 p-12 text-black transition-all shrink-0 origin-top relative"
+                  className="bg-white dark:bg-slate-900 shadow-lg dark:shadow-none border border-gray-300 dark:border-slate-600 p-12 text-black transition-all shrink-0 origin-top relative"
                   style={{
                     width: '794px',
                     minHeight: '1123px',
@@ -1424,18 +1424,18 @@ export default function AdminSuratDashboard({
               </div>
 
               {/* Sidebar Controls */}
-              <div className="w-full md:w-64 bg-white p-6 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col justify-between">
+              <div className="w-full md:w-64 bg-white dark:bg-slate-900 p-6 border-t md:border-t-0 md:border-l border-gray-200 dark:border-slate-700 flex flex-col justify-between">
                 <div className="space-y-6">
                   <div>
                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Metadata Surat</h4>
-                    <div className="space-y-3 text-sm text-gray-700">
+                    <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
                       <div>
                         <span className="text-gray-400 block text-xs">Nomor Surat</span>
-                        <span className="font-mono font-bold text-gray-900 break-all">{selectedSurat.nomor}</span>
+                        <span className="font-mono font-bold text-gray-900 dark:text-white break-all">{selectedSurat.nomor}</span>
                       </div>
                       <div>
                         <span className="text-gray-400 block text-xs">Jenis Surat</span>
-                        <span className="font-semibold text-gray-900">{getFullLetterName(selectedSurat.jenis)}</span>
+                        <span className="font-semibold text-gray-900 dark:text-white">{getFullLetterName(selectedSurat.jenis)}</span>
                       </div>
                       <div>
                         <span className="text-gray-400 block text-xs">Pemohon</span>
@@ -1444,12 +1444,12 @@ export default function AdminSuratDashboard({
                       {selectedSurat.nik && (
                         <div>
                           <span className="text-gray-400 block text-xs">NIK Pemohon</span>
-                          <span className="font-mono text-gray-900">{selectedSurat.nik}</span>
+                          <span className="font-mono text-gray-900 dark:text-white">{selectedSurat.nik}</span>
                         </div>
                       )}
                       <div>
                         <span className="text-gray-400 block text-xs">Tanggal Terbit</span>
-                        <span className="text-gray-900">{selectedSurat.tanggal}</span>
+                        <span className="text-gray-900 dark:text-white">{selectedSurat.tanggal}</span>
                       </div>
                     </div>
                   </div>
@@ -1459,7 +1459,7 @@ export default function AdminSuratDashboard({
                   {!selectedSurat.status || selectedSurat.status !== 'Dibatalkan' ? (
                     <button 
                       onClick={() => triggerSinglePrint(selectedSurat)}
-                      className="w-full flex items-center justify-center gap-2 bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-emerald-800 transition-all"
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all"
                     >
                       <Printer className="w-4 h-4" /> Cetak Surat
                     </button>
@@ -1484,26 +1484,26 @@ export default function AdminSuratDashboard({
       {/* Cancel Confirmation Modal */}
       {suratToCancel && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 text-center space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-slate-800 text-center space-y-4">
             <div className="mx-auto w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-orange-600">
               <Ban className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">Konfirmasi Batalkan Surat</h3>
-              <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">Konfirmasi Batalkan Surat</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                 Apakah Anda yakin ingin membatalkan surat nomor <span className="font-mono font-bold text-orange-600 break-all">{suratToCancel.nomor}</span>? Surat akan tetap tercatat di arsip namun tidak dapat diedit atau dicetak lagi.
               </p>
             </div>
             <div className="flex gap-3">
               <button 
                 onClick={() => setSuratToCancel(null)}
-                className="flex-1 py-2.5 border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-bold text-gray-700 transition-all"
+                className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-gray-700 dark:text-slate-300 transition-all"
               >
                 Kembali
               </button>
               <button 
                 onClick={handleCancelSurat}
-                className="flex-1 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
+                className="flex-1 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all"
               >
                 Ya, Batalkan
               </button>
@@ -1515,26 +1515,26 @@ export default function AdminSuratDashboard({
       {/* Delete Confirmation Modal */}
       {suratToDelete && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 text-center space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-slate-800 text-center space-y-4">
             <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
               <Trash2 className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">Konfirmasi Hapus Arsip Surat</h3>
-              <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">Konfirmasi Hapus Arsip Surat</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                 Apakah Anda yakin ingin menghapus arsip surat nomor <span className="font-mono font-bold text-red-600 break-all">{suratToDelete.nomor}</span>? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
               </p>
             </div>
             <div className="flex gap-3">
               <button 
                 onClick={() => setSuratToDelete(null)}
-                className="flex-1 py-2.5 border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-bold text-gray-700 transition-all"
+                className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-gray-700 dark:text-slate-300 transition-all"
               >
                 Batal
               </button>
               <button 
                 onClick={handleDeleteSurat}
-                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all"
               >
                 Ya, Hapus
               </button>
@@ -1546,26 +1546,26 @@ export default function AdminSuratDashboard({
       {/* Bulk Delete Confirmation Modal */}
       {showBulkDeleteModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 text-center space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 dark:border-slate-800 text-center space-y-4">
             <div className="mx-auto w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
               <Trash2 className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">Konfirmasi Hapus Masal</h3>
-              <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+              <h3 className="text-base font-bold text-gray-900 dark:text-white">Konfirmasi Hapus Masal</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
                 Apakah Anda yakin ingin menghapus <span className="font-bold text-red-600">{selectedSuratIds.length}</span> arsip surat yang terpilih? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
               </p>
             </div>
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowBulkDeleteModal(false)}
-                className="flex-1 py-2.5 border border-gray-200 hover:bg-gray-50 rounded-xl text-sm font-bold text-gray-700 transition-all"
+                className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold text-gray-700 dark:text-slate-300 transition-all"
               >
                 Batal
               </button>
               <button 
                 onClick={handleBulkDelete}
-                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all"
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all"
               >
                 Ya, Hapus Masal
               </button>
@@ -1576,7 +1576,7 @@ export default function AdminSuratDashboard({
 
       {/* Hidden print container for printing a single letter in full resolution */}
       {selectedSurat && (
-        <div id="single-letter-print-container-wrapper" className="hidden print:block bg-white text-black p-12 printable-area" style={{ fontFamily: 'Arial, Helvetica, sans-serif', width: '794px', minHeight: '1123px' }}>
+        <div id="single-letter-print-container-wrapper" className="hidden print:block bg-white dark:bg-slate-900 text-black p-12 printable-area" style={{ fontFamily: 'Arial, Helvetica, sans-serif', width: '794px', minHeight: '1123px' }}>
           {renderLetterContent(selectedSurat, activeResident)}
           {isPrintingSingle && (
             <div 

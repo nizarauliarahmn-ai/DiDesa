@@ -29,7 +29,7 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
   }, []);
 
   return (
-    <section className="relative rounded-3xl overflow-hidden bg-emerald-950/80 dark:bg-slate-950/85 backdrop-blur-md p-8 md:p-10 lg:p-12 shadow-sm border border-emerald-900/10 dark:border-slate-800/40 min-h-[320px] flex items-center">
+    <section className="relative rounded-3xl overflow-hidden bg-emerald-950/80 dark:bg-slate-950/85 backdrop-blur-md p-8 md:p-10 lg:p-12 shadow-sm dark:shadow-none border border-emerald-900/10 dark:border-slate-800/40 min-h-[320px] flex items-center">
       <div 
         className="absolute inset-0 z-0 bg-cover bg-no-repeat transition-all duration-300" 
         style={{ 
@@ -58,7 +58,7 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
         <div className="flex flex-wrap gap-4">
           <button 
             onClick={() => onTabChange && onTabChange('ai_assistant')}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95 cursor-pointer border border-indigo-500 flex items-center gap-2 group"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl font-bold text-sm transition-all shadow-sm dark:shadow-none active:scale-95 cursor-pointer border border-indigo-500 flex items-center gap-2 group"
           >
             <Sparkles className="w-4 h-4 text-indigo-200 group-hover:animate-pulse" />
             <span>Tanya Asisten AI</span>
@@ -66,7 +66,7 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
           </button>
           <button 
             onClick={() => onTabChange && onTabChange('layanan_mandiri')}
-            className="bg-white text-emerald-800 px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all shadow-sm active:scale-95 cursor-pointer"
+            className="bg-white dark:bg-slate-900 text-emerald-800 px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all shadow-sm dark:shadow-none active:scale-95 cursor-pointer"
           >
             Layanan Mandiri
           </button>

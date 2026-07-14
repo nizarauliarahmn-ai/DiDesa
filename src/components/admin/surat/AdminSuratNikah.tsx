@@ -472,7 +472,7 @@ export default function AdminSuratNikah({
               </head>
               <body>
                 <div class="page">
-                  <div class="printable-area bg-white text-black">
+                  <div class="printable-area bg-white dark:bg-slate-900 text-black">
                     ${content}
                   </div>
                 </div>
@@ -805,11 +805,11 @@ export default function AdminSuratNikah({
 
   if (showRiwayat) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-black">
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm dark:shadow-none border border-gray-200 dark:border-slate-700 p-8 text-black">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-xl font-bold text-slate-800">Riwayat Surat Nikah</h2>
-            <p className="text-sm text-slate-500">Riwayat ini tersimpan di browser Anda.</p>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Riwayat Surat Nikah</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Riwayat ini tersimpan di browser Anda.</p>
           </div>
           <div className="flex gap-2">
             <button 
@@ -833,30 +833,30 @@ export default function AdminSuratNikah({
         </div>
 
         {riwayat.length === 0 ? (
-          <div className="py-12 text-center text-slate-500 border-2 border-dashed border-slate-200 rounded-xl">
+          <div className="py-12 text-center text-slate-500 dark:text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
             Belum ada riwayat tersimpan.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="p-3 text-xs font-bold text-slate-600 uppercase">Calon Suami</th>
-                  <th className="p-3 text-xs font-bold text-slate-600 uppercase">Calon Istri</th>
-                  <th className="p-3 text-xs font-bold text-slate-600 uppercase">Nomor Surat</th>
-                  <th className="p-3 text-xs font-bold text-slate-600 uppercase">Tgl Akad</th>
-                  <th className="p-3 text-xs font-bold text-slate-600 uppercase">Disimpan</th>
-                  <th className="p-3 text-xs font-bold text-slate-600 uppercase">Aksi</th>
+                <tr className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+                  <th className="p-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Calon Suami</th>
+                  <th className="p-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Calon Istri</th>
+                  <th className="p-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Nomor Surat</th>
+                  <th className="p-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Tgl Akad</th>
+                  <th className="p-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Disimpan</th>
+                  <th className="p-3 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {riwayat.map(r => (
                   <tr key={r.id} className="hover:bg-slate-50/50">
-                    <td className="p-3 text-sm text-slate-700">{r.data.namaSuami || '-'}</td>
-                    <td className="p-3 text-sm text-slate-700">{r.data.namaIstri || '-'}</td>
-                    <td className="p-3 text-sm text-slate-700">{r.data.nomorSurat || '-'}</td>
-                    <td className="p-3 text-sm text-slate-700">{r.data.tanggalMenikah ? fmtTgl(r.data.tanggalMenikah) : '-'}</td>
-                    <td className="p-3 text-sm text-slate-700">{new Date(r.savedAt).toLocaleDateString('id-ID')}</td>
+                    <td className="p-3 text-sm text-slate-700 dark:text-slate-300">{r.data.namaSuami || '-'}</td>
+                    <td className="p-3 text-sm text-slate-700 dark:text-slate-300">{r.data.namaIstri || '-'}</td>
+                    <td className="p-3 text-sm text-slate-700 dark:text-slate-300">{r.data.nomorSurat || '-'}</td>
+                    <td className="p-3 text-sm text-slate-700 dark:text-slate-300">{r.data.tanggalMenikah ? fmtTgl(r.data.tanggalMenikah) : '-'}</td>
+                    <td className="p-3 text-sm text-slate-700 dark:text-slate-300">{new Date(r.savedAt).toLocaleDateString('id-ID')}</td>
                     <td className="p-3 text-sm flex gap-2">
                       <button 
                         onClick={() => {
@@ -890,7 +890,7 @@ export default function AdminSuratNikah({
   }
 
   return (
-    <div className="w-full bg-white min-h-screen text-slate-900 pb-20 print:bg-white print:pb-0">
+    <div className="w-full bg-white dark:bg-slate-900 min-h-screen text-slate-900 dark:text-white pb-20 print:bg-white print:pb-0">
       {/* Dedicated Print Block */}
       <div 
         className="hidden print:block printable-area" 
@@ -918,17 +918,17 @@ export default function AdminSuratNikah({
       </div>
 
       {/* Header - Hidden on Print */}
-      <div className="print:hidden px-8 pt-4 pb-3 bg-white/95 backdrop-blur-sm border-b border-slate-100 sticky top-16 z-30 shadow-sm">
+      <div className="print:hidden px-8 pt-4 pb-3 bg-white/95 backdrop-blur-sm border-b border-slate-100 dark:border-slate-800 sticky top-16 z-30 shadow-sm dark:shadow-none">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-4">
             <button 
               onClick={onBack}
-              className="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 transition-colors"
+              className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-200 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight">Surat Nikah</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Surat Nikah</h1>
               <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Model N1 - N4 & Pengantar</p>
             </div>
           </div>
@@ -946,11 +946,11 @@ export default function AdminSuratNikah({
                 onClick={() => setStep(s.n)}
                 className={`flex-none flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-colors
                   ${isActive ? 'bg-emerald-600 text-white border-emerald-600' : 
-                    done ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}
+                    done ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}
                 `}
               >
                 <span className={`w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold
-                  ${isActive ? 'bg-white/25 text-white' : done ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500'}
+                  ${isActive ? 'bg-white/25 text-white' : done ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}
                 `}>
                   {done ? '✓' : s.n}
                 </span>
@@ -964,13 +964,13 @@ export default function AdminSuratNikah({
       {/* Form Area - Hidden on Print */}
       <div className="print:hidden px-8 max-w-5xl mx-auto">
         {step === 1 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-1">1. Pilih Mempelai (Warga Desa)</h2>
-            <p className="text-sm text-slate-500 mb-6">Pilih salah satu calon mempelai yang merupakan warga desa kita.</p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">1. Pilih Mempelai (Warga Desa)</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Pilih salah satu calon mempelai yang merupakan warga desa kita.</p>
             
             <div className="space-y-6">
               <div className="relative">
-                <label className="text-xs font-bold text-slate-700 block mb-2">Cari Penduduk</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-2">Cari Penduduk</label>
                 <div className="flex gap-2">
                   <input 
                     type="text" 
@@ -983,7 +983,7 @@ export default function AdminSuratNikah({
                 <p className="text-[10px] text-emerald-700 font-medium mt-1.5">* Pencarian otomatis melengkapi biodata, alamat, KK, pendidikan, dan pekerjaan warga desa terpilih</p>
                 
                 {searchQuery.trim().length > 0 && (
-                  <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-64 overflow-y-auto">
+                  <div className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-64 overflow-y-auto">
                     {(() => {
                       const filtered = residents.filter(r => 
                         r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -993,7 +993,7 @@ export default function AdminSuratNikah({
                       if (filtered.length === 0) {
                         return (
                           <div className="p-8 text-center">
-                            <p className="text-sm text-slate-500 mb-4">Warga tidak ditemukan dalam database penduduk.</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Warga tidak ditemukan dalam database penduduk.</p>
                             <button 
                               onClick={() => {
                                 setFormData(prev => ({
@@ -1004,7 +1004,7 @@ export default function AdminSuratNikah({
                                 setStep(2);
                                 setSearchQuery('');
                               }}
-                              className="px-6 py-2 bg-emerald-700 text-white rounded-lg text-xs font-bold hover:bg-emerald-800 shadow-md shadow-emerald-100"
+                              className="px-6 py-2 bg-emerald-700 text-white rounded-lg text-xs font-bold hover:bg-emerald-800 shadow-md dark:shadow-none shadow-emerald-100"
                             >
                               Lanjutkan Isi Manual & Daftarkan Baru
                             </button>
@@ -1019,8 +1019,8 @@ export default function AdminSuratNikah({
                           className="w-full px-4 py-3 text-left hover:bg-emerald-50 border-b last:border-0 flex justify-between items-center"
                         >
                           <div>
-                            <p className="font-bold text-slate-900">{r.name}</p>
-                            <p className="text-xs text-slate-500">{r.nik} • {r.address}</p>
+                            <p className="font-bold text-slate-900 dark:text-white">{r.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{r.nik} • {r.address}</p>
                           </div>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${r.gender === 'Laki-laki' || r.gender === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
                             {r.gender}
@@ -1040,8 +1040,8 @@ export default function AdminSuratNikah({
                     </div>
                     <div>
                       <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Warga Desa Terpilih</p>
-                      <p className="font-bold text-slate-900">{formData.isWargaSuami ? formData.namaSuami : formData.namaIstri}</p>
-                      <p className="text-xs text-slate-500">{formData.isWargaSuami ? 'Calon Suami' : 'Calon Istri'}</p>
+                      <p className="font-bold text-slate-900 dark:text-white">{formData.isWargaSuami ? formData.namaSuami : formData.namaIstri}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{formData.isWargaSuami ? 'Calon Suami' : 'Calon Istri'}</p>
                     </div>
                   </div>
                   <button 
@@ -1055,17 +1055,17 @@ export default function AdminSuratNikah({
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">Nomor Surat</label>
-                  <input type="text" name="nomorSurat" value={formData.nomorSurat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-emerald-500" placeholder="SKN/.../..." />
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nomor Surat</label>
+                  <input type="text" name="nomorSurat" value={formData.nomorSurat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" placeholder="SKN/.../..." />
                   <p className="text-[10px] text-emerald-700 font-medium">* Nomor surat otomatis terisi oleh SistemDiDesa</p>
                 </div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tanggal Surat</label><input type="date" name="tanggalSurat" value={formData.tanggalSurat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-emerald-500" /></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tanggal Surat</label><input type="date" name="tanggalSurat" value={formData.tanggalSurat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" /></div>
                 
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tanggal Menikah</label><input type="date" name="tanggalMenikah" value={formData.tanggalMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-emerald-500" /></div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Jam Menikah</label><input type="time" name="jamMenikah" value={formData.jamMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-emerald-500" /></div>
-                <div className="col-span-2 space-y-1"><label className="text-xs font-bold text-slate-700">Tempat Akad</label><input type="text" name="tempatMenikah" value={formData.tempatMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-900" placeholder="Rumah / KUA / Lokasi Lainnya" /></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tanggal Menikah</label><input type="date" name="tanggalMenikah" value={formData.tanggalMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" /></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jam Menikah</label><input type="time" name="jamMenikah" value={formData.jamMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" /></div>
+                <div className="col-span-2 space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Akad</label><input type="text" name="tempatMenikah" value={formData.tempatMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-900" placeholder="Rumah / KUA / Lokasi Lainnya" /></div>
               </div>
             </div>
 
@@ -1082,158 +1082,158 @@ export default function AdminSuratNikah({
         )}
 
         {step === 2 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-1">2. Data Pasangan (Luar Desa)</h2>
-            <p className="text-sm text-slate-500 mb-6">Lengkapi data pasangan yang berasal dari luar desa.</p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">2. Data Pasangan (Luar Desa)</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Lengkapi data pasangan yang berasal dari luar desa.</p>
 
             <div className="grid grid-cols-2 gap-8">
               {/* KOLOM SUAMI */}
               <div className="space-y-4">
-                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${formData.isWargaSuami ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 border-slate-100'}`}>
+                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${formData.isWargaSuami ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-800'}`}>
                   Calon Suami {formData.isWargaSuami && <span className="text-[10px] bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800">WARGA KITA</span>}
                 </h3>
                 
                 <div className="space-y-3">
-                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Lengkap</label><input type="text" name="namaSuami" value={formData.namaSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase font-bold" /></div>
+                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label><input type="text" name="namaSuami" value={formData.namaSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase font-bold" /></div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">NIK</label>
-                      <input type="text" name="nikSuami" value={formData.nikSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" />
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                      <input type="text" name="nikSuami" value={formData.nikSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" />
                       <p className="text-[10px] text-emerald-700 font-medium">* 16 digit NIK calon suami</p>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">No. KK</label>
-                      <input type="text" name="noKKSuami" value={formData.noKKSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" />
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">No. KK</label>
+                      <input type="text" name="noKKSuami" value={formData.noKKSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" />
                       <p className="text-[10px] text-emerald-700 font-medium">* 16 digit KK calon suami</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tempat Lahir</label><input type="text" name="tempatLahirSuami" value={formData.tempatLahirSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tgl Lahir</label><input type="date" name="tanggalLahirSuami" value={formData.tanggalLahirSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirSuami" value={formData.tempatLahirSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tgl Lahir</label><input type="date" name="tanggalLahirSuami" value={formData.tanggalLahirSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Agama</label>
-                      <select name="agamaSuami" value={formData.agamaSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                      <select name="agamaSuami" value={formData.agamaSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         {RELIGION_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pekerjaan</label>
-                      <select name="pekerjaanSuami" value={formData.pekerjaanSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                      <select name="pekerjaanSuami" value={formData.pekerjaanSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         <option value="">Pilih...</option>{PEKERJAAN_OPTIONS.map(p => <option key={p}>{p}</option>)}
                       </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pendidikan</label>
-                      <select name="pendidikanSuami" value={formData.pendidikanSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pendidikan</label>
+                      <select name="pendidikanSuami" value={formData.pendidikanSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         <option value="">Pilih...</option>
                         {PENDIDIKAN_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Status</label>
-                      <select name="statusSuami" value={formData.statusSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Status</label>
+                      <select name="statusSuami" value={formData.statusSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         <option>Jejaka</option><option>Duda</option>
                       </select>
                     </div>
                   </div>
                   {formData.statusSuami === 'Duda' && (
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Istri Terdahulu</label><input type="text" name="namaIstriTerdahulu" value={formData.namaIstriTerdahulu} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Istri Terdahulu</label><input type="text" name="namaIstriTerdahulu" value={formData.namaIstriTerdahulu} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
                   )}
-                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Alamat Lengkap</label><input type="text" name="alamatSuami" value={formData.alamatSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label><input type="text" name="alamatSuami" value={formData.alamatSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                 </div>
               </div>
 
               {/* KOLOM ISTRI */}
               <div className="space-y-4">
-                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${!formData.isWargaSuami ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 border-slate-100'}`}>
+                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${!formData.isWargaSuami ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-800'}`}>
                   Calon Istri {!formData.isWargaSuami && <span className="text-[10px] bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800">WARGA KITA</span>}
                 </h3>
 
                 <div className="space-y-3">
-                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Lengkap</label><input type="text" name="namaIstri" value={formData.namaIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase font-bold" /></div>
+                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label><input type="text" name="namaIstri" value={formData.namaIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase font-bold" /></div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">NIK</label>
-                      <input type="text" name="nikIstri" value={formData.nikIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" />
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                      <input type="text" name="nikIstri" value={formData.nikIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" />
                       <p className="text-[10px] text-emerald-700 font-medium">* 16 digit NIK calon istri</p>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700">No. KK</label>
-                      <input type="text" name="noKKIstri" value={formData.noKKIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" />
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">No. KK</label>
+                      <input type="text" name="noKKIstri" value={formData.noKKIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" />
                       <p className="text-[10px] text-emerald-700 font-medium">* 16 digit KK calon istri</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tempat Lahir</label><input type="text" name="tempatLahirIstri" value={formData.tempatLahirIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tgl Lahir</label><input type="date" name="tanggalLahirIstri" value={formData.tanggalLahirIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirIstri" value={formData.tempatLahirIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tgl Lahir</label><input type="date" name="tanggalLahirIstri" value={formData.tanggalLahirIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Agama</label>
-                      <select name="agamaIstri" value={formData.agamaIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                      <select name="agamaIstri" value={formData.agamaIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         {RELIGION_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pekerjaan</label>
-                      <select name="pekerjaanIstri" value={formData.pekerjaanIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                      <select name="pekerjaanIstri" value={formData.pekerjaanIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         <option value="">Pilih...</option>{PEKERJAAN_OPTIONS.map(p => <option key={p}>{p}</option>)}
                       </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pendidikan</label>
-                      <select name="pendidikanIstri" value={formData.pendidikanIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pendidikan</label>
+                      <select name="pendidikanIstri" value={formData.pendidikanIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         <option value="">Pilih...</option>
                         {PENDIDIKAN_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Status</label>
-                      <select name="statusIstri" value={formData.statusIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Status</label>
+                      <select name="statusIstri" value={formData.statusIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                         <option>Perawan</option><option>Janda</option>
                       </select>
                     </div>
                   </div>
                   {formData.statusIstri === 'Janda' && (
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Suami Terdahulu</label><input type="text" name="namaSuamiTerdahulu" value={formData.namaSuamiTerdahulu} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Suami Terdahulu</label><input type="text" name="namaSuamiTerdahulu" value={formData.namaSuamiTerdahulu} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
                   )}
-                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Alamat Lengkap</label><input type="text" name="alamatIstri" value={formData.alamatIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                  <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label><input type="text" name="alamatIstri" value={formData.alamatIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 flex justify-between">
-              <button onClick={() => setStep(1)} className="px-6 py-2 border border-slate-300 text-slate-600 rounded-lg font-bold hover:bg-slate-50">&larr; Kembali</button>
+              <button onClick={() => setStep(1)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
               <button onClick={() => setStep(3)} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700">Lanjut &rarr;</button>
             </div>
           </div>
         )}
 
         {step === 3 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm overflow-hidden">
-            <h2 className="text-lg font-bold text-slate-800 mb-1">3. Data Orang Tua</h2>
-            <p className="text-sm text-slate-500 mb-6">Lengkapi data orang tua kedua calon mempelai.</p>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none overflow-hidden">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">3. Data Orang Tua</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Lengkapi data orang tua kedua calon mempelai.</p>
             
             <div className="grid grid-cols-2 gap-8 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
               {/* ORTU SUAMI */}
               <div className="space-y-6">
                 <h3 className="text-sm font-bold text-emerald-800 uppercase tracking-widest pb-2 border-b border-emerald-100">Orang Tua Suami</h3>
                 
-                <div className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ayah Suami</p>
                   <div className="grid grid-cols-1 gap-3">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Ayah</label><input type="text" name="namaAyahSuami" value={formData.namaAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase" /></div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">NIK Ayah</label><input type="text" name="nikAyahSuami" value={formData.nikAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ayah</label><input type="text" name="namaAyahSuami" value={formData.namaAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ayah</label><input type="text" name="nikAyahSuami" value={formData.nikAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tempat Lahir</label><input type="text" name="tempatLahirAyahSuami" value={formData.tempatLahirAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tgl Lahir</label><input type="date" name="tanggalLahirAyahSuami" value={formData.tanggalLahirAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirAyahSuami" value={formData.tempatLahirAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tgl Lahir</label><input type="date" name="tanggalLahirAyahSuami" value={formData.tanggalLahirAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Agama</label>
-                        <select name="agamaAyahSuami" value={formData.agamaAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                        <select name="agamaAyahSuami" value={formData.agamaAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           {RELIGION_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                       </div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pekerjaan</label>
-                        <select name="pekerjaanAyahSuami" value={formData.pekerjaanAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                        <select name="pekerjaanAyahSuami" value={formData.pekerjaanAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           <option value="">Pilih...</option>{PEKERJAAN_OPTIONS.map(p => <option key={p}>{p}</option>)}
                         </select>
                       </div>
@@ -1241,23 +1241,23 @@ export default function AdminSuratNikah({
                   </div>
                 </div>
 
-                <div className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ibu Suami</p>
                   <div className="grid grid-cols-1 gap-3">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Ibu</label><input type="text" name="namaIbuSuami" value={formData.namaIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase" /></div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">NIK Ibu</label><input type="text" name="nikIbuSuami" value={formData.nikIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ibu</label><input type="text" name="namaIbuSuami" value={formData.namaIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ibu</label><input type="text" name="nikIbuSuami" value={formData.nikIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tempat Lahir</label><input type="text" name="tempatLahirIbuSuami" value={formData.tempatLahirIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tgl Lahir</label><input type="date" name="tanggalLahirIbuSuami" value={formData.tanggalLahirIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirIbuSuami" value={formData.tempatLahirIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tgl Lahir</label><input type="date" name="tanggalLahirIbuSuami" value={formData.tanggalLahirIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Agama</label>
-                        <select name="agamaIbuSuami" value={formData.agamaIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                        <select name="agamaIbuSuami" value={formData.agamaIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           {RELIGION_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                       </div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pekerjaan</label>
-                        <select name="pekerjaanIbuSuami" value={formData.pekerjaanIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                        <select name="pekerjaanIbuSuami" value={formData.pekerjaanIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           <option value="">Pilih...</option>{PEKERJAAN_OPTIONS.map(p => <option key={p}>{p}</option>)}
                         </select>
                       </div>
@@ -1265,30 +1265,30 @@ export default function AdminSuratNikah({
                   </div>
                 </div>
 
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Alamat Orang Tua Suami</label><input type="text" name="alamatOrtuSuami" value={formData.alamatOrtuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Alamat Orang Tua Suami</label><input type="text" name="alamatOrtuSuami" value={formData.alamatOrtuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
               </div>
 
               {/* ORTU ISTRI */}
               <div className="space-y-6">
                 <h3 className="text-sm font-bold text-emerald-800 uppercase tracking-widest pb-2 border-b border-emerald-100">Orang Tua Istri</h3>
                 
-                <div className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ayah Istri</p>
                   <div className="grid grid-cols-1 gap-3">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Ayah</label><input type="text" name="namaAyahIstri" value={formData.namaAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase" /></div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">NIK Ayah</label><input type="text" name="nikAyahIstri" value={formData.nikAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ayah</label><input type="text" name="namaAyahIstri" value={formData.namaAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ayah</label><input type="text" name="nikAyahIstri" value={formData.nikAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tempat Lahir</label><input type="text" name="tempatLahirAyahIstri" value={formData.tempatLahirAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tgl Lahir</label><input type="date" name="tanggalLahirAyahIstri" value={formData.tanggalLahirAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirAyahIstri" value={formData.tempatLahirAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tgl Lahir</label><input type="date" name="tanggalLahirAyahIstri" value={formData.tanggalLahirAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Agama</label>
-                        <select name="agamaAyahIstri" value={formData.agamaAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                        <select name="agamaAyahIstri" value={formData.agamaAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           {RELIGION_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                       </div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pekerjaan</label>
-                        <select name="pekerjaanAyahIstri" value={formData.pekerjaanAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                        <select name="pekerjaanAyahIstri" value={formData.pekerjaanAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           <option value="">Pilih...</option>{PEKERJAAN_OPTIONS.map(p => <option key={p}>{p}</option>)}
                         </select>
                       </div>
@@ -1296,23 +1296,23 @@ export default function AdminSuratNikah({
                   </div>
                 </div>
 
-                <div className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ibu Istri</p>
                   <div className="grid grid-cols-1 gap-3">
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Nama Ibu</label><input type="text" name="namaIbuIstri" value={formData.namaIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase" /></div>
-                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700">NIK Ibu</label><input type="text" name="nikIbuIstri" value={formData.nikIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ibu</label><input type="text" name="namaIbuIstri" value={formData.namaIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ibu</label><input type="text" name="nikIbuIstri" value={formData.nikIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tempat Lahir</label><input type="text" name="tempatLahirIbuIstri" value={formData.tempatLahirIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Tgl Lahir</label><input type="date" name="tanggalLahirIbuIstri" value={formData.tanggalLahirIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirIbuIstri" value={formData.tempatLahirIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tgl Lahir</label><input type="date" name="tanggalLahirIbuIstri" value={formData.tanggalLahirIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Agama</label>
-                        <select name="agamaIbuIstri" value={formData.agamaIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                        <select name="agamaIbuIstri" value={formData.agamaIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           {RELIGION_OPTIONS.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                       </div>
-                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Pekerjaan</label>
-                        <select name="pekerjaanIbuIstri" value={formData.pekerjaanIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white">
+                      <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                        <select name="pekerjaanIbuIstri" value={formData.pekerjaanIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900">
                           <option value="">Pilih...</option>{PEKERJAAN_OPTIONS.map(p => <option key={p}>{p}</option>)}
                         </select>
                       </div>
@@ -1320,35 +1320,35 @@ export default function AdminSuratNikah({
                   </div>
                 </div>
 
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Alamat Orang Tua Istri</label><input type="text" name="alamatOrtuIstri" value={formData.alamatOrtuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" /></div>
+                <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Alamat Orang Tua Istri</label><input type="text" name="alamatOrtuIstri" value={formData.alamatOrtuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
               </div>
             </div>
 
-            <div className="mt-8 flex justify-between border-t border-slate-100 pt-6">
-              <button onClick={() => setStep(2)} className="px-6 py-2 border border-slate-300 text-slate-600 rounded-lg font-bold hover:bg-slate-50">&larr; Kembali</button>
+            <div className="mt-8 flex justify-between border-t border-slate-100 dark:border-slate-800 pt-6">
+              <button onClick={() => setStep(2)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
               <button onClick={() => setStep(4)} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700">Lanjut &rarr;</button>
             </div>
           </div>
         )}
 
         {step === 4 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-800 mb-4">4. Wali & Pejabat</h2>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">4. Wali & Pejabat</h2>
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Nama Wali</label>
-                <input type="text" name="namaWali" value={formData.namaWali} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white uppercase" placeholder="Sama dengan nama ayah jika kosong" />
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Wali</label>
+                <input type="text" name="namaWali" value={formData.namaWali} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" placeholder="Sama dengan nama ayah jika kosong" />
                 <p className="text-[10px] text-emerald-700 font-medium">* Kosongkan jika wali adalah Ayah Kandung</p>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Hubungan Wali</label>
-                <select name="hubunganWali" value={formData.hubunganWali} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white font-medium">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Hubungan Wali</label>
+                <select name="hubunganWali" value={formData.hubunganWali} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium">
                   <option>Ayah Kandung</option><option>Saudara Laki-laki Kandung</option><option>Wali Hakim</option>
                 </select>
                 <p className="text-[10px] text-emerald-700 font-medium">* Hubungan kekerabatan wali nikah dengan calon pengantin wanita</p>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Pilih Pejabat Penandatangan</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pilih Pejabat Penandatangan</label>
                 <select
                   value={formData.namaPejabat}
                   onChange={(e) => {
@@ -1370,7 +1370,7 @@ export default function AdminSuratNikah({
                       jabatanPejabat: found ? found.role : prev.jabatanPejabat 
                     }));
                   }}
-                  className="w-full px-3 py-2 border rounded-lg bg-white font-bold text-emerald-900"
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 font-bold text-emerald-900"
                 >
                   {(() => {
                     try {
@@ -1394,44 +1394,44 @@ export default function AdminSuratNikah({
                 </select>
                 <p className="text-[10px] text-emerald-700 font-medium">* Daftar pejabat dapat disesuaikan pada Menu Pengaturan Desa</p>
               </div>
-              <div className="space-y-1"><label className="text-xs font-bold text-slate-700">Jabatan (Ketik Manual jika perlu)</label>
-                <input type="text" name="jabatanPejabat" value={formData.jabatanPejabat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white" />
+              <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jabatan (Ketik Manual jika perlu)</label>
+                <input type="text" name="jabatanPejabat" value={formData.jabatanPejabat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" />
               </div>
             </div>
             
             <div className="mt-8 flex justify-between">
-              <button onClick={() => setStep(3)} className="px-6 py-2 border border-slate-300 text-slate-600 rounded-lg font-bold hover:bg-slate-50">&larr; Kembali</button>
+              <button onClick={() => setStep(3)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
               <button onClick={() => setStep(5)} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700">Lihat & Cetak &rarr;</button>
             </div>
           </div>
         )}
 
         {step === 5 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm print:hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none print:hidden">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               
               {/* KIRI: KONTROL & TABS */}
               <div className="lg:col-span-5 flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-bold text-slate-800">5. Preview & Cetak</h2>
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">5. Preview & Cetak</h2>
                   <div className="flex gap-3">
-                    <button onClick={saveToRiwayat} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors">
+                    <button onClick={saveToRiwayat} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 transition-colors">
                       <Save className="w-4 h-4" /> Simpan 
                     </button>
-                    <button onClick={handlePrint} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition-all active:scale-95">
+                    <button onClick={handlePrint} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-md dark:shadow-none shadow-emerald-600/20 transition-all active:scale-95">
                       <Printer className="w-4 h-4" /> Cetak
                     </button>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pilih Dokumen</label>
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pilih Dokumen</label>
                   <div className="flex flex-wrap gap-2">
                     {DOC_TABS.map(tab => (
                       <button 
                         key={tab.id}
                         onClick={() => setActiveDoc(tab.id)}
-                        className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all ${activeDoc === tab.id ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20 scale-105' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'}`}
+                        className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all ${activeDoc === tab.id ? 'bg-emerald-600 text-white border-emerald-600 shadow-md dark:shadow-none shadow-emerald-600/20 scale-105' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300'}`}
                       >
                         {tab.label}
                       </button>
@@ -1452,27 +1452,27 @@ export default function AdminSuratNikah({
 
               {/* KANAN: PREVIEW A4 */}
               <div className="lg:col-span-7">
-                <div className="bg-slate-50 border border-slate-200 rounded-3xl overflow-hidden shadow-inner flex flex-col h-[700px] sticky top-6">
-                  <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white shrink-0 shadow-sm z-10">
+                <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl overflow-hidden shadow-inner flex flex-col h-[700px] sticky top-6">
+                  <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0 shadow-sm dark:shadow-none z-10">
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span className="text-xs font-bold text-slate-700 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
                     </div>
                 
-                <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-100">
+                <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
                   <button 
                     onClick={() => setPreviewZoom(prev => Math.max(0.3, prev - 0.05))} 
-                    className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                     title="Zoom Out"
                   >
                     <ZoomOut size={16} />
                   </button>
-                  <span className="text-xs font-mono font-bold text-slate-600 px-2 w-14 text-center">
+                  <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
                     {Math.round(previewZoom * 100)}%
                   </span>
                   <button 
                     onClick={() => setPreviewZoom(prev => Math.min(1.2, prev + 0.05))} 
-                    className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                     title="Zoom In"
                   >
                     <ZoomIn size={16} />
@@ -1480,7 +1480,7 @@ export default function AdminSuratNikah({
                   <div className="w-px h-5 bg-slate-200 mx-1"></div>
                   <button 
                     onClick={() => setPreviewZoom(0.45)} 
-                    className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-[10px] font-bold"
+                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-[10px] font-bold"
                     title="Reset Zoom"
                   >
                     Reset
@@ -1507,16 +1507,16 @@ export default function AdminSuratNikah({
                     borderRadius: '12px',
                     transition: 'width 0.2s ease-out, height 0.2s ease-out'
                   }}
-                  className="bg-white m-auto shrink-0 relative"
+                  className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
                 >
                   {/* Visual Crop Marks */}
-                  <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 pointer-events-none z-10"></div>
-                  <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 pointer-events-none z-10"></div>
-                  <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 pointer-events-none z-10"></div>
-                  <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 pointer-events-none z-10"></div>
+                  <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                  <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                  <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                  <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
 
                   <div 
-                    className="bg-white shrink-0"
+                    className="bg-white dark:bg-slate-900 shrink-0"
                     style={{ 
                       width: '794px', 
                       height: '1123px', 
@@ -1539,7 +1539,7 @@ export default function AdminSuratNikah({
             </div>
 
             <div className="mt-8">
-              <button onClick={() => setStep(4)} className="px-6 py-2 border border-slate-300 text-slate-600 rounded-lg font-bold hover:bg-slate-50">&larr; Kembali</button>
+              <button onClick={() => setStep(4)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
             </div>
           </div>
         )}

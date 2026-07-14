@@ -54,24 +54,24 @@ export default function KalenderDesa() {
   ).sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return (
-    <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-        <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
+    <section className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+      <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+        <h4 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <CalendarIcon className="text-emerald-700 w-5 h-5" />
           Kalender Desa
         </h4>
         <div className="flex items-center gap-1">
-          <button onClick={prevMonth} className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={prevMonth} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button onClick={nextMonth} className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={nextMonth} className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
       
       <div className="p-5">
-        <div className="text-center font-bold text-sm text-gray-800 mb-4">
+        <div className="text-center font-bold text-sm text-gray-800 dark:text-slate-100 mb-4">
           {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
         </div>
         
@@ -95,7 +95,7 @@ export default function KalenderDesa() {
                 key={day} 
                 className={`
                   text-xs p-1.5 rounded-lg flex items-center justify-center relative
-                  ${isToday ? 'bg-emerald-600 text-white font-bold' : 'text-gray-700'}
+                  ${isToday ? 'bg-emerald-600 text-white font-bold' : 'text-gray-700 dark:text-slate-300'}
                   ${hasEvent && !isToday ? 'bg-emerald-50 text-emerald-800 font-bold' : ''}
                 `}
               >
@@ -114,10 +114,10 @@ export default function KalenderDesa() {
           {currentMonthEvents.length > 0 ? (
             <div className="space-y-3">
               {currentMonthEvents.map(event => (
-                <div key={event.id} className="group relative pl-3 border-l-2 border-gray-100 hover:border-emerald-500 transition-colors">
+                <div key={event.id} className="group relative pl-3 border-l-2 border-gray-100 dark:border-slate-800 hover:border-emerald-500 transition-colors">
                   <div className={`absolute -left-[5px] top-1.5 w-2 h-2 rounded-full border-2 border-white ${event.color === 'emerald' ? 'bg-emerald-500' : event.color === 'blue' ? 'bg-blue-500' : 'bg-amber-500'} group-hover:scale-125 transition-transform`} />
-                  <p className="text-xs font-bold text-gray-900 mb-1">{event.title}</p>
-                  <div className="flex flex-col gap-1 text-[10px] text-gray-500 font-medium">
+                  <p className="text-xs font-bold text-gray-900 dark:text-white mb-1">{event.title}</p>
+                  <div className="flex flex-col gap-1 text-[10px] text-gray-500 dark:text-slate-400 font-medium">
                     <span className="flex items-center gap-1.5"><Clock className="w-3 h-3" /> {event.date.getDate()} {monthNames[event.date.getMonth()]} • {event.time}</span>
                     <span className="flex items-center gap-1.5"><MapPin className="w-3 h-3" /> {event.location}</span>
                   </div>
@@ -125,8 +125,8 @@ export default function KalenderDesa() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-4 bg-gray-50 rounded-xl border border-gray-100 border-dashed">
-              <p className="text-xs text-gray-500">Tidak ada jadwal di bulan ini.</p>
+            <div className="text-center py-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-800 border-dashed">
+              <p className="text-xs text-gray-500 dark:text-slate-400">Tidak ada jadwal di bulan ini.</p>
             </div>
           )}
         </div>

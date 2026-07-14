@@ -99,17 +99,17 @@ export default function AdminGlobalBranding() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Branding Platform Global</h2>
-          <p className="text-sm text-slate-500 mt-1">Konfigurasi visual utama yang akan diterapkan ke seluruh instansi desa</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Branding Platform Global</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Konfigurasi visual utama yang akan diterapkan ke seluruh instansi desa</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 space-y-6">
-          <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
             <div className="p-8 space-y-6">
               <div className="space-y-4">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Globe size={18} className="text-emerald-600" />
                   Nama Aplikasi Platform
                 </label>
@@ -117,13 +117,13 @@ export default function AdminGlobalBranding() {
                   type="text" 
                   value={globalName}
                   onChange={(e) => setGlobalName(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all font-bold text-slate-900"
+                  className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all font-bold text-slate-900 dark:text-white"
                   placeholder="Contoh: DiDesa, SmartVillage, dll"
                 />
               </div>
 
               <div className="space-y-4">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Image size={18} className="text-emerald-600" />
                   Logo Platform (PNG/SVG)
                 </label>
@@ -132,7 +132,7 @@ export default function AdminGlobalBranding() {
                     type="text" 
                     value={globalLogo}
                     onChange={(e) => setGlobalLogo(e.target.value)}
-                    className="flex-1 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all text-sm font-mono"
+                    className="flex-1 px-5 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all text-sm font-mono"
                     placeholder="https://example.com/logo.png"
                   />
                   <input
@@ -155,7 +155,7 @@ export default function AdminGlobalBranding() {
               </div>
 
               <div className="space-y-4">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Palette size={18} className="text-emerald-600" />
                   Warna Tema Utama
                 </label>
@@ -170,20 +170,20 @@ export default function AdminGlobalBranding() {
                     type="text" 
                     value={globalColor}
                     onChange={(e) => setGlobalColor(e.target.value)}
-                    className="flex-1 px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-emerald-500 transition-all font-mono uppercase"
+                    className="flex-1 px-5 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 transition-all font-mono uppercase"
                   />
                 </div>
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-slate-100">
-                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <FileText size={18} className="text-emerald-600" />
                   Footer Cetak Surat (HTML)
                 </label>
                 <textarea 
                   value={globalPrintFooter}
                   onChange={(e) => setGlobalPrintFooter(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all text-sm font-mono"
+                  className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all text-sm font-mono"
                   placeholder="Teks footer yang akan tampil di bawah semua dokumen cetak..."
                   rows={3}
                 />
@@ -191,7 +191,7 @@ export default function AdminGlobalBranding() {
               </div>
             </div>
 
-            <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+            <div className="p-8 bg-slate-50 dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
               <button 
                 onClick={resetBranding}
                 className="text-rose-600 hover:text-rose-700 text-sm font-bold flex items-center gap-2"
@@ -229,7 +229,7 @@ export default function AdminGlobalBranding() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
             <h4 className="text-lg font-bold mb-6">Live Preview Sidebar</h4>
             
-            <div className="bg-white rounded-3xl p-6 shadow-2xl">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl">
               <div className="flex items-center gap-3 mb-8">
                 <div 
                   className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner"
@@ -244,7 +244,7 @@ export default function AdminGlobalBranding() {
               </div>
 
               <div className="space-y-2">
-                <div className="h-10 bg-slate-50 rounded-xl border border-slate-100 flex items-center px-4 gap-3">
+                <div className="h-10 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center px-4 gap-3">
                   <div className="w-4 h-4 bg-slate-200 rounded" />
                   <div className="h-2 w-20 bg-slate-200 rounded" />
                 </div>
@@ -252,7 +252,7 @@ export default function AdminGlobalBranding() {
                   <div className="w-4 h-4 rounded" style={{ backgroundColor: globalColor }} />
                   <div className="h-2 w-24 rounded" style={{ backgroundColor: globalColor }} />
                 </div>
-                <div className="h-10 bg-slate-50 rounded-xl border border-slate-100 flex items-center px-4 gap-3">
+                <div className="h-10 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center px-4 gap-3">
                   <div className="w-4 h-4 bg-slate-200 rounded" />
                   <div className="h-2 w-16 bg-slate-200 rounded" />
                 </div>

@@ -42,7 +42,21 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
 export function getSaaSTemplates(): LetterClassification[] {
   const stored = localStorage.getItem('saas_global_letter_catalog');
   if (stored) {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored) as LetterClassification[];
+    let updated = false;
+    
+    // Merge any missing defaults that might have been added in newer versions
+    INITIAL_CLASSIFICATIONS.forEach(init => {
+      if (!parsed.some(p => p.id === init.id)) {
+        parsed.push(init);
+        updated = true;
+      }
+    });
+    
+    if (updated) {
+      localStorage.setItem('saas_global_letter_catalog', JSON.stringify(parsed));
+    }
+    return parsed;
   }
   return INITIAL_CLASSIFICATIONS;
 }

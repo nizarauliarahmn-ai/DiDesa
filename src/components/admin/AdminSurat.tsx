@@ -96,22 +96,22 @@ export default function AdminSurat({
   return (
     <div className="max-w-6xl mx-auto pb-24 space-y-6">
       {/* Sub Navigation */}
-      <div className="flex overflow-x-auto border-b border-gray-200 no-print">
+      <div className="flex overflow-x-auto border-b border-gray-200 dark:border-slate-700 no-print">
         <button 
           onClick={() => changeTab('dashboard')}
-          className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 ${activeTab === 'dashboard' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 ${activeTab === 'dashboard' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
         >
           Daftar Surat
         </button>
         <button 
           onClick={() => changeTab('buat')}
-          className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 ${activeTab === 'buat' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 ${activeTab === 'buat' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
         >
           Buat Surat
         </button>
         <button 
           onClick={() => changeTab('penomoran')}
-          className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 ${activeTab === 'penomoran' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 ${activeTab === 'penomoran' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
         >
           Pengaturan Surat
         </button>

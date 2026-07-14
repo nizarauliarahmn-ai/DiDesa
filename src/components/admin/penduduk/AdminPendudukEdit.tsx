@@ -214,17 +214,17 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       {/* Breadcrumb & Sticky Header */}
       <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2 text-sm text-gray-500 mb-2 font-medium">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400 mb-2 font-medium">
             <button onClick={onBack} className="hover:text-emerald-700 transition-colors">Daftar Penduduk</button>
             <span className="text-gray-400">/</span>
             <span className="text-emerald-700 font-bold">
               {isAdd ? 'Formulir Pendaftaran' : 'Edit Data'}
             </span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
             {isAdd ? 'Tambah Penduduk Baru' : 'Edit Data Penduduk'}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-slate-400">
             {isAdd 
               ? 'Silakan lengkapi seluruh formulir di bawah ini untuk mendaftarkan warga baru.' 
               : `Mengubah data informasi kependudukan warga dengan NIK ${data.nik}.`}
@@ -234,13 +234,13 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
         <div className="flex gap-3 w-full sm:w-auto">
           <button 
             onClick={onBack}
-            className="flex-1 sm:flex-none px-6 py-2.5 border border-gray-300 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-50 transition-all active:scale-95 bg-white"
+            className="flex-1 sm:flex-none px-6 py-2.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 font-bold text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all active:scale-95 bg-white dark:bg-slate-900"
           >
             Batal
           </button>
           <button 
             onClick={handleSave}
-            className="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-sm hover:bg-emerald-800 transition-all active:scale-95 flex items-center justify-center gap-2"
+            className="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all active:scale-95 flex items-center justify-center gap-2"
           >
             <Save className="w-4 h-4" />
             {isAdd ? 'Simpan Data' : 'Simpan Perubahan'}
@@ -253,17 +253,17 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
         <div className="lg:col-span-8 space-y-8">
           
           {/* Section 1: Biodata Diri */}
-          <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+          <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
                 <User className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Biodata Diri</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Biodata Diri</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Nama Lengkap Sesuai KTP</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap Sesuai KTP</label>
                 <input 
                   type="text"
                   value={name}
@@ -271,8 +271,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     setName(e.target.value);
                     if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
                   }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
-                    errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
+                    errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
                   placeholder="Masukkan nama lengkap..."
                 />
@@ -281,7 +281,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* NIK Field */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">NIK (Nomor Induk Kependudukan)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK (Nomor Induk Kependudukan)</label>
                 <input 
                   type="text"
                   maxLength={16}
@@ -291,8 +291,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     setNik(val);
                     if (errors.nik) setErrors(prev => ({ ...prev, nik: '' }));
                   }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
-                    errors.nik ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
+                    errors.nik ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
                   placeholder="16 digit NIK..."
                 />
@@ -301,7 +301,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* Nomor KK Field (Newly Added) */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">No. KK (Kartu Keluarga)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. KK (Kartu Keluarga)</label>
                 <input 
                   type="text"
                   maxLength={16}
@@ -311,8 +311,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     setNoKk(val);
                     if (errors.noKk) setErrors(prev => ({ ...prev, noKk: '' }));
                   }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
-                    errors.noKk ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
+                    errors.noKk ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
                   placeholder="16 digit No. KK..."
                 />
@@ -320,11 +320,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Jenis Kelamin</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Jenis Kelamin</label>
                 <select 
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white cursor-pointer"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
                 >
                   <option value="Laki-laki">Laki-laki</option>
                   <option value="Perempuan">Perempuan</option>
@@ -332,7 +332,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Tempat Lahir</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tempat Lahir</label>
                 <input 
                   type="text"
                   value={birthPlace}
@@ -340,8 +340,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     setBirthPlace(e.target.value);
                     if (errors.birthPlace) setErrors(prev => ({ ...prev, birthPlace: '' }));
                   }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
-                    errors.birthPlace ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
+                    errors.birthPlace ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
                   placeholder="Contoh: Jakarta"
                 />
@@ -349,7 +349,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Tanggal Lahir</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tanggal Lahir</label>
                 <input 
                   type="date"
                   value={birthDate}
@@ -357,19 +357,19 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     setBirthDate(e.target.value);
                     if (errors.birthDate) setErrors(prev => ({ ...prev, birthDate: '' }));
                   }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white ${
-                    errors.birthDate ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 ${
+                    errors.birthDate ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
                 />
                 {errors.birthDate && <p className="text-xs text-red-500 font-semibold">{errors.birthDate}</p>}
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Golongan Darah</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Golongan Darah</label>
                 <select 
                   value={bloodType}
                   onChange={(e) => setBloodType(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white cursor-pointer"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
                 >
                   <option value="A">A</option>
                   <option value="B">B</option>
@@ -380,11 +380,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Agama</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Agama</label>
                 <select 
                   value={religion}
                   onChange={(e) => setReligion(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white cursor-pointer"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
                 >
                   <option value="Islam">Islam</option>
                   <option value="Kristen Protestan">Kristen Protestan</option>
@@ -397,11 +397,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* Pekerjaan Dropdown selection (Updated from input) */}
               <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pekerjaan</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pekerjaan</label>
                 <select 
                   value={job}
                   onChange={(e) => setJob(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white cursor-pointer"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
                 >
                   {PEKERJAAN_OPTIONS.map((opt) => (
                     <option key={opt} value={opt}>{opt}</option>
@@ -411,23 +411,23 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* Father and Mother Names */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Nama Ayah Kandung</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Ayah Kandung</label>
                 <input 
                   type="text"
                   value={fatherName}
                   onChange={(e) => setFatherName(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
                   placeholder="Masukkan nama ayah kandung..."
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Nama Ibu Kandung</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Ibu Kandung</label>
                 <input 
                   type="text"
                   value={motherName}
                   onChange={(e) => setMotherName(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
                   placeholder="Masukkan nama ibu kandung..."
                 />
               </div>
@@ -435,17 +435,17 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
           </section>
 
           {/* Section 2: Alamat & Domisili */}
-          <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+          <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
                 <MapPin className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Alamat & Domisili</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Alamat & Domisili</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
               <div className="md:col-span-6 space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Alamat Lengkap</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Alamat Lengkap</label>
                 <textarea 
                   rows={2}
                   value={address}
@@ -453,8 +453,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     setAddress(e.target.value);
                     if (errors.address) setErrors(prev => ({ ...prev, address: '' }));
                   }}
-                  className={`w-full px-4 py-3 border rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none ${
-                    errors.address ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full px-4 py-3 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none ${
+                    errors.address ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
                   placeholder="Nama jalan, nomor rumah, dsb..."
                 ></textarea>
@@ -463,11 +463,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* RT Dropdown select list */}
               <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">RT</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">RT</label>
                 <select 
                   value={rt}
                   onChange={(e) => handleRtChange(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white cursor-pointer font-mono"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer font-mono"
                 >
                   <option value="01">01</option>
                   <option value="02">02</option>
@@ -478,19 +478,19 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* RW input (auto-populated and disabled based on the rule) */}
               <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">RW (Otomatis)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">RW (Otomatis)</label>
                 <input 
                   type="text"
                   maxLength={3}
                   disabled
                   value={rw}
-                  className="w-full h-11 px-4 border border-gray-100 bg-gray-50 text-gray-500 rounded-xl text-sm outline-none font-mono cursor-not-allowed"
+                  className="w-full h-11 px-4 border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-xl text-sm outline-none font-mono cursor-not-allowed"
                   placeholder="Terisi otomatis..."
                 />
               </div>
 
               <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Desa/Kelurahan</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Desa/Kelurahan</label>
                 <input 
                   type="text"
                   value={desa}
@@ -498,8 +498,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     setDesa(e.target.value);
                     if (errors.desa) setErrors(prev => ({ ...prev, desa: '' }));
                   }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white ${
-                    errors.desa ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200'
+                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 ${
+                    errors.desa ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
                   placeholder="Nama Desa/Kelurahan..."
                 />
@@ -507,7 +507,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="md:col-span-6 space-y-2">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Status Domisili</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Domisili</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button 
                     type="button"
@@ -515,11 +515,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     className={`flex items-center gap-3 p-3.5 border-2 rounded-xl transition-all ${
                       domicileStatus === 'Sesuai KTP' 
                         ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 font-bold' 
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      domicileStatus === 'Sesuai KTP' ? 'border-emerald-600' : 'border-gray-300'
+                      domicileStatus === 'Sesuai KTP' ? 'border-emerald-600' : 'border-gray-300 dark:border-slate-600'
                     }`}>
                       {domicileStatus === 'Sesuai KTP' && <div className="w-2 h-2 bg-emerald-600 rounded-full" />}
                     </div>
@@ -532,11 +532,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     className={`flex items-center gap-3 p-3.5 border-2 rounded-xl transition-all ${
                       domicileStatus === 'Pendatang / Domisili Sementara' 
                         ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 font-bold' 
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      domicileStatus === 'Pendatang / Domisili Sementara' ? 'border-emerald-600' : 'border-gray-300'
+                      domicileStatus === 'Pendatang / Domisili Sementara' ? 'border-emerald-600' : 'border-gray-300 dark:border-slate-600'
                     }`}>
                       {domicileStatus === 'Pendatang / Domisili Sementara' && <div className="w-2 h-2 bg-emerald-600 rounded-full" />}
                     </div>
@@ -552,13 +552,13 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
         <div className="lg:col-span-4 space-y-8">
           
           {/* Avatar Upload Card */}
-          <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative overflow-hidden">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 text-left">Foto Penduduk</h4>
+          <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 text-center relative overflow-hidden">
+            <h4 className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-4 text-left">Foto Penduduk</h4>
             
             <div className="relative group mx-auto mb-6">
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className={`w-44 h-44 mx-auto rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-emerald-600 group-hover:bg-emerald-50/20 cursor-pointer ${
+                className={`w-44 h-44 mx-auto rounded-2xl bg-gray-50 dark:bg-slate-800 border-2 border-dashed border-gray-200 dark:border-slate-700 flex flex-col items-center justify-center overflow-hidden transition-all group-hover:border-emerald-600 group-hover:bg-emerald-50/20 cursor-pointer ${
                   photoPreview ? 'border-solid border-emerald-100' : ''
                 }`}
               >
@@ -589,7 +589,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               <button 
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex-1 py-2 bg-white text-emerald-700 border border-emerald-600 font-bold text-xs rounded-xl hover:bg-emerald-50 transition-colors"
+                className="flex-1 py-2 bg-white dark:bg-slate-900 text-emerald-700 border border-emerald-600 font-bold text-xs rounded-xl hover:bg-emerald-50 transition-colors"
               >
                 Pilih File
               </button>
@@ -597,7 +597,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 <button 
                   type="button"
                   onClick={() => setPhotoPreview(null)}
-                  className="px-3 py-2 bg-white text-red-600 border border-red-200 rounded-xl hover:bg-red-50 hover:text-red-700 transition-colors"
+                  className="px-3 py-2 bg-white dark:bg-slate-900 text-red-600 border border-red-200 rounded-xl hover:bg-red-50 hover:text-red-700 transition-colors"
                   title="Hapus Foto"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -611,21 +611,21 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
           </section>
 
           {/* Section 3: Status & Hubungan */}
-          <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+          <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
                 <Users className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Status</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Status</h3>
             </div>
 
             <div className="space-y-6">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Hubungan Keluarga</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan Keluarga</label>
                 <select 
                   value={familyRelation}
                   onChange={(e) => setFamilyRelation(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white cursor-pointer"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
                 >
                   <option value="Kepala Keluarga">Kepala Keluarga</option>
                   <option value="Istri">Istri</option>
@@ -636,11 +636,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pendidikan Terakhir</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pendidikan Terakhir</label>
                 <select 
                   value={education}
                   onChange={(e) => setEducation(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white cursor-pointer"
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
                 >
                   <option value="Tidak/Belum Sekolah">Tidak/Belum Sekolah</option>
                   <option value="SD / Sederajat">SD / Sederajat</option>
@@ -653,7 +653,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block">Status Penduduk</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider block">Status Penduduk</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['Aktif', 'Pindah', 'Meninggal', 'Ganda'].map((status) => (
                     <button
@@ -663,7 +663,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                       className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
                         residentStatus === status
                           ? 'border-emerald-600 bg-emerald-50/50 text-emerald-700'
-                          : 'border-gray-100 text-gray-500 hover:bg-gray-50/60'
+                          : 'border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50/60'
                       }`}
                     >
                       {residentStatus === status && <Check className="w-3.5 h-3.5" />}
@@ -676,13 +676,13 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
           </section>
 
           {/* System Info Accent Card */}
-          <div className="bg-white/60 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-gray-100 border-l-4 border-l-emerald-600 flex items-start gap-4">
+          <div className="bg-white/60 backdrop-blur-xl p-5 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 border-l-4 border-l-emerald-600 flex items-start gap-4">
             <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
               <Info className="w-5 h-5" />
             </div>
             <div>
               <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-0.5">Informasi Sistem</p>
-              <p className="text-xs text-gray-500 leading-relaxed">
+              <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">
                 Data akan dienkripsi dan disimpan secara aman di database desa.
               </p>
             </div>

@@ -18,7 +18,7 @@ const CustomTooltip = ({
   size
 }: TooltipRenderProps) => {
   return (
-    <div {...tooltipProps} className="bg-white rounded-[24px] shadow-2xl overflow-hidden w-[340px] max-w-[90vw] font-sans border border-gray-100/50 animate-in fade-in zoom-in-95 duration-200">
+    <div {...tooltipProps} className="bg-white dark:bg-slate-900 rounded-[24px] shadow-2xl overflow-hidden w-[340px] max-w-[90vw] font-sans border border-gray-100/50 animate-in fade-in zoom-in-95 duration-200">
       <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-6 flex flex-col justify-between relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-emerald-400/20 rounded-full blur-2xl -ml-10 -mb-10 pointer-events-none" />
@@ -38,12 +38,12 @@ const CustomTooltip = ({
         </div>
         
         <div className="relative z-10 w-full h-1.5 bg-black/20 rounded-full mt-4 overflow-hidden backdrop-blur-sm border border-black/10">
-           <div className="h-full bg-white rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ width: `${((index + 1) / size) * 100}%` }} />
+           <div className="h-full bg-white dark:bg-slate-900 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ width: `${((index + 1) / size) * 100}%` }} />
         </div>
       </div>
       
       <div className="p-6">
-        <div className="text-gray-700 text-[15px] leading-relaxed mb-8 font-medium">
+        <div className="text-gray-700 dark:text-slate-300 text-[15px] leading-relaxed mb-8 font-medium">
           {step.content}
         </div>
         
@@ -58,14 +58,14 @@ const CustomTooltip = ({
             {index > 0 && (
               <button 
                 {...backProps}
-                className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors active:scale-95"
+                className="px-4 py-2.5 text-xs font-bold text-gray-500 dark:text-slate-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors active:scale-95"
               >
                 Kembali
               </button>
             )}
             <button 
               {...primaryProps}
-              className="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-700/30 transition-all flex items-center gap-1.5 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
+              className="px-5 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl shadow-lg dark:shadow-none shadow-emerald-600/20 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-700/30 transition-all flex items-center gap-1.5 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
             >
               {isLastStep ? (
                 <>Selesai <Check size={16} /></>

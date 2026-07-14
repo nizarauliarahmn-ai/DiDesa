@@ -95,7 +95,7 @@ export default function AspirasiWarga() {
         </div>
         <div className="relative z-10 px-8 max-w-7xl mx-auto w-full text-white">
           <div className="max-w-2xl">
-            <span className="bg-emerald-600/90 backdrop-blur-md text-emerald-50 px-4 py-1.5 rounded-full text-xs font-bold mb-4 inline-block tracking-wider uppercase shadow-sm">
+            <span className="bg-emerald-600/90 backdrop-blur-md text-emerald-50 px-4 py-1.5 rounded-full text-xs font-bold mb-4 inline-block tracking-wider uppercase shadow-sm dark:shadow-none">
               Portal Aspirasi Digital
             </span>
             <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
@@ -112,32 +112,32 @@ export default function AspirasiWarga() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-20">
         {/* Left Side: Form Section (8 Columns) */}
         <div className="lg:col-span-8">
-          <div className="bg-white shadow-xl shadow-slate-200/50 rounded-3xl p-6 md:p-8 border border-slate-100">
-            <div className="flex items-center gap-4 mb-8 border-b border-slate-100 pb-6">
+          <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-4 mb-8 border-b border-slate-100 dark:border-slate-800 pb-6">
               <div className="w-12 h-12 bg-emerald-50 text-emerald-700 rounded-2xl flex items-center justify-center shrink-0">
                 <Send className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Kirim Aspirasi & Laporan</h2>
-                <p className="text-slate-500 text-sm mt-1 font-medium">Formulir digital untuk layanan pengaduan dan saran warga.</p>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Kirim Aspirasi & Laporan</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">Formulir digital untuk layanan pengaduan dan saran warga.</p>
               </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Nama Lengkap (Opsional)</label>
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">Nama Lengkap (Opsional)</label>
                   <input 
                     type="text" 
                     value={formData.sender}
                     onChange={(e) => setFormData({...formData, sender: e.target.value})}
-                    className="w-full bg-slate-50 rounded-xl border border-slate-200 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium" 
+                    className="w-full bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium" 
                     placeholder="Masukkan nama Anda (kosongkan jika anonim)" 
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Kategori Aspirasi</label>
-                  <select required value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-slate-50 rounded-xl border border-slate-200 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">Kategori Aspirasi</label>
+                  <select required value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium">
                     <option value="">Pilih Kategori</option>
                     <option value="pengaduan">Pengaduan (Laporan)</option>
                     <option value="saran">Saran</option>
@@ -148,14 +148,14 @@ export default function AspirasiWarga() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Subjek</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">Subjek</label>
                 <input 
                   list="subjek-options"
                   type="text" 
                   required
                   value={formData.subject}
                   onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                  className="w-full bg-slate-50 rounded-xl border border-slate-200 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium" 
                   placeholder="Pilih atau ketik ringkasan singkat aspirasi Anda" 
                 />
                 <datalist id="subjek-options">
@@ -169,34 +169,34 @@ export default function AspirasiWarga() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Deskripsi Detail</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">Deskripsi Detail</label>
                 <textarea 
                   required
                   rows={4} 
                   value={formData.content}
                   onChange={(e) => setFormData({...formData, content: e.target.value})}
-                  className="w-full bg-slate-50 rounded-xl border border-slate-200 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium resize-none" 
+                  className="w-full bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium resize-none" 
                   placeholder="Ceritakan aspirasi Anda secara mendalam agar kami dapat menindaklanjuti dengan tepat..."
                 ></textarea>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider block">Lampiran Foto/Dokumen (Opsional)</label>
-                <label className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer group block w-full text-center">
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block">Lampiran Foto/Dokumen (Opsional)</label>
+                <label className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer group block w-full text-center">
                   <input type="file" className="hidden" accept=".jpg,.jpeg,.png,.pdf" onChange={(e) => {
                     if (e.target.files && e.target.files[0]) setFile(e.target.files[0]);
                   }} />
                   {!file ? (
                     <>
-                      <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <div className="w-14 h-14 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center shadow-sm dark:shadow-none group-hover:scale-110 transition-transform">
                         <CloudUpload className="w-6 h-6 text-emerald-600" />
                       </div>
-                      <p className="text-sm font-bold text-slate-700">Klik untuk unggah atau seret berkas ke sini</p>
-                      <p className="text-xs text-slate-500 font-medium">Format: JPG, PNG, PDF (Maks. 5MB)</p>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Klik untuk unggah atau seret berkas ke sini</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Format: JPG, PNG, PDF (Maks. 5MB)</p>
                     </>
                   ) : (
                     <>
-                      <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center shadow-sm">
+                      <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center shadow-sm dark:shadow-none">
                         <CheckCircle className="w-6 h-6 text-emerald-600" />
                       </div>
                       <p className="text-sm font-bold text-emerald-700">{file.name}</p>
@@ -216,7 +216,7 @@ export default function AspirasiWarga() {
               <button 
                 type="submit" 
                 disabled={isSubmitting}
-                className="w-full py-3 bg-emerald-700 text-white text-base font-bold rounded-xl hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-500/30 transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-700/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full py-3 bg-emerald-700 text-white text-base font-bold rounded-xl hover:bg-emerald-800 focus:ring-4 focus:ring-emerald-500/30 transition-all flex items-center justify-center gap-2 shadow-lg dark:shadow-none shadow-emerald-700/20 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
@@ -237,14 +237,14 @@ export default function AspirasiWarga() {
         {/* Right Side: Sidebar Tracking & Stats (4 Columns) */}
         <div className="lg:col-span-4 space-y-6">
           {/* Tracking Section */}
-          <div className="bg-white shadow-xl shadow-slate-200/40 rounded-3xl p-6 border border-slate-100">
+          <div className="bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40 rounded-3xl p-6 border border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                 <Radar className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 tracking-tight">Lacak Aspirasi Saya</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Lacak Aspirasi Saya</h3>
             </div>
-            <p className="text-sm font-medium text-slate-500 mb-4 leading-relaxed">
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
               Masukkan nomor tiket untuk melihat status tindak lanjut.
             </p>
             <div className="flex gap-2">
@@ -253,22 +253,22 @@ export default function AspirasiWarga() {
                 value={ticketSearch}
                 onChange={(e) => setTicketSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearchTicket()}
-                className="flex-1 bg-slate-50 rounded-xl border border-slate-200 p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm font-medium uppercase" 
+                className="flex-1 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-sm font-medium uppercase" 
                 placeholder="TKT-XXXXXX" 
               />
-              <button onClick={handleSearchTicket} className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-600/20 cursor-pointer">
+              <button onClick={handleSearchTicket} className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-all shadow-md dark:shadow-none shadow-blue-600/20 cursor-pointer">
                 <Search className="w-5 h-5" />
               </button>
             </div>
             
             {searchAttempted && (
-              <div className="mt-4 p-4 rounded-xl border border-slate-200 bg-slate-50">
+              <div className="mt-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                 {trackedTicket ? (
                   <div className="space-y-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{trackedTicket.id}</p>
-                        <p className="text-sm font-bold text-slate-900 mt-1">{trackedTicket.subject}</p>
+                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{trackedTicket.id}</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white mt-1">{trackedTicket.subject}</p>
                       </div>
                       <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
                         trackedTicket.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' :
@@ -280,10 +280,10 @@ export default function AspirasiWarga() {
                     </div>
                     
                     {trackedTicket.adminResponse && (
-                      <div className="mt-3 p-3 bg-white rounded-lg border border-emerald-100 shadow-sm relative overflow-hidden">
+                      <div className="mt-3 p-3 bg-white dark:bg-slate-900 rounded-lg border border-emerald-100 shadow-sm dark:shadow-none relative overflow-hidden">
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
                         <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1">Tanggapan Admin</p>
-                        <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{trackedTicket.adminResponse.text}</p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{trackedTicket.adminResponse.text}</p>
                         {trackedTicket.adminResponse.fileName && (
                           <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded inline-flex">
                             <CheckCircle size={12} />
@@ -294,7 +294,7 @@ export default function AspirasiWarga() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm font-medium text-slate-500 text-center py-2">Tiket tidak ditemukan. Periksa kembali nomor tiket Anda.</p>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 text-center py-2">Tiket tidak ditemukan. Periksa kembali nomor tiket Anda.</p>
                 )}
               </div>
             )}
@@ -343,26 +343,26 @@ export default function AspirasiWarga() {
           </div>
 
           {/* FAQ Quick Links */}
-          <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
-            <h3 className="text-base font-bold text-slate-900 mb-4 tracking-tight">Panduan Aspirasi</h3>
+          <div className="bg-slate-50 dark:bg-slate-800 rounded-3xl p-6 border border-slate-100 dark:border-slate-800">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4 tracking-tight">Panduan Aspirasi</h3>
             <ul className="space-y-2">
-              <li className="flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all cursor-pointer group shadow-sm hover:shadow-md border border-transparent hover:border-slate-100">
-                <div className="w-8 h-8 bg-slate-100 group-hover:bg-emerald-50 rounded-lg flex items-center justify-center transition-colors">
-                  <HelpCircle className="w-4 h-4 text-slate-500 group-hover:text-emerald-600" />
+              <li className="flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all cursor-pointer group shadow-sm dark:shadow-none hover:shadow-md border border-transparent hover:border-slate-100">
+                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 group-hover:bg-emerald-50 rounded-lg flex items-center justify-center transition-colors">
+                  <HelpCircle className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-emerald-600" />
                 </div>
-                <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Cara menyampaikan pengaduan?</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 transition-colors">Cara menyampaikan pengaduan?</span>
               </li>
-              <li className="flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all cursor-pointer group shadow-sm hover:shadow-md border border-transparent hover:border-slate-100">
-                <div className="w-8 h-8 bg-slate-100 group-hover:bg-emerald-50 rounded-lg flex items-center justify-center transition-colors">
-                  <Shield className="w-4 h-4 text-slate-500 group-hover:text-emerald-600" />
+              <li className="flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all cursor-pointer group shadow-sm dark:shadow-none hover:shadow-md border border-transparent hover:border-slate-100">
+                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 group-hover:bg-emerald-50 rounded-lg flex items-center justify-center transition-colors">
+                  <Shield className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-emerald-600" />
                 </div>
-                <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Kerahasiaan identitas pelapor</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 transition-colors">Kerahasiaan identitas pelapor</span>
               </li>
-              <li className="flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all cursor-pointer group shadow-sm hover:shadow-md border border-transparent hover:border-slate-100">
-                <div className="w-8 h-8 bg-slate-100 group-hover:bg-emerald-50 rounded-lg flex items-center justify-center transition-colors">
-                  <Clock className="w-4 h-4 text-slate-500 group-hover:text-emerald-600" />
+              <li className="flex items-center gap-3 p-3 hover:bg-white rounded-xl transition-all cursor-pointer group shadow-sm dark:shadow-none hover:shadow-md border border-transparent hover:border-slate-100">
+                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 group-hover:bg-emerald-50 rounded-lg flex items-center justify-center transition-colors">
+                  <Clock className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-emerald-600" />
                 </div>
-                <span className="text-sm font-medium text-slate-700 group-hover:text-slate-900 transition-colors">Waktu pengerjaan tindak lanjut</span>
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 transition-colors">Waktu pengerjaan tindak lanjut</span>
               </li>
             </ul>
           </div>

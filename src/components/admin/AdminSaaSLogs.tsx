@@ -39,26 +39,26 @@ export default function AdminSaaSLogs() {
     <div className="max-w-[1440px] mx-auto space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Log Aktivitas SaaS</h2>
-          <p className="text-sm text-slate-500 mt-1">Rekam jejak seluruh aksi administratif pada platform global</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Log Aktivitas SaaS</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Rekam jejak seluruh aksi administratif pada platform global</p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-bold flex items-center gap-2 hover:bg-slate-50 transition-all">
+          <button className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-400 text-sm font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
             <Download size={16} />
             <span>Ekspor CSV</span>
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
         {/* Filters */}
-        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-4">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text"
               placeholder="Cari aksi, admin, atau target..."
-              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:border-emerald-500 transition-all text-sm"
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 transition-all text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -71,7 +71,7 @@ export default function AdminSaaSLogs() {
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
                   filterStatus === status 
                   ? 'bg-slate-900 border-slate-900 text-white' 
-                  : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300'
                 }`}
               >
                 {status}
@@ -83,7 +83,7 @@ export default function AdminSaaSLogs() {
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
+            <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">
               <tr>
                 <th className="px-8 py-4">Waktu & Tanggal</th>
                 <th className="px-8 py-4">Administrator</th>
@@ -96,21 +96,21 @@ export default function AdminSaaSLogs() {
               {filteredLogs.length > 0 ? filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-8 py-5">
-                    <div className="font-bold text-slate-900">{log.waktu}</div>
+                    <div className="font-bold text-slate-900 dark:text-white">{log.waktu}</div>
                     <div className="text-[10px] text-slate-400 mt-0.5">{log.tanggal}</div>
                   </td>
                   <td className="px-8 py-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400">
                         {log.admin.charAt(0)}
                       </div>
-                      <span className="font-medium text-slate-700">{log.admin}</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">{log.admin}</span>
                     </div>
                   </td>
                   <td className="px-8 py-5">
-                    <span className="font-bold text-slate-900">{log.aksi}</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{log.aksi}</span>
                   </td>
-                  <td className="px-8 py-5 text-slate-500 italic">
+                  <td className="px-8 py-5 text-slate-500 dark:text-slate-400 italic">
                     {log.target}
                   </td>
                   <td className="px-8 py-5">

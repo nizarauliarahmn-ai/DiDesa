@@ -346,37 +346,37 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-      <div className="bg-white rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-200">
         
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-extrabold text-slate-900 tracking-tight">Wisaya Impor Data Penduduk</h3>
-              <p className="text-xs text-slate-500">Impor ratusan data penduduk real dari file Excel/CSV secara instan.</p>
+              <h3 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">Wisaya Impor Data Penduduk</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Impor ratusan data penduduk real dari file Excel/CSV secara instan.</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Steps Progress Indicator */}
         {step < 4 && (
-          <div className="px-8 py-3 border-b border-slate-50 bg-white grid grid-cols-3 text-xs font-bold text-slate-400">
+          <div className="px-8 py-3 border-b border-slate-50 bg-white dark:bg-slate-900 grid grid-cols-3 text-xs font-bold text-slate-400">
             <div className={`flex items-center gap-2 ${step >= 1 ? 'text-emerald-700' : ''}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-emerald-700 text-white font-black' : step > 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100'}`}>1</span>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-emerald-700 text-white font-black' : step > 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-slate-800'}`}>1</span>
               <span>Unggah File / Tempel</span>
             </div>
             <div className={`flex items-center gap-2 ${step >= 2 ? 'text-emerald-700' : ''}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-emerald-700 text-white font-black' : step > 2 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100'}`}>2</span>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-emerald-700 text-white font-black' : step > 2 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-slate-800'}`}>2</span>
               <span>Pemetaan Kolom</span>
             </div>
             <div className={`flex items-center gap-2 ${step >= 3 ? 'text-emerald-700' : ''}`}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 3 ? 'bg-emerald-700 text-white font-black' : 'bg-slate-100'}`}>3</span>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 3 ? 'bg-emerald-700 text-white font-black' : 'bg-slate-100 dark:bg-slate-800'}`}>3</span>
               <span>Pratinjau & Validasi</span>
             </div>
           </div>
@@ -395,7 +395,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                 </div>
                 <button 
                   onClick={handleSampleTemplateDownload}
-                  className="flex items-center gap-1.5 bg-white text-emerald-700 hover:bg-emerald-100/30 px-3.5 py-2 rounded-xl text-xs font-bold border border-emerald-200 transition-colors"
+                  className="flex items-center gap-1.5 bg-white dark:bg-slate-900 text-emerald-700 hover:bg-emerald-100/30 px-3.5 py-2 rounded-xl text-xs font-bold border border-emerald-200 transition-colors"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Unduh Template CSV</span>
@@ -406,7 +406,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
               <div 
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-3xl p-8 text-center bg-slate-50/50 hover:bg-emerald-50/10 cursor-pointer transition-all flex flex-col items-center justify-center min-h-[180px] relative group"
+                className="border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-emerald-500 rounded-3xl p-8 text-center bg-slate-50/50 hover:bg-emerald-50/10 cursor-pointer transition-all flex flex-col items-center justify-center min-h-[180px] relative group"
                 onClick={() => document.getElementById('modal-file-upload')?.click()}
               >
                 <input 
@@ -416,28 +416,28 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                   className="hidden" 
                   onChange={handleFileUpload}
                 />
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 shadow-sm dark:shadow-none group-hover:scale-105 transition-transform">
                   <Upload className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-bold text-slate-800">Pilih file CSV atau seret ke sini</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Pilih file CSV atau seret ke sini</p>
                 <p className="text-xs text-slate-400 mt-1">Mendukung format file .csv (Pemisah koma atau titik koma)</p>
               </div>
 
               <div className="flex items-center gap-3 my-4">
-                <div className="h-px bg-slate-100 flex-1"></div>
+                <div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"></div>
                 <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Atau Tempel Teks CSV</span>
-                <div className="h-px bg-slate-100 flex-1"></div>
+                <div className="h-px bg-slate-100 dark:bg-slate-800 flex-1"></div>
               </div>
 
               {/* Text Area Paste */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-600 block">Tempel Teks CSV Anda (Kolom pertama harus Header):</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block">Tempel Teks CSV Anda (Kolom pertama harus Header):</label>
                 <textarea 
                   value={csvText}
                   onChange={(e) => setCsvText(e.target.value)}
                   placeholder="NIK,Nama Lengkap,Jenis Kelamin,RT,RW&#10;3201020405060009,Aulia Rahman,Laki-laki,01,02"
                   rows={6}
-                  className="w-full rounded-2xl border border-slate-200 p-4 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none placeholder:text-slate-300"
+                  className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 p-4 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none placeholder:text-slate-300"
                 />
                 {csvText.trim().length > 0 && (
                   <button 
@@ -463,9 +463,9 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                 <p>Silakan sesuaikan kolom dari file Excel Anda (kiri) agar cocok dengan bidang data penduduk di sistem (kanan).</p>
               </div>
 
-              <div className="border border-slate-100 rounded-2xl overflow-hidden max-h-[350px] overflow-y-auto shadow-sm">
+              <div className="border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden max-h-[350px] overflow-y-auto shadow-sm dark:shadow-none">
                 <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50 text-slate-500 font-extrabold text-xs tracking-wider border-b border-slate-100">
+                  <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider border-b border-slate-100 dark:border-slate-800">
                     <tr>
                       <th className="px-5 py-3">Bidang Data Penduduk</th>
                       <th className="px-5 py-3">Kolom File Excel / CSV Anda</th>
@@ -478,7 +478,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                         <tr key={field.key} className="hover:bg-slate-50/50">
                           <td className="px-5 py-3.5">
                             <div className="flex flex-col">
-                              <span className="font-bold text-slate-800">
+                              <span className="font-bold text-slate-800 dark:text-slate-100">
                                 {field.label}
                                 {field.required && <span className="text-red-500 ml-1 font-extrabold">*</span>}
                               </span>
@@ -497,7 +497,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                                   ? 'border-emerald-200 bg-emerald-50/30 text-emerald-800' 
                                   : field.required 
                                     ? 'border-red-200 bg-red-50/30 text-red-800' 
-                                    : 'border-slate-200 bg-white text-slate-500'
+                                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400'
                               }`}
                             >
                               <option value={-1}>{field.required ? '-- Pilih Kolom Wajib --' : '-- Jangan Impor Bidang Ini --'}</option>
@@ -516,7 +516,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
               <div className="flex justify-between items-center pt-2">
                 <button 
                   onClick={() => setStep(1)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-600 transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400 transition-colors"
                 >
                   Kembali
                 </button>
@@ -530,7 +530,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                     }
                     setStep(3);
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
+                  className="px-6 py-2.5 rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 text-xs font-bold transition-colors shadow-sm dark:shadow-none flex items-center gap-1.5"
                 >
                   <span>Lanjut ke Pratinjau</span>
                   <ArrowRight className="w-4 h-4" />
@@ -551,7 +551,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                   </div>
                 </div>
 
-                <div className={`p-4 rounded-2xl flex items-center gap-3 border ${validationResults.invalidCount > 0 ? 'bg-amber-50 text-amber-800 border-amber-100/50' : 'bg-slate-50 text-slate-500 border-slate-100'}`}>
+                <div className={`p-4 rounded-2xl flex items-center gap-3 border ${validationResults.invalidCount > 0 ? 'bg-amber-50 text-amber-800 border-amber-100/50' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-800'}`}>
                   {validationResults.invalidCount > 0 ? (
                     <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
                   ) : (
@@ -568,13 +568,13 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                 </div>
               </div>
 
-              <div className="border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-                <div className="px-5 py-3 bg-slate-50 text-xs font-bold text-slate-600 border-b border-slate-100">
+              <div className="border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
+                <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800">
                   Pratinjau Data Mapped (Maksimal 10 Baris Pertama)
                 </div>
                 <div className="max-h-[250px] overflow-y-auto">
                   <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-50/50 text-slate-500 text-[10px] font-extrabold tracking-wider border-b border-slate-100 sticky top-0">
+                    <thead className="bg-slate-50/50 text-slate-500 dark:text-slate-400 text-[10px] font-extrabold tracking-wider border-b border-slate-100 dark:border-slate-800 sticky top-0">
                       <tr>
                         <th className="px-4 py-2.5">Status</th>
                         <th className="px-4 py-2.5">NIK</th>
@@ -600,8 +600,8 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                                 </span>
                               )}
                             </td>
-                            <td className="px-4 py-2.5 font-mono text-slate-600 font-medium">{res.nik || '(Kosong)'}</td>
-                            <td className="px-4 py-2.5 font-bold text-slate-900">{res.name || '(Kosong)'}</td>
+                            <td className="px-4 py-2.5 font-mono text-slate-600 dark:text-slate-400 font-medium">{res.nik || '(Kosong)'}</td>
+                            <td className="px-4 py-2.5 font-bold text-slate-900 dark:text-white">{res.name || '(Kosong)'}</td>
                             <td className="px-4 py-2.5">{res.gender}</td>
                             <td className="px-4 py-2.5 font-mono">{res.rtRw}</td>
                             <td className="px-4 py-2.5">{res.status}</td>
@@ -623,13 +623,13 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
               <div className="flex justify-between items-center pt-2">
                 <button 
                   onClick={() => setStep(2)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-600 transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-400 transition-colors"
                 >
                   Kembali
                 </button>
                 <button 
                   onClick={handleConfirmImport}
-                  className="px-6 py-2.5 rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
+                  className="px-6 py-2.5 rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 text-xs font-bold transition-colors shadow-sm dark:shadow-none flex items-center gap-1.5"
                 >
                   <span>Mulai Impor {validationResults.validCount} Data</span>
                   <Check className="w-4 h-4" />
@@ -646,23 +646,23 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                   <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center animate-spin mb-2">
                     <Loader2 className="w-8 h-8" />
                   </div>
-                  <h4 className="text-lg font-bold text-slate-900">Sedang Mengunggah & Menyinkronkan Data...</h4>
-                  <p className="text-sm text-slate-500 max-w-md">Data sedang divalidasi dan diunggah ke database aktif Anda (Supabase/PostgreSQL/Memory). Mohon tunggu sebentar.</p>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">Sedang Mengunggah & Menyinkronkan Data...</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md">Data sedang divalidasi dan diunggah ke database aktif Anda (Supabase/PostgreSQL/Memory). Mohon tunggu sebentar.</p>
                 </>
               ) : importResult?.success ? (
                 <>
                   <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2 animate-bounce">
                     <CheckCircle className="w-10 h-10" />
                   </div>
-                  <h4 className="text-xl font-extrabold text-slate-900">Impor Berhasil! 🎉</h4>
-                  <p className="text-sm text-slate-500 max-w-md font-medium">
-                    Selamat! <span className="font-extrabold text-slate-800">{importResult.count} data penduduk</span> berhasil disimpan dan disinkronkan ke dalam database dengan aman.
+                  <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">Impor Berhasil! 🎉</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md font-medium">
+                    Selamat! <span className="font-extrabold text-slate-800 dark:text-slate-100">{importResult.count} data penduduk</span> berhasil disimpan dan disinkronkan ke dalam database dengan aman.
                   </p>
                   <button 
                     onClick={() => {
                       onClose();
                     }}
-                    className="mt-6 px-8 py-3 bg-emerald-700 text-white font-bold rounded-xl text-xs hover:bg-emerald-800 transition-colors shadow-md"
+                    className="mt-6 px-8 py-3 bg-emerald-700 text-white font-bold rounded-xl text-xs hover:bg-emerald-800 transition-colors shadow-md dark:shadow-none"
                   >
                     Selesai & Tutup
                   </button>
@@ -672,13 +672,13 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                   <div className="w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center mb-2">
                     <AlertCircle className="w-10 h-10" />
                   </div>
-                  <h4 className="text-xl font-extrabold text-slate-900">Impor Gagal</h4>
+                  <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">Impor Gagal</h4>
                   <p className="text-sm text-red-500 max-w-md font-semibold">
                     {importResult?.error || 'Gagal menyimpan data ke server.'}
                   </p>
                   <button 
                     onClick={() => setStep(3)}
-                    className="mt-6 px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-colors"
+                    className="mt-6 px-6 py-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs transition-colors"
                   >
                     Kembali untuk Mencoba Lagi
                   </button>

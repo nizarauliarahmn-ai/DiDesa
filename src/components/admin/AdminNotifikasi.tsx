@@ -206,11 +206,11 @@ export default function AdminNotifikasi({
       {/* Header Section */}
       <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
             <Bell className="text-emerald-700 w-7 h-7" />
             Notifikasi Pusat Kontrol
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
             Pantau aktivitas pendaftaran, perubahan kependudukan, pengajuan layanan, dan pembaruan sistem secara langsung.
           </p>
         </div>
@@ -228,7 +228,7 @@ export default function AdminNotifikasi({
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-colors border ${
               unreadCount > 0 
                 ? 'bg-emerald-700 text-white border-emerald-600 hover:bg-emerald-800' 
-                : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                : 'bg-gray-100 dark:bg-slate-800 text-gray-400 border-gray-200 dark:border-slate-700 cursor-not-allowed'
             }`}
           >
             <CheckCheck size={16} />
@@ -238,9 +238,9 @@ export default function AdminNotifikasi({
       </div>
 
       {/* Main Container */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200/80 shadow-sm dark:shadow-none overflow-hidden">
         {/* Search & Filter Header */}
-        <div className="p-4 md:p-6 border-b border-gray-100 bg-slate-50/50 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="p-4 md:p-6 border-b border-gray-100 dark:border-slate-800 bg-slate-50/50 flex flex-col md:flex-row gap-4 items-center justify-between">
           {/* Filters */}
           <div className="flex flex-wrap gap-1.5 self-start md:self-auto">
             <button
@@ -248,7 +248,7 @@ export default function AdminNotifikasi({
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                 activeFilter === 'all' 
                   ? 'bg-emerald-800 text-white' 
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
               Semua {notifications.length > 0 && `(${notifications.length})`}
@@ -258,7 +258,7 @@ export default function AdminNotifikasi({
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 ${
                 activeFilter === 'unread' 
                   ? 'bg-emerald-800 text-white' 
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
               Belum Dibaca 
@@ -273,7 +273,7 @@ export default function AdminNotifikasi({
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                 activeFilter === 'Residents' 
                   ? 'bg-emerald-800 text-white' 
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
               Kependudukan
@@ -283,7 +283,7 @@ export default function AdminNotifikasi({
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                 activeFilter === 'Services' 
                   ? 'bg-emerald-800 text-white' 
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
               Layanan
@@ -293,7 +293,7 @@ export default function AdminNotifikasi({
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                 activeFilter === 'Assistance' 
                   ? 'bg-emerald-800 text-white' 
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
               Bantuan
@@ -303,7 +303,7 @@ export default function AdminNotifikasi({
               className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${
                 activeFilter === 'System' 
                   ? 'bg-emerald-800 text-white' 
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'
               }`}
             >
               Sistem
@@ -318,7 +318,7 @@ export default function AdminNotifikasi({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari kata kunci notifikasi..."
-              className="pl-9 pr-4 py-1.5 bg-white border border-gray-200 rounded-xl w-full text-xs text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              className="pl-9 pr-4 py-1.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl w-full text-xs text-gray-700 dark:text-slate-300 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
             />
           </div>
         </div>
@@ -330,11 +330,11 @@ export default function AdminNotifikasi({
             <p className="text-sm">Memuat daftar notifikasi...</p>
           </div>
         ) : filteredNotifications.length === 0 ? (
-          <div className="p-16 text-center text-gray-500 flex flex-col items-center justify-center">
-            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 border border-gray-100">
+          <div className="p-16 text-center text-gray-500 dark:text-slate-400 flex flex-col items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-4 border border-gray-100 dark:border-slate-800">
               <BellOff className="text-gray-400 w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-gray-800">Tidak Ada Notifikasi</h3>
+            <h3 className="text-base font-bold text-gray-800 dark:text-slate-100">Tidak Ada Notifikasi</h3>
             <p className="text-xs text-gray-400 max-w-sm mt-1">
               {searchQuery.trim() !== "" 
                 ? "Tidak menemukan notifikasi yang cocok dengan pencarian Anda." 
@@ -367,7 +367,7 @@ export default function AdminNotifikasi({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <h3 className={`text-sm font-bold truncate ${
-                        !item.isRead ? 'text-gray-900 font-extrabold' : 'text-gray-700 font-semibold'
+                        !item.isRead ? 'text-gray-900 dark:text-white font-extrabold' : 'text-gray-700 dark:text-slate-300 font-semibold'
                       }`}>
                         {item.title}
                       </h3>
@@ -380,7 +380,7 @@ export default function AdminNotifikasi({
                       </div>
                     </div>
                     <p className={`text-xs leading-relaxed ${
-                      !item.isRead ? 'text-gray-800 font-medium' : 'text-gray-500'
+                      !item.isRead ? 'text-gray-800 dark:text-slate-100 font-medium' : 'text-gray-500 dark:text-slate-400'
                     }`}>
                       {item.message}
                     </p>
@@ -404,9 +404,9 @@ export default function AdminNotifikasi({
       {/* Simulation Modal */}
       {showSimModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-slate-50 border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-slate-50 dark:bg-slate-800 border-b border-gray-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-base font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
                 <Bell className="text-emerald-700 w-5 h-5" />
                 Simulasikan Notifikasi
               </h3>
@@ -420,35 +420,35 @@ export default function AdminNotifikasi({
             
             <form onSubmit={handleSimulateNotification} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">Judul Notifikasi</label>
+                <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Judul Notifikasi</label>
                 <input 
                   type="text" 
                   required
                   placeholder="Misal: Penyaluran Bantuan Selesai"
                   value={simTitle}
                   onChange={(e) => setSimTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">Pesan / Konten</label>
+                <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Pesan / Konten</label>
                 <textarea 
                   required
                   rows={3}
                   placeholder="Deskripsi detail apa yang baru saja diperbarui atau terjadi..."
                   value={simMessage}
                   onChange={(e) => setSimMessage(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">Kategori</label>
+                <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Kategori</label>
                 <select 
                   value={simCategory}
                   onChange={(e) => setSimCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
                 >
                   <option value="Residents">Kependudukan (Residents)</option>
                   <option value="Services">Layanan (Services)</option>
@@ -468,13 +468,13 @@ export default function AdminNotifikasi({
                 <button
                   type="button"
                   onClick={() => setShowSimModal(false)}
-                  className="px-4 py-2 bg-gray-50 border border-gray-200 text-gray-600 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors"
+                  className="px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 rounded-xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-colors shadow-sm"
+                  className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-colors shadow-sm dark:shadow-none"
                 >
                   Kirim Notifikasi
                 </button>

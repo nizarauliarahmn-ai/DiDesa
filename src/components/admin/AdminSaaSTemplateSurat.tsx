@@ -169,20 +169,20 @@ export default function AdminSaaSTemplateSurat() {
 
   return (
     <div className="max-w-6xl mx-auto pb-24 space-y-6">
-      <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-5">
           <FileText size={120} />
         </div>
         <div className="relative z-10">
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">Manajemen Template Surat</h2>
-          <p className="text-slate-500 max-w-2xl leading-relaxed">
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Manajemen Template Surat</h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-2xl leading-relaxed">
             Kelola katalog jenis surat secara global. Semua desa akan mewarisi daftar jenis surat yang dibuat di sini. Admin Desa dapat memilih untuk menampilkan atau menyembunyikan jenis surat di akun mereka.
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
             <input 
@@ -190,7 +190,7 @@ export default function AdminSaaSTemplateSurat() {
               placeholder="Cari nama atau singkatan surat..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm font-medium bg-white"
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm font-medium bg-white dark:bg-slate-900"
             />
           </div>
           <button 
@@ -204,7 +204,7 @@ export default function AdminSaaSTemplateSurat() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 text-slate-500 text-xs font-bold uppercase tracking-wider border-b border-slate-100">
+              <tr className="bg-slate-50/80 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
                 <th className="p-4 pl-6">Jenis Surat</th>
                 <th className="p-4">Singkatan</th>
                 <th className="p-4">Kode Klasifikasi</th>
@@ -213,14 +213,14 @@ export default function AdminSaaSTemplateSurat() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                   <td className="p-4 pl-6">
-                    <span className="font-bold text-slate-900">{item.jenis}</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{item.jenis}</span>
                   </td>
                   <td className="p-4">
                     <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">{item.klasifikasi}</span>
                   </td>
-                  <td className="p-4 font-mono text-sm text-slate-600">
+                  <td className="p-4 font-mono text-sm text-slate-600 dark:text-slate-400">
                     {item.kodeKlasifikasi}
                   </td>
                   <td className="p-4">
@@ -245,7 +245,7 @@ export default function AdminSaaSTemplateSurat() {
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-slate-500 font-medium">
+                  <td colSpan={4} className="p-8 text-center text-slate-500 dark:text-slate-400 font-medium">
                     Tidak ada template surat yang ditemukan
                   </td>
                 </tr>
@@ -258,14 +258,14 @@ export default function AdminSaaSTemplateSurat() {
       {/* Modal Tambah/Edit */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h3 className="text-xl font-bold text-slate-900">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                 {editingId ? 'Edit Template Surat' : 'Tambah Template Surat'}
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-all"
+                className="w-8 h-8 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -273,17 +273,17 @@ export default function AdminSaaSTemplateSurat() {
             
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Jenis Surat Lengkap</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider ml-1">Jenis Surat Lengkap</label>
                 <input 
                   type="text" 
                   value={formData.jenis}
                   onChange={handleJenisChange}
                   placeholder="Contoh: SURAT KETERANGAN USAHA"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Singkatan (Dibuat Otomatis)</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider ml-1">Singkatan (Dibuat Otomatis)</label>
                 <input 
                   type="text" 
                   value={formData.klasifikasi}
@@ -293,7 +293,7 @@ export default function AdminSaaSTemplateSurat() {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider ml-1">Kode Klasifikasi Arsip (Dibuat Otomatis)</label>
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider ml-1">Kode Klasifikasi Arsip (Dibuat Otomatis)</label>
                 <input 
                   type="text" 
                   value={formData.kodeKlasifikasi}
@@ -304,16 +304,16 @@ export default function AdminSaaSTemplateSurat() {
               </div>
             </div>
             
-            <div className="p-6 border-t border-slate-100 bg-slate-50 flex gap-3">
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 flex gap-3">
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="flex-1 px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-all"
+                className="flex-1 px-6 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 Batal
               </button>
               <button 
                 onClick={handleSave}
-                className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-sm transition-all"
+                className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-sm dark:shadow-none transition-all"
               >
                 <CheckCircle2 className="w-5 h-5" /> {editingId ? 'Simpan' : 'Tambahkan'}
               </button>

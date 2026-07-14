@@ -76,12 +76,12 @@ export default function ConfirmModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: 'spring', duration: 0.3 }}
-            className="relative bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 p-6 flex flex-col items-center text-center z-10"
+            className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 p-6 flex flex-col items-center text-center z-10"
           >
             {/* Close Button */}
             <button
               onClick={onCancel}
-              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200"
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 hover:text-gray-600 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200"
             >
               <X className="w-5 h-5" />
             </button>
@@ -92,12 +92,12 @@ export default function ConfirmModal({
             </div>
 
             {/* Title */}
-            <h3 className="text-xl font-bold text-gray-900 tracking-tight mb-2">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
               {title}
             </h3>
 
             {/* Message */}
-            <div className="text-sm font-medium text-gray-500 mb-6 leading-relaxed px-2">
+            <div className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-6 leading-relaxed px-2">
               {message}
             </div>
 
@@ -106,14 +106,14 @@ export default function ConfirmModal({
               <button
                 type="button"
                 onClick={onCancel}
-                className="flex-1 py-3 px-4 rounded-xl border-2 border-gray-100 hover:border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-gray-100"
+                className="flex-1 py-3 px-4 rounded-xl border-2 border-gray-100 dark:border-slate-800 hover:border-gray-200 text-sm font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-gray-100"
               >
                 {cancelText}
               </button>
               <button
                 type="button"
                 onClick={onConfirm}
-                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${theme.confirmBtn}`}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all shadow-lg dark:shadow-none focus:outline-none focus:ring-2 focus:ring-offset-2 ${theme.confirmBtn}`}
               >
                 {confirmText}
               </button>

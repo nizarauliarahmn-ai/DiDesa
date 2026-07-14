@@ -203,10 +203,10 @@ export default function App() {
 
   if (view === 'admin') {
     return (
-      <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
+      <div className="flex h-screen bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-sans overflow-hidden">
         <AdminSidebar setView={setView} activeTab={adminTab} setActiveTab={setAdminTab} onLogout={handleLogout} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
         <div className="flex-1 h-screen overflow-hidden relative">
-          <main className="h-full overflow-y-auto bg-slate-50 scroll-smooth">
+          <main className="h-full overflow-y-auto bg-slate-50 dark:bg-slate-800 scroll-smooth">
             <AdminHeader 
               setActiveTab={setAdminTab} 
               globalSearch={globalSearch} 
@@ -297,7 +297,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50/50 text-gray-900 font-sans overflow-hidden">
+    <div className="flex h-screen bg-gray-50/50 text-gray-900 dark:text-white font-sans overflow-hidden">
       <div className="lg:hidden">
         <Sidebar onLogout={handleLogout} activeTab={publicTab} setActiveTab={setPublicTab} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
       </div>
@@ -314,11 +314,11 @@ export default function App() {
               <div></div>
               <div className="flex gap-3">
                  {(user.role === 'admin' || user.role === 'kades' || user.role === 'saas_admin') && (
-                   <button onClick={() => setView('admin')} className="bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-emerald-700 transition-colors cursor-pointer">
+                   <button onClick={() => setView('admin')} className="bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-700 transition-colors cursor-pointer">
                      Masuk Mode Admin Desa
                    </button>
                  )}
-                 <button onClick={handleLogout} className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm border border-rose-200 transition-colors cursor-pointer">
+                 <button onClick={handleLogout} className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none border border-rose-200 transition-colors cursor-pointer">
                    Keluar Sesi
                  </button>
               </div>
@@ -343,7 +343,7 @@ export default function App() {
         </main>
 
         {/* Mobile Navigation Bar matching user mockup request */}
-        <nav className="fixed bottom-0 w-full h-16 bg-white border-t border-gray-200 flex justify-around items-center lg:hidden z-50 shadow-[0px_-2px_10px_rgba(0,0,0,0.05)] pb-safe">
+        <nav className="fixed bottom-0 w-full h-16 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 flex justify-around items-center lg:hidden z-50 shadow-[0px_-2px_10px_rgba(0,0,0,0.05)] pb-safe">
           <button 
              onClick={() => setPublicTab('dashboard')} 
              className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${publicTab === 'dashboard' ? 'text-emerald-800 font-bold' : 'text-gray-400'}`}
@@ -362,7 +362,7 @@ export default function App() {
           <div className="relative -top-3">
             <button 
               id="tour-mobile-aspirasi" onClick={() => setPublicTab('aspirasi')}
-              className="w-14 h-14 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full flex flex-col items-center justify-center shadow-lg shadow-emerald-700/30 active:scale-95 transition-all border-4 border-white"
+              className="w-14 h-14 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full flex flex-col items-center justify-center shadow-lg dark:shadow-none shadow-emerald-700/30 active:scale-95 transition-all border-4 border-white"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square-text"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg>
             </button>

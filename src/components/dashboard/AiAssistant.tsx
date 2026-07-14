@@ -27,20 +27,20 @@ export default function AiAssistant() {
           <Bot size={24} />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             Asisten AI DiDesa
             <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded-full border border-indigo-200 uppercase tracking-wider flex items-center gap-1">
               <Sparkles size={10} /> Unggulan
             </span>
-            <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-white shadow-sm">
+            <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-white shadow-sm dark:shadow-none">
               DEV
             </span>
           </h2>
-          <p className="text-gray-500 text-sm font-medium">Tanya informasi layanan, statistik, atau panduan secara instan.</p>
+          <p className="text-gray-500 dark:text-slate-400 text-sm font-medium">Tanya informasi layanan, statistik, atau panduan secara instan.</p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+      <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden flex flex-col">
         <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-4">
           {messages.map((msg, i) => (
             <motion.div 
@@ -49,23 +49,23 @@ export default function AiAssistant() {
               key={i} 
               className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-gray-100' : 'bg-indigo-100 text-indigo-600'}`}>
-                {msg.role === 'user' ? <User size={14} className="text-gray-600" /> : <Bot size={14} />}
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-gray-100 dark:bg-slate-800' : 'bg-indigo-100 text-indigo-600'}`}>
+                {msg.role === 'user' ? <User size={14} className="text-gray-600 dark:text-slate-400" /> : <Bot size={14} />}
               </div>
-              <div className={`p-4 rounded-2xl text-sm font-medium ${msg.role === 'user' ? 'bg-emerald-600 text-white rounded-tr-sm' : 'bg-gray-50 text-gray-700 rounded-tl-sm border border-gray-100'}`}>
+              <div className={`p-4 rounded-2xl text-sm font-medium ${msg.role === 'user' ? 'bg-emerald-600 text-white rounded-tr-sm' : 'bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-tl-sm border border-gray-100 dark:border-slate-800'}`}>
                 {msg.content}
               </div>
             </motion.div>
           ))}
         </div>
-        <div className="p-4 bg-gray-50 border-t border-gray-100">
+        <div className="p-4 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800">
           <form onSubmit={handleSend} className="relative">
             <input 
               type="text" 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Tanyakan sesuatu..."
-              className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none"
+              className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none"
             />
             <button 
               type="submit" 

@@ -37,10 +37,10 @@ export default function StatCards() {
   return (
     <section>
       <div className="flex items-center justify-between mb-4 px-1">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           Statistik Kependudukan
         </h3>
-        <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">Update: {getCurrentMonthYear()}</span>
+        <span className="text-xs font-medium text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-md">Update: {getCurrentMonthYear()}</span>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -53,10 +53,10 @@ export default function StatCards() {
   );
 }
 
-function StatCard({ title, value, subtext, subtextColor = "text-gray-500", valueColor = "text-gray-900" }: { title: string, value: string, subtext: string, subtextColor?: string, valueColor?: string }) {
+function StatCard({ title, value, subtext, subtextColor = "text-gray-500 dark:text-slate-400", valueColor = "text-gray-900 dark:text-white" }: { title: string, value: string, subtext: string, subtextColor?: string, valueColor?: string }) {
   return (
-    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group">
-      <p className="text-sm font-semibold text-gray-500 mb-2">{title}</p>
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none hover:shadow-md transition-shadow group">
+      <p className="text-sm font-semibold text-gray-500 dark:text-slate-400 mb-2">{title}</p>
       <h3 className={`text-4xl font-bold mb-2 tracking-tight group-hover:scale-105 transform origin-left transition-transform ${valueColor}`}>{value}</h3>
       <p className={`text-xs font-medium ${subtextColor}`}>{subtext}</p>
     </div>

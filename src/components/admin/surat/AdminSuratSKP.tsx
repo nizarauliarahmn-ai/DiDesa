@@ -348,7 +348,7 @@ export default function AdminSuratSKP({
     const pages = generateHTML();
     const pagesHTML = pages.map((page, index) => `
       <div class="page" style="${index > 0 ? 'page-break-before: always;' : ''}">
-        <div class="printable-area bg-white text-black">
+        <div class="printable-area bg-white dark:bg-slate-900 text-black">
           ${page}
         </div>
       </div>
@@ -770,21 +770,21 @@ export default function AdminSuratSKP({
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-md sticky top-16 z-30">
+      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-16 z-30">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <button onClick={onBack} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           </button>
           <div>
-            <h1 className="text-lg font-bold text-slate-800">Buat Surat Keterangan Pindah (SKP)</h1>
-            <p className="text-xs text-slate-500">Formulir pembuatan Surat Keterangan Pindah Domisili Antar Wilayah</p>
+            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat Surat Keterangan Pindah (SKP)</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Formulir pembuatan Surat Keterangan Pindah Domisili Antar Wilayah</p>
           </div>
         </div>
         <div className="flex gap-2">
           
           <button 
             onClick={handlePrint}
-            className="flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-900/20 active:scale-95"
+            className="flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg dark:shadow-none shadow-emerald-900/20 active:scale-95"
           >
             <Printer className="w-4 h-4" />
             Cetak Surat
@@ -798,10 +798,10 @@ export default function AdminSuratSKP({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none p-6 overflow-hidden"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-slate-800 flex items-center gap-2">
+              <h2 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <History className="w-4 h-4 text-emerald-600" />
                 Riwayat Pembuatan SKP
               </h2>
@@ -859,11 +859,11 @@ export default function AdminSuratSKP({
                       setManualFollowers([]);
                     }
                   }}
-                  className="p-3 border border-slate-100 rounded-xl hover:border-emerald-200 hover:bg-emerald-50 cursor-pointer transition-all group"
+                  className="p-3 border border-slate-100 dark:border-slate-800 rounded-xl hover:border-emerald-200 hover:bg-emerald-50 cursor-pointer transition-all group"
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="font-bold text-slate-700 text-sm">{item.nama}</p>
+                      <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">{item.nama}</p>
                       <p className="text-[10px] text-slate-400">{item.nomor || 'No Nomor'}</p>
                     </div>
                     <span className="text-[10px] text-slate-400">{new Date(item.tanggal).toLocaleDateString('id-ID')}</span>
@@ -880,8 +880,8 @@ export default function AdminSuratSKP({
         <div className="lg:col-span-7 space-y-6">
           
           {/* Pencarian Warga */}
-          <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider">
+          <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 uppercase tracking-wider">
               <Search className="w-4 h-4 text-emerald-600" />
               Pilih Penduduk (Warga)
             </h3>
@@ -891,32 +891,32 @@ export default function AdminSuratSKP({
                 <input 
                   type="text"
                   placeholder="Cari NIK atau Nama Warga..."
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <p className="mt-2 text-emerald-600 font-medium text-[10px]">* Pencarian otomatis melengkapi biodata, alamat asal, dan pekerjaan warga desa terpilih</p>
               {searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-20">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-20">
                   {filteredResidents.length > 0 ? (
                     filteredResidents.map(res => (
                       <button
                         key={res.nik}
                         onClick={() => handleSelectResident(res)}
-                        className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 text-left transition-colors border-b border-slate-100 last:border-0"
+                        className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
                       >
                         <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 font-bold shrink-0">
                           {res.name[0]}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-800">{res.name}</p>
-                          <p className="text-xs text-slate-500">NIK: {res.nik} • {res.desa}</p>
+                          <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} • {res.desa}</p>
                         </div>
                       </button>
                     ))
                   ) : (
-                    <p className="p-4 text-sm text-slate-500 italic text-center">Warga tidak ditemukan.</p>
+                    <p className="p-4 text-sm text-slate-500 dark:text-slate-400 italic text-center">Warga tidak ditemukan.</p>
                   )}
                 </div>
               )}
@@ -936,24 +936,24 @@ export default function AdminSuratSKP({
           </section>
 
           {/* Form Detail */}
-          <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
             {/* Informasi Surat */}
             <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
-                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-slate-600" />
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                 </div>
-                <h3 className="font-bold text-slate-800">Informasi Surat</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Informasi Surat</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     Nomor Surat
                   </label>
                   <input 
                     type="text"
                     placeholder="Contoh: SKP/064/WHi/2026"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
                     value={formData.nomorSurat}
                     onChange={(e) => setFormData({...formData, nomorSurat: e.target.value})}
                   />
@@ -964,35 +964,35 @@ export default function AdminSuratSKP({
 
             {/* Data Penduduk Asal */}
             <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
                   <User className="w-4 h-4 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Data Penduduk (Asal)</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Penduduk (Asal)</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Nama Lengkap</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
                   <input 
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.nama}
                     onChange={(e) => setFormData({...formData, nama: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">NIK</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
                   <input 
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.nik}
                     onChange={(e) => setFormData({...formData, nik: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Jenis Kelamin</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.jenisKelamin}
                     onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
                   >
@@ -1001,9 +1001,9 @@ export default function AdminSuratSKP({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Agama</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.agama}
                     onChange={(e) => setFormData({...formData, agama: e.target.value})}
                   >
@@ -1016,9 +1016,9 @@ export default function AdminSuratSKP({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Pekerjaan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     value={formData.pekerjaan}
                     onChange={(e) => setFormData({...formData, pekerjaan: e.target.value})}
                   >
@@ -1027,9 +1027,9 @@ export default function AdminSuratSKP({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Status Perkawinan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.statusPerkawinan}
                     onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
                   >
@@ -1040,48 +1040,48 @@ export default function AdminSuratSKP({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Tempat Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
                   <input 
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tempatLahir}
                     onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Tanggal Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
                   <input 
                     type="date"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tanggalLahir}
                     onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">RT (Asal)</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT (Asal)</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                       value={formData.rt}
                       onChange={(e) => setFormData({...formData, rt: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">RW (Asal)</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW (Asal)</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                       value={formData.rw}
                       onChange={(e) => setFormData({...formData, rw: e.target.value})}
                     />
                   </div>
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Alamat Lengkap (Asal)</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap (Asal)</label>
                   <textarea 
                     rows={2}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={formData.alamat}
                     onChange={(e) => setFormData({...formData, alamat: e.target.value})}
                   />
@@ -1091,79 +1091,79 @@ export default function AdminSuratSKP({
 
             {/* Data Tujuan Pindah */}
             <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
                   <MapPin className="w-4 h-4 text-blue-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Data Tujuan Kepindahan</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Tujuan Kepindahan</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Alamat Tujuan Lengkap (Jalan/Dukuh/Kampung)</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Tujuan Lengkap (Jalan/Dukuh/Kampung)</label>
                   <input 
                     type="text"
                     placeholder="Contoh: Jl. Diponegoro No. 12"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.alamatTujuan}
                     onChange={(e) => setFormData({...formData, alamatTujuan: e.target.value})}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">RT Tujuan</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT Tujuan</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                       value={formData.rtTujuan}
                       onChange={(e) => setFormData({...formData, rtTujuan: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">RW Tujuan</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW Tujuan</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                       value={formData.rwTujuan}
                       onChange={(e) => setFormData({...formData, rwTujuan: e.target.value})}
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Desa/Kelurahan Tujuan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Desa/Kelurahan Tujuan</label>
                   <input 
                     type="text"
                     placeholder="Contoh: Menteng"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.desaTujuan}
                     onChange={(e) => setFormData({...formData, desaTujuan: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Kecamatan Tujuan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kecamatan Tujuan</label>
                   <input 
                     type="text"
                     placeholder="Contoh: Menteng"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.kecamatanTujuan}
                     onChange={(e) => setFormData({...formData, kecamatanTujuan: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Kabupaten/Kota Tujuan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kabupaten/Kota Tujuan</label>
                   <input 
                     type="text"
                     placeholder="Contoh: Jakarta Pusat"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.kabupatenTujuan}
                     onChange={(e) => setFormData({...formData, kabupatenTujuan: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Provinsi Tujuan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Provinsi Tujuan</label>
                   <input 
                     type="text"
                     placeholder="Contoh: DKI Jakarta"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.provinsiTujuan}
                     onChange={(e) => setFormData({...formData, provinsiTujuan: e.target.value})}
                   />
@@ -1173,17 +1173,17 @@ export default function AdminSuratSKP({
 
             {/* Detail Kepindahan */}
             <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
                   <Briefcase className="w-4 h-4 text-amber-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Detail Kepindahan</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Detail Kepindahan</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Alasan Pindah</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alasan Pindah</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.alasanPindah}
                     onChange={(e) => setFormData({...formData, alasanPindah: e.target.value})}
                   >
@@ -1198,35 +1198,35 @@ export default function AdminSuratSKP({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Tanggal Pindah</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Pindah</label>
                   <input 
                     type="date"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tanggalPindah}
                     onChange={(e) => setFormData({...formData, tanggalPindah: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 flex justify-between items-center">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex justify-between items-center">
                     <span>Jumlah Keluarga yang Ikut (Orang)</span>
-                    <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-semibold">Otomatis</span>
+                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded-full font-semibold">Otomatis</span>
                   </label>
                   <input 
                     type="number"
                     min="0"
                     readOnly
-                    className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl outline-none text-slate-500 font-bold cursor-not-allowed"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-slate-500 dark:text-slate-400 font-bold cursor-not-allowed"
                     value={formData.jumlahKeluargaPindah}
                   />
                 </div>
                 
                 {/* AUTOMATED FAMILY MEMBERS CHECKLIST */}
-                <div className="md:col-span-2 space-y-4 pt-4 border-t border-slate-100">
+                <div className="md:col-span-2 space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                       <span>Daftar Pengikut / Anggota Keluarga (Satu KK)</span>
                     </label>
-                    <span className="text-[10px] text-slate-400 font-mono bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                    <span className="text-[10px] text-slate-400 font-mono bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded border border-slate-100 dark:border-slate-800">
                       No. KK: {(() => {
                         const sRes = residents.find(r => r.nik === formData.nik);
                         return sRes ? ((sRes as any).noKk || (sRes as any).no_kk || '-') : '-';
@@ -1235,11 +1235,11 @@ export default function AdminSuratSKP({
                   </div>
 
                   {familyMembers.length > 0 ? (
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm">
+                    <div className="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-sm dark:shadow-none">
                       <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                           <thead>
-                            <tr className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                            <tr className="bg-slate-50 dark:bg-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
                               <th className="p-3.5 text-center w-14">Pilih</th>
                               <th className="p-3.5">Nama Lengkap</th>
                               <th className="p-3.5">NIK</th>
@@ -1263,11 +1263,11 @@ export default function AdminSuratSKP({
                                           setCheckedFamilyNiks(checkedFamilyNiks.filter(n => n !== member.nik));
                                         }
                                       }}
-                                      className="w-4.5 h-4.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500/20 cursor-pointer transition-all"
+                                      className="w-4.5 h-4.5 text-emerald-600 rounded border-slate-300 dark:border-slate-600 focus:ring-emerald-500/20 cursor-pointer transition-all"
                                     />
                                   </td>
-                                  <td className="p-3.5 font-bold text-slate-800">{member.name}</td>
-                                  <td className="p-3.5 font-mono text-slate-500">{member.nik}</td>
+                                  <td className="p-3.5 font-bold text-slate-800 dark:text-slate-100">{member.name}</td>
+                                  <td className="p-3.5 font-mono text-slate-500 dark:text-slate-400">{member.nik}</td>
                                   <td className="p-3.5">
                                     <select
                                       value={familyRelations[member.nik] || 'Anak'}
@@ -1277,7 +1277,7 @@ export default function AdminSuratSKP({
                                           [member.nik]: e.target.value
                                         });
                                       }}
-                                      className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-emerald-500 font-semibold text-slate-700 disabled:opacity-50 disabled:bg-slate-100 transition-all"
+                                      className="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:border-emerald-500 font-semibold text-slate-700 dark:text-slate-300 disabled:opacity-50 disabled:bg-slate-100 transition-all"
                                       disabled={!isChecked}
                                     >
                                       <option value="Istri">Istri</option>
@@ -1290,7 +1290,7 @@ export default function AdminSuratSKP({
                                       <option value="Famili Lain">Famili Lain</option>
                                     </select>
                                   </td>
-                                  <td className="p-3.5 text-slate-500 font-medium">
+                                  <td className="p-3.5 text-slate-500 dark:text-slate-400 font-medium">
                                     {member.gender === 'Laki-Laki' ? 'L' : 'P'}
                                   </td>
                                 </tr>
@@ -1301,7 +1301,7 @@ export default function AdminSuratSKP({
                       </div>
                     </div>
                   ) : (
-                    <div className="p-6 bg-slate-50 border border-slate-200 border-dashed rounded-2xl text-center">
+                    <div className="p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 border-dashed rounded-2xl text-center">
                       <p className="text-xs text-slate-400 italic font-medium">
                         * Tidak ditemukan warga lain dengan No. KK yang sama di database penduduk desa.
                       </p>
@@ -1310,9 +1310,9 @@ export default function AdminSuratSKP({
                 </div>
 
                 {/* MANUAL ADDITIONAL FOLLOWERS */}
-                <div className="md:col-span-2 space-y-4 pt-4 border-t border-slate-100">
+                <div className="md:col-span-2 space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Pengikut Tambahan (Manual)</h4>
+                    <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Pengikut Tambahan (Manual)</h4>
                     <button
                       type="button"
                       onClick={() => {
@@ -1333,13 +1333,13 @@ export default function AdminSuratSKP({
                   {manualFollowers.length > 0 ? (
                     <div className="space-y-3 bg-slate-50/50 p-4 rounded-2xl border border-slate-200/50">
                       {manualFollowers.map((follower, index) => (
-                        <div key={follower.id} className="flex flex-wrap md:flex-nowrap gap-3 items-center bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm relative group">
+                        <div key={follower.id} className="flex flex-wrap md:flex-nowrap gap-3 items-center bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none relative group">
                           <div className="flex-1 min-w-[140px]">
                             <label className="text-[10px] font-bold text-slate-400 block mb-1">Nama Lengkap</label>
                             <input 
                               type="text"
                               placeholder="Nama Lengkap"
-                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800"
+                              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none focus:border-emerald-500 font-bold text-slate-800 dark:text-slate-100"
                               value={follower.name}
                               onChange={(e) => {
                                 const next = [...manualFollowers];
@@ -1353,7 +1353,7 @@ export default function AdminSuratSKP({
                             <input 
                               type="text"
                               placeholder="NIK"
-                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono outline-none focus:border-emerald-500 text-slate-700"
+                              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-mono outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-300"
                               value={follower.nik}
                               onChange={(e) => {
                                 const next = [...manualFollowers];
@@ -1371,7 +1371,7 @@ export default function AdminSuratSKP({
                                 next[index].relationship = e.target.value;
                                 setManualFollowers(next);
                               }}
-                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none text-slate-700 font-semibold"
+                              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none text-slate-700 dark:text-slate-300 font-semibold"
                             >
                               <option value="Istri">Istri</option>
                               <option value="Suami">Suami</option>
@@ -1392,7 +1392,7 @@ export default function AdminSuratSKP({
                                 next[index].gender = e.target.value;
                                 setManualFollowers(next);
                               }}
-                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs outline-none text-slate-700 font-semibold"
+                              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs outline-none text-slate-700 dark:text-slate-300 font-semibold"
                             >
                               <option value="Laki-Laki">Laki-Laki</option>
                               <option value="Perempuan">Perempuan</option>
@@ -1419,19 +1419,19 @@ export default function AdminSuratSKP({
             </div>
 
             {/* Pejabat Penandatangan */}
-            <div className="pt-6 border-t border-slate-100">
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
                   <FileSignature className="w-4 h-4 text-amber-600" />
                 </div>
-                <h3 className="font-bold text-slate-800">Pejabat Penandatangan</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Pejabat Penandatangan</h3>
               </div>
               <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
                     <select 
-                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
                       value={formData.namaPejabat}
                       onChange={(e) => {
                         const name = e.target.value;
@@ -1465,7 +1465,7 @@ export default function AdminSuratSKP({
                     <label className="text-sm font-bold text-amber-900">Jabatan</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl outline-none font-medium"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none font-medium"
                       value={formData.jabatanPejabat}
                       onChange={(e) => setFormData({...formData, jabatanPejabat: e.target.value})}
                     />
@@ -1473,7 +1473,7 @@ export default function AdminSuratSKP({
                 </div>
                 
                 <div className="mt-6 pt-6 border-t border-amber-100">
-                  <label className="flex items-center gap-3 p-3 bg-white border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 transition-colors">
+                  <label className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 transition-colors">
                     <input 
                       type="checkbox"
                       checked={formData.includeCamat}
@@ -1481,8 +1481,8 @@ export default function AdminSuratSKP({
                       className="w-5 h-5 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
                     />
                     <div>
-                      <div className="font-bold text-slate-800 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                      <div className="text-xs text-slate-500 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                      <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
                     </div>
                   </label>
                 </div>
@@ -1508,27 +1508,27 @@ export default function AdminSuratSKP({
             </div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-bold text-slate-700 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
               </div>
               
-              <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
                 <button 
                   onClick={() => setPreviewZoom(prev => Math.max(0.3, prev - 0.05))} 
-                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                   title="Zoom Out"
                 >
                   <ZoomOut size={16} />
                 </button>
-                <span className="text-xs font-mono font-bold text-slate-600 px-2 w-14 text-center">
+                <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
                   {Math.round(previewZoom * 100)}%
                 </span>
                 <button 
                   onClick={() => setPreviewZoom(prev => Math.min(1.2, prev + 0.05))} 
-                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                   title="Zoom In"
                 >
                   <ZoomIn size={16} />
@@ -1537,13 +1537,13 @@ export default function AdminSuratSKP({
             </div>
 
             {/* Stage containing A4 page scaled using CSS transform */}
-            <div className="flex-1 bg-slate-100 overflow-auto p-6 flex flex-col items-center gap-6 cursor-grab active:cursor-grabbing" {...dragProps}>
+            <div className="flex-1 bg-slate-100 dark:bg-slate-800 overflow-auto p-6 flex flex-col items-center gap-6 cursor-grab active:cursor-grabbing" {...dragProps}>
               {(() => {
                 const pages = generateHTML();
                 return pages.map((pageHtml, index) => (
                   <div 
                     key={index}
-                    className="bg-white shadow-2xl relative select-none shrink-0"
+                    className="bg-white dark:bg-slate-900 shadow-2xl relative select-none shrink-0"
                     style={{ 
                       width: '210mm', 
                       height: '297mm',
@@ -1555,19 +1555,19 @@ export default function AdminSuratSKP({
                     }}
                   >
                     {/* Page Number Label */}
-                    <div className="absolute -top-6 left-0 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                    <div className="absolute -top-6 left-0 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                       Halaman {index + 1} dari {pages.length}
                     </div>
 
                     {/* 4 Corner Crop Marks for Premium Print Layout */}
-                    <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-slate-300 crop-mark" />
-                    <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-slate-300 crop-mark" />
-                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-slate-300 crop-mark" />
-                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-slate-300 crop-mark" />
+                    <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 crop-mark" />
+                    <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 crop-mark" />
+                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 crop-mark" />
+                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 crop-mark" />
 
                     {/* Printable Content Frame */}
                     <div 
-                      className="w-full text-black bg-white relative h-full"
+                      className="w-full text-black bg-white dark:bg-slate-900 relative h-full"
                       style={{ 
                         padding: '40px 48px',
                         boxSizing: 'border-box',

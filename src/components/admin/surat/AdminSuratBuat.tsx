@@ -154,7 +154,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
         </div>
         <p className={`font-bold uppercase text-xs m-0 decoration-1 ${nameUnderlineClass} ${textAlignClass}`}>{namaPejabat}</p>
         {nipPejabat && nipPejabat !== '-' && nipPejabat !== '' && (
-          <p className={`text-[10px] font-mono mt-0.5 text-gray-700 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
+          <p className={`text-[10px] font-mono mt-0.5 text-gray-700 dark:text-slate-300 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
         )}
       </div>
     );
@@ -209,10 +209,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
             <div className={`w-[230px] ${textAlignClass}`}>
               <p className={`font-bold text-xs m-0 decoration-1 ${nameUnderlineClass} ${textAlignClass}`}>{sig.sigLeftName}</p>
               {sig.sigLeftPangkat && (
-                <p className={`text-[11px] mt-0.5 text-gray-800 m-0 ${textAlignClass}`}>{sig.sigLeftPangkat}</p>
+                <p className={`text-[11px] mt-0.5 text-gray-800 dark:text-slate-100 m-0 ${textAlignClass}`}>{sig.sigLeftPangkat}</p>
               )}
               {sig.sigLeftNip && sig.sigLeftNip !== '-' && (
-                <p className={`text-[11px] mt-0.5 text-gray-800 m-0 ${textAlignClass}`}>NIP : {sig.sigLeftNip}</p>
+                <p className={`text-[11px] mt-0.5 text-gray-800 dark:text-slate-100 m-0 ${textAlignClass}`}>NIP : {sig.sigLeftNip}</p>
               )}
             </div>
 
@@ -220,7 +220,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
             <div className={`w-[230px] ${textAlignClass}`}>
               <p className={`font-bold uppercase text-xs m-0 decoration-1 ${nameUnderlineClass} ${textAlignClass}`}>{namaPejabat}</p>
               {nipPejabat && nipPejabat !== '-' && nipPejabat !== '' && (
-                <p className={`text-[10px] font-mono mt-0.5 text-gray-700 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
+                <p className={`text-[10px] font-mono mt-0.5 text-gray-700 dark:text-slate-300 m-0 ${textAlignClass}`}>NIP. {nipPejabat}</p>
               )}
             </div>
           </div>
@@ -467,7 +467,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
               </head>
               <body>
                 <div class="page">
-                  <div class="printable-area bg-white text-black">
+                  <div class="printable-area bg-white dark:bg-slate-900 text-black">
                     ${content}
                   </div>
                 </div>
@@ -587,15 +587,15 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[500px] relative overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 min-h-[500px] relative overflow-hidden">
         
         {/* STEP 1: Select Template */}
         {step === 1 && (
           <div className="p-8 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">Pilih Jenis & Template Surat</h3>
-                <p className="text-sm text-gray-500 mt-1">Gunakan salah satu dari {classifications.length} jenis surat resmi Wasah Hilir</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Pilih Jenis & Template Surat</h3>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gunakan salah satu dari {classifications.length} jenis surat resmi Wasah Hilir</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -604,13 +604,13 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     placeholder="Cari jenis surat..."
                     value={searchLetterQuery}
                     onChange={(e) => setSearchLetterQuery(e.target.value)}
-                    className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none w-56 font-semibold"
+                    className="pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none w-56 font-semibold"
                   />
                   <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
                 <button 
                   onClick={onBack}
-                  className="text-gray-500 hover:text-emerald-700 font-bold text-sm transition-colors border border-gray-200 px-4 py-2 rounded-xl bg-white"
+                  className="text-gray-500 dark:text-slate-400 hover:text-emerald-700 font-bold text-sm transition-colors border border-gray-200 dark:border-slate-700 px-4 py-2 rounded-xl bg-white dark:bg-slate-900"
                 >
                   Batal
                 </button>
@@ -694,7 +694,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       setSelectedTemplate(t.klasifikasi);
                       setStep(2);
                     }}
-                    className="flex items-center p-3.5 bg-white border border-gray-200 rounded-xl hover:border-emerald-600 hover:bg-emerald-50/50 transition-all text-left group gap-3 relative cursor-pointer"
+                    className="flex items-center p-3.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-emerald-600 hover:bg-emerald-50/50 transition-all text-left group gap-3 relative cursor-pointer"
                   >
                     <button 
                       onClick={(e) => {
@@ -708,7 +708,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       className={`absolute top-2 right-2 p-1.5 rounded-full transition-all z-10 ${
                         favorites.includes(t.klasifikasi) 
                           ? 'bg-rose-50 text-rose-500 scale-110' 
-                          : 'bg-gray-50 text-gray-300 hover:text-rose-400 opacity-0 group-hover:opacity-100'
+                          : 'bg-gray-50 dark:bg-slate-800 text-gray-300 hover:text-rose-400 opacity-0 group-hover:opacity-100'
                       }`}
                       title={favorites.includes(t.klasifikasi) ? "Hapus dari Favorit" : "Tambah ke Favorit"}
                     >
@@ -731,7 +731,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           No: {String(t.noUrutTerakhir).padStart(3, '0')}
                         </span>
                       </div>
-                      <h4 className="font-bold text-sm text-gray-900 group-hover:text-emerald-800 transition-colors truncate">{t.jenis}</h4>
+                      <h4 className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-emerald-800 transition-colors truncate">{t.jenis}</h4>
                     </div>
                   </div>
                 );
@@ -744,7 +744,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                         <div className="flex items-center gap-2">
                           <Sparkles size={14} className="text-amber-500 fill-amber-500" />
                           <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">Paling Sering Digunakan</h4>
-                          <div className="h-px flex-1 bg-gray-100"></div>
+                          <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800"></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {mostUsed.map(renderTemplateCard)}
@@ -758,7 +758,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                         <div className="flex items-center gap-2">
                           <Heart size={14} className="text-rose-500 fill-rose-500" />
                           <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">Template Favorit</h4>
-                          <div className="h-px flex-1 bg-gray-100"></div>
+                          <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800"></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {favoriteTemplates.map(renderTemplateCard)}
@@ -772,7 +772,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                         <div className="flex items-center gap-2">
                           <Archive size={14} className="text-gray-400" />
                           <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400">Semua Template</h4>
-                          <div className="h-px flex-1 bg-gray-100"></div>
+                          <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800"></div>
                         </div>
                       )}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -797,21 +797,21 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 md:p-8 animate-in fade-in duration-500">
              <div className="lg:col-span-7 space-y-6">
                 
-                <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                   <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider">
+                <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+                   <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 uppercase tracking-wider">
                       <Search className="w-4 h-4 text-emerald-600" />
                       Identifikasi Penduduk
                    </h3>
                    <div className="max-w-xl mx-auto space-y-6 py-8">
               <div className="relative group">
-                <label className="block text-sm font-bold text-gray-600 mb-2">Cari NIK atau Nama</label>
+                <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Cari NIK atau Nama</label>
                 <div className="relative">
                   <input 
                     type="text" 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Masukkan NIK atau nama warga..."
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none font-semibold text-gray-800"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none font-semibold text-gray-800 dark:text-slate-100"
                   />
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
@@ -820,15 +820,15 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
 
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
                 {filteredResidents.map((r) => (
-                  <div key={r.nik} className="p-4 bg-white hover:bg-emerald-50/40 rounded-xl flex items-center justify-between border border-gray-100 hover:border-emerald-200 transition-all">
+                  <div key={r.nik} className="p-4 bg-white dark:bg-slate-900 hover:bg-emerald-50/40 rounded-xl flex items-center justify-between border border-gray-100 dark:border-slate-800 hover:border-emerald-200 transition-all">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700">
                         {r.name.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900">{r.name}</h4>
-                        <p className="text-xs text-gray-500 font-mono">NIK: {r.nik}</p>
-                        <p className="text-xs text-gray-500">{r.address || `${r.rt_rw || 'RT/RW'}`}</p>
+                        <h4 className="font-bold text-gray-900 dark:text-white">{r.name}</h4>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 font-mono">NIK: {r.nik}</p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400">{r.address || `${r.rt_rw || 'RT/RW'}`}</p>
                       </div>
                     </div>
                     <button 
@@ -849,18 +849,18 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                 ))}
                 
                 {searchQuery.trim().length > 0 && filteredResidents.length === 0 && (
-                  <div className="text-center py-12 flex flex-col items-center border border-dashed border-slate-200 rounded-2xl bg-slate-50">
-                    <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-3">
+                  <div className="text-center py-12 flex flex-col items-center border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-800">
+                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 mb-3">
                       <UserPlus className="w-6 h-6" />
                     </div>
-                    <h4 className="font-bold text-slate-800">Warga tidak ditemukan</h4>
-                    <p className="text-xs text-slate-500 mb-4 px-8">Jika warga domisili desa kita namun belum terdaftar, Anda bisa melewati pencarian ini.</p>
+                    <h4 className="font-bold text-slate-800 dark:text-slate-100">Warga tidak ditemukan</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 px-8">Jika warga domisili desa kita namun belum terdaftar, Anda bisa melewati pencarian ini.</p>
                     <button 
                       onClick={() => {
                         setSelectedResident(null);
                         
                       }}
-                      className="px-6 py-2 bg-emerald-700 text-white rounded-lg text-xs font-bold hover:bg-emerald-800 shadow-md shadow-emerald-100 transition-all"
+                      className="px-6 py-2 bg-emerald-700 text-white rounded-lg text-xs font-bold hover:bg-emerald-800 shadow-md dark:shadow-none shadow-emerald-100 transition-all"
                     >
                       Lanjut Manual & Daftarkan Baru
                     </button>
@@ -868,12 +868,12 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                 )}
 
                 {searchQuery.trim().length === 0 && residents.length > 0 && (
-                  <div className="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
-                    <p className="text-xs text-slate-500 font-bold mb-2">Daftar Warga Terbaru (Klik "Pilih" atau Cari di atas):</p>
+                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-2">Daftar Warga Terbaru (Klik "Pilih" atau Cari di atas):</p>
                     <div className="space-y-2">
                       {residents.slice(0, 3).map((r) => (
                         <div key={r.nik} className="flex items-center justify-between text-xs py-1">
-                          <span className="font-semibold text-slate-700">{r.name} <span className="text-[10px] text-slate-400 font-mono">({r.nik})</span></span>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300">{r.name} <span className="text-[10px] text-slate-400 font-mono">({r.nik})</span></span>
                           <button 
                             onClick={() => { 
                               setSelectedResident(r); 
@@ -899,35 +899,35 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
             
                 </section>
 
-                <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
-                   <h3 className="text-xl font-bold text-gray-900 mb-6">Lengkapi Informasi Surat</h3>
+                <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
+                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Lengkapi Informasi Surat</h3>
                    <form className="grid grid-cols-1 md:grid-cols-2 gap-8" onSubmit={(e) => { e.preventDefault();  }}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 mb-2">Nama Lengkap</label>
+                  <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Nama Lengkap</label>
                   <input 
                     type="text" 
                     value={selectedResident?.pendingMeta?.details?.name || selectedResident?.name || ''} 
                     readOnly 
-                    className="w-full bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 text-gray-500 cursor-not-allowed font-semibold"
+                    className="w-full bg-gray-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 cursor-not-allowed font-semibold"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 mb-2">NIK</label>
+                  <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">NIK</label>
                   <input 
                     type="text" 
                     value={selectedResident?.pendingMeta?.details?.nik || selectedResident?.nik || ''} 
                     readOnly 
-                    className="w-full bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 text-gray-500 cursor-not-allowed font-mono font-semibold"
+                    className="w-full bg-gray-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 cursor-not-allowed font-mono font-semibold"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 mb-2">Tempat, Tanggal Lahir</label>
+                  <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Tempat, Tanggal Lahir</label>
                   <input 
                     type="text" 
                     value={selectedResident ? `${selectedResident.pendingMeta?.details?.birthPlace || selectedResident.birthPlace || ''}, ${selectedResident.pendingMeta?.details?.birthDate || selectedResident.birthDate || ''}` : ''} 
                     readOnly 
-                    className="w-full bg-gray-50 px-4 py-3 rounded-xl border border-gray-200 text-gray-500 cursor-not-allowed"
+                    className="w-full bg-gray-50 dark:bg-slate-800 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 cursor-not-allowed"
                   />
                 </div>
               </div>
@@ -935,19 +935,19 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-600 mb-2">Nomor Surat</label>
+                    <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Nomor Surat</label>
                     <input 
                       type="text" 
                       value={nomorSurat}
                       onChange={(e) => setNomorSurat(e.target.value)}
                       placeholder="Auto-generated format"
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono font-bold text-emerald-800 text-sm"
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono font-bold text-emerald-800 text-sm"
                       required
                     />
                     <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Format: [Kode]/[No]/[Tahun]. Dapat diubah manual jika perlu.</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-600 mb-2">Penandatangan Surat</label>
+                    <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Penandatangan Surat</label>
                     <select
                       value={namaKades}
                       onChange={(e) => {
@@ -969,7 +969,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     </select>
                     
                     <div className="mt-4 pt-4 border-t border-emerald-100/50">
-                      <label className="flex items-center gap-3 p-3 bg-white border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition-colors">
+                      <label className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-50 transition-colors">
                         <input 
                           type="checkbox"
                           checked={includeCamat}
@@ -977,8 +977,8 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           className="w-5 h-5 text-emerald-600 rounded border-emerald-300 focus:ring-emerald-500"
                         />
                         <div>
-                          <div className="font-bold text-slate-800 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                          <div className="text-xs text-slate-500 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                          <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
                         </div>
                       </label>
                     </div>
@@ -994,19 +994,19 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       </h4>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Nama Usaha / Toko</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Nama Usaha / Toko</label>
                       <input 
                         type="text" 
                         value={usahaName}
                         onChange={(e) => setUsahaName(e.target.value)}
                         placeholder="Contoh: Warung Sembako Berkah / Bengkel Motor Makmur"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                         required
                       />
                       <p className="mt-1.5 text-[10px] text-emerald-600 font-medium">Tulis nama lengkap usaha atau nama toko fisik yang bersangkutan.</p>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Jenis / Bidang Usaha</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Jenis / Bidang Usaha</label>
                       <select 
                         value={BUSINESS_CATEGORIES.includes(usahaJenis) ? usahaJenis : (usahaJenis ? "Lainnya (Tulis Kustom...)" : "")}
                         onChange={(e) => {
@@ -1017,7 +1017,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                             setUsahaJenis(val);
                           }
                         }}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm bg-white"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm bg-white dark:bg-slate-900"
                         required
                       >
                         <option value="" disabled>-- Pilih Bidang Usaha --</option>
@@ -1040,14 +1040,14 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       )}
                     </div>
                     <div className="relative">
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Mulai Berdiri Sejak (Bulan/Tahun)</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Mulai Berdiri Sejak (Bulan/Tahun)</label>
                       <div className="flex gap-2">
                         <input 
                           type="text" 
                           value={usahaMulai}
                           onChange={(e) => setUsahaMulai(e.target.value)}
                           placeholder="Contoh: Januari 2021"
-                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                          className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                           required
                           onClick={() => setShowMulaiPicker(true)}
                         />
@@ -1062,21 +1062,21 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       </div>
 
                       {showMulaiPicker && (
-                        <div className="absolute right-0 mt-2 p-4 bg-white border border-gray-200 shadow-2xl rounded-2xl z-50 w-72 animate-in fade-in zoom-in-95 duration-150">
+                        <div className="absolute right-0 mt-2 p-4 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl z-50 w-72 animate-in fade-in zoom-in-95 duration-150">
                           {/* Picker Header */}
-                          <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+                          <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-slate-800">
                             <button
                               type="button"
                               onClick={() => setPickerYear(prev => prev - 1)}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 font-bold text-sm"
+                              className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-gray-600 dark:text-slate-400 font-bold text-sm"
                             >
                               &larr;
                             </button>
-                            <span className="font-bold text-gray-800 text-sm">{pickerYear}</span>
+                            <span className="font-bold text-gray-800 dark:text-slate-100 text-sm">{pickerYear}</span>
                             <button
                               type="button"
                               onClick={() => setPickerYear(prev => prev + 1)}
-                              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-600 font-bold text-sm"
+                              className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-gray-600 dark:text-slate-400 font-bold text-sm"
                             >
                               &rarr;
                             </button>
@@ -1096,8 +1096,8 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                                   }}
                                   className={`py-2 text-xs font-semibold rounded-lg transition-all ${
                                     isSelected 
-                                      ? 'bg-emerald-600 text-white shadow-sm font-bold' 
-                                      : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-700'
+                                      ? 'bg-emerald-600 text-white shadow-sm dark:shadow-none font-bold' 
+                                      : 'text-gray-700 dark:text-slate-300 hover:bg-emerald-50 hover:text-emerald-700'
                                   }`}
                                 >
                                   {month.substring(0, 3)}
@@ -1107,7 +1107,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           </div>
 
                           {/* Quick selection or Close */}
-                          <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100">
+                          <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-100 dark:border-slate-800">
                             <button
                               type="button"
                               onClick={() => {
@@ -1123,7 +1123,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                             <button
                               type="button"
                               onClick={() => setShowMulaiPicker(false)}
-                              className="text-[10px] font-bold text-gray-500 hover:bg-gray-100 px-2.5 py-1 rounded-md"
+                              className="text-[10px] font-bold text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 px-2.5 py-1 rounded-md"
                             >
                               Tutup
                             </button>
@@ -1133,35 +1133,35 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       <p className="mt-1.5 text-[10px] text-gray-400">Tulis langsung atau klik tombol <b>Pilih</b> untuk menggunakan kalender interaktif.</p>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Alamat Usaha</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Alamat Usaha</label>
                       <input 
                         type="text" 
                         value={usahaAlamat}
                         onChange={(e) => setUsahaAlamat(e.target.value)}
                         placeholder="Contoh: Jl. Keramat RT 01/RW 02 No. 12"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                         required
                       />
                       <p className="mt-1.5 text-[10px] text-emerald-600 font-medium">Lokasi operasional usaha. Cantumkan RT/RW jika berada di pemukiman desa.</p>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Nomor Induk Berusaha (NIB) / Izin Usaha (Opsional)</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Nomor Induk Berusaha (NIB) / Izin Usaha (Opsional)</label>
                       <input 
                         type="text" 
                         value={usahaNib}
                         onChange={(e) => setUsahaNib(e.target.value)}
                         placeholder="Contoh: 9120001234567 atau isi - jika belum ada"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Omset Bulanan / Perkiraan (Opsional)</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Omset Bulanan / Perkiraan (Opsional)</label>
                       <input 
                         type="text" 
                         value={usahaOmzet}
                         onChange={(e) => setUsahaOmzet(e.target.value)}
                         placeholder="Contoh: Rp 5.000.000,-"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                       />
                     </div>
                   </div>
@@ -1176,25 +1176,25 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       </h4>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Jumlah Penghasilan Bulanan (Rata-rata)</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Jumlah Penghasilan Bulanan (Rata-rata)</label>
                       <input 
                         type="text" 
                         value={penghasilanNominal}
                         onChange={(e) => setPenghasilanNominal(e.target.value)}
                         placeholder="Contoh: Rp 3.500.000,- (Tiga Juta Lima Ratus Ribu Rupiah)"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                         required
                       />
                       <p className="mt-1.5 text-[10px] text-emerald-600 font-medium">Tulis nominal angka serta terbilang dalam rupiah jika diperlukan.</p>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-gray-600 mb-1.5">Sumber Penghasilan / Pekerjaan</label>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Sumber Penghasilan / Pekerjaan</label>
                       <input 
                         type="text" 
                         value={penghasilanSumber}
                         onChange={(e) => setPenghasilanSumber(e.target.value)}
                         placeholder="Contoh: Bertani, Pedagang Kelontong, Wiraswasta"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                         required
                       />
                       <p className="mt-1.5 text-[10px] text-emerald-600 font-medium">Sektor pekerjaan yang menghasilkan pendapatan rutin terkait.</p>
@@ -1203,13 +1203,13 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                 )}
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-600 mb-2">Keperluan / Keterangan Tambahan</label>
+                  <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Keperluan / Keterangan Tambahan</label>
                   <textarea 
                     rows={4} 
                     value={keperluan}
                     onChange={(e) => setKeperluan(e.target.value)}
                     placeholder="Contoh: Digunakan untuk persyaratan melamar pekerjaan atau pengurusan administrasi kependudukan."
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none font-medium text-sm"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none resize-none font-medium text-sm"
                     required
                   ></textarea>
                   <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
@@ -1222,28 +1222,28 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
              
              <div className="lg:col-span-5 relative">
                 <div className="sticky top-24 space-y-6">
-                   <div className="flex-1 flex flex-col min-w-0 bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl">
+                   <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl">
                 {/* Zoom Controls */}
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0 relative z-10">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0 relative z-10">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span className="text-xs font-bold text-slate-700 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
                   </div>
                   
-                  <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-100">
+                  <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
                     <button 
                       onClick={() => setZoomLevel(prev => Math.max(0.3, prev - 0.05))} 
-                      className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                      className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                       title="Zoom Out"
                     >
                       <ZoomOut size={16} />
                     </button>
-                    <span className="text-xs font-mono font-bold text-slate-600 px-2 w-14 text-center">
+                    <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
                       {Math.round(zoomLevel * 100)}%
                     </span>
                     <button 
                       onClick={() => setZoomLevel(prev => Math.min(1.2, prev + 0.05))} 
-                      className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                      className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                       title="Zoom In"
                     >
                       <ZoomIn size={16} />
@@ -1251,7 +1251,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     <div className="w-px h-5 bg-slate-200 mx-1"></div>
                     <button 
                       onClick={() => setZoomLevel(0.45)} 
-                      className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-[10px] font-bold"
+                      className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-[10px] font-bold"
                       title="Reset Zoom"
                     >
                       Reset
@@ -1280,17 +1280,17 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       borderRadius: '12px',
                       transition: 'width 0.2s ease-out, height 0.2s ease-out'
                     }}
-                    className="bg-white m-auto shrink-0 relative"
+                    className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
                   >
                     {/* Visual Crop Marks */}
-                    <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 pointer-events-none z-10"></div>
-                    <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 pointer-events-none z-10"></div>
-                    <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 pointer-events-none z-10"></div>
-                    <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 pointer-events-none z-10"></div>
+                    <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                    <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                    <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                    <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
 
                     <div 
                       ref={componentRef}
-                      className="bg-white p-12 relative text-black shrink-0 print-wrapper animate-in fade-in duration-300 printable-area" 
+                      className="bg-white dark:bg-slate-900 p-12 relative text-black shrink-0 print-wrapper animate-in fade-in duration-300 printable-area" 
                       style={{ 
                         fontFamily: letterFont,
                         width: '794px',
@@ -1302,10 +1302,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     >
                   
                   {/* Crop Marks (Visual only for preview) */}
-                  <div className="crop-mark absolute top-8 left-8 w-4 h-4 border-t border-l border-gray-300"></div>
-                  <div className="crop-mark absolute top-8 right-8 w-4 h-4 border-t border-r border-gray-300"></div>
-                  <div className="crop-mark absolute bottom-8 left-8 w-4 h-4 border-b border-l border-gray-300"></div>
-                  <div className="crop-mark absolute bottom-8 right-8 w-4 h-4 border-b border-r border-gray-300"></div>
+                  <div className="crop-mark absolute top-8 left-8 w-4 h-4 border-t border-l border-gray-300 dark:border-slate-600"></div>
+                  <div className="crop-mark absolute top-8 right-8 w-4 h-4 border-t border-r border-gray-300 dark:border-slate-600"></div>
+                  <div className="crop-mark absolute bottom-8 left-8 w-4 h-4 border-b border-l border-gray-300 dark:border-slate-600"></div>
+                  <div className="crop-mark absolute bottom-8 right-8 w-4 h-4 border-b border-r border-gray-300 dark:border-slate-600"></div>
 
                   <div className="px-4">
                     {/* Letter Header / Kop Surat */}
@@ -1424,7 +1424,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                         specificContent = (
                           <div className="my-6 pl-4 border-l-4 border-red-600/50 space-y-2 bg-red-50/30 p-3 rounded-lg">
                             <p className="font-extrabold text-red-950 uppercase tracking-wider text-xs">STATUS: TELAH MENINGGAL DUNIA / WAFAT</p>
-                            <p className="text-justify text-xs text-gray-700 leading-[1.15]">Berdasarkan saksi keluarga dan laporan kependudukan wilayah setempat, yang bersangkutan dinyatakan telah wafat dengan tertib kependudukan.</p>
+                            <p className="text-justify text-xs text-gray-700 dark:text-slate-300 leading-[1.15]">Berdasarkan saksi keluarga dan laporan kependudukan wilayah setempat, yang bersangkutan dinyatakan telah wafat dengan tertib kependudukan.</p>
                           </div>
                         );
                         middleParagraph = `Surat keterangan kematian ini diterbitkan secara resmi untuk pengurusan akta kematian, asuransi, waris, serta keperluan keluarga lainnya:`;
@@ -1509,7 +1509,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           <p className="text-justify leading-[1.15]">
                             {middleParagraph}
                           </p>
-                          <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl my-4 text-justify font-medium italic text-gray-800">
+                          <div className="p-4 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 rounded-xl my-4 text-justify font-medium italic text-gray-800 dark:text-slate-100">
                             "{keperluan || 'Persyaratan administrasi kependudukan.'}"
                           </div>
                           <p className="text-justify leading-[1.15] mt-2">{trailingParagraph}</p>
@@ -1534,13 +1534,13 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
               {/* Actions Sidebar */}
               
                    
-                   <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                   <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none">
                        <h4 className="font-bold text-emerald-800 mb-2">Selesai Berkas?</h4>
                        <p className="text-sm text-emerald-700/80 mb-6 leading-relaxed">
                           Pastikan data sudah benar sebelum mencetak atau menyimpan ke arsip digital.
                        </p>
                        <div className="space-y-3">
-                          <button onClick={handlePrint} className="w-full flex items-center justify-center gap-2 bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-sm hover:bg-emerald-800 transition-all">
+                          <button onClick={handlePrint} className="w-full flex items-center justify-center gap-2 bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all">
                              <Printer className="w-5 h-5" /> Cetak PDF
                           </button>
                           <button onClick={handleSimpan} disabled={isSaving} className="w-full flex items-center justify-center gap-2 border-2 border-emerald-700 text-emerald-700 py-3 rounded-xl font-bold hover:bg-emerald-50 transition-all disabled:opacity-50">

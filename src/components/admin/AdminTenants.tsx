@@ -296,7 +296,7 @@ export default function AdminTenants() {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex border-b border-gray-200 dark:border-slate-700">
         <button
           onClick={() => setActiveTab('tenants')}
           className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
@@ -340,14 +340,14 @@ export default function AdminTenants() {
       {activeTab === 'updates' ? (
         <AdminGlobalUpdates />
       ) : activeTab === 'feedback' ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <MessageSquare className="text-emerald-600" />
                 Daftar Saran & Kritik Pengguna
               </h2>
-              <p className="text-gray-500 text-sm mt-1">Kumpulan masukan dari seluruh desa yang menggunakan platform.</p>
+              <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Kumpulan masukan dari seluruh desa yang menggunakan platform.</p>
             </div>
             <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">
               {feedbacks.length} Total Feedback
@@ -356,7 +356,7 @@ export default function AdminTenants() {
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50/50 text-gray-500 font-medium border-b border-gray-100">
+              <thead className="bg-gray-50/50 text-gray-500 dark:text-slate-400 font-medium border-b border-gray-100 dark:border-slate-800">
                 <tr>
                   <th className="px-6 py-4">Pengirim</th>
                   <th className="px-6 py-4">Kategori</th>
@@ -370,7 +370,7 @@ export default function AdminTenants() {
                 {feedbacks.map(f => (
                   <tr key={f.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-bold text-gray-900">{f.nama}</div>
+                      <div className="font-bold text-gray-900 dark:text-white">{f.nama}</div>
                       <div className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">{f.desa}</div>
                     </td>
                     <td className="px-6 py-4">
@@ -381,14 +381,14 @@ export default function AdminTenants() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-gray-600 max-w-xs truncate" title={f.pesan}>{f.pesan}</p>
+                      <p className="text-gray-600 dark:text-slate-400 max-w-xs truncate" title={f.pesan}>{f.pesan}</p>
                     </td>
-                    <td className="px-6 py-4 text-gray-500 font-medium">
+                    <td className="px-6 py-4 text-gray-500 dark:text-slate-400 font-medium">
                       {f.tanggal}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        f.status === 'Baru' ? 'bg-emerald-100 text-emerald-700 animate-pulse' : f.status === 'Dibaca' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'
+                        f.status === 'Baru' ? 'bg-emerald-100 text-emerald-700 animate-pulse' : f.status === 'Dibaca' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'
                       }`}>
                         {f.status}
                       </span>
@@ -423,11 +423,11 @@ export default function AdminTenants() {
         <>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
                 <Server className="w-6 h-6 text-emerald-600" />
                 Manajemen Klien & Kredensial Multi-Tenant
               </h2>
-              <p className="text-gray-500 text-sm mt-1">Kelola desa klien, status berlangganan, serta kredensial akses pimpinan dan operator secara mandiri.</p>
+              <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Kelola desa klien, status berlangganan, serta kredensial akses pimpinan dan operator secara mandiri.</p>
             </div>
             <button 
               onClick={() => {
@@ -442,7 +442,7 @@ export default function AdminTenants() {
                 });
                 setIsModalOpen(true);
               }} 
-              className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-md hover:shadow-lg active:scale-95 shrink-0"
+              className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-md dark:shadow-none hover:shadow-lg active:scale-95 shrink-0"
             >
               <Plus size={16} />
               Tambah Desa Klien
@@ -451,38 +451,38 @@ export default function AdminTenants() {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center gap-4">
               <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 shrink-0 animate-pulse">
                 <Database size={24} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Klien Desa</p>
-                <p className="text-2xl font-extrabold text-gray-900"><NumberCounter end={tenants.length} /></p>
+                <p className="text-2xl font-extrabold text-gray-900 dark:text-white"><NumberCounter end={tenants.length} /></p>
               </div>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 shrink-0">
                 <Activity size={24} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Klien Aktif</p>
-                <p className="text-2xl font-extrabold text-gray-900"><NumberCounter end={tenants.filter(t => t.status === 'active' || !t.status).length} /></p>
+                <p className="text-2xl font-extrabold text-gray-900 dark:text-white"><NumberCounter end={tenants.filter(t => t.status === 'active' || !t.status).length} /></p>
               </div>
             </div>
-            <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center gap-4">
               <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center text-purple-600 shrink-0">
                 <ShieldCheck size={24} />
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Arsitektur Database</p>
-                <p className="text-base font-extrabold text-gray-900">RLS Isolated Multi-Tenant</p>
+                <p className="text-base font-extrabold text-gray-900 dark:text-white">RLS Isolated Multi-Tenant</p>
               </div>
             </div>
           </div>
 
           {/* Tenant List */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
+            <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 gap-4">
               <div className="relative w-full sm:w-80">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input 
@@ -490,11 +490,11 @@ export default function AdminTenants() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Cari desa, domain, atau kode unik..." 
-                  className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white"
+                  className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white dark:bg-slate-900"
                 />
               </div>
               
-              <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+              <div className="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-slate-400">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 <span>Tabel Terenkripsi Otomatis</span>
               </div>
@@ -502,7 +502,7 @@ export default function AdminTenants() {
             
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50/50 text-gray-500 font-bold border-b border-gray-100 uppercase text-[11px] tracking-wider">
+                <thead className="bg-gray-50/50 text-gray-500 dark:text-slate-400 font-bold border-b border-gray-100 dark:border-slate-800 uppercase text-[11px] tracking-wider">
                   <tr>
                     <th className="px-6 py-4">Instansi Klien</th>
                     <th className="px-6 py-4">Domain / Subdomain</th>
@@ -527,7 +527,7 @@ export default function AdminTenants() {
                       <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <AlertTriangle className="text-amber-500 w-8 h-8" />
-                          <span className="font-bold text-gray-700">Tidak ada hasil cocok</span>
+                          <span className="font-bold text-gray-700 dark:text-slate-300">Tidak ada hasil cocok</span>
                           <span className="text-xs text-gray-400">Coba ubah kata kunci pencarian Anda</span>
                         </div>
                       </td>
@@ -548,13 +548,13 @@ export default function AdminTenants() {
                               <Building2 size={16} />
                             </div>
                             <div>
-                              <div className="font-extrabold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                              <div className="font-extrabold text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors">
                                 {tenant.nama_desa}
                               </div>
                               <div className="text-[11px] text-gray-400 font-semibold font-mono mt-0.5 uppercase tracking-wide flex items-center gap-1.5">
                                 <span>ID: {tenant.id.split('-')[0]}</span>
                                 <span className="text-gray-300">•</span>
-                                <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold">KODE: {tenant.kode_desa}</span>
+                                <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded text-[9px] font-bold">KODE: {tenant.kode_desa}</span>
                               </div>
                             </div>
                           </div>
@@ -563,7 +563,7 @@ export default function AdminTenants() {
                         {/* Domain / Subdomain */}
                         <td className="px-6 py-4">
                           <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 bg-slate-50 px-2 py-1 rounded-md border border-slate-100 w-fit">
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800 w-fit">
                               <Globe size={13} className="text-emerald-600 shrink-0" />
                               <span className="truncate">{tenant.domain || 'Belum diatur'}</span>
                             </div>
@@ -577,7 +577,7 @@ export default function AdminTenants() {
                         <td className="px-6 py-4">
                           <div className="space-y-1.5 max-w-[200px]">
                             {/* Email */}
-                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 p-1 rounded-md border border-gray-100 transition-all">
+                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-md border border-gray-100 dark:border-slate-800 transition-all">
                               <span className="truncate flex items-center gap-1">
                                 <Mail size={11} className="text-amber-500 shrink-0" />
                                 <span className="font-mono text-[11px]">{kadEmail}</span>
@@ -591,7 +591,7 @@ export default function AdminTenants() {
                               </button>
                             </div>
                             {/* Password */}
-                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 p-1 rounded-md border border-gray-100 transition-all">
+                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-md border border-gray-100 dark:border-slate-800 transition-all">
                               <span className="truncate flex items-center gap-1">
                                 <Lock size={11} className="text-amber-500 shrink-0" />
                                 <span className="font-mono text-[11px]">
@@ -613,7 +613,7 @@ export default function AdminTenants() {
                         <td className="px-6 py-4">
                           <div className="space-y-1.5 max-w-[200px]">
                             {/* Email */}
-                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 p-1 rounded-md border border-gray-100 transition-all">
+                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-md border border-gray-100 dark:border-slate-800 transition-all">
                               <span className="truncate flex items-center gap-1">
                                 <Mail size={11} className="text-blue-500 shrink-0" />
                                 <span className="font-mono text-[11px]">{admEmail}</span>
@@ -627,7 +627,7 @@ export default function AdminTenants() {
                               </button>
                             </div>
                             {/* Password */}
-                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 p-1 rounded-md border border-gray-100 transition-all">
+                            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-gray-600 dark:text-slate-400 bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 p-1 rounded-md border border-gray-100 dark:border-slate-800 transition-all">
                               <span className="truncate flex items-center gap-1">
                                 <Lock size={11} className="text-blue-500 shrink-0" />
                                 <span className="font-mono text-[11px]">
@@ -667,10 +667,10 @@ export default function AdminTenants() {
                             {/* Lihat Sandi Button */}
                             <button
                               onClick={() => setShowRowPasswords(prev => ({ ...prev, [tenant.id]: !prev[tenant.id] }))}
-                              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-sm active:scale-95 border ${
+                              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 shadow-sm dark:shadow-none active:scale-95 border ${
                                 isVisible 
                                   ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' 
-                                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                                  : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                               }`}
                               title={isVisible ? "Sembunyikan Sandi" : "Lihat Sandi"}
                             >
@@ -681,7 +681,7 @@ export default function AdminTenants() {
                             {/* Impersonate Login Button */}
                             <button 
                               onClick={() => handleLoginAs(tenant)}
-                              className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors flex items-center gap-1 shadow-sm active:scale-95"
+                              className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors flex items-center gap-1 shadow-sm dark:shadow-none active:scale-95"
                               title="Login instan ke dasbor desa klien ini"
                             >
                               <ExternalLink size={13} />
@@ -692,21 +692,21 @@ export default function AdminTenants() {
                             <div className="relative">
                               <button 
                                 onClick={() => setActiveDropdownId(activeDropdownId === tenant.id ? null : tenant.id)}
-                                className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200 bg-white"
+                                className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                               >
                                 <MoreVertical size={14} />
                               </button>
 
                               {activeDropdownId === tenant.id && (
-                                <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1 px-1.5 flex items-center gap-1 animate-in fade-in slide-in-from-right-2 duration-150">
+                                <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-50 py-1 px-1.5 flex items-center gap-1 animate-in fade-in slide-in-from-right-2 duration-150">
                                   <button
                                     onClick={() => handleOpenEditModal(tenant)}
-                                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 hover:text-emerald-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
+                                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-emerald-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
                                     <Edit size={13} className="text-gray-400" />
                                     <span>Edit</span>
                                   </button>
-                                  <div className="w-[1px] h-4 bg-gray-100"></div>
+                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
                                   <button
                                     onClick={() => handleDeleteTenant(tenant)}
                                     className="px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
@@ -732,10 +732,10 @@ export default function AdminTenants() {
       {/* CREATE MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50">
               <div>
-                <h3 className="font-extrabold text-gray-900 text-lg flex items-center gap-2">
+                <h3 className="font-extrabold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                   <Building2 className="text-emerald-600" />
                   Tambah Klien Desa Baru
                 </h3>
@@ -752,42 +752,42 @@ export default function AdminTenants() {
                 <div className="space-y-4">
                   <h4 className="text-xs font-black text-emerald-800 uppercase tracking-widest border-b pb-1">Detail Instansi Desa</h4>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">Nama Desa</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nama Desa</label>
                     <input 
                       required 
                       type="text" 
                       value={formData.nama_desa} 
                       onChange={e => setFormData({...formData, nama_desa: e.target.value})} 
-                      className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
+                      className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
                       placeholder="Contoh: Desa Wasah Hilir" 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">Kode Desa (Unik / Rujukan Pusat)</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Kode Desa (Unik / Rujukan Pusat)</label>
                     <input 
                       required 
                       type="text" 
                       value={formData.kode_desa} 
                       onChange={e => setFormData({...formData, kode_desa: e.target.value})} 
-                      className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
+                      className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
                       placeholder="Contoh: 1234WHi" 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">Domain / Subdomain Utama</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Domain / Subdomain Utama</label>
                     <input 
                       required 
                       type="text" 
                       value={formData.domain} 
                       onChange={e => setFormData({...formData, domain: e.target.value})} 
-                      className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
+                      className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
                       placeholder="Contoh: wasahhilir.sistemdidesa.id" 
                     />
                   </div>
                 </div>
 
                 {/* Initial Custom Credentials */}
-                <div className="space-y-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                <div className="space-y-4 bg-gray-50 dark:bg-slate-800 p-4 rounded-2xl border border-gray-100 dark:border-slate-800">
                   <h4 className="text-xs font-black text-emerald-800 uppercase tracking-widest border-b pb-1">Kredensial Login Pertama</h4>
                   
                   {/* Super Admin */}
@@ -799,7 +799,7 @@ export default function AdminTenants() {
                         type="email" 
                         value={formData.kades_email} 
                         onChange={e => setFormData({...formData, kades_email: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900" 
                         placeholder="Masukkan email kades" 
                       />
                     </div>
@@ -809,7 +809,7 @@ export default function AdminTenants() {
                         type="text" 
                         value={formData.kades_password} 
                         onChange={e => setFormData({...formData, kades_password: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900" 
                         placeholder="kades123" 
                       />
                     </div>
@@ -824,7 +824,7 @@ export default function AdminTenants() {
                         type="email" 
                         value={formData.admin_email} 
                         onChange={e => setFormData({...formData, admin_email: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900" 
                         placeholder="Masukkan email admin" 
                       />
                     </div>
@@ -834,7 +834,7 @@ export default function AdminTenants() {
                         type="text" 
                         value={formData.admin_password} 
                         onChange={e => setFormData({...formData, admin_password: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900" 
                         placeholder="admin123" 
                       />
                     </div>
@@ -842,8 +842,8 @@ export default function AdminTenants() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-100 flex gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl hover:bg-gray-200 transition-colors">Batal</button>
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex gap-3">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl hover:bg-gray-200 transition-colors">Batal</button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
                   {isSubmitting ? 'Menyimpan...' : 'Simpan & Daftarkan Klien'}
                 </button>
@@ -856,10 +856,10 @@ export default function AdminTenants() {
       {/* EDIT CREDENTIALS / DETAILS MODAL */}
       {isEditModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50">
               <div>
-                <h3 className="font-extrabold text-gray-900 text-lg flex items-center gap-2">
+                <h3 className="font-extrabold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                   <Key className="text-emerald-600" />
                   Kelola Klien & Atur Kredensial Akses
                 </h3>
@@ -876,41 +876,41 @@ export default function AdminTenants() {
                 <div className="space-y-4">
                   <h4 className="text-xs font-black text-emerald-800 uppercase tracking-widest border-b pb-1">Detail Registrasi Instansi</h4>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">Nama Instansi Desa</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Nama Instansi Desa</label>
                     <input 
                       required 
                       type="text" 
                       value={editFormData.nama_desa} 
                       onChange={e => setEditFormData({...editFormData, nama_desa: e.target.value})} 
-                      className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" 
+                      className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">Kode Desa (Unik)</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Kode Desa (Unik)</label>
                     <input 
                       required 
                       type="text" 
                       value={editFormData.kode_desa} 
                       onChange={e => setEditFormData({...editFormData, kode_desa: e.target.value})} 
-                      className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" 
+                      className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">Domain / Subdomain</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Domain / Subdomain</label>
                     <input 
                       required 
                       type="text" 
                       value={editFormData.domain} 
                       onChange={e => setEditFormData({...editFormData, domain: e.target.value})} 
-                      className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" 
+                      className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" 
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1">Status Klien</label>
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Status Klien</label>
                     <select 
                       value={editFormData.status} 
                       onChange={e => setEditFormData({...editFormData, status: e.target.value})} 
-                      className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     >
                       <option value="active">Aktif / Berlangganan</option>
                       <option value="inactive">Suspend / Non-aktif</option>
@@ -931,7 +931,7 @@ export default function AdminTenants() {
                         type="email" 
                         value={editFormData.kades_email} 
                         onChange={e => setEditFormData({...editFormData, kades_email: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900" 
                       />
                     </div>
                     <div>
@@ -940,7 +940,7 @@ export default function AdminTenants() {
                         type="text" 
                         value={editFormData.kades_password} 
                         onChange={e => setEditFormData({...editFormData, kades_password: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white font-mono" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 font-mono" 
                       />
                     </div>
                   </div>
@@ -954,7 +954,7 @@ export default function AdminTenants() {
                         type="email" 
                         value={editFormData.admin_email} 
                         onChange={e => setEditFormData({...editFormData, admin_email: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900" 
                       />
                     </div>
                     <div>
@@ -963,15 +963,15 @@ export default function AdminTenants() {
                         type="text" 
                         value={editFormData.admin_password} 
                         onChange={e => setEditFormData({...editFormData, admin_password: e.target.value})}
-                        className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg bg-white font-mono" 
+                        className="w-full px-3 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 font-mono" 
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-100 flex gap-3">
-                <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl hover:bg-gray-200 transition-colors">Batal</button>
+              <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex gap-3">
+                <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl hover:bg-gray-200 transition-colors">Batal</button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 transition-colors">
                   {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan Kredensial'}
                 </button>

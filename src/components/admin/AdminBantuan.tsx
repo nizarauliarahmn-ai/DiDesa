@@ -319,13 +319,13 @@ export default function AdminBantuan({
                 setFormProgram("");
                 setCriteriaChecked({});
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white shadow-sm border border-gray-200 text-gray-700 hover:text-emerald-700 hover:border-emerald-200 transition-all active:scale-95"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 shadow-sm dark:shadow-none border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 hover:text-emerald-700 hover:border-emerald-200 transition-all active:scale-95"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Tambah Penerima Bantuan</h2>
-              <p className="text-sm text-gray-500 mt-0.5">Input data warga baru untuk program bantuan sosial desa.</p>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tambah Penerima Bantuan</h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">Input data warga baru untuk program bantuan sosial desa.</p>
             </div>
           </div>
           <div className="flex gap-3 w-full sm:w-auto">
@@ -337,14 +337,14 @@ export default function AdminBantuan({
                 setFormProgram("");
                 setCriteriaChecked({});
               }}
-              className="flex-1 sm:flex-none px-6 py-2.5 border border-gray-300 text-gray-700 font-bold text-sm rounded-xl hover:bg-gray-50 transition-all active:scale-95 bg-white"
+              className="flex-1 sm:flex-none px-6 py-2.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 font-bold text-sm rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all active:scale-95 bg-white dark:bg-slate-900"
             >
               Batal
             </button>
             <button 
               onClick={handleSaveAddForm}
               disabled={isSaving || !selectedResidentNik || !formProgram}
-              className="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-sm hover:bg-emerald-800 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               {isSaving ? 'Menyimpan...' : 'Simpan Data'}
@@ -357,17 +357,17 @@ export default function AdminBantuan({
           {/* Left Column: Form Fields */}
           <div className="lg:col-span-8 space-y-6">
             {/* Section 1: Pilih Penduduk */}
-            <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 space-y-6">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                   <Search className="w-4 h-4" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">1. Pilih Penduduk</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">1. Pilih Penduduk</h3>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1.5 relative">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">
                     Cari Berdasarkan NIK atau Nama
                   </label>
                   <div className="relative group">
@@ -382,14 +382,14 @@ export default function AdminBantuan({
                           setSelectedResidentNik(""); // Clear selection if user types again
                         }
                       }}
-                      className="w-full h-12 pl-11 pr-4 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 bg-white transition-all"
+                      className="w-full h-12 pl-11 pr-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900 transition-all"
                     />
                   </div>
                   <p className="text-[11px] text-gray-400 italic ml-1">Ketik nama atau NIK warga untuk mulai mencari</p>
 
                   {/* Suggestion Dropdown */}
                   {searchResidentQuery.trim() !== "" && !selectedResidentNik && (
-                    <div className="absolute left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden divide-y divide-gray-100 max-h-[220px] overflow-y-auto">
+                    <div className="absolute left-0 right-0 z-50 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden divide-y divide-gray-100 max-h-[220px] overflow-y-auto">
                       {searchResultsForAddView.length === 0 ? (
                         <p className="p-4 text-xs text-gray-400 text-center font-medium">Warga tidak ditemukan</p>
                       ) : (
@@ -404,8 +404,8 @@ export default function AdminBantuan({
                             className="w-full p-3.5 text-left hover:bg-emerald-50/40 cursor-pointer transition-colors flex justify-between items-center"
                           >
                             <div className="text-left">
-                              <p className="text-sm font-extrabold text-gray-800">{r.name}</p>
-                              <p className="text-[11px] font-bold text-gray-500 font-mono">NIK: {r.nik}</p>
+                              <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100">{r.name}</p>
+                              <p className="text-[11px] font-bold text-gray-500 dark:text-slate-400 font-mono">NIK: {r.nik}</p>
                               {r.status?.toLowerCase().includes('meninggal') && (
                                 <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold rounded">
                                   <AlertCircle className="w-3 h-3" />
@@ -431,22 +431,22 @@ export default function AdminBantuan({
                 </div>
 
                 {/* Resident Info Preview Card */}
-                <div className="p-5 rounded-2xl bg-slate-50 border border-gray-200/60 flex gap-4 items-start shadow-inner">
+                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-gray-200/60 flex gap-4 items-start shadow-inner">
                   <div className="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 shrink-0">
                     <Users className="w-8 h-8" />
                   </div>
                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Nama Lengkap</p>
-                      <p className="font-bold text-gray-800 text-sm">{selectedResidentDetail ? selectedResidentDetail.name : "-"}</p>
+                      <p className="font-bold text-gray-800 dark:text-slate-100 text-sm">{selectedResidentDetail ? selectedResidentDetail.name : "-"}</p>
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">NIK</p>
-                      <p className="font-bold text-gray-800 text-sm font-mono">{selectedResidentDetail ? selectedResidentDetail.nik : "-"}</p>
+                      <p className="font-bold text-gray-800 dark:text-slate-100 text-sm font-mono">{selectedResidentDetail ? selectedResidentDetail.nik : "-"}</p>
                     </div>
                     <div className="sm:col-span-2">
                       <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Alamat</p>
-                      <p className="text-xs text-gray-600 font-semibold leading-relaxed">
+                      <p className="text-xs text-gray-600 dark:text-slate-400 font-semibold leading-relaxed">
                         {selectedResidentDetail 
                           ? `RT ${selectedResidentDetail.rt || "-"} / RW ${selectedResidentDetail.rw || "-"}, Desa ${selectedResidentDetail.desa || "Sukamaju"}, ${selectedResidentDetail.address || ""}`
                           : "Pilih warga terlebih dahulu..."}
@@ -483,17 +483,17 @@ export default function AdminBantuan({
             </section>
 
             {/* Section 2: Detail Bantuan */}
-            <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-6">
+            <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 space-y-6">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                   <Banknote className="w-4 h-4" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">2. Detail Program Bantuan</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">2. Detail Program Bantuan</h3>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Program Bantuan</label>
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Program Bantuan</label>
                   <select 
                     value={formProgram}
                     onChange={(e) => {
@@ -514,7 +514,7 @@ export default function AdminBantuan({
                         setFormFunding("APBN");
                       }
                     }}
-                    className="w-full h-12 px-4 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 bg-white"
+                    className="w-full h-12 px-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                   >
                     <option value="">Pilih Program</option>
                     <option value="BLT Dana Desa">BLT Dana Desa</option>
@@ -525,7 +525,7 @@ export default function AdminBantuan({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status Pengajuan</label>
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Status Pengajuan</label>
                   <div className="w-full h-12 px-4 flex items-center bg-amber-50/50 border border-amber-100 rounded-xl text-amber-800">
                     <span className="w-2 h-2 rounded-full bg-amber-500 mr-2"></span>
                     <span className="text-sm font-bold">Proses Verifikasi</span>
@@ -533,25 +533,25 @@ export default function AdminBantuan({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Besaran Bantuan</label>
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Besaran Bantuan</label>
                   <div className="relative group">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">Rp</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400 font-bold text-sm">Rp</span>
                     <input 
                       type="text"
                       value={formAmount}
                       onChange={(e) => setFormAmount(e.target.value)}
                       placeholder="300.000"
-                      className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 bg-white"
+                      className="w-full h-12 pl-10 pr-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Sumber Dana</label>
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Sumber Dana</label>
                   <select 
                     value={formFunding}
                     onChange={(e) => setFormFunding(e.target.value)}
-                    className="w-full h-12 px-4 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 bg-white"
+                    className="w-full h-12 px-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                   >
                     <option value="">Pilih Sumber Dana</option>
                     <option value="Dana Desa">Dana Desa</option>
@@ -566,14 +566,14 @@ export default function AdminBantuan({
 
           {/* Right Column: Criteria & Actions */}
           <div className="lg:col-span-4">
-            <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between space-y-6">
+            <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 flex flex-col justify-between space-y-6">
               <div>
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                       <CheckCircle2 className="w-4 h-4" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900">3. Kriteria</h3>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">3. Kriteria</h3>
                   </div>
                   <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full uppercase tracking-wider">
                     Dinamis
@@ -582,9 +582,9 @@ export default function AdminBantuan({
 
                 {/* Empty State */}
                 {!formProgram ? (
-                  <div className="flex mb-6 flex-col items-center justify-center py-12 text-center border border-dashed border-gray-200 rounded-2xl bg-gray-50/40 px-4">
+                  <div className="flex mb-6 flex-col items-center justify-center py-12 text-center border border-dashed border-gray-200 dark:border-slate-700 rounded-2xl bg-gray-50/40 px-4">
                     <AlertCircle className="w-12 h-12 text-gray-300 mb-3 animate-pulse" />
-                    <p className="text-xs text-gray-500 italic max-w-[200px] leading-relaxed">
+                    <p className="text-xs text-gray-500 dark:text-slate-400 italic max-w-[200px] leading-relaxed">
                       Pilih program bantuan terlebih dahulu untuk melihat kriteria yang relevan.
                     </p>
                   </div>
@@ -593,28 +593,28 @@ export default function AdminBantuan({
                   <div className="space-y-3">
                     {formProgram === "BLT Dana Desa" && (
                       <>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["low_income"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "low_income": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Penghasilan Rendah</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">Keluarga dengan pendapatan di bawah UMR desa.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Penghasilan Rendah</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">Keluarga dengan pendapatan di bawah UMR desa.</p>
                           </div>
                         </label>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["job_loss"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "job_loss": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Kehilangan Pekerjaan</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">PHK atau usaha terhenti akibat kondisi darurat.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Kehilangan Pekerjaan</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">PHK atau usaha terhenti akibat kondisi darurat.</p>
                           </div>
                         </label>
                       </>
@@ -622,28 +622,28 @@ export default function AdminBantuan({
 
                     {formProgram === "Program Keluarga Harapan (PKH)" && (
                       <>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["elderly"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "elderly": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Lanjut Usia (Lansia)</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">Berusia di atas 60 tahun & tidak produktif.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Lanjut Usia (Lansia)</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">Berusia di atas 60 tahun & tidak produktif.</p>
                           </div>
                         </label>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["disability"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "disability": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Disabilitas</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">Memiliki keterbatasan fisik atau mental.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Disabilitas</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">Memiliki keterbatasan fisik atau mental.</p>
                           </div>
                         </label>
                       </>
@@ -651,28 +651,28 @@ export default function AdminBantuan({
 
                     {formProgram === "Bantuan Pangan Non-Tunai" && (
                       <>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["disability"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "disability": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Disabilitas</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">Memiliki keterbatasan fisik atau mental.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Disabilitas</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">Memiliki keterbatasan fisik atau mental.</p>
                           </div>
                         </label>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["low_income"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "low_income": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Penghasilan Rendah</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">Keluarga dengan pendapatan di bawah UMR desa.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Penghasilan Rendah</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">Keluarga dengan pendapatan di bawah UMR desa.</p>
                           </div>
                         </label>
                       </>
@@ -680,28 +680,28 @@ export default function AdminBantuan({
 
                     {formProgram === "Bansos Tunai Kemensos" && (
                       <>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["low_income"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "low_income": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Penghasilan Rendah</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">Keluarga dengan pendapatan di bawah UMR desa.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Penghasilan Rendah</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">Keluarga dengan pendapatan di bawah UMR desa.</p>
                           </div>
                         </label>
-                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
+                        <label className="flex items-start gap-3.5 p-3.5 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all cursor-pointer group border border-transparent hover:border-gray-100">
                           <input 
                             type="checkbox"
                             checked={!!criteriaChecked["job_loss"]}
                             onChange={(e) => setCriteriaChecked({ ...criteriaChecked, "job_loss": e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
+                            className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 focus:ring-offset-0 mt-0.5" 
                           />
                           <div>
-                            <p className="font-bold text-sm text-gray-800">Kehilangan Pekerjaan</p>
-                            <p className="text-xs text-gray-500 leading-normal mt-0.5 font-medium">PHK atau usaha terhenti akibat kondisi darurat.</p>
+                            <p className="font-bold text-sm text-gray-800 dark:text-slate-100">Kehilangan Pekerjaan</p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 leading-normal mt-0.5 font-medium">PHK atau usaha terhenti akibat kondisi darurat.</p>
                           </div>
                         </label>
                       </>
@@ -729,7 +729,7 @@ export default function AdminBantuan({
     <div className="max-w-6xl mx-auto pb-24 space-y-6">
       {/* DB Engine Indicator Header Badge */}
       <div className="flex justify-end">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 shadow-sm">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 text-xs font-bold border border-gray-200 dark:border-slate-700 shadow-sm dark:shadow-none">
           <Database className="w-4 h-4 text-emerald-600 animate-pulse" />
           <span>Koneksi Live:</span>
           <span className={`px-2 py-0.5 rounded-md font-extrabold text-[10px] ${
@@ -756,8 +756,8 @@ export default function AdminBantuan({
       {/* Welcome Header */}
       <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Program Bantuan Aktif</h3>
-          <p className="text-gray-500 mt-1">Kelola dan validasi penerima bantuan sosial Desa Sukamaju secara langsung.</p>
+          <h3 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Program Bantuan Aktif</h3>
+          <p className="text-gray-500 dark:text-slate-400 mt-1">Kelola dan validasi penerima bantuan sosial Desa Sukamaju secara langsung.</p>
         </div>
         <button 
           onClick={() => {
@@ -779,7 +779,7 @@ export default function AdminBantuan({
             }
             setShowAddView(true);
           }}
-          className="flex items-center justify-center gap-2 bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-800 active:scale-95 transition-all shadow-sm"
+          className="flex items-center justify-center gap-2 bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-800 active:scale-95 transition-all shadow-sm dark:shadow-none"
         >
           <UserPlus className="w-5 h-5" />
           Tambah Penerima
@@ -794,10 +794,10 @@ export default function AdminBantuan({
             setSelectedProgram("BLT Dana Desa");
             setShowOverlapOnly(false);
           }}
-          className={`cursor-pointer bg-white border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
+          className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
             selectedProgram === "BLT Dana Desa" && !showOverlapOnly
-              ? 'border-emerald-600 ring-4 ring-emerald-50 shadow-md' 
-              : 'border-gray-100 hover:shadow-md'
+              ? 'border-emerald-600 ring-4 ring-emerald-50 shadow-md dark:shadow-none' 
+              : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
           }`}
         >
           <div className="flex justify-between items-start relative z-10">
@@ -809,8 +809,8 @@ export default function AdminBantuan({
             <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full">Desa</span>
           </div>
           <div className="mt-2">
-            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">BLT Dana Desa</p>
-            <h4 className="text-2xl font-extrabold text-gray-900 mt-0.5">{stats.blt} <span className="text-xs font-semibold text-gray-500">Penerima</span></h4>
+            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">BLT Dana Desa</p>
+            <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{stats.blt} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
           </div>
         </div>
 
@@ -820,10 +820,10 @@ export default function AdminBantuan({
             setSelectedProgram("Program Keluarga Harapan (PKH)");
             setShowOverlapOnly(false);
           }}
-          className={`cursor-pointer bg-white border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
+          className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
             selectedProgram === "Program Keluarga Harapan (PKH)" && !showOverlapOnly
-              ? 'border-blue-600 ring-4 ring-blue-50 shadow-md' 
-              : 'border-gray-100 hover:shadow-md'
+              ? 'border-blue-600 ring-4 ring-blue-50 shadow-md dark:shadow-none' 
+              : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
           }`}
         >
           <div className="flex justify-between items-start relative z-10">
@@ -835,8 +835,8 @@ export default function AdminBantuan({
             <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-full">Keluarga</span>
           </div>
           <div className="mt-2">
-            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">PKH (Harapan)</p>
-            <h4 className="text-2xl font-extrabold text-gray-900 mt-0.5">{stats.pkh} <span className="text-xs font-semibold text-gray-500">Penerima</span></h4>
+            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">PKH (Harapan)</p>
+            <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{stats.pkh} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
           </div>
         </div>
 
@@ -846,10 +846,10 @@ export default function AdminBantuan({
             setSelectedProgram("Bantuan Pangan Non-Tunai");
             setShowOverlapOnly(false);
           }}
-          className={`cursor-pointer bg-white border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
+          className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
             selectedProgram === "Bantuan Pangan Non-Tunai" && !showOverlapOnly
-              ? 'border-amber-600 ring-4 ring-amber-50 shadow-md' 
-              : 'border-gray-100 hover:shadow-md'
+              ? 'border-amber-600 ring-4 ring-amber-50 shadow-md dark:shadow-none' 
+              : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
           }`}
         >
           <div className="flex justify-between items-start relative z-10">
@@ -861,8 +861,8 @@ export default function AdminBantuan({
             <span className="px-2.5 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full">Pangan</span>
           </div>
           <div className="mt-2">
-            <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Pangan Non-Tunai</p>
-            <h4 className="text-2xl font-extrabold text-gray-900 mt-0.5">{stats.bpnt} <span className="text-xs font-semibold text-gray-500">Penerima</span></h4>
+            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">Pangan Non-Tunai</p>
+            <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{stats.bpnt} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
           </div>
         </div>
       </div>
@@ -883,7 +883,7 @@ export default function AdminBantuan({
           </div>
           <button 
             onClick={() => setShowOverlapOnly(prev => !prev)}
-            className={`px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm w-full md:w-auto mt-3 md:mt-0 ${
+            className={`px-5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm dark:shadow-none w-full md:w-auto mt-3 md:mt-0 ${
               showOverlapOnly 
                 ? 'bg-red-800 text-white hover:bg-red-950' 
                 : 'bg-red-600 text-white hover:bg-red-700'
@@ -895,13 +895,13 @@ export default function AdminBantuan({
       )}
 
       {/* Table Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/20">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/20">
           <div className="flex items-center gap-3">
-            <h4 className="font-bold text-lg text-gray-900">
+            <h4 className="font-bold text-lg text-gray-900 dark:text-white">
               {showOverlapOnly ? "Tumpang Tindih (Penerima Ganda)" : `Penerima ${selectedProgram}`}
             </h4>
-            <span className="px-2.5 py-0.5 bg-gray-100 rounded-full text-xs font-bold text-gray-600">
+            <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-slate-800 rounded-full text-xs font-bold text-gray-600 dark:text-slate-400">
               {filteredResidents.length} Jiwa
             </span>
           </div>
@@ -913,7 +913,7 @@ export default function AdminBantuan({
                 placeholder="Cari penerima bantuan..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
               />
               <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
@@ -922,13 +922,13 @@ export default function AdminBantuan({
         
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-gray-50/50 border-b border-gray-100">
+            <thead className="bg-gray-50/50 border-b border-gray-100 dark:border-slate-800">
               <tr>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 uppercase tracking-wider">NIK / NAMA</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 uppercase tracking-wider">DUSUN / RT / RW</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 uppercase tracking-wider">BANTUAN LAIN</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 uppercase tracking-wider">STATUS</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 uppercase tracking-wider text-center">AKSI</th>
+                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">NIK / NAMA</th>
+                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">DUSUN / RT / RW</th>
+                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">BANTUAN LAIN</th>
+                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">STATUS</th>
+                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -954,8 +954,8 @@ export default function AdminBantuan({
                   return (
                     <tr key={resident.nik} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-6 py-4">
-                        <p className="font-bold text-sm text-gray-900">{resident.nik}</p>
-                        <p className="text-sm font-semibold text-gray-600">{resident.name}</p>
+                        <p className="font-bold text-sm text-gray-900 dark:text-white">{resident.nik}</p>
+                        <p className="text-sm font-semibold text-gray-600 dark:text-slate-400">{resident.name}</p>
                         {resident.status?.toLowerCase().includes('meninggal') && (
                           <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded-md">
                             <AlertCircle className="w-3 h-3" />
@@ -963,7 +963,7 @@ export default function AdminBantuan({
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">
+                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">
                         {resident.desa || "Sukamaju"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
                       </td>
                       <td className="px-6 py-4">
@@ -1018,12 +1018,12 @@ export default function AdminBantuan({
       {/* Modal Tambah Penerima */}
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-6 flex justify-between items-center border-b border-gray-100 bg-gray-50/50">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 flex justify-between items-center border-b border-gray-100 dark:border-slate-800 bg-gray-50/50">
               <h3 className="font-bold text-xl text-emerald-800">Tambah Penerima Bantuan</h3>
               <button 
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-gray-200 rounded-full text-gray-500 transition-colors"
+                className="p-2 hover:bg-gray-200 rounded-full text-gray-500 dark:text-slate-400 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1038,7 +1038,7 @@ export default function AdminBantuan({
 
               {/* Search Section */}
               <div>
-                <label className="block text-xs font-extrabold text-gray-500 uppercase tracking-wider mb-2">CARI NAMA / NIK WARGA</label>
+                <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">CARI NAMA / NIK WARGA</label>
                 <div className="relative">
                   <input 
                     type="text" 
@@ -1048,14 +1048,14 @@ export default function AdminBantuan({
                       setSearchResidentQuery(e.target.value);
                       setSelectedResidentNik(""); // Reset selection if typing
                     }}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm font-semibold text-gray-800"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm font-semibold text-gray-800 dark:text-slate-100"
                   />
                   <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
 
                 {/* Live Search Suggestion Box */}
                 {searchResidentQuery.trim() !== "" && !selectedResidentNik && (
-                  <div className="mt-2 border border-gray-100 rounded-xl bg-white shadow-lg overflow-hidden divide-y divide-gray-50 max-h-[180px] overflow-y-auto">
+                  <div className="mt-2 border border-gray-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-lg dark:shadow-none overflow-hidden divide-y divide-gray-50 max-h-[180px] overflow-y-auto">
                     {availableResidentsForModal.length === 0 ? (
                       <p className="p-3.5 text-xs text-gray-400 text-center font-medium">Warga tidak ditemukan atau sudah terdaftar di program ini</p>
                     ) : (
@@ -1069,8 +1069,8 @@ export default function AdminBantuan({
                           className="p-3.5 hover:bg-emerald-50/40 cursor-pointer transition-colors text-left flex justify-between items-center"
                         >
                           <div>
-                            <p className="text-sm font-extrabold text-gray-800">{r.name}</p>
-                            <p className="text-[11px] font-bold text-gray-500">NIK: {r.nik}</p>
+                            <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100">{r.name}</p>
+                            <p className="text-[11px] font-bold text-gray-500 dark:text-slate-400">NIK: {r.nik}</p>
                           </div>
                           <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">Pilih</span>
                         </div>
@@ -1105,20 +1105,20 @@ export default function AdminBantuan({
                   )}
 
                   {/* Details Form (Disabled until NIK verified) */}
-                  <div className="space-y-4 border border-gray-100 p-4 rounded-xl bg-gray-50/30">
+                  <div className="space-y-4 border border-gray-100 dark:border-slate-800 p-4 rounded-xl bg-gray-50/30">
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">NAMA LENGKAP</label>
-                      <p className="text-sm font-bold text-gray-800">{selectedResidentDetail.name}</p>
+                      <p className="text-sm font-bold text-gray-800 dark:text-slate-100">{selectedResidentDetail.name}</p>
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">ALAMAT RT / RW</label>
-                      <p className="text-sm font-semibold text-gray-700">
+                      <p className="text-sm font-semibold text-gray-700 dark:text-slate-300">
                         RT {selectedResidentDetail.rt || "-"} / RW {selectedResidentDetail.rw || "-"}, {selectedResidentDetail.desa || "Sukamaju"}, {selectedResidentDetail.address || ""}
                       </p>
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">STATUS HUBUNGAN / PEKERJAAN</label>
-                      <p className="text-xs font-semibold text-gray-600">
+                      <p className="text-xs font-semibold text-gray-600 dark:text-slate-400">
                         {selectedResidentDetail.familyRelation || "Kepala Keluarga"} — {selectedResidentDetail.job || "-"}
                       </p>
                     </div>
@@ -1127,17 +1127,17 @@ export default function AdminBantuan({
               )}
             </div>
             
-            <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex justify-end gap-3">
+            <div className="p-6 bg-gray-50/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
               <button 
                 onClick={() => setShowModal(false)}
-                className="px-6 py-2.5 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-all text-sm"
+                className="px-6 py-2.5 font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-200 rounded-xl transition-all text-sm"
               >
                 Batal
               </button>
               <button 
                 onClick={handleAddAid}
                 disabled={!selectedResidentNik || isSaving}
-                className="bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-emerald-800 shadow-sm transition-all text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                className="bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-emerald-800 shadow-sm dark:shadow-none transition-all text-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isSaving ? "Menyimpan..." : "Simpan Penerima"}
               </button>

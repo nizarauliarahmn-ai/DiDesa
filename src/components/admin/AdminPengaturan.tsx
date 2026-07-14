@@ -25,6 +25,12 @@ export default function AdminPengaturan() {
 
   const [appTheme, setAppTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
 
+  const handleThemeChange = (theme: string) => {
+    setAppTheme(theme);
+    localStorage.setItem('app_theme', theme);
+    window.dispatchEvent(new Event('app_theme_updated'));
+  };
+
   const [isSaving, setIsSaving] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
@@ -75,6 +81,8 @@ export default function AdminPengaturan() {
       localStorage.setItem('app_theme', appTheme);
 
       window.dispatchEvent(new Event('village_settings_updated'));
+      window.dispatchEvent(new Event('app_theme_updated'));
+
       setIsSaving(false);
     }, 800);
   };
@@ -106,11 +114,11 @@ export default function AdminPengaturan() {
     <div className="max-w-6xl mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
+          <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
             <Settings className="w-8 h-8 text-emerald-600" />
             Pengaturan Profil Desa
           </h2>
-          <p className="text-gray-500 mt-2 font-medium text-sm">
+          <p className="text-gray-500 dark:text-slate-400 mt-2 font-medium text-sm">
             Konfigurasi informasi dasar, alamat, identitas visual, dan pengaturan tata letak cetak dokumen.
           </p>
         </div>
@@ -118,7 +126,7 @@ export default function AdminPengaturan() {
           <button 
             onClick={handleSaveGlobalConfig}
             disabled={isSaving}
-            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-2 hover:-translate-y-0.5"
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg dark:shadow-none shadow-emerald-600/20 transition-all flex items-center gap-2 hover:-translate-y-0.5"
           >
             {isSaving ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -134,9 +142,9 @@ export default function AdminPengaturan() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Identitas Desa */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="p-5 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-              <h3 className="font-extrabold text-gray-900 flex items-center gap-2">
+              <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-emerald-600" />
                 Informasi & Identitas Desa
               </h3>
@@ -151,7 +159,7 @@ export default function AdminPengaturan() {
                 />
                 <label 
                   htmlFor="ai-doc-import"
-                  className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 border border-indigo-100 shadow-sm"
+                  className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 border border-indigo-100 shadow-sm dark:shadow-none"
                 >
                   {isImporting ? (
                     <div className="w-3.5 h-3.5 border-2 border-indigo-700/30 border-t-indigo-700 rounded-full animate-spin" />
@@ -166,61 +174,61 @@ export default function AdminPengaturan() {
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider ml-1">Nama Desa / Kelurahan</label>
+                  <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Nama Desa / Kelurahan</label>
                   <input 
                     type="text" 
                     value={villageName}
                     onChange={(e) => setVillageName(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 font-bold transition-all bg-gray-50 focus:bg-white"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider ml-1">Kecamatan</label>
+                  <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Kecamatan</label>
                   <input 
                     type="text" 
                     value={kecamatan}
                     onChange={(e) => setKecamatan(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 font-bold transition-all bg-gray-50 focus:bg-white"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                   />
                 </div>
               </div>
               
               <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider ml-1">Pemerintah Kabupaten / Kota</label>
+                <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Pemerintah Kabupaten / Kota</label>
                 <input 
                   type="text" 
                   value={kabupaten}
                   onChange={(e) => setKabupaten(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 font-bold transition-all bg-gray-50 focus:bg-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider ml-1">Alamat Lengkap</label>
+                <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Alamat Lengkap</label>
                 <textarea 
                   rows={2}
                   value={alamat}
                   onChange={(e) => setAlamat(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 font-medium transition-all bg-gray-50 focus:bg-white resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-medium transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white resize-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider ml-1">Kontak & Email (Kop Surat)</label>
+                <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Kontak & Email (Kop Surat)</label>
                 <input 
                   type="text" 
                   value={kontak}
                   onChange={(e) => setKontak(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 font-medium transition-all bg-gray-50 focus:bg-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-medium transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                 />
               </div>
             </div>
           </div>
 
           {/* Banner Images */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
              <div className="p-5 border-b border-gray-50 bg-gray-50/50">
-              <h3 className="font-extrabold text-gray-900 flex items-center gap-2">
+              <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <ImageIcon className="w-5 h-5 text-emerald-600" />
                 Visual & Banner Web
               </h3>
@@ -229,16 +237,16 @@ export default function AdminPengaturan() {
             <div className="p-6 space-y-8">
               {/* Logo */}
               <div className="flex gap-6 items-center">
-                <div className="w-20 h-20 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center p-2 shrink-0">
+                <div className="w-20 h-20 rounded-2xl bg-gray-50 dark:bg-slate-800 border-2 border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center p-2 shrink-0">
                   <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150'; }} />
                 </div>
                 <div className="flex-1 space-y-1.5">
-                  <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider ml-1">URL Logo Resmi</label>
+                  <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">URL Logo Resmi</label>
                   <input 
                     type="text" 
                     value={logoUrl}
                     onChange={(e) => setLogoUrl(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 transition-all bg-gray-50 focus:bg-white"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                   />
                   <p className="text-[10px] text-gray-400">Gunakan URL gambar transparan (PNG) untuk hasil kop surat terbaik.</p>
                 </div>
@@ -246,11 +254,11 @@ export default function AdminPengaturan() {
 
               {/* Banner Welcome */}
               <div className="space-y-3">
-                <label className="text-xs font-extrabold text-gray-500 uppercase tracking-wider flex items-center justify-between">
+                <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between">
                   <span>Banner Halaman Utama</span>
                   <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md">Pratinjau Asli</span>
                 </label>
-                <div className="relative h-32 rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
+                <div className="relative h-32 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800">
                   <img 
                     src={welcomeBannerUrl} 
                     alt="Banner Utama" 
@@ -268,14 +276,14 @@ export default function AdminPengaturan() {
                     value={welcomeBannerUrl}
                     onChange={(e) => setWelcomeBannerUrl(e.target.value)}
                     placeholder="URL Gambar (Unsplash, dll)"
-                    className="col-span-1 md:col-span-3 px-3 py-2 rounded-lg border border-gray-200 text-xs outline-none focus:border-emerald-500"
+                    className="col-span-1 md:col-span-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-xs outline-none focus:border-emerald-500"
                   />
                   <div className="col-span-1 flex items-center gap-2 text-xs">
-                    <label className="text-gray-500 font-bold">Posisi Y (%):</label>
+                    <label className="text-gray-500 dark:text-slate-400 font-bold">Posisi Y (%):</label>
                     <input type="range" min="0" max="100" value={welcomeBannerYOffset} onChange={(e) => setWelcomeBannerYOffset(e.target.value)} className="flex-1" />
                   </div>
                   <div className="col-span-1 flex items-center gap-2 text-xs">
-                    <label className="text-gray-500 font-bold">Zoom (%):</label>
+                    <label className="text-gray-500 dark:text-slate-400 font-bold">Zoom (%):</label>
                     <input type="range" min="100" max="200" value={welcomeBannerZoom} onChange={(e) => setWelcomeBannerZoom(e.target.value)} className="flex-1" />
                   </div>
                 </div>
@@ -286,27 +294,27 @@ export default function AdminPengaturan() {
 
         {/* Sidebar Settings */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="p-5 border-b border-gray-50 bg-gray-50/50">
-              <h3 className="font-extrabold text-gray-900 flex items-center gap-2">
+              <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-emerald-600" />
                 Peta & Geospasial
               </h3>
             </div>
             <div className="p-5 space-y-4">
-              <div className="aspect-video bg-gray-100 rounded-xl relative overflow-hidden group border border-gray-200">
+              <div className="aspect-video bg-gray-100 dark:bg-slate-800 rounded-xl relative overflow-hidden group border border-gray-200 dark:border-slate-700">
                 <img 
                   src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                   className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
                   alt="Map Placeholder"
                 />
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                   <div className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg border border-white shadow-sm mb-2">
-                     <p className="text-[10px] font-mono font-bold text-gray-700">{decimalToDMS(villageLat, villageLng)}</p>
+                   <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-lg border border-white shadow-sm dark:shadow-none mb-2">
+                     <p className="text-[10px] font-mono font-bold text-gray-700 dark:text-slate-300">{decimalToDMS(villageLat, villageLng)}</p>
                    </div>
                    <button 
                      onClick={() => setIsMapModalOpen(true)}
-                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg flex items-center gap-1.5 transition-all"
+                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg dark:shadow-none flex items-center gap-1.5 transition-all"
                    >
                      <Map className="w-3.5 h-3.5" /> Set Ulang Titik
                    </button>
@@ -314,20 +322,20 @@ export default function AdminPengaturan() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider">Latitude</label>
-                  <input type="number" step="any" value={villageLat} onChange={(e) => setVillageLat(parseFloat(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono outline-none" />
+                  <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Latitude</label>
+                  <input type="number" step="any" value={villageLat} onChange={(e) => setVillageLat(parseFloat(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-xs font-mono outline-none" />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-extrabold text-gray-500 uppercase tracking-wider">Longitude</label>
-                  <input type="number" step="any" value={villageLng} onChange={(e) => setVillageLng(parseFloat(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-xs font-mono outline-none" />
+                  <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Longitude</label>
+                  <input type="number" step="any" value={villageLng} onChange={(e) => setVillageLng(parseFloat(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-xs font-mono outline-none" />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="p-5 border-b border-gray-50 bg-gray-50/50">
-              <h3 className="font-extrabold text-gray-900 flex items-center gap-2">
+              <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <Palette className="w-5 h-5 text-emerald-600" />
                 Tema Aplikasi
               </h3>
@@ -335,30 +343,30 @@ export default function AdminPengaturan() {
             <div className="p-5">
               <div className="grid grid-cols-2 gap-3">
                 <button 
-                  onClick={() => setAppTheme('light')}
-                  className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${appTheme === 'light' ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                  onClick={() => handleThemeChange('light')}
+                  className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${appTheme === 'light' ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-100 dark:border-slate-800 hover:border-gray-200 bg-white dark:bg-slate-900'}`}
                 >
-                  <div className="w-full h-12 bg-gray-100 rounded-lg flex border border-gray-200">
-                    <div className="w-1/3 h-full border-r border-gray-200 bg-white rounded-l-lg"></div>
-                    <div className="w-2/3 h-full bg-slate-50 rounded-r-lg flex flex-col p-1.5 gap-1">
-                      <div className="w-full h-2 bg-white rounded shadow-sm"></div>
-                      <div className="w-2/3 h-2 bg-white rounded shadow-sm"></div>
+                  <div className="w-full h-12 bg-gray-100 dark:bg-slate-800 rounded-lg flex border border-gray-200 dark:border-slate-700">
+                    <div className="w-1/3 h-full border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 rounded-l-lg"></div>
+                    <div className="w-2/3 h-full bg-slate-50 dark:bg-slate-800 rounded-r-lg flex flex-col p-1.5 gap-1">
+                      <div className="w-full h-2 bg-white dark:bg-slate-900 rounded shadow-sm dark:shadow-none"></div>
+                      <div className="w-2/3 h-2 bg-white dark:bg-slate-900 rounded shadow-sm dark:shadow-none"></div>
                     </div>
                   </div>
-                  <span className={`text-xs font-bold ${appTheme === 'light' ? 'text-emerald-700' : 'text-gray-500'}`}>Mode Terang</span>
+                  <span className={`text-xs font-bold ${appTheme === 'light' ? 'text-emerald-700' : 'text-gray-500 dark:text-slate-400'}`}>Mode Terang</span>
                 </button>
                 <button 
-                  onClick={() => setAppTheme('dark')}
-                  className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${appTheme === 'dark' ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                  onClick={() => handleThemeChange('dark')}
+                  className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${appTheme === 'dark' ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-100 dark:border-slate-800 hover:border-gray-200 bg-white dark:bg-slate-900'}`}
                 >
                   <div className="w-full h-12 bg-slate-800 rounded-lg flex border border-slate-700">
                     <div className="w-1/3 h-full border-r border-slate-700 bg-slate-900 rounded-l-lg"></div>
                     <div className="w-2/3 h-full bg-slate-800 rounded-r-lg flex flex-col p-1.5 gap-1">
-                      <div className="w-full h-2 bg-slate-700 rounded shadow-sm"></div>
-                      <div className="w-2/3 h-2 bg-slate-700 rounded shadow-sm"></div>
+                      <div className="w-full h-2 bg-slate-700 rounded shadow-sm dark:shadow-none"></div>
+                      <div className="w-2/3 h-2 bg-slate-700 rounded shadow-sm dark:shadow-none"></div>
                     </div>
                   </div>
-                  <span className={`text-xs font-bold ${appTheme === 'dark' ? 'text-emerald-700' : 'text-gray-500'}`}>Mode Gelap</span>
+                  <span className={`text-xs font-bold ${appTheme === 'dark' ? 'text-emerald-700' : 'text-gray-500 dark:text-slate-400'}`}>Mode Gelap</span>
                 </button>
               </div>
             </div>
@@ -368,17 +376,17 @@ export default function AdminPengaturan() {
 
       {isMapModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm bg-slate-900/40">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800">
               <div>
-                <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
                   <Compass className="w-6 h-6 text-emerald-600" />
                   Tetapkan Koordinat Desa
                 </h3>
-                <p className="text-xs font-bold text-slate-500 mt-1 uppercase tracking-wider">Visualisasi Peta DiDesa</p>
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Visualisasi Peta DiDesa</p>
               </div>
             </div>
-            <div className="p-6 bg-white flex-1 overflow-y-auto space-y-4">
+            <div className="p-6 bg-white dark:bg-slate-900 flex-1 overflow-y-auto space-y-4">
               <div className="relative w-full aspect-video bg-emerald-50 rounded-2xl overflow-hidden border-2 border-emerald-100 shadow-inner">
                 {/* Simulated Map Background */}
                 <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
@@ -416,8 +424,8 @@ export default function AdminPengaturan() {
                 })()}
               </div>
             </div>
-            <div className="p-6 bg-slate-50 border-t border-slate-100 flex gap-3">
-              <button onClick={() => setIsMapModalOpen(false)} className="flex-1 bg-white border-2 border-slate-200 text-slate-600 py-3 rounded-xl font-bold hover:bg-slate-100">Batal</button>
+            <div className="p-6 bg-slate-50 dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex gap-3">
+              <button onClick={() => setIsMapModalOpen(false)} className="flex-1 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 py-3 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700">Batal</button>
               <button onClick={() => setIsMapModalOpen(false)} className="flex-1 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800">Simpan Koordinat</button>
             </div>
           </div>

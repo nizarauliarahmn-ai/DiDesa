@@ -120,19 +120,19 @@ export default function AdminApprovalQueue() {
       <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Antrean Konfirmasi (Maker-Checker)</h1>
-            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Antrean Konfirmasi (Maker-Checker)</h1>
+            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm dark:shadow-none">
               <ShieldAlert size={12} /> Verifikator Mode
             </span>
           </div>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
             Daftar pengajuan aksi kependudukan dari operator admin yang memerlukan persetujuan Super Admin.
           </p>
         </div>
         <button
           onClick={fetchApprovals}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl shadow-sm transition-colors disabled:opacity-50 cursor-pointer self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl shadow-sm dark:shadow-none transition-colors disabled:opacity-50 cursor-pointer self-start sm:self-auto"
         >
           <RefreshCw size={15} className={`${loading ? 'animate-spin' : ''}`} />
           <span>Segarkan Antrean</span>
@@ -140,22 +140,22 @@ export default function AdminApprovalQueue() {
       </div>
 
       {/* Main Container */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
         {loading ? (
           <div className="py-24 text-center">
             <RefreshCw className="w-10 h-10 text-emerald-700 animate-spin mx-auto mb-4" />
-            <p className="text-sm font-bold text-gray-500">Memuat data antrean persetujuan...</p>
+            <p className="text-sm font-bold text-gray-500 dark:text-slate-400">Memuat data antrean persetujuan...</p>
           </div>
         ) : approvals.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50/80 border-b border-gray-100">
+              <thead className="bg-gray-50/80 border-b border-gray-100 dark:border-slate-800">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Detail Warga</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Tipe Aksi</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Dibuat Oleh</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Tanggal Pengajuan</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap text-center">Aksi Verifikasi</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Detail Warga</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Tipe Aksi</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Dibuat Oleh</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Tanggal Pengajuan</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap text-center">Aksi Verifikasi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -175,13 +175,13 @@ export default function AdminApprovalQueue() {
                             {item.name ? item.name.substring(0, 2).toUpperCase() : 'WD'}
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-gray-900">{item.name}</p>
-                            <p className="text-xs font-mono text-gray-500">NIK: {item.nik} • RT/RW {item.rtRw}</p>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white">{item.name}</p>
+                            <p className="text-xs font-mono text-gray-500 dark:text-slate-400">NIK: {item.nik} • RT/RW {item.rtRw}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-sm ${
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shadow-sm dark:shadow-none ${
                           isDelete ? 'bg-rose-50 text-rose-700 border-rose-100' : 
                           isMove ? 'bg-amber-50 text-amber-700 border-amber-100' :
                           'bg-emerald-50 text-emerald-700 border-emerald-100'
@@ -191,13 +191,13 @@ export default function AdminApprovalQueue() {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300">
                           <User size={14} className="text-gray-400" />
                           <span className="font-semibold">Operator (Staf Desa)</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400 font-medium">
                           <Calendar size={14} className="text-gray-400" />
                           <span>{formatDate(item.pendingMeta?.requestDate)}</span>
                         </div>
@@ -207,7 +207,7 @@ export default function AdminApprovalQueue() {
                           {(isEdit || isStatus) && item.pendingMeta?.details && (
                             <button
                               onClick={() => setSelectedDetails(item)}
-                              className="px-3.5 py-1.5 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm transition-all cursor-pointer"
+                              className="px-3.5 py-1.5 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm dark:shadow-none transition-all cursor-pointer"
                             >
                               <FileText size={14} />
                               <span>Lihat Detail</span>
@@ -216,7 +216,7 @@ export default function AdminApprovalQueue() {
                           <button
                             onClick={() => handleApprove(item.nik, item.name, actionType)}
                             disabled={actioningNik !== null}
-                            className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                            className="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm dark:shadow-none transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                           >
                             <Check size={14} />
                             <span>Setujui</span>
@@ -224,7 +224,7 @@ export default function AdminApprovalQueue() {
                           <button
                             onClick={() => handleReject(item.nik, item.name, actionType)}
                             disabled={actioningNik !== null}
-                            className="px-3.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                            className="px-3.5 py-1.5 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm dark:shadow-none transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                           >
                             <X size={14} />
                             <span>Tolak</span>
@@ -240,11 +240,11 @@ export default function AdminApprovalQueue() {
           </div>
         ) : (
           <div className="py-20 text-center max-w-md mx-auto">
-            <div className="w-16 h-16 bg-slate-50 border border-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm text-emerald-800">
+            <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm dark:shadow-none text-emerald-800">
               <Check className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900">Antrean Bersih</h3>
-            <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Antrean Bersih</h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
               Tidak ada pengajuan persetujuan data kependudukan yang tertunda saat ini. Semua pengajuan telah diverifikasi.
             </p>
           </div>
@@ -252,7 +252,7 @@ export default function AdminApprovalQueue() {
       </div>
 
       {/* Info Notice Box */}
-      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 flex items-start gap-3.5 shadow-sm max-w-4xl">
+      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 flex items-start gap-3.5 shadow-sm dark:shadow-none max-w-4xl">
         <AlertCircle className="text-amber-700 w-5 h-5 shrink-0 mt-0.5" />
         <div>
           <h4 className="text-sm font-bold text-amber-900">Petunjuk Kebijakan Maker-Checker</h4>
@@ -267,32 +267,32 @@ export default function AdminApprovalQueue() {
       {/* Details Modal */}
       {selectedDetails && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-50 text-blue-700 rounded-xl flex items-center justify-center">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Detail Perubahan Data</h3>
-                  <p className="text-sm text-slate-500">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Detail Perubahan Data</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Menampilkan perubahan yang diajukan untuk warga {selectedDetails.name}
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setSelectedDetails(null)}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="p-0 overflow-y-auto flex-1 bg-white">
+            <div className="p-0 overflow-y-auto flex-1 bg-white dark:bg-slate-900">
               <div className="divide-y divide-slate-100/80">
                 {/* Header comparison row */}
                 <div className="grid grid-cols-2 bg-slate-50/50 sticky top-0 z-10 backdrop-blur-sm border-b border-slate-200/60">
-                  <div className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-r border-slate-100">
+                  <div className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest border-r border-slate-100 dark:border-slate-800">
                     Data Saat Ini (Original)
                   </div>
                   <div className="p-4 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
@@ -337,7 +337,7 @@ export default function AdminApprovalQueue() {
                           <p className="text-sm text-emerald-700 font-bold">
                             {field.proposed || '-'}
                           </p>
-                          <span className="animate-in fade-in zoom-in duration-300 text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tight shadow-sm shadow-emerald-200">
+                          <span className="animate-in fade-in zoom-in duration-300 text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tight shadow-sm dark:shadow-none shadow-emerald-200">
                             Berubah
                           </span>
                         </div>
@@ -348,10 +348,10 @@ export default function AdminApprovalQueue() {
               </div>
             </div>
 
-            <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
+            <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 flex justify-end gap-3">
               <button 
                 onClick={() => setSelectedDetails(null)}
-                className="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer"
+                className="px-4 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               >
                 Tutup Detail
               </button>
@@ -361,7 +361,7 @@ export default function AdminApprovalQueue() {
                   setSelectedDetails(null);
                 }}
                 disabled={actioningNik !== null}
-                className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold rounded-lg flex items-center gap-2 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold rounded-lg flex items-center gap-2 shadow-sm dark:shadow-none transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 <Check size={16} />
                 <span>Setujui Perubahan</span>

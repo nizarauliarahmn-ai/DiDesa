@@ -43,7 +43,7 @@ export default function NewsSection({ onTabChange }: { onTabChange?: (tab: strin
   return (
     <section>
       <div className="flex items-center justify-between mb-6 px-1">
-        <h3 className="text-lg font-bold text-gray-900">Berita & Pengumuman</h3>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Berita & Pengumuman</h3>
         <button onClick={() => onTabChange && onTabChange('berita')} className="text-emerald-700 text-sm font-bold hover:text-emerald-800 flex items-center gap-1 group cursor-pointer">
           Lihat Semua <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
@@ -67,7 +67,7 @@ export default function NewsSection({ onTabChange }: { onTabChange?: (tab: strin
 
 function NewsCard({ image, tag, tagColor, title, excerpt }: { image: string, tag: string, tagColor: string, title: string, excerpt: string }) {
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-all group cursor-pointer flex flex-col h-full">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 hover:shadow-md transition-all group cursor-pointer flex flex-col h-full">
       <div className="h-48 bg-cover bg-center overflow-hidden" >
         <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       </div>
@@ -75,10 +75,10 @@ function NewsCard({ image, tag, tagColor, title, excerpt }: { image: string, tag
         <span className={`inline-block px-3 py-1.5 text-[10px] font-bold rounded-lg mb-4 w-fit tracking-wider uppercase ${tagColor}`}>
           {tag}
         </span>
-        <h5 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
+        <h5 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
           {title}
         </h5>
-        <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+        <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
           {excerpt}
         </p>
       </div>

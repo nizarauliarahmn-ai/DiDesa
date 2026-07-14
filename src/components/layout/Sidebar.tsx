@@ -57,9 +57,9 @@ export default function Sidebar({
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsMobileMenuOpen?.(false)} />
       )}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-gray-200 flex-col h-full shadow-sm transition-transform duration-300 lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 flex-col h-full shadow-sm dark:shadow-none transition-transform duration-300 lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex`}>
         {isMobileMenuOpen && (
-          <button onClick={() => setIsMobileMenuOpen?.(false)} className="absolute top-4 right-4 p-2 text-gray-500 hover:bg-gray-100 rounded-lg lg:hidden">
+          <button onClick={() => setIsMobileMenuOpen?.(false)} className="absolute top-4 right-4 p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg lg:hidden">
             <X size={20} />
           </button>
         )}
@@ -79,9 +79,9 @@ export default function Sidebar({
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: globalColor }}>{globalName}</h1>
-            <span className="text-[9px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full">v3.0</span>
+            <span className="text-[9px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-1.5 py-0.5 rounded-full">v3.0</span>
           </div>
-          <p className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest mt-1">
+          <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1">
             {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
           </p>
         </div>
@@ -133,17 +133,17 @@ export default function Sidebar({
       </nav>
 
       {/* Profile */}
-      <div className="p-4 border-t border-gray-100 m-4 rounded-xl bg-gray-50 flex flex-col gap-3">
+      <div className="p-4 border-t border-gray-100 dark:border-slate-800 m-4 rounded-xl bg-gray-50 dark:bg-slate-800 flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <img src={authUser?.avatar || "https://i.pravatar.cc/150?img=11"} alt="Profile" className="w-10 h-10 rounded-full border-2 border-emerald-100 object-cover" />
           <div className="overflow-hidden flex-1">
-            <p className="text-xs font-bold text-gray-900 truncate">{authUser?.name || "Akses Publik"}</p>
-            <p className="text-[10px] text-gray-500 truncate font-semibold">{authUser?.email || "warga@wasahhilir.desa.id"}</p>
+            <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{authUser?.name || "Akses Publik"}</p>
+            <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate font-semibold">{authUser?.email || "warga@wasahhilir.desa.id"}</p>
           </div>
         </div>
         <button 
           onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-white hover:bg-rose-50 border border-gray-100 hover:border-rose-200 text-rose-600 rounded-lg text-xs font-bold transition-all mb-1"
+          className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-white dark:bg-slate-900 hover:bg-rose-50 border border-gray-100 dark:border-slate-800 hover:border-rose-200 text-rose-600 rounded-lg text-xs font-bold transition-all mb-1"
         >
           <LogOut size={14} />
           <span>Keluar Sesi</span>
@@ -169,7 +169,7 @@ function NavItem({ icon, label, active = false, onClick, id }: { icon: React.Rea
       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium text-sm relative overflow-hidden group ${
         active
           ? 'bg-emerald-50/80 text-emerald-700'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+          : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900'
       }`}
     >
       {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-600 rounded-r-md"></div>}

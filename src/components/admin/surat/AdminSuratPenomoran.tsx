@@ -299,10 +299,10 @@ return (
     {/* Header */}
     <div className="sticky top-16 z-40 bg-slate-50/60 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
-        <h2 className="text-xl font-bold text-gray-900">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Pengaturan Penomoran Surat
         </h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">
           Atur format penomoran otomatis secara global dan visibilitas pilihan
           surat.
         </p>
@@ -310,7 +310,7 @@ return (
       {isSuperAdmin ? (
         <button
           onClick={handleOpenAdd}
-          className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm hover:scale-102 transition-all flex items-center gap-2 self-start sm:self-auto"
+          className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm shadow-sm dark:shadow-none hover:scale-102 transition-all flex items-center gap-2 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" /> Tambah Jenis Surat
         </button>
@@ -343,17 +343,17 @@ return (
       {/* Left Column: Format & Settings */}
       <div className="lg:col-span-1 space-y-6">
         {/* Format Penomoran */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-emerald-50 text-emerald-700 rounded-xl flex items-center justify-center">
               <Settings className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-gray-900">Format Nomor</h3>
+            <h3 className="font-bold text-gray-900 dark:text-white">Format Nomor</h3>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Template Format
               </label>
               <input
@@ -362,16 +362,16 @@ return (
                 disabled={!isSuperAdmin}
                 onChange={(e) => setFormat(e.target.value)}
                 placeholder="Contoh: [NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]"
-                className={`w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono text-gray-900 font-bold bg-gray-50/50 ${!isSuperAdmin ? "opacity-60 cursor-not-allowed" : ""}`}
+                className={`w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono text-gray-900 dark:text-white font-bold bg-gray-50/50 ${!isSuperAdmin ? "opacity-60 cursor-not-allowed" : ""}`}
               />
             </div>
 
-            <div className="bg-gray-50/80 p-4 rounded-xl border border-gray-100 space-y-3">
+            <div className="bg-gray-50/80 p-4 rounded-xl border border-gray-100 dark:border-slate-800 space-y-3">
               <div>
-                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">
+                <p className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
                   Variabel Tersedia:
                 </p>
-                <p className="text-[11px] text-gray-500 mt-0.5">
+                <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">
                   Sistem akan otomatis menambahkan pembatas miring jika
                   diperlukan.
                 </p>
@@ -383,7 +383,7 @@ return (
                     type="button"
                     disabled={!isSuperAdmin}
                     onClick={() => handleAppendVariable(v.code)}
-                    className={`flex items-center justify-between p-2 rounded-lg bg-white border border-gray-200 transition-all text-left group ${isSuperAdmin ? "hover:bg-emerald-50 hover:border-emerald-200" : "cursor-not-allowed opacity-70"}`}
+                    className={`flex items-center justify-between p-2 rounded-lg bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 transition-all text-left group ${isSuperAdmin ? "hover:bg-emerald-50 hover:border-emerald-200" : "cursor-not-allowed opacity-70"}`}
                     title={
                       isSuperAdmin
                         ? `Klik untuk menambahkan ${v.code}`
@@ -394,9 +394,9 @@ return (
                       <span className="text-[11px] font-mono font-bold text-emerald-800 bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/50">
                         {v.code}
                       </span>
-                      <p className="text-[10px] text-gray-500">{v.desc}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-slate-400">{v.desc}</p>
                     </div>
-                    <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded group-hover:bg-emerald-100 group-hover:text-emerald-800 transition-colors">
+                    <span className="text-[10px] font-mono text-gray-400 bg-gray-100 dark:bg-slate-800 px-1.5 py-0.5 rounded group-hover:bg-emerald-100 group-hover:text-emerald-800 transition-colors">
                       {v.sample}
                     </span>
                   </button>
@@ -425,12 +425,12 @@ return (
         </div>
 
         {/* Reset Settings */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-amber-50 text-amber-700 rounded-xl flex items-center justify-center">
               <RefreshCw className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-gray-900">Reset Otomatis</h3>
+            <h3 className="font-bold text-gray-900 dark:text-white">Reset Otomatis</h3>
           </div>
 
           <label
@@ -449,10 +449,10 @@ return (
               ></div>
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">
+              <p className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors">
                 Reset Setiap Awal Tahun
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                 Nomor urut akan kembali ke 001 pada tanggal 1 Januari.
               </p>
             </div>
@@ -461,7 +461,7 @@ return (
           {isSuperAdmin && (
             <button
               onClick={handleSaveSettings}
-              className="w-full mt-6 bg-white border-2 border-emerald-700 text-emerald-700 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-6 bg-white dark:bg-slate-900 border-2 border-emerald-700 text-emerald-700 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-colors flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" /> Simpan Pengaturan
             </button>
@@ -471,17 +471,17 @@ return (
 
       {/* Right Column: Klasifikasi Kode Surat */}
       <div className="lg:col-span-2">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
-          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden h-full flex flex-col">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-50 text-blue-700 rounded-xl flex items-center justify-center">
                 <Hash className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900">
+                <h3 className="font-bold text-gray-900 dark:text-white">
                   Klasifikasi Kode Surat
                 </h3>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   Buku klasifikasi arsip kependudukan desa
                 </p>
               </div>
@@ -492,7 +492,7 @@ return (
                 placeholder="Cari jenis/klasifikasi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
+                className="w-full pl-9 pr-3 py-2 text-xs border border-gray-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 font-medium"
               />
               <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
@@ -500,18 +500,18 @@ return (
 
           <div className="flex-1 overflow-x-auto max-h-[600px] overflow-y-auto">
             <table className="w-full text-left">
-              <thead className="sticky top-0 bg-white shadow-sm z-10">
-                <tr className="bg-gray-50/80 border-b border-gray-100">
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-28">
+              <thead className="sticky top-0 bg-white dark:bg-slate-900 shadow-sm dark:shadow-none z-10">
+                <tr className="bg-gray-50/80 border-b border-gray-100 dark:border-slate-800">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider w-28">
                     No. Kode
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-24">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider w-24">
                     Singkatan
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                     Jenis Surat
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-20 text-center">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider w-20 text-center">
                     Aktif
                   </th>
                 </tr>
@@ -529,12 +529,12 @@ return (
                         </span>
                       </td>
                       <td className="px-6 py-3.5">
-                        <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-gray-100 text-gray-700 font-mono text-xs font-bold">
+                        <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-md bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-mono text-xs font-bold">
                           {item.klasifikasi}
                         </span>
                       </td>
                       <td className="px-6 py-3.5">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
                           {item.jenis}
                         </span>
                       </td>
@@ -550,7 +550,7 @@ return (
                           className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${item.isVisible !== false ? "bg-emerald-500" : "bg-gray-200"} ${!isSuperAdmin ? "opacity-50 cursor-not-allowed" : ""}`}
                         >
                           <span
-                            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${item.isVisible !== false ? "translate-x-4" : "translate-x-1"}`}
+                            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white dark:bg-slate-900 transition-transform ${item.isVisible !== false ? "translate-x-4" : "translate-x-1"}`}
                           />
                         </button>
                       </td>
@@ -593,15 +593,15 @@ return (
     {/* Add / Edit Modal */}
     {showModal && (
       <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-        <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-extrabold text-gray-900 flex items-center gap-2">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+            <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-emerald-700" />
               {editingItem ? "Edit Jenis Surat" : "Tambah Jenis Surat"}
             </h3>
             <button
               onClick={() => setShowModal(false)}
-              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             >
               <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
             </button>
@@ -609,7 +609,7 @@ return (
 
           <form onSubmit={handleSaveClassification} className="p-6 space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Nama Jenis Surat
               </label>
               <input
@@ -617,13 +617,13 @@ return (
                 value={formJenis}
                 onChange={(e) => setFormJenis(e.target.value)}
                 placeholder="Contoh: SK KEMATIAN, SK BELUM MENIKAH"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                 No. Kode Surat (Klasifikasi Arsip)
               </label>
               <input
@@ -631,13 +631,13 @@ return (
                 value={formKodeKlasifikasi}
                 onChange={(e) => setFormKodeKlasifikasi(e.target.value)}
                 placeholder="Contoh: 145, 400, 500"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono font-bold text-emerald-800"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono font-bold text-emerald-800"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Singkatan Jenis Surat (Abbreviation)
               </label>
               <input
@@ -645,22 +645,22 @@ return (
                 value={formKlasifikasi}
                 onChange={(e) => setFormKlasifikasi(e.target.value)}
                 placeholder="Contoh: SKM, SKBM, SKS"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono font-semibold"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono font-semibold"
                 required
               />
             </div>
 
-            <div className="pt-4 flex items-center justify-end gap-2 border-t border-gray-100 mt-6">
+            <div className="pt-4 flex items-center justify-end gap-2 border-t border-gray-100 dark:border-slate-800 mt-6">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2.5 border border-gray-200 text-gray-600 hover:bg-gray-50 rounded-xl text-sm font-bold transition-all"
+                className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl text-sm font-bold transition-all"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-sm font-bold shadow-sm transition-all flex items-center gap-2"
+                className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all flex items-center gap-2"
               >
                 <Check className="w-4 h-4" /> Simpan
               </button>

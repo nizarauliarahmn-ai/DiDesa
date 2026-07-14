@@ -174,19 +174,19 @@ export default function AdminAspirasi({
     <div className="max-w-6xl mx-auto pb-24 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Aspirasi Warga</h2>
-          <p className="text-sm font-medium text-gray-500">Kelola dan tindak lanjuti masukan dari masyarakat</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Aspirasi Warga</h2>
+          <p className="text-sm font-medium text-gray-500 dark:text-slate-400">Kelola dan tindak lanjuti masukan dari masyarakat</p>
         </div>
         <button 
           onClick={() => setShowPrintModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-900 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 text-white rounded-xl text-sm font-bold hover:bg-slate-900 transition-colors shadow-sm dark:shadow-none"
         >
           <Printer size={18} />
           Cetak Laporan
         </button>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4">
+      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm dark:shadow-none p-4">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="relative flex-1 md:w-80">
@@ -196,7 +196,7 @@ export default function AdminAspirasi({
                 placeholder="Cari nomor tiket atau subjek..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium"
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all text-sm font-medium"
               />
             </div>
           </div>
@@ -209,8 +209,8 @@ export default function AdminAspirasi({
                 onClick={() => setFilter(f)}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
                   filter === f 
-                    ? 'bg-emerald-600 text-white shadow-sm' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-emerald-600 text-white shadow-sm dark:shadow-none' 
+                    : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200'
                 }`}
               >
                 {f}
@@ -222,22 +222,22 @@ export default function AdminAspirasi({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-gray-100">
-                <th className="py-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Tiket</th>
-                <th className="py-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                <th className="py-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Pengirim</th>
-                <th className="py-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Subjek</th>
-                <th className="py-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="py-4 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Aksi</th>
+              <tr className="border-b border-gray-100 dark:border-slate-800">
+                <th className="py-4 px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tiket</th>
+                <th className="py-4 px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
+                <th className="py-4 px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pengirim</th>
+                <th className="py-4 px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Subjek</th>
+                <th className="py-4 px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                <th className="py-4 px-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filteredAspirasi.map(aspirasi => (
                 <tr key={aspirasi.id} onClick={() => { setSelectedAspirasi(aspirasi); setNewStatus(aspirasi.status); setResponseText(aspirasi.adminResponse?.text || ''); }} className="hover:bg-emerald-50/50 transition-colors cursor-pointer group">
-                  <td className="py-4 px-4 text-sm font-bold text-gray-900">{aspirasi.id}</td>
-                  <td className="py-4 px-4 text-sm font-medium text-gray-500">{aspirasi.date}</td>
-                  <td className="py-4 px-4 text-sm font-bold text-gray-700">{aspirasi.sender}</td>
-                  <td className="py-4 px-4 text-sm font-medium text-gray-900 max-w-[200px] truncate">{aspirasi.subject}</td>
+                  <td className="py-4 px-4 text-sm font-bold text-gray-900 dark:text-white">{aspirasi.id}</td>
+                  <td className="py-4 px-4 text-sm font-medium text-gray-500 dark:text-slate-400">{aspirasi.date}</td>
+                  <td className="py-4 px-4 text-sm font-bold text-gray-700 dark:text-slate-300">{aspirasi.sender}</td>
+                  <td className="py-4 px-4 text-sm font-medium text-gray-900 dark:text-white max-w-[200px] truncate">{aspirasi.subject}</td>
                   <td className="py-4 px-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                       aspirasi.status === 'Selesai' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
@@ -261,7 +261,7 @@ export default function AdminAspirasi({
               ))}
               {filteredAspirasi.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-gray-500 font-medium">
+                  <td colSpan={6} className="py-12 text-center text-gray-500 dark:text-slate-400 font-medium">
                     Tidak ada aspirasi yang ditemukan.
                   </td>
                 </tr>
@@ -273,20 +273,20 @@ export default function AdminAspirasi({
 
       {selectedAspirasi && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
                   <MessageSquareText className="w-5 h-5 text-emerald-700" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-gray-900 leading-none">Detail Aspirasi</h3>
-                  <p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-wider">{selectedAspirasi.id}</p>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white leading-none">Detail Aspirasi</h3>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 mt-1 uppercase tracking-wider">{selectedAspirasi.id}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setSelectedAspirasi(null)}
-                className="w-8 h-8 flex items-center justify-center bg-gray-50 hover:bg-gray-100 text-gray-500 rounded-full transition-colors"
+                className="w-8 h-8 flex items-center justify-center bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400 rounded-full transition-colors"
               >
                 <X size={18} />
               </button>
@@ -295,26 +295,26 @@ export default function AdminAspirasi({
             <div className="p-6 overflow-y-auto">
               <div className="space-y-6">
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Kategori</p>
-                  <p className="text-sm font-bold text-gray-900 capitalize">{selectedAspirasi.category}</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Kategori</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white capitalize">{selectedAspirasi.category}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Pengirim</p>
-                  <p className="text-sm font-bold text-gray-900">{selectedAspirasi.sender}</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pengirim</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedAspirasi.sender}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Subjek</p>
-                  <p className="text-sm font-bold text-gray-900">{selectedAspirasi.subject}</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Subjek</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{selectedAspirasi.subject}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Isi Aspirasi</p>
-                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm font-medium text-gray-800 leading-relaxed whitespace-pre-wrap">
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Isi Aspirasi</p>
+                  <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-800 text-sm font-medium text-gray-800 dark:text-slate-100 leading-relaxed whitespace-pre-wrap">
                     {selectedAspirasi.content}
                   </div>
                 </div>
                 {selectedAspirasi.fileName && (
                   <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Lampiran</p>
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Lampiran</p>
                     <div className="flex items-center gap-2 p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl">
                       <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">
                         <CheckCircle size={14} />
@@ -325,7 +325,7 @@ export default function AdminAspirasi({
                 )}
                 {selectedAspirasi.adminResponse && (
                   <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tanggapan Admin</p>
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Tanggapan Admin</p>
                     <div className="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 space-y-3">
                       <p className="text-sm font-medium text-emerald-900 whitespace-pre-wrap">{selectedAspirasi.adminResponse.text}</p>
                       {selectedAspirasi.adminResponse.fileName && (
@@ -340,7 +340,7 @@ export default function AdminAspirasi({
                 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Status Saat Ini</p>
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Saat Ini</p>
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
                       selectedAspirasi.status === 'Selesai' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                       selectedAspirasi.status === 'Proses' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
@@ -359,9 +359,9 @@ export default function AdminAspirasi({
                     </h4>
                     
                     <div>
-                      <label className="text-xs font-bold text-gray-700 mb-1 block">Ubah Status</label>
+                      <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Ubah Status</label>
                       <select 
-                        className="w-full border border-gray-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                        className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-900"
                         value={newStatus}
                         onChange={(e) => setNewStatus(e.target.value as any)}
                       >
@@ -372,20 +372,20 @@ export default function AdminAspirasi({
                     </div>
                     
                     <div>
-                      <label className="text-xs font-bold text-gray-700 mb-1 block">Tanggapan/Jawaban (Opsional)</label>
+                      <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Tanggapan/Jawaban (Opsional)</label>
                       <textarea
                         placeholder="Ketik tanggapan Anda di sini..."
-                        className="w-full border border-gray-300 rounded-lg p-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none bg-white min-h-[100px] resize-none"
+                        className="w-full border border-gray-300 dark:border-slate-600 rounded-lg p-3 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-slate-900 min-h-[100px] resize-none"
                         value={responseText}
                         onChange={(e) => setResponseText(e.target.value)}
                       ></textarea>
                     </div>
 
                     <div className="pt-2">
-                      <p className="text-xs font-bold text-gray-700 mb-2">Lampiran Foto/Dokumen (Opsional)</p>
-                      <label className="flex items-center justify-center gap-2 p-3 bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                        <UploadCloud size={16} className="text-gray-500" />
-                        <span className="text-xs font-bold text-gray-600">
+                      <p className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-2">Lampiran Foto/Dokumen (Opsional)</p>
+                      <label className="flex items-center justify-center gap-2 p-3 bg-white dark:bg-slate-900 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                        <UploadCloud size={16} className="text-gray-500 dark:text-slate-400" />
+                        <span className="text-xs font-bold text-gray-600 dark:text-slate-400">
                           {proofFile ? proofFile.name : 'Pilih Berkas'}
                         </span>
                         <input type="file" className="hidden" accept="image/*,.pdf" onChange={(e) => {
@@ -397,7 +397,7 @@ export default function AdminAspirasi({
                     <div className="pt-2">
                       <button 
                         onClick={handleUpdateStatus}
-                        className="w-full py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/20"
+                        className="w-full py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md dark:shadow-none shadow-blue-600/20"
                       >
                         Kirim Jawaban
                       </button>
@@ -407,10 +407,10 @@ export default function AdminAspirasi({
               </div>
             </div>
             
-            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+            <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 flex justify-end gap-3">
               <button 
                 onClick={() => setSelectedAspirasi(null)}
-                className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 transition-colors"
+                className="px-6 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Tutup
               </button>
@@ -422,59 +422,59 @@ export default function AdminAspirasi({
 
       {showPrintModal && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Printer size={20} className="text-slate-700" /> Cetak Laporan
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Printer size={20} className="text-slate-700 dark:text-slate-300" /> Cetak Laporan
               </h3>
               <button 
                 onClick={() => setShowPrintModal(false)}
-                className="w-8 h-8 flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-full transition-colors"
+                className="w-8 h-8 flex items-center justify-center bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-full transition-colors"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-slate-600 font-medium">Pilih rentang tanggal aspirasi yang ingin dicetak.</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">Pilih rentang tanggal aspirasi yang ingin dicetak.</p>
               
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-bold text-slate-700 mb-1 block uppercase tracking-wider">Tanggal Mulai</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 block uppercase tracking-wider">Tanggal Mulai</label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input 
                       type="date" 
                       value={printStartDate}
                       onChange={(e) => setPrintStartDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 pl-10 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pl-10 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 mb-1 block uppercase tracking-wider">Tanggal Akhir</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 block uppercase tracking-wider">Tanggal Akhir</label>
                   <div className="relative">
                     <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                     <input 
                       type="date" 
                       value={printEndDate}
                       onChange={(e) => setPrintEndDate(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 pl-10 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pl-10 text-sm font-medium focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none"
                     />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 flex justify-end gap-3">
               <button 
                 onClick={() => setShowPrintModal(false)}
-                className="px-4 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+                className="px-4 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Batal
               </button>
               <button 
                 onClick={handlePrint}
-                className="px-4 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-600/20"
+                className="px-4 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-md dark:shadow-none shadow-blue-600/20"
               >
                 Buat Laporan
               </button>

@@ -208,18 +208,18 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 relative overflow-hidden px-4 py-8">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 relative overflow-hidden px-4 py-8">
       {/* Dynamic Background Gradients */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-12 -translate-y-12"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-12 translate-y-12"></div>
 
       {/* Login Card Container */}
-      <div className="w-full max-w-[480px] bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-6 md:p-8 relative z-10">
+      <div className="w-full max-w-[480px] bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 p-6 md:p-8 relative z-10">
         
         {/* Brand Header */}
-        <div className="flex flex-col items-center text-center mb-8 bg-slate-50/50 rounded-2xl p-5 border border-slate-100">
+        <div className="flex flex-col items-center text-center mb-8 bg-slate-50/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
           <div 
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md mb-3 transition-all duration-300 overflow-hidden"
+            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-3 transition-all duration-300 overflow-hidden"
             style={{ backgroundColor: globalColor }}
           >
             {globalLogo ? (
@@ -247,7 +247,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </div>
 
         {/* Tab Selector for Login Role */}
-        <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-50 rounded-2xl mb-6">
+        <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-50 dark:bg-slate-800 rounded-2xl mb-6">
           <button
             type="button"
             onClick={() => {
@@ -257,8 +257,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             }}
             className={`py-2.5 rounded-xl text-xs font-extrabold transition-all ${
               role === 'admin' || role === 'kades'
-                ? 'bg-white text-emerald-800 shadow-sm'
-                : 'text-gray-500 hover:text-gray-800'
+                ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none'
+                : 'text-gray-500 dark:text-slate-400 hover:text-gray-800'
             }`}
           >
             Sistem Admin Desa
@@ -272,8 +272,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             }}
             className={`py-2.5 rounded-xl text-xs font-extrabold transition-all ${
               role === 'public'
-                ? 'bg-white text-emerald-800 shadow-sm'
-                : 'text-gray-500 hover:text-gray-800'
+                ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none'
+                : 'text-gray-500 dark:text-slate-400 hover:text-gray-800'
             }`}
           >
             Portal Layanan Warga
@@ -288,7 +288,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               onClick={() => setRole('admin')}
               className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold transition-all flex items-center justify-center gap-1.5 ${
                 role === 'admin'
-                  ? 'bg-emerald-800 text-white shadow-sm font-black'
+                  ? 'bg-emerald-800 text-white shadow-sm dark:shadow-none font-black'
                   : 'text-emerald-800/70 hover:bg-emerald-50 hover:text-emerald-900'
               }`}
             >
@@ -300,7 +300,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               onClick={() => setRole('kades')}
               className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold transition-all flex items-center justify-center gap-1.5 ${
                 role === 'kades'
-                  ? 'bg-emerald-800 text-white shadow-sm font-black'
+                  ? 'bg-emerald-800 text-white shadow-sm dark:shadow-none font-black'
                   : 'text-emerald-800/70 hover:bg-emerald-50 hover:text-emerald-900'
               }`}
             >
@@ -313,7 +313,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
               Email atau Nama Pengguna
             </label>
             <div className="relative">
@@ -325,14 +325,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={role === 'admin' ? 'admin@wasahhilir.desa.id' : 'warga@wasahhilir.desa.id'}
-                className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
+                className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
               />
             </div>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-[11px] font-extrabold text-gray-500 uppercase tracking-wider">
+              <label className="block text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                 Kata Sandi
               </label>
               <a href="#" className="text-[10px] font-extrabold text-emerald-700 hover:underline">
@@ -348,7 +348,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
+                className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
               />
               <button
                 type="button"
@@ -364,7 +364,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 mt-2 text-white font-bold text-xs rounded-xl transition-all duration-200 shadow-md flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
+            className="w-full py-3 mt-2 text-white font-bold text-xs rounded-xl transition-all duration-200 shadow-md dark:shadow-none flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50"
             style={{ backgroundColor: globalColor, boxShadow: `0 4px 12px ${globalColor}33` }}
           >
             <span>{isLoading ? 'Menghubungkan...' : 'Masuk Sekarang'}</span>
@@ -375,9 +375,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         {/* Divider */}
         <div className="relative my-6 text-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-100"></div>
+            <div className="w-full border-t border-gray-100 dark:border-slate-800"></div>
           </div>
-          <span className="relative bg-white px-3 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
+          <span className="relative bg-white dark:bg-slate-900 px-3 text-[10px] font-extrabold text-gray-400 uppercase tracking-wider">
             Atau Demo Akses Instan
           </span>
         </div>

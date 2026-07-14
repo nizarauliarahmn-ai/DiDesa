@@ -122,14 +122,14 @@ export default function PetaWilayah() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-bold text-gray-900">Geospasial & Peta Wilayah</h2>
-        <p className="text-sm text-gray-500 mt-1">Gali potensi geospasial desa, tata ruang lahan, dan lokasi fasilitas publik secara interaktif.</p>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Geospasial & Peta Wilayah</h2>
+        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gali potensi geospasial desa, tata ruang lahan, dan lokasi fasilitas publik secara interaktif.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Left Interactive Map Block */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none p-4 space-y-4">
             <div className="flex items-center justify-between px-2">
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-emerald-700 animate-pulse" /> PETA INTERAKTIF DIGITAL
@@ -176,10 +176,10 @@ export default function PetaWilayah() {
                       )}
                       
                       {/* Circle Pin Frame */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 transition-all duration-200 ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg dark:shadow-none border-2 transition-all duration-200 ${
                         isSelected 
                           ? 'bg-amber-500 border-white text-white scale-125 z-20' 
-                          : 'bg-white border-emerald-700 text-emerald-800 hover:bg-emerald-50 hover:scale-110'
+                          : 'bg-white dark:bg-slate-900 border-emerald-700 text-emerald-800 hover:bg-emerald-50 hover:scale-110'
                       }`}>
                         {poi.category === 'kantor' && <Landmark className="w-4 h-4" />}
                         {poi.category === 'infrastruktur' && <Navigation className="w-4 h-4" />}
@@ -189,7 +189,7 @@ export default function PetaWilayah() {
                       </div>
 
                       {/* Floating tag on hover */}
-                      <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-900/95 text-[10px] font-bold text-white px-2 py-1 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200 pointer-events-none z-30">
+                      <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-900/95 text-[10px] font-bold text-white px-2 py-1 rounded-lg shadow-md dark:shadow-none whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200 pointer-events-none z-30">
                         {poi.name.split(' ').slice(-2).join(' ')}
                       </span>
                     </div>
@@ -197,9 +197,9 @@ export default function PetaWilayah() {
                 );
               })}
 
-              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-3.5 py-2.5 rounded-xl border border-gray-200 shadow-md text-[10px] space-y-1 z-10 font-bold">
+              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-md dark:shadow-none text-[10px] space-y-1 z-10 font-bold">
                 <p className="text-gray-400 uppercase tracking-widest text-[8px] mb-1.5">LEGENDA PETA</p>
-                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-white border-2 border-emerald-700" /> <span>Fasilitas Publik / Administrasi</span></div>
+                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-700" /> <span>Fasilitas Publik / Administrasi</span></div>
                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> <span>Titik Terpilih</span></div>
               </div>
             </div>
@@ -207,7 +207,7 @@ export default function PetaWilayah() {
 
           {/* POI Info Card */}
           {selectedPoi ? (
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col md:flex-row animate-in slide-in-from-bottom-6 duration-200">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden flex flex-col md:flex-row animate-in slide-in-from-bottom-6 duration-200">
               <div className="w-full md:w-56 h-48 md:h-auto bg-cover bg-center shrink-0">
                 <img src={selectedPoi.image} alt={selectedPoi.name} className="w-full h-full object-cover" />
               </div>
@@ -220,11 +220,11 @@ export default function PetaWilayah() {
                     <Pin className="w-3.5 h-3.5" /> {selectedPoi.coordinates}
                   </span>
                 </div>
-                <h4 className="text-base font-bold text-gray-900">{selectedPoi.name}</h4>
-                <p className="text-xs text-gray-500 leading-relaxed font-semibold">Alamat: {selectedPoi.address}</p>
-                <p className="text-xs text-gray-700 leading-relaxed text-justify">{selectedPoi.desc}</p>
+                <h4 className="text-base font-bold text-gray-900 dark:text-white">{selectedPoi.name}</h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed font-semibold">Alamat: {selectedPoi.address}</p>
+                <p className="text-xs text-gray-700 dark:text-slate-300 leading-relaxed text-justify">{selectedPoi.desc}</p>
                 <div className="border-t border-gray-50 pt-3 flex items-center justify-between">
-                  <span className="text-[10px] text-gray-400 font-bold">Pengelola / PJ: <span className="text-gray-700">{selectedPoi.officer}</span></span>
+                  <span className="text-[10px] text-gray-400 font-bold">Pengelola / PJ: <span className="text-gray-700 dark:text-slate-300">{selectedPoi.officer}</span></span>
                   <button 
                     onClick={() => {
                       navigator.clipboard.writeText(selectedPoi.coordinates);
@@ -238,7 +238,7 @@ export default function PetaWilayah() {
               </div>
             </div>
           ) : (
-            <div className="bg-gray-50/50 rounded-3xl border border-dashed border-gray-200 p-8 text-center text-gray-400 text-xs font-semibold">
+            <div className="bg-gray-50/50 rounded-3xl border border-dashed border-gray-200 dark:border-slate-700 p-8 text-center text-gray-400 text-xs font-semibold">
               Silakan klik salah satu pin penanda di peta untuk melihat rincian informasi wilayah.
             </div>
           )}
@@ -247,52 +247,52 @@ export default function PetaWilayah() {
         {/* Right Sidebar stats */}
         <div className="space-y-6">
           {/* Geografis Stats */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-5">
-            <h4 className="text-sm font-bold text-gray-900 border-b border-gray-50 pb-3">Profil Geografis Desa</h4>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-5">
+            <h4 className="text-sm font-bold text-gray-900 dark:text-white border-b border-gray-50 pb-3">Profil Geografis Desa</h4>
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Pemukiman</span>
-                <span className="font-bold text-gray-800">1.2 km² (28.5%)</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">1.2 km² (28.5%)</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Sawah Irigasi</span>
-                <span className="font-bold text-gray-800">2.5 km² (59.5%)</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">2.5 km² (59.5%)</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Perkebunan</span>
-                <span className="font-bold text-gray-800">0.5 km² (12.0%)</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">0.5 km² (12.0%)</span>
               </div>
-              <div className="h-px bg-gray-50" />
+              <div className="h-px bg-gray-50 dark:bg-slate-800" />
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Suhu Rata-rata</span>
-                <span className="font-bold text-gray-800">26°C - 32°C</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">26°C - 32°C</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Curah Hujan Tahunan</span>
-                <span className="font-bold text-gray-800">2.200 mm/tahun</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">2.200 mm/tahun</span>
               </div>
             </div>
           </div>
 
           {/* Batas Batas Wilayah */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
-            <h4 className="text-sm font-bold text-gray-900 border-b border-gray-50 pb-3">Batas Wilayah Administratif</h4>
-            <div className="space-y-3 text-xs font-semibold text-gray-700">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-4">
+            <h4 className="text-sm font-bold text-gray-900 dark:text-white border-b border-gray-50 pb-3">Batas Wilayah Administratif</h4>
+            <div className="space-y-3 text-xs font-semibold text-gray-700 dark:text-slate-300">
               <div className="flex items-start gap-2.5">
                 <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">UTARA</span>
-                <p className="flex-1 text-gray-800 leading-snug">{borderUtara}</p>
+                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderUtara}</p>
               </div>
               <div className="flex items-start gap-2.5">
                 <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">SELATAN</span>
-                <p className="flex-1 text-gray-800 leading-snug">{borderSelatan}</p>
+                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderSelatan}</p>
               </div>
               <div className="flex items-start gap-2.5">
                 <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">TIMUR</span>
-                <p className="flex-1 text-gray-800 leading-snug">{borderTimur}</p>
+                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderTimur}</p>
               </div>
               <div className="flex items-start gap-2.5">
                 <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">BARAT</span>
-                <p className="flex-1 text-gray-800 leading-snug">{borderBarat}</p>
+                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderBarat}</p>
               </div>
             </div>
           </div>

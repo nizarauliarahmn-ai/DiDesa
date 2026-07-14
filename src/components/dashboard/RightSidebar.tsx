@@ -20,20 +20,20 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
     <div className="space-y-6">
       <KalenderDesa />
       {/* Geospasial Desa */}
-      <section className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-          <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
+      <section className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+          <h4 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <MapIcon className="text-emerald-700 w-5 h-5" />
             Geospasial Desa
           </h4>
           <button 
             onClick={() => onTabChange && onTabChange('peta_wilayah')}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer"
+            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
           >
             <Maximize className="w-4 h-4" />
           </button>
         </div>
-        <div className="h-56 relative group overflow-hidden bg-gray-100">
+        <div className="h-56 relative group overflow-hidden bg-gray-100 dark:bg-slate-800">
           <img 
             src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" 
             alt="Map" 
@@ -42,28 +42,28 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
           <div className="absolute inset-0 bg-emerald-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
             <button 
               onClick={() => onTabChange && onTabChange('peta_wilayah')}
-              className="bg-white text-emerald-800 px-5 py-2.5 rounded-xl font-bold text-sm shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 cursor-pointer"
+              className="bg-white dark:bg-slate-900 text-emerald-800 px-5 py-2.5 rounded-xl font-bold text-sm shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 cursor-pointer"
             >
               Buka Peta Interaktif
             </button>
           </div>
         </div>
-        <div className="p-5 bg-white">
+        <div className="p-5 bg-white dark:bg-slate-900">
           <div className="grid grid-cols-2 gap-3">
-            <div className="text-center p-3 bg-gray-50 rounded-2xl border border-gray-100/50">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Luas Wilayah</p>
-              <p className="font-bold text-gray-900">4.2 km²</p>
+            <div className="text-center p-3 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100/50">
+              <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Luas Wilayah</p>
+              <p className="font-bold text-gray-900 dark:text-white">4.2 km²</p>
             </div>
-            <div className="text-center p-3 bg-gray-50 rounded-2xl border border-gray-100/50">
-              <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Ketinggian</p>
-              <p className="font-bold text-gray-900">120 mdpl</p>
+            <div className="text-center p-3 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100/50">
+              <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Ketinggian</p>
+              <p className="font-bold text-gray-900 dark:text-white">120 mdpl</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* IDM Card */}
-      <section className="bg-gradient-to-br from-emerald-700 to-emerald-900 p-8 rounded-3xl shadow-md text-white relative overflow-hidden">
+      <section className="bg-gradient-to-br from-emerald-700 to-emerald-900 p-8 rounded-3xl shadow-md dark:shadow-none text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
         <div className="flex justify-between items-start mb-6 relative z-10">
           <div>
@@ -79,7 +79,7 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
         </p>
         <button 
           onClick={() => setShowIdmModal(true)}
-          className="w-full bg-white text-emerald-900 font-bold py-3.5 rounded-xl hover:bg-emerald-50 transition-colors shadow-sm text-sm relative z-10 active:scale-[0.98] cursor-pointer"
+          className="w-full bg-white dark:bg-slate-900 text-emerald-900 font-bold py-3.5 rounded-xl hover:bg-emerald-50 transition-colors shadow-sm dark:shadow-none text-sm relative z-10 active:scale-[0.98] cursor-pointer"
         >
           Lihat Detail Skor
         </button>
@@ -88,10 +88,10 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
       {/* IDM Details Modal */}
       {showIdmModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white text-gray-900 rounded-3xl max-w-md w-full p-6 space-y-6 border border-gray-100 shadow-2xl relative animate-in zoom-in-95 duration-150">
+          <div className="bg-white dark:bg-slate-900 text-gray-900 dark:text-white rounded-3xl max-w-md w-full p-6 space-y-6 border border-gray-100 dark:border-slate-800 shadow-2xl relative animate-in zoom-in-95 duration-150">
             <button 
               onClick={() => setShowIdmModal(false)}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-50 transition-all"
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
             >
               <X className="w-5 h-5" />
             </button>
@@ -101,21 +101,21 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
                 Indeks Desa Membangun (IDM)
               </span>
               <h4 className="text-lg font-bold">Rincian Skor IDM Desa</h4>
-              <p className="text-xs text-gray-500 font-semibold">Skor komposit dari ketahanan sosial, ekonomi, dan ekologi {desaName}.</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 font-semibold">Skor komposit dari ketahanan sosial, ekonomi, dan ekologi {desaName}.</p>
             </div>
 
             <div className="space-y-4 text-xs font-semibold">
               <div className="space-y-1.5">
                 <div className="flex justify-between"><span>Indeks Ketahanan Sosial (IKS)</span><span className="text-emerald-700">0.912</span></div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '91.2%' }} /></div>
+                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '91.2%' }} /></div>
               </div>
               <div className="space-y-1.5">
                 <div className="flex justify-between"><span>Indeks Ketahanan Ekonomi (IKE)</span><span className="text-emerald-700">0.865</span></div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '86.5%' }} /></div>
+                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '86.5%' }} /></div>
               </div>
               <div className="space-y-1.5">
                 <div className="flex justify-between"><span>Indeks Ketahanan Ekologi (IKL)</span><span className="text-emerald-700">0.900</span></div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '90%' }} /></div>
+                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '90%' }} /></div>
               </div>
             </div>
 
@@ -127,25 +127,25 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
       )}
 
       {/* Kontak Darurat */}
-      <section className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+      <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-5 px-1">Kontak Darurat</h4>
         <div className="space-y-3">
-          <a href="tel:081234567890" className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
+          <a href="tel:081234567890" className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
             <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500 group-hover:scale-105 transition-transform">
               <Phone className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 mb-0.5">Ambulans Desa</p>
-              <p className="text-xs font-medium text-gray-500">0812-3456-7890</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white mb-0.5">Ambulans Desa</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-slate-400">0812-3456-7890</p>
             </div>
           </a>
-          <a href="tel:082100000000" className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
+          <a href="tel:082100000000" className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
             <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-105 transition-transform">
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 mb-0.5">Babinsa / Bhabinkamtibmas</p>
-              <p className="text-xs font-medium text-gray-500">0821-xxxx-xxxx</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white mb-0.5">Babinsa / Bhabinkamtibmas</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-slate-400">0821-xxxx-xxxx</p>
             </div>
           </a>
         </div>

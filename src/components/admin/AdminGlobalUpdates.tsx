@@ -68,7 +68,7 @@ export default function AdminGlobalUpdates() {
       case 'feature': return <Rocket className="w-5 h-5 text-blue-500" />;
       case 'fix': return <ShieldCheck className="w-5 h-5 text-emerald-500" />;
       case 'improvement': return <Zap className="w-5 h-5 text-amber-500" />;
-      default: return <Info className="w-5 h-5 text-gray-500" />;
+      default: return <Info className="w-5 h-5 text-gray-500 dark:text-slate-400" />;
     }
   };
 
@@ -85,15 +85,15 @@ export default function AdminGlobalUpdates() {
     <div className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
             <Megaphone className="w-6 h-6 text-emerald-600" />
             Update Sistem Global
           </h2>
-          <p className="text-gray-500 text-sm mt-1">Sampaikan pembaruan fitur ke seluruh klien desa secara otomatis.</p>
+          <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Sampaikan pembaruan fitur ke seluruh klien desa secara otomatis.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)} 
-          className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-sm dark:shadow-none"
         >
           <Plus size={16} />
           Buat Pengumuman Baru
@@ -104,24 +104,24 @@ export default function AdminGlobalUpdates() {
         {/* Update List */}
         <div className="lg:col-span-2 space-y-4">
           {loading ? (
-            <div className="bg-white p-8 rounded-2xl border border-gray-100 text-center text-gray-500">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-gray-100 dark:border-slate-800 text-center text-gray-500 dark:text-slate-400">
               Memuat pengumuman...
             </div>
           ) : updates.length === 0 ? (
-            <div className="bg-white p-12 rounded-2xl border border-dashed border-gray-200 text-center space-y-3">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto">
+            <div className="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700 text-center space-y-3">
+              <div className="w-16 h-16 bg-gray-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto">
                 <Megaphone className="w-8 h-8 text-gray-300" />
               </div>
               <div className="max-w-xs mx-auto">
-                <p className="text-gray-900 font-bold">Belum Ada Pengumuman</p>
-                <p className="text-gray-500 text-sm">Klik tombol "Buat Pengumuman Baru" untuk mengirim update ke seluruh klien.</p>
+                <p className="text-gray-900 dark:text-white font-bold">Belum Ada Pengumuman</p>
+                <p className="text-gray-500 dark:text-slate-400 text-sm">Klik tombol "Buat Pengumuman Baru" untuk mengirim update ke seluruh klien.</p>
               </div>
             </div>
           ) : updates.map((update) => (
-            <div key={update.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+            <div key={update.id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none hover:shadow-md transition-all group">
               <div className="flex items-start justify-between">
                 <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center shrink-0">
                     {getIcon(update.type)}
                   </div>
                   <div>
@@ -133,10 +133,10 @@ export default function AdminGlobalUpdates() {
                         {getTypeLabel(update.type)}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-emerald-700 transition-colors">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors">
                       {update.title}
                     </h3>
-                    <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                    <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-2 mt-1">
                       {update.content}
                     </p>
                     <div className="flex items-center gap-4 mt-3 text-[11px] text-gray-400 font-medium">
@@ -161,7 +161,7 @@ export default function AdminGlobalUpdates() {
 
         {/* Sidebar Info */}
         <div className="space-y-4">
-          <div className="bg-emerald-900 rounded-2xl p-6 text-white shadow-lg shadow-emerald-900/20">
+          <div className="bg-emerald-900 rounded-2xl p-6 text-white shadow-lg dark:shadow-none shadow-emerald-900/20">
             <h4 className="font-bold mb-4 flex items-center gap-2">
               <Rocket className="w-5 h-5 text-emerald-400" />
               Satu Update untuk Semua
@@ -190,11 +190,11 @@ export default function AdminGlobalUpdates() {
       {/* Create Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50">
               <div>
-                <h3 className="text-xl font-bold text-gray-900 tracking-tight">Buat Pengumuman Update</h3>
-                <p className="text-xs text-gray-500 font-medium">Luncurkan info fitur baru ke seluruh ekosistem DiDesa</p>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Buat Pengumuman Update</h3>
+                <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Luncurkan info fitur baru ke seluruh ekosistem DiDesa</p>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)} 
@@ -206,31 +206,31 @@ export default function AdminGlobalUpdates() {
             <form onSubmit={handleSubmit} className="p-8 space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-bold text-gray-700">Judul Pembaruan</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-slate-300">Judul Pembaruan</label>
                   <input 
                     required 
                     type="text" 
                     value={formData.title} 
                     onChange={e => setFormData({...formData, title: e.target.value})} 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all" 
                     placeholder="Contoh: Modul Surat Nikah Digital" 
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-bold text-gray-700">Versi Rilis</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-slate-300">Versi Rilis</label>
                   <input 
                     required 
                     type="text" 
                     value={formData.version} 
                     onChange={e => setFormData({...formData, version: e.target.value})} 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-mono" 
+                    className="w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-mono" 
                     placeholder="Contoh: 1.2.0" 
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-bold text-gray-700">Tipe Pembaruan</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-slate-300">Tipe Pembaruan</label>
                 <div className="grid grid-cols-3 gap-3">
                   {(['feature', 'fix', 'improvement'] as const).map((type) => (
                     <button
@@ -240,7 +240,7 @@ export default function AdminGlobalUpdates() {
                       className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
                         formData.type === type 
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-700' 
-                          : 'border-gray-100 bg-white text-gray-500 hover:border-emerald-200'
+                          : 'border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 hover:border-emerald-200'
                       }`}
                     >
                       <div className="mb-2">{getIcon(type)}</div>
@@ -251,13 +251,13 @@ export default function AdminGlobalUpdates() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-bold text-gray-700">Konten Pengumuman (Markdown)</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-slate-300">Konten Pengumuman (Markdown)</label>
                 <textarea 
                   required 
                   rows={6}
                   value={formData.content} 
                   onChange={e => setFormData({...formData, content: e.target.value})} 
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-sans" 
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-sans" 
                   placeholder="Gunakan Markdown untuk membuat list atau teks tebal..."
                 ></textarea>
                 <p className="text-[10px] text-gray-400 font-medium">Mendukung syntax: **Teks Tebal**, - List Item, dll.</p>
@@ -267,14 +267,14 @@ export default function AdminGlobalUpdates() {
                 <button 
                   type="button" 
                   onClick={() => setIsModalOpen(false)} 
-                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all"
+                  className="flex-1 px-4 py-3 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold rounded-xl hover:bg-gray-200 transition-all"
                 >
                   Batalkan
                 </button>
                 <button 
                   type="submit" 
                   disabled={isSubmitting} 
-                  className="flex-1 px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-emerald-900/20"
+                  className="flex-1 px-4 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg dark:shadow-none shadow-emerald-900/20"
                 >
                   {isSubmitting ? 'Memproses...' : 'Luncurkan Update'}
                 </button>

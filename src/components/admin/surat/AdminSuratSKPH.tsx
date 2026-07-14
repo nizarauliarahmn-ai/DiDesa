@@ -310,7 +310,7 @@ export default function AdminSuratSKPH({
         </head>
         <body>
           <div class="page">
-            <div class="printable-area bg-white text-black">
+            <div class="printable-area bg-white dark:bg-slate-900 text-black">
               ${content}
             </div>
           </div>
@@ -490,14 +490,14 @@ export default function AdminSuratSKPH({
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-md sticky top-16 z-30">
+      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-16 z-30">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <button onClick={onBack} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
+            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           </button>
           <div>
-            <h1 className="text-lg font-bold text-slate-800">Buat Surat Penghasilan (SKPH)</h1>
-            <p className="text-xs text-slate-500">Surat Keterangan Penghasilan</p>
+            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat Surat Penghasilan (SKPH)</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Surat Keterangan Penghasilan</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -505,7 +505,7 @@ export default function AdminSuratSKPH({
           <button 
             onClick={handlePrint}
             disabled={loading}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/10"
+            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg dark:shadow-none shadow-emerald-600/10"
           >
             <Printer className="w-4 h-4" />
             {loading ? 'Menyiapkan...' : 'Cetak Surat'}
@@ -520,18 +520,18 @@ export default function AdminSuratSKPH({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none overflow-hidden"
           >
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2 uppercase tracking-wider">
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50">
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm flex items-center gap-2 uppercase tracking-wider">
                 <History className="w-4 h-4 text-emerald-600" />
                 Riwayat Pembuatan SKPH Terakhir
               </h3>
-              <span className="text-xs text-slate-500">{riwayat.length} entri disimpan lokal</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">{riwayat.length} entri disimpan lokal</span>
             </div>
             <div className="divide-y divide-slate-100 max-h-[300px] overflow-auto">
               {riwayat.length === 0 ? (
-                <div className="p-8 text-center text-slate-500 italic text-sm">Belum ada riwayat pembuatan surat di perangkat ini.</div>
+                <div className="p-8 text-center text-slate-500 dark:text-slate-400 italic text-sm">Belum ada riwayat pembuatan surat di perangkat ini.</div>
               ) : riwayat.map((item) => (
                 <div key={item.id} className="p-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                   <div className="flex items-center gap-3">
@@ -539,8 +539,8 @@ export default function AdminSuratSKPH({
                       {item.nama[0]}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-800 text-sm">{item.nama}</p>
-                      <p className="text-xs text-slate-500 font-mono mt-0.5">{item.nomor}</p>
+                      <p className="font-bold text-slate-800 dark:text-slate-100 text-sm">{item.nama}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{item.nomor}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -555,7 +555,7 @@ export default function AdminSuratSKPH({
                         setFormData(item.data);
                         setShowRiwayat(false);
                       }}
-                      className="px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                      className="px-3 py-1.5 text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                     >
                       Gunakan Data
                     </button>
@@ -579,8 +579,8 @@ export default function AdminSuratSKPH({
         <div className="lg:col-span-7 space-y-6">
           
           {/* Pencarian Warga */}
-          <section className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 uppercase tracking-wider">
+          <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 uppercase tracking-wider">
               <Search className="w-4 h-4 text-emerald-600" />
               Pilih Warga (Penduduk)
             </h3>
@@ -590,32 +590,32 @@ export default function AdminSuratSKPH({
                 <input 
                   type="text"
                   placeholder="Cari NIK atau Nama Warga..."
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               <p className="mt-2 text-emerald-600 font-medium text-[10px]">* Pencarian otomatis melengkapi biodata, alamat, KK, pendidikan, dan pekerjaan warga desa terpilih</p>
               {searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-20">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-20">
                   {filteredResidents.length > 0 ? (
                     filteredResidents.map(res => (
                       <button
                         key={res.nik}
                         onClick={() => handleSelectResident(res)}
-                        className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 text-left transition-colors border-b border-slate-100 last:border-0"
+                        className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
                       >
                         <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 font-bold shrink-0">
                           {res.name[0]}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-800">{res.name}</p>
-                          <p className="text-xs text-slate-500">NIK: {res.nik} • {res.desa}</p>
+                          <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} • {res.desa}</p>
                         </div>
                       </button>
                     ))
                   ) : (
-                    <p className="p-4 text-sm text-slate-500 italic text-center">Warga tidak ditemukan.</p>
+                    <p className="p-4 text-sm text-slate-500 dark:text-slate-400 italic text-center">Warga tidak ditemukan.</p>
                   )}
                 </div>
               )}
@@ -635,24 +635,24 @@ export default function AdminSuratSKPH({
           </section>
 
           {/* Form Detail */}
-          <section className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
             {/* Informasi Surat */}
             <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
-                <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-slate-600" />
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                 </div>
-                <h3 className="font-bold text-slate-800">Informasi Surat</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Informasi Surat</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     Nomor Surat
                   </label>
                   <input 
                     type="text"
                     placeholder="Contoh: SKPH/064/WHi/2026"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
                     value={formData.nomorSurat}
                     onChange={(e) => setFormData({...formData, nomorSurat: e.target.value})}
                   />
@@ -663,35 +663,35 @@ export default function AdminSuratSKPH({
 
             {/* Data Penduduk */}
             <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
                   <User className="w-4 h-4 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Data Penduduk</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Penduduk</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Nama Lengkap</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
                   <input 
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.nama}
                     onChange={(e) => setFormData({...formData, nama: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">NIK</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
                   <input 
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.nik}
                     onChange={(e) => setFormData({...formData, nik: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Jenis Kelamin</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.jenisKelamin}
                     onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
                   >
@@ -700,9 +700,9 @@ export default function AdminSuratSKPH({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Agama</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.agama}
                     onChange={(e) => setFormData({...formData, agama: e.target.value})}
                   >
@@ -715,9 +715,9 @@ export default function AdminSuratSKPH({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Pekerjaan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     value={formData.pekerjaan}
                     onChange={(e) => setFormData({...formData, pekerjaan: e.target.value})}
                   >
@@ -726,9 +726,9 @@ export default function AdminSuratSKPH({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Status Perkawinan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.statusPerkawinan}
                     onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
                   >
@@ -739,48 +739,48 @@ export default function AdminSuratSKPH({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Tempat Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
                   <input 
                     type="text"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tempatLahir}
                     onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Tanggal Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
                   <input 
                     type="date"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tanggalLahir}
                     onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">RT</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                       value={formData.rt}
                       onChange={(e) => setFormData({...formData, rt: e.target.value})}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">RW</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                       value={formData.rw}
                       onChange={(e) => setFormData({...formData, rw: e.target.value})}
                     />
                   </div>
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Alamat Lengkap</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
                   <textarea 
                     rows={2}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={formData.alamat}
                     onChange={(e) => setFormData({...formData, alamat: e.target.value})}
                   />
@@ -790,40 +790,40 @@ export default function AdminSuratSKPH({
 
             {/* Informasi Detail Penghasilan */}
             <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
                   <DollarSign className="w-4 h-4 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 uppercase tracking-wide">Detail Penghasilan</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Detail Penghasilan</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Sumber Penghasilan / Pekerjaan Rill</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sumber Penghasilan / Pekerjaan Rill</label>
                   <input 
                     type="text"
                     placeholder="Contoh: Bertani Padi / Wiraswasta Kelontong"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     value={formData.sumberPenghasilan}
                     onChange={(e) => setFormData({...formData, sumberPenghasilan: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Rata-rata Penghasilan Bulanan (Rp)</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rata-rata Penghasilan Bulanan (Rp)</label>
                   <input 
                     type="text"
                     placeholder="Contoh: 1500000 atau Rp 1.500.000"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     value={formData.jumlahPenghasilan}
                     onChange={(e) => setFormData({...formData, jumlahPenghasilan: e.target.value})}
                   />
                   <p className="mt-1 text-[10px] text-emerald-600 font-medium">Auto-format rupiah ketika dicetak.</p>
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Keperluan Surat (Diberikan Untuk...)</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat (Diberikan Untuk...)</label>
                   <input 
                     type="text"
                     placeholder="Contoh: Persyaratan pengajuan kredit bank"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.keperluan}
                     onChange={(e) => setFormData({...formData, keperluan: e.target.value})}
                   />
@@ -833,19 +833,19 @@ export default function AdminSuratSKPH({
             </div>
 
             {/* Pejabat Penandatangan */}
-            <div className="pt-6 border-t border-slate-100">
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
                   <FileSignature className="w-4 h-4 text-amber-600" />
                 </div>
-                <h3 className="font-bold text-slate-800">Pejabat Penandatangan</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Pejabat Penandatangan</h3>
               </div>
               <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
                     <select 
-                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
                       value={formData.namaPejabat}
                       onChange={(e) => {
                         const name = e.target.value;
@@ -879,7 +879,7 @@ export default function AdminSuratSKPH({
                     <label className="text-sm font-bold text-amber-900">Jabatan</label>
                     <input 
                       type="text"
-                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl outline-none font-medium"
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none font-medium"
                       value={formData.jabatanPejabat}
                       onChange={(e) => setFormData({...formData, jabatanPejabat: e.target.value})}
                     />
@@ -888,7 +888,7 @@ export default function AdminSuratSKPH({
                 </div>
                 
                 <div className="mt-6 pt-6 border-t border-amber-100">
-                  <label className="flex items-center gap-3 p-3 bg-white border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 transition-colors">
+                  <label className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 transition-colors">
                     <input 
                       type="checkbox"
                       checked={formData.includeCamat}
@@ -896,8 +896,8 @@ export default function AdminSuratSKPH({
                       className="w-5 h-5 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
                     />
                     <div>
-                      <div className="font-bold text-slate-800 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                      <div className="text-xs text-slate-500 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                      <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
                     </div>
                   </label>
                 </div>
@@ -923,27 +923,27 @@ export default function AdminSuratSKPH({
             </div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-xs font-bold text-slate-700 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
               </div>
               
-              <div className="flex items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
                 <button 
                   onClick={() => setPreviewZoom(prev => Math.max(0.3, prev - 0.05))} 
-                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                   title="Zoom Out"
                 >
                   <ZoomOut size={16} />
                 </button>
-                <span className="text-xs font-mono font-bold text-slate-600 px-2 w-14 text-center">
+                <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
                   {Math.round(previewZoom * 100)}%
                 </span>
                 <button 
                   onClick={() => setPreviewZoom(prev => Math.min(1.2, prev + 0.05))} 
-                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
                   title="Zoom In"
                 >
                   <ZoomIn size={16} />
@@ -951,7 +951,7 @@ export default function AdminSuratSKPH({
                 <div className="w-px h-5 bg-slate-200 mx-1"></div>
                 <button 
                   onClick={() => setPreviewZoom(0.45)} 
-                  className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-[10px] font-bold"
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-[10px] font-bold"
                   title="Reset Zoom"
                 >
                   Reset
@@ -978,16 +978,16 @@ export default function AdminSuratSKPH({
                   borderRadius: '12px',
                   transition: 'width 0.2s ease-out, height 0.2s ease-out'
                 }}
-                className="bg-white m-auto shrink-0 relative"
+                className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
               >
                 {/* Visual Crop Marks */}
-                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 pointer-events-none z-10"></div>
-                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 pointer-events-none z-10"></div>
-                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 pointer-events-none z-10"></div>
-                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 pointer-events-none z-10"></div>
+                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
 
                 <div 
-                  className="bg-white shrink-0"
+                  className="bg-white dark:bg-slate-900 shrink-0"
                   style={{ 
                     width: '794px', 
                     height: '1123px', 
