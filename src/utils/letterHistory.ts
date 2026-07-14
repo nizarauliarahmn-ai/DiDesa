@@ -13,42 +13,42 @@ export interface LetterHistory {
 const INITIAL_HISTORY: LetterHistory[] = [
   {
     id: 'h-1',
-    nomor: '145/001/DS-SKM/V/2024',
+    nomor: '145/001/DS-SKD/V/2024',
     jenis: 'Surat Keterangan Domisili',
-    nik: '3201020405060001', // Ahmad Bukhori's NIK, or fallback matching Budi Santoso
-    nama: 'Budi Santoso',
+    nik: '3201020405060001',
+    nama: 'Ahmad Bukhori',
     tanggal: '24 Mei 2024',
     keperluan: 'Persyaratan Administrasi Pernikahan',
     status: 'Selesai'
   },
   {
     id: 'h-2',
-    nomor: '400/002/DS-SKM/V/2024',
-    jenis: 'SKTM',
-    nik: '3201020405060002', // Siti Nurhaliza / Siti Aminah
-    nama: 'Siti Aminah',
-    tanggal: '23 Mei 2024',
-    keperluan: 'Keringanan Biaya Sekolah Anak',
-    status: 'Selesai'
-  },
-  {
-    id: 'h-3',
-    nomor: '500/003/DS-SKM/V/2024',
+    nomor: '500/012/DS-SKU/VI/2024',
     jenis: 'Surat Keterangan Usaha',
-    nik: '3201020405060003', // Deddy Setiawan / Ahmad Faisal
-    nama: 'Ahmad Faisal',
-    tanggal: '22 Mei 2024',
+    nik: '1111111111110001',
+    nama: 'Suherman',
+    tanggal: '12 Juni 2024',
     keperluan: 'Pengajuan Kredit Usaha Rakyat (KUR)',
     status: 'Selesai'
   },
   {
+    id: 'h-3',
+    nomor: '474/029/DS-SPT/VII/2024',
+    jenis: 'Surat Pengurusan Taspen',
+    nik: '2222222222220001',
+    nama: 'Bambang Wijaya',
+    tanggal: '10 Juli 2024',
+    keperluan: 'Klaim Asuransi Pensiun Taspen',
+    status: 'Selesai'
+  },
+  {
     id: 'h-4',
-    nomor: '145/004/DS-SKM/V/2024',
-    jenis: 'Surat Keterangan Domisili',
-    nik: '3201020405060004', // Rina Wulandari / Ratna Sari
-    nama: 'Ratna Sari',
-    tanggal: '21 Mei 2024',
-    keperluan: 'Persyaratan Pembukaan Rekening Bank',
+    nomor: '400/015/DS-SKTM/VI/2024',
+    jenis: 'SKTM',
+    nik: '3333333333330001',
+    nama: 'Kartono',
+    tanggal: '15 Juni 2024',
+    keperluan: 'Keringanan Biaya Rumah Sakit',
     status: 'Selesai'
   }
 ];
