@@ -240,6 +240,8 @@ export default function AdminSuratDashboard({
           matchesType = surat.jenis.toLowerCase().includes('penghasilan') || surat.jenis.toLowerCase().includes('skph');
         } else if (selectedType === 'spt') {
           matchesType = surat.jenis.toLowerCase() === 'spt' || surat.jenis.toLowerCase().includes('taspen');
+        } else if (selectedType === 'sppd') {
+          matchesType = surat.jenis.toLowerCase().includes('sppd') || surat.jenis.toLowerCase().includes('perjalanan dinas') || surat.jenis.toLowerCase().includes('surat tugas');
         }
       }
 
@@ -1096,6 +1098,7 @@ export default function AdminSuratDashboard({
             <option value="sku">Keterangan Usaha</option>
             <option value="skph">Keterangan Penghasilan</option>
             <option value="spt">Pengurusan Taspen (SPT)</option>
+            <option value="sppd">Perjalanan Dinas (SPPD)</option>
           </select>
           <button 
             onClick={() => {

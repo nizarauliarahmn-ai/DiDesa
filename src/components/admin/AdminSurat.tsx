@@ -13,6 +13,7 @@ import AdminSuratSKD from './surat/AdminSuratSKD';
 import AdminSuratSKP from './surat/AdminSuratSKP';
 import AdminSuratSDU from './surat/AdminSuratSDU';
 import AdminSuratSPT from './surat/AdminSuratSPT';
+import AdminSuratSPPD from './surat/AdminSuratSPPD';
 import { getLetterFullData } from '../../utils/letterHistory';
 
 export default function AdminSurat({ 
@@ -28,7 +29,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
 
@@ -139,6 +140,7 @@ export default function AdminSurat({
             onOpenSKH={() => changeTab('skh')}
             onOpenSDU={() => changeTab('sdu')}
             onOpenSPT={() => changeTab('spt')}
+              onOpenSPPD={() => changeTab('sppd')}
           />
         )}
         {activeTab === 'nikah' && (
@@ -226,3 +228,4 @@ export default function AdminSurat({
     </div>
   );
 }
+

@@ -38,13 +38,15 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '27', jenis: 'SURAT KUASA', klasifikasi: 'SKS', kodeKlasifikasi: '100', noUrutTerakhir: 2, isVisible: true },
   { id: '28', jenis: 'SK PENGHASILAN', klasifikasi: 'SKPH', kodeKlasifikasi: '400', noUrutTerakhir: 4, isVisible: true },
   { id: '29', jenis: 'SURAT PENGURUSAN TASPEN', klasifikasi: 'SPT', kodeKlasifikasi: '474', noUrutTerakhir: 0, isVisible: true },
-  { id: '30', jenis: 'SK DOMISILI USAHA', klasifikasi: 'SDU', kodeKlasifikasi: '500', noUrutTerakhir: 0, isVisible: true, deskripsi: 'Surat Keterangan Domisili Usaha' }
+  { id: '30', jenis: 'SK DOMISILI USAHA', klasifikasi: 'SDU', kodeKlasifikasi: '500', noUrutTerakhir: 0, isVisible: true, deskripsi: 'Surat Keterangan Domisili Usaha' },
+  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
 ];
 
 export function getSaaSTemplates(): LetterClassification[] {
   const stored = localStorage.getItem('saas_global_letter_catalog');
   if (stored) {
-    const parsed = JSON.parse(stored) as LetterClassification[];
+    const parsed = JSON.parse(stored) as LetterClassification[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
+];
     let updated = false;
     
     // Merge any missing defaults that might have been added in newer versions
@@ -80,7 +82,8 @@ export function getGlobalSequenceNumber(): number {
   let maxVal = 56; // default fallback matching the screenshot
   if (storedClass) {
     try {
-      const parsed = JSON.parse(storedClass) as any[];
+      const parsed = JSON.parse(storedClass) as any[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
+];
       if (Array.isArray(parsed) && parsed.length > 0) {
         maxVal = parsed.reduce((max, c) => Math.max(max, Number(c.noUrutTerakhir) || 0), 0);
       }
@@ -97,7 +100,8 @@ export function saveGlobalSequenceNumber(num: number) {
   const stored = localStorage.getItem('letter_classifications');
   if (stored) {
     try {
-      const parsed = JSON.parse(stored) as any[];
+      const parsed = JSON.parse(stored) as any[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
+];
       if (Array.isArray(parsed)) {
         const updated = parsed.map(c => ({ ...c, noUrutTerakhir: num }));
         localStorage.setItem('letter_classifications', JSON.stringify(updated));
@@ -113,7 +117,8 @@ export function getLetterClassifications(): LetterClassification[] {
   
   if (stored) {
     try {
-      const parsed = JSON.parse(stored) as any[];
+      const parsed = JSON.parse(stored) as any[  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
+];
       let mapped = parsed.map(item => {
         return {
           ...item,
@@ -259,4 +264,5 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
     .replace(/\[KABUPATEN\]/g, kabupaten)
     .replace(/\[DESA\]/g, desaInitial);
 }
+
 

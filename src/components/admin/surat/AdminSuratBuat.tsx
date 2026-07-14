@@ -51,7 +51,7 @@ const formatMonthYearInIndonesian = (monthYearStr: string): string => {
 };
 
 export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSDU, onOpenSPT }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
-  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void }) {
+  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void }) {
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
@@ -681,6 +681,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       }
                       if (t.klasifikasi === 'SPT') {
                         if (onOpenSPT) onOpenSPT();
+                        return;
+                      }
+                      if (t.klasifikasi === 'SPPD') {
+                        if (onOpenSPPD) onOpenSPPD();
                         return;
                       }
                       setSelectedTemplate(t.klasifikasi);
@@ -1581,4 +1585,5 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     </div>
   );
 }
+
 
