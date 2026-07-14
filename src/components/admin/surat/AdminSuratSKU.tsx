@@ -433,12 +433,12 @@ export default function AdminSuratSKU({
       </div>
 
       <!-- JUDUL SURAT -->
-      <div style="text-align:center;margin-bottom:15px;">
+      <div style="text-align:center;margin-bottom:8px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN USAHA</h3>
         <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
         Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa :
       </p>
 
@@ -455,7 +455,7 @@ export default function AdminSuratSKU({
       </table>
 
       <!-- DETAIL USAHA -->
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:8px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Adalah benar nama tersebut di atas merupakan warga kami yang berdomisili sah di Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}, dan berdasarkan peninjauan kami memang benar memiliki dan aktif mengelola unit usaha perorangan mandiri dengan rincian detail sebagai berikut :
       </p>
 
@@ -468,15 +468,15 @@ export default function AdminSuratSKU({
         ${formData.usahaOmzet ? `<tr><td>Estimasi Omset Bulanan</td><td>:</td><td>${formData.usahaOmzet}</td></tr>` : ''}
       </table>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;margin-top:15px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;margin-top:15px;">
         Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas benar memiliki dan mengelola usaha produktif perorangan yang beroperasi di wilayah desa kami.
       </p>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Surat keterangan ini diberikan atas dasar permohonan yang bersangkutan untuk dipergunakan sebagai kelengkapan persyaratan administrasi pengajuan bantuan modal atau pinjaman usaha.
       </p>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:25px;font-size:14px;">
         Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
 

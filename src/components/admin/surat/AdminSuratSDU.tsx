@@ -477,12 +477,12 @@ export default function AdminSuratSDU({
       </div>
 
       <!-- JUDUL SURAT -->
-      <div style="text-align:center;margin-bottom:30px;">
+      <div style="text-align:center;margin-bottom:15px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Surat Keterangan Domisili Usaha</h3>
         <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
 
-      <p style="text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
+      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
         Yang bertanda tangan di bawah ini:
       </p>
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.6;font-size:14px;">
@@ -490,7 +490,7 @@ export default function AdminSuratSDU({
         <tr><td>b. Jabatan</td><td>:</td><td><strong style="text-transform:uppercase;">${v(formData.jabatanPejabat)} ${activeDesa.toUpperCase()}</strong></td></tr>
       </table>
 
-      <p style="text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
+      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
         Menerangkan bahwa:
       </p>
 
@@ -501,7 +501,7 @@ export default function AdminSuratSDU({
         <tr><td style="vertical-align:top;">c. Alamat Usaha</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.alamatUsaha)}</td></tr>
       </table>
 
-      <p style="text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
+      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
         Adalah benar milik penanggung jawab / pimpinan di bawah ini:
       </p>
 
@@ -517,15 +517,15 @@ export default function AdminSuratSDU({
       </table>
 
             <!-- PERNYATAAN -->
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas benar memiliki fasilitas tempat usaha operasional yang berdomisili di wilayah administrasi desa kami.
       </p>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Surat keterangan ini diberikan atas dasar permohonan yang bersangkutan untuk dipergunakan sebagai kelengkapan persyaratan administrasi legalitas usaha.
       </p>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:25px;font-size:14px;">
         Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
 

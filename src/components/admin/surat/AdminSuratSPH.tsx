@@ -486,7 +486,7 @@ export default function AdminSuratSPH({
       </div>
 
       <!-- JUDUL SURAT -->
-      <div style="text-align:center;margin-bottom:15px;">
+      <div style="text-align:center;margin-bottom:8px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN PINDAH</h3>
         <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
@@ -548,12 +548,12 @@ export default function AdminSuratSPH({
         </tbody>
       </table>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;margin-top:15px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;margin-top:15px;">
         Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas benar berstatus sebagai warga kami yang bermaksud melakukan perpindahan alamat domisili ke tujuan yang baru.
       </p>
 
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:25px;font-size:14px;">
         Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
 

@@ -409,12 +409,12 @@ export default function AdminSuratSKH({
       </div>
 
       <!-- JUDUL SURAT -->
-      <div style="text-align:center;margin-bottom:30px;">
+      <div style="text-align:center;margin-bottom:15px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN KEHILANGAN</h3>
         <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:8px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa :
       </p>
 
@@ -431,23 +431,23 @@ export default function AdminSuratSKH({
       </table>
 
             <!-- PERNYATAAN -->
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;margin-top:15px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;margin-top:15px;">
         Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas benar telah melaporkan kehilangan dokumen/barang dengan rincian sebagai berikut:
       </p>
 
       <!-- DATA KEHILANGAN -->
-      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:15px;margin-left:40px;line-height:1.3;font-size:14px;">
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:8px;margin-left:40px;line-height:1.3;font-size:14px;">
         <tr><td style="width:30%;vertical-align:top;">Barang/Dokumen Hilang</td><td style="width:3%;vertical-align:top;">:</td><td><strong>${v(formData.barangHilang)}</strong></td></tr>
         <tr><td style="vertical-align:top;">Tanggal Kehilangan</td><td style="vertical-align:top;">:</td><td>${fmtDate(formData.tanggalKehilangan)}</td></tr>
         <tr><td style="vertical-align:top;">Tempat Kehilangan</td><td style="vertical-align:top;">:</td><td>${v(formData.tempatKehilangan)}</td></tr>
         ${formData.keteranganKehilangan ? `<tr><td style="vertical-align:top;">Keterangan Tambahan</td><td style="vertical-align:top;">:</td><td>${v(formData.keteranganKehilangan)}</td></tr>` : ''}
       </table>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Surat keterangan ini diberikan atas dasar permohonan yang bersangkutan untuk dipergunakan sebagai kelengkapan persyaratan administrasi pengajuan laporan kepolisian atau penerbitan dokumen pengganti.
       </p>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:25px;font-size:14px;">
         Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
 

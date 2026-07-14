@@ -376,7 +376,7 @@ export default function AdminSuratSPT({
 
   const generatePage1HTML = () => `
     <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;position:relative;background:white;font-family:${letterFont};">
-      <div style="text-align:center;margin-bottom:20px;">
+      <div style="text-align:center;margin-bottom:10px;">
         <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">SURAT KUASA AHLI WARIS</h3>
         <p style="margin:2px 0 0 0;font-size:13.5px;">Nomor : ${v(formData.nomorSurat)}</p>
       </div>
@@ -393,7 +393,7 @@ export default function AdminSuratSPT({
           <div style="margin-bottom:8px;">
             <span style="display:inline-block;width:20px;vertical-align:top;font-weight:bold;">${i + 1}.</span>
             <div style="display:inline-block;width:calc(100% - 25px);vertical-align:top;">
-              <table style="width:100%;border-collapse:collapse;line-height:1.2;font-size:13px;">
+              <table style="width:100%;border-collapse:collapse;line-height:1.15;font-size:13px;">
                 <tr><td style="width:28%;">Nama</td><td style="width:2%;">:</td><td><strong>${h.editedName}</strong></td></tr>
                 <tr><td>NIK</td><td>:</td><td style="font-family:monospace;">${h.editedNik}</td></tr>
                 <tr><td>Tempat, Tgl Lahir</td><td>:</td><td>${h.editedBirthPlace}, ${fmtDate(h.editedBirthDate)}</td></tr>
@@ -412,7 +412,7 @@ export default function AdminSuratSPT({
         Surat kuasa ini kami buat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
 
-      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:20px;line-height:1.2;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:20px;line-height:1.15;">
         <tr>
           <td style="width:40%;text-align:center;vertical-align:top;padding-bottom:15px;">
             Yang Diberi Kuasa,<br/><br/><br/><br/><br/>
@@ -444,7 +444,7 @@ export default function AdminSuratSPT({
 
   const generatePage2HTML = () => `
     <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;position:relative;background:white;font-family:${letterFont};">
-      <div style="text-align:center;margin-bottom:20px;">
+      <div style="text-align:center;margin-bottom:10px;">
         <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">SURAT PERNYATAAN WARIS</h3>
         <p style="margin:2px 0 0 0;font-size:13.5px;">Tanggal : ${tglFormatted}</p>
       </div>

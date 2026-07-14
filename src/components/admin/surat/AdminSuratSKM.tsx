@@ -411,12 +411,12 @@ export default function AdminSuratSKM({
       </div>
 
       <!-- JUDUL SURAT -->
-      <div style="text-align:center;margin-bottom:15px;">
+      <div style="text-align:center;margin-bottom:8px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN KEMATIAN</h3>
         <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
         Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa :
       </p>
 
@@ -433,7 +433,7 @@ export default function AdminSuratSKM({
       </table>
 
       <!-- PERNYATAAN KEMATIAN -->
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:10px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
         Nama tersebut di atas adalah benar-benar penduduk Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)} Kabupaten ${cleanStr(v(formData.namaKabupaten), /^(kabupaten|kota)\s+/i)}, yang mana berdasarkan laporan dan kesaksian dari pihak keluarga, yang bersangkutan telah meninggal dunia pada:
       </p>
 
@@ -446,15 +446,15 @@ export default function AdminSuratSKM({
       </table>
 
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;margin-top:15px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;margin-top:15px;">
         Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas adalah warga kami yang benar telah meninggal dunia pada waktu dan tempat yang telah dilaporkan.
       </p>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Surat keterangan ini diberikan atas dasar permohonan yang bersangkutan untuk dipergunakan sebagai kelengkapan persyaratan administrasi pengurusan dokumen kependudukan ahli waris.
       </p>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:25px;font-size:14px;">
         Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
       <!-- TANDA TANGAN -->

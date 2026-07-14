@@ -660,12 +660,12 @@ export default function AdminSuratSKP({
         return '';
       })()}
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;margin-top:15px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;margin-top:15px;">
         Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas benar berstatus sebagai warga kami yang bermaksud melakukan perpindahan alamat domisili ke tujuan yang baru.
       </p>
 
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:40px;font-size:14px;">
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:25px;font-size:14px;">
         Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
 
@@ -704,7 +704,7 @@ export default function AdminSuratSKP({
 
         <!-- TABEL PENGIKUT LENGKAP -->
         <div style="margin-bottom: 24px; font-size: 12.5px; line-height: 1.35;">
-          <table style="width:100%; border-collapse:collapse; margin-top:5px; margin-bottom:15px; font-size:12px;">
+          <table style="width:100%; border-collapse:collapse; margin-top:5px; margin-bottom:8px; font-size:12px;">
             <thead>
               <tr style="background-color: #f2f2f2; font-weight: bold; text-align: center;">
                 <th style="border: 1px solid #000; padding: 6px 8px; width: 6%;">No</th>

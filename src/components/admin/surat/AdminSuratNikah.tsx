@@ -504,7 +504,7 @@ export default function AdminSuratNikah({
 
   const kopHtml = () => {
     return `
-      <div style="display:flex;align-items:flex-start;border-bottom:2.5px solid #000;padding-bottom:8px;margin-bottom:20px;font-family:${letterFont};">
+      <div style="display:flex;align-items:flex-start;border-bottom:2.5px solid #000;padding-bottom:8px;margin-bottom:10px;font-family:${letterFont};">
         <div style="display:flex;width:100%;align-items:center;">
           <div style="width:100px;height:110px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
             <img src="${localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png'}" style="width:100%;height:100%;object-fit:contain;" />
