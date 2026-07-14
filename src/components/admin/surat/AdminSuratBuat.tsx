@@ -727,8 +727,9 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                             Sering Dipakai
                           </span>
                         )}
-                        <span className="text-[9px] text-gray-400 font-mono">
-                          No: {String(t.noUrutTerakhir).padStart(3, '0')}
+                        <span className="text-[9px] text-gray-400 font-mono flex items-center gap-1">
+                          {t.kodeKlasifikasi && <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-slate-500 font-bold">Kode: {t.kodeKlasifikasi}</span>}
+                          <span>No: {String(t.noUrutTerakhir).padStart(3, '0')}</span>
                         </span>
                       </div>
                       <h4 className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-emerald-800 transition-colors truncate">{t.jenis}</h4>

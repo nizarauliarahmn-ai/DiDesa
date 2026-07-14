@@ -1,4 +1,5 @@
 import { fetchResidentsCached, invalidateResidentsCache } from '../../../utils/apiCache';
+import { useLetterKode } from '../../../hooks/useLetterKode';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -97,6 +98,7 @@ export default function AdminSuratSPT({
   // ─── State ───
   const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SPT', 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk');
+  const templateKode = useLetterKode('SPT');
   const [success, setSuccess] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [allResidents, setAllResidents] = useState<FullResident[]>([]);
@@ -699,7 +701,7 @@ export default function AdminSuratSPT({
           </button>
           <div>
             <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat SPT</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -1104,5 +1106,6 @@ export default function AdminSuratSPT({
     </div>
   );
 }
+
 
 

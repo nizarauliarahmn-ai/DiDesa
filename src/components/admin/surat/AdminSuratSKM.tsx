@@ -1,4 +1,5 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
+import { useLetterKode } from '../../../hooks/useLetterKode';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -38,6 +39,7 @@ export default function AdminSuratSKM({
 }) {
   const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SKM', 'Surat Keterangan Kematian / Miskin');
+  const templateKode = useLetterKode('SKM');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -498,7 +500,7 @@ export default function AdminSuratSKM({
           </button>
           <div>
             <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat SKM</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -597,7 +599,7 @@ export default function AdminSuratSKM({
                         </div>
                         <div>
                           <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
                         </div>
                       </button>
                     ))
@@ -1044,5 +1046,6 @@ export default function AdminSuratSKM({
     </div>
   );
 }
+
 
 
