@@ -439,10 +439,15 @@ export default function AdminSuratSKPH({
         <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
       </table>
 
-            <!-- PERNYATAAN -->
+      <!-- RINCIAN PENGHASILAN -->
       <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
-        Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas benar memiliki pekerjaan dengan rata-rata penghasilan per bulan sesuai dengan rincian pernyataan yang telah disepakati.
+        Berdasarkan permohonan dan keterangan yang bersangkutan, nama tersebut di atas menerangkan dengan sebenar-benarnya bahwa ia memiliki penghasilan dengan rincian sebagai berikut:
       </p>
+
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:20px;margin-left:40px;line-height:2;font-size:14px;">
+        <tr><td style="width:40%;">Sumber Penghasilan Utama</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.sumberPenghasilan)}</strong></td></tr>
+        <tr><td>Rata-rata Penghasilan Per Bulan</td><td>:</td><td><strong>${formatRupiah(formData.jumlahPenghasilan)}</strong></td></tr>
+      </table>
 
       <p style="text-indent:40px;text-align:justify;line-height:1.2;margin-bottom:15px;font-size:14px;">
         Surat keterangan ini diberikan atas dasar permohonan yang bersangkutan untuk dipergunakan sebagai kelengkapan persyaratan administrasi pendaftaran sekolah atau pengajuan beasiswa.
