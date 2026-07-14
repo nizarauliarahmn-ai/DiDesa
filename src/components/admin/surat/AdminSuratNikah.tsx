@@ -1022,7 +1022,7 @@ export default function AdminSuratNikah({
                         >
                           <div>
                             <p className="font-bold text-slate-900 dark:text-white">{r.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {r.nik}</p>
                           </div>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${r.gender === 'Laki-laki' || r.gender === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
                             {r.gender}
@@ -1043,7 +1043,7 @@ export default function AdminSuratNikah({
                     <div>
                       <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Warga Desa Terpilih</p>
                       <p className="font-bold text-slate-900 dark:text-white">{formData.isWargaSuami ? formData.namaSuami : formData.namaIstri}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {formData.isWargaSuami ? formData.nikSuami : formData.nikIstri}</p>
                     </div>
                   </div>
                   <button 
@@ -1573,6 +1573,7 @@ export default function AdminSuratNikah({
     </div>
   );
 }
+
 
 
 

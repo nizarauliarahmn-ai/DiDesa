@@ -599,7 +599,7 @@ export default function AdminSuratSKM({
                         </div>
                         <div>
                           <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} &bull; {res.desa}</p>
                         </div>
                       </button>
                     ))
@@ -1046,6 +1046,7 @@ export default function AdminSuratSKM({
     </div>
   );
 }
+
 
 
 
