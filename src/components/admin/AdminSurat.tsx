@@ -55,7 +55,7 @@ export default function AdminSurat({
     const jenis = letter.jenis?.toUpperCase() || '';
     if (jenis === 'SKP') {
       setActiveTab('skp');
-    } else if (jenis === 'SKD' || jenis === 'SURAT KETERANGAN DOMISILI') {
+    } else if (jenis === 'SDP' || jenis === 'SKD' || jenis === 'SURAT KETERANGAN DOMISILI' || jenis === 'SK DOMISILI PERORANGAN') {
       setActiveTab('skd');
     } else if (jenis === 'SDU' || jenis === 'SK DOMISILI USAHA') {
       setActiveTab('sdu');

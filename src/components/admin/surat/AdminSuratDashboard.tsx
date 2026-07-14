@@ -20,9 +20,13 @@ const getFullLetterName = (jenis: string): string => {
     'SPT': 'Surat Pengurusan Taspen (SPT)',
     'SURAT PENGURUSAN TASPEN': 'Surat Pengurusan Taspen (SPT)',
     'SDU': 'Surat Keterangan Domisili Usaha (SDU)',
-    'SKD': 'Surat Keterangan Domisili Perorangan (SKD)',
-    'SK DOMISILI': 'Surat Keterangan Domisili Perorangan (SKD)',
-    'Surat Keterangan Domisili': 'Surat Keterangan Domisili Perorangan (SKD)',
+    'SKD': 'Surat Keterangan Domisili Perorangan (SDP)',
+    'SDP': 'Surat Keterangan Domisili Perorangan (SDP)',
+    'SK DOMISILI': 'Surat Keterangan Domisili Perorangan (SDP)',
+    'SK DOMISILI PERORANGAN': 'Surat Keterangan Domisili Perorangan (SDP)',
+    'Surat Keterangan Domisili': 'Surat Keterangan Domisili Perorangan (SDP)',
+    'SURAT KETERANGAN DOMISILI': 'Surat Keterangan Domisili Perorangan (SDP)',
+    'SURAT KETERANGAN DOMISILI PERORANGAN': 'Surat Keterangan Domisili Perorangan (SDP)',
     'SKBM': 'Surat Keterangan Belum Menikah (SKBM)',
     'SK BELUM MENIKAH': 'Surat Keterangan Belum Menikah (SKBM)',
     'SKU': 'Surat Keterangan Usaha (SKU)',
@@ -392,7 +396,7 @@ export default function AdminSuratDashboard({
       if (typeLower.includes('kehilangan') || typeLower === 'skh' || s.nomor.includes('/SKH/')) return 'SKH';
       if (typeLower.includes('undangan') || typeLower === 'und' || s.nomor.includes('/UND/')) return 'UND';
       if (typeLower === 'su' || s.nomor.includes('/SU/') || typeLower.includes('umum') || typeLower.includes('dinas')) return 'SU';
-      if (typeLower.includes('domisili') || typeLower === 'skd' || s.nomor.includes('/SKD/')) return 'SKD';
+      if (typeLower.includes('domisili') || typeLower === 'skd' || typeLower === 'sdp' || s.nomor.includes('/SKD/') || s.nomor.includes('/SDP/')) return 'SDP';
       if (typeLower.includes('pengantar') || typeLower === 'skp' || s.nomor.includes('/SKP/')) return 'SKP';
       return typeLower.toUpperCase();
     };
@@ -521,7 +525,8 @@ export default function AdminSuratDashboard({
                     case 'SKL': return 'SURAT KETERANGAN KELAHIRAN (SKL)';
                     case 'SPH': return 'SURAT PENGANTAR PINDAH (SPH)';
                     case 'SKPH': return 'SURAT KETERANGAN PENGHASILAN (SKPH)';
-                    case 'SKD': return 'SURAT KETERANGAN DOMISILI PERORANGAN (SKD)';
+                    case 'SKD':
+                    case 'SDP': return 'SURAT KETERANGAN DOMISILI PERORANGAN (SDP)';
                     case 'SKP': return 'SURAT KETERANGAN PINDAH (SKP)';
                     case 'SKH': return 'SURAT KETERANGAN KEHILANGAN (SKH)';
                     case 'SDU': return 'SURAT KETERANGAN DOMISILI USAHA (SDU)';
@@ -621,7 +626,7 @@ export default function AdminSuratDashboard({
                 </>
               );
 
-              if (code === 'SKD') {
+              if (code === 'SKD' || code === 'SDP') {
                 return (
                   <>
                     <p className="text-justify leading-relaxed indent-8 mb-2">

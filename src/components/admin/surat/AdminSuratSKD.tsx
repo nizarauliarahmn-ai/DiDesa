@@ -1073,7 +1073,7 @@ export default function AdminSuratSKD({
         onClose={() => setSuccess(false)}
         nomorSurat={formData.nomorSurat}
         namaWarga={formData.nama}
-        jenisSurat="Surat Keterangan Domisili (SKD)"
+        jenisSurat="Surat Keterangan Domisili Perorangan (SDP)"
         onBackToTemplates={onBack}
       />
     </div>

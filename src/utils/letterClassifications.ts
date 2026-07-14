@@ -12,7 +12,7 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '2', jenis: 'UNDANGAN', klasifikasi: 'UND', kodeKlasifikasi: '005', noUrutTerakhir: 12, isVisible: true },
   { id: '3', jenis: 'SK KEMATIAN', klasifikasi: 'SKM', kodeKlasifikasi: '474.2', noUrutTerakhir: 3, isVisible: true },
   { id: '4', jenis: 'SK AHLI WARIS', klasifikasi: 'SKAW', kodeKlasifikasi: '474', noUrutTerakhir: 2, isVisible: true },
-  { id: '5', jenis: 'SK DOMISILI', klasifikasi: 'SKD', kodeKlasifikasi: '145', noUrutTerakhir: 18, isVisible: true },
+  { id: '5', jenis: 'SK DOMISILI PERORANGAN', klasifikasi: 'SDP', kodeKlasifikasi: '145', noUrutTerakhir: 18, isVisible: true },
   { id: '6', jenis: 'SURAT KETERANGAN UMUM', klasifikasi: 'SKUM', kodeKlasifikasi: '400', noUrutTerakhir: 4, isVisible: true },
   { id: '7', jenis: 'SK NIKAH', klasifikasi: 'SKN', kodeKlasifikasi: '474', noUrutTerakhir: 8, isVisible: true },
   { id: '8', jenis: 'SKTM', klasifikasi: 'SKTM', kodeKlasifikasi: '400', noUrutTerakhir: 15, isVisible: true },
@@ -47,8 +47,14 @@ export function getSaaSTemplates(): LetterClassification[] {
     
     // Merge any missing defaults that might have been added in newer versions
     INITIAL_CLASSIFICATIONS.forEach(init => {
-      if (!parsed.some(p => p.id === init.id)) {
+      const idx = parsed.findIndex(p => p.id === init.id);
+      if (idx === -1) {
         parsed.push(init);
+        updated = true;
+      } else if (init.id === '5' && (parsed[idx].klasifikasi !== 'SDP' || parsed[idx].jenis !== 'SK DOMISILI PERORANGAN')) {
+        // Migrate legacy SKD template to SDP (SK Domisili Perorangan) for consistency
+        parsed[idx].klasifikasi = 'SDP';
+        parsed[idx].jenis = 'SK DOMISILI PERORANGAN';
         updated = true;
       }
     });
