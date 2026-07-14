@@ -572,7 +572,7 @@ export default function AdminSuratSPT({
     </div>`;
 
   const generateLampiranKuasaHTML = () => `
-    <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;background:white;font-family:${letterFont};">
+    <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;position:relative;background:white;font-family:${letterFont};">
       <div style="text-align:center;margin-bottom:20px;">
         <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">LAMPIRAN SURAT KUASA AHLI WARIS</h3>
         <p style="margin:2px 0 0 0;font-size:13.5px;">Nomor : ${v(formData.nomorSurat)}</p>
@@ -604,13 +604,13 @@ export default function AdminSuratSPT({
         `).join('')}
       </div>
       
-      <div style="margin-top:50px;">
+      <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;">
         ${SAAS_CONFIG.globalFooterHTML}
       </div>
     </div>`;
 
   const generateLampiranPernyataanHTML = () => `
-    <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;background:white;font-family:${letterFont};">
+    <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;position:relative;background:white;font-family:${letterFont};">
       <div style="text-align:center;margin-bottom:20px;">
         <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">LAMPIRAN SURAT PERNYATAAN WARIS</h3>
         <p style="margin:2px 0 0 0;font-size:13.5px;">Tanggal : ${tglFormatted}</p>
@@ -649,7 +649,7 @@ export default function AdminSuratSPT({
         `).join('')}
       </div>
 
-      <div style="margin-top:50px;">
+      <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;">
         ${SAAS_CONFIG.globalFooterHTML}
       </div>
     </div>`;
@@ -767,20 +767,16 @@ export default function AdminSuratSPT({
             <div className="grid grid-cols-2 gap-2.5 pt-1">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Hari Wafat</label>
-                <select className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.hariMeninggal} onChange={e => setFormData(p => ({...p, hariMeninggal: e.target.value}))}>
-                  <option value="">-- Pilih --</option>
-                  <option value="Senin">Senin</option>
-                  <option value="Selasa">Selasa</option>
-                  <option value="Rabu">Rabu</option>
-                  <option value="Kamis">Kamis</option>
-                  <option value="Jumat">Jumat</option>
-                  <option value="Sabtu">Sabtu</option>
-                  <option value="Minggu">Minggu</option>
-                </select>
+                <input type="text" className="w-full px-3 py-2 text-sm bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-slate-500 font-medium" value={formData.hariMeninggal} readOnly placeholder="Otomatis" title="Terisi otomatis saat memilih tanggal" />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tanggal</label>
-                <input type="date" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.tanggalMeninggal} onChange={e => setFormData(p => ({...p, tanggalMeninggal: e.target.value}))} />
+                <input type="date" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.tanggalMeninggal} onChange={e => {
+                  const val = e.target.value;
+                  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                  const dayStr = val ? days[new Date(val).getDay()] : '';
+                  setFormData(p => ({...p, tanggalMeninggal: val, hariMeninggal: dayStr}));
+                }} />
               </div>
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Jam</label>
