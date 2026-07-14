@@ -148,14 +148,41 @@ export default function AdminHeader({
         })
         .then(data => {
           if (Array.isArray(data)) {
-            // Apply role-based read status from localStorage
             try {
               const authUserStr = localStorage.getItem('didesa_auth_user');
               const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
+              
+              let roleData = [];
+              if (role === 'saas_admin') {
+                roleData = data.filter(n => n.category === 'System');
+                
+                const saasReqsStr = localStorage.getItem('saas_letter_requests');
+                if (saasReqsStr) {
+                  const saasReqs = JSON.parse(saasReqsStr);
+                  saasReqs.forEach((r: any) => {
+                    roleData.unshift({
+                      id: `saas-req-${r.id}`,
+                      title: 'Pengajuan Tambah Surat',
+                      message: `Desa ${r.villageName} mengajukan surat baru: ${r.letterName}.`,
+                      category: 'System',
+                      time: 'Baru saja',
+                      timestamp: r.timestamp,
+                      isRead: false
+                    });
+                  });
+                }
+              } else if (role === 'kades') {
+                roleData = data.filter(n => n.category === 'System' || n.category === 'Assistance' || (n.title && n.title.toLowerCase().includes('persetujuan')));
+              } else {
+                roleData = data.filter(n => n.category !== 'System' || n.title.toLowerCase().includes('database'));
+              }
+              
+              roleData.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+
               const readIdsStr = localStorage.getItem(`didesa_read_notifs_${role}`);
               const readIds = readIdsStr ? JSON.parse(readIdsStr) : [];
               
-              const modifiedData = data.map(n => ({
+              const modifiedData = roleData.map(n => ({
                 ...n,
                 isRead: readIds.includes(n.id)
               }));
