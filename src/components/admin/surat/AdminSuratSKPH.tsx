@@ -816,12 +816,19 @@ export default function AdminSuratSKPH({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rata-rata Penghasilan Bulanan (Rp)</label>
                   <input 
                     type="text"
-                    placeholder="Contoh: 1500000 atau Rp 1.500.000"
+                    placeholder="Contoh: 1.500.000"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     value={formData.jumlahPenghasilan}
-                    onChange={(e) => setFormData({...formData, jumlahPenghasilan: e.target.value})}
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                      let formatted = '';
+                      if (rawValue) {
+                        formatted = parseInt(rawValue, 10).toLocaleString('id-ID');
+                      }
+                      setFormData({...formData, jumlahPenghasilan: formatted});
+                    }}
                   />
-                  <p className="mt-1 text-[10px] text-emerald-600 font-medium">Auto-format rupiah ketika dicetak.</p>
+                  <p className="mt-1 text-[10px] text-emerald-600 font-medium">Terformat otomatis. Hanya menerima angka.</p>
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat (Diberikan Untuk...)</label>
