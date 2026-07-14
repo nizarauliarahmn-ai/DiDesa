@@ -239,7 +239,11 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    setClassifications(getLetterClassifications());
+    const cls = getLetterClassifications();
+    if (!cls.find(c => c.klasifikasi === 'SPPD')) {
+      cls.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
+    }
+    setClassifications(cls);
     
     // Fetch residents for Step 2 search
     fetchResidentsCached()
@@ -283,7 +287,11 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       } catch (e) {}
     };
     const handleClassificationsUpdate = () => {
-      setClassifications(getLetterClassifications());
+      const cls = getLetterClassifications();
+      if (!cls.find(c => c.klasifikasi === 'SPPD')) {
+        cls.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
+      }
+      setClassifications(cls);
     };
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     window.addEventListener('letter_classifications_updated', handleClassificationsUpdate);

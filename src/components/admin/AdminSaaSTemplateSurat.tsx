@@ -35,10 +35,18 @@ export default function AdminSaaSTemplateSurat() {
         
         if (missingTemplates.length > 0) {
           const merged = [...parsedStored, ...missingTemplates];
+          if (!merged.find(m => m.klasifikasi === 'SPPD')) {
+            merged.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
+          }
           setTemplates(merged);
           localStorage.setItem('saas_global_letter_catalog', JSON.stringify(merged));
         } else {
-          setTemplates(parsedStored);
+          const toSet = [...parsedStored];
+          if (!toSet.find(m => m.klasifikasi === 'SPPD')) {
+            toSet.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
+            localStorage.setItem('saas_global_letter_catalog', JSON.stringify(toSet));
+          }
+          setTemplates(toSet);
         }
       } else {
         setTemplates(initial);
