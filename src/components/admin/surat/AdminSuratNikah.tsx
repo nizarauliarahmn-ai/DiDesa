@@ -929,7 +929,7 @@ export default function AdminSuratNikah({
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Surat Nikah</h1>
+              <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat SKN</h1>
               <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Model N1 - N4 & Pengantar</p>
             </div>
           </div>
@@ -1572,4 +1572,5 @@ export default function AdminSuratNikah({
     </div>
   );
 }
+
 
