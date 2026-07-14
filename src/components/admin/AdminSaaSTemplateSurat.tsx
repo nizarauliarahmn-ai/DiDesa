@@ -17,6 +17,7 @@ export default function AdminSaaSTemplateSurat() {
     jenis: '',
     klasifikasi: '',
     kodeKlasifikasi: '',
+    deskripsi: '',
     noUrutTerakhir: 0
   });
 
@@ -154,6 +155,7 @@ export default function AdminSaaSTemplateSurat() {
       jenis: '',
       klasifikasi: '',
       kodeKlasifikasi: '',
+      deskripsi: '',
       noUrutTerakhir: 0
     });
     setIsModalOpen(true);
@@ -165,6 +167,7 @@ export default function AdminSaaSTemplateSurat() {
       jenis: item.jenis,
       klasifikasi: item.klasifikasi,
       kodeKlasifikasi: item.kodeKlasifikasi,
+      deskripsi: item.deskripsi || '',
       noUrutTerakhir: item.noUrutTerakhir
     });
     setIsModalOpen(true);
@@ -218,6 +221,7 @@ export default function AdminSaaSTemplateSurat() {
                        jenis: req.letterName,
                        klasifikasi: '',
                        kodeKlasifikasi: '',
+                       deskripsi: '',
                        noUrutTerakhir: 0
                      });
                      // Mark as resolved
@@ -334,6 +338,16 @@ export default function AdminSaaSTemplateSurat() {
                   value={formData.jenis}
                   onChange={handleJenisChange}
                   placeholder="Contoh: SURAT KETERANGAN USAHA"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider ml-1">Deskripsi / Subjudul (Kecil)</label>
+                <input 
+                  type="text" 
+                  value={formData.deskripsi}
+                  onChange={e => setFormData({ ...formData, deskripsi: e.target.value })}
+                  placeholder="Contoh: Surat Keterangan Kehilangan / Miskin"
                   className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
                 />
               </div>

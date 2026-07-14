@@ -1,4 +1,5 @@
 import { fetchResidentsCached, invalidateResidentsCache } from '../../../utils/apiCache';
+import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import {
@@ -95,6 +96,7 @@ export default function AdminSuratSPT({
 
   // ─── State ───
   const [loading, setLoading] = useState(false);
+  const templateDesc = useLetterDescription('SPT', 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk');
   const [success, setSuccess] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [allResidents, setAllResidents] = useState<FullResident[]>([]);
@@ -697,7 +699,7 @@ export default function AdminSuratSPT({
           </button>
           <div>
             <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Surat Pengurusan Taspen (SPT)</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -1102,3 +1104,4 @@ export default function AdminSuratSPT({
     </div>
   );
 }
+

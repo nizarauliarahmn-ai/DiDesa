@@ -1,4 +1,5 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
+import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -1020,7 +1021,7 @@ export default function AdminSuratNikah({
                         >
                           <div>
                             <p className="font-bold text-slate-900 dark:text-white">{r.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{r.nik} • {r.address}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
                           </div>
                           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${r.gender === 'Laki-laki' || r.gender === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'}`}>
                             {r.gender}
@@ -1041,7 +1042,7 @@ export default function AdminSuratNikah({
                     <div>
                       <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Warga Desa Terpilih</p>
                       <p className="font-bold text-slate-900 dark:text-white">{formData.isWargaSuami ? formData.namaSuami : formData.namaIstri}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{formData.isWargaSuami ? 'Calon Suami' : 'Calon Istri'}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
                     </div>
                   </div>
                   <button 
@@ -1571,3 +1572,4 @@ export default function AdminSuratNikah({
     </div>
   );
 }
+

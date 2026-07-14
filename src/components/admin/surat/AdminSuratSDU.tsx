@@ -1,4 +1,5 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
+import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -51,6 +52,7 @@ export default function AdminSuratSDU({
   editLetterId?: string | null
 }) {
   const [loading, setLoading] = useState(false);
+  const templateDesc = useLetterDescription('SDU', 'Surat Keterangan Domisili Usaha');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -568,7 +570,7 @@ export default function AdminSuratSDU({
           </button>
           <div>
             <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat SDP</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Surat Keterangan Domisili Usaha</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -667,7 +669,7 @@ export default function AdminSuratSDU({
                         </div>
                         <div>
                           <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} • {res.desa}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{templateDesc}</p>
                         </div>
                       </button>
                     ))
@@ -1164,4 +1166,5 @@ export default function AdminSuratSDU({
     </div>
   );
 }
+
 
