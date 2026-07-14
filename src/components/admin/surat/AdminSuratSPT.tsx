@@ -343,6 +343,7 @@ export default function AdminSuratSPT({
           ${generatePage1HTML()}
           <div class="page-break"></div>
           ${generatePage2HTML()}
+          ${activeHeirs.length > 5 ? `<div class="page-break"></div>\n          ${generatePage3HTML()}` : ''}
           <script>window.onload=function(){window.print();}<\/script>
         </body></html>`);
         doc.close();
@@ -389,7 +390,7 @@ export default function AdminSuratSPT({
       </p>
 
       <div style="margin-left:40px;margin-bottom:12px;font-size:13px;line-height:1.25;">
-        ${activeHeirs.map((h, i) => `
+        ${activeHeirs.slice(0, 5).map((h, i) => `
           <div style="margin-bottom:8px;">
             <span style="display:inline-block;width:20px;vertical-align:top;font-weight:bold;">${i + 1}.</span>
             <div style="display:inline-block;width:calc(100% - 25px);vertical-align:top;">
@@ -402,6 +403,7 @@ export default function AdminSuratSPT({
             </div>
           </div>`).join('')}
       </div>
+      ${activeHeirs.length > 5 ? `<div style="margin-left:40px;margin-bottom:12px;font-style:italic;font-size:12px;">(* Lanjutan daftar ahli waris No. 6 dst. dilanjutkan pada Lembar Lampiran ke-3)</div>` : ''}
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:12px;font-size:13.5px;">
         Kami sepakat menunjuk atau memberikan Kuasa kepada salah satu orang dari kami yang bernama
@@ -421,11 +423,12 @@ export default function AdminSuratSPT({
           <td style="width:20%;"></td>
           <td style="width:40%;text-align:left;vertical-align:top;padding-bottom:15px;">
             Pemberi Kuasa (Ahli Waris):<br/><br/>
-            ${activeHeirs.map((h, i) => `
+            ${activeHeirs.slice(0, 5).map((h, i) => `
               <div style="margin-bottom:12px;display:flex;justify-content:space-between;">
                 <span>${i + 1}. ${h.editedName}</span>
                 <span style="font-style:italic;margin-right:20px;">(...................)</span>
               </div>`).join('')}
+            ${activeHeirs.length > 5 ? `<div style="font-style:italic;font-size:11px;margin-top:5px;">(Tanda Tangan Lanjutan Terlampir)</div>` : ''}
           </td>
         </tr>
         <tr>
@@ -476,7 +479,7 @@ export default function AdminSuratSPT({
           </tr>
         </thead>
         <tbody>
-          ${activeHeirs.map((h, i) => `
+          ${activeHeirs.slice(0, 5).map((h, i) => `
             <tr>
               <td style="border:1px solid #000;padding:3px;text-align:center;">${i + 1}</td>
               <td style="border:1px solid #000;padding:3px 6px;font-weight:bold;text-transform:uppercase;">${h.editedName}</td>
@@ -486,6 +489,7 @@ export default function AdminSuratSPT({
             </tr>`).join('')}
         </tbody>
       </table>
+      ${activeHeirs.length > 5 ? `<div style="font-style:italic;font-size:11.5px;margin-bottom:10px;">(* Lanjutan tabel ahli waris No. 6 dst. terdapat pada Lembar Lampiran ke-3)</div>` : ''}
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:8px;font-size:13px;">
         Kami tersebut di atas adalah satu-satunya ahli waris, tidak ada lagi ahli waris yang lain.
@@ -500,11 +504,12 @@ export default function AdminSuratSPT({
           <tr>
             <td style="width:50%;vertical-align:top;text-align:left;padding-right:10px;">
               <strong>Para Ahli Waris:</strong><br/><br/>
-              ${activeHeirs.map((h, i) => `
+              ${activeHeirs.slice(0, 5).map((h, i) => `
                 <div style="margin-bottom:8px;display:flex;justify-content:space-between;width:90%;">
                   <span>${i + 1}. ${h.editedName}</span>
                   <span style="font-style:italic;">(.................)</span>
                 </div>`).join('')}
+              ${activeHeirs.length > 5 ? `<div style="font-style:italic;font-size:11px;margin-top:5px;">(Tanda Tangan Lanjutan Terlampir)</div>` : ''}
             </td>
             <td style="width:50%;vertical-align:top;text-align:left;padding-left:10px;">
               <strong>Para Saksi-Saksi:</strong><br/><br/>
@@ -559,6 +564,51 @@ export default function AdminSuratSPT({
       </div>
     </div>`;
 
+  const generatePage3HTML = () => `
+    <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;position:relative;background:white;font-family:${letterFont};">
+      <div style="text-align:center;margin-bottom:20px;">
+        <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">LAMPIRAN LANJUTAN AHLI WARIS</h3>
+        <p style="margin:2px 0 0 0;font-size:13.5px;">Nomor : ${v(formData.nomorSurat)}</p>
+      </div>
+
+      <h4 style="font-size:13px;margin-bottom:10px;">A. Lanjutan Tabel Ahli Waris</h4>
+      <table style="width:100%;border-collapse:collapse;margin-top:8px;margin-bottom:20px;font-size:11.5px;" border="1">
+        <thead>
+          <tr style="background:#f2f2f2;font-weight:bold;text-align:center;">
+            <th style="border:1px solid #000;padding:4px;width:6%;">No</th>
+            <th style="border:1px solid #000;padding:4px;text-align:left;width:30%;">Nama Lengkap</th>
+            <th style="border:1px solid #000;padding:4px;width:20%;">NIK</th>
+            <th style="border:1px solid #000;padding:4px;width:24%;">Tempat, Tanggal Lahir</th>
+            <th style="border:1px solid #000;padding:4px;width:20%;">Hubungan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${activeHeirs.slice(5).map((h, i) => `
+            <tr>
+              <td style="border:1px solid #000;padding:3px;text-align:center;">${i + 6}</td>
+              <td style="border:1px solid #000;padding:3px 6px;font-weight:bold;text-transform:uppercase;">${h.editedName}</td>
+              <td style="border:1px solid #000;padding:3px;text-align:center;font-family:monospace;">${h.editedNik}</td>
+              <td style="border:1px solid #000;padding:3px;text-align:center;">${h.editedBirthPlace}, ${fmtDate(h.editedBirthDate)}</td>
+              <td style="border:1px solid #000;padding:3px;text-align:center;">${h.editedRelationship}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+
+      <h4 style="font-size:13px;margin-bottom:10px;margin-top:30px;">B. Lanjutan Tanda Tangan Ahli Waris</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:20px;">
+        ${activeHeirs.slice(5).map((h, i) => `
+          <div style="width:45%;margin-bottom:30px;">
+            <div style="margin-bottom:40px;font-size:13px;">${i + 6}. ${h.editedName}</div>
+            <div style="font-size:13px;">(...................................)</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;">
+        ${SAAS_CONFIG.globalFooterHTML}
+      </div>
+    </div>`;
+
   // ─── Filtered pewaris search ───
   const filteredPewaris = allResidents.filter(r =>
     r.name.toLowerCase().includes(pewarisQuery.toLowerCase()) ||
@@ -594,7 +644,7 @@ export default function AdminSuratSPT({
             className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg dark:shadow-none shadow-emerald-900/20 active:scale-95 disabled:opacity-60"
           >
             <Printer className="w-4 h-4" />
-            {loading ? 'Memproses...' : 'Cetak 2 Lembar'}
+            {loading ? 'Memproses...' : `Cetak ${activeHeirs.length > 5 ? '3' : '2'} Lembar`}
           </button>
         </div>
       </div>
