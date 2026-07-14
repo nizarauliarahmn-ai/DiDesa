@@ -264,6 +264,32 @@ export default function AdminSuratSPT({
     let synced = 0;
     let failed = 0;
 
+    // 1. Update Pewaris (Deceased) status to 'Meninggal Dunia'
+    if (selectedPewaris.status !== 'Meninggal Dunia' && selectedPewaris.status !== 'Meninggal') {
+      const updatedPewaris = { ...selectedPewaris, status: 'Meninggal Dunia' };
+      try {
+        if (isSuperAdmin) {
+          const res = await fetch(`/api/residents/${selectedPewaris.nik}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedPewaris),
+          });
+          if (res.ok) synced++;
+          else failed++;
+        } else {
+          const res = await fetch(`/api/residents/${selectedPewaris.nik}/request-approval`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ actionType: 'edit', originalStatus: selectedPewaris.status || 'Aktif', details: updatedPewaris }),
+          });
+          if (res.ok) synced++;
+          else failed++;
+        }
+      } catch { failed++; }
+    }
+
+    // 2. Update Heirs Data
+
     for (const c of edited) {
       const r = c.resident;
       const hasChanges =
