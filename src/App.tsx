@@ -52,6 +52,13 @@ export default function App() {
     return 'admin';
   });
 
+  // Clear cache to force reload letter classifications
+  if (localStorage.getItem('letter_cache_version') !== 'v4') {
+    localStorage.removeItem('letter_classifications');
+    localStorage.removeItem('saas_global_letter_catalog');
+    localStorage.setItem('letter_cache_version', 'v4');
+  }
+
   const [adminTab, setAdminTab] = useState('dashboard');
   const [presetResident, setPresetResident] = useState<any>(null);
   const [globalSearch, setGlobalSearch] = useState('');
@@ -390,3 +397,4 @@ export default function App() {
     </div>
   );
 }
+
