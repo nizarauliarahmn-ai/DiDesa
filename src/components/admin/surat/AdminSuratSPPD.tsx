@@ -1073,41 +1073,43 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         <div className="lg:col-span-7 h-[calc(100vh-140px)] sticky top-24">
           <div className="bg-slate-200/40 dark:bg-slate-800/20 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col relative overflow-hidden h-full">
             
-            {/* Print Layout Selector */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-1 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 flex z-10">
-            <button
-              onClick={() => setPrintLayout('semua')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'semua' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
-            >
-              Semua Halaman
-            </button>
-            <button
-              onClick={() => setPrintLayout('spt')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'spt' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
-            >
-              1. Surat Tugas
-            </button>
-            <button
-              onClick={() => setPrintLayout('sppd')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'sppd' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
-            >
-              2. Visum SPPD
-            </button>
-            <button
-              onClick={() => setPrintLayout('laporan')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'laporan' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
-            >
-              3. Lembar Laporan
-            </button>
-            
-            <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-2 self-center"></div>
-            
-            <div className="flex items-center">
-              <button onClick={() => setZoomLevel(z => Math.max(0.3, z - 0.1))} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"><ZoomOut className="w-4 h-4" /></button>
-              <span className="text-xs font-mono w-12 text-center text-gray-700 dark:text-slate-300">{Math.round(zoomLevel * 100)}%</span>
-              <button onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.1))} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"><ZoomIn className="w-4 h-4" /></button>
+            {/* Print Layout Selector Header */}
+            <div className="flex justify-center pt-4 pb-2 shrink-0 bg-slate-200/50 dark:bg-slate-800/50 border-b border-gray-200/50 dark:border-slate-700/50 z-10 shadow-sm">
+              <div className="bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex">
+                <button
+                  onClick={() => setPrintLayout('semua')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'semua' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+                >
+                  Semua Halaman
+                </button>
+                <button
+                  onClick={() => setPrintLayout('spt')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'spt' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+                >
+                  1. Surat Tugas
+                </button>
+                <button
+                  onClick={() => setPrintLayout('sppd')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'sppd' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+                >
+                  2. Visum SPPD
+                </button>
+                <button
+                  onClick={() => setPrintLayout('laporan')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'laporan' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+                >
+                  3. Lembar Laporan
+                </button>
+                
+                <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-2 self-center"></div>
+                
+                <div className="flex items-center">
+                  <button onClick={() => setZoomLevel(z => Math.max(0.3, z - 0.1))} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"><ZoomOut className="w-4 h-4" /></button>
+                  <span className="text-xs font-mono w-12 text-center text-gray-700 dark:text-slate-300">{Math.round(zoomLevel * 100)}%</span>
+                  <button onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.1))} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"><ZoomIn className="w-4 h-4" /></button>
+                </div>
+              </div>
             </div>
-          </div>
 
           <div 
             {...dragProps}
