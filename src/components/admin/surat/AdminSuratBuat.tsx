@@ -294,13 +294,16 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       setClassifications(cls);
     };
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
+    window.addEventListener('village_settings_updated', handleClassificationsUpdate);
     window.addEventListener('letter_classifications_updated', handleClassificationsUpdate);
     
     // Initial sync
     handleSettingsUpdate();
+    handleClassificationsUpdate();
     
     return () => {
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
+      window.removeEventListener('village_settings_updated', handleClassificationsUpdate);
       window.removeEventListener('letter_classifications_updated', handleClassificationsUpdate);
     };
   }, []);

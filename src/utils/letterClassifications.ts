@@ -133,17 +133,21 @@ export function getLetterClassifications(): LetterClassification[] {
         }
       });
       
-      // Merge updates from SaaS (jenis, klasifikasi, kodeKlasifikasi)
+      // Merge updates from SaaS (jenis, klasifikasi, kodeKlasifikasi, isVisible)
       mapped = mapped.map(item => {
         const saasMatch = saasTemplates.find(s => s.id === item.id);
         if (saasMatch) {
-          if (item.jenis !== saasMatch.jenis || item.klasifikasi !== saasMatch.klasifikasi || item.kodeKlasifikasi !== saasMatch.kodeKlasifikasi) {
+          if (item.jenis !== saasMatch.jenis || 
+              item.klasifikasi !== saasMatch.klasifikasi || 
+              item.kodeKlasifikasi !== saasMatch.kodeKlasifikasi ||
+              item.isVisible !== saasMatch.isVisible) {
             updated = true;
             return {
               ...item,
               jenis: saasMatch.jenis,
               klasifikasi: saasMatch.klasifikasi,
               kodeKlasifikasi: saasMatch.kodeKlasifikasi,
+              isVisible: saasMatch.isVisible,
               noUrutTerakhir: globalSeq
             };
           }
