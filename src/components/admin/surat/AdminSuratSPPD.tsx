@@ -94,8 +94,14 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
   // Dasar & Pelaporan
   const [dasarPenugasan, setDasarPenugasan] = useState(editData?.dasarPenugasan || 'surat undangan dengan nomor surat: ........ tanggal ........');
-    const [namaPPTK, setNamaPPTK] = useState(editData?.namaPPTK || '');
-    const [kepadaYth, setKepadaYth] = useState(editData?.kepadaYth || `Kepala ${SAAS_CONFIG.desaName}`);
+  const [isDasarManual, setIsDasarManual] = useState(() => {
+    if (!editData) return false;
+    return editData.dasarPenugasan && !editData.dasarPenugasan.startsWith('surat undangan');
+  });
+  const [dasarNo, setDasarNo] = useState('');
+  const [dasarTgl, setDasarTgl] = useState('');
+  const [namaPPTK, setNamaPPTK] = useState(editData?.namaPPTK || '');
+  const [kepadaYth, setKepadaYth] = useState(editData?.kepadaYth || `Kepala ${SAAS_CONFIG.desaName}`);
 
   // Detail Perjalanan
   const [maksudPerjalanan, setMaksudPerjalanan] = useState(editData?.maksudPerjalanan || '');
@@ -238,6 +244,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
   };
+
+  useEffect(() => {
+    if (!isDasarManual) {
+      const tglStr = dasarTgl ? formatDate(dasarTgl) : '........';
+      setDasarPenugasan(`surat undangan dengan nomor surat: ${dasarNo || '........'} tanggal ${tglStr}`);
+    }
+  }, [dasarNo, dasarTgl, isDasarManual]);
 
   const currentDateFormatted = () => {
     const d = new Date();
@@ -750,53 +763,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pengaturan Tanda Tangan</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Penandatangan</label>
-                <select
-                  value={namaKades}
-                  onChange={(e) => {
-                    const selected = officers.find((o: any) => o.name === e.target.value);
-                    if (selected) {
-                      setNamaKades(selected.name);
-                      setRoleKades(selected.role);
-                      setNipKades(selected.nip || '');
-                    }
-                  }}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                >
-                  {officers.length > 0 ? (
-                    officers.map((officer: any, idx: number) => (
-                      <option key={idx} value={officer.name}>{officer.name} - {officer.role}</option>
-                    ))
-                  ) : (
-                    <option value={namaKades}>{namaKades} - {roleKades}</option>
-                  )}
-                </select>
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Jika memilih selain Kepala Desa, sistem akan otomatis menambahkan keterangan <strong>"A.n. Kepala Desa,"</strong>.
-                </p>
-              </div>
-              
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <label className="flex items-start gap-3 cursor-pointer p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
-                  <input 
-                    type="checkbox"
-                    checked={includeCamat}
-                    onChange={(e) => setIncludeCamat(e.target.checked)}
-                    className="w-5 h-5 mt-0.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
-                  />
-                  <div>
-                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan pada Surat Tugas (Camat di sebelah kiri)</div>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pegawai yang Diperintah</h3>
             <div className="space-y-4">
               <div className="relative">
@@ -960,35 +926,44 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Detail Perjalanan Dinas & Dasar</h3>
             <div className="space-y-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Dasar Penugasan (Berdasarkan...)</label>
-                <textarea 
-                  value={dasarPenugasan}
-                  onChange={(e) => setDasarPenugasan(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm mb-3"
-                  rows={2}
-                  placeholder="Misal: surat undangan dengan nomor surat: ... tanggal ..."
-                />
-                <div className="flex flex-col gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
-                  <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Isi Otomatis (opsional):</div>
-                  <div className="flex gap-2 items-center">
-                     <input type="text" id="cepat_no" placeholder="Nomor Surat Undangan..." className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-sm flex-1 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-emerald-500" />
-                     <input type="text" id="cepat_tgl" placeholder="Tanggal (contoh: 12 Juli 2026)..." className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-sm w-48 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-emerald-500" />
-                     <button 
-                       onClick={(e) => {
-                         e.preventDefault();
-                         const no = (document.getElementById('cepat_no') as HTMLInputElement).value;
-                         const tgl = (document.getElementById('cepat_tgl') as HTMLInputElement).value;
-                         if (no || tgl) {
-                           setDasarPenugasan(`surat undangan dengan nomor surat: ${no} tanggal ${tgl}`);
-                         }
-                       }}
-                       className="px-3 py-1.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500/30 rounded-lg text-sm font-medium transition-colors"
-                     >
-                       Gunakan Template
-                     </button>
-                  </div>
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Dasar Penugasan</label>
+                  <label className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-800 p-1 px-2 rounded transition-colors">
+                    <input 
+                      type="checkbox" 
+                      checked={isDasarManual} 
+                      onChange={(e) => setIsDasarManual(e.target.checked)} 
+                      className="rounded border-gray-300 dark:border-slate-600 text-emerald-500 focus:ring-emerald-500" 
+                    />
+                    Isi Manual (Format Lain)
+                  </label>
                 </div>
+                {!isDasarManual ? (
+                  <div className="flex gap-3 items-center">
+                    <input 
+                      type="text" 
+                      value={dasarNo} 
+                      onChange={(e) => setDasarNo(e.target.value)} 
+                      placeholder="Nomor Surat Undangan..." 
+                      className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm" 
+                    />
+                    <input 
+                      type="date" 
+                      value={dasarTgl} 
+                      onChange={(e) => setDasarTgl(e.target.value)} 
+                      className="px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm w-48" 
+                    />
+                  </div>
+                ) : (
+                  <textarea 
+                    value={dasarPenugasan}
+                    onChange={(e) => setDasarPenugasan(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
+                    rows={2}
+                    placeholder="Misal: Dokumen Pelaksanaan Anggaran (DPA)..."
+                  />
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Pelaksana Teknis (PPTK)</label>
@@ -1106,6 +1081,53 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
                   placeholder="Misal: APBDes Tahun 2025"
                 />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pengaturan Tanda Tangan</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Penandatangan</label>
+                <select
+                  value={namaKades}
+                  onChange={(e) => {
+                    const selected = officers.find((o: any) => o.name === e.target.value);
+                    if (selected) {
+                      setNamaKades(selected.name);
+                      setRoleKades(selected.role);
+                      setNipKades(selected.nip || '');
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                >
+                  {officers.length > 0 ? (
+                    officers.map((officer: any, idx: number) => (
+                      <option key={idx} value={officer.name}>{officer.name} - {officer.role}</option>
+                    ))
+                  ) : (
+                    <option value={namaKades}>{namaKades} - {roleKades}</option>
+                  )}
+                </select>
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Jika memilih selain Kepala Desa, sistem akan otomatis menambahkan keterangan <strong>"A.n. Kepala Desa,"</strong>.
+                </p>
+              </div>
+              
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <label className="flex items-start gap-3 cursor-pointer p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
+                  <input 
+                    type="checkbox"
+                    checked={includeCamat}
+                    onChange={(e) => setIncludeCamat(e.target.checked)}
+                    className="w-5 h-5 mt-0.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan pada Surat Tugas (Camat di sebelah kiri)</div>
+                  </div>
+                </label>
               </div>
             </div>
           </div>
