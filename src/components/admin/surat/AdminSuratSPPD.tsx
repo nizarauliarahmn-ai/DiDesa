@@ -259,13 +259,14 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <meta charset="utf-8">
           <title>Surat Perjalanan Dinas (SPPD)</title>
           <script src="https://cdn.tailwindcss.com"></script>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
           <style>
-            body { font-family: Arial, Helvetica, sans-serif; background: transparent; margin: 0; padding: 0; line-height: 1.5; color: #000; }
+            body { font-family: Arial, Helvetica, sans-serif; background: transparent; margin: 0; padding: 0; line-height: 1.5; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
             .page-landscape { width: 297mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
             .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
-            .print-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.4; }
-            .print-table th, .print-table td { border: 1px solid black; padding: 6px 10px; vertical-align: top; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 11px; line-height: 1.2; }
+            .print-table th, .print-table td { border: 1px solid black; padding: 2px 4px; vertical-align: top; }
             
             @media print {
               body { background: white; }
@@ -431,41 +432,41 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   </tbody>
                 </table>
 
-                <div class="flex justify-end text-[11px] mt-4">
+                <div class="flex justify-end text-[11px] mt-1">
                   <div class="w-[200px]">
                     <div class="grid grid-cols-[80px_10px_1fr]">
                       <span>Dikeluarkan di</span><span>:</span><span>${desaName.replace(/desa|kelurahan/gi, '').trim()}</span>
                       <span>Pada tanggal</span><span>:</span><span>${currentDateFormatted()}</span>
                     </div>
-                    <div class="mt-2 font-bold">${roleKades},</div>
-                    <div class="h-12"></div>
+                    <div class="mt-1 font-bold">${roleKades},</div>
+                    <div class="h-10"></div>
                     <div class="font-bold underline">${namaKades}</div>
                   </div>
                 </div>
               </div>
               
               <!-- Kanan -->
-              <div class="w-[47%] pl-4 text-[11px] flex flex-col">
-                <div class="border-t border-black py-2">I. SPPD Nomor: ${nomorSurat}</div>
+              <div class="w-[47%] pl-4 text-[10px] flex flex-col">
+                <div class="grid grid-cols-[20px_100px_10px_1fr] leading-tight pt-1">
+                  <span>I.</span><span>SPPD Nomor</span><span>:</span><span>${nomorSurat}</span>
+                  <span></span><span>Berangkat dari</span><span>:</span><span>${tempatBerangkat}</span>
+                  <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
+                  <span></span><span>Ke</span><span>:</span><span>${tempatTujuan}</span>
+                </div>
+                <div class="mt-1 mb-2 text-center">Pejabat Pelaksana Teknis Kegiatan,</div>
+                <div class="text-center font-bold underline">${namaPPTK || '................................'}</div>
                 
                 <!-- Box II -->
-                <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
+                <div class="border-t border-black py-1 grid grid-cols-2 gap-2">
                   <div>
-                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                    <div class="grid grid-cols-[20px_40px_10px_1fr] leading-tight">
                       <span>II.</span><span>Tiba di</span><span>:</span><span>${tempatTujuan}</span>
-                      <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
-                      <span></span><span>Kepala</span><span>:</span><span></span>
-                    </div>
-                    <div class="h-10"></div>
-                    <div class="text-center">(.......................................)</div>
-                  </div>
-                  <div>
-                    <div class="grid grid-cols-[80px_10px_1fr]">
+                    <div class="grid grid-cols-[80px_10px_1fr] leading-tight">
                       <span>Berangkat dari</span><span>:</span><span>${tempatTujuan}</span>
                       <span>Ke</span><span>:</span><span>${tempatBerangkat}</span>
                       <span>Pada Tanggal</span><span>:</span><span>${formatDateFull(tanggalKembali)}</span>
                     </div>
-                    <div class="h-10"></div>
+                    <div class="h-6"></div>
                     <div class="text-center">(.......................................)</div>
                   </div>
                 </div>
@@ -473,12 +474,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 <!-- Box III -->
                 <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
                   <div>
-                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                    <div class="grid grid-cols-[20px_60px_10px_1fr] leading-tight">
                       <span>III.</span><span>Tiba di</span><span>:</span><span></span>
                       <span></span><span>Pada tanggal</span><span>:</span><span></span>
                       <span></span><span>Kepala</span><span>:</span><span></span>
                     </div>
-                    <div class="h-10"></div>
+                    <div class="h-6"></div>
                     <div class="text-center">(.......................................)</div>
                   </div>
                   <div>
@@ -495,12 +496,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 <!-- Box IV -->
                 <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
                   <div>
-                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                    <div class="grid grid-cols-[20px_60px_10px_1fr] leading-tight">
                       <span>IV.</span><span>Tiba di</span><span>:</span><span></span>
                       <span></span><span>Pada tanggal</span><span>:</span><span></span>
                       <span></span><span>Kepala</span><span>:</span><span></span>
                     </div>
-                    <div class="h-10"></div>
+                    <div class="h-6"></div>
                     <div class="text-center">(.......................................)</div>
                   </div>
                   <div>
@@ -517,17 +518,17 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 <!-- Box V -->
                 <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
                   <div>
-                    <div class="grid grid-cols-[20px_60px_10px_1fr]">
+                    <div class="grid grid-cols-[20px_60px_10px_1fr] leading-tight">
                       <span>V.</span><span>Tiba di</span><span>:</span><span>${tempatBerangkat}</span>
                       <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalKembali)}</span>
                     </div>
-                    <div class="col-span-2 mt-2">
+                    <div class="col-span-2 mt-1">
                       Telah diperiksa dengan keterangan bahwa perjalanan tersebut di atas benar dilakukan atas perintahnya dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.
                     </div>
                   </div>
                   <div>
-                    <div class="mt-8 text-center font-bold">${roleKades},</div>
-                    <div class="h-10"></div>
+                    <div class="mt-4 text-center font-bold">${roleKades},</div>
+                    <div class="h-8"></div>
                     <div class="text-center font-bold">${namaKades}</div>
                   </div>
                 </div>
