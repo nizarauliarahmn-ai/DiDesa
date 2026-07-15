@@ -129,10 +129,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     setIncludeCamat(false);
 
     if (editData?.nomorSurat) {
-      setNomorSurat(editData.nomorSurat.split('/').pop() || '');
+      setNomorSurat(editData.nomorSurat);
     } else {
-      const nextSeq = getGlobalSequenceNumber() + 1;
-      setNomorSurat(nextSeq.toString().padStart(3, '0'));
+      const generatedNo = generateLetterNumber('SPPD', kodeKlasifikasi || '094');
+      setNomorSurat(generatedNo);
     }
   }, [editData, kodeKlasifikasi]);
 
@@ -150,10 +150,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     
     setIsSaving(true);
     try {
-      const fullNomor = `${kodeKlasifikasi}/${nomorSurat}`;
       const payload = {
         klasifikasi: 'SPPD',
-        nomorSurat: fullNomor,
+        nomorSurat: nomorSurat,
         tanggal: new Date().toISOString(),
         pemohon: namaPegawai,
         nikPemohon: nipPegawai || '-',
@@ -294,8 +293,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             
             <div class="text-[14px] text-black">
               <div class="text-center mb-8">
-                <h6 class="font-bold underline uppercase text-[16px] tracking-wide">SURAT TUGAS</h6>
-                <p class="font-bold mt-1">${kodeKlasifikasi} / ${nomorSurat}</p>
+                <h6 class="font-bold underline uppercase text-[16px]">SURAT TUGAS</h6>
+                <p class="font-bold mt-1">Nomor : ${nomorSurat}</p>
               </div>
 
               <div class="mb-6 text-justify leading-relaxed">
@@ -360,11 +359,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 </div>
                 
                 <div class="text-center text-[12px] mb-4">
-                  <div class="grid grid-cols-[120px_10px_1fr] text-left mx-auto max-w-[200px]">
-                    <span>Kode Nomor</span><span>:</span><span>${kodeKlasifikasi}</span>
-                    <span>Nomor</span><span>:</span><span>${kodeKlasifikasi}/${nomorSurat}</span>
-                  </div>
-                  <h6 class="font-bold underline uppercase text-[14px] mt-2">SURAT PERJALANAN DINAS</h6>
+                  <h6 class="font-bold underline uppercase text-[14px]">SURAT PERJALANAN DINAS</h6>
+                  <p class="font-bold mt-1">Nomor : ${nomorSurat}</p>
                 </div>
 
                 <table class="print-table text-[11px] mb-4">
@@ -450,22 +446,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               
               <!-- Kanan -->
               <div class="w-[47%] pl-4 text-[11px] flex flex-col">
+                <div class="border-t border-black py-2">I. SPPD Nomor: ${nomorSurat}</div>
                 
-                <!-- Box I -->
-                <div class="grid grid-cols-[1fr_auto] mb-2">
-                  <div></div>
-                  <div>
-                    <div class="grid grid-cols-[20px_100px_10px_1fr]">
-                      <span>I.</span><span>SPPD Nomor</span><span>:</span><span>${kodeKlasifikasi}/${nomorSurat}</span>
-                      <span></span><span>Berangkat dari</span><span>:</span><span>${tempatBerangkat}</span>
-                      <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
-                      <span></span><span>Ke</span><span>:</span><span>${tempatTujuan}</span>
-                    </div>
-                    <div class="mt-4 mb-8 text-center">Pejabat Pelaksana Teknis Kegiatan,</div>
-                    <div class="text-center font-bold">${namaPPTK || '................................'}</div>
-                  </div>
-                </div>
-
                 <!-- Box II -->
                 <div class="border-t border-black py-2 grid grid-cols-2 gap-2">
                   <div>
@@ -575,7 +557,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <div class="page-a4 page-laporan bg-white shadow-lg mx-auto">
             <div class="text-[14px] text-black pt-12">
               <div class="text-center mb-10">
-                <h6 class="font-bold uppercase text-[16px] tracking-wide">LAPORAN PERJALANAN DINAS</h6>
+                <h6 class="font-bold uppercase text-[16px]">LAPORAN PERJALANAN DINAS</h6>
               </div>
 
               <div class="grid grid-cols-[150px_10px_1fr] gap-2 mb-8 max-w-xl mx-auto">
@@ -661,19 +643,14 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Identitas Surat</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nomor Surat Akhir</label>
-                <div className="flex gap-2">
-                  <div className="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400">
-                    {kodeKlasifikasi} / 
-                  </div>
-                  <input 
-                    type="text" 
-                    value={nomorSurat}
-                    onChange={(e) => setNomorSurat(e.target.value)}
-                    className="w-32 px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="001"
-                  />
-                </div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nomor Surat</label>
+                <input 
+                  type="text" 
+                  value={nomorSurat}
+                  onChange={(e) => setNomorSurat(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  placeholder="Format Lengkap (Misal: 094 / ...)"
+                />
               </div>
             </div>
           </div>
