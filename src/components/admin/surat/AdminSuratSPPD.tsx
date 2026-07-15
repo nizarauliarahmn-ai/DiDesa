@@ -174,18 +174,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   }, [tanggalBerangkat, tanggalKembali]);
 
   const handlePrint = () => {
-    const html = generateHTML();
-    const printWindow = window.open('', '_blank', 'width=1200,height=900');
-    if (!printWindow) return;
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
-    printWindow.onload = () => {
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 500);
-    };
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      iframeRef.current.focus();
+      iframeRef.current.contentWindow.print();
+    }
   };
 
   const handleRecord = () => {
@@ -662,7 +654,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               .page-landscape { page: landscape_page; }
 
               ${printLayout === 'surattugas' ? `.page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
-              ${printLayout !== 'semua' && printLayout !== 'surattugas' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
+              ${printLayout !== 'semua' && printLayout !== 'surattugas' ? `.page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
               ${printLayout === 'semua' ? `.page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
             }
           </style>
