@@ -431,20 +431,20 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <tr>
                       <td class="text-center align-top">8</td>
                       <td colspan="2" class="p-0 align-top">
-                        <table class="w-full h-full" style="border-collapse: collapse; border: 1px solid black;">
+                        <table class="w-full h-full" style="border-collapse: collapse; border: none;">
                           <tr>
-                            <td style="border: 1px solid black; padding: 4px;" class="font-bold pl-2">Pengikut/ Nama</td>
-                            <td style="border: 1px solid black; padding: 4px; text-align: center; width: 70px;" class="font-bold">Tgl Lahir</td>
-                            <td style="border: 1px solid black; padding: 4px; text-align: center; width: 90px;" class="font-bold">Keterangan</td>
+                            <td style="border-right: 1px solid black; border-bottom: 1px solid black; border-top: none; border-left: none; padding: 4px;" class="font-bold pl-2">Pengikut/ Nama</td>
+                            <td style="border-right: 1px solid black; border-bottom: 1px solid black; border-top: none; border-left: none; padding: 4px; text-align: center; width: 70px;" class="font-bold">Tgl Lahir</td>
+                            <td style="border-bottom: 1px solid black; border-top: none; border-left: none; border-right: none; padding: 4px; text-align: center; width: 90px;" class="font-bold">Keterangan</td>
                           </tr>
                           <tr>
-                            <td style="border: 1px solid black; padding: 4px; vertical-align: top; min-height: 40px;" class="pl-2">
+                            <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; vertical-align: top; min-height: 40px;" class="pl-2">
                               ${pengikut.length > 0 ? pengikut.map((p, i) => `${i+1}. ${p.nama}<br>`).join('') : '1.<br>2.<br>3. dst'}
                             </td>
-                            <td style="border: 1px solid black; padding: 4px; vertical-align: top; text-align: center;">
+                            <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; vertical-align: top; text-align: center;">
                               ${pengikut.length > 0 ? pengikut.map(p => `${p.umur}<br>`).join('') : ''}
                             </td>
-                            <td style="border: 1px solid black; padding: 4px; vertical-align: top; text-align: center;">
+                            <td style="border: none; padding: 4px; vertical-align: top; text-align: center;">
                               ${pengikut.length > 0 ? pengikut.map(p => `${p.keterangan}<br>`).join('') : ''}
                             </td>
                           </tr>
