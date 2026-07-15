@@ -532,14 +532,15 @@ return (
                       </td>
                       <td className="px-6 py-3.5 text-center">
                         <button
-                          disabled={!isSuperAdmin}
+                          disabled={!isSuperAdmin || item.isSaaSDisabled}
                           onClick={() =>
                             handleToggleVisibility(
                               item.id,
                               item.isVisible !== false,
                             )
                           }
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${item.isVisible !== false ? "bg-emerald-500" : "bg-gray-200"} ${!isSuperAdmin ? "opacity-50 cursor-not-allowed" : ""}`}
+                          title={item.isSaaSDisabled ? "Dinonaktifkan oleh Pusat (SaaS)" : ""}
+                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${item.isVisible !== false ? "bg-emerald-500" : "bg-gray-200"} ${(!isSuperAdmin || item.isSaaSDisabled) ? "opacity-50 cursor-not-allowed" : ""}`}
                         >
                           <span
                             className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white dark:bg-slate-900 transition-transform ${item.isVisible !== false ? "translate-x-4" : "translate-x-1"}`}

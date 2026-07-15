@@ -6,6 +6,7 @@ export interface LetterClassification {
     deskripsi?: string; // The numeric archive classification (e.g. "145", "400")
   noUrutTerakhir: number;
   isVisible?: boolean;
+  isSaaSDisabled?: boolean;
   deskripsi?: string;
 }
 
@@ -137,17 +138,25 @@ export function getLetterClassifications(): LetterClassification[] {
       mapped = mapped.map(item => {
         const saasMatch = saasTemplates.find(s => s.id === item.id);
         if (saasMatch) {
+          const isSaaSDisabled = saasMatch.isVisible === false;
+          let newIsVisible = item.isVisible;
+          if (isSaaSDisabled) {
+            newIsVisible = false;
+          }
+
           if (item.jenis !== saasMatch.jenis || 
               item.klasifikasi !== saasMatch.klasifikasi || 
               item.kodeKlasifikasi !== saasMatch.kodeKlasifikasi ||
-              item.isVisible !== saasMatch.isVisible) {
+              item.isSaaSDisabled !== isSaaSDisabled ||
+              item.isVisible !== newIsVisible) {
             updated = true;
             return {
               ...item,
               jenis: saasMatch.jenis,
               klasifikasi: saasMatch.klasifikasi,
               kodeKlasifikasi: saasMatch.kodeKlasifikasi,
-              isVisible: saasMatch.isVisible,
+              isVisible: newIsVisible,
+              isSaaSDisabled: isSaaSDisabled,
               noUrutTerakhir: globalSeq
             };
           }
