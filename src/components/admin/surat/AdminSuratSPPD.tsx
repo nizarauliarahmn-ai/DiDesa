@@ -86,11 +86,23 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     setOfficers(officersList);
   }, []);
 
-  // Pegawai / Yang Diperintah
-  const [namaPegawai, setNamaPegawai] = useState(editData?.namaPegawai || '');
-  const [nipPegawai, setNipPegawai] = useState(editData?.nipPegawai || '');
-  const [pangkatGolongan, setPangkatGolongan] = useState(editData?.pangkatGolongan || '');
-  const [jabatanPegawai, setJabatanPegawai] = useState(editData?.jabatanPegawai || '');
+  // Daftar Pelaksana Perjalanan Dinas & Pengikut
+  const [pelaksanaList, setPelaksanaList] = useState<any[]>(() => {
+    if (editData?.pelaksanaList) return editData.pelaksanaList;
+    if (editData?.namaPegawai) {
+      return [{
+        id: crypto.randomUUID(),
+        nama: editData.namaPegawai,
+        nip: editData.nipPegawai || '',
+        pangkat: editData.pangkatGolongan || '',
+        jabatan: editData.jabatanPegawai || '',
+        pengikutList: editData.pengikut || []
+      }];
+    }
+    return [{ id: crypto.randomUUID(), nama: '', nip: '', pangkat: '', jabatan: '', pengikutList: [] }];
+  });
+
+  const [activePreviewTab, setActivePreviewTab] = useState('surattugas');
 
   // Dasar & Pelaporan
   const [dasarPenugasan, setDasarPenugasan] = useState(editData?.dasarPenugasan || 'surat undangan dengan nomor surat: ........ tanggal ........');
@@ -116,8 +128,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [bebanAnggaran, setBebanAnggaran] = useState(editData?.bebanAnggaran || 'APBDes');
   const [mataAnggaran, setMataAnggaran] = useState(editData?.mataAnggaran || '');
 
-  // Pengikut
-  const [pengikut, setPengikut] = useState<{nama: string, umur: string, keterangan: string}[]>(editData?.pengikut || []);
 
   const [printLayout, setPrintLayout] = useState('semua'); // 'semua', 'spt', 'sppd', 'laporan'
 
@@ -180,12 +190,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         klasifikasi: 'SPPD',
         nomorSurat: nomorSurat,
         tanggal: new Date().toISOString(),
-        pemohon: namaPegawai,
-        nikPemohon: nipPegawai || '-',
-        namaPegawai,
-        nipPegawai,
-        pangkatGolongan,
-        jabatanPegawai,
+        pemohon: pelaksanaList[0]?.nama || 'Pelaksana',
+        nikPemohon: pelaksanaList[0]?.nip || '-',
+        pelaksanaList,
         maksudPerjalanan,
         alatAngkut,
         tempatBerangkat,
@@ -197,8 +204,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         mataAnggaran,
         dasarPenugasan,
         namaPPTK,
-        kepadaYth,
-        pengikut
+        kepadaYth
       };
 
       if (editLetterId) {
@@ -216,18 +222,47 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     }
   };
 
-  const addPengikut = () => {
-    setPengikut([...pengikut, { nama: '', umur: '', keterangan: '' }]);
+  const addPelaksana = () => {
+    setPelaksanaList([...pelaksanaList, { id: crypto.randomUUID(), nama: '', nip: '', pangkat: '', jabatan: '', pengikutList: [] }]);
   };
 
-  const removePengikut = (index: number) => {
-    setPengikut(pengikut.filter((_, i) => i !== index));
+  const removePelaksana = (id: string) => {
+    setPelaksanaList(pelaksanaList.filter(p => p.id !== id));
+    if (activePreviewTab === id) setActivePreviewTab('surattugas');
   };
 
-  const handlePengikutChange = (index: number, field: string, value: string) => {
-    const newPengikut = [...pengikut];
-    newPengikut[index] = { ...newPengikut[index], [field]: value };
-    setPengikut(newPengikut);
+  const handlePelaksanaChange = (id: string, field: string, value: string) => {
+    setPelaksanaList(pelaksanaList.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
+
+  const addPengikutToPelaksana = (pelaksanaId: string) => {
+    setPelaksanaList(pelaksanaList.map(p => {
+      if (p.id === pelaksanaId) {
+        if (p.pengikutList.length >= 5) return p;
+        return { ...p, pengikutList: [...p.pengikutList, { nama: '', umur: '', keterangan: '' }] };
+      }
+      return p;
+    }));
+  };
+
+  const removePengikutFromPelaksana = (pelaksanaId: string, pengikutIndex: number) => {
+    setPelaksanaList(pelaksanaList.map(p => {
+      if (p.id === pelaksanaId) {
+        return { ...p, pengikutList: p.pengikutList.filter((_: any, i: number) => i !== pengikutIndex) };
+      }
+      return p;
+    }));
+  };
+
+  const handlePengikutChange = (pelaksanaId: string, pengikutIndex: number, field: string, value: string) => {
+    setPelaksanaList(pelaksanaList.map(p => {
+      if (p.id === pelaksanaId) {
+        const newPengikut = [...p.pengikutList];
+        newPengikut[pengikutIndex] = { ...newPengikut[pengikutIndex], [field]: value };
+        return { ...p, pengikutList: newPengikut };
+      }
+      return p;
+    }));
   };
 
   const formatDateFull = (dateStr: string) => {
@@ -286,26 +321,20 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         </div>
     `;
 
-    const participants = [
-      {
-        nama: namaPegawai,
-        jabatan: jabatanPegawai,
-        pangkat: pangkatGolongan || '-',
-        isLeader: true,
-        pengikutList: pengikut
-      },
-      ...pengikut.filter(p => p.nama && p.nama.trim() !== '').map(p => ({
-        nama: p.nama,
-        jabatan: p.keterangan || '-',
+    const allParticipantsFlat = pelaksanaList.flatMap((p) => [
+      { ...p, isLeader: true },
+      ...p.pengikutList.filter((pg: any) => pg.nama.trim() !== '').map((pg: any) => ({
+        nama: pg.nama,
+        jabatan: pg.keterangan || '-',
         pangkat: '-',
-        isLeader: false,
-        pengikutList: []
+        nip: '-',
+        isLeader: false
       }))
-    ].filter(p => p.nama && p.nama.trim() !== '');
+    ]).filter((p: any) => p.nama && p.nama.trim() !== '');
 
     const generatePage2And3 = (participant: any) => `
           <!-- HALAMAN 2: VISUM SPPD (LANDSCAPE) -->
-          <div class="page-landscape page-sppd bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
+          <div class="page-landscape page-sppd bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''} ${printLayout !== 'semua' && printLayout !== participant.id ? 'display: none;' : ''}">
             <div class="flex gap-4 h-full">
               <!-- Kiri -->
               <div class="w-[53%] pr-4">
@@ -562,7 +591,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <!-- HALAMAN 3: LEMBAR LAPORAN -->
-          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
+          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''} ${printLayout !== 'semua' && printLayout !== participant.id ? 'display: none;' : ''}">
             <div class="text-[14px] text-black pt-12">
               <div class="text-center mb-10">
                 <h6 class="font-bold uppercase text-[16px]">LAPORAN PERJALANAN DINAS</h6>
@@ -616,24 +645,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               body { background: white; }
               .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
               
-              ${printLayout === 'spt' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
-              ${printLayout === 'sppd' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: none; }` : ''}
-              ${printLayout === 'laporan' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: none; } .page-sppd { display: none; } .page-laporan { display: block; }` : ''}
+              ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
+              ${printLayout !== 'semua' && printLayout !== 'surattugas' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
               ${printLayout === 'semua' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
             }
-
-            /* Non-print layout visibility */
-            ${printLayout !== 'semua' ? `
-              .page-spt { display: ${printLayout === 'spt' ? 'block' : 'none'}; }
-              .page-sppd { display: ${printLayout === 'sppd' ? 'block' : 'none'}; }
-              .page-laporan { display: ${printLayout === 'laporan' ? 'block' : 'none'}; }
-            ` : ''}
           </style>
         </head>
         <body>
 
           <!-- HALAMAN 1: SURAT TUGAS -->
-          <div class="page-a4 page-spt bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
+          <div class="page-a4 page-spt bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''} ${printLayout !== 'semua' && printLayout !== 'surattugas' ? 'display: none;' : ''}">
             ${kopSuratHTML}
             
             <div class="text-[14px] text-black">
@@ -657,16 +678,11 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td class="text-center py-3">1</td>
-                    <td class="py-3 font-semibold">${namaPegawai}</td>
-                    <td class="py-3">${jabatanPegawai}</td>
-                  </tr>
-                  ${pengikut.map((p, i) => `
+                  ${allParticipantsFlat.map((p: any, i: number) => `
                     <tr>
-                      <td class="text-center py-3">${i+2}</td>
+                      <td class="text-center py-3">${i+1}</td>
                       <td class="py-3 font-semibold">${p.nama}</td>
-                      <td class="py-3">${p.keterangan || '-'}</td>
+                      <td class="py-3">${p.jabatan || '-'}</td>
                     </tr>
                   `).join('')}
                 </tbody>
@@ -692,7 +708,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             </div>
           </div>
 
-          ${participants.map(p => generatePage2And3(p)).join('')}
+          ${pelaksanaList.map(p => generatePage2And3(p)).join('')}
 
         </body>
       </html>
@@ -763,164 +779,190 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pegawai yang Diperintah</h3>
-            <div className="space-y-4">
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
-                <div className="relative">
-                  <input 
-                    type="text" 
-                    value={namaPegawai}
-                    onChange={(e) => {
-                      setNamaPegawai(e.target.value);
-                      setShowPegawaiDropdown(true);
-                    }}
-                    onFocus={() => setShowPegawaiDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowPegawaiDropdown(false), 200)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 pr-8"
-                    placeholder="Ketik nama untuk mencari aparat / penduduk..."
-                  />
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                </div>
-                {showPegawaiDropdown && namaPegawai.length > 1 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 max-h-60 overflow-y-auto z-50">
-                    {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(namaPegawai.toLowerCase()) || (r.nik || r.nip || '').includes(namaPegawai)).slice(0, 5).map((res: any, idx: number) => (
-                      <button
-                        key={res.nik || res.nip || idx}
-                        onClick={() => {
-                          setNamaPegawai(res.name || res.nama || '');
-                          setNipPegawai(res.nik || res.nip || '');
-                          setJabatanPegawai(res.pekerjaan || res.jabatan || '');
-                          setShowPegawaiDropdown(false);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 dark:border-slate-700/50 last:border-0"
-                      >
-                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{res.name || res.nama}</div>
-                        <div className="text-xs text-gray-500 dark:text-slate-400">{res.nik ? `NIK: ${res.nik}` : (res.nip ? `NIP: ${res.nip}` : '')} &bull; {res.pekerjaan || res.jabatan || 'Tidak ada keterangan'}</div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">NIP/NIK (Opsional)</label>
-                  <input 
-                    type="text" 
-                    value={nipPegawai}
-                    onChange={(e) => setNipPegawai(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="NIP / NIK"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pangkat/Gol (Opsional)</label>
-                  <input 
-                    type="text" 
-                    value={pangkatGolongan}
-                    onChange={(e) => setPangkatGolongan(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="Misal: II/a"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Jabatan</label>
-                <input 
-                  type="text" 
-                  value={jabatanPegawai}
-                  onChange={(e) => setJabatanPegawai(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  placeholder="Misal: Kaur Keuangan"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Pengikut (Opsional)</h3>
-              {pengikut.length < 5 && (
-                  <button 
-                    onClick={addPengikut}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-lg transition-colors"
-                  >
-                    <Plus size={14} /> Tambah Pengikut
-                  </button>
-                )}
+              <h3 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Daftar Pelaksana Perjalanan Dinas</h3>
             </div>
             
-            {pengikut.length === 0 ? (
-              <div className="text-center py-6 text-sm text-gray-500 dark:text-slate-400 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-gray-200 dark:border-slate-700">
-                Tidak ada pengikut. Klik tambah untuk memasukkan.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {pengikut.map((p, index) => (
-                  <div key={index} className="flex gap-2 items-start bg-gray-50 dark:bg-slate-800/50 p-3 rounded-xl border border-gray-100 dark:border-slate-700">
-                    <div className="flex-1 grid grid-cols-12 gap-2">
-                      <div className="col-span-5 relative">
+            <div className="space-y-6">
+              {pelaksanaList.map((pelaksana, pIdx) => (
+                <div key={pelaksana.id} className="p-4 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/30">
+                  <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200 dark:border-slate-700">
+                    <h4 className="font-semibold text-gray-800 dark:text-slate-200 text-sm">
+                      Pelaksana No. {pIdx + 1} {pIdx === 0 ? '(Ketua Rombongan)' : ''}
+                    </h4>
+                    {pelaksanaList.length > 1 && (
+                      <button onClick={() => removePelaksana(pelaksana.id)} className="text-red-500 hover:text-red-700 text-xs flex items-center gap-1 font-medium">
+                        <Trash2 size={14} /> Hapus
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-4 mb-4">
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
+                      <div className="relative">
                         <input 
                           type="text" 
-                          value={p.nama}
+                          value={pelaksana.nama}
                           onChange={(e) => {
-                            handlePengikutChange(index, 'nama', e.target.value);
-                            setActivePengikutDropdown(index);
+                            handlePelaksanaChange(pelaksana.id, 'nama', e.target.value);
+                            setActivePelaksanaDropdown(pelaksana.id);
                           }}
-                          onFocus={() => setActivePengikutDropdown(index)}
-                          onBlur={() => setTimeout(() => setActivePengikutDropdown(null), 200)}
-                          className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                          placeholder="Nama Pengikut"
+                          onFocus={() => setActivePelaksanaDropdown(pelaksana.id)}
+                          onBlur={() => setTimeout(() => setActivePelaksanaDropdown(null), 200)}
+                          className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 bg-white"
+                          placeholder="Ketik nama aparat / penduduk..."
                         />
-                        {activePengikutDropdown === index && p.nama.length > 1 && (
-                          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 max-h-48 overflow-y-auto z-50">
-                            {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(p.nama.toLowerCase()) || (r.nik || r.nip || '').includes(p.nama)).slice(0, 5).map((res: any, idx: number) => (
-                              <button
-                                key={res.nik || res.nip || idx}
-                                onClick={() => {
-                                  handlePengikutChange(index, 'nama', res.name || res.nama || '');
-                                  handlePengikutChange(index, 'umur', (res.umur ? res.umur.toString() : (res.nik || res.nip || '')));
-                                  handlePengikutChange(index, 'keterangan', res.pekerjaan || res.jabatan || '');
-                                  setActivePengikutDropdown(null);
-                                }}
-                                className="w-full text-left px-3 py-2 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 dark:border-slate-700/50 last:border-0"
-                              >
-                                <div className="font-semibold text-gray-900 dark:text-white text-xs">{res.name || res.nama}</div>
-                                <div className="text-[10px] text-gray-500 dark:text-slate-400">{res.nik ? `NIK: ${res.nik}` : (res.nip ? `NIP: ${res.nip}` : '')} &bull; {res.pekerjaan || res.jabatan || 'Tidak ada keterangan'}</div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                       </div>
-                      <div className="col-span-3">
+                      {activePelaksanaDropdown === pelaksana.id && pelaksana.nama.length > 1 && (
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 max-h-60 overflow-y-auto z-50">
+                          {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(pelaksana.nama.toLowerCase()) || (r.nik || r.nip || '').includes(pelaksana.nama)).slice(0, 5).map((res: any, idx: number) => (
+                            <button
+                              key={res.nik || res.nip || idx}
+                              onClick={() => {
+                                handlePelaksanaChange(pelaksana.id, 'nama', res.name || res.nama || '');
+                                handlePelaksanaChange(pelaksana.id, 'nip', res.nik || res.nip || '');
+                                handlePelaksanaChange(pelaksana.id, 'jabatan', res.pekerjaan || res.jabatan || '');
+                                setActivePelaksanaDropdown(null);
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 dark:border-slate-700/50 last:border-0"
+                            >
+                              <div className="font-semibold text-gray-900 dark:text-white text-sm">{res.name || res.nama}</div>
+                              <div className="text-xs text-gray-500 dark:text-slate-400">{res.nik ? `NIK: ${res.nik}` : (res.nip ? `NIP: ${res.nip}` : '')} &bull; {res.pekerjaan || res.jabatan || 'Tidak ada keterangan'}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">NIP/NIK (Opsional)</label>
                         <input 
                           type="text" 
-                          value={p.umur}
-                          onChange={(e) => handlePengikutChange(index, 'umur', e.target.value)}
-                          className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                          placeholder="Umur"
+                          value={pelaksana.nip}
+                          onChange={(e) => handlePelaksanaChange(pelaksana.id, 'nip', e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 bg-white"
+                          placeholder="NIP / NIK"
                         />
                       </div>
-                      <div className="col-span-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pangkat/Gol (Opsional)</label>
                         <input 
                           type="text" 
-                          value={p.keterangan}
-                          onChange={(e) => handlePengikutChange(index, 'keterangan', e.target.value)}
-                          className="w-full px-3 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                          placeholder="Keterangan"
+                          value={pelaksana.pangkat}
+                          onChange={(e) => handlePelaksanaChange(pelaksana.id, 'pangkat', e.target.value)}
+                          className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 bg-white"
+                          placeholder="Misal: II/a"
                         />
                       </div>
                     </div>
-                    <button 
-                      onClick={() => removePengikut(index)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors mt-0.5"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Jabatan / Keterangan</label>
+                      <input 
+                        type="text" 
+                        value={pelaksana.jabatan}
+                        onChange={(e) => handlePelaksanaChange(pelaksana.id, 'jabatan', e.target.value)}
+                        className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 bg-white"
+                        placeholder="Misal: Kaur Keuangan"
+                      />
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
+
+                  {/* Pengikut Section for this Pelaksana */}
+                  <div className="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+                    <div className="flex justify-between items-center mb-3">
+                      <h5 className="font-semibold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Pengikut (Bawaan No. {pIdx + 1})</h5>
+                      {pelaksana.pengikutList.length < 5 && (
+                        <button 
+                          onClick={() => addPengikutToPelaksana(pelaksana.id)}
+                          className="flex items-center gap-1 px-2 py-1 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-600 dark:text-gray-300 text-xs rounded transition-colors"
+                        >
+                          <Plus size={12} /> Tambah Pengikut
+                        </button>
+                      )}
+                    </div>
+                    {pelaksana.pengikutList.length === 0 ? (
+                      <div className="text-center py-4 text-xs text-gray-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-lg border border-dashed border-gray-200 dark:border-slate-700">
+                        Tidak ada pengikut.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {pelaksana.pengikutList.map((p: any, index: number) => (
+                          <div key={index} className="flex gap-2 items-start bg-white dark:bg-slate-900 p-2 rounded-lg border border-gray-100 dark:border-slate-700">
+                            <div className="flex-1 grid grid-cols-12 gap-2">
+                              <div className="col-span-5 relative">
+                                <input 
+                                  type="text" 
+                                  value={p.nama}
+                                  onChange={(e) => {
+                                    handlePengikutChange(pelaksana.id, index, 'nama', e.target.value);
+                                    setActivePengikutDropdown(`${pelaksana.id}-${index}`);
+                                  }}
+                                  onFocus={() => setActivePengikutDropdown(`${pelaksana.id}-${index}`)}
+                                  onBlur={() => setTimeout(() => setActivePengikutDropdown(null), 200)}
+                                  className="w-full px-2 py-1.5 text-xs rounded-md border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                                  placeholder="Nama Pengikut"
+                                />
+                                {activePengikutDropdown === `${pelaksana.id}-${index}` && p.nama.length > 1 && (
+                                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-100 dark:border-slate-700 max-h-48 overflow-y-auto z-50">
+                                    {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(p.nama.toLowerCase()) || (r.nik || r.nip || '').includes(p.nama)).slice(0, 5).map((res: any, idx: number) => (
+                                      <button
+                                        key={res.nik || res.nip || idx}
+                                        onClick={() => {
+                                          handlePengikutChange(pelaksana.id, index, 'nama', res.name || res.nama || '');
+                                          handlePengikutChange(pelaksana.id, index, 'umur', (res.umur ? res.umur.toString() : (res.nik || res.nip || '')));
+                                          handlePengikutChange(pelaksana.id, index, 'keterangan', res.pekerjaan || res.jabatan || '');
+                                          setActivePengikutDropdown(null);
+                                        }}
+                                        className="w-full text-left px-2 py-1.5 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 dark:border-slate-700/50 last:border-0"
+                                      >
+                                        <div className="font-medium text-gray-900 dark:text-white text-[11px]">{res.name || res.nama}</div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="col-span-3">
+                                <input 
+                                  type="text" 
+                                  value={p.umur}
+                                  onChange={(e) => handlePengikutChange(pelaksana.id, index, 'umur', e.target.value)}
+                                  className="w-full px-2 py-1.5 text-xs rounded-md border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                                  placeholder="Umur"
+                                />
+                              </div>
+                              <div className="col-span-4">
+                                <input 
+                                  type="text" 
+                                  value={p.keterangan}
+                                  onChange={(e) => handlePengikutChange(pelaksana.id, index, 'keterangan', e.target.value)}
+                                  className="w-full px-2 py-1.5 text-xs rounded-md border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                                  placeholder="Keterangan"
+                                />
+                              </div>
+                            </div>
+                            <button 
+                              onClick={() => removePengikutFromPelaksana(pelaksana.id, index)}
+                              className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded transition-colors mt-0.5"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+              <button 
+                onClick={addPelaksana}
+                className="w-full flex justify-center items-center gap-2 py-3 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 text-sm font-semibold rounded-xl transition-colors border border-emerald-100 dark:border-slate-700"
+              >
+                <Plus size={16} /> Tambah Orang yang Melakukan Perjalanan Dinas
+              </button>
+            </div>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
@@ -1141,28 +1183,25 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <div className="flex justify-center pt-4 pb-2 shrink-0 bg-slate-200/50 dark:bg-slate-800/50 border-b border-gray-200/50 dark:border-slate-700/50 z-10 shadow-sm">
               <div className="bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 flex">
                 <button
+                  onClick={() => setPrintLayout('surattugas')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'surattugas' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+                >
+                  Surat Tugas
+                </button>
+                {pelaksanaList.map((p, idx) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setPrintLayout(p.id)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all max-w-[200px] truncate ${printLayout === p.id ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
+                  >
+                    SPPD & Laporan {p.nama ? `(${p.nama.split(' ')[0]})` : `Pelaksana ${idx + 1}`}
+                  </button>
+                ))}
+                <button
                   onClick={() => setPrintLayout('semua')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'semua' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
                 >
                   Semua Halaman
-                </button>
-                <button
-                  onClick={() => setPrintLayout('spt')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'spt' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
-                >
-                  1. Surat Tugas
-                </button>
-                <button
-                  onClick={() => setPrintLayout('sppd')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'sppd' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
-                >
-                  2. Visum SPPD
-                </button>
-                <button
-                  onClick={() => setPrintLayout('laporan')}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${printLayout === 'laporan' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-gray-600 hover:bg-gray-50 dark:text-slate-400 dark:hover:bg-slate-700'}`}
-                >
-                  3. Lembar Laporan
                 </button>
                 
                 <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-2 self-center"></div>
