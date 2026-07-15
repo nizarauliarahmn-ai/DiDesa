@@ -432,13 +432,15 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
                 <div class="flex justify-end text-[10px] mt-1 pr-4">
                   <div class="w-[200px]">
-                    <div class="grid grid-cols-[80px_10px_1fr]">
+                    <div class="grid grid-cols-[80px_10px_1fr] mb-1">
                       <span>Dikeluarkan di</span><span>:</span><span>${desaName.replace(/desa|kelurahan/gi, '').trim()}</span>
                       <span>pada tanggal</span><span>:</span><span>${currentDateFormatted()}</span>
                     </div>
-                    <div class="mt-1 font-bold">${rightRoleHtml}</div>
-                    <div class="h-10"></div>
-                    <div class="font-bold uppercase">${namaKades}</div>
+                    <div class="text-center w-full">
+                      <div class="font-bold">${rightRoleHtml}</div>
+                      <div class="h-12"></div>
+                      <div class="font-bold uppercase">${namaKades}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -446,16 +448,18 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <!-- Kanan -->
               <div class="w-[47%] pl-4 text-[9px] flex flex-col">
                 <div class="pl-8 mb-2">
-                  <div class="grid grid-cols-[80px_10px_1fr] leading-tight">
+                  <div class="grid grid-cols-[90px_10px_1fr] leading-tight mb-2">
                     <span>I. SPPD Nomor</span><span>:</span><span>${nomorSurat}</span>
                     <span>Berangkat dari</span><span>:</span><span>${tempatBerangkat}</span>
                     <span class="pl-2 italic">(tempat kedudukan)</span><span></span><span></span>
                     <span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
                     <span>Ke</span><span>:</span><span>${tempatTujuan}</span>
                   </div>
-                  <div class="mt-1 font-bold">Pejabat Pelaksana Teknis Kegiatan,</div>
-                  <div class="h-10"></div>
-                  <div class="font-bold uppercase">${namaPPTK || '...................................................'}</div>
+                  <div class="text-center w-full">
+                    <div class="font-bold">Pejabat Pelaksana Teknis Kegiatan,</div>
+                    <div class="h-12"></div>
+                    <div class="font-bold uppercase">${namaPPTK || '...................................................'}</div>
+                  </div>
                 </div>
 
                 <table class="w-full border-collapse" style="border: 1px solid black;">
@@ -545,9 +549,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           </div>
                         </div>
                         <div class="flex justify-center mt-2">
-                          <div class="w-1/2">
+                          <div class="text-center w-full">
                             <div class="font-bold">${rightRoleHtml}</div>
-                            <div class="h-10"></div>
+                            <div class="h-12"></div>
                             <div class="font-bold uppercase">${namaKades}</div>
                           </div>
                         </div>
