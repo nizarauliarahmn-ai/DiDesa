@@ -6,7 +6,7 @@ import { useLetterKode } from '../../../hooks/useLetterKode';
 import { getLetterClassifications, generateLetterNumber } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
-import { getReactSignaturePreview } from '../../../utils/signature';
+import { getPrintSignatureHTML } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onBack: () => void, editData?: any, editLetterId?: string | null }) {
@@ -271,7 +271,7 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
 
               <div class="mb-8">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
 
-              ${getReactSignaturePreview(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
+              ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
             </div>
           </div>
 
