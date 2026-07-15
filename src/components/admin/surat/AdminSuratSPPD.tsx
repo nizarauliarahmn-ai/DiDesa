@@ -578,10 +578,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   };
 
   return (
-    <div className="flex flex-col absolute inset-0 bg-slate-50 dark:bg-slate-900 z-10">
+    <div className="max-w-7xl mx-auto space-y-6 pb-20">
       {/* Header */}
-      <div className="flex-none bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-4 z-30">
           <div className="flex items-center gap-4">
             <button 
               onClick={onBack}
@@ -619,14 +618,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               Cetak SPPD
             </button>
           </div>
-        </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Editor Form */}
-        <div className="w-[500px] flex-none overflow-y-auto bg-slate-50 dark:bg-slate-900 border-r border-gray-200 dark:border-slate-800 p-6 custom-scrollbar">
+        <div className="lg:col-span-5 space-y-6">
           
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Identitas Surat</h3>
             <div className="space-y-4">
               <div>
@@ -941,9 +939,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         </div>
 
         {/* Preview Panel */}
-        <div className="flex-1 bg-slate-200/40 dark:bg-slate-800/20 flex flex-col relative overflow-hidden">
-          
-          {/* Print Layout Selector */}
+        <div className="lg:col-span-7 h-[calc(100vh-140px)] sticky top-24">
+          <div className="bg-slate-200/40 dark:bg-slate-800/20 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col relative overflow-hidden h-full">
+            
+            {/* Print Layout Selector */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-1 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 flex z-10">
             <button
               onClick={() => setPrintLayout('semua')}
@@ -997,6 +996,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
