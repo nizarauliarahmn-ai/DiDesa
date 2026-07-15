@@ -647,7 +647,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             
             @media print {
               body { background: white; overflow: visible; margin: 0; padding: 0; }
-              .page-a4, .page-landscape { min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
+              .page-a4, .page-landscape { min-height: 100vh; box-shadow: none; margin: 0; border-radius: 0; overflow: hidden; }
               
               ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
               ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; } .page-landscape { page: landscape_page; } @page landscape_page { size: landscape; margin: 0; }` : ''}
