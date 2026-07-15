@@ -24,7 +24,8 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
   // SPPD State
   const classifications = getLetterClassifications();
   const sppdClass = classifications.find(c => c.klasifikasi === 'SPPD');
-  const [kodeKlasifikasi, setKodeKlasifikasi] = useLetterKode('SPPD');
+  const kodeKlasifikasiRaw = useLetterKode('SPPD');
+  const kodeKlasifikasi = kodeKlasifikasiRaw || '094';
   const [nomorSurat, setNomorSurat] = useState('');
   
   // Resident Data for Search
