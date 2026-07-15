@@ -546,17 +546,20 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <!-- Box V -->
                     <tr>
                       <td colspan="2" class="border-b border-black p-1 align-top">
-                        <div class="flex">
-                          <div class="w-1/2">
-                            <div class="grid grid-cols-[15px_45px_10px_1fr] leading-tight">
-                              <span>V.</span><span>Tiba di</span><span>:</span><span></span>
-                              <span></span><span>Pada tanggal</span><span>:</span><span></span>
+                        <div class="grid grid-cols-[15px_1fr] leading-tight">
+                          <span>V.</span>
+                          <div>
+                            <div class="grid grid-cols-[60px_10px_1fr] leading-tight">
+                              <span>Tiba di</span><span>:</span><span></span>
+                              <span>Pada tanggal</span><span>:</span><span></span>
                             </div>
                             <div class="mt-1 leading-tight text-justify pr-2">
                               Telah diperiksa dengan keterangan bahwa perjalanan tersebut dilakukan atas perintah dan semata-mata untuk kepentingan jabatan dalam waktu yang sesingkat-singkatnya.
                             </div>
                           </div>
-                          <div class="w-1/2 flex flex-col items-center pt-2">
+                        </div>
+                        <div class="flex justify-end mt-2">
+                          <div class="w-1/2 flex flex-col items-center">
                             <div class="font-bold text-center">${rightRoleHtml}</div>
                             <div class="h-10"></div>
                             <div class="font-bold underline text-center">${namaKades}</div>
