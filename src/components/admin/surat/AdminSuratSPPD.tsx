@@ -342,15 +342,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <!-- Kiri -->
               <div class="w-[53%] pr-4">
                 ${kopSuratHTML}
-                <div class="flex justify-center my-1">
-                  <div class="w-full h-[2px] bg-black"></div>
-                </div>
                 
-                <div class="flex justify-end text-[10px] pr-8 mb-2">
+                <div class="flex justify-end text-[10px] pr-8 mb-2 mt-2">
                   <div class="grid grid-cols-[80px_10px_1fr]">
-                    <span>Lembar ke</span><span>:</span><span></span>
-                    <span>Kode Nomor</span><span>:</span><span></span>
-                    <span>Nomor</span><span>:</span><span></span>
+                    <span>Lembar ke</span><span>:</span><span>1</span>
+                    <span>Kode Nomor</span><span>:</span><span>${kodeKlasifikasi}</span>
+                    <span>Nomor</span><span>:</span><span>${nomorSurat}</span>
                   </div>
                 </div>
                 
@@ -398,30 +395,26 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <tr>
                         <td rowspan="2" class="text-center align-top">8</td>
                         <td class="font-bold align-middle pl-2">Pengikut/ Nama</td>
-                        <td class="p-0 align-top">
-                          <table class="w-full h-full" style="border-collapse: collapse; border: none;">
-                            <tr>
-                              <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; text-align: center; width: 45%;" class="font-bold">Tgl Lahir</td>
-                              <td style="border: none; padding: 4px; text-align: center; width: 55%;" class="font-bold">Keterangan</td>
-                            </tr>
-                          </table>
+                        <td class="p-0 align-top border-b border-black">
+                          <div class="flex w-full h-full min-h-[20px]">
+                            <div class="w-[45%] border-r border-black p-1 text-center font-bold">Tgl Lahir</div>
+                            <div class="w-[55%] p-1 text-center font-bold">Keterangan</div>
+                          </div>
                         </td>
                       </tr>
                       <tr>
                         <td class="align-top pl-2" style="min-height: 40px; padding-bottom: 8px;">
-                          ${participant.pengikutList.length > 0 ? participant.pengikutList.map((p: any, i: number) => `${i+1}. ${p.nama}<br>`).join('') : (participant.isLeader ? '1.<br>2.<br>3. dst' : '')}
+                          ${participant.pengikutList?.length > 0 ? participant.pengikutList.map((p: any, i: number) => `${i+1}. ${p.nama}<br>`).join('') : (participant.isLeader ? '1.<br>2.<br>3. dst' : '')}
                         </td>
-                        <td class="p-0 align-top">
-                          <table class="w-full h-full" style="border-collapse: collapse; border: none;">
-                            <tr>
-                              <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; vertical-align: top; text-align: center; width: 45%;">
-                                ${participant.pengikutList.length > 0 ? participant.pengikutList.map((p: any) => `${p.umur}<br>`).join('') : ''}
-                              </td>
-                              <td style="border: none; padding: 4px; vertical-align: top; text-align: center; width: 55%;">
-                                ${participant.pengikutList.length > 0 ? participant.pengikutList.map((p: any) => `${p.keterangan}<br>`).join('') : ''}
-                              </td>
-                            </tr>
-                          </table>
+                        <td class="p-0 align-top h-full">
+                          <div class="flex w-full h-full min-h-[40px]">
+                            <div class="w-[45%] border-r border-black p-1 text-center">
+                              ${participant.pengikutList?.length > 0 ? participant.pengikutList.map((p: any) => `${p.umur}<br>`).join('') : ''}
+                            </div>
+                            <div class="w-[55%] p-1 text-center">
+                              ${participant.pengikutList?.length > 0 ? participant.pengikutList.map((p: any) => `${p.keterangan}<br>`).join('') : ''}
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     <tr>
@@ -443,9 +436,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       <span>Dikeluarkan di</span><span>:</span><span>${desaName.replace(/desa|kelurahan/gi, '').trim()}</span>
                       <span>pada tanggal</span><span>:</span><span>${currentDateFormatted()}</span>
                     </div>
-                    <div class="mt-1 text-center font-bold">${rightRoleHtml}</div>
-                    <div class="h-8"></div>
-                    <div class="font-bold underline">${namaKades}</div>
+                    <div class="mt-1 font-bold">${rightRoleHtml}</div>
+                    <div class="h-10"></div>
+                    <div class="font-bold uppercase">${namaKades}</div>
                   </div>
                 </div>
               </div>
@@ -460,9 +453,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
                     <span>Ke</span><span>:</span><span>${tempatTujuan}</span>
                   </div>
-                  <div class="mt-1 text-center font-bold">Pejabat Pelaksana Teknis Kegiatan,</div>
-                  <div class="h-8"></div>
-                  <div class="text-center font-bold underline">${namaPPTK || '...................................................'}</div>
+                  <div class="mt-1 font-bold">Pejabat Pelaksana Teknis Kegiatan,</div>
+                  <div class="h-10"></div>
+                  <div class="font-bold uppercase">${namaPPTK || '...................................................'}</div>
                 </div>
 
                 <table class="w-full border-collapse" style="border: 1px solid black;">
@@ -476,7 +469,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           <span></span><span>Kepala</span><span>:</span><span></span>
                         </div>
                         <div class="h-8"></div>
-                        <div class="flex justify-center gap-12"><span>(</span><span>)</span></div>
+                        <div class="flex justify-center text-gray-500">..................................</div>
                       </td>
                       <td class="border-b border-black p-1 w-1/2 align-top">
                         <div class="grid grid-cols-[60px_10px_1fr] leading-tight pl-2">
@@ -486,7 +479,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           <span>Kepala</span><span>:</span><span></span>
                         </div>
                         <div class="h-8"></div>
-                        <div class="flex justify-center gap-12"><span>(</span><span>)</span></div>
+                        <div class="flex justify-center text-gray-500">..................................</div>
                       </td>
                     </tr>
                     
@@ -499,7 +492,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           <span></span><span>Kepala</span><span>:</span><span></span>
                         </div>
                         <div class="h-8"></div>
-                        <div class="flex justify-center gap-12"><span>(</span><span>)</span></div>
+                        <div class="flex justify-center text-gray-500">..................................</div>
                       </td>
                       <td class="border-b border-black p-1 w-1/2 align-top">
                         <div class="grid grid-cols-[60px_10px_1fr] leading-tight pl-2">
@@ -509,7 +502,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           <span>Kepala</span><span>:</span><span></span>
                         </div>
                         <div class="h-8"></div>
-                        <div class="flex justify-center gap-12"><span>(</span><span>)</span></div>
+                        <div class="flex justify-center text-gray-500">..................................</div>
                       </td>
                     </tr>
                     
@@ -522,7 +515,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           <span></span><span>Kepala</span><span>:</span><span></span>
                         </div>
                         <div class="h-8"></div>
-                        <div class="flex justify-center gap-12"><span>(</span><span>)</span></div>
+                        <div class="flex justify-center text-gray-500">..................................</div>
                       </td>
                       <td class="border-b border-black p-1 w-1/2 align-top">
                         <div class="grid grid-cols-[60px_10px_1fr] leading-tight pl-2">
@@ -532,7 +525,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           <span>Kepala</span><span>:</span><span></span>
                         </div>
                         <div class="h-8"></div>
-                        <div class="flex justify-center gap-12"><span>(</span><span>)</span></div>
+                        <div class="flex justify-center text-gray-500">..................................</div>
                       </td>
                     </tr>
                     
@@ -552,10 +545,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           </div>
                         </div>
                         <div class="flex justify-center mt-2">
-                          <div class="w-1/2 text-center">
+                          <div class="w-1/2">
                             <div class="font-bold">${rightRoleHtml}</div>
-                            <div class="h-8"></div>
-                            <div class="font-bold underline">${namaKades}</div>
+                            <div class="h-10"></div>
+                            <div class="font-bold uppercase">${namaKades}</div>
                           </div>
                         </div>
                       </td>
