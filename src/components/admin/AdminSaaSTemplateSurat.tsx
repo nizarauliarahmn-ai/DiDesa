@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Edit3, Trash2, CheckCircle2, X } from 'lucide-react';
 import { showToast } from '../../utils/toast';
+import { supabase } from '../../utils/supabase';
 
 export default function AdminSaaSTemplateSurat() {
   const [templates, setTemplates] = useState<any[]>([]);
@@ -133,7 +134,11 @@ export default function AdminSaaSTemplateSurat() {
 
   const saveTemplates = (newTemplates: any[]) => {
     setTemplates(newTemplates);
-    localStorage.setItem('saas_global_letter_catalog', JSON.stringify(newTemplates));
+    const jsonStr = JSON.stringify(newTemplates);
+    localStorage.setItem('saas_global_letter_catalog', jsonStr);
+    try {
+      supabase.from('saas_settings').upsert({ key: 'saas_global_letter_catalog', value: jsonStr }, { onConflict: 'key' }).then();
+    } catch (e) {}
   };
 
   const handleSave = () => {

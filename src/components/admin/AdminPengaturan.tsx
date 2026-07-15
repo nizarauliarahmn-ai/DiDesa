@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { supabase } from '../../utils/supabase';
 import { 
   Building2, MapPin, Save, Image as ImageIcon, Check, Bot, Layout, Upload, Map,
   Palette, Smartphone, Compass, Settings
@@ -95,6 +97,34 @@ export default function AdminPengaturan() {
       localStorage.setItem('village_lat', villageLat.toString());
       localStorage.setItem('village_lng', villageLng.toString());
       localStorage.setItem('app_theme', appTheme);
+
+      try {
+        const settingsToSave = [
+          { key: 'village_name', value: villageName },
+          { key: 'village_kecamatan', value: kecamatan },
+          { key: 'village_kabupaten', value: kabupaten },
+          { key: 'village_alamat', value: alamat },
+          { key: 'kop_desa', value: villageName },
+          { key: 'kop_kecamatan', value: kecamatan },
+          { key: 'kop_kabupaten', value: kabupaten },
+          { key: 'kop_alamat', value: alamat },
+          { key: 'kop_kontak', value: kontak },
+          { key: 'kop_logo_url', value: logoUrl },
+          { key: 'village_welcome_banner_url', value: welcomeBannerUrl },
+          { key: 'village_welcome_banner_y_offset', value: welcomeBannerYOffset },
+          { key: 'village_welcome_banner_zoom', value: welcomeBannerZoom },
+          { key: 'village_aspirasi_banner_url', value: aspirasiBannerUrl },
+          { key: 'village_aspirasi_banner_y_offset', value: aspirasiBannerYOffset },
+          { key: 'village_aspirasi_banner_zoom', value: aspirasiBannerZoom },
+          { key: 'village_lat', value: villageLat.toString() },
+          { key: 'village_lng', value: villageLng.toString() },
+          { key: 'app_theme', value: appTheme }
+        ];
+        // Fire and forget upsert to Supabase
+        supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'key' }).then();
+      } catch (err) {
+        console.error('Failed to sync settings to Supabase', err);
+      }
 
       window.dispatchEvent(new Event('village_settings_updated'));
       window.dispatchEvent(new Event('app_theme_updated'));

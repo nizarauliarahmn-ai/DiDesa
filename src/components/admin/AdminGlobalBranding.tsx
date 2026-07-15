@@ -1,6 +1,6 @@
-
 import React, { useState, useRef } from 'react';
 import { Settings, Save, Image, Palette, Globe, CheckCircle, AlertCircle, Trash2, FileText, UploadCloud } from 'lucide-react';
+import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 
 export default function AdminGlobalBranding() {
@@ -46,6 +46,18 @@ export default function AdminGlobalBranding() {
     localStorage.setItem('global_app_color', globalColor);
     localStorage.setItem('global_print_footer', globalPrintFooter);
     
+    try {
+      const settingsToSave = [
+        { key: 'global_app_name', value: globalName },
+        { key: 'global_app_logo', value: globalLogo },
+        { key: 'global_app_color', value: globalColor },
+        { key: 'global_print_footer', value: globalPrintFooter }
+      ];
+      supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'key' }).then();
+    } catch (e) {
+      console.error(e);
+    }
+    
     addSaaSLog({
       admin: JSON.parse(localStorage.getItem('didesa_auth_user') || '{}').name || 'Admin',
       aksi: 'Update Branding Platform',
@@ -90,6 +102,16 @@ export default function AdminGlobalBranding() {
       localStorage.setItem('global_app_logo', defaultLogo);
       localStorage.setItem('global_app_color', defaultColor);
       localStorage.setItem('global_print_footer', defaultFooter);
+
+      try {
+        const resetSettings = [
+          { key: 'global_app_name', value: defaultName },
+          { key: 'global_app_logo', value: defaultLogo },
+          { key: 'global_app_color', value: defaultColor },
+          { key: 'global_print_footer', value: defaultFooter }
+        ];
+        supabase.from('saas_settings').upsert(resetSettings, { onConflict: 'key' }).then();
+      } catch (e) {}
 
       window.dispatchEvent(new Event('global_branding_updated'));
     }

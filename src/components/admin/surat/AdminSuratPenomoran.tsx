@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { supabase } from "../../../utils/supabase";
 import {
   Settings,
   Save,
@@ -210,6 +211,14 @@ export default function AdminSuratPenomoran() {
 const handleSaveSettings = () => {
   localStorage.setItem("surat_format", format);
   localStorage.setItem("surat_autoreset", autoReset ? "true" : "false");
+
+  try {
+    const settingsToSave = [
+      { key: 'surat_format', value: format },
+      { key: 'surat_autoreset', value: autoReset ? "true" : "false" }
+    ];
+    supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'key' }).then();
+  } catch (e) {}
 
   // Dispatch custom event so that other components re-load settings
   window.dispatchEvent(new Event("village_settings_updated"));

@@ -1,6 +1,7 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
+import { SupabaseSync } from './components/SupabaseSync';
 import './index.css';
 
 // Client-side API Mock for Serverless environments (like Vercel)
@@ -174,6 +175,8 @@ if (
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <SupabaseSync />
     <App />
   </StrictMode>,
 );
+window.addEventListener('error', e => alert('ERROR: ' + e.message + ' at ' + e.filename + ':' + e.lineno)); window.addEventListener('unhandledrejection', e => alert('PROMISE ERROR: ' + e.reason));
