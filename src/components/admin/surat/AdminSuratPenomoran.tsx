@@ -526,9 +526,17 @@ return (
                         </span>
                       </td>
                       <td className="px-6 py-3.5">
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                          {item.jenis}
-                        </span>
+                        <div className="flex flex-col gap-1.5 items-start">
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                            {item.jenis}
+                          </span>
+                          {item.isSaaSDisabled && (
+                            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 rounded text-[9px] font-bold tracking-wide border border-slate-200 dark:border-slate-700">
+                              <AlertCircle size={10} />
+                              TAHAP PENGEMBANGAN
+                            </div>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-3.5 text-center">
                         <button
