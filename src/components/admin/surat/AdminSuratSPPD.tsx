@@ -646,12 +646,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             .print-table th, .print-table td { border: 1px solid black; padding: 2px 4px; vertical-align: top; }
             
             @media print {
-              body { background: white; overflow: visible; }
-              .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
+              body { background: white; overflow: visible; margin: 0; padding: 0; }
+              .page-a4, .page-landscape { min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
               
-              ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 15mm 20mm; }` : ''}
-              ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 10mm 15mm; } .page-landscape { page: landscape_page; } @page landscape_page { size: landscape; margin: 10mm 15mm; }` : ''}
-              ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 15mm 20mm; }` : ''}
+              ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
+              ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; } .page-landscape { page: landscape_page; } @page landscape_page { size: landscape; margin: 0; }` : ''}
+              ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
             }
           </style>
         </head>
