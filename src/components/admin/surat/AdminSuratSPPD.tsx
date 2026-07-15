@@ -242,7 +242,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   };
 
   const handlePelaksanaChange = (id: string, field: string, value: string) => {
-    setPelaksanaList(pelaksanaList.map(p => p.id === id ? { ...p, [field]: value } : p));
+    setPelaksanaList(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
   };
 
   const addPengikutToPelaksana = (pelaksanaId: string) => {
@@ -265,7 +265,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   };
 
   const handlePengikutChange = (pelaksanaId: string, pengikutIndex: number, field: string, value: string) => {
-    setPelaksanaList(pelaksanaList.map(p => {
+    setPelaksanaList(prev => prev.map(p => {
       if (p.id === pelaksanaId) {
         const newPengikut = [...p.pengikutList];
         newPengikut[pengikutIndex] = { ...newPengikut[pengikutIndex], [field]: value };
@@ -1309,7 +1309,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 <iframe
                   ref={iframeRef}
                   scrolling="no"
-                  className="pointer-events-none shadow-2xl rounded-sm"
+                  className="pointer-events-none"
                   style={{
                     width: '297mm',
                     minHeight: '297mm',
@@ -1319,7 +1319,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                         ? '297mm'
                         : '600mm',
                     border: 'none',
-                    background: 'white'
+                    background: 'transparent'
                   }}
                   srcDoc={generateHTML()}
                   title="Print Preview SPPD"
