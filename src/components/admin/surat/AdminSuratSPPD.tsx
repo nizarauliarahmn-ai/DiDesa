@@ -57,7 +57,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
   // Desa Settings
   const [desaName, setDesaName] = useState('Desa Wasah Hilir');
-  const [namaKades, setNamaKades] = useState('NIZAR AULIA RAHMAN');
+  const [namaKades, setNamaKades] = useState('FAZAKKIR RAHMAD');
   const [roleKades, setRoleKades] = useState('Kepala Desa');
   const [nipKades, setNipKades] = useState('');
   const [includeCamat, setIncludeCamat] = useState(false);
@@ -119,7 +119,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
   useEffect(() => {
     setDesaName(localStorage.getItem('kop_desa') || 'Wasah Hilir');
-    setNamaKades(localStorage.getItem('kop_kades') || 'NIZAR AULIA RAHMAN');
+    setNamaKades(localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD');
     setRoleKades('Kepala Desa');
     
     const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
@@ -451,7 +451,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       <span>pada tanggal</span><span>:</span><span>${currentDateFormatted()}</span>
                     </div>
                     <div class="mt-1 text-center font-bold">${rightRoleHtml}</div>
-                    <div class="h-10"></div>
+                    <div class="h-12"></div>
                     <div class="font-bold underline text-center">${namaKades}</div>
                   </div>
                 </div>
@@ -559,10 +559,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           </div>
                         </div>
                         <div class="flex justify-end mt-2">
-                          <div class="w-1/2 flex flex-col items-center">
-                            <div class="font-bold text-center">${rightRoleHtml}</div>
-                            <div class="h-10"></div>
-                            <div class="font-bold underline text-center">${namaKades}</div>
+                          <div class="w-1/2 text-center">
+                            <div class="font-bold">${rightRoleHtml}</div>
+                            <div class="h-12"></div>
+                            <div class="font-bold underline">${namaKades}</div>
                           </div>
                         </div>
                       </td>
