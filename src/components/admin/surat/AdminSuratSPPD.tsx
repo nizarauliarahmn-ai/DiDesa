@@ -273,102 +273,24 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         </div>
     `;
 
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Surat Perjalanan Dinas (SPPD)</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-          <style>
-            body { font-family: Arial, Helvetica, sans-serif; background: transparent; margin: 0; padding: 0; line-height: 1.5; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
-            .page-landscape { width: 297mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
-            .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
-            .print-table { width: 100%; border-collapse: collapse; font-size: 11px; line-height: 1.2; }
-            .print-table th, .print-table td { border: 1px solid black; padding: 2px 4px; vertical-align: top; }
-            
-            @media print {
-              body { background: white; }
-              .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
-              
-              ${printLayout === 'spt' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
-              ${printLayout === 'sppd' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: none; }` : ''}
-              ${printLayout === 'laporan' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: none; } .page-sppd { display: none; } .page-laporan { display: block; }` : ''}
-              ${printLayout === 'semua' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
-            }
+    const participants = [
+      {
+        nama: namaPegawai,
+        jabatan: jabatanPegawai,
+        pangkat: pangkatGolongan || '-',
+        isLeader: true,
+        pengikutList: pengikut
+      },
+      ...pengikut.filter(p => p.nama && p.nama.trim() !== '').map(p => ({
+        nama: p.nama,
+        jabatan: p.keterangan || '-',
+        pangkat: '-',
+        isLeader: false,
+        pengikutList: []
+      }))
+    ].filter(p => p.nama && p.nama.trim() !== '');
 
-            /* Non-print layout visibility */
-            ${printLayout !== 'semua' ? `
-              .page-spt { display: ${printLayout === 'spt' ? 'block' : 'none'}; }
-              .page-sppd { display: ${printLayout === 'sppd' ? 'block' : 'none'}; }
-              .page-laporan { display: ${printLayout === 'laporan' ? 'block' : 'none'}; }
-            ` : ''}
-          </style>
-        </head>
-        <body>
-
-          <!-- HALAMAN 1: SURAT TUGAS -->
-          <div class="page-a4 page-spt bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
-            ${kopSuratHTML}
-            
-            <div class="text-[14px] text-black">
-              <div class="text-center mb-8">
-                <h6 class="font-bold underline uppercase text-[16px]">SURAT TUGAS</h6>
-                <p class="font-bold mt-1">Nomor : ${nomorSurat}</p>
-              </div>
-
-              <div class="mb-6 text-justify leading-relaxed">
-                Berdasarkan ${dasarPenugasan},
-              </div>
-
-              <div class="text-center font-bold mb-6">MEMERINTAHKAN</div>
-              
-              <table class="print-table mb-8">
-                <thead>
-                  <tr class="bg-gray-50">
-                    <th class="w-12 text-center py-3">NO</th>
-                    <th class="text-center py-3">NAMA</th>
-                    <th class="text-center py-3">JABATAN</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td class="text-center py-3">1</td>
-                    <td class="py-3 font-semibold">${namaPegawai}</td>
-                    <td class="py-3">${jabatanPegawai}</td>
-                  </tr>
-                  ${pengikut.map((p, i) => `
-                    <tr>
-                      <td class="text-center py-3">${i+2}</td>
-                      <td class="py-3 font-semibold">${p.nama}</td>
-                      <td class="py-3">${p.keterangan || '-'}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-
-              <div class="grid grid-cols-[130px_10px_1fr] gap-2 mb-10 text-[14px]">
-                <span class="font-semibold">Hari/Tanggal</span><span>:</span>
-                <span>${formatDateFull(tanggalBerangkat)}</span>
-                
-                <span class="font-semibold">Perihal</span><span>:</span>
-                <span>${maksudPerjalanan}</span>
-
-                <span class="font-semibold">Tempat</span><span>:</span>
-                <span>${tempatTujuan}</span>
-              </div>
-
-              <div class="mb-10 text-justify leading-relaxed">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
-
-              ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
-            </div>
-            <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
-                ${SAAS_CONFIG.globalFooterHTML}
-            </div>
-          </div>
-
+    const generatePage2And3 = (participant: any) => `
           <!-- HALAMAN 2: VISUM SPPD (LANDSCAPE) -->
           <div class="page-landscape page-sppd bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
             <div class="flex gap-4 h-full">
@@ -401,12 +323,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <tr>
                       <td class="text-center">2</td>
                       <td>Nama Pegawai yang diperintah</td>
-                      <td class="font-bold">${namaPegawai}</td>
+                      <td class="font-bold">${participant.nama}</td>
                     </tr>
                     <tr>
                       <td class="text-center">3</td>
                       <td>a. Pangkat dan golongan ruang<br>b. Jabatan<br>c. Tingkat menurut peraturan perjalanan</td>
-                      <td>a. ${pangkatGolongan || '-'}<br>b. ${jabatanPegawai || '-'}<br>c. -</td>
+                      <td>a. ${participant.pangkat}<br>b. ${participant.jabatan}<br>c. -</td>
                     </tr>
                     <tr>
                       <td class="text-center">4</td>
@@ -442,16 +364,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       </tr>
                       <tr>
                         <td class="align-top pl-2" style="min-height: 40px; padding-bottom: 8px;">
-                          ${pengikut.length > 0 ? pengikut.map((p, i) => `${i+1}. ${p.nama}<br>`).join('') : '1.<br>2.<br>3. dst'}
+                          ${participant.pengikutList.length > 0 ? participant.pengikutList.map((p: any, i: number) => `${i+1}. ${p.nama}<br>`).join('') : (participant.isLeader ? '1.<br>2.<br>3. dst' : '')}
                         </td>
                         <td class="p-0 align-top">
                           <table class="w-full h-full" style="border-collapse: collapse; border: none;">
                             <tr>
                               <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; vertical-align: top; text-align: center; width: 45%;">
-                                ${pengikut.length > 0 ? pengikut.map(p => `${p.umur}<br>`).join('') : ''}
+                                ${participant.pengikutList.length > 0 ? participant.pengikutList.map((p: any) => `${p.umur}<br>`).join('') : ''}
                               </td>
                               <td style="border: none; padding: 4px; vertical-align: top; text-align: center; width: 55%;">
-                                ${pengikut.length > 0 ? pengikut.map(p => `${p.keterangan}<br>`).join('') : ''}
+                                ${participant.pengikutList.length > 0 ? participant.pengikutList.map((p: any) => `${p.keterangan}<br>`).join('') : ''}
                               </td>
                             </tr>
                           </table>
@@ -627,7 +549,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <!-- HALAMAN 3: LEMBAR LAPORAN -->
-          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto">
+          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
             <div class="text-[14px] text-black pt-12">
               <div class="text-center mb-10">
                 <h6 class="font-bold uppercase text-[16px]">LAPORAN PERJALANAN DINAS</h6>
@@ -636,8 +558,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <div class="grid grid-cols-[150px_10px_1fr] gap-2 mb-8 max-w-xl mx-auto">
                 <span>Kepada Yth</span><span>:</span><span>${kepadaYth}</span>
                 <span>Dari</span><span>:</span><span></span>
-                <span>Nama</span><span>:</span><span>${namaPegawai}</span>
-                <span>Jabatan</span><span>:</span><span>${jabatanPegawai}</span>
+                <span>Nama</span><span>:</span><span>${participant.nama}</span>
+                <span>Jabatan</span><span>:</span><span>${participant.jabatan}</span>
                 <span>Hari/Tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
                 <span>Perihal</span><span>:</span><span>${maksudPerjalanan}</span>
                 <span>Tempat</span><span>:</span><span>${tempatTujuan}</span>
@@ -651,7 +573,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 <div class="text-center w-[250px]">
                   <p>Yang Melaporkan,</p>
                   <div class="h-24"></div>
-                  <p class="font-bold underline">${namaPegawai}</p>
+                  <p class="font-bold underline">${participant.nama}</p>
                 </div>
               </div>
             </div>
@@ -659,6 +581,105 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 ${SAAS_CONFIG.globalFooterHTML}
             </div>
           </div>
+    `;
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Surat Perjalanan Dinas (SPPD)</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+          <style>
+            body { font-family: Arial, Helvetica, sans-serif; background: transparent; margin: 0; padding: 0; line-height: 1.5; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
+            .page-landscape { width: 297mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
+            .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 11px; line-height: 1.2; }
+            .print-table th, .print-table td { border: 1px solid black; padding: 2px 4px; vertical-align: top; }
+            
+            @media print {
+              body { background: white; }
+              .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
+              
+              ${printLayout === 'spt' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
+              ${printLayout === 'sppd' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: none; }` : ''}
+              ${printLayout === 'laporan' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: none; } .page-sppd { display: none; } .page-laporan { display: block; }` : ''}
+              ${printLayout === 'semua' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
+            }
+
+            /* Non-print layout visibility */
+            ${printLayout !== 'semua' ? `
+              .page-spt { display: ${printLayout === 'spt' ? 'block' : 'none'}; }
+              .page-sppd { display: ${printLayout === 'sppd' ? 'block' : 'none'}; }
+              .page-laporan { display: ${printLayout === 'laporan' ? 'block' : 'none'}; }
+            ` : ''}
+          </style>
+        </head>
+        <body>
+
+          <!-- HALAMAN 1: SURAT TUGAS -->
+          <div class="page-a4 page-spt bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''}">
+            ${kopSuratHTML}
+            
+            <div class="text-[14px] text-black">
+              <div class="text-center mb-8">
+                <h6 class="font-bold underline uppercase text-[16px]">SURAT TUGAS</h6>
+                <p class="font-bold mt-1">Nomor : ${nomorSurat}</p>
+              </div>
+
+              <div class="mb-6 text-justify leading-relaxed">
+                Berdasarkan ${dasarPenugasan},
+              </div>
+
+              <div class="text-center font-bold mb-6">MEMERINTAHKAN</div>
+              
+              <table class="print-table mb-8">
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="w-12 text-center py-3">NO</th>
+                    <th class="text-center py-3">NAMA</th>
+                    <th class="text-center py-3">JABATAN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="text-center py-3">1</td>
+                    <td class="py-3 font-semibold">${namaPegawai}</td>
+                    <td class="py-3">${jabatanPegawai}</td>
+                  </tr>
+                  ${pengikut.map((p, i) => `
+                    <tr>
+                      <td class="text-center py-3">${i+2}</td>
+                      <td class="py-3 font-semibold">${p.nama}</td>
+                      <td class="py-3">${p.keterangan || '-'}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+
+              <div class="grid grid-cols-[130px_10px_1fr] gap-2 mb-10 text-[14px]">
+                <span class="font-semibold">Hari/Tanggal</span><span>:</span>
+                <span>${formatDateFull(tanggalBerangkat)}</span>
+                
+                <span class="font-semibold">Perihal</span><span>:</span>
+                <span>${maksudPerjalanan}</span>
+
+                <span class="font-semibold">Tempat</span><span>:</span>
+                <span>${tempatTujuan}</span>
+              </div>
+
+              <div class="mb-10 text-justify leading-relaxed">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
+
+              ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
+            </div>
+            <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
+                ${SAAS_CONFIG.globalFooterHTML}
+            </div>
+          </div>
+
+          ${participants.map(p => generatePage2And3(p)).join('')}
 
         </body>
       </html>
