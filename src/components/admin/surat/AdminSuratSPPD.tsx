@@ -94,8 +94,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
   // Dasar & Pelaporan
   const [dasarPenugasan, setDasarPenugasan] = useState(editData?.dasarPenugasan || 'surat undangan dengan nomor surat: ........ tanggal ........');
-  const [namaPPTK, setNamaPPTK] = useState(editData?.namaPPTK || '');
-  const [kepadaYth, setKepadaYth] = useState(editData?.kepadaYth || 'Kepala Desa Wasah Hilir');
+    const [namaPPTK, setNamaPPTK] = useState(editData?.namaPPTK || '');
+    const [kepadaYth, setKepadaYth] = useState(editData?.kepadaYth || `Kepala ${SAAS_CONFIG.desaName}`);
 
   // Detail Perjalanan
   const [maksudPerjalanan, setMaksudPerjalanan] = useState(editData?.maksudPerjalanan || '');
@@ -962,42 +962,50 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <div className="space-y-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Dasar Penugasan (Berdasarkan...)</label>
-                <input 
-                  type="text" 
+                <textarea 
                   value={dasarPenugasan}
                   onChange={(e) => setDasarPenugasan(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm mb-3"
+                  rows={2}
                   placeholder="Misal: surat undangan dengan nomor surat: ... tanggal ..."
                 />
+                <div className="flex flex-col gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                  <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Isi Otomatis (opsional):</div>
+                  <div className="flex gap-2 items-center">
+                     <input type="text" id="cepat_no" placeholder="Nomor Surat Undangan..." className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-sm flex-1 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-emerald-500" />
+                     <input type="text" id="cepat_tgl" placeholder="Tanggal (contoh: 12 Juli 2026)..." className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-sm w-48 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-emerald-500" />
+                     <button 
+                       onClick={(e) => {
+                         e.preventDefault();
+                         const no = (document.getElementById('cepat_no') as HTMLInputElement).value;
+                         const tgl = (document.getElementById('cepat_tgl') as HTMLInputElement).value;
+                         if (no || tgl) {
+                           setDasarPenugasan(`surat undangan dengan nomor surat: ${no} tanggal ${tgl}`);
+                         }
+                       }}
+                       className="px-3 py-1.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-200 dark:hover:bg-emerald-500/30 rounded-lg text-sm font-medium transition-colors"
+                     >
+                       Gunakan Template
+                     </button>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Pelaksana Teknis (PPTK)</label>
-                  <select
-                    value={namaPPTK}
-                    onChange={(e) => setNamaPPTK(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
-                  >
-                    <option value="">-- Pilih PPTK (Jika Ada) --</option>
-                    {officers.length > 0 ? (
-                      officers.map((officer: any, idx: number) => (
-                        <option key={idx} value={officer.name}>{officer.name} - {officer.role}</option>
-                      ))
-                    ) : (
-                      <option value={namaPPTK}>{namaPPTK}</option>
-                    )}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Laporan Ditujukan Kepada</label>
-                  <input 
-                    type="text" 
-                    value={kepadaYth}
-                    onChange={(e) => setKepadaYth(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
-                    placeholder="Misal: Kepala Desa Wasah Hilir"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Pelaksana Teknis (PPTK)</label>
+                <select
+                  value={namaPPTK}
+                  onChange={(e) => setNamaPPTK(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
+                >
+                  <option value="">-- Pilih PPTK (Jika Ada) --</option>
+                  {officers.length > 0 ? (
+                    officers.map((officer: any, idx: number) => (
+                      <option key={idx} value={officer.name}>{officer.name} - {officer.role}</option>
+                    ))
+                  ) : (
+                    <option value={namaPPTK}>{namaPPTK}</option>
+                  )}
+                </select>
               </div>
             </div>
             
@@ -1014,25 +1022,41 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 />
               </div>
               
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tempat Tujuan</label>
+                <textarea 
+                  value={tempatTujuan}
+                  onChange={(e) => setTempatTujuan(e.target.value)}
+                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  rows={2}
+                  placeholder="Tempat Tujuan (Bisa diisi panjang jika perlu)"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Tempat Tujuan</label>
-                  <input 
-                    type="text" 
-                    value={tempatTujuan}
-                    onChange={(e) => setTempatTujuan(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="Tujuan"
-                  />
-                </div>
-                <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Alat Angkut</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={alatAngkut}
                     onChange={(e) => setAlatAngkut(e.target.value)}
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                    placeholder="Misal: Kendaraan Dinas"
+                  >
+                    <option value="">-- Pilih Alat Angkut --</option>
+                    <option value="Kendaraan Dinas">Kendaraan Dinas</option>
+                    <option value="Kendaraan Umum">Kendaraan Umum</option>
+                    <option value="Kendaraan Pribadi">Kendaraan Pribadi</option>
+                    <option value="Pesawat Udara">Pesawat Udara</option>
+                    <option value="Kapal Laut">Kapal Laut</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Lama Perjalanan (Hari)</label>
+                  <input 
+                    type="text" 
+                    value={lamaPerjalanan}
+                    onChange={(e) => setLamaPerjalanan(e.target.value)}
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                    placeholder="Misal: 1 (Satu) Hari"
                   />
                 </div>
               </div>
@@ -1056,17 +1080,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
                   />
                 </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Lama Perjalanan (Hari)</label>
-                <input 
-                  type="text" 
-                  value={lamaPerjalanan}
-                  onChange={(e) => setLamaPerjalanan(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  placeholder="Misal: 2 (Dua) Hari"
-                />
               </div>
             </div>
           </div>
