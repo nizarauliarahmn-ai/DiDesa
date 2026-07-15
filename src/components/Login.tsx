@@ -156,6 +156,14 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   // Demo Quick Login
   const handleQuickLogin = (selectedRole: 'admin' | 'kades' | 'saas_admin' | 'public') => {
+    if (selectedRole === 'saas_admin') {
+      const pass = window.prompt("Demi keamanan akun demo, masukkan password SaaS Admin (saas123):");
+      if (pass !== "saas123") {
+        showToast("Password salah atau dibatalkan. Gagal masuk sebagai SaaS Admin.", "error");
+        return;
+      }
+    }
+
     setIsLoading(true);
     setRole(selectedRole);
 
