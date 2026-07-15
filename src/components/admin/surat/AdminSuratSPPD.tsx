@@ -429,28 +429,34 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       <td>a. ${lamaPerjalanan}<br>b. ${formatDateFull(tanggalBerangkat)}<br>c. ${formatDateFull(tanggalKembali)}</td>
                     </tr>
                     <tr>
-                      <td class="text-center align-top">8</td>
-                      <td colspan="2" class="p-0 align-top">
-                        <table class="w-full h-full" style="border-collapse: collapse; border: none;">
-                          <tr>
-                            <td style="border-right: 1px solid black; border-bottom: 1px solid black; border-top: none; border-left: none; padding: 4px;" class="font-bold pl-2">Pengikut/ Nama</td>
-                            <td style="border-right: 1px solid black; border-bottom: 1px solid black; border-top: none; border-left: none; padding: 4px; text-align: center; width: 70px;" class="font-bold">Tgl Lahir</td>
-                            <td style="border-bottom: 1px solid black; border-top: none; border-left: none; border-right: none; padding: 4px; text-align: center; width: 90px;" class="font-bold">Keterangan</td>
-                          </tr>
-                          <tr>
-                            <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; vertical-align: top; min-height: 40px;" class="pl-2">
-                              ${pengikut.length > 0 ? pengikut.map((p, i) => `${i+1}. ${p.nama}<br>`).join('') : '1.<br>2.<br>3. dst'}
-                            </td>
-                            <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; vertical-align: top; text-align: center;">
-                              ${pengikut.length > 0 ? pengikut.map(p => `${p.umur}<br>`).join('') : ''}
-                            </td>
-                            <td style="border: none; padding: 4px; vertical-align: top; text-align: center;">
-                              ${pengikut.length > 0 ? pengikut.map(p => `${p.keterangan}<br>`).join('') : ''}
-                            </td>
-                          </tr>
-                        </table>
-                      </td>
-                    </tr>
+                        <td rowspan="2" class="text-center align-top">8</td>
+                        <td class="font-bold align-middle pl-2">Pengikut/ Nama</td>
+                        <td class="p-0 align-top">
+                          <table class="w-full h-full" style="border-collapse: collapse; border: none;">
+                            <tr>
+                              <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; text-align: center; width: 45%;" class="font-bold">Tgl Lahir</td>
+                              <td style="border: none; padding: 4px; text-align: center; width: 55%;" class="font-bold">Keterangan</td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="align-top pl-2" style="min-height: 40px; padding-bottom: 8px;">
+                          ${pengikut.length > 0 ? pengikut.map((p, i) => `${i+1}. ${p.nama}<br>`).join('') : '1.<br>2.<br>3. dst'}
+                        </td>
+                        <td class="p-0 align-top">
+                          <table class="w-full h-full" style="border-collapse: collapse; border: none;">
+                            <tr>
+                              <td style="border-right: 1px solid black; border-bottom: none; border-top: none; border-left: none; padding: 4px; vertical-align: top; text-align: center; width: 45%;">
+                                ${pengikut.length > 0 ? pengikut.map(p => `${p.umur}<br>`).join('') : ''}
+                              </td>
+                              <td style="border: none; padding: 4px; vertical-align: top; text-align: center; width: 55%;">
+                                ${pengikut.length > 0 ? pengikut.map(p => `${p.keterangan}<br>`).join('') : ''}
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
                     <tr>
                       <td class="text-center align-top">9</td>
                       <td>Pembebanan anggaran<br>a. Instansi<br>b. Mata anggaran</td>
@@ -472,7 +478,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     </div>
                     <div class="mt-1 text-center font-bold">${rightRoleHtml}</div>
                     <div class="h-8"></div>
-                    <div class="font-bold underline text-center">${namaKades}</div>
+                    <div class="font-bold underline">${namaKades}</div>
                   </div>
                 </div>
               </div>
@@ -847,12 +853,14 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Pengikut (Opsional)</h3>
-              <button 
-                onClick={addPengikut}
-                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-lg transition-colors"
-              >
-                <Plus size={14} /> Tambah Pengikut
-              </button>
+              {pengikut.length < 5 && (
+                  <button 
+                    onClick={addPengikut}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-lg transition-colors"
+                  >
+                    <Plus size={14} /> Tambah Pengikut
+                  </button>
+                )}
             </div>
             
             {pengikut.length === 0 ? (
