@@ -556,9 +556,8 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   };
 
   const filteredClassifications = classifications.filter(c => 
-    (c.jenis.toLowerCase().includes(searchLetterQuery.toLowerCase()) ||
-    c.klasifikasi.toLowerCase().includes(searchLetterQuery.toLowerCase())) &&
-    c.isVisible !== false
+    c.jenis.toLowerCase().includes(searchLetterQuery.toLowerCase()) ||
+    c.klasifikasi.toLowerCase().includes(searchLetterQuery.toLowerCase())
   );
 
   const filteredResidents = searchQuery.trim().length > 0
@@ -646,10 +645,15 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                   !mostUsed.some(m => m.klasifikasi === c.klasifikasi)
                 );
 
-                const renderTemplateCard = (t: LetterClassification) => (
+                const renderTemplateCard = (t: LetterClassification) => {
+                  const isDisabled = t.isVisible === false;
+                  
+                  return (
                   <div 
                     key={t.id}
                     onClick={() => {
+                      if (isDisabled) return;
+                      
                       if (t.klasifikasi === 'SKN') {
                         if (onOpenNikah) onOpenNikah();
                         return;
@@ -698,27 +702,33 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       setSelectedTemplate(t.klasifikasi);
                       setStep(2);
                     }}
-                    className="flex items-center p-3.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-emerald-600 hover:bg-emerald-50/50 transition-all text-left group gap-3 relative cursor-pointer"
+                    className={`flex items-center p-3.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl transition-all text-left gap-3 relative ${
+                      isDisabled 
+                        ? 'opacity-60 cursor-not-allowed grayscale-[50%]' 
+                        : 'hover:border-emerald-600 hover:bg-emerald-50/50 group cursor-pointer'
+                    }`}
                   >
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const updated = favorites.includes(t.klasifikasi)
-                          ? favorites.filter(f => f !== t.klasifikasi)
-                          : [...favorites, t.klasifikasi];
-                        setFavorites(updated);
-                        localStorage.setItem('letter_favorites', JSON.stringify(updated));
-                      }}
-                      className={`absolute top-2 right-2 p-1.5 rounded-full transition-all z-10 ${
-                        favorites.includes(t.klasifikasi) 
-                          ? 'bg-rose-50 text-rose-500 scale-110' 
-                          : 'bg-gray-50 dark:bg-slate-800 text-gray-300 hover:text-rose-400 opacity-0 group-hover:opacity-100'
-                      }`}
-                      title={favorites.includes(t.klasifikasi) ? "Hapus dari Favorit" : "Tambah ke Favorit"}
-                    >
-                      <Heart size={14} fill={favorites.includes(t.klasifikasi) ? "currentColor" : "none"} />
-                    </button>
-                    <div className="p-2 bg-emerald-50/50 rounded-lg group-hover:scale-110 transition-transform shrink-0">
+                    {!isDisabled && (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const updated = favorites.includes(t.klasifikasi)
+                            ? favorites.filter(f => f !== t.klasifikasi)
+                            : [...favorites, t.klasifikasi];
+                          setFavorites(updated);
+                          localStorage.setItem('letter_favorites', JSON.stringify(updated));
+                        }}
+                        className={`absolute top-2 right-2 p-1.5 rounded-full transition-all z-10 ${
+                          favorites.includes(t.klasifikasi) 
+                            ? 'bg-rose-50 text-rose-500 scale-110' 
+                            : 'bg-gray-50 dark:bg-slate-800 text-gray-300 hover:text-rose-400 opacity-0 group-hover:opacity-100'
+                        }`}
+                        title={favorites.includes(t.klasifikasi) ? "Hapus dari Favorit" : "Tambah ke Favorit"}
+                      >
+                        <Heart size={14} fill={favorites.includes(t.klasifikasi) ? "currentColor" : "none"} />
+                      </button>
+                    )}
+                    <div className={`p-2 rounded-lg shrink-0 ${isDisabled ? 'bg-gray-100 dark:bg-slate-800' : 'bg-emerald-50/50 group-hover:scale-110 transition-transform'}`}>
                       {getTemplateIcon(t.klasifikasi, t.jenis)}
                     </div>
                     <div className="flex-1 min-w-0 py-0.5">
@@ -740,17 +750,29 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           </span>
                         )}
                       </div>
-                      <h4 className="font-bold text-[13px] leading-snug text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors truncate uppercase">
+                      <h4 className={`font-bold text-[13px] leading-snug truncate uppercase transition-colors ${
+                        isDisabled 
+                          ? 'text-gray-500 dark:text-gray-400' 
+                          : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400'
+                      }`}>
                         {t.jenis}
                       </h4>
                       {t.deskripsi && (
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5 group-hover:text-emerald-600/70 transition-colors">
+                        <p className={`text-[10px] truncate mt-0.5 transition-colors ${
+                          isDisabled ? 'text-gray-400' : 'text-slate-500 dark:text-slate-400 group-hover:text-emerald-600/70'
+                        }`}>
                           {t.deskripsi}
                         </p>
                       )}
+                      {isDisabled && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 rounded text-[9px] font-bold tracking-wide border border-slate-200 dark:border-slate-700">
+                          <AlertCircle size={10} />
+                          TAHAP PENGEMBANGAN
+                        </div>
+                      )}
                     </div>
                   </div>
-                );
+                )};
 
                 return (
                   <>

@@ -132,6 +132,17 @@ export default function AdminSaaSTemplateSurat() {
     });
   };
 
+  const toggleVisibility = (id: string) => {
+    const updated = templates.map(t => {
+      if (t.id === id) {
+        return { ...t, isVisible: t.isVisible === false ? true : false };
+      }
+      return t;
+    });
+    saveTemplates(updated);
+    showToast('Visibilitas template berhasil diubah', 'success');
+  };
+
   const saveTemplates = (newTemplates: any[]) => {
     setTemplates(newTemplates);
     const jsonStr = JSON.stringify(newTemplates);
@@ -288,9 +299,10 @@ export default function AdminSaaSTemplateSurat() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
-                <th className="p-4 pl-6">Jenis Surat</th>
-                <th className="p-4">Singkatan</th>
-                <th className="p-4">Kode Klasifikasi</th>
+                <th className="p-4 pl-6 text-left">Jenis Surat</th>
+                <th className="p-4 text-left">Singkatan</th>
+                <th className="p-4 text-left">Kode Klasifikasi</th>
+                <th className="p-4 text-center">Status</th>
                 <th className="p-4 text-center">Tindakan</th>
               </tr>
             </thead>
@@ -305,6 +317,20 @@ export default function AdminSaaSTemplateSurat() {
                   </td>
                   <td className="p-4 font-mono text-sm text-slate-600 dark:text-slate-400">
                     {item.kodeKlasifikasi}
+                  </td>
+                  <td className="p-4 text-center">
+                    <button
+                      onClick={() => toggleVisibility(item.id)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                        item.isVisible !== false ? 'bg-emerald-500' : 'bg-gray-300'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          item.isVisible !== false ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center justify-center gap-2">
