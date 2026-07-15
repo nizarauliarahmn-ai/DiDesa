@@ -336,7 +336,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
     const generatePage2And3 = (participant: any) => `
           <!-- HALAMAN 2: VISUM SPPD (LANDSCAPE) -->
-          <div class="page-landscape page-sppd bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''} ${printLayout !== 'semua' && printLayout !== participant.id ? 'display: none;' : ''}">
+          <div class="page-landscape page-sppd bg-white shadow-lg mx-auto" style="${printLayout !== `sppd-${participant.id}` ? 'display: none;' : ''}">
             <div class="flex gap-4 h-full">
               <!-- Kiri -->
               <div class="w-[53%] pr-4">
@@ -593,7 +593,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <!-- HALAMAN 3: LEMBAR LAPORAN -->
-          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''} ${printLayout !== 'semua' && printLayout !== participant.id ? 'display: none;' : ''}">
+          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout !== `laporan-${participant.id}` ? 'display: none;' : ''}">
             <div class="text-[14px] text-black pt-12">
               <div class="text-center mb-10">
                 <h6 class="font-bold uppercase text-[16px]">LAPORAN PERJALANAN DINAS</h6>
@@ -649,20 +649,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               body { background: white; overflow: visible; }
               .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
               
-              @page { size: portrait; margin: 15mm 20mm; }
-              @page landscape_page { size: landscape; margin: 10mm 15mm; }
-              .page-landscape { page: landscape_page; }
-
-              ${printLayout === 'surattugas' ? `.page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
-              ${printLayout !== 'semua' && printLayout !== 'surattugas' ? `.page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
-              ${printLayout === 'semua' ? `.page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
+              ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 15mm 20mm; }` : ''}
+              ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 10mm 15mm; } .page-landscape { page: landscape_page; } @page landscape_page { size: landscape; margin: 10mm 15mm; }` : ''}
+              ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 15mm 20mm; }` : ''}
             }
           </style>
         </head>
         <body>
 
           <!-- HALAMAN 1: SURAT TUGAS -->
-          <div class="page-a4 page-spt bg-white shadow-lg mb-8 mx-auto" style="${printLayout === 'semua' ? 'margin-bottom: 2rem;' : ''} ${printLayout !== 'semua' && printLayout !== 'surattugas' ? 'display: none;' : ''}">
+          <div class="page-a4 page-spt bg-white shadow-lg mx-auto" style="${printLayout !== 'surattugas' ? 'display: none;' : ''}">
             ${kopSuratHTML}
             
             <div class="text-[14px] text-black">
@@ -1210,67 +1206,72 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden h-full">
 
             {/* Document selector bar */}
-            <div className="flex flex-wrap items-center gap-2 p-3 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 shrink-0">
-
-              {/* Surat Tugas button */}
-              <button
-                onClick={() => setPrintLayout('surattugas')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
-                  printLayout === 'surattugas'
-                    ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
-                    : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300 hover:text-emerald-600'
-                }`}
-              >
-                <FileText size={14} />
-                <span>Surat Tugas</span>
-              </button>
-
-              {/* Per-pelaksana SPPD+Laporan buttons */}
-              {pelaksanaList.map((p, idx) => (
+            <div className="flex flex-col border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 shrink-0">
+              {/* Row 1: Surat Tugas */}
+              <div className="flex items-center gap-4 p-3 overflow-x-auto">
+                <span className="text-sm font-semibold text-gray-700 dark:text-slate-300 w-24 shrink-0">Surat Tugas:</span>
                 <button
-                  key={p.id}
-                  onClick={() => setPrintLayout(p.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
-                    printLayout === p.id
+                  onClick={() => setPrintLayout('surattugas')}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-sm font-semibold transition-all border ${
+                    printLayout === 'surattugas'
                       ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
                       : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300 hover:text-emerald-600'
                   }`}
                 >
-                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold ${
-                    printLayout === p.id ? 'bg-white/30 text-white' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
-                  }`}>{idx + 1}</span>
-                  <span>{p.nama ? p.nama.split(' ').slice(0, 2).join(' ') : `Pelaksana ${idx + 1}`}</span>
+                  <FileText size={14} /> Cetak Surat Tugas
                 </button>
-              ))}
-
-              <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-1"></div>
-
-              {/* Print all */}
-              <button
-                onClick={() => setPrintLayout('semua')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
-                  printLayout === 'semua'
-                    ? 'bg-gray-800 text-white border-gray-800'
-                    : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-gray-400'
-                }`}
-              >
-                Cetak Semua
-              </button>
-
-              {/* Spacer + zoom + print button */}
-              <div className="ml-auto flex items-center gap-2">
-                <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 rounded-lg p-0.5">
-                  <button onClick={() => setZoomLevel(z => Math.max(0.3, z - 0.1))} className="p-1.5 text-gray-500 hover:bg-white dark:hover:bg-slate-700 rounded-md transition-colors"><ZoomOut className="w-4 h-4" /></button>
-                  <span className="text-xs font-mono w-10 text-center text-gray-700 dark:text-slate-300">{Math.round(zoomLevel * 100)}%</span>
-                  <button onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.1))} className="p-1.5 text-gray-500 hover:bg-white dark:hover:bg-slate-700 rounded-md transition-colors"><ZoomIn className="w-4 h-4" /></button>
+                <div className="ml-auto flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 rounded-lg p-0.5">
+                    <button onClick={() => setZoomLevel(z => Math.max(0.3, z - 0.1))} className="p-1.5 text-gray-500 hover:bg-white dark:hover:bg-slate-700 rounded-md transition-colors"><ZoomOut className="w-4 h-4" /></button>
+                    <span className="text-xs font-mono w-10 text-center text-gray-700 dark:text-slate-300">{Math.round(zoomLevel * 100)}%</span>
+                    <button onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.1))} className="p-1.5 text-gray-500 hover:bg-white dark:hover:bg-slate-700 rounded-md transition-colors"><ZoomIn className="w-4 h-4" /></button>
+                  </div>
+                  <button
+                    onClick={handlePrint}
+                    disabled={!nomorSurat}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-gray-900 dark:bg-slate-700 hover:bg-gray-800 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
+                  >
+                    <Printer size={14} /> Cetak Sekarang
+                  </button>
                 </div>
-                <button
-                  onClick={handlePrint}
-                  disabled={!nomorSurat}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-gray-900 dark:bg-slate-700 hover:bg-gray-800 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
-                >
-                  <Printer size={14} /> Cetak
-                </button>
+              </div>
+              
+              {/* Row 2: SPPD */}
+              <div className="flex items-center gap-4 p-3 border-t border-gray-100 dark:border-slate-700/50 overflow-x-auto">
+                <span className="text-sm font-semibold text-gray-700 dark:text-slate-300 w-24 shrink-0">SPPD (Lanskap):</span>
+                {pelaksanaList.map((p, idx) => (
+                  <button
+                    key={`sppd-${p.id}`}
+                    onClick={() => setPrintLayout(`sppd-${p.id}`)}
+                    className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-sm font-semibold transition-all border ${
+                      printLayout === `sppd-${p.id}`
+                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300 hover:text-emerald-600'
+                    }`}
+                  >
+                    <Printer size={14} />
+                    <span className="truncate max-w-[120px]">{p.nama ? p.nama.split(' ')[0] : `Pelaksana ${idx + 1}`}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Row 3: Laporan */}
+              <div className="flex items-center gap-4 p-3 border-t border-gray-100 dark:border-slate-700/50 overflow-x-auto">
+                <span className="text-sm font-semibold text-gray-700 dark:text-slate-300 w-24 shrink-0">Laporan:</span>
+                {pelaksanaList.map((p, idx) => (
+                  <button
+                    key={`laporan-${p.id}`}
+                    onClick={() => setPrintLayout(`laporan-${p.id}`)}
+                    className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-sm font-semibold transition-all border ${
+                      printLayout === `laporan-${p.id}`
+                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
+                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300 hover:text-emerald-600'
+                    }`}
+                  >
+                    <FileText size={14} />
+                    <span className="truncate max-w-[120px]">{p.nama ? p.nama.split(' ')[0] : `Pelaksana ${idx + 1}`}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -1278,15 +1279,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 shrink-0 flex items-center gap-3">
               <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Pratinjau:</span>
               {printLayout === 'surattugas' && (
-                <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Surat Tugas — Semua Pelaksana</span>
-              )}
-              {printLayout === 'semua' && (
-                <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Semua Dokumen (Surat Tugas + SPPD + Laporan)</span>
+                <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Surat Tugas (Kertas Portrait)</span>
               )}
               {pelaksanaList.map((p, idx) =>
-                printLayout === p.id ? (
-                  <span key={p.id} className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                    SPPD &amp; Laporan — Pelaksana No. {idx + 1}: {p.nama || '—'}
+                printLayout === `sppd-${p.id}` ? (
+                  <span key={`lbl-sppd-${p.id}`} className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                    SPPD — Pelaksana {idx + 1}: {p.nama || '—'} (Kertas Lanskap)
+                  </span>
+                ) : printLayout === `laporan-${p.id}` ? (
+                  <span key={`lbl-lap-${p.id}`} className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                    Laporan — Pelaksana {idx + 1}: {p.nama || '—'} (Kertas Portrait)
                   </span>
                 ) : null
               )}
@@ -1305,11 +1307,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   style={{
                     width: '297mm',
                     minHeight: '297mm',
-                    height: printLayout === 'semua'
-                      ? `${350 + pelaksanaList.length * 600}mm`
-                      : printLayout === 'surattugas'
-                        ? '297mm'
-                        : '600mm',
+                    height: printLayout.startsWith('sppd-') ? '215mm' : '300mm',
                     border: 'none',
                     background: 'transparent'
                   }}
