@@ -235,13 +235,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <title>Surat Perjalanan Dinas (SPPD)</title>
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
-            @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&display=swap');
-            body { font-family: 'Times New Roman', Times, serif; background: white; margin: 0; padding: 0; }
+            body { font-family: Arial, Helvetica, sans-serif; background: white; margin: 0; padding: 0; line-height: 1.5; color: #000; }
             .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; }
-            .page-landscape { width: 330mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; }
+            .page-landscape { width: 297mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; }
             .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
-            .print-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-            .print-table th, .print-table td { border: 1px solid black; padding: 4px 8px; vertical-align: top; }
+            .print-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.4; }
+            .print-table th, .print-table td { border: 1px solid black; padding: 6px 10px; vertical-align: top; }
             
             @media print {
               body { background: white; }
@@ -268,53 +267,53 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             ${SAAS_CONFIG.globalHeaderHTML}
             
             <div class="text-[14px] text-black">
-              <div class="text-center mb-6">
+              <div class="text-center mb-8">
                 <h6 class="font-bold underline uppercase text-[16px] tracking-wide">SURAT TUGAS</h6>
-                <p class="font-bold">${kodeKlasifikasi} / ${nomorSurat}</p>
+                <p class="font-bold mt-1">${kodeKlasifikasi} / ${nomorSurat}</p>
               </div>
 
-              <div class="mb-4 text-justify">
+              <div class="mb-6 text-justify leading-relaxed">
                 Berdasarkan ${dasarPenugasan},
               </div>
 
-              <div class="text-center font-bold mb-4">MEMERINTAHKAN</div>
+              <div class="text-center font-bold mb-6">MEMERINTAHKAN</div>
               
-              <table class="print-table mb-6">
+              <table class="print-table mb-8">
                 <thead>
-                  <tr>
-                    <th class="w-12 text-center">NO</th>
-                    <th class="text-center">NAMA</th>
-                    <th class="text-center">JABATAN</th>
+                  <tr class="bg-gray-50">
+                    <th class="w-12 text-center py-3">NO</th>
+                    <th class="text-center py-3">NAMA</th>
+                    <th class="text-center py-3">JABATAN</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td class="text-center">1</td>
-                    <td>${namaPegawai}</td>
-                    <td>${jabatanPegawai}</td>
+                    <td class="text-center py-3">1</td>
+                    <td class="py-3 font-semibold">${namaPegawai}</td>
+                    <td class="py-3">${jabatanPegawai}</td>
                   </tr>
                   ${pengikut.map((p, i) => `
                     <tr>
-                      <td class="text-center">${i+2}</td>
-                      <td>${p.nama}</td>
-                      <td>${p.keterangan || '-'}</td>
+                      <td class="text-center py-3">${i+2}</td>
+                      <td class="py-3 font-semibold">${p.nama}</td>
+                      <td class="py-3">${p.keterangan || '-'}</td>
                     </tr>
                   `).join('')}
                 </tbody>
               </table>
 
-              <div class="grid grid-cols-[120px_10px_1fr] gap-1 mb-8">
-                <span>Hari/Tanggal</span><span>:</span>
+              <div class="grid grid-cols-[130px_10px_1fr] gap-2 mb-10 text-[14px]">
+                <span class="font-semibold">Hari/Tanggal</span><span>:</span>
                 <span>${formatDateFull(tanggalBerangkat)}</span>
                 
-                <span>Perihal</span><span>:</span>
+                <span class="font-semibold">Perihal</span><span>:</span>
                 <span>${maksudPerjalanan}</span>
 
-                <span>Tempat</span><span>:</span>
+                <span class="font-semibold">Tempat</span><span>:</span>
                 <span>${tempatTujuan}</span>
               </div>
 
-              <div class="mb-8">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
+              <div class="mb-10 text-justify leading-relaxed">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
 
               ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
             </div>
@@ -987,9 +986,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 ref={iframeRef}
                 className="bg-white shadow-xl pointer-events-none rounded-sm border border-gray-100"
                 style={{ 
-                  width: '215mm', // Exact F4 width
-                  minHeight: '330mm', // F4 min height
-                  height: printLayout === 'semua' ? '1050mm' : '330mm'
+                  width: '297mm', 
+                  minHeight: '297mm', 
+                  height: printLayout === 'semua' ? '900mm' : (printLayout === 'sppd' ? '210mm' : '297mm')
                 }}
                 srcDoc={generateHTML()}
                 title="Print Preview SPPD"
