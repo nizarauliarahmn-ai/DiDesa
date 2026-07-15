@@ -420,7 +420,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <tr>
                       <td class="text-center align-top">9</td>
                       <td>Pembebanan anggaran<br>a. Instansi<br>b. Mata anggaran</td>
-                      <td class="align-top"><br>a. ${bebanAnggaran}<br>b. ${mataAnggaran || '-'}</td>
+                      <td class="align-top"><br>a. Pemerintah Desa ${cleanDesaName}<br>b. ${bebanAnggaran || '-'}</td>
                     </tr>
                     <tr>
                       <td class="text-center">10</td>
@@ -1126,23 +1126,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pembebanan Anggaran</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Instansi / Beban Anggaran</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Mata Anggaran</label>
                 <input 
                   type="text" 
                   value={bebanAnggaran}
                   onChange={(e) => setBebanAnggaran(e.target.value)}
                   className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  placeholder="Misal: Pemerintah Desa Wasah Hilir"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Mata Anggaran</label>
-                <input 
-                  type="text" 
-                  value={mataAnggaran}
-                  onChange={(e) => setMataAnggaran(e.target.value)}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
-                  placeholder="Misal: APBDes Tahun 2025"
+                  placeholder="Misal: APBDes Tahun 2026"
                 />
               </div>
             </div>
