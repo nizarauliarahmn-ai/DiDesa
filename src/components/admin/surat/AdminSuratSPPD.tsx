@@ -115,7 +115,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
   const [printLayout, setPrintLayout] = useState('semua'); // 'semua', 'spt', 'sppd', 'laporan'
 
-  const scrollRef = useDragScroll();
+  const dragProps = useDragScroll();
 
   useEffect(() => {
     setDesaName(localStorage.getItem('kop_desa') || 'Wasah Hilir');
@@ -261,16 +261,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <title>Surat Perjalanan Dinas (SPPD)</title>
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
-            body { font-family: Arial, Helvetica, sans-serif; background: white; margin: 0; padding: 0; line-height: 1.5; color: #000; }
-            .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; }
-            .page-landscape { width: 297mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; }
+            body { font-family: Arial, Helvetica, sans-serif; background: transparent; margin: 0; padding: 0; line-height: 1.5; color: #000; }
+            .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
+            .page-landscape { width: 297mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
             .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
             .print-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.4; }
             .print-table th, .print-table td { border: 1px solid black; padding: 6px 10px; vertical-align: top; }
             
             @media print {
               body { background: white; }
-              .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; }
+              .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
               
               ${printLayout === 'spt' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
               ${printLayout === 'sppd' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: none; }` : ''}
@@ -342,6 +342,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <div class="mb-10 text-justify leading-relaxed">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
 
               ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
+            </div>
+            <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
+                ${SAAS_CONFIG.globalFooterHTML}
             </div>
           </div>
 
@@ -563,6 +566,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
               </div>
             </div>
+            <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
+                ${SAAS_CONFIG.globalFooterHTML}
+            </div>
           </div>
 
           <!-- HALAMAN 3: LEMBAR LAPORAN -->
@@ -593,7 +599,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   <p class="font-bold underline">${namaPegawai}</p>
                 </div>
               </div>
-
+            </div>
+            <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
+                ${SAAS_CONFIG.globalFooterHTML}
             </div>
           </div>
 
@@ -666,6 +674,53 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     placeholder="001"
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pengaturan Tanda Tangan</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Penandatangan</label>
+                <select
+                  value={namaKades}
+                  onChange={(e) => {
+                    const selected = officers.find((o: any) => o.name === e.target.value);
+                    if (selected) {
+                      setNamaKades(selected.name);
+                      setRoleKades(selected.role);
+                      setNipKades(selected.nip || '');
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                >
+                  {officers.length > 0 ? (
+                    officers.map((officer: any, idx: number) => (
+                      <option key={idx} value={officer.name}>{officer.name} - {officer.role}</option>
+                    ))
+                  ) : (
+                    <option value={namaKades}>{namaKades} - {roleKades}</option>
+                  )}
+                </select>
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  Jika memilih selain Kepala Desa, sistem akan otomatis menambahkan keterangan <strong>"A.n. Kepala Desa,"</strong>.
+                </p>
+              </div>
+              
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <label className="flex items-start gap-3 cursor-pointer p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
+                  <input 
+                    type="checkbox"
+                    checked={includeCamat}
+                    onChange={(e) => setIncludeCamat(e.target.checked)}
+                    className="w-5 h-5 mt-0.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
+                  />
+                  <div>
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan pada Surat Tugas (Camat di sebelah kiri)</div>
+                  </div>
+                </label>
               </div>
             </div>
           </div>
@@ -1004,17 +1059,19 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <div 
-            ref={scrollRef}
-            className="flex-1 overflow-auto p-8 flex flex-col items-center gap-8 cursor-grab active:cursor-grabbing relative bg-slate-200/50 dark:bg-slate-800/50"
+            {...dragProps}
+            className="flex-1 overflow-auto p-8 flex flex-col items-center gap-8 relative bg-slate-200/50 dark:bg-slate-800/50"
           >
             <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.2s', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <iframe
                 ref={iframeRef}
-                className="bg-white shadow-xl pointer-events-none rounded-sm border border-gray-100"
+                className="pointer-events-none"
                 style={{ 
                   width: '297mm', 
                   minHeight: '297mm', 
-                  height: printLayout === 'semua' ? '900mm' : (printLayout === 'sppd' ? '210mm' : '297mm')
+                  height: printLayout === 'semua' ? '900mm' : (printLayout === 'sppd' ? '210mm' : '297mm'),
+                  border: 'none',
+                  background: 'transparent'
                 }}
                 srcDoc={generateHTML()}
                 title="Print Preview SPPD"
