@@ -44,7 +44,7 @@ export const SAAS_CONFIG = {
   get globalFooterHTML() {
     const customFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     return `
-      <div class="saas-global-footer w-full bg-white dark:bg-slate-900 select-none" style="border-top: 0.5px solid #cbd5e1; padding-top: 5px; font-family: 'Inter', sans-serif; line-height: 1.5; font-size: 8px; color: #94a3b8; text-align: left;">
+      <div class="saas-global-footer w-full select-none" style="background: transparent; border-top: 0.5px solid #cbd5e1; padding-top: 5px; font-family: 'Inter', sans-serif; line-height: 1.5; font-size: 8px; color: #94a3b8; text-align: left;">
         ${customFooter}
       </div>
     `;
