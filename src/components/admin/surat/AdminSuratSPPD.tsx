@@ -644,7 +644,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <script src="https://cdn.tailwindcss.com"></script>
           <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
           <style>
-            body { font-family: Arial, Helvetica, sans-serif; background: transparent; margin: 0; padding: 0; line-height: 1.5; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            body { font-family: Arial, Helvetica, sans-serif; background: transparent; margin: 0; padding: 0; line-height: 1.5; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: hidden; }
+            /* Hide scrollbar for Chrome, Safari and Opera */
+            body::-webkit-scrollbar { display: none; }
             .page-a4 { width: 210mm; min-height: 297mm; padding: 15mm 20mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
             .page-landscape { width: 297mm; min-height: 210mm; padding: 10mm 15mm; position: relative; page-break-after: always; box-sizing: border-box; background: white; margin-bottom: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 4px; overflow: hidden; }
             .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
@@ -652,12 +654,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             .print-table th, .print-table td { border: 1px solid black; padding: 2px 4px; vertical-align: top; }
             
             @media print {
-              body { background: white; }
+              body { background: white; overflow: visible; }
               .page-a4, .page-landscape { padding: 0 !important; min-height: auto; box-shadow: none; margin: 0; border-radius: 0; overflow: visible; }
               
-              ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
+              @page { size: portrait; margin: 15mm 20mm; }
+              @page landscape_page { size: landscape; margin: 10mm 15mm; }
+              .page-landscape { page: landscape_page; }
+
+              ${printLayout === 'surattugas' ? `.page-spt { display: block; } .page-sppd { display: none; } .page-laporan { display: none; }` : ''}
               ${printLayout !== 'semua' && printLayout !== 'surattugas' ? `@page { size: landscape; margin: 10mm 15mm; } .page-spt { display: none; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
-              ${printLayout === 'semua' ? `@page { size: portrait; margin: 15mm 20mm; } .page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
+              ${printLayout === 'semua' ? `.page-spt { display: block; } .page-sppd { display: block; } .page-laporan { display: block; }` : ''}
             }
           </style>
         </head>
@@ -846,7 +852,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                           {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(pelaksana.nama.toLowerCase()) || (r.nik || r.nip || '').includes(pelaksana.nama)).slice(0, 5).map((res: any, idx: number) => (
                             <button
                               key={res.nik || res.nip || idx}
-                              onClick={() => {
+                              onMouseDown={(e) => {
+                                e.preventDefault(); // Prevent input onBlur from firing before selection
                                 handlePelaksanaChange(pelaksana.id, 'nama', res.name || res.nama || '');
                                 handlePelaksanaChange(pelaksana.id, 'nip', res.nik || res.nip || '');
                                 handlePelaksanaChange(pelaksana.id, 'jabatan', res.pekerjaan || res.jabatan || '');
@@ -935,7 +942,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                                     {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(p.nama.toLowerCase()) || (r.nik || r.nip || '').includes(p.nama)).slice(0, 5).map((res: any, idx: number) => (
                                       <button
                                         key={res.nik || res.nip || idx}
-                                        onClick={() => {
+                                        onMouseDown={(e) => {
+                                          e.preventDefault(); // Prevent input onBlur from firing before selection
                                           handlePengikutChange(pelaksana.id, index, 'nama', res.name || res.nama || '');
                                           handlePengikutChange(pelaksana.id, index, 'umur', (res.umur ? res.umur.toString() : (res.nik || res.nip || '')));
                                           handlePengikutChange(pelaksana.id, index, 'keterangan', res.pekerjaan || res.jabatan || '');
@@ -1300,15 +1308,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.2s ease', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <iframe
                   ref={iframeRef}
+                  scrolling="no"
                   className="pointer-events-none shadow-2xl rounded-sm"
                   style={{
                     width: '297mm',
                     minHeight: '297mm',
                     height: printLayout === 'semua'
-                      ? `${320 + pelaksanaList.length * 580}mm`
+                      ? `${350 + pelaksanaList.length * 600}mm`
                       : printLayout === 'surattugas'
                         ? '297mm'
-                        : '590mm',
+                        : '600mm',
                     border: 'none',
                     background: 'white'
                   }}
