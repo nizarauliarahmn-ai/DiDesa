@@ -71,8 +71,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   
   // Resident Data for Search
   const [residents, setResidents] = useState<any[]>([]);
-  const [showPegawaiDropdown, setShowPegawaiDropdown] = useState(false);
-  const [activePengikutDropdown, setActivePengikutDropdown] = useState<number | null>(null);
+  const [activePelaksanaDropdown, setActivePelaksanaDropdown] = useState<string | null>(null);
+  const [activePengikutDropdown, setActivePengikutDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     fetchResidentsCached()
