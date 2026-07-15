@@ -174,9 +174,18 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   }, [tanggalBerangkat, tanggalKembali]);
 
   const handlePrint = () => {
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.print();
-    }
+    const html = generateHTML();
+    const printWindow = window.open('', '_blank', 'width=1200,height=900');
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 500);
+    };
   };
 
   const handleRecord = () => {
@@ -719,70 +728,61 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-4 z-30">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={onBack}
-              className="p-2 text-gray-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                {editData ? 'Edit SPPD' : 'Buat SPPD'}
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-slate-400">
-                Surat Perjalanan Dinas
-              </p>
-            </div>
+    <div className="flex items-center justify-between bg-white dark:bg-slate-900 px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-16 z-50">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={onBack}
+            className="p-2 text-gray-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+              {editData ? 'Edit SPPD' : 'Buat SPPD'}
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Surat Perjalanan Dinas</p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Tab switcher */}
-            <div className="flex bg-gray-100 dark:bg-slate-800 rounded-xl p-1">
-              <button
-                onClick={() => setActiveTab('form')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  activeTab === 'form'
-                    ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-700'
-                }`}
-              >
-                <FileText size={15} /> Pengisian Form
-              </button>
-              <button
-                onClick={() => setActiveTab('cetak')}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  activeTab === 'cetak'
-                    ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-700'
-                }`}
-              >
-                <Eye size={15} /> Pratinjau & Cetak
-              </button>
-            </div>
-            <div className="h-6 w-px bg-gray-200 dark:bg-slate-700"></div>
-            <div className="px-4 py-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl font-mono text-sm font-semibold border border-emerald-100 dark:border-emerald-500/20">
-              {kodeKlasifikasi}/{nomorSurat}
-            </div>
-            <button
-              onClick={handleRecord}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-sm shadow-emerald-200 dark:shadow-none font-medium disabled:opacity-50"
-            >
-              <Save size={18} />
-              {isSaving ? 'Menyimpan...' : (hasRecorded ? 'Perbarui Data' : 'Catat & Simpan')}
-            </button>
-            {activeTab === 'cetak' && (
-              <button
-                onClick={handlePrint}
-                disabled={!nomorSurat}
-                className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 dark:bg-slate-700 hover:bg-gray-800 dark:hover:bg-slate-600 text-white rounded-xl transition-all shadow-sm disabled:opacity-50 font-medium"
-              >
-                <Printer size={18} /> Cetak Halaman Ini
-              </button>
-            )}
+        </div>
+
+        {/* Center: Tab switcher — fixed layout, no shift */}
+        <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-xl p-1 gap-0.5">
+          <button
+            onClick={() => setActiveTab('form')}
+            className={`flex items-center gap-1.5 min-w-[140px] justify-center px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'form'
+                ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                : 'text-gray-500 dark:text-slate-400'
+            }`}
+          >
+            <FileText size={14} /> Pengisian Form
+          </button>
+          <button
+            onClick={() => setActiveTab('cetak')}
+            className={`flex items-center gap-1.5 min-w-[150px] justify-center px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === 'cetak'
+                ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                : 'text-gray-500 dark:text-slate-400'
+            }`}
+          >
+            <Eye size={14} /> Pratinjau & Cetak
+          </button>
+        </div>
+
+        {/* Right: actions — always the same */}
+        <div className="flex items-center gap-2">
+          <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg font-mono text-sm font-semibold border border-emerald-100 dark:border-emerald-500/20">
+            {kodeKlasifikasi}/{nomorSurat}
           </div>
-      </div>
+          <button
+            onClick={handleRecord}
+            disabled={isSaving}
+            className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-sm shadow-emerald-200 dark:shadow-none font-semibold disabled:opacity-50 text-sm"
+          >
+            <Save size={16} />
+            {isSaving ? 'Menyimpan...' : (hasRecorded ? 'Perbarui Data' : 'Catat & Simpan')}
+          </button>
+        </div>
+    </div>
 
       {/* TAB: PENGISIAN FORM */}
       {activeTab === 'form' && (
@@ -1208,8 +1208,11 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       {activeTab === 'cetak' && (
         <div className="h-[calc(100vh-160px)] flex flex-col">
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden h-full">
-            {/* Document selector */}
+
+            {/* Document selector bar */}
             <div className="flex flex-wrap items-center gap-2 p-3 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 shrink-0">
+
+              {/* Surat Tugas button */}
               <button
                 onClick={() => setPrintLayout('surattugas')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
@@ -1218,8 +1221,11 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300 hover:text-emerald-600'
                 }`}
               >
-                <FileText size={14} /> Surat Tugas
+                <FileText size={14} />
+                <span>Surat Tugas</span>
               </button>
+
+              {/* Per-pelaksana SPPD+Laporan buttons */}
               {pelaksanaList.map((p, idx) => (
                 <button
                   key={p.id}
@@ -1230,11 +1236,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300 hover:text-emerald-600'
                   }`}
                 >
-                  <Printer size={14} />
-                  SPPD & Laporan {p.nama ? `(${p.nama.split(' ')[0]})` : `Pelaksana ${idx + 1}`}
+                  <span className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold ${
+                    printLayout === p.id ? 'bg-white/30 text-white' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
+                  }`}>{idx + 1}</span>
+                  <span>{p.nama ? p.nama.split(' ').slice(0, 2).join(' ') : `Pelaksana ${idx + 1}`}</span>
                 </button>
               ))}
+
               <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-1"></div>
+
+              {/* Print all */}
               <button
                 onClick={() => setPrintLayout('semua')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
@@ -1243,29 +1254,63 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-gray-400'
                 }`}
               >
-                Cetak Semua Sekaligus
+                Cetak Semua
               </button>
-              <div className="ml-auto flex items-center gap-1">
-                <button onClick={() => setZoomLevel(z => Math.max(0.3, z - 0.1))} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"><ZoomOut className="w-4 h-4" /></button>
-                <span className="text-xs font-mono w-12 text-center text-gray-700 dark:text-slate-300">{Math.round(zoomLevel * 100)}%</span>
-                <button onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.1))} className="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"><ZoomIn className="w-4 h-4" /></button>
+
+              {/* Spacer + zoom + print button */}
+              <div className="ml-auto flex items-center gap-2">
+                <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-800 rounded-lg p-0.5">
+                  <button onClick={() => setZoomLevel(z => Math.max(0.3, z - 0.1))} className="p-1.5 text-gray-500 hover:bg-white dark:hover:bg-slate-700 rounded-md transition-colors"><ZoomOut className="w-4 h-4" /></button>
+                  <span className="text-xs font-mono w-10 text-center text-gray-700 dark:text-slate-300">{Math.round(zoomLevel * 100)}%</span>
+                  <button onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.1))} className="p-1.5 text-gray-500 hover:bg-white dark:hover:bg-slate-700 rounded-md transition-colors"><ZoomIn className="w-4 h-4" /></button>
+                </div>
+                <button
+                  onClick={handlePrint}
+                  disabled={!nomorSurat}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gray-900 dark:bg-slate-700 hover:bg-gray-800 text-white rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
+                >
+                  <Printer size={14} /> Cetak
+                </button>
               </div>
             </div>
+
+            {/* Document label banner */}
+            <div className="px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-800/30 shrink-0 flex items-center gap-3">
+              <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Pratinjau:</span>
+              {printLayout === 'surattugas' && (
+                <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Surat Tugas — Semua Pelaksana</span>
+              )}
+              {printLayout === 'semua' && (
+                <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">Semua Dokumen (Surat Tugas + SPPD + Laporan)</span>
+              )}
+              {pelaksanaList.map((p, idx) =>
+                printLayout === p.id ? (
+                  <span key={p.id} className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                    SPPD &amp; Laporan — Pelaksana No. {idx + 1}: {p.nama || '—'}
+                  </span>
+                ) : null
+              )}
+            </div>
+
             {/* Preview iframe */}
             <div
               {...dragProps}
-              className="flex-1 overflow-auto p-8 flex flex-col items-center gap-8 bg-slate-200/50 dark:bg-slate-800/50"
+              className="flex-1 overflow-auto p-8 flex flex-col items-center bg-slate-200/50 dark:bg-slate-800/50"
             >
-              <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.2s', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.2s ease', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <iframe
                   ref={iframeRef}
-                  className="pointer-events-none"
-                  style={{ 
-                    width: '297mm', 
-                    minHeight: '297mm', 
-                    height: printLayout === 'semua' ? '900mm' : (printLayout === 'surattugas' ? '297mm' : '507mm'),
+                  className="pointer-events-none shadow-2xl rounded-sm"
+                  style={{
+                    width: '297mm',
+                    minHeight: '297mm',
+                    height: printLayout === 'semua'
+                      ? `${320 + pelaksanaList.length * 580}mm`
+                      : printLayout === 'surattugas'
+                        ? '297mm'
+                        : '590mm',
                     border: 'none',
-                    background: 'transparent'
+                    background: 'white'
                   }}
                   srcDoc={generateHTML()}
                   title="Print Preview SPPD"
