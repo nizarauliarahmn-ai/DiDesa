@@ -461,6 +461,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   <div>
                     <div class="grid grid-cols-[20px_40px_10px_1fr] leading-tight">
                       <span>II.</span><span>Tiba di</span><span>:</span><span>${tempatTujuan}</span>
+                      <span></span><span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
+                      <span></span><span>Kepala</span><span>:</span><span></span>
+                    </div>
+                    <div class="h-6"></div>
+                    <div class="text-center">(.......................................)</div>
+                  </div>
+                  <div>
                     <div class="grid grid-cols-[80px_10px_1fr] leading-tight">
                       <span>Berangkat dari</span><span>:</span><span>${tempatTujuan}</span>
                       <span>Ke</span><span>:</span><span>${tempatBerangkat}</span>
@@ -483,12 +490,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <div class="text-center">(.......................................)</div>
                   </div>
                   <div>
-                    <div class="grid grid-cols-[80px_10px_1fr]">
+                    <div class="grid grid-cols-[80px_10px_1fr] leading-tight">
                       <span>Berangkat dari</span><span>:</span><span></span>
                       <span>Ke</span><span>:</span><span></span>
                       <span>Pada Tanggal</span><span>:</span><span></span>
                     </div>
-                    <div class="h-10"></div>
+                    <div class="h-6"></div>
                     <div class="text-center">(.......................................)</div>
                   </div>
                 </div>
@@ -505,12 +512,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                     <div class="text-center">(.......................................)</div>
                   </div>
                   <div>
-                    <div class="grid grid-cols-[80px_10px_1fr]">
+                    <div class="grid grid-cols-[80px_10px_1fr] leading-tight">
                       <span>Berangkat dari</span><span>:</span><span></span>
                       <span>Ke</span><span>:</span><span></span>
                       <span>Pada Tanggal</span><span>:</span><span></span>
                     </div>
-                    <div class="h-10"></div>
+                    <div class="h-6"></div>
                     <div class="text-center">(.......................................)</div>
                   </div>
                 </div>
