@@ -234,19 +234,17 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
 
     const kopSuratHTML = `
-        <div style="border-bottom:3px solid #000;margin-bottom:8px;">
-          <div style="display:flex;align-items:flex-start;padding-bottom:4px;border-bottom:1px solid #000;margin-bottom:1px;font-family:Arial, sans-serif;">
-            <div style="display:flex;width:100%;align-items:center;">
-              <div style="width:90px;height:90px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
-                <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
-              </div>
-              <div style="text-align:center;flex:1;padding-right:90px;">
-                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">Pemerintah Kabupaten ${activeKabupaten.toUpperCase()}</div>
-                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">Kecamatan ${activeKecamatan.toUpperCase()}</div>
-                <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">Desa ${activeDesa.toUpperCase()}</div>
-                <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${activeAlamat}</div>
-                <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${kontakKantor}</div>
-              </div>
+        <div style="border-bottom:2px solid #000;margin-bottom:8px;padding-bottom:2px;">
+          <div style="display:flex;align-items:center;font-family:Arial, sans-serif;">
+            <div style="width:75px;height:75px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:10px;">
+              <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
+            </div>
+            <div style="text-align:center;flex:1;">
+              <div style="font-weight:bold;font-size:13px;text-transform:uppercase;line-height:1.1;margin:0 0 1px 0;">Pemerintah Kabupaten ${activeKabupaten.toUpperCase()}</div>
+              <div style="font-weight:bold;font-size:13px;text-transform:uppercase;line-height:1.1;margin:0 0 1px 0;">Kecamatan ${activeKecamatan.toUpperCase()}</div>
+              <div style="font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:1px 0 2px 0;">Desa ${activeDesa.toUpperCase()}</div>
+              <div style="font-size:10px;text-transform:capitalize;line-height:1.1;margin:1px 0 0 0;">${activeAlamat}</div>
+              <div style="font-size:10px;line-height:1.1;margin:1px 0 0 0;">${kontakKantor}</div>
             </div>
           </div>
         </div>
