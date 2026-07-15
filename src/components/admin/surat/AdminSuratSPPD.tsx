@@ -324,19 +324,20 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     `;
 
     const allParticipantsFlat = pelaksanaList.flatMap((p) => [
-      { ...p, isLeader: true },
-      ...p.pengikutList.filter((pg: any) => pg.nama.trim() !== '').map((pg: any) => ({
+      { ...p, isLeader: true, groupId: p.id },
+      ...(p.pengikutList || []).map((pg: any) => ({
         nama: pg.nama,
         jabatan: pg.keterangan || '-',
         pangkat: '-',
         nip: '-',
-        isLeader: false
+        isLeader: false,
+        groupId: p.id
       }))
-    ]).filter((p: any) => p.nama && p.nama.trim() !== '');
+    ]); // Do not filter empty names so blank forms can be printed
 
     const generatePage2And3 = (participant: any) => `
           <!-- HALAMAN 2: VISUM SPPD (LANDSCAPE) -->
-          <div class="page-landscape page-sppd bg-white shadow-lg mx-auto" style="${printLayout !== `sppd-${participant.id}` ? 'display: none;' : ''}">
+          <div class="page-landscape page-sppd bg-white shadow-lg mx-auto" style="${printLayout !== `sppd-${participant.groupId}` ? 'display: none;' : ''}">
             <div class="flex gap-4 h-full">
               <!-- Kiri -->
               <div class="w-[53%] pr-4">
@@ -593,7 +594,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <!-- HALAMAN 3: LEMBAR LAPORAN -->
-          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout !== `laporan-${participant.id}` ? 'display: none;' : ''}">
+          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout !== `laporan-${participant.groupId}` ? 'display: none;' : ''}">
             <div class="text-[14px] text-black pt-12">
               <div class="text-center mb-10">
                 <h6 class="font-bold uppercase text-[16px]">LAPORAN PERJALANAN DINAS</h6>
