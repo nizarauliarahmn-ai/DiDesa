@@ -136,6 +136,26 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     }
   }, [editData, kodeKlasifikasi]);
 
+  const angkaTerbilang = (angka: number): string => {
+    const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    if (angka < 12) return words[angka];
+    if (angka < 20) return words[angka - 10] + " Belas";
+    if (angka < 100) return words[Math.floor(angka / 10)] + " Puluh " + (angka % 10 !== 0 ? words[angka % 10] : "");
+    return angka.toString();
+  };
+
+  useEffect(() => {
+    if (tanggalBerangkat && tanggalKembali) {
+      const start = new Date(tanggalBerangkat);
+      const end = new Date(tanggalKembali);
+      const diffTime = end.getTime() - start.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays > 0) {
+        setLamaPerjalanan(`${diffDays} (${angkaTerbilang(diffDays).trim()}) Hari`);
+      }
+    }
+  }, [tanggalBerangkat, tanggalKembali]);
+
   const handlePrint = () => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.contentWindow.print();
@@ -451,7 +471,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       <span>pada tanggal</span><span>:</span><span>${currentDateFormatted()}</span>
                     </div>
                     <div class="mt-1 text-center font-bold">${rightRoleHtml}</div>
-                    <div class="h-12"></div>
+                    <div class="h-8"></div>
                     <div class="font-bold underline text-center">${namaKades}</div>
                   </div>
                 </div>
@@ -558,10 +578,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                             </div>
                           </div>
                         </div>
-                        <div class="flex justify-end mt-2">
+                        <div class="flex justify-center mt-2">
                           <div class="w-1/2 text-center">
                             <div class="font-bold">${rightRoleHtml}</div>
-                            <div class="h-12"></div>
+                            <div class="h-8"></div>
                             <div class="font-bold underline">${namaKades}</div>
                           </div>
                         </div>
@@ -924,13 +944,20 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Pelaksana Teknis (PPTK)</label>
-                  <input 
-                    type="text" 
+                  <select
                     value={namaPPTK}
                     onChange={(e) => setNamaPPTK(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
-                    placeholder="Nama PPTK (Jika Ada)"
-                  />
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800 text-sm"
+                  >
+                    <option value="">-- Pilih PPTK (Jika Ada) --</option>
+                    {officers.length > 0 ? (
+                      officers.map((officer: any, idx: number) => (
+                        <option key={idx} value={officer.name}>{officer.name} - {officer.role}</option>
+                      ))
+                    ) : (
+                      <option value={namaPPTK}>{namaPPTK}</option>
+                    )}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Laporan Ditujukan Kepada</label>
