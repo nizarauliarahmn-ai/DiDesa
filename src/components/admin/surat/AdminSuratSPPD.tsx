@@ -980,15 +980,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
           <div 
             ref={scrollRef}
-            className="flex-1 overflow-auto p-8 flex flex-col items-center gap-8 cursor-grab active:cursor-grabbing relative"
+            className="flex-1 overflow-auto p-8 flex flex-col items-center gap-8 cursor-grab active:cursor-grabbing relative bg-slate-200/50 dark:bg-slate-800/50"
           >
             <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.2s', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <iframe
                 ref={iframeRef}
-                className="w-full max-w-[330mm] bg-white shadow-xl pointer-events-none"
+                className="bg-white shadow-xl pointer-events-none rounded-sm border border-gray-100"
                 style={{ 
-                  minHeight: '297mm', // A4 min height
-                  height: printLayout === 'semua' ? '1000mm' : '320mm'
+                  width: '215mm', // Exact F4 width
+                  minHeight: '330mm', // F4 min height
+                  height: printLayout === 'semua' ? '1050mm' : '330mm'
                 }}
                 srcDoc={generateHTML()}
                 title="Print Preview SPPD"
