@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Component } from 'react';
 import { ArrowLeft, Printer, Save, Plus, Trash2, Search } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { fetchResidentsCached } from '../../../utils/apiCache';
@@ -9,7 +9,46 @@ import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
+// Error Boundary to catch and display any rendering errors
+class SPPDErrorBoundary extends Component<{children: React.ReactNode, onBack: () => void}, {hasError: boolean, error: any}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: any) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: any, info: any) {
+    console.error('SPPD Error:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{padding: 40, fontFamily: 'monospace'}}>
+          <h2 style={{color: 'red'}}>⚠️ Error pada halaman SPPD</h2>
+          <pre style={{background: '#fee', padding: 20, borderRadius: 8, whiteSpace: 'pre-wrap', wordBreak: 'break-all'}}>
+            {String(this.state.error?.message || this.state.error)}
+          </pre>
+          <pre style={{background: '#fff3cd', padding: 20, borderRadius: 8, whiteSpace: 'pre-wrap', wordBreak: 'break-all', marginTop: 10}}>
+            {String(this.state.error?.stack || '')}
+          </pre>
+          <button onClick={this.props.onBack} style={{marginTop: 20, padding: '10px 20px', background: '#059669', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer'}}>← Kembali</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onBack: () => void, editData?: any, editLetterId?: string | null }) {
+  return (
+    <SPPDErrorBoundary onBack={onBack}>
+      <AdminSuratSPPDInner onBack={onBack} editData={editData} editLetterId={editLetterId} />
+    </SPPDErrorBoundary>
+  );
+}
+
+function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () => void, editData?: any, editLetterId?: string | null }) {
   const [isSaving, setIsSaving] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
