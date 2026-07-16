@@ -128,8 +128,6 @@ export default function AdminSuratSKL({
       if (editData.anakData) setAnakData(editData.anakData);
       if (editData.ayahData) setAyahData(editData.ayahData);
       if (editData.ibuData) setIbuData(editData.ibuData);
-      if (editData.pelaporData) setPelaporData(editData.pelaporData);
-      if (editData.rsData) setRsData(editData.rsData);
       if (editData.namaPejabat) setNamaPejabat(editData.namaPejabat);
       if (editData.jabatanPejabat) setJabatanPejabat(editData.jabatanPejabat);
       if (editData.includeCamat !== undefined) setIncludeCamat(editData.includeCamat);
@@ -702,38 +700,6 @@ export default function AdminSuratSKL({
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
                     value={tanggalSurat}
                     onChange={(e) => setTanggalSurat(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Data Fasilitas Kesehatan */}
-            <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center">
-                  <Building className="w-4 h-4 text-indigo-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Fasilitas Kesehatan (Opsional)</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">No. Surat RS/Klinik</label>
-                  <input 
-                    type="text"
-                    placeholder="Contoh: RS/2026/01/123"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={rsData.noSuratRs}
-                    onChange={(e) => setRsData({...rsData, noSuratRs: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Faskes</label>
-                  <input 
-                    type="text"
-                    placeholder="Contoh: RSUD Kabupaten"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={rsData.namaRs}
-                    onChange={(e) => setRsData({...rsData, namaRs: e.target.value})}
                   />
                 </div>
               </div>
