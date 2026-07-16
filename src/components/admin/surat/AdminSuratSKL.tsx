@@ -356,8 +356,8 @@ export default function AdminSuratSKL({
       anakData,
       ayahData,
       ibuData,
-      pelaporData,
-      rsData,
+      saksi1Data,
+      saksi2Data,
       namaPejabat,
       jabatanPejabat,
       includeCamat
@@ -588,8 +588,8 @@ export default function AdminSuratSKL({
                     setAnakData(data.anakData || anakData);
                     setAyahData(data.ayahData || ayahData);
                     setIbuData(data.ibuData || ibuData);
-                    setPelaporData(data.pelaporData || pelaporData);
-                    setRsData(data.rsData || rsData);
+                    setSaksi1Data(data.saksi1Data || saksi1Data);
+                    setSaksi2Data(data.saksi2Data || saksi2Data);
                     setNamaPejabat(data.namaPejabat || namaPejabat);
                     setJabatanPejabat(data.jabatanPejabat || jabatanPejabat);
                     setIncludeCamat(data.includeCamat || false);
@@ -928,73 +928,75 @@ export default function AdminSuratSKL({
               </div>
             </div>
 
-            {/* Data Pelapor (Opsional) */}
+            
+            {/* Saksi 1 */}
             <div>
               <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
                   <Activity className="w-4 h-4 text-orange-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Pelapor (Opsional)</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Saksi 1</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Pelapor</label>
-                  <input 
-                    type="text"
-                    placeholder="16 digit NIK"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={pelaporData.nik}
-                    onChange={(e) => setPelaporData({...pelaporData, nik: e.target.value})}
-                  />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                  <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nik} onChange={(e) => setSaksi1Data({...saksi1Data, nik: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Pelapor</label>
-                  <input 
-                    type="text"
-                    placeholder="Nama lengkap"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={pelaporData.nama}
-                    onChange={(e) => setPelaporData({...pelaporData, nama: e.target.value})}
-                  />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+                  <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nama} onChange={(e) => setSaksi1Data({...saksi1Data, nama: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Umur (Tahun)</label>
-                  <input 
-                    type="number"
-                    placeholder="Umur"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={pelaporData.umur}
-                    onChange={(e) => setPelaporData({...pelaporData, umur: e.target.value})}
-                  />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tempatLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tempatLahir: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                  <input type="text" placeholder="Misal: 05 Maret 1988" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tanggalLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tanggalLahir: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <input 
-                    type="text"
-                    placeholder="Pekerjaan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={pelaporData.pekerjaan}
-                    onChange={(e) => setPelaporData({...pelaporData, pekerjaan: e.target.value})}
-                  />
+                  <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.pekerjaan} onChange={(e) => setSaksi1Data({...saksi1Data, pekerjaan: e.target.value})} />
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Hubungan dengan Anak</label>
-                  <input 
-                    type="text"
-                    placeholder="Misal: Ayah Kandung, Kakek"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={pelaporData.hubungan}
-                    onChange={(e) => setPelaporData({...pelaporData, hubungan: e.target.value})}
-                  />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
+                  <textarea rows={2} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none" value={saksi1Data.alamat} onChange={(e) => setSaksi1Data({...saksi1Data, alamat: e.target.value})} />
+                </div>
+              </div>
+            </div>
+
+            {/* Saksi 2 */}
+            <div>
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-blue-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Saksi 2</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                  <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nik} onChange={(e) => setSaksi2Data({...saksi2Data, nik: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+                  <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nama} onChange={(e) => setSaksi2Data({...saksi2Data, nama: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tempatLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tempatLahir: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                  <input type="text" placeholder="Misal: 12 Januari 1991" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tanggalLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tanggalLahir: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                  <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.pekerjaan} onChange={(e) => setSaksi2Data({...saksi2Data, pekerjaan: e.target.value})} />
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
-                  <textarea 
-                    rows={2}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={pelaporData.alamat}
-                    onChange={(e) => setPelaporData({...pelaporData, alamat: e.target.value})}
-                  />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
+                  <textarea rows={2} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none" value={saksi2Data.alamat} onChange={(e) => setSaksi2Data({...saksi2Data, alamat: e.target.value})} />
                 </div>
               </div>
             </div>
