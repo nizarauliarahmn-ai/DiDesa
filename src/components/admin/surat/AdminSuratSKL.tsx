@@ -116,7 +116,7 @@ export default function AdminSuratSKL({
   const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
   const kontakKantor = localStorage.getItem('kop_kontak') || '081346867519 | pemdesawasahhilir@gmail.com';
 
-  const [previewZoom, setPreviewZoom] = useState(0.45);
+  const [previewZoom, setPreviewZoom] = useState(0.38);
   const dragProps = useDragScroll();
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -1087,7 +1087,7 @@ export default function AdminSuratSKL({
                 </button>
                 <div className="w-px h-5 bg-slate-200 mx-1"></div>
                 <button 
-                  onClick={() => setPreviewZoom(0.45)} 
+                  onClick={() => setPreviewZoom(0.38)} 
                   className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-[10px] font-bold"
                   title="Reset Zoom"
                 >
@@ -1130,7 +1130,7 @@ export default function AdminSuratSKL({
                     height: '1123px', 
                     padding: '56px 75px',
                     transform: `scale(${previewZoom})`,
-                    transformOrigin: 'top left',
+                    transformOrigin: 'top center',
                     fontFamily: letterFont,
                     fontSize: '13px',
                     lineHeight: '1.45',
