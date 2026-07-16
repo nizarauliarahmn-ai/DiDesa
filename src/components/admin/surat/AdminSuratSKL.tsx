@@ -435,9 +435,9 @@ export default function AdminSuratSKL({
             <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
           </div>
           <div style="text-align:center;flex:1;padding-right:70px;padding-left:70px;">
-            <div style="font-weight:bold;font-size:16px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:0 0 2px 0;">PEMERINTAH KABUPATEN ${namaKabupaten.toUpperCase()}</div>
-            <div style="font-weight:bold;font-size:16px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:0 0 2px 0;">KECAMATAN ${namaKecamatan.toUpperCase()}</div>
-            <div style="font-weight:900;font-size:22px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:2px 0 5px 0;">KANTOR KEPALA DESA ${namaDesa.toUpperCase()}</div>
+            <div style="font-weight:bold;font-size:16px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:0 0 2px 0;">PEMERINTAH KABUPATEN ${cleanStr(namaKabupaten, /^(kabupaten|kota)\s+/i).toUpperCase()}</div>
+            <div style="font-weight:bold;font-size:16px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:0 0 2px 0;">KECAMATAN ${cleanStr(namaKecamatan, /^kecamatan\s+/i).toUpperCase()}</div>
+            <div style="font-weight:900;font-size:22px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:2px 0 5px 0;">KANTOR KEPALA DESA ${cleanStr(namaDesa, /^(desa|kelurahan)\s+/i).toUpperCase()}</div>
             <div style="font-size:12px;line-height:1.2;margin:2px 0 0 0;">Alamat: ${alamatKantor}</div>
           </div>
         </div>
@@ -500,7 +500,7 @@ export default function AdminSuratSKL({
         </table>
 
         <p style="text-align:justify;line-height:1.5;margin-bottom:40px;font-size:12px;text-indent:40px;">
-          Demikian Surat Keterangan Kenal Lahir ini diberikan kepada yang bersangkutan untuk dapat dipergunakan sebagaimana mestinya.
+          Demikian Surat Keterangan Lahir ini diberikan kepada yang bersangkutan untuk dapat dipergunakan sebagaimana mestinya.
         </p>
 
         <!-- TANDA TANGAN -->
