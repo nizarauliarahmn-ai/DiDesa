@@ -445,7 +445,7 @@ export default function AdminSuratSKL({
 
         <!-- JUDUL SURAT -->
         <div style="text-align:center;margin-bottom:25px;">
-          <h2 style="font-size:16px;font-weight:bold;text-decoration:underline;margin:0 0 5px 0;text-transform:uppercase;">SURAT KETERANGAN KENAL LAHIR</h2>
+          <h2 style="font-size:16px;font-weight:bold;text-decoration:underline;margin:0 0 5px 0;text-transform:uppercase;">SURAT KETERANGAN LAHIR</h2>
           <div style="font-size:12px;">Nomor: ${noSurat}</div>
         </div>
 
