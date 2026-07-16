@@ -54,13 +54,21 @@ export default function AdminSuratSKL({
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
 
   // Data Anak
-  const [anakData, setAnakData] = useState({
+  const [anakData,
+      rsData, setAnakData] = useState({
     nama: '',
     jenisKelamin: 'Laki-laki',
     tempatLahir: '',
     tanggalLahir: '',
     jamLahir: '',
     anakKe: '1'
+  });
+
+  // Data RS/Kelahiran
+  const [rsData, setRsData] = useState({
+    namaRS: '',
+    noSuratRS: '',
+    tanggalSuratRS: ''
   });
 
   // Data Ayah
@@ -126,6 +134,7 @@ export default function AdminSuratSKL({
       setNoSurat(editData.nomorSurat || editData.noSurat || '');
       setTanggalSurat(editData.tanggalSurat || new Date().toISOString().split('T')[0]);
       if (editData.anakData) setAnakData(editData.anakData);
+      if (editData.rsData) setRsData(editData.rsData);
       if (editData.ayahData) setAyahData(editData.ayahData);
       if (editData.ibuData) setIbuData(editData.ibuData);
       if (editData.namaPejabat) setNamaPejabat(editData.namaPejabat);
@@ -273,7 +282,7 @@ export default function AdminSuratSKL({
           <title>Cetak SKL - ${anakData.nama}</title>
           ${styles}
           <style>
-            @page { size: A4; margin: 0 !important; }
+            @page { size: A4; margin: 0; }
             body { 
               margin: 0; 
               padding: 0; 
@@ -291,21 +300,22 @@ export default function AdminSuratSKL({
               overflow: hidden;
             }
             .printable-area {
-              position: absolute !important;
-              left: 0 !important;
-              top: 0 !important;
+              position: relative !important;
               width: 210mm !important;
-              height: 297mm !important;
-              margin: 0 !important;
+              height: auto !important;
+              min-height: 297mm !important;
+              margin: 0 auto !important;
+              padding: 0 !important;
               box-sizing: border-box !important;
               background: white !important;
               color: black !important;
               box-shadow: none !important;
               border: none !important;
-              display: block !important;
               transform: none !important;
-              visibility: visible !important;
               font-family: ${letterFont};
+              font-size: 13px;
+              line-height: 1.5;
+            };
               font-size: 13px;
               line-height: 1.5;
             }
@@ -405,8 +415,6 @@ export default function AdminSuratSKL({
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const noSuratVal = noSurat || 'SKL/146/WHi/2026';
-    
-    // Clean string helper
     const cleanStr = (str, pattern) => str.replace(pattern, '').trim();
     
     const terbilang = (angka) => {
@@ -419,8 +427,13 @@ export default function AdminSuratSKL({
       return num.toString();
     };
 
+    let pPengantarAnak = "Bahwa dari pernikahan tersebut telah lahir seorang anak:";
+    if (rsData.namaRS) {
+      pPengantarAnak = `Bahwa dari pernikahan tersebut telah lahir seorang anak di ${rsData.namaRS}${rsData.noSuratRS ? `, berdasarkan Surat Keterangan Lahir Nomor ${rsData.noSuratRS}` : ''}${rsData.tanggalSuratRS ? ` tanggal ${rsData.tanggalSuratRS}` : ''}, dengan rincian:`;
+    }
+
     let html = `
-      <div style="background:white;width:794px;min-height:1123px;padding:70px 75px 80px 75px;box-sizing:border-box;margin:0 auto;box-shadow:0 10px 25px rgba(0,0,0,0.1);position:relative;overflow:hidden;font-family:Arial, sans-serif;color:#000;">
+      <div style="background:white;width:794px;min-height:1123px;padding:30px 40px;box-sizing:border-box;position:relative;overflow:hidden;font-family:Arial, sans-serif;color:#000;">
         
         <!-- KOP SURAT -->
         <div style="border-bottom:3px solid #000;padding-bottom:5px;margin-bottom:10px;display:flex;align-items:center;position:relative;">
@@ -465,9 +478,7 @@ export default function AdminSuratSKL({
           <tr><td style="vertical-align:top;">e.</td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;">${v(ibuData.alamat)}</td></tr>
         </table>
 
-        <p style="text-align:justify;line-height:1.3;margin-bottom:8px;font-size:12px;">
-          Bahwa dari pernikahan tersebut telah lahir seorang anak:
-        </p>
+        <p style="text-align:justify;line-height:1.3;margin-bottom:8px;font-size:12px;">${pPengantarAnak}</p>
 
         <table style="width:100%; border-collapse:collapse; margin-bottom:8px; margin-left:10px; line-height:1.3; font-size:12px;">
           <tr><td style="width:4%;vertical-align:top;">a.</td><td style="width:25%;vertical-align:top;">Anak Ke-</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.anakKe)} (${terbilang(anakData.anakKe)})</td></tr>
@@ -507,7 +518,7 @@ export default function AdminSuratSKL({
         )}
 
         <!-- GLOBAL FOOTER -->
-        <div style="position: absolute; bottom: 30px; left: 75px; right: 75px;">
+        <div style="position: absolute; bottom: 30px; left: 40px; right: 40px; text-align: center;">
           ${SAAS_CONFIG.globalFooterHTML}
         </div>
       </div>
@@ -582,6 +593,7 @@ export default function AdminSuratSKL({
                     setNoSurat(data.nomorSurat || '');
                     setTanggalSurat(data.tanggalSurat || '');
                     setAnakData(data.anakData || anakData);
+                    setRsData(data.rsData || rsData);
                     setAyahData(data.ayahData || ayahData);
                     setIbuData(data.ibuData || ibuData);
                     setSaksi1Data(data.saksi1Data || saksi1Data);
