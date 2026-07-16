@@ -1124,19 +1124,21 @@ export default function AdminSuratSKL({
                 <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
 
                 <div 
-                  className="bg-white dark:bg-slate-900 shrink-0"
-                  style={{ 
-                    width: '794px', 
-                    height: '1123px', 
-                    padding: '56px 75px',
+                  style={{
+                    width: '794px',
+                    height: '1123px',
                     transform: `scale(${previewZoom})`,
-                    transformOrigin: 'top center',
+                    transformOrigin: 'top left',
                     fontFamily: letterFont,
                     fontSize: '13px',
                     lineHeight: '1.45',
-                    position: 'relative',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
                     color: 'black',
-                    boxSizing: 'border-box'
+                    boxSizing: 'border-box',
+                    padding: '56px 75px',
+                    background: 'white'
                   }}
                   dangerouslySetInnerHTML={{ __html: generateHTML() }}
                 />
