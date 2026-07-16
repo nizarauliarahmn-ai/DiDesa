@@ -37,7 +37,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       const { data, error } = await supabase
         .from('tenants')
         .select('id')
-        .eq('subdomain', subdomain)
+        .eq('domain', subdomain)
         .single();
         
       if (data && data.id) {
