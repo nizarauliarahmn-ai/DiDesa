@@ -421,7 +421,7 @@ export default function AdminSuratSKL({
     };
 
     let html = `
-      <div style="background:white;width:794px;min-height:1123px;padding:40px 50px 40px 50px;box-sizing:border-box;margin:0 auto;box-shadow:0 10px 25px rgba(0,0,0,0.1);position:relative;overflow:hidden;font-family:Arial, sans-serif;color:#000;">
+      <div style="background:white;width:794px;min-height:1123px;padding:70px 75px 80px 75px;box-sizing:border-box;margin:0 auto;box-shadow:0 10px 25px rgba(0,0,0,0.1);position:relative;overflow:hidden;font-family:Arial, sans-serif;color:#000;">
         
         <!-- KOP SURAT -->
         <div style="border-bottom:3px solid #000;padding-bottom:5px;margin-bottom:10px;display:flex;align-items:center;position:relative;">
@@ -508,7 +508,9 @@ export default function AdminSuratSKL({
         )}
 
         <!-- GLOBAL FOOTER -->
-        ${SAAS_CONFIG.globalFooterHTML}
+        <div style="position: absolute; bottom: 30px; left: 75px; right: 75px;">
+          ${SAAS_CONFIG.globalFooterHTML}
+        </div>
       </div>
     `;
 
