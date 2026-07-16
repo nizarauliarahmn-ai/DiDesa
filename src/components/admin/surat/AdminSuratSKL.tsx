@@ -218,18 +218,18 @@ export default function AdminSuratSKL({ onBack, presetResident, editData, editLe
     };
 
     let html = `
-      <div style="font-family:${letterFont}; color:#000; padding: 20px 40px; line-height: 1.5;">
+      <div style="font-family:${letterFont}; color:#000; padding: 56px 75px; line-height: 1.5; font-size: 13px; box-sizing: border-box;">
         <!-- KOP SURAT -->
         <div style="border-bottom:3px solid #000;margin-bottom:12px;">
           <div style="display:flex;align-items:flex-start;padding-bottom:6px;border-bottom:1px solid #000;margin-bottom:1px;">
             <div style="display:flex;width:100%;align-items:center;">
               <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
-                <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_of_Ministry_of_Home_Affairs_of_the_Republic_of_Indonesia.svg/800px-Logo_of_Ministry_of_Home_Affairs_of_the_Republic_of_Indonesia.svg.png'" />
+                <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
               </div>
               <div style="text-align:center;flex:1;padding-right:90px;">
-                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">PEMERINTAH KABUPATEN ${activeKabupaten.toUpperCase().replace('KABUPATEN ', '')}</div>
-                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">KECAMATAN ${activeKecamatan.toUpperCase().replace('KECAMATAN ', '')}</div>
-                <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">DESA ${activeDesa.toUpperCase().replace('DESA ', '')}</div>
+                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKabupaten.toUpperCase()}</div>
+                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKecamatan.toUpperCase()}</div>
+                <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${activeDesa.toUpperCase()}</div>
                 <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${activeAlamat}</div>
               </div>
             </div>
@@ -545,24 +545,41 @@ export default function AdminSuratSKL({ onBack, presetResident, editData, editLe
       </div>
 
       {/* Kolom Kanan: Live Preview Kertas */}
-      <div className="w-full lg:w-1/2 h-full overflow-y-auto bg-gray-100 dark:bg-black/20 p-4 sm:p-8 rounded-3xl border border-gray-200 dark:border-slate-800 custom-scrollbar">
-        <div className="sticky top-0">
-          <div className="flex items-center justify-between mb-4">
+      <div className="w-full lg:w-1/2 h-full overflow-y-auto bg-gray-100 dark:bg-black/20 p-4 sm:p-8 rounded-3xl border border-gray-200 dark:border-slate-800 custom-scrollbar relative">
+        <div className="sticky top-0 h-full flex flex-col">
+          <div className="flex items-center justify-between mb-4 flex-none">
             <h3 className="font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-sm flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500" /> Pratinjau Dokumen
             </h3>
-            <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md">Ukuran A4</span>
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
+              <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
+                A4
+              </span>
+            </div>
           </div>
           
-          {/* Kertas A4 */}
-          <div className="bg-white w-full max-w-[210mm] mx-auto min-h-[297mm] shadow-2xl rounded-sm p-[20mm] md:p-[25.4mm] text-black relative origin-top transform scale-90 sm:scale-100 transition-transform duration-300" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
-            
-            {/* Template Dokumen untuk di-Print */}
-            <div 
-              ref={printRef} 
-              className="w-full h-full bg-white"
-              dangerouslySetInnerHTML={{ __html: generateSuratHTML() }}
-            />
+          <div className="flex-1 overflow-auto bg-gray-200/50 dark:bg-gray-800/50 rounded-2xl flex justify-center items-start custom-scrollbar">
+            <div style={{ padding: '20px', minWidth: 'max-content' }}>
+              <div 
+                className="bg-white dark:bg-slate-900 shrink-0 shadow-2xl"
+                style={{ 
+                  width: '794px', 
+                  height: '1123px', 
+                  padding: '0',
+                  transform: 'scale(0.8)',
+                  transformOrigin: 'top center',
+                  position: 'relative',
+                  color: 'black',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <div 
+                  ref={printRef} 
+                  className="w-full h-full"
+                  dangerouslySetInnerHTML={{ __html: generateSuratHTML() }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
