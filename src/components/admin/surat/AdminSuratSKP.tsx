@@ -532,7 +532,7 @@ export default function AdminSuratSKP({
             <div style="text-align:center;flex:1;padding-right:90px;">
               <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKabupaten.toUpperCase()}</div>
               <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKecamatan.toUpperCase()}</div>
-              <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${activeDesa.toUpperCase()}</div>
+              <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">DESA ${activeDesa.toUpperCase()}</div>
               <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${activeAlamat}</div>
               <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${formData.kontakKantor || '0813 4686 7519, pemdeswasahhilir@gmail.com'}</div>
             </div>
