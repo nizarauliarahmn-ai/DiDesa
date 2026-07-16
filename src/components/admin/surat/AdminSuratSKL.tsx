@@ -159,8 +159,7 @@ export default function AdminSuratSKL({ onBack, presetResident, editData, editLe
       // Dispatch update global untuk merefresh data penduduk di halaman lain
       window.dispatchEvent(new Event('residents_updated'));
 
-      if (isPrint && printRef.current) {
-        const printContents = printRef.current.innerHTML;
+      if (isPrint) {
         const printWindow = window.open('', '_blank');
         if (printWindow) {
           printWindow.document.write(`
@@ -168,50 +167,15 @@ export default function AdminSuratSKL({ onBack, presetResident, editData, editLe
               <head>
                 <title>Cetak Surat Keterangan Lahir</title>
                 <style>
-                  body { font-family: 'Times New Roman', Times, serif; line-height: 1.5; padding: 40px; margin: 0; color: #000; }
-                  .text-center { text-align: center; }
-                  .font-bold { font-weight: bold; }
-                  .uppercase { text-transform: uppercase; }
-                  .underline { text-decoration: underline; }
-                  .text-xl { font-size: 20px; }
-                  .text-lg { font-size: 18px; }
-                  .text-sm { font-size: 14px; }
-                  .mb-1 { margin-bottom: 4px; }
-                  .mb-2 { margin-bottom: 8px; }
-                  .mb-4 { margin-bottom: 16px; }
-                  .mb-6 { margin-bottom: 24px; }
-                  .mb-8 { margin-bottom: 32px; }
-                  .mt-4 { margin-top: 16px; }
-                  .mt-8 { margin-top: 32px; }
-                  .mt-12 { margin-top: 48px; }
-                  .mt-16 { margin-top: 64px; }
-                  .grid { display: grid; }
-                  .grid-cols-2 { grid-template-columns: 1fr 1fr; }
-                  .border-b-2 { border-bottom: 2px solid #000; }
-                  .pb-4 { padding-bottom: 16px; }
-                  .w-full { width: 100%; }
-                  .text-justify { text-align: justify; }
-                  .pl-4 { padding-left: 16px; }
-                  .pl-8 { padding-left: 32px; }
-                  
-                  .kop-surat { display: flex; align-items: center; border-bottom: 3px solid black; padding-bottom: 10px; margin-bottom: 20px; }
-                  .kop-logo { width: 70px; height: 90px; object-fit: contain; margin-right: 20px; }
-                  .kop-text { flex: 1; text-align: center; }
-                  .kop-text h1 { margin: 0; font-size: 24px; text-transform: uppercase; font-weight: bold; }
-                  .kop-text h2 { margin: 0; font-size: 20px; text-transform: uppercase; font-weight: bold; }
-                  .kop-text p { margin: 0; font-size: 14px; }
-                  
-                  .data-grid { display: grid; grid-template-columns: 180px 15px 1fr; margin-bottom: 4px; }
-                  
+                  body { margin: 0; padding: 0; color: #000; }
                   @media print {
                     @page { margin: 1cm; size: A4; }
-                    body { padding: 0; }
-                    -webkit-print-color-adjust: exact;
+                    body { -webkit-print-color-adjust: exact; }
                   }
                 </style>
               </head>
               <body>
-                ${printContents}
+                ${generateSuratHTML()}
                 <script>
                   window.onload = function() { window.print(); window.close(); }
                 </script>
@@ -226,10 +190,137 @@ export default function AdminSuratSKL({ onBack, presetResident, editData, editLe
     }, 1000);
   };
 
-  const formattedDate = () => {
-    const d = new Date(tanggalSurat);
-    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  const generateSuratHTML = () => {
+    const today = new Date();
+    const letterFont = localStorage.getItem('kop_font') || "'Times New Roman', Times, serif";
+    const villageLogo = localStorage.getItem('kop_logo') || '/logo_kabupaten.png';
+    const activeKabupaten = localStorage.getItem('kop_kabupaten') || villageKabupaten || 'Kabupaten';
+    const activeKecamatan = localStorage.getItem('kop_kecamatan') || villageKecamatan || 'Kecamatan';
+    const activeDesa = localStorage.getItem('kop_desa') || villageName || 'Desa';
+    const activeAlamat = localStorage.getItem('kop_alamat') || villageAlamat || 'Alamat';
+    
+    const v = (val: any, fallback = '_______________________') => val ? val : fallback;
+    const cleanStr = (s: string, regex: RegExp) => (s || "").replace(regex, "");
+    
+    const fDate = (d: string) => {
+      if (!d) return '';
+      try {
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return d;
+        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      } catch (e) { return d; }
+    };
+
+    const formattedDate = () => {
+      const d = new Date(tanggalSurat);
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    };
+
+    let html = `
+      <div style="font-family:${letterFont}; color:#000; padding: 20px 40px; line-height: 1.5;">
+        <!-- KOP SURAT -->
+        <div style="border-bottom:3px solid #000;margin-bottom:12px;">
+          <div style="display:flex;align-items:flex-start;padding-bottom:6px;border-bottom:1px solid #000;margin-bottom:1px;">
+            <div style="display:flex;width:100%;align-items:center;">
+              <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
+                <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_of_Ministry_of_Home_Affairs_of_the_Republic_of_Indonesia.svg/800px-Logo_of_Ministry_of_Home_Affairs_of_the_Republic_of_Indonesia.svg.png'" />
+              </div>
+              <div style="text-align:center;flex:1;padding-right:90px;">
+                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">PEMERINTAH KABUPATEN ${activeKabupaten.toUpperCase().replace('KABUPATEN ', '')}</div>
+                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">KECAMATAN ${activeKecamatan.toUpperCase().replace('KECAMATAN ', '')}</div>
+                <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">DESA ${activeDesa.toUpperCase().replace('DESA ', '')}</div>
+                <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${activeAlamat}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- JUDUL SURAT -->
+        <div style="text-align:center;margin-bottom:15px;margin-top:20px;">
+          <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN KELAHIRAN</h3>
+          <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(noSurat, '... / ... / ... / ' + today.getFullYear())}</p>
+        </div>
+
+        <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;text-indent: 40px;">
+          Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)}, Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)}, Kabupaten ${cleanStr(activeKabupaten, /^kabupaten\s+/i)}, menerangkan dengan sebenarnya bahwa:
+        </p>
+
+        <!-- DATA IBU -->
+        <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
+          <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(ibuData.nama)}</strong></td></tr>
+          <tr><td>NIK</td><td>:</td><td>${v(ibuData.nik)}</td></tr>
+          <tr><td>Umur</td><td>:</td><td>${ibuData.umur ? `${ibuData.umur} Tahun` : '____ Tahun'}</td></tr>
+          <tr><td>Pekerjaan</td><td>:</td><td>${v(ibuData.pekerjaan)}</td></tr>
+          <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(ibuData.alamat, '_____________________________________________')}</td></tr>
+        </table>
+
+        <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
+          Istri dari:
+        </p>
+
+        <!-- DATA AYAH -->
+        <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
+          <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(ayahData.nama)}</strong></td></tr>
+          <tr><td>NIK</td><td>:</td><td>${v(ayahData.nik)}</td></tr>
+          <tr><td>Umur</td><td>:</td><td>${ayahData.umur ? `${ayahData.umur} Tahun` : '____ Tahun'}</td></tr>
+          <tr><td>Pekerjaan</td><td>:</td><td>${v(ayahData.pekerjaan)}</td></tr>
+          <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(ayahData.alamat, '_____________________________________________')}</td></tr>
+        </table>
+
+        <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
+          Telah lahir anak <strong style="text-transform:lowercase;">${anakData.jenisKelamin || 'laki-laki/perempuan'}</strong> pada:
+        </p>
+
+        <!-- DATA ANAK -->
+        <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
+          <tr><td style="width:30%;">Tempat Lahir</td><td style="width:3%;">:</td><td>${v(anakData.tempatLahir)}</td></tr>
+          <tr><td>Hari/Tanggal Lahir</td><td>:</td><td>${anakData.tanggalLahir ? fDate(anakData.tanggalLahir) : '_______________________'}</td></tr>
+          <tr><td>Pukul/Jam</td><td>:</td><td>${anakData.jamLahir || '____ WIB'}</td></tr>
+          <tr><td>Anak Ke-</td><td>:</td><td>${anakData.anakKe || '____'}</td></tr>
+          <tr><td style="padding-top:8px;">Diberi Nama</td><td style="padding-top:8px;">:</td><td style="padding-top:8px;"><strong style="text-transform:uppercase;font-size:16px;">${v(anakData.nama)}</strong></td></tr>
+        </table>
+      `;
+
+      if (pelaporData.nama) {
+        html += `
+          <p style="text-align:justify;line-height:1.15;margin-top:15px;margin-bottom:10px;font-size:14px;">
+            Surat Keterangan ini dibuat berdasarkan laporan dari:
+          </p>
+          <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
+            <tr><td style="width:30%;">Nama Pelapor</td><td style="width:3%;">:</td><td><strong>${v(pelaporData.nama)}</strong></td></tr>
+            <tr><td>Hubungan</td><td>:</td><td>${v(pelaporData.hubungan)}</td></tr>
+          </table>
+        `;
+      }
+
+      if (rsData.noSuratRs && rsData.namaRs) {
+        html += `
+          <p style="text-align:justify;line-height:1.15;margin-top:10px;margin-bottom:10px;font-size:14px;">
+            Sesuai dengan Surat Keterangan Kelahiran dari ${rsData.namaRs} Nomor: ${rsData.noSuratRs}.
+          </p>
+        `;
+      }
+
+      html += `
+        <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:20px;font-size:14px;">
+          Demikian surat keterangan ini dibuat dengan sesungguhnya untuk dapat dipergunakan sebagaimana mestinya, khususnya untuk persyaratan pengurusan Akta Kelahiran dan dokumen kependudukan lainnya.
+        </p>
+
+        <!-- TANDA TANGAN -->
+        <div style="display:flex;justify-content:flex-end;margin-top:30px;font-size:14px;">
+          <div style="text-align:center;width:250px;">
+            <div style="margin-bottom:2px;">${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)}, ${formattedDate()}</div>
+            ${penandatangan === 'kades' ? 
+              `<div style="font-weight:bold;margin-bottom:70px;">KEPALA DESA ${activeDesa.toUpperCase().replace('DESA ', '')}</div>` :
+              `<div style="margin-bottom:2px;">a.n. Kepala Desa ${activeDesa.replace('Desa ', '')}</div><div style="font-weight:bold;margin-bottom:70px;">SEKRETARIS DESA</div>`
+            }
+            <div style="font-weight:bold;text-decoration:underline;">${penandatangan === 'kades' ? villageKades.toUpperCase() : '...................................'}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    return html;
   };
 
   return (
@@ -467,141 +558,11 @@ export default function AdminSuratSKL({ onBack, presetResident, editData, editLe
           <div className="bg-white w-full max-w-[210mm] mx-auto min-h-[297mm] shadow-2xl rounded-sm p-[20mm] md:p-[25.4mm] text-black relative origin-top transform scale-90 sm:scale-100 transition-transform duration-300" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
             
             {/* Template Dokumen untuk di-Print */}
-            <div ref={printRef} className="w-full h-full text-justify text-[11pt] md:text-[12pt] leading-normal md:leading-relaxed">
-              
-              {/* Kop Surat */}
-              <div className="kop-surat flex items-center border-b-[3px] border-black pb-3 md:pb-4 mb-4 md:mb-6">
-                <img src="/logo_kabupaten.png" alt="Logo" className="w-[60px] md:w-[70px] h-auto object-contain mr-4 md:mr-6" onError={(e) => { e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo_of_Ministry_of_Home_Affairs_of_the_Republic_of_Indonesia.svg/800px-Logo_of_Ministry_of_Home_Affairs_of_the_Republic_of_Indonesia.svg.png' }} />
-                <div className="flex-1 text-center">
-                  <h1 className="m-0 text-[14pt] md:text-[16pt] uppercase font-bold tracking-wide">Pemerintah Kabupaten {villageKabupaten.replace(/kabupaten/i, '').trim()}</h1>
-                  <h2 className="m-0 text-[14pt] md:text-[16pt] uppercase font-bold tracking-wide">Kecamatan {villageKecamatan.replace(/kecamatan/i, '').trim()}</h2>
-                  <h2 className="m-0 text-[16pt] md:text-[18pt] uppercase font-bold tracking-widest mt-1">Desa {villageName.replace(/desa/i, '').trim()}</h2>
-                  <p className="m-0 text-[9pt] md:text-[10pt] mt-1 italic">{villageAlamat}</p>
-                </div>
-              </div>
-
-              {/* Judul Surat */}
-              <div className="text-center mb-6 md:mb-8 mt-4 md:mt-6">
-                <h3 className="m-0 text-[12pt] md:text-[14pt] font-bold uppercase underline decoration-2 underline-offset-4 tracking-wide">SURAT KETERANGAN KELAHIRAN</h3>
-                <p className="m-0 text-[11pt] mt-1 font-medium">Nomor: {noSurat}</p>
-              </div>
-
-              {/* Isi Surat */}
-              <p className="indent-[10mm] md:indent-[12.7mm] mb-4">
-                Yang bertanda tangan di bawah ini Kepala Desa {villageName}, Kecamatan {villageKecamatan}, Kabupaten {villageKabupaten}, menerangkan dengan sebenarnya bahwa:
-              </p>
-
-              {/* Data Istri/Ibu */}
-              <div className="mb-4 pl-4 md:pl-8">
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Nama Lengkap</span><span>:</span><span className="font-bold">{ibuData.nama || '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>NIK</span><span>:</span><span>{ibuData.nik || '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Umur</span><span>:</span><span>{ibuData.umur ? `${ibuData.umur} Tahun` : '____ Tahun'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Pekerjaan</span><span>:</span><span>{ibuData.pekerjaan || '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1 items-start">
-                  <span>Alamat</span><span>:</span><span>{ibuData.alamat || '_____________________________________________'}</span>
-                </div>
-              </div>
-
-              {/* Data Suami/Ayah */}
-              <p className="mb-4">Istri dari: </p>
-              <div className="mb-4 pl-4 md:pl-8">
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Nama Lengkap</span><span>:</span><span className="font-bold">{ayahData.nama || '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>NIK</span><span>:</span><span>{ayahData.nik || '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Umur</span><span>:</span><span>{ayahData.umur ? `${ayahData.umur} Tahun` : '____ Tahun'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Pekerjaan</span><span>:</span><span>{ayahData.pekerjaan || '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1 items-start">
-                  <span>Alamat</span><span>:</span><span>{ayahData.alamat || '_____________________________________________'}</span>
-                </div>
-              </div>
-
-              {/* Kalimat Kelahiran */}
-              <p className="mb-4">
-                Telah lahir anak <span className="font-bold lowercase">{anakData.jenisKelamin || 'laki-laki/perempuan'}</span> pada:
-              </p>
-
-              {/* Data Anak */}
-              <div className="mb-4 pl-4 md:pl-8">
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Tempat Lahir</span><span>:</span><span>{anakData.tempatLahir || '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Hari/Tanggal Lahir</span><span>:</span><span>{anakData.tanggalLahir ? formattedDate() : '_______________________'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Pukul/Jam</span><span>:</span><span>{anakData.jamLahir || '____ WIB/WITA/WIT'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                  <span>Anak Ke-</span><span>:</span><span>{anakData.anakKe || '____'}</span>
-                </div>
-                <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1 mt-2">
-                  <span>Diberi Nama</span><span>:</span><span className="font-bold text-lg">{anakData.nama || '_______________________'}</span>
-                </div>
-              </div>
-
-              {/* Data Pelapor (Optional Section in Preview) */}
-              {pelaporData.nama && (
-                <>
-                  <p className="mb-4 mt-2">
-                    Surat Keterangan ini dibuat berdasarkan laporan dari:
-                  </p>
-                  <div className="mb-4 pl-4 md:pl-8">
-                    <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                      <span>Nama Pelapor</span><span>:</span><span>{pelaporData.nama}</span>
-                    </div>
-                    <div className="data-grid grid grid-cols-[130px_10px_1fr] md:grid-cols-[160px_15px_1fr] mb-1">
-                      <span>Hubungan</span><span>:</span><span>{pelaporData.hubungan}</span>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Tambahan Info RS jika ada */}
-              {rsData.noSuratRs && rsData.namaRs && (
-                <p className="mb-4 mt-2 text-justify">
-                  Sesuai dengan Surat Keterangan Kelahiran dari {rsData.namaRs} Nomor: {rsData.noSuratRs}.
-                </p>
-              )}
-
-              {/* Penutup */}
-              <p className="indent-[10mm] md:indent-[12.7mm] mb-8 md:mb-12 text-justify">
-                Demikian surat keterangan ini dibuat dengan sesungguhnya untuk dapat dipergunakan sebagaimana mestinya, khususnya untuk persyaratan pengurusan Akta Kelahiran dan dokumen kependudukan lainnya.
-              </p>
-
-              {/* Tanda Tangan */}
-              <div className="flex justify-end w-full">
-                <div className="w-[60%] md:w-[50%] text-center">
-                  <p className="mb-0">{villageName}, {formattedDate()}</p>
-                  
-                  {penandatangan === 'kades' ? (
-                    <p className="font-bold mb-16 md:mb-24 uppercase">KEPALA DESA {villageName}</p>
-                  ) : (
-                    <>
-                      <p className="mb-0">a.n. Kepala Desa {villageName}</p>
-                      <p className="font-bold mb-16 md:mb-24 uppercase">SEKRETARIS DESA</p>
-                    </>
-                  )}
-
-                  <p className="font-bold underline uppercase">{penandatangan === 'kades' ? villageKades : '...................................'}</p>
-                </div>
-              </div>
-
-            </div>
+            <div 
+              ref={printRef} 
+              className="w-full h-full bg-white"
+              dangerouslySetInnerHTML={{ __html: generateSuratHTML() }}
+            />
           </div>
         </div>
       </div>
