@@ -690,6 +690,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                         if (onOpenSKM) onOpenSKM();
                         return;
                       }
+                      if (t.klasifikasi === 'SKH') {
+                        if (onOpenSKH) onOpenSKH();
+                        return;
+                      }
                       if (t.klasifikasi === 'SKP') {
                         if (onOpenSKP) onOpenSKP();
                         return;
