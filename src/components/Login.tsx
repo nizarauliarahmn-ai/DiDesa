@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server } from 'lucide-react';
 import { showToast } from '../utils/toast';
+import { supabase } from '../utils/supabase';
+import { resolveCurrentTenant } from '../utils/tenantResolver';
 
 interface LoginProps {
   onLoginSuccess: (user: { email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string }) => void;
@@ -23,7 +25,22 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
 
+  const [currentTenant, setCurrentTenant] = useState<any>(null);
+
   useEffect(() => {
+    const initializeTenant = async () => {
+      const tenantId = await resolveCurrentTenant();
+      if (tenantId) {
+        const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
+        if (data) {
+          setCurrentTenant(data);
+          setDesaName(data.nama_desa || 'Desa Wasah Hilir');
+          // Update global names based on tenant
+        }
+      }
+    };
+    initializeTenant();
+    
     const handleSettingsUpdate = () => {
       setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
       setKabupatenName(localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
@@ -56,14 +73,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     setIsLoading(true);
 
     try {
-      // Fetch tenants list from the server to check for custom credentials
-      const res = await fetch('/api/tenants');
-      const tenants: any[] = res.ok ? await res.json() : [];
-
-      // Check if credentials match any custom tenant
-      const matchingTenantAdmin = tenants.find(t => t.admin_email?.toLowerCase() === email.toLowerCase() && t.admin_password === password);
-      const matchingTenantKades = tenants.find(t => t.kades_email?.toLowerCase() === email.toLowerCase() && t.kades_password === password);
-
       // Check if it's the default super-user for SaaS admin
       if (email === 'admin@sistemdidesa.id' && password === 'saas123') {
         const loggedUser = {
@@ -78,6 +87,17 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         setIsLoading(false);
         return;
       }
+
+      // Check credentials in Supabase tenants table
+      const { data: tenantMatches, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .or(`admin_email.eq."${email}",kades_email.eq."${email}"`);
+
+      if (error) throw error;
+      const matchingTenantAdmin = tenantMatches?.find(t => t.admin_email?.toLowerCase() === email.toLowerCase() && t.admin_password === password);
+      const matchingTenantKades = tenantMatches?.find(t => t.kades_email?.toLowerCase() === email.toLowerCase() && t.kades_password === password);
+
 
       if (matchingTenantKades) {
         // Log in as Super Admin for this tenant
@@ -171,6 +191,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       setIsLoading(false);
       let loggedUser;
 
+      // Fallback variables if currentTenant is not loaded yet
+      const fallbackKadesEmail = currentTenant?.kades_email || 'kades@wasahhilir.desa.id';
+      const fallbackKadesPass = currentTenant?.kades_password || 'kades123';
+      const fallbackAdminEmail = currentTenant?.admin_email || 'admin@wasahhilir.desa.id';
+      const fallbackAdminPass = currentTenant?.admin_password || 'admin123';
+      const fallbackDesaName = currentTenant?.nama_desa || 'Wasah Hilir';
+
       if (selectedRole === 'saas_admin') {
         setEmail('admin@sistemdidesa.id');
         setPassword('saas123');
@@ -181,21 +208,23 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           avatar: 'https://i.pravatar.cc/150?img=60'
         };
       } else if (selectedRole === 'kades') {
-        setEmail('kades@wasahhilir.desa.id');
-        setPassword('kades123');
+        setEmail(fallbackKadesEmail);
+        setPassword(fallbackKadesPass);
         loggedUser = {
-          email: 'kades@wasahhilir.desa.id',
+          email: fallbackKadesEmail,
           role: 'kades' as const,
-          name: (localStorage.getItem('village_super_admin') || 'Fazakkir Rahmad') + ' (Super Admin)',
+          tenantId: currentTenant?.id || '11111111-1111-1111-1111-111111111111',
+          name: `Super Admin ${fallbackDesaName}`,
           avatar: 'https://i.pravatar.cc/150?img=47'
         };
       } else if (selectedRole === 'admin') {
-        setEmail('admin@wasahhilir.desa.id');
-        setPassword('admin123');
+        setEmail(fallbackAdminEmail);
+        setPassword(fallbackAdminPass);
         loggedUser = {
-          email: 'admin@wasahhilir.desa.id',
+          email: fallbackAdminEmail,
           role: 'admin' as const,
-          name: 'Fazakkir Rahmad (Admin)',
+          tenantId: currentTenant?.id || '11111111-1111-1111-1111-111111111111',
+          name: `Admin ${fallbackDesaName}`,
           avatar: 'https://i.pravatar.cc/150?img=12'
         };
       } else {
@@ -204,11 +233,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         loggedUser = {
           email: 'warga@wasahhilir.desa.id',
           role: 'public' as const,
-          name: 'Budi Santoso (Warga RT 02)',
+          tenantId: currentTenant?.id || '11111111-1111-1111-1111-111111111111',
+          name: `Warga ${fallbackDesaName}`,
           avatar: 'https://i.pravatar.cc/150?img=11'
         };
       }
 
+      if (currentTenant?.nama_desa) {
+        localStorage.setItem('kop_desa', currentTenant.nama_desa);
+      }
+      
       localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
       onLoginSuccess(loggedUser);
       showToast(`Login Demo Sukses sebagai ${selectedRole === 'kades' || selectedRole === 'saas_admin' ? 'Super Admin' : selectedRole === 'admin' ? 'Admin' : 'Penduduk/Warga'}!`, 'success');
@@ -332,7 +366,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={role === 'admin' ? 'admin@wasahhilir.desa.id' : 'warga@wasahhilir.desa.id'}
+                placeholder={role === 'admin' ? (currentTenant?.admin_email || 'admin@wasahhilir.desa.id') : 'warga@wasahhilir.desa.id'}
                 className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
               />
             </div>
@@ -408,7 +442,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   Admin
                 </span>
               </div>
-              <p className="text-[10px] text-emerald-800/70 truncate font-semibold">Username: admin@wasahhilir.desa.id | Pass: admin123</p>
+              <p className="text-[10px] text-emerald-800/70 truncate font-semibold">Username: {currentTenant?.admin_email || 'admin@wasahhilir.desa.id'} | Pass: {currentTenant?.admin_password || 'admin123'}</p>
             </div>
           </button>
 
@@ -428,7 +462,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   Super Admin
                 </span>
               </div>
-              <p className="text-[10px] text-amber-800/70 truncate font-semibold">Username: kades@wasahhilir.desa.id | Pass: kades123</p>
+              <p className="text-[10px] text-amber-800/70 truncate font-semibold">Username: {currentTenant?.kades_email || 'kades@wasahhilir.desa.id'} | Pass: {currentTenant?.kades_password || 'kades123'}</p>
             </div>
           </button>
 
