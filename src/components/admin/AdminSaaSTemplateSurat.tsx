@@ -11,6 +11,9 @@ export default function AdminSaaSTemplateSurat() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
+  // Delete confirmation modal state
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  
   // SaaS requests state
   const [requests, setRequests] = useState<any[]>([]);
   
@@ -179,10 +182,15 @@ export default function AdminSaaSTemplateSurat() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Yakin ingin menghapus template surat ini?')) {
-      const updated = templates.filter(t => t.id !== id);
+    setDeleteConfirmId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmId) {
+      const updated = templates.filter(t => t.id !== deleteConfirmId);
       saveTemplates(updated);
       showToast('Template berhasil dihapus', 'success');
+      setDeleteConfirmId(null);
     }
   };
 
@@ -437,6 +445,39 @@ export default function AdminSaaSTemplateSurat() {
                 className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 flex items-center justify-center gap-2 shadow-sm dark:shadow-none transition-all"
               >
                 <CheckCircle2 className="w-5 h-5" /> {editingId ? 'Simpan' : 'Tambahkan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Hapus */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-6 text-center space-y-4">
+              <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto text-rose-600">
+                <Trash2 size={32} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Hapus Template?</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  Apakah Anda yakin ingin menghapus template ini? Tindakan ini tidak dapat dibatalkan.
+                </p>
+              </div>
+            </div>
+            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 flex gap-3">
+              <button 
+                onClick={() => setDeleteConfirmId(null)}
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-2.5 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700 shadow-sm dark:shadow-none transition-all"
+              >
+                Ya, Hapus
               </button>
             </div>
           </div>
