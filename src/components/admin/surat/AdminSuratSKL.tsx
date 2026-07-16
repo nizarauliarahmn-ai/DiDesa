@@ -54,8 +54,7 @@ export default function AdminSuratSKL({
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
 
   // Data Anak
-  const [anakData,
-      rsData, setAnakData] = useState({
+  const [anakData, setAnakData] = useState({
     nama: '',
     jenisKelamin: 'Laki-laki',
     tempatLahir: '',
@@ -360,6 +359,7 @@ export default function AdminSuratSKL({
     const payloadData = {
       nomorSurat: noSurat,
       tanggalSurat,
+      rsData,
       anakData,
       ayahData,
       ibuData,
