@@ -37,6 +37,9 @@ import {
   insertResident, 
   updateResident, 
   deleteResident, 
+  getArchivedResidents,
+  restoreResident,
+  hardDeleteResident,
   getActiveDbEngine,
   getNotifications,
   addNotification,
@@ -483,6 +486,37 @@ app.delete("/api/residents/:nik", async (req, res) => {
   try {
     const success = await deleteResident(nik);
     res.json({ success, message: `Resident with NIK ${nik} processed` });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/residents/archived", async (req, res) => {
+  try {
+    const archived = await getArchivedResidents();
+    res.json(archived);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/residents/:nik/restore", async (req, res) => {
+  const { nik } = req.params;
+  try {
+    const success = await restoreResident(nik);
+    addNotification("Penduduk Direstore", `Data penduduk dengan NIK ${nik} telah dikembalikan dari tong sampah.`, "Residents");
+    res.json({ success, message: `Resident with NIK ${nik} restored` });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/residents/:nik/hard-delete", async (req, res) => {
+  const { nik } = req.params;
+  try {
+    const success = await hardDeleteResident(nik);
+    addNotification("Penduduk Dihapus Permanen", `Data penduduk dengan NIK ${nik} telah dihapus permanen.`, "Residents");
+    res.json({ success, message: `Resident with NIK ${nik} hard deleted` });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

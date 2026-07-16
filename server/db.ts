@@ -34,6 +34,7 @@ export const residentsTable = pgTable("residents", {
   fatherName: text("father_name"),
   motherName: text("mother_name"),
   activeAids: jsonb("active_aids").$type<string[]>(),
+  isDeleted: integer("is_deleted").default(0),
 });
 
 export const globalUpdatesTable = pgTable("global_updates", {
@@ -181,6 +182,8 @@ if (databaseUrl) {
       ALTER TABLE tenants ADD COLUMN IF NOT EXISTS alamat TEXT;
       ALTER TABLE tenants ADD COLUMN IF NOT EXISTS kontak TEXT;
       ALTER TABLE tenants ADD COLUMN IF NOT EXISTS logo_url TEXT;
+
+      ALTER TABLE residents ADD COLUMN IF NOT EXISTS is_deleted INTEGER DEFAULT 0;
     `).then(() => {
       console.log("Database table verification completed (auto-migration).");
     }).catch((err: any) => {
@@ -294,6 +297,7 @@ function normalizeResident(res: any) {
     fatherName: res.fatherName || res.father_name || "",
     motherName: res.motherName || res.mother_name || "",
     activeAids: Array.isArray(activeAids) ? activeAids : [],
+    is_deleted: res.isDeleted || res.is_deleted || 0
   };
 }
 
@@ -309,9 +313,9 @@ export async function getResidents(): Promise<any[]> {
           await insertResident(resident);
         }
         const seededRes = await pgPool.query("SELECT * FROM residents ORDER BY name ASC");
-        return seededRes.rows.map(normalizeResident);
+        return seededRes.rows.map(normalizeResident).filter((r: any) => r.is_deleted !== 1);
       }
-      return res.rows.map(normalizeResident);
+      return res.rows.map(normalizeResident).filter((r: any) => r.is_deleted !== 1);
     } catch (err: any) {
       console.warn("Drizzle PostgreSQL getResidents failed:", err.message || err);
       console.warn("Falling back and disabling Drizzle PostgreSQL for this session.");
@@ -363,7 +367,7 @@ export async function getResidents(): Promise<any[]> {
         }
       }
 
-      return allData.map(normalizeResident);
+      return allData.map(normalizeResident).filter((r: any) => r.is_deleted !== 1);
     } catch (err: any) {
       console.warn("Supabase query failed. The 'residents' table might not be initialized yet in Supabase.");
       console.warn("Tip: Run the SQL migration script from PANDUAN_DATABASE.md inside Supabase SQL Editor!");
@@ -374,7 +378,7 @@ export async function getResidents(): Promise<any[]> {
   }
 
   // Fallback to local memory list
-  return memoryResidents;
+  return memoryResidents.filter((r: any) => r.is_deleted !== 1);
 }
 
 export async function insertResident(resident: any): Promise<any> {
@@ -581,8 +585,8 @@ export async function deleteResident(nik: string, silent: boolean = false): Prom
 
   if (drizzleDb) {
     try {
-      await pgPool.query("DELETE FROM residents WHERE nik = $1", [nik]);
-      if (!silent) addNotification("Penduduk Dihapus", `Data penduduk ${residentName} (NIK: ${nik}) telah dihapus dari sistem.`, "Residents");
+      await pgPool.query("UPDATE residents SET is_deleted = 1 WHERE nik = $1", [nik]);
+      if (!silent) addNotification("Penduduk Dipindahkan ke Arsip", `Data penduduk ${residentName} (NIK: ${nik}) telah dipindahkan ke arsip/tong sampah.`, "Residents");
       return true;
     } catch (err: any) {
       console.error("Drizzle delete error:", err);
@@ -592,9 +596,9 @@ export async function deleteResident(nik: string, silent: boolean = false): Prom
 
   if (supabase) {
     try {
-      const { error } = await supabase.from("residents").delete().eq("nik", nik);
+      const { error } = await supabase.from("residents").update({ is_deleted: 1 }).eq("nik", nik);
       if (error) throw error;
-      if (!silent) addNotification("Penduduk Dihapus", `Data penduduk ${residentName} (NIK: ${nik}) telah dihapus dari sistem.`, "Residents");
+      if (!silent) addNotification("Penduduk Dipindahkan ke Arsip", `Data penduduk ${residentName} (NIK: ${nik}) telah dipindahkan ke arsip/tong sampah.`, "Residents");
       return true;
     } catch (err: any) {
       console.error("Supabase delete error:", err);
@@ -602,8 +606,62 @@ export async function deleteResident(nik: string, silent: boolean = false): Prom
     }
   }
 
+  const foundMem = memoryResidents.find(r => r.nik === nik);
+  if (foundMem) {
+    (foundMem as any).is_deleted = 1;
+  }
+  if (!silent) addNotification("Penduduk Dipindahkan ke Arsip", `Data penduduk ${residentName} (NIK: ${nik}) telah dipindahkan ke arsip/tong sampah.`, "Residents");
+  return true;
+}
+
+export async function getArchivedResidents(): Promise<any[]> {
+  if (drizzleDb) {
+    try {
+      const res = await pgPool.query("SELECT * FROM residents WHERE is_deleted = 1 ORDER BY name ASC");
+      return res.rows.map(normalizeResident);
+    } catch (err: any) {}
+  }
+  if (supabase) {
+    try {
+      const { data } = await supabase.from("residents").select("*").eq("is_deleted", 1).order("name", { ascending: true });
+      if (data) return data.map(normalizeResident);
+    } catch (err: any) {}
+  }
+  return memoryResidents.filter(r => (r as any).is_deleted === 1);
+}
+
+export async function restoreResident(nik: string): Promise<boolean> {
+  if (drizzleDb) {
+    try {
+      await pgPool.query("UPDATE residents SET is_deleted = 0 WHERE nik = $1", [nik]);
+      return true;
+    } catch (err: any) {}
+  }
+  if (supabase) {
+    try {
+      await supabase.from("residents").update({ is_deleted: 0 }).eq("nik", nik);
+      return true;
+    } catch (err: any) {}
+  }
+  const foundMem = memoryResidents.find(r => r.nik === nik);
+  if (foundMem) (foundMem as any).is_deleted = 0;
+  return true;
+}
+
+export async function hardDeleteResident(nik: string): Promise<boolean> {
+  if (drizzleDb) {
+    try {
+      await pgPool.query("DELETE FROM residents WHERE nik = $1", [nik]);
+      return true;
+    } catch (err: any) {}
+  }
+  if (supabase) {
+    try {
+      await supabase.from("residents").delete().eq("nik", nik);
+      return true;
+    } catch (err: any) {}
+  }
   memoryResidents = memoryResidents.filter(r => r.nik !== nik);
-  if (!silent) addNotification("Penduduk Dihapus", `Data penduduk ${residentName} (NIK: ${nik}) telah dihapus dari sistem.`, "Residents");
   return true;
 }
 

@@ -6,6 +6,7 @@ import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, Chevro
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
+import AdminPendudukArchive from './penduduk/AdminPendudukArchive';
 import { showToast } from '../../utils/toast';
 
 const FILTERS = ["Semua", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
@@ -50,6 +51,7 @@ export default function AdminPenduduk({
   const [editingPenduduk, setEditingPenduduk] = useState<any>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showAiAnalysis, setShowAiAnalysis] = useState(false);
   const itemsPerPage = 10;
@@ -179,6 +181,28 @@ export default function AdminPenduduk({
 
   const villageName = localStorage.getItem('village_name') || 'Desa Sukamaju';
 
+  const handleRequestDelete = async (nik: string, name: string) => {
+    if (!confirm(`Anda yakin ingin mengajukan penghapusan data penduduk ${name}? Data tidak akan dihapus langsung, melainkan menunggu persetujuan Super Admin.`)) return;
+    
+    try {
+      const res = await fetch(`/api/residents/${nik}/request-approval`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actionType: 'delete' })
+      });
+      if (res.ok) {
+        showToast(`Pengajuan hapus data ${name} berhasil dikirim ke Super Admin!`, 'success');
+        fetchResidents();
+        // Dispatch global event for notification bubble update
+        window.dispatchEvent(new Event('notifications_updated'));
+      } else {
+        throw new Error('Gagal mengajukan penghapusan');
+      }
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
+  };
+
   const handleExportData = (format: 'json' | 'csv') => {
     if (residents.length === 0) {
       showToast("Tidak ada data penduduk yang dapat diexport.", "error");
@@ -282,6 +306,10 @@ export default function AdminPenduduk({
     );
   }
 
+  if (showArchive) {
+    return <AdminPendudukArchive onBack={() => { setShowArchive(false); fetchResidents(); }} />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto pb-24 space-y-4">
       {/* Page Header */}
@@ -296,6 +324,10 @@ export default function AdminPenduduk({
           <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">Kelola data informasi kependudukan {villageName}.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
+          <button onClick={() => setShowArchive(true)} className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg border border-rose-200 dark:border-rose-800/50 text-rose-600 dark:text-rose-400 font-bold text-xs sm:text-sm hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors bg-white dark:bg-slate-900 shadow-sm dark:shadow-none whitespace-nowrap">
+            <Trash2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Tong Sampah</span>
+          </button>
           <button onClick={() => setShowImportModal(true)} className="flex-1 md:flex-none justify-center flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg border border-emerald-700 text-emerald-700 font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-colors shadow-sm dark:shadow-none bg-white dark:bg-slate-900 whitespace-nowrap">
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Impor Data</span>
@@ -701,8 +733,11 @@ const TableRow = React.memo(({ nik, noKk, kepalaKeluarga, initials, name, age, g
           <button data-action="view" className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Detail">
             <Eye className="w-4 h-4" />
           </button>
-          <button data-action="edit" className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Edit">
+          <button onClick={(e) => { e.stopPropagation(); setEditingPenduduk({ nik, name, noKk, gender, rtRw, rt, rw, status, age, birthPlace, birthDate, bloodType, religion, job, address, desa, domicileStatus, familyRelation, education, photo, fatherName, motherName, activeAids }); }} disabled={status === 'pending_approval'} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Edit">
             <Edit2 className="w-4 h-4" />
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); handleRequestDelete(nik, name); }} disabled={status === 'pending_approval'} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Hapus">
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </td>
