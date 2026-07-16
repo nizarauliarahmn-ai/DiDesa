@@ -28,31 +28,33 @@ export default function AdminSaaSTemplateSurat() {
       const initial = mod.INITIAL_CLASSIFICATIONS;
       const stored = localStorage.getItem('saas_global_letter_catalog');
       
+      let merged: any[] = [];
       if (stored) {
         const parsedStored = JSON.parse(stored);
         const missingTemplates = initial.filter(initItem => 
           !parsedStored.some((storedItem: any) => storedItem.klasifikasi === initItem.klasifikasi)
         );
-        
-        if (missingTemplates.length > 0) {
-          const merged = [...parsedStored, ...missingTemplates];
-          if (!merged.find(m => m.klasifikasi === 'SPPD')) {
-            merged.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
-          }
-          setTemplates(merged);
-          localStorage.setItem('saas_global_letter_catalog', JSON.stringify(merged));
-        } else {
-          const toSet = [...parsedStored];
-          if (!toSet.find(m => m.klasifikasi === 'SPPD')) {
-            toSet.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
-            localStorage.setItem('saas_global_letter_catalog', JSON.stringify(toSet));
-          }
-          setTemplates(toSet);
-        }
+        merged = [...parsedStored, ...missingTemplates];
       } else {
-        setTemplates(initial);
-        localStorage.setItem('saas_global_letter_catalog', JSON.stringify(initial));
+        merged = [...initial];
       }
+
+      if (!merged.find(m => m.klasifikasi === 'SPPD')) {
+        merged.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
+      }
+
+      // Cleanup Duplicates automatically (by klasifikasi)
+      const uniqueTemplatesMap = new Map();
+      merged.forEach(item => {
+        // Keep the first one found
+        if (!uniqueTemplatesMap.has(item.klasifikasi)) {
+          uniqueTemplatesMap.set(item.klasifikasi, item);
+        }
+      });
+      const deduplicatedTemplates = Array.from(uniqueTemplatesMap.values());
+
+      setTemplates(deduplicatedTemplates);
+      localStorage.setItem('saas_global_letter_catalog', JSON.stringify(deduplicatedTemplates));
     });
 
     const storedReqs = localStorage.getItem('saas_letter_requests');
