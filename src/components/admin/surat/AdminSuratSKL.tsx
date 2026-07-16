@@ -1123,16 +1123,11 @@ export default function AdminSuratSKL({
                     height: '1123px',
                     transform: `scale(${previewZoom})`,
                     transformOrigin: 'top left',
-                    fontFamily: letterFont,
-                    fontSize: '13px',
-                    lineHeight: '1.45',
                     position: 'absolute',
                     top: 0,
                     left: 0,
                     color: 'black',
-                    boxSizing: 'border-box',
-                    padding: '56px 75px',
-                    background: 'white'
+                    boxSizing: 'border-box'
                   }}
                   dangerouslySetInnerHTML={{ __html: generateHTML() }}
                 />
