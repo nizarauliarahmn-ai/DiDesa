@@ -6,6 +6,7 @@ import AdminSuratNikah from './surat/AdminSuratNikah';
 import AdminSuratSKTM from './surat/AdminSuratSKTM';
 import AdminSuratSKBM from './surat/AdminSuratSKBM';
 import AdminSuratSKH from './surat/AdminSuratSKH';
+import AdminSuratSKL from './surat/AdminSuratSKL';
 import AdminSuratSKM from './surat/AdminSuratSKM';
 import AdminSuratSKU from './surat/AdminSuratSKU';
 import AdminSuratSKPH from './surat/AdminSuratSKPH';
@@ -138,6 +139,7 @@ export default function AdminSurat({
             onOpenSKD={() => changeTab('skd')}
             onOpenSKP={() => changeTab('skp')}
             onOpenSKH={() => changeTab('skh')}
+            onOpenSKL={() => changeTab('skl')}
             onOpenSDU={() => changeTab('sdu')}
             onOpenSPT={() => changeTab('spt')}
               onOpenSPPD={() => changeTab('sppd')}
@@ -167,6 +169,14 @@ export default function AdminSurat({
         )}
         {activeTab === 'skh' && (
           <AdminSuratSKH 
+            editData={editData}
+            editLetterId={editLetterId}
+            onBack={() => changeTab('buat')} 
+          />
+        )}
+        {activeTab === 'skl' && (
+          <AdminSuratSKL 
+            presetResident={presetResident}
             editData={editData}
             editLetterId={editLetterId}
             onBack={() => changeTab('buat')} 
