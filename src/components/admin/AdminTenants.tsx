@@ -1,5 +1,6 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../../utils/supabase';
 import { 
   Database, Plus, Search, Server, Activity, Users, MoreVertical, 
   Globe, ShieldCheck, X, Megaphone, Building2, MessageSquare, 
@@ -121,18 +122,21 @@ export default function AdminTenants() {
     }
   }, []);
 
-  const fetchTenants = () => {
+  const fetchTenants = async () => {
     setLoading(true);
-    fetch('/api/tenants')
-      .then(res => res.json())
-      .then(data => {
-        setTenants(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching tenants:", err);
-        setLoading(false);
-      });
+    try {
+      const { data, error } = await supabase
+        .from('tenants')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      setTenants(data || []);
+    } catch (err) {
+      console.error("Error fetching tenants from Supabase:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -164,12 +168,12 @@ export default function AdminTenants() {
         kades_password: formData.kades_password || 'kades123'
       };
 
-      const res = await fetch('/api/tenants', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
+      const { data, error } = await supabase
+        .from('tenants')
+        .insert([payload])
+        .select();
+
+      if (!error && data) {
         setIsModalOpen(false);
         setFormData({ 
           nama_desa: '', 
@@ -190,8 +194,7 @@ export default function AdminTenants() {
           status: 'Berhasil'
         });
       } else {
-        const errorData = await res.json();
-        showToast(`Gagal: ${errorData.error}`, 'error');
+        showToast(`Gagal: ${error?.message || 'Error Supabase'}`, 'error');
       }
     } catch (err) {
       console.error("Error adding tenant", err);
@@ -221,12 +224,21 @@ export default function AdminTenants() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/tenants/${editFormData.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editFormData)
-      });
-      if (res.ok) {
+      const { error } = await supabase
+        .from('tenants')
+        .update({
+          nama_desa: editFormData.nama_desa,
+          kode_desa: editFormData.kode_desa,
+          domain: editFormData.domain,
+          status: editFormData.status,
+          admin_email: editFormData.admin_email,
+          admin_password: editFormData.admin_password,
+          kades_email: editFormData.kades_email,
+          kades_password: editFormData.kades_password
+        })
+        .eq('id', editFormData.id);
+
+      if (!error) {
         setIsEditModalOpen(false);
         showToast('Kredensial & data klien berhasil diperbarui!', 'success');
         fetchTenants();
@@ -238,8 +250,7 @@ export default function AdminTenants() {
           status: 'Berhasil'
         });
       } else {
-        const errorData = await res.json();
-        showToast(`Gagal memperbarui: ${errorData.error}`, 'error');
+        showToast(`Gagal memperbarui: ${error.message}`, 'error');
       }
     } catch (err) {
       console.error("Error updating tenant", err);
@@ -254,10 +265,12 @@ export default function AdminTenants() {
     if (!isConfirmed) return;
 
     try {
-      const res = await fetch(`/api/tenants/${tenant.id}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
+      const { error } = await supabase
+        .from('tenants')
+        .delete()
+        .eq('id', tenant.id);
+        
+      if (!error) {
         showToast(`Klien "${tenant.nama_desa}" berhasil dihapus dari sistem!`, 'success');
         fetchTenants();
         
@@ -268,7 +281,7 @@ export default function AdminTenants() {
           status: 'Berhasil'
         });
       } else {
-        showToast('Gagal menghapus klien dari database', 'error');
+        showToast(`Gagal menghapus: ${error.message}`, 'error');
       }
     } catch (err) {
       console.error("Error deleting tenant", err);
