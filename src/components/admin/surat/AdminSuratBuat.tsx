@@ -1454,14 +1454,14 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       }
 
                       // Dynamic standard surat keterangan texts
-                      let leadingParagraph = `Yang bertanda tangan di bawah ini Kepala ${desaName}, ${kecamatanName}, ${kabupatenName}, menerangkan dengan sebenarnya bahwa:`;
+                      let leadingParagraph = `Menerangkan dengan sebenarnya bahwa:`;
                       let middleParagraph = `Adalah benar nama tersebut di atas merupakan penduduk ${desaName} yang berdomisili sah pada alamat tersebut. Surat keterangan ini diterbitkan secara resmi untuk memenuhi keperluan:`;
                       let trailingParagraph = `Demikian surat keterangan ini kami buat dengan sebenarnya agar dapat dipergunakan dan dipertanggungjawabkan sebagaimana mestinya.`;
 
                       let specificContent = null;
 
                       if (selectedTemplate === 'SKM') {
-                        leadingParagraph = `Yang bertanda tangan di bawah ini Kepala ${desaName}, ${kecamatanName}, ${kabupatenName}, menerangkan dengan sebenarnya bahwa warga kami:`;
+                        leadingParagraph = `Menerangkan dengan sebenarnya bahwa warga kami:`;
                         specificContent = (
                           <div className="my-6 pl-4 border-l-4 border-red-600/50 space-y-2 bg-red-50/30 p-3 rounded-lg">
                             <p className="font-extrabold text-red-950 uppercase tracking-wider text-xs">STATUS: TELAH MENINGGAL DUNIA / WAFAT</p>
@@ -1510,7 +1510,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       } else if (selectedTemplate === 'SKBM') {
                         middleParagraph = `Adalah benar nama tersebut di atas berstatus belum kawin / belum pernah menikah berdasarkan registrasi kependudukan kami. Surat keterangan ini diterbitkan untuk keperluan persyaratan nikah/administrasi pekerjaan:`;
                       } else if (selectedTemplate === 'SKL') {
-                        leadingParagraph = `Yang bertanda tangan di bawah ini Kepala ${desaName}, menerangkan bahwa dari pasangan warga kami telah lahir seorang anak dengan identitas kependudukan terlampir di bawah ini. Adapun orang tua anak tersebut adalah:`;
+                        leadingParagraph = `Menerangkan dengan sebenarnya bahwa dari pasangan warga kami telah lahir seorang anak dengan identitas kependudukan terlampir di bawah ini. Adapun orang tua anak tersebut adalah:`;
                         middleParagraph = `Surat keterangan kelahiran ini dibuat sebagai bukti pengantar utama pengurusan akta kelahiran resmi anak pada instansi pencatatan sipil:`;
                       } else if (selectedTemplate === 'SKH') {
                         middleParagraph = `Adalah benar yang bersangkutan telah melaporkan kehilangan dokumen penting non-pidana. Surat pengantar kehilangan ini diberikan untuk pengurusan dokumen baru ke instansi berwenang:`;
@@ -1533,14 +1533,20 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                             </h6>
                             <p className="text-[14px] font-mono">Nomor: {nomorSurat}</p>
                           </div>
+                          <p className="text-justify leading-[1.15] mb-3">Yang bertanda tangan di bawah ini:</p>
+                          <div className="pl-8 mb-4 space-y-1 text-[14px]">
+                            <div className="grid grid-cols-[160px_10px_1fr]"><span>a. Nama</span><span>:</span><span className="font-bold uppercase">{namaKades}</span></div>
+                            <div className="grid grid-cols-[160px_10px_1fr]"><span>b. Jabatan</span><span>:</span><span className="font-bold uppercase">{roleKades} {desaName.toUpperCase()}</span></div>
+                          </div>
+                          
                           <p className="text-justify leading-[1.15]">{leadingParagraph}</p>
                           
-                          <div className="pl-8 my-6 space-y-3">
-                            <div className="grid grid-cols-[160px_10px_1fr]"><span>Nama</span><span>:</span><span className="font-bold">{name}</span></div>
-                            <div className="grid grid-cols-[160px_10px_1fr]"><span>NIK</span><span>:</span><span className="font-mono font-semibold">{nik}</span></div>
-                            <div className="grid grid-cols-[160px_10px_1fr]"><span>Tempat, Tgl Lahir</span><span>:</span><span>{birthPlace}, {birthDate}</span></div>
-                            <div className="grid grid-cols-[160px_10px_1fr]"><span>Jenis Kelamin</span><span>:</span><span>{gender}</span></div>
-                            <div className="grid grid-cols-[160px_10px_1fr]"><span>Alamat / Domisili</span><span>:</span><span>{address} {rtRw}</span></div>
+                          <div className="pl-8 my-6 space-y-2 text-[14px]">
+                            <div className="grid grid-cols-[160px_10px_1fr]"><span>a. Nama Lengkap</span><span>:</span><span className="font-bold uppercase">{name}</span></div>
+                            <div className="grid grid-cols-[160px_10px_1fr]"><span>b. NIK</span><span>:</span><span className="font-mono font-semibold">{nik}</span></div>
+                            <div className="grid grid-cols-[160px_10px_1fr]"><span>c. Tempat, Tgl Lahir</span><span>:</span><span>{birthPlace}, {birthDate}</span></div>
+                            <div className="grid grid-cols-[160px_10px_1fr]"><span>d. Jenis Kelamin</span><span>:</span><span>{gender}</span></div>
+                            <div className="grid grid-cols-[160px_10px_1fr]"><span>e. Alamat / Domisili</span><span>:</span><span>{address} {rtRw}</span></div>
                           </div>
 
                           {specificContent}
