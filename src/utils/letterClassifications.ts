@@ -167,12 +167,22 @@ export function getLetterClassifications(): LetterClassification[] {
       // Clean up templates that were deleted by SaaS
       const mappedCount = mapped.length;
       mapped = mapped.filter(item => saasTemplates.some(s => s.id === item.id));
-      if (mapped.length !== mappedCount) updated = true;
+      
+      // Auto-deduplicate village classifications by klasifikasi to fix legacy duplicates
+      const uniqueMap = new Map();
+      mapped.forEach(item => {
+        if (!uniqueMap.has(item.klasifikasi)) {
+          uniqueMap.set(item.klasifikasi, item);
+        }
+      });
+      const deduplicated = Array.from(uniqueMap.values());
+      
+      if (deduplicated.length !== mappedCount) updated = true;
 
       if (updated) {
-        localStorage.setItem('letter_classifications', JSON.stringify(mapped));
+        localStorage.setItem('letter_classifications', JSON.stringify(deduplicated));
       }
-      return mapped;
+      return deduplicated;
     } catch (e) {
       // fallback
     }
