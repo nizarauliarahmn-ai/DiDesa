@@ -55,6 +55,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null); // holds classification code or ID
   const [searchQuery, setSearchQuery] = useState('');
@@ -558,10 +559,17 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     return <FileText className="w-6 h-6 text-emerald-700" />;
   };
 
-  const filteredClassifications = classifications.filter(c => 
-    c.jenis.toLowerCase().includes(searchLetterQuery.toLowerCase()) ||
-    c.klasifikasi.toLowerCase().includes(searchLetterQuery.toLowerCase())
-  );
+  const filteredClassifications = classifications.filter(c => {
+    const matchesSearch = c.jenis.toLowerCase().includes(searchLetterQuery.toLowerCase()) ||
+                          c.klasifikasi.toLowerCase().includes(searchLetterQuery.toLowerCase());
+    
+    if (!matchesSearch) return false;
+
+    if (statusFilter === 'active') return c.isVisible !== false;
+    if (statusFilter === 'inactive') return c.isVisible === false;
+    
+    return true;
+  });
 
   const filteredResidents = searchQuery.trim().length > 0
     ? residents.filter(r => 
@@ -617,6 +625,15 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                   />
                   <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
+                <select 
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  className="px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300"
+                >
+                  <option value="all">Semua Status</option>
+                  <option value="active">Aktif</option>
+                  <option value="inactive">Tidak Aktif</option>
+                </select>
                 <button 
                   onClick={onBack}
                   className="text-gray-500 dark:text-slate-400 hover:text-emerald-700 font-bold text-sm transition-colors border border-gray-200 dark:border-slate-700 px-4 py-2 rounded-xl bg-white dark:bg-slate-900"
