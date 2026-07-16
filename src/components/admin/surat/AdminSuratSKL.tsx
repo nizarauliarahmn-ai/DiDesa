@@ -67,7 +67,8 @@ export default function AdminSuratSKL({
   const [ayahData, setAyahData] = useState({
     nik: '',
     nama: '',
-    umur: '',
+    tempatLahir: '',
+    tanggalLahir: '',
     pekerjaan: '',
     alamat: ''
   });
@@ -76,25 +77,30 @@ export default function AdminSuratSKL({
   const [ibuData, setIbuData] = useState({
     nik: '',
     nama: '',
-    umur: '',
+    tempatLahir: '',
+    tanggalLahir: '',
     pekerjaan: '',
     alamat: ''
   });
 
-  // Data Pelapor
-  const [pelaporData, setPelaporData] = useState({
+  // Saksi 1
+  const [saksi1Data, setSaksi1Data] = useState({
     nik: '',
     nama: '',
-    umur: '',
+    tempatLahir: '',
+    tanggalLahir: '',
     pekerjaan: '',
-    alamat: '',
-    hubungan: 'Ayah Kandung'
+    alamat: ''
   });
 
-  // Data RS/Klinik
-  const [rsData, setRsData] = useState({
-    noSuratRs: '',
-    namaRs: ''
+  // Saksi 2
+  const [saksi2Data, setSaksi2Data] = useState({
+    nik: '',
+    nama: '',
+    tempatLahir: '',
+    tanggalLahir: '',
+    pekerjaan: '',
+    alamat: ''
   });
 
   // Pejabat
@@ -397,128 +403,116 @@ export default function AdminSuratSKL({
 
   const v = (val: any, fallback = '_______________________') => val ? val : fallback;
   
-  const generateHTML = () => {
+    const generateHTML = () => {
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
-
-    const cleanStr = (s: string, regex: RegExp) => (s || "").replace(regex, "");
-    const fmtDate = (d: string) => {
-      if (!d) return '';
-      try {
-        const date = new Date(d);
-        if (isNaN(date.getTime())) return d;
-        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-      } catch (e) { return d; }
+    const noSurat = rxData.noSurat || 'SKL/146/WHi/2026';
+    
+    // Clean string helper (capitalizes each word, removes prefixes like 'desa', 'kecamatan' if any, but since we rely on it directly, we just capitalize)
+    const capitalize = (str) => {
+      if (!str) return '';
+      return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
+
+    const terbilang = (angka) => {
+      const num = parseInt(angka);
+      if (isNaN(num)) return '';
+      const huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+      if (num < 12) return huruf[num];
+      if (num < 20) return huruf[num - 10] + " Belas";
+      if (num < 100) return huruf[Math.floor(num / 10)] + " Puluh " + huruf[num % 10];
+      return num.toString();
+    };
+
     let html = `
-      <!-- KOP SURAT -->
-      <div style="border-bottom:3px solid #000;margin-bottom:12px;">
-        <div style="display:flex;align-items:flex-start;padding-bottom:6px;border-bottom:1px solid #000;margin-bottom:1px;font-family:${letterFont};">
-          <div style="display:flex;width:100%;align-items:center;">
-            <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
-              <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
-            </div>
-            <div style="text-align:center;flex:1;padding-right:90px;">
-              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKabupaten.toUpperCase()}</div>
-              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKecamatan.toUpperCase()}</div>
-              <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${namaDesa.toUpperCase()}</div>
-              <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${alamatKantor}</div>
-              <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${kontakKantor}</div>
-            </div>
+      <div style="background:white;width:210mm;min-height:297mm;padding:15mm 20mm 20mm 20mm;box-sizing:border-box;margin:0 auto;box-shadow:0 10px 25px rgba(0,0,0,0.1);position:relative;overflow:hidden;font-family:Arial, sans-serif;color:#000;">
+        
+        <!-- KOP SURAT -->
+        <div style="border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:20px;display:flex;align-items:center;position:relative;">
+          <div style="width:70px;height:90px;position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;">
+            <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
+          </div>
+          <div style="text-align:center;flex:1;padding-right:70px;padding-left:70px;">
+            <div style="font-weight:bold;font-size:16px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:0 0 2px 0;">PEMERINTAH KABUPATEN ${namaKabupaten.toUpperCase()}</div>
+            <div style="font-weight:bold;font-size:16px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:0 0 2px 0;">KECAMATAN ${namaKecamatan.toUpperCase()}</div>
+            <div style="font-weight:900;font-size:22px;text-transform:uppercase;letter-spacing:1px;line-height:1.2;margin:2px 0 5px 0;">KANTOR KEPALA DESA ${namaDesa.toUpperCase()}</div>
+            <div style="font-size:12px;line-height:1.2;margin:2px 0 0 0;">Alamat: ${alamatKantor}</div>
           </div>
         </div>
-      </div>
+        
+        <div style="border-top:1px solid #000;margin-top:-18px;margin-bottom:20px;"></div>
 
-      <!-- JUDUL SURAT -->
-      <div style="text-align:center;margin-bottom:15px;">
-        <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN KELAHIRAN</h3>
-        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(noSurat, '... / ... / ... / ' + today.getFullYear())}</p>
-      </div>
+        <!-- JUDUL SURAT -->
+        <div style="text-align:center;margin-bottom:25px;">
+          <h2 style="font-size:16px;font-weight:bold;text-decoration:underline;margin:0 0 5px 0;text-transform:uppercase;">SURAT KETERANGAN KENAL LAHIR</h2>
+          <div style="font-size:12px;">Nomor: ${noSurat}</div>
+        </div>
 
-      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;text-indent: 40px;">
-        Yang bertanda tangan di bawah ini Kepala ${cleanStr(namaDesa, /^(desa|kelurahan)\\s+/i)}, Kecamatan ${cleanStr(namaKecamatan, /^kecamatan\\s+/i)}, ${namaKabupaten}, menerangkan dengan sebenarnya bahwa:
-      </p>
-
-      <!-- DATA IBU -->
-      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(ibuData.nama)}</strong></td></tr>
-        <tr><td>NIK</td><td>:</td><td>${v(ibuData.nik)}</td></tr>
-        <tr><td>Umur</td><td>:</td><td>${ibuData.umur ? `${ibuData.umur} Tahun` : '____ Tahun'}</td></tr>
-        <tr><td>Pekerjaan</td><td>:</td><td>${v(ibuData.pekerjaan)}</td></tr>
-        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(ibuData.alamat, '_____________________________________________')}</td></tr>
-      </table>
-
-      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
-        Istri dari:
-      </p>
-
-      <!-- DATA AYAH -->
-      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(ayahData.nama)}</strong></td></tr>
-        <tr><td>NIK</td><td>:</td><td>${v(ayahData.nik)}</td></tr>
-        <tr><td>Umur</td><td>:</td><td>${ayahData.umur ? `${ayahData.umur} Tahun` : '____ Tahun'}</td></tr>
-        <tr><td>Pekerjaan</td><td>:</td><td>${v(ayahData.pekerjaan)}</td></tr>
-        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(ayahData.alamat, '_____________________________________________')}</td></tr>
-      </table>
-
-      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
-        Telah lahir anak <strong style="text-transform:lowercase;">${anakData.jenisKelamin || 'laki-laki/perempuan'}</strong> pada:
-      </p>
-
-      <!-- DATA ANAK -->
-      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-        <tr><td style="width:30%;">Tempat Lahir</td><td style="width:3%;">:</td><td>${v(anakData.tempatLahir)}</td></tr>
-        <tr><td>Hari/Tanggal Lahir</td><td>:</td><td>${anakData.tanggalLahir ? fmtDate(anakData.tanggalLahir) : '_______________________'}</td></tr>
-        <tr><td>Pukul/Jam</td><td>:</td><td>${anakData.jamLahir || '____ WIB'}</td></tr>
-        <tr><td>Anak Ke-</td><td>:</td><td>${anakData.anakKe || '____'}</td></tr>
-        <tr><td style="padding-top:8px;">Diberi Nama</td><td style="padding-top:8px;">:</td><td style="padding-top:8px;"><strong style="text-transform:uppercase;font-size:16px;">${v(anakData.nama)}</strong></td></tr>
-      </table>
-    `;
-
-    if (pelaporData.nama) {
-      html += `
-        <p style="text-align:justify;line-height:1.15;margin-top:15px;margin-bottom:10px;font-size:14px;">
-          Surat Keterangan ini dibuat berdasarkan laporan dari:
+        <p style="text-align:justify;line-height:1.5;margin-bottom:15px;font-size:12px;text-indent:40px;">
+          Yang bertanda tangan di bawah ini, Kepala Desa ${cleanStr(namaDesa, /^(desa|kelurahan)\s+/i)}, Kecamatan ${cleanStr(namaKecamatan, /^kecamatan\s+/i)}, Kabupaten ${cleanStr(namaKabupaten, /^kabupaten\s+/i)}, menerangkan dengan sebenarnya bahwa pasangan suami istri sah:
         </p>
-        <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-          <tr><td style="width:30%;">Nama Pelapor</td><td style="width:3%;">:</td><td><strong>${v(pelaporData.nama)}</strong></td></tr>
-          <tr><td>Hubungan</td><td>:</td><td>${v(pelaporData.hubungan)}</td></tr>
+
+        <p style="font-weight:bold; margin-bottom: 8px; font-size:12px;">I. DATA SUAMI (AYAH)</p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; margin-left:20px; line-height:1.5; font-size:12px;">
+          <tr><td style="width:4%;vertical-align:top;">a.</td><td style="width:25%;vertical-align:top;">Nama Lengkap</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(ayahData.nama)}</strong></td></tr>
+          <tr><td style="vertical-align:top;">b.</td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ayahData.nik)}</td></tr>
+          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ayahData.tempatLahir)}, ${v(ayahData.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;">d.</td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ayahData.pekerjaan)}</td></tr>
+          <tr><td style="vertical-align:top;">e.</td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;">${v(ayahData.alamat)}</td></tr>
         </table>
-      `;
-    }
 
-    if (rsData.noSuratRs && rsData.namaRs) {
-      html += `
-        <p style="text-align:justify;line-height:1.15;margin-top:10px;margin-bottom:10px;font-size:14px;">
-          Sesuai dengan Surat Keterangan Kelahiran dari ${rsData.namaRs} Nomor: ${rsData.noSuratRs}.
+        <p style="font-weight:bold; margin-bottom: 8px; font-size:12px;">II. DATA ISTRI (IBU)</p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; margin-left:20px; line-height:1.5; font-size:12px;">
+          <tr><td style="width:4%;vertical-align:top;">a.</td><td style="width:25%;vertical-align:top;">Nama Lengkap</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(ibuData.nama)}</strong></td></tr>
+          <tr><td style="vertical-align:top;">b.</td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ibuData.nik)}</td></tr>
+          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ibuData.tempatLahir)}, ${v(ibuData.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;">d.</td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ibuData.pekerjaan)}</td></tr>
+          <tr><td style="vertical-align:top;">e.</td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;">${v(ibuData.alamat)}</td></tr>
+        </table>
+
+        <p style="text-align:justify;line-height:1.5;margin-bottom:15px;font-size:12px;">
+          Bahwa dari pernikahan tersebut telah lahir seorang anak:
         </p>
-      `;
-    }
 
-    html += `
-      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:20px;font-size:14px;">
-        Demikian surat keterangan ini dibuat dengan sesungguhnya untuk dapat dipergunakan sebagaimana mestinya, khususnya untuk persyaratan pengurusan Akta Kelahiran dan dokumen kependudukan lainnya.
-      </p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; margin-left:20px; line-height:1.5; font-size:12px;">
+          <tr><td style="width:4%;vertical-align:top;">a.</td><td style="width:25%;vertical-align:top;">Anak Ke-</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.anakKe)} (${terbilang(anakData.anakKe)})</td></tr>
+          <tr><td style="vertical-align:top;">b.</td><td style="vertical-align:top;">Jenis Kelamin</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.jenisKelamin)}</td></tr>
+          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tanggal / Jam Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.tanggalLahir)} / ${v(anakData.jamLahir)} WITA</td></tr>
+          <tr><td style="vertical-align:top;">d.</td><td style="vertical-align:top;">Tempat Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.tempatLahir)}</td></tr>
+          <tr><td style="vertical-align:top;">e.</td><td style="vertical-align:top;">Diberi Nama</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(anakData.nama)}</strong></td></tr>
+        </table>
 
-      <!-- TANDA TANGAN -->
-      ${getPrintSignatureHTML(
-        namaDesa,
-        tglFormatted,
-        namaPejabat,
-        jabatanPejabat,
-        (() => {
-          try {
-            const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-            const found = officersList.find((o: any) => o.name === namaPejabat);
-            return found?.nip || '-';
-          } catch(e) {
-            return '-';
-          }
-        })(),
-        includeCamat
-      )}
-      <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
+        <p style="font-weight:bold; margin-bottom: 8px; font-size:12px;">III. SAKSI-SAKSI</p>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px; margin-left:20px; line-height:1.5; font-size:12px;">
+          <tr><td style="width:4%;vertical-align:top;">1.</td><td style="width:25%;vertical-align:top;">Nama Lengkap</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(saksi1Data.nama)}</strong></td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi1Data.nik)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi1Data.tempatLahir)}, ${v(saksi1Data.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi1Data.pekerjaan)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;padding-bottom:12px;">${v(saksi1Data.alamat)}</td></tr>
+
+          <tr><td style="vertical-align:top;">2.</td><td style="vertical-align:top;">Nama Lengkap</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(saksi2Data.nama)}</strong></td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi2Data.nik)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi2Data.tempatLahir)}, ${v(saksi2Data.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi2Data.pekerjaan)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;">${v(saksi2Data.alamat)}</td></tr>
+        </table>
+
+        <p style="text-align:justify;line-height:1.5;margin-bottom:40px;font-size:12px;text-indent:40px;">
+          Demikian Surat Keterangan Kenal Lahir ini diberikan kepada yang bersangkutan untuk dapat dipergunakan sebagaimana mestinya.
+        </p>
+
+        <!-- TANDA TANGAN -->
+        ${getPrintSignatureHTML(
+          namaDesa,
+          tglFormatted,
+          namaPejabat,
+          jabatanPejabat,
+          "",
+          includeCamat
+        )}
+
+        <!-- GLOBAL FOOTER -->
         ${SAAS_CONFIG.globalFooterHTML}
       </div>
     `;
@@ -846,14 +840,12 @@ export default function AdminSuratSKL({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Umur (Tahun)</label>
-                  <input 
-                    type="number"
-                    placeholder="Misal: 30"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ayahData.umur}
-                    onChange={(e) => setAyahData({...ayahData, umur: e.target.value})}
-                  />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tempatLahir} onChange={(e) => setAyahData({...ayahData, tempatLahir: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                  <input type="text" placeholder="Misal: 01 Maret 1967" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tanggalLahir} onChange={(e) => setAyahData({...ayahData, tanggalLahir: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
@@ -907,14 +899,12 @@ export default function AdminSuratSKL({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Umur (Tahun)</label>
-                  <input 
-                    type="number"
-                    placeholder="Misal: 28"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ibuData.umur}
-                    onChange={(e) => setIbuData({...ibuData, umur: e.target.value})}
-                  />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tempatLahir} onChange={(e) => setIbuData({...ibuData, tempatLahir: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                  <input type="text" placeholder="Misal: 02 April 1971" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tanggalLahir} onChange={(e) => setIbuData({...ibuData, tanggalLahir: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
