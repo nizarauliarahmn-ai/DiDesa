@@ -436,19 +436,22 @@ export default function AdminSuratSKL({
       <div style="background:white;width:794px;min-height:1123px;padding:70px 75px 80px 75px;box-sizing:border-box;position:relative;overflow:hidden;font-family:Arial, sans-serif;color:#000;">
         
         <!-- KOP SURAT -->
-        <div style="border-bottom:3px solid #000;padding-bottom:5px;margin-bottom:10px;display:flex;align-items:center;position:relative;">
-          <div style="width:70px;height:85px;position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;">
-            <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
-          </div>
-          <div style="text-align:center;flex:1;padding-right:70px;padding-left:70px;">
-            <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.1;margin:0 0 1px 0;">PEMERINTAH KABUPATEN ${cleanStr(namaKabupaten, /^(kabupaten|kota)\s+/i).toUpperCase()}</div>
-            <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.1;margin:0 0 1px 0;">KECAMATAN ${cleanStr(namaKecamatan, /^kecamatan\s+/i).toUpperCase()}</div>
-            <div style="font-weight:900;font-size:18px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.1;margin:2px 0 2px 0;">KANTOR KEPALA DESA ${cleanStr(namaDesa, /^(desa|kelurahan)\s+/i).toUpperCase()}</div>
-            <div style="font-size:11px;line-height:1.1;margin:1px 0 0 0;">Alamat: ${alamatKantor}</div>
+        <div style="border-bottom:3px solid #000;margin-bottom:12px;">
+          <div style="display:flex;align-items:flex-start;padding-bottom:6px;margin-bottom:1px;font-family:Arial, sans-serif;">
+            <div style="display:flex;width:100%;align-items:center;">
+              <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
+                <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
+              </div>
+              <div style="text-align:center;flex:1;padding-right:90px;">
+                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKabupaten.toUpperCase()}</div>
+                <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKecamatan.toUpperCase()}</div>
+                <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${namaDesa.toUpperCase()}</div>
+                <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${alamatKantor}</div>
+                <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${kontakKantor}</div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div style="border-top:1px solid #000;margin-top:-8px;margin-bottom:10px;"></div>
 
         <!-- JUDUL SURAT -->
         <div style="text-align:center;margin-bottom:10px;">
