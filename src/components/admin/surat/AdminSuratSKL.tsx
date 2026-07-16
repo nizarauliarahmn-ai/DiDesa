@@ -297,7 +297,6 @@ export default function AdminSuratSKL({
               width: 210mm !important;
               height: 297mm !important;
               margin: 0 !important;
-              padding: 56px 75px !important; 
               box-sizing: border-box !important;
               background: white !important;
               color: black !important;
