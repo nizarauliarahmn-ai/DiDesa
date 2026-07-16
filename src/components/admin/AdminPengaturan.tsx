@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { 
   Building2, MapPin, Save, Image as ImageIcon, Check, Bot, Layout, Upload, Map,
   Palette, Smartphone, Compass, Settings
 } from 'lucide-react';
 
 export default function AdminPengaturan() {
+  const [tenantId, setTenantId] = useState<string | null>(null);
+
+  useEffect(() => {
+    resolveCurrentTenant().then(setTenantId);
+  }, []);
   const [villageName, setVillageName] = useState(() => localStorage.getItem('village_name') || 'WASAH HILIR');
   const [kecamatan, setKecamatan] = useState(() => localStorage.getItem('village_kecamatan') || 'Kecamatan Simpur');
   const [kabupaten, setKabupaten] = useState(() => localStorage.getItem('village_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
@@ -71,66 +77,77 @@ export default function AdminPengaturan() {
     return `${toDMS(lat, true)} ${toDMS(lng, false)}`;
   };
 
-  const handleSaveGlobalConfig = () => {
+  const handleSaveGlobalConfig = async () => {
+    if (!tenantId) {
+      alert("Gagal menyimpan: Tenant ID tidak ditemukan. Mohon refresh halaman.");
+      return;
+    }
+
     setIsSaving(true);
-    setTimeout(() => {
-      localStorage.setItem('village_name', villageName);
-      localStorage.setItem('village_kecamatan', kecamatan);
-      localStorage.setItem('village_kabupaten', kabupaten);
-      localStorage.setItem('village_alamat', alamat);
+    
+    // Allow UI to show spinner
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Save to kop keys for 100% synchronization
-      localStorage.setItem('kop_desa', villageName);
-      localStorage.setItem('kop_kecamatan', kecamatan);
-      localStorage.setItem('kop_kabupaten', kabupaten);
-      localStorage.setItem('kop_alamat', alamat);
-      localStorage.setItem('kop_kontak', kontak);
-      localStorage.setItem('kop_logo_url', logoUrl);
+    localStorage.setItem('village_name', villageName);
+    localStorage.setItem('village_kecamatan', kecamatan);
+    localStorage.setItem('village_kabupaten', kabupaten);
+    localStorage.setItem('village_alamat', alamat);
 
-      localStorage.setItem('village_welcome_banner_url', welcomeBannerUrl);
-      localStorage.setItem('village_welcome_banner_y_offset', welcomeBannerYOffset);
-      localStorage.setItem('village_welcome_banner_zoom', welcomeBannerZoom);
-      localStorage.setItem('village_aspirasi_banner_url', aspirasiBannerUrl);
-      localStorage.setItem('village_aspirasi_banner_y_offset', aspirasiBannerYOffset);
-      localStorage.setItem('village_aspirasi_banner_zoom', aspirasiBannerZoom);
-      
-      localStorage.setItem('village_lat', villageLat.toString());
-      localStorage.setItem('village_lng', villageLng.toString());
-      localStorage.setItem('app_theme', appTheme);
+    // Save to kop keys for 100% synchronization
+    localStorage.setItem('kop_desa', villageName);
+    localStorage.setItem('kop_kecamatan', kecamatan);
+    localStorage.setItem('kop_kabupaten', kabupaten);
+    localStorage.setItem('kop_alamat', alamat);
+    localStorage.setItem('kop_kontak', kontak);
+    localStorage.setItem('kop_logo_url', logoUrl);
 
-      try {
-        const settingsToSave = [
-          { key: 'village_name', value: villageName },
-          { key: 'village_kecamatan', value: kecamatan },
-          { key: 'village_kabupaten', value: kabupaten },
-          { key: 'village_alamat', value: alamat },
-          { key: 'kop_desa', value: villageName },
-          { key: 'kop_kecamatan', value: kecamatan },
-          { key: 'kop_kabupaten', value: kabupaten },
-          { key: 'kop_alamat', value: alamat },
-          { key: 'kop_kontak', value: kontak },
-          { key: 'kop_logo_url', value: logoUrl },
-          { key: 'village_welcome_banner_url', value: welcomeBannerUrl },
-          { key: 'village_welcome_banner_y_offset', value: welcomeBannerYOffset },
-          { key: 'village_welcome_banner_zoom', value: welcomeBannerZoom },
-          { key: 'village_aspirasi_banner_url', value: aspirasiBannerUrl },
-          { key: 'village_aspirasi_banner_y_offset', value: aspirasiBannerYOffset },
-          { key: 'village_aspirasi_banner_zoom', value: aspirasiBannerZoom },
-          { key: 'village_lat', value: villageLat.toString() },
-          { key: 'village_lng', value: villageLng.toString() },
-          { key: 'app_theme', value: appTheme }
-        ];
-        // Fire and forget upsert to Supabase
-        supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'key' }).then();
-      } catch (err) {
-        console.error('Failed to sync settings to Supabase', err);
+    localStorage.setItem('village_welcome_banner_url', welcomeBannerUrl);
+    localStorage.setItem('village_welcome_banner_y_offset', welcomeBannerYOffset);
+    localStorage.setItem('village_welcome_banner_zoom', welcomeBannerZoom);
+    localStorage.setItem('village_aspirasi_banner_url', aspirasiBannerUrl);
+    localStorage.setItem('village_aspirasi_banner_y_offset', aspirasiBannerYOffset);
+    localStorage.setItem('village_aspirasi_banner_zoom', aspirasiBannerZoom);
+    
+    localStorage.setItem('village_lat', villageLat.toString());
+    localStorage.setItem('village_lng', villageLng.toString());
+    localStorage.setItem('app_theme', appTheme);
+
+    try {
+      const settingsToSave = [
+        { tenant_id: tenantId, key: 'village_name', value: villageName },
+        { tenant_id: tenantId, key: 'village_kecamatan', value: kecamatan },
+        { tenant_id: tenantId, key: 'village_kabupaten', value: kabupaten },
+        { tenant_id: tenantId, key: 'village_alamat', value: alamat },
+        { tenant_id: tenantId, key: 'kop_desa', value: villageName },
+        { tenant_id: tenantId, key: 'kop_kecamatan', value: kecamatan },
+        { tenant_id: tenantId, key: 'kop_kabupaten', value: kabupaten },
+        { tenant_id: tenantId, key: 'kop_alamat', value: alamat },
+        { tenant_id: tenantId, key: 'kop_kontak', value: kontak },
+        { tenant_id: tenantId, key: 'kop_logo_url', value: logoUrl },
+        { tenant_id: tenantId, key: 'village_welcome_banner_url', value: welcomeBannerUrl },
+        { tenant_id: tenantId, key: 'village_welcome_banner_y_offset', value: welcomeBannerYOffset },
+        { tenant_id: tenantId, key: 'village_welcome_banner_zoom', value: welcomeBannerZoom },
+        { tenant_id: tenantId, key: 'village_aspirasi_banner_url', value: aspirasiBannerUrl },
+        { tenant_id: tenantId, key: 'village_aspirasi_banner_y_offset', value: aspirasiBannerYOffset },
+        { tenant_id: tenantId, key: 'village_aspirasi_banner_zoom', value: aspirasiBannerZoom },
+        { tenant_id: tenantId, key: 'village_lat', value: villageLat.toString() },
+        { tenant_id: tenantId, key: 'village_lng', value: villageLng.toString() },
+        { tenant_id: tenantId, key: 'app_theme', value: appTheme }
+      ];
+      // Await upsert to Supabase
+      const { error } = await supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'tenant_id,key' });
+      if (error) {
+        console.error('Supabase Upsert Error:', error);
+        alert('Gagal menyinkronkan ke server Supabase.');
       }
+    } catch (err) {
+      console.error('Failed to sync settings to Supabase', err);
+    }
 
-      window.dispatchEvent(new Event('village_settings_updated'));
-      window.dispatchEvent(new Event('app_theme_updated'));
+    window.dispatchEvent(new Event('village_settings_updated'));
+    window.dispatchEvent(new Event('app_theme_updated'));
 
-      setIsSaving(false);
-    }, 800);
+    setIsSaving(false);
   };
 
   const handleImportDocument = (e: React.ChangeEvent<HTMLInputElement>) => {

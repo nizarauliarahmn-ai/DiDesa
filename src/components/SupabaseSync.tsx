@@ -1,14 +1,40 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
+import { resolveCurrentTenant } from '../utils/tenantResolver';
 
 export function SupabaseSync() {
+  const [tenantId, setTenantId] = useState<string | null>(null);
+
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Initial Fetch (Sync from Cloud to Local)
+    // 1. Resolve Tenant ID First
+    const initTenant = async () => {
+      const resolvedId = await resolveCurrentTenant();
+      if (isMounted) {
+        setTenantId(resolvedId);
+      }
+    };
+    initTenant();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!tenantId) return;
+
+    let isMounted = true;
+
+    // 2. Initial Fetch (Sync from Cloud to Local, Scoped to Tenant)
     const fetchSettings = async () => {
       try {
-        const { data, error } = await supabase.from('saas_settings').select('*');
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('*')
+          .eq('tenant_id', tenantId);
+
         if (error) {
           console.error('Error fetching Supabase settings:', error);
           return;
@@ -38,15 +64,16 @@ export function SupabaseSync() {
 
     fetchSettings();
 
-    // 2. Realtime Subscription
+    // 3. Realtime Subscription (Scoped to Tenant)
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel(`schema-db-changes-${tenantId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'saas_settings',
+          filter: `tenant_id=eq.${tenantId}`
         },
         (payload) => {
           const newRow = payload.new as { key: string; value: string };
@@ -69,7 +96,7 @@ export function SupabaseSync() {
       isMounted = false;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [tenantId]);
 
   return null;
 }
