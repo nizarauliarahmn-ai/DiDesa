@@ -40,7 +40,7 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '28', jenis: 'SK PENGHASILAN', klasifikasi: 'SKPH', kodeKlasifikasi: '400', noUrutTerakhir: 4, isVisible: true },
   { id: '29', jenis: 'SURAT PENGURUSAN TASPEN', klasifikasi: 'SPT', kodeKlasifikasi: '474', noUrutTerakhir: 0, isVisible: true },
   { id: '30', jenis: 'SK DOMISILI USAHA', klasifikasi: 'SDU', kodeKlasifikasi: '500', noUrutTerakhir: 0, isVisible: true, deskripsi: 'Surat Keterangan Domisili Usaha' },
-  { id: '17', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
+  { id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true }
 ];
 
 export function getSaaSTemplates(): LetterClassification[] {
