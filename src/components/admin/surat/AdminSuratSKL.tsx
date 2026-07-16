@@ -523,7 +523,7 @@ export default function AdminSuratSKL({
       </div>
     `;
 
-    setPreviewHtml(html);
+    return html;
   };
 
   const filteredResidents = residents.filter(r => 
