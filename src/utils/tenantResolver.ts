@@ -21,15 +21,19 @@ export async function resolveCurrentTenant(): Promise<string | null> {
   isResolving = true;
 
   try {
-    const hostname = window.location.hostname;
-    
-    // 1. Cek Subdomain (Opsi B)
-    const parts = hostname.split('.');
-    let subdomain: string | null = null;
+    // 1. Cek Parameter URL khusus untuk testing (Misal di Vercel: didesa.vercel.app?tenant=sukamakmur)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantParam = urlParams.get('tenant');
+    let subdomain: string | null = tenantParam;
 
-    if (parts.length >= 2) {
-      if (parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'didesa') {
-        subdomain = parts[0];
+    // 2. Jika tidak ada parameter, Cek Subdomain (Opsi B)
+    if (!subdomain) {
+      const hostname = window.location.hostname;
+      const parts = hostname.split('.');
+      if (parts.length >= 2) {
+        if (parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'didesa') {
+          subdomain = parts[0];
+        }
       }
     }
 
