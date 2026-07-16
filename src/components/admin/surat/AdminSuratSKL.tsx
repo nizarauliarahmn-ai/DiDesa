@@ -405,12 +405,15 @@ export default function AdminSuratSKL({
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
-    const noSurat = rxData.noSurat || 'SKL/146/WHi/2026';
+    const noSuratVal = noSurat || 'SKL/146/WHi/2026';
     
-    // Clean string helper (capitalizes each word, removes prefixes like 'desa', 'kecamatan' if any, but since we rely on it directly, we just capitalize)
-    const capitalize = (str) => {
+    // Clean string helper
+    const cleanStr = (str: string, pattern: RegExp) => str.replace(pattern, '').trim();
+    
+    // Capitalize helper
+    const capitalize = (str: string) => {
       if (!str) return '';
-      return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      return str.toLowerCase().split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     };
 
     const terbilang = (angka) => {
@@ -444,7 +447,7 @@ export default function AdminSuratSKL({
         <!-- JUDUL SURAT -->
         <div style="text-align:center;margin-bottom:25px;">
           <h2 style="font-size:16px;font-weight:bold;text-decoration:underline;margin:0 0 5px 0;text-transform:uppercase;">SURAT KETERANGAN LAHIR</h2>
-          <div style="font-size:12px;">Nomor: ${noSurat}</div>
+          <div style="font-size:12px;">Nomor: ${noSuratVal}</div>
         </div>
 
         <p style="text-align:justify;line-height:1.5;margin-bottom:15px;font-size:12px;text-indent:40px;">
