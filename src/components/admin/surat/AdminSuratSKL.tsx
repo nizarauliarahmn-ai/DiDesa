@@ -414,17 +414,17 @@ export default function AdminSuratSKL({
     let html = `
       <!-- KOP SURAT -->
       <div style="border-bottom:3px solid #000;margin-bottom:12px;">
-        <div style="display:flex;align-items:flex-start;padding-bottom:6px;border-bottom:1px solid #000;margin-bottom:1px;font-family:\${letterFont};">
+        <div style="display:flex;align-items:flex-start;padding-bottom:6px;border-bottom:1px solid #000;margin-bottom:1px;font-family:${letterFont};">
           <div style="display:flex;width:100%;align-items:center;">
             <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
-              <img src="\${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
+              <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
             </div>
             <div style="text-align:center;flex:1;padding-right:90px;">
-              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">\${namaKabupaten.toUpperCase()}</div>
-              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">\${namaKecamatan.toUpperCase()}</div>
-              <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">\${namaDesa.toUpperCase()}</div>
-              <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">\${alamatKantor}</div>
-              <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">\${kontakKantor}</div>
+              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKabupaten.toUpperCase()}</div>
+              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKecamatan.toUpperCase()}</div>
+              <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${namaDesa.toUpperCase()}</div>
+              <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${alamatKantor}</div>
+              <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${kontakKantor}</div>
             </div>
           </div>
         </div>
@@ -433,20 +433,20 @@ export default function AdminSuratSKL({
       <!-- JUDUL SURAT -->
       <div style="text-align:center;margin-bottom:15px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN KELAHIRAN</h3>
-        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : \${v(noSurat, '... / ... / ... / ' + today.getFullYear())}</p>
+        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(noSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
 
       <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;text-indent: 40px;">
-        Yang bertanda tangan di bawah ini Kepala \${cleanStr(namaDesa, /^(desa|kelurahan)\\s+/i)}, Kecamatan \${cleanStr(namaKecamatan, /^kecamatan\\s+/i)}, \${namaKabupaten}, menerangkan dengan sebenarnya bahwa:
+        Yang bertanda tangan di bawah ini Kepala ${cleanStr(namaDesa, /^(desa|kelurahan)\\s+/i)}, Kecamatan ${cleanStr(namaKecamatan, /^kecamatan\\s+/i)}, ${namaKabupaten}, menerangkan dengan sebenarnya bahwa:
       </p>
 
       <!-- DATA IBU -->
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">\${v(ibuData.nama)}</strong></td></tr>
-        <tr><td>NIK</td><td>:</td><td>\${v(ibuData.nik)}</td></tr>
-        <tr><td>Umur</td><td>:</td><td>\${ibuData.umur ? \`\${ibuData.umur} Tahun\` : '____ Tahun'}</td></tr>
-        <tr><td>Pekerjaan</td><td>:</td><td>\${v(ibuData.pekerjaan)}</td></tr>
-        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>\${v(ibuData.alamat, '_____________________________________________')}</td></tr>
+        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(ibuData.nama)}</strong></td></tr>
+        <tr><td>NIK</td><td>:</td><td>${v(ibuData.nik)}</td></tr>
+        <tr><td>Umur</td><td>:</td><td>${ibuData.umur ? `${ibuData.umur} Tahun` : '____ Tahun'}</td></tr>
+        <tr><td>Pekerjaan</td><td>:</td><td>${v(ibuData.pekerjaan)}</td></tr>
+        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(ibuData.alamat, '_____________________________________________')}</td></tr>
       </table>
 
       <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
@@ -455,54 +455,54 @@ export default function AdminSuratSKL({
 
       <!-- DATA AYAH -->
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">\${v(ayahData.nama)}</strong></td></tr>
-        <tr><td>NIK</td><td>:</td><td>\${v(ayahData.nik)}</td></tr>
-        <tr><td>Umur</td><td>:</td><td>\${ayahData.umur ? \`\${ayahData.umur} Tahun\` : '____ Tahun'}</td></tr>
-        <tr><td>Pekerjaan</td><td>:</td><td>\${v(ayahData.pekerjaan)}</td></tr>
-        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>\${v(ayahData.alamat, '_____________________________________________')}</td></tr>
+        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(ayahData.nama)}</strong></td></tr>
+        <tr><td>NIK</td><td>:</td><td>${v(ayahData.nik)}</td></tr>
+        <tr><td>Umur</td><td>:</td><td>${ayahData.umur ? `${ayahData.umur} Tahun` : '____ Tahun'}</td></tr>
+        <tr><td>Pekerjaan</td><td>:</td><td>${v(ayahData.pekerjaan)}</td></tr>
+        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(ayahData.alamat, '_____________________________________________')}</td></tr>
       </table>
 
       <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
-        Telah lahir anak <strong style="text-transform:lowercase;">\${anakData.jenisKelamin || 'laki-laki/perempuan'}</strong> pada:
+        Telah lahir anak <strong style="text-transform:lowercase;">${anakData.jenisKelamin || 'laki-laki/perempuan'}</strong> pada:
       </p>
 
       <!-- DATA ANAK -->
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-        <tr><td style="width:30%;">Tempat Lahir</td><td style="width:3%;">:</td><td>\${v(anakData.tempatLahir)}</td></tr>
-        <tr><td>Hari/Tanggal Lahir</td><td>:</td><td>\${anakData.tanggalLahir ? fmtDate(anakData.tanggalLahir) : '_______________________'}</td></tr>
-        <tr><td>Pukul/Jam</td><td>:</td><td>\${anakData.jamLahir || '____ WIB'}</td></tr>
-        <tr><td>Anak Ke-</td><td>:</td><td>\${anakData.anakKe || '____'}</td></tr>
-        <tr><td style="padding-top:8px;">Diberi Nama</td><td style="padding-top:8px;">:</td><td style="padding-top:8px;"><strong style="text-transform:uppercase;font-size:16px;">\${v(anakData.nama)}</strong></td></tr>
+        <tr><td style="width:30%;">Tempat Lahir</td><td style="width:3%;">:</td><td>${v(anakData.tempatLahir)}</td></tr>
+        <tr><td>Hari/Tanggal Lahir</td><td>:</td><td>${anakData.tanggalLahir ? fmtDate(anakData.tanggalLahir) : '_______________________'}</td></tr>
+        <tr><td>Pukul/Jam</td><td>:</td><td>${anakData.jamLahir || '____ WIB'}</td></tr>
+        <tr><td>Anak Ke-</td><td>:</td><td>${anakData.anakKe || '____'}</td></tr>
+        <tr><td style="padding-top:8px;">Diberi Nama</td><td style="padding-top:8px;">:</td><td style="padding-top:8px;"><strong style="text-transform:uppercase;font-size:16px;">${v(anakData.nama)}</strong></td></tr>
       </table>
-    \`;
+    `;
 
     if (pelaporData.nama) {
-      html += \`
+      html += `
         <p style="text-align:justify;line-height:1.15;margin-top:15px;margin-bottom:10px;font-size:14px;">
           Surat Keterangan ini dibuat berdasarkan laporan dari:
         </p>
         <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-          <tr><td style="width:30%;">Nama Pelapor</td><td style="width:3%;">:</td><td><strong>\${v(pelaporData.nama)}</strong></td></tr>
-          <tr><td>Hubungan</td><td>:</td><td>\${v(pelaporData.hubungan)}</td></tr>
+          <tr><td style="width:30%;">Nama Pelapor</td><td style="width:3%;">:</td><td><strong>${v(pelaporData.nama)}</strong></td></tr>
+          <tr><td>Hubungan</td><td>:</td><td>${v(pelaporData.hubungan)}</td></tr>
         </table>
-      \`;
+      `;
     }
 
     if (rsData.noSuratRs && rsData.namaRs) {
-      html += \`
+      html += `
         <p style="text-align:justify;line-height:1.15;margin-top:10px;margin-bottom:10px;font-size:14px;">
-          Sesuai dengan Surat Keterangan Kelahiran dari \${rsData.namaRs} Nomor: \${rsData.noSuratRs}.
+          Sesuai dengan Surat Keterangan Kelahiran dari ${rsData.namaRs} Nomor: ${rsData.noSuratRs}.
         </p>
-      \`;
+      `;
     }
 
-    html += \`
+    html += `
       <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:20px;font-size:14px;">
         Demikian surat keterangan ini dibuat dengan sesungguhnya untuk dapat dipergunakan sebagaimana mestinya, khususnya untuk persyaratan pengurusan Akta Kelahiran dan dokumen kependudukan lainnya.
       </p>
 
       <!-- TANDA TANGAN -->
-      \${getPrintSignatureHTML(
+      ${getPrintSignatureHTML(
         namaDesa,
         tglFormatted,
         namaPejabat,
