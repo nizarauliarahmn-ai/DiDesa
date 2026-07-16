@@ -13,6 +13,12 @@ export function getPrintSignatureHTML(
   const isDual = includeCamatOverride === true;
   const isAn = jabatanPejabat.toLowerCase() !== 'kepala desa';
 
+  // Uppercase only the name part, preserving the degree
+  const parts = namaPejabat.split(',');
+  const namePart = parts[0].toUpperCase();
+  const titlePart = parts.slice(1).join(',');
+  const formattedNamaPejabat = titlePart.length > 0 ? `${namePart},${titlePart}` : namePart;
+
   const sigLeftRoleRaw = localStorage.getItem('village_signature_left_role') || 'Camat Simpur';
   let sigLeftRole = sigLeftRoleRaw;
   if (includeCamatOverride && !sigLeftRole.toLowerCase().includes('mengetahui')) {
@@ -48,12 +54,12 @@ export function getPrintSignatureHTML(
   }
 
   const rightSideHtml = `
-    <div style="text-align:${textAlign};width:230px;font-size:14px;display:inline-block;vertical-align:top;">
+    <div style="text-align:${textAlign};width:320px;font-size:14px;display:inline-block;vertical-align:top;">
       ${metaHtml}
       <div style="margin-bottom:55px;margin-top:5px;min-height:35px;line-height:1.4;">
         ${rightRoleHtml}
       </div>
-      <p style="font-weight:bold;margin:0;text-transform:uppercase;${nameDecoration}">${namaPejabat}</p>
+      <p style="font-weight:bold;margin:0;${nameDecoration}">${formattedNamaPejabat}</p>
       ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-family:monospace;font-size:11px;">NIP. ${nipPejabat}</p>` : ''}
     </div>
   `;
@@ -64,13 +70,13 @@ export function getPrintSignatureHTML(
         <!-- TOP ROW (Roles) -->
         <div style="display:flex;justify-content:space-between;">
           <!-- Left Top -->
-          <div style="width:230px;text-align:${textAlign};">
+          <div style="width:320px;text-align:${textAlign};">
             <div style="min-height:35px;line-height:1.4;white-space:pre-line;">
               ${sigLeftRole}
             </div>
           </div>
           <!-- Right Top -->
-          <div style="width:230px;text-align:${textAlign};">
+          <div style="width:320px;text-align:${textAlign};">
             ${metaHtml}
             <div style="margin-top:5px;min-height:35px;line-height:1.4;">
               ${rightRoleHtml}
@@ -84,14 +90,14 @@ export function getPrintSignatureHTML(
         <!-- BOTTOM ROW (Names) -->
         <div style="display:flex;justify-content:space-between;">
           <!-- Left Bottom -->
-          <div style="width:230px;text-align:${textAlign};">
+          <div style="width:320px;text-align:${textAlign};">
             <p style="font-weight:bold;margin:0;${nameDecoration}">${sigLeftName}</p>
             ${sigLeftPangkat ? `<p style="margin:2px 0 0 0;font-size:13px;">${sigLeftPangkat}</p>` : ''}
             ${sigLeftNip && sigLeftNip !== '-' && sigLeftNip !== '' ? `<p style="margin:2px 0 0 0;font-size:13px;">NIP : ${sigLeftNip}</p>` : ''}
           </div>
           <!-- Right Bottom -->
-          <div style="width:230px;text-align:${textAlign};">
-            <p style="font-weight:bold;margin:0;text-transform:uppercase;${nameDecoration}">${namaPejabat}</p>
+          <div style="width:320px;text-align:${textAlign};">
+            <p style="font-weight:bold;margin:0;${nameDecoration}">${formattedNamaPejabat}</p>
             ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-family:monospace;font-size:11px;">NIP. ${nipPejabat}</p>` : ''}
           </div>
         </div>
