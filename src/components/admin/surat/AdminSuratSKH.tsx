@@ -781,47 +781,6 @@ export default function AdminSuratSKH({
                   />
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Barang yang Hilang</label>
-                  <input 
-                    type="text"
-                    placeholder="Contoh: KTP, Kartu ATM BRI, Buku Tabungan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.barangHilang}
-                    onChange={(e) => setFormData({...formData, barangHilang: e.target.value})}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Kehilangan</label>
-                    <input 
-                      type="date"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.tanggalKehilangan}
-                      onChange={(e) => setFormData({...formData, tanggalKehilangan: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Kehilangan</label>
-                    <input 
-                      type="text"
-                      placeholder="Contoh: Perjalanan dari Wasah Hilir ke Kandangan"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.tempatKehilangan}
-                      onChange={(e) => setFormData({...formData, tempatKehilangan: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keterangan Tambahan</label>
-                  <textarea 
-                    rows={2}
-                    placeholder="Contoh: Hilang beserta dompet warna hitam"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={formData.keteranganKehilangan}
-                    onChange={(e) => setFormData({...formData, keteranganKehilangan: e.target.value})}
-                  />
-                </div>
-                <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat</label>
                   <input 
                     type="text"
@@ -829,6 +788,62 @@ export default function AdminSuratSKH({
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.keperluan}
                     onChange={(e) => setFormData({...formData, keperluan: e.target.value})}
+                  />
+                  <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan tujuan pembuatan surat ini secara spesifik.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Data Kehilangan */}
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 bg-rose-50 rounded-lg flex items-center justify-center">
+                  <AlertCircle className="w-4 h-4 text-rose-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Kehilangan</h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Isi dengan informasi barang/dokumen yang hilang</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Barang / Dokumen yang Hilang</label>
+                  <input 
+                    type="text"
+                    placeholder="Contoh: KTP, Kartu ATM BRI, Buku Tabungan"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-rose-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-rose-200 transition-all"
+                    value={formData.barangHilang}
+                    onChange={(e) => setFormData({...formData, barangHilang: e.target.value})}
+                  />
+                  <p className="mt-1 text-[10px] text-rose-500 font-medium">* Wajib diisi. Pisahkan dengan koma jika lebih dari satu barang.</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Kehilangan</label>
+                  <input 
+                    type="date"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    value={formData.tanggalKehilangan}
+                    onChange={(e) => setFormData({...formData, tanggalKehilangan: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Kehilangan</label>
+                  <input 
+                    type="text"
+                    placeholder="Contoh: Perjalanan dari Wasah Hilir ke Kandangan"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    value={formData.tempatKehilangan}
+                    onChange={(e) => setFormData({...formData, tempatKehilangan: e.target.value})}
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keterangan Tambahan (Opsional)</label>
+                  <textarea 
+                    rows={2}
+                    placeholder="Contoh: Hilang beserta dompet warna hitam merek Polo"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                    value={formData.keteranganKehilangan}
+                    onChange={(e) => setFormData({...formData, keteranganKehilangan: e.target.value})}
                   />
                 </div>
               </div>
@@ -914,13 +929,12 @@ export default function AdminSuratSKH({
 
         {/* Preview Column */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="bg-rose-50 p-5 rounded-2xl border border-rose-100 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-bold text-emerald-900 text-xs">Informasi Penting & Cetak</h4>
-              <p className="text-[11px] text-emerald-700 mt-1 leading-relaxed">
-                Pastikan data orang tua dan anak sudah sesuai dengan KTP/KK terbaru. 
-                Gunakan fitur pencarian untuk meminimalkan kesalahan pengetikan. Jika tombol cetak tidak merespon, silakan gunakan menu <strong>Buka di Tab Baru</strong>.
+              <h4 className="font-bold text-rose-900 text-xs">Informasi Penting &amp; Cetak</h4>
+              <p className="text-[11px] text-rose-700 mt-1 leading-relaxed">
+                Pastikan identitas warga sesuai KTP/KK terbaru. Isi bagian <strong>Data Kehilangan</strong> dengan lengkap — termasuk barang yang hilang, tanggal, dan tempat kejadian. Jika tombol cetak tidak merespon, gunakan menu <strong>Buka di Tab Baru</strong>.
               </p>
             </div>
           </div>
