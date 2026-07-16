@@ -417,21 +417,33 @@ export default function AdminSuratSKTM({
         <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
-        Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa :
+
+      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
+        Yang bertanda tangan di bawah ini:
+      </p>
+
+      <!-- DATA PEJABAT -->
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.6;font-size:14px;">
+        <tr><td style="width:30%;">a. Nama</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.namaPejabat)}</strong></td></tr>
+        <tr><td>b. Jabatan</td><td>:</td><td><strong style="text-transform:uppercase;">${v(formData.jabatanPejabat)} ${activeDesa.toUpperCase()}</strong></td></tr>
+      </table>
+
+      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
+        Menerangkan dengan sebenarnya bahwa:
       </p>
 
       <!-- DATA PENDUDUK -->
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
-        <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.nama)}</strong></td></tr>
-        <tr><td>NIK</td><td>:</td><td>${v(formData.nik)}</td></tr>
-        <tr><td>Tempat, Tanggal lahir</td><td>:</td><td>${v(formData.tempatLahir)}, ${fmtDate(formData.tanggalLahir)}</td></tr>
-        <tr><td>Jenis Kelamin</td><td>:</td><td>${v(formData.jenisKelamin)}</td></tr>
-        <tr><td>Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
-        <tr><td>Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
-        <tr><td>Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
-        <tr><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
+        <tr><td style="width:30%;">a. Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.nama)}</strong></td></tr>
+        <tr><td>b. NIK</td><td>:</td><td>${v(formData.nik)}</td></tr>
+        <tr><td>c. Tempat, Tanggal Lahir</td><td>:</td><td>${v(formData.tempatLahir)}, ${fmtDate(formData.tanggalLahir)}</td></tr>
+        <tr><td>d. Jenis Kelamin</td><td>:</td><td>${v(formData.jenisKelamin)}</td></tr>
+        <tr><td>e. Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
+        <tr><td>f. Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
+        <tr><td>g. Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
+        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
       </table>
+
 
       <!-- PERNYATAAN -->
       <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
