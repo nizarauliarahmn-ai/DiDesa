@@ -411,8 +411,7 @@ export default function AdminSuratSKL({
         return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
       } catch (e) { return d; }
     };
-
-    let html = \`
+    let html = `
       <!-- KOP SURAT -->
       <div style="border-bottom:3px solid #000;margin-bottom:12px;">
         <div style="display:flex;align-items:flex-start;padding-bottom:6px;border-bottom:1px solid #000;margin-bottom:1px;font-family:\${letterFont};">
@@ -520,11 +519,11 @@ export default function AdminSuratSKL({
         includeCamat
       )}
       <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
-        \${SAAS_CONFIG.globalFooterHTML}
+        ${SAAS_CONFIG.globalFooterHTML}
       </div>
-    \`;
-    
-    return html;
+    `;
+
+    setPreviewHtml(html);
   };
 
   const filteredResidents = residents.filter(r => 
