@@ -450,7 +450,14 @@ export default function AdminTenants() {
             </div>
             <button 
               onClick={() => {
-                window.print();
+                const isDark = document.documentElement.classList.contains('dark');
+                if (isDark) document.documentElement.classList.remove('dark');
+                
+                setTimeout(() => {
+                  window.print();
+                  if (isDark) document.documentElement.classList.add('dark');
+                }, 100);
+
                 addSaaSLog({
                   admin: authUser?.name || 'SaaS Admin',
                   aksi: 'Cetak Laporan Klien',
@@ -761,9 +768,14 @@ export default function AdminTenants() {
                                       const prevQuery = searchQuery;
                                       setSearchQuery(tenant.nama_desa);
                                       
+                                      const isDark = document.documentElement.classList.contains('dark');
+                                      if (isDark) document.documentElement.classList.remove('dark');
+                                      
                                       // Wait for re-render, then print
                                       setTimeout(() => {
                                         window.print();
+                                        
+                                        if (isDark) document.documentElement.classList.add('dark');
                                         
                                         // Reset search query after print dialog closes
                                         setTimeout(() => setSearchQuery(prevQuery), 500);

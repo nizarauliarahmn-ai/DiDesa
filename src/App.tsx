@@ -212,8 +212,8 @@ export default function App() {
     return (
       <div className="flex h-screen bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-sans overflow-hidden print:h-auto print:overflow-visible print:block">
         <AdminSidebar setView={setView} activeTab={adminTab} setActiveTab={setAdminTab} onLogout={handleLogout} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
-        <div className="flex-1 h-screen overflow-hidden relative print:h-auto print:overflow-visible">
-          <main className="h-full overflow-y-auto bg-slate-50 dark:bg-slate-800 scroll-smooth print:h-auto print:overflow-visible">
+        <div className="flex-1 h-screen overflow-hidden relative print:h-auto print:overflow-visible print:block">
+          <main className="h-full overflow-y-auto bg-slate-50 dark:bg-slate-800 scroll-smooth print:h-auto print:overflow-visible print:block">
             <AdminHeader 
               setActiveTab={setAdminTab} 
               globalSearch={globalSearch} 
@@ -222,8 +222,8 @@ export default function App() {
               toggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
               className="sticky top-0 z-50"
             />
-            <div className="p-4 md:p-6 lg:p-8 pb-72 lg:pb-80 flex flex-col min-h-full">
-              <div className="flex-1">
+            <div className="p-4 md:p-6 lg:p-8 pb-72 lg:pb-80 flex flex-col min-h-full print:p-0 print:block">
+              <div className="flex-1 print:block">
                 <PageTransition pageKey={adminTab}>
                 {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
                 {adminTab === 'produk_hukum' && <AdminProdukHukum />}
