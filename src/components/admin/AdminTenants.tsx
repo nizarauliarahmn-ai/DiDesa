@@ -575,14 +575,28 @@ export default function AdminTenants() {
 
                         {/* Domain / Subdomain */}
                         <td className="px-6 py-4">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800 w-fit">
-                              <Globe size={13} className="text-emerald-600 shrink-0" />
-                              <span className="truncate">{tenant.domain || 'Belum diatur'}</span>
+                          <div className="space-y-2">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800 w-fit">
+                                <Globe size={13} className="text-emerald-600 shrink-0" />
+                                <span className="truncate">{tenant.domain || 'Belum diatur'}</span>
+                              </div>
+                              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                <Database size={9} /> Single DB / Supabase RLS
+                              </span>
                             </div>
-                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                              <Database size={9} /> Single DB / Supabase RLS
-                            </span>
+                            
+                            {tenant.domain && (
+                              <a 
+                                href={`/?tenant=${tenant.domain}`} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1.5 rounded-lg border border-emerald-200 transition-colors w-fit group/link"
+                              >
+                                <ExternalLink size={13} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                                Buka Portal Web
+                              </a>
+                            )}
                           </div>
                         </td>
 
