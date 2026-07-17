@@ -210,10 +210,10 @@ export default function App() {
 
   if (view === 'admin') {
     return (
-      <div className="flex h-screen bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-sans overflow-hidden">
+      <div className="flex h-screen bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-sans overflow-hidden print:h-auto print:overflow-visible print:block">
         <AdminSidebar setView={setView} activeTab={adminTab} setActiveTab={setAdminTab} onLogout={handleLogout} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
-        <div className="flex-1 h-screen overflow-hidden relative">
-          <main className="h-full overflow-y-auto bg-slate-50 dark:bg-slate-800 scroll-smooth">
+        <div className="flex-1 h-screen overflow-hidden relative print:h-auto print:overflow-visible">
+          <main className="h-full overflow-y-auto bg-slate-50 dark:bg-slate-800 scroll-smooth print:h-auto print:overflow-visible">
             <AdminHeader 
               setActiveTab={setAdminTab} 
               globalSearch={globalSearch} 
