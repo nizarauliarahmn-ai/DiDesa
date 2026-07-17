@@ -7,6 +7,8 @@ import { getAspirasi } from '../../utils/aspirasiData';
 import { getFeedbacks, Feedback } from '../../utils/feedbackData';
 import { getSaaSLogs, SaaSLog } from '../../utils/saasLogs';
 import { supabase } from '../../utils/supabase';
+import { getLetterHistory, LetterHistory } from '../../utils/letterHistory';
+import { getLetterClassifications } from '../../utils/letterClassifications';
 
 export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
   const [residents, setResidents] = useState<any[]>([]);
@@ -17,6 +19,9 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   const [authUser, setAuthUser] = useState<any>(null);
   const [saasLogs, setSaasLogs] = useState<SaaSLog[]>([]);
   const [saasTenants, setSaasTenants] = useState<any[]>([]);
+  const [letterHistory, setLetterHistory] = useState<LetterHistory[]>([]);
+  const [populerSurat, setPopulerSurat] = useState<string>('-');
+  const [activeServicesCount, setActiveServicesCount] = useState<number>(0);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('didesa_auth_user') || '{}');
@@ -59,6 +64,19 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
     // load aspirasi & feedback
     setAspirasiList(getAspirasi());
     setFeedbacks(getFeedbacks());
+
+    const history = getLetterHistory();
+    setLetterHistory(history);
+    
+    // hitung layanan terpopuler
+    if (history.length > 0) {
+      const counts: Record<string, number> = {};
+      history.forEach(h => { counts[h.jenis] = (counts[h.jenis] || 0) + 1; });
+      const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+      setPopulerSurat(sorted[0][0]);
+    }
+
+    setActiveServicesCount(getLetterClassifications().length);
 
     fetchResidentsCached()
       .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })
@@ -430,7 +448,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               <span className="text-primary font-bold text-xs bg-primary-container/10 px-2 py-1 rounded">+8% Bulan ini</span>
             </div>
             <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Surat Dikeluarkan</p>
-            <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={1248} /></h3>
+            <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={letterHistory.length} /></h3>
           </div>
           
           <div className="standard-card p-6 border-l-4 border-tertiary">
@@ -451,7 +469,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Produk Hukum (SK/Perdes)</p>
             </div>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={45} /></h3>
+              <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={0} /></h3>
               <span className="text-sm font-bold text-gray-400">Dokumen</span>
             </div>
           </div>
@@ -464,8 +482,8 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Layanan Terpopuler</p>
             </div>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">SKU</h3>
-              <span className="text-sm font-bold text-gray-400">(Ket. Usaha)</span>
+              <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{populerSurat}</h3>
+              <span className="text-sm font-bold text-gray-400">(Terkini)</span>
             </div>
           </div>
 
@@ -486,7 +504,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               </div>
               <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Layanan Aktif</p>
             </div>
-            <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={15} /></h3>
+            <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={activeServicesCount} /></h3>
           </div>
         </div>
       </div>
