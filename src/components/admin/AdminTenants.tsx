@@ -204,6 +204,68 @@ export default function AdminTenants() {
     }
   };
 
+  const handlePrint = (singleVillageName?: string) => {
+    if (singleVillageName) setSearchQuery(singleVillageName);
+
+    setTimeout(() => {
+      const table = document.getElementById('tenants-table');
+      if (!table) return;
+      
+      const clone = table.cloneNode(true) as HTMLTableElement;
+      
+      const rows = clone.querySelectorAll('tr');
+      rows.forEach(row => {
+        if (row.children.length > 0) {
+          row.removeChild(row.lastElementChild!);
+        }
+      });
+
+      const printContent = clone.outerHTML;
+      const win = window.open('', '', 'height=700,width=1000');
+      if (win) {
+        win.document.write(`
+          <html>
+            <head>
+              <title>Cetak Data Kredensial</title>
+              <style>
+                body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 30px; color: #111; }
+                .print-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                h1 { margin: 0 0 10px 0; text-transform: uppercase; font-size: 24px; letter-spacing: 1px; }
+                p { margin: 0; color: #555; font-size: 14px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+                th, td { border: 1px solid #ddd; padding: 12px 15px; text-align: left; vertical-align: middle; }
+                th { background-color: #f4f6f8; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; color: #333; }
+                tr:nth-child(even) td { background-color: #fafafa; }
+                .hidden { display: none !important; }
+                span { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+                .bg-emerald-100 { background: #d1fae5; color: #047857; }
+                .bg-amber-100 { background: #fef3c7; color: #b45309; }
+                .bg-gray-100 { background: #f3f4f6; color: #374151; }
+                .text-blue-600 { color: #2563eb; }
+                .flex { display: flex; align-items: center; gap: 4px; }
+              </style>
+            </head>
+            <body>
+              <div class="print-header">
+                <h1>Data Kredensial Klien DiDesa</h1>
+                <p>Dicetak pada: ${new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                ${singleVillageName ? `<p style="margin-top:5px; font-weight:bold; color:#059669;">Filter: ${singleVillageName}</p>` : ''}
+              </div>
+              ${printContent}
+            </body>
+          </html>
+        `);
+        win.document.close();
+        win.focus();
+        setTimeout(() => {
+          win.print();
+          win.close();
+          if (singleVillageName) setSearchQuery('');
+        }, 500);
+      }
+    }, 100);
+  };
+
   const handleOpenEditModal = (tenant: any) => {
     setEditFormData({
       id: tenant.id,
@@ -449,22 +511,7 @@ export default function AdminTenants() {
               <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Kelola desa klien, status berlangganan, serta kredensial akses pimpinan dan operator secara mandiri.</p>
             </div>
             <button 
-              onClick={() => {
-                const isDark = document.documentElement.classList.contains('dark');
-                if (isDark) document.documentElement.classList.remove('dark');
-                
-                setTimeout(() => {
-                  window.print();
-                  if (isDark) document.documentElement.classList.add('dark');
-                }, 100);
-
-                addSaaSLog({
-                  admin: authUser?.name || 'SaaS Admin',
-                  aksi: 'Cetak Laporan Klien',
-                  target: 'Semua Klien',
-                  status: 'Berhasil'
-                });
-              }}
+              onClick={() => handlePrint()}
               className="print:hidden flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors shadow-sm active:scale-95 shrink-0"
             >
               <Printer size={16} />
@@ -542,7 +589,7 @@ export default function AdminTenants() {
             </div>
             
             <div className="overflow-x-auto print:overflow-visible">
-              <table className="w-full text-left text-sm print:text-xs">
+              <table id="tenants-table" className="w-full text-left text-sm print:text-xs">
                 <thead className="bg-gray-50/50 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 font-bold border-b border-gray-100 dark:border-slate-800 uppercase text-[11px] tracking-wider print:bg-white print:text-black">
                   <tr>
                     <th className="px-6 py-4">Instansi Klien</th>
@@ -763,24 +810,7 @@ export default function AdminTenants() {
                                   </button>
                                   <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
                                   <button
-                                    onClick={() => {
-                                      // Save current search query
-                                      const prevQuery = searchQuery;
-                                      setSearchQuery(tenant.nama_desa);
-                                      
-                                      const isDark = document.documentElement.classList.contains('dark');
-                                      if (isDark) document.documentElement.classList.remove('dark');
-                                      
-                                      // Wait for re-render, then print
-                                      setTimeout(() => {
-                                        window.print();
-                                        
-                                        if (isDark) document.documentElement.classList.add('dark');
-                                        
-                                        // Reset search query after print dialog closes
-                                        setTimeout(() => setSearchQuery(prevQuery), 500);
-                                      }, 300);
-                                    }}
+                                    onClick={() => handlePrint(tenant.nama_desa)}
                                     className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-blue-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
                                     <Printer size={13} className="text-gray-400" />
