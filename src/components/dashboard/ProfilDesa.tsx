@@ -19,12 +19,7 @@ export default function ProfilDesa() {
   };
 
   const [perangkatDesa, setPerangkatDesa] = useState([
-    { name: 'Fazakkir Rahmad', role: 'Kepala Desa', photo: 'https://i.pravatar.cc/150?img=12' },
-    { name: 'Siti Aminah', role: 'Sekretaris Desa', photo: 'https://i.pravatar.cc/150?img=47' },
-    { name: 'Budi Santoso', role: 'Kasi Pemerintahan', photo: 'https://i.pravatar.cc/150?img=11' },
-    { name: 'Dewi Lestari', role: 'Kasi Kesejahteraan', photo: 'https://i.pravatar.cc/150?img=5' },
-    { name: 'Agus Pratama', role: 'Kasi Pelayanan', photo: 'https://i.pravatar.cc/150?img=8' },
-    { name: 'Rina Wati', role: 'Kaur Keuangan', photo: 'https://i.pravatar.cc/150?img=9' },
+    { name: 'Belum Diatur', role: 'Kepala Desa', photo: 'https://api.dicebear.com/9.x/micah/svg?seed=BelumDiatur' }
   ]);
 
   useEffect(() => {
@@ -34,10 +29,9 @@ export default function ProfilDesa() {
         const officers = JSON.parse(saved);
         if (Array.isArray(officers) && officers.length > 0) {
           // Filter to only include actual Perangkat Desa (not BPD, LPM, etc. which usually have 'Ketua' or specific keywords, or just use all for now since they are managed centrally)
-          const mapped = officers.map((o: any, idx: number) => ({
-            name: o.name,
-            role: o.role,
-            photo: `https://i.pravatar.cc/150?img=${(idx % 50) + 1}`
+          const mapped = officers.map((officer: any) => ({
+            ...officer,
+            photo: `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(officer.name)}`
           }));
           setPerangkatDesa(mapped);
         }

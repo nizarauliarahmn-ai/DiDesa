@@ -65,6 +65,15 @@ export default function App() {
     localStorage.setItem('letter_cache_version', 'v4');
   }
 
+  // Wipe old dummy data
+  if (localStorage.getItem('data_wipe_v1') !== 'true') {
+    localStorage.removeItem('didesa_feedbacks');
+    localStorage.removeItem('didesa_aspirasi_data');
+    localStorage.removeItem('local_residents');
+    localStorage.removeItem('village_officers');
+    localStorage.setItem('data_wipe_v1', 'true');
+  }
+
   // Migrate old demo name to new demo name
   if (localStorage.getItem('kop_desa') === 'Desa Wasah Hilir' || localStorage.getItem('kop_desa') === 'Wasah Hilir') {
     localStorage.setItem('kop_desa', 'Desa Sukamakmur');
@@ -190,8 +199,18 @@ export default function App() {
     
     applyTheme();
     window.addEventListener('app_theme_updated', applyTheme);
+
+    const handleAuthUserUpdate = () => {
+      const saved = localStorage.getItem('didesa_auth_user');
+      if (saved) {
+        setUser(JSON.parse(saved));
+      }
+    };
+    window.addEventListener('auth_user_updated', handleAuthUserUpdate);
+
     return () => {
       window.removeEventListener('app_theme_updated', applyTheme);
+      window.removeEventListener('auth_user_updated', handleAuthUserUpdate);
     };
   }, []);
 

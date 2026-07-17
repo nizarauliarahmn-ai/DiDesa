@@ -1,7 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera } from 'lucide-react';
 import { X } from 'lucide-react';
 import { getFeedbacks } from '../../utils/feedbackData';
+import { supabase } from '../../utils/supabase';
+import { showToast } from '../../utils/toast';
+
+const compressImage = (file: File): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 400; // Small size for avatar
+        const MAX_HEIGHT = 400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Canvas to Blob failed'));
+          }
+        }, 'image/jpeg', 0.7); // 70% quality
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
 
 export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogout, isMobileMenuOpen, setIsMobileMenuOpen }: { setView: (view: 'public' | 'admin') => void, activeTab: string, setActiveTab: (tab: string) => void, onLogout: () => void, isMobileMenuOpen?: boolean, setIsMobileMenuOpen?: (val: boolean) => void }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
@@ -12,6 +59,52 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      if (!e.target.files || e.target.files.length === 0) return;
+      setIsUploadingAvatar(true);
+      const file = e.target.files[0];
+      
+      // Compress the image before uploading
+      const compressedBlob = await compressImage(file);
+      
+      const fileName = `avatar-${Date.now()}-${Math.floor(Math.random() * 10000)}.jpg`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('public-assets')
+        .upload(filePath, compressedBlob, {
+          contentType: 'image/jpeg'
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('public-assets')
+        .getPublicUrl(filePath);
+
+      if (authUser) {
+        const updatedUser = { ...authUser, avatar: publicUrl };
+        setAuthUser(updatedUser);
+        localStorage.setItem('didesa_auth_user', JSON.stringify(updatedUser));
+        window.dispatchEvent(new Event('auth_user_updated'));
+        showToast('Foto profil berhasil diperbarui!', 'success');
+      }
+      
+      // Reset input value to allow uploading the same file again if needed
+      e.target.value = '';
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      const errMsg = error?.message || error?.error || 'Terjadi kesalahan sistem';
+      showToast(`Gagal: ${errMsg}`, 'error');
+      // Reset input value on error too
+      e.target.value = '';
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   React.useEffect(() => {
     const loadAuthUser = () => {
@@ -148,9 +241,15 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       {/* Profile */}
       <div className="p-4 border-t border-gray-100 dark:border-slate-800 flex flex-col gap-3 mt-auto bg-white dark:bg-slate-900">
         <div className="flex items-center gap-3 px-1">
-          <div className="relative shrink-0">
-            <img src={authUser?.avatar || "https://i.pravatar.cc/150?img=12"} alt="Admin" className="w-11 h-11 rounded-full border-2 border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none object-cover" />
-            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center ${authUser?.role === 'saas_admin' ? 'bg-purple-500' : authUser?.role === 'kades' ? 'bg-amber-500' : 'bg-emerald-500'}`} title={authUser?.role === 'saas_admin' ? 'SaaS Admin' : authUser?.role === 'kades' ? 'Super Admin' : 'Admin'}>
+          <div className="relative shrink-0 group cursor-pointer">
+            <label className="cursor-pointer block relative">
+              <img src={authUser?.avatar || `https://api.dicebear.com/9.x/micah/svg?seed=${authUser?.name || 'Admin'}`} alt="Admin" className={`w-11 h-11 rounded-full border-2 border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none object-cover ${isUploadingAvatar ? 'opacity-50' : 'group-hover:opacity-80'} transition-opacity`} />
+              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                 <Camera size={14} className="text-white" />
+              </div>
+              <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
+            </label>
+            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center pointer-events-none ${authUser?.role === 'saas_admin' ? 'bg-purple-500' : authUser?.role === 'kades' ? 'bg-amber-500' : 'bg-emerald-500'}`} title={authUser?.role === 'saas_admin' ? 'SaaS Admin' : authUser?.role === 'kades' ? 'Super Admin' : 'Admin'}>
               {authUser?.role === 'saas_admin' ? (
                 <Building2 size={10} className="text-white" />
               ) : authUser?.role === 'kades' ? (

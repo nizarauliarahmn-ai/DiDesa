@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Mail, Phone, Globe, Instagram, Music, ChevronUp, MessageSquare, Send, X as CloseIcon } from 'lucide-react';
+import { Mail, Phone, Globe, Instagram, Music, ChevronUp, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin } from 'lucide-react';
 import { addFeedback } from '../../utils/feedbackData';
 
 export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
@@ -19,6 +19,36 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const [globalName, setGlobalName] = useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
+  
+  // Dynamic Footer Settings
+  const [globalFooterDesc, setGlobalFooterDesc] = useState(() => localStorage.getItem('global_footer_desc') ?? 'Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.');
+  const [globalFooterEmail, setGlobalFooterEmail] = useState(() => localStorage.getItem('global_footer_email') ?? 'info@didesa.id');
+  const [globalFooterPhone, setGlobalFooterPhone] = useState(() => localStorage.getItem('global_footer_phone') ?? '+62 813-4686-7519');
+  const [globalFooterAffiliateTitle, setGlobalFooterAffiliateTitle] = useState(() => localStorage.getItem('global_footer_affiliate_title') ?? 'AFFILIATOR');
+  const [globalFooterAffiliateSubtitle, setGlobalFooterAffiliateSubtitle] = useState(() => localStorage.getItem('global_footer_affiliate_subtitle') ?? 'Mendigitalisasi desa & raih komisi nyata.');
+  const [globalFooterAffiliateLink, setGlobalFooterAffiliateLink] = useState(() => localStorage.getItem('global_footer_affiliate_link') ?? 'https://wa.me/6281346867519?text=Affiliator');
+  const [globalFooterSocial1Icon, setGlobalFooterSocial1Icon] = useState(() => localStorage.getItem('global_footer_social1_icon') ?? 'instagram');
+  const [globalFooterSocial1Link, setGlobalFooterSocial1Link] = useState(() => localStorage.getItem('global_footer_social1_link') ?? 'https://instagram.com/didesa.id');
+  const [globalFooterSocial2Icon, setGlobalFooterSocial2Icon] = useState(() => localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
+  const [globalFooterSocial2Link, setGlobalFooterSocial2Link] = useState(() => localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
+  const [globalFooterCopyright, setGlobalFooterCopyright] = useState(() => localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
+
+  const renderSocialIcon = (iconUrl: string) => {
+    if (!iconUrl) return <Globe className="w-4 h-4" />;
+    if (iconUrl.startsWith('http') || iconUrl.startsWith('data:')) {
+      return <img src={iconUrl} alt="Social" className="w-4 h-4 object-contain opacity-70 group-hover:opacity-100 transition-opacity" />;
+    }
+    // Fallback for legacy static icon names
+    switch(iconUrl) {
+      case 'instagram': return <Instagram className="w-4 h-4" />;
+      case 'tiktok': return <Music className="w-4 h-4" />;
+      case 'facebook': return <Facebook className="w-4 h-4" />;
+      case 'twitter': return <Twitter className="w-4 h-4" />;
+      case 'youtube': return <Youtube className="w-4 h-4" />;
+      case 'linkedin': return <Linkedin className="w-4 h-4" />;
+      default: return <Globe className="w-4 h-4" />;
+    }
+  };
 
   const handleSubmitFeedback = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +116,17 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
       setGlobalName(localStorage.getItem('global_app_name') || 'DiDesa');
       setGlobalLogo(localStorage.getItem('global_app_logo') || '');
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
+      setGlobalFooterDesc(localStorage.getItem('global_footer_desc') ?? 'Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.');
+      setGlobalFooterEmail(localStorage.getItem('global_footer_email') ?? 'info@didesa.id');
+      setGlobalFooterPhone(localStorage.getItem('global_footer_phone') ?? '+62 813-4686-7519');
+      setGlobalFooterAffiliateTitle(localStorage.getItem('global_footer_affiliate_title') ?? 'AFFILIATOR');
+      setGlobalFooterAffiliateSubtitle(localStorage.getItem('global_footer_affiliate_subtitle') ?? 'Mendigitalisasi desa & raih komisi nyata.');
+      setGlobalFooterAffiliateLink(localStorage.getItem('global_footer_affiliate_link') ?? 'https://wa.me/6281346867519?text=Affiliator');
+      setGlobalFooterSocial1Icon(localStorage.getItem('global_footer_social1_icon') ?? 'instagram');
+      setGlobalFooterSocial1Link(localStorage.getItem('global_footer_social1_link') ?? 'https://instagram.com/didesa.id');
+      setGlobalFooterSocial2Icon(localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
+      setGlobalFooterSocial2Link(localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
+      setGlobalFooterCopyright(localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
     };
 
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
@@ -127,7 +168,9 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-[11px] font-black tracking-tight text-slate-800 dark:text-slate-100 uppercase">{globalName} Indonesia</span>
-            <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider hidden sm:inline">© {new Date().getFullYear()} • HAK CIPTA DILINDUNGI</span>
+            {globalFooterCopyright && (
+              <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider hidden sm:inline">{globalFooterCopyright}</span>
+            )}
           </div>
         </div>
 
@@ -155,21 +198,27 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           
           {/* Info Section */}
           <div className="lg:col-span-3">
-            <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed opacity-80 text-center sm:text-left">
-              Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.
-            </p>
+            {globalFooterDesc && (
+              <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed opacity-80 text-center sm:text-left">
+                {globalFooterDesc}
+              </p>
+            )}
           </div>
 
           {/* Contact Section */}
           <div className="lg:col-span-3 flex flex-col gap-1.5 items-center sm:items-start">
             <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Kontak Hubungi</h4>
             <div className="flex flex-col gap-1 items-center sm:items-start">
-              <a href="mailto:info@didesa.id" className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
-                <Mail className="w-3 h-3 text-emerald-600" /> info@didesa.id
-              </a>
-              <a href="tel:+6281346867519" className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
-                <Phone className="w-3 h-3 text-emerald-600" /> +62 813-4686-7519
-              </a>
+              {globalFooterEmail && (
+                <a href={`mailto:${globalFooterEmail}`} className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
+                  <Mail className="w-3 h-3 text-emerald-600" /> {globalFooterEmail}
+                </a>
+              )}
+              {globalFooterPhone && (
+                <a href={`tel:${globalFooterPhone.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
+                  <Phone className="w-3 h-3 text-emerald-600" /> {globalFooterPhone}
+                </a>
+              )}
               <button 
                 onClick={() => setIsModalOpen(true)}
                 className="mt-1 flex items-center gap-2 text-[10px] text-emerald-700 font-bold tracking-wide hover:opacity-70 group/saran"
@@ -275,33 +324,43 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
 
           {/* Affiliator Card */}
           <div className="lg:col-span-4">
-            <div className="bg-emerald-700/80 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-600/30 shadow-lg dark:shadow-none shadow-emerald-900/5 group/card relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full -mr-8 -mt-8 transition-transform group-hover/card:scale-150 duration-700" />
-              <div className="flex-1 space-y-0.5 relative z-10">
-                <h4 className="text-[9px] font-black text-emerald-100 uppercase tracking-widest leading-none">AFFILIATOR</h4>
-                <p className="text-[10px] text-white font-bold leading-tight">
-                  Mendigitalisasi desa & raih komisi nyata.
-                </p>
+            {globalFooterAffiliateTitle && (
+              <div className="bg-emerald-700/80 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-600/30 shadow-lg dark:shadow-none shadow-emerald-900/5 group/card relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full -mr-8 -mt-8 transition-transform group-hover/card:scale-150 duration-700" />
+                <div className="flex-1 space-y-0.5 relative z-10">
+                  <h4 className="text-[9px] font-black text-emerald-100 uppercase tracking-widest leading-none">{globalFooterAffiliateTitle}</h4>
+                  {globalFooterAffiliateSubtitle && (
+                    <p className="text-[10px] text-white font-bold leading-tight">
+                      {globalFooterAffiliateSubtitle}
+                    </p>
+                  )}
+                </div>
+                {globalFooterAffiliateLink && (
+                  <a 
+                    href={globalFooterAffiliateLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="whitespace-nowrap px-4 py-1.5 bg-white dark:bg-slate-900 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 transition-all shadow-sm dark:shadow-none active:scale-95 relative z-10"
+                  >
+                    GABUNG
+                  </a>
+                )}
               </div>
-              <a 
-                href="https://wa.me/6281346867519?text=Affiliator" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="whitespace-nowrap px-4 py-1.5 bg-white dark:bg-slate-900 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 transition-all shadow-sm dark:shadow-none active:scale-95 relative z-10"
-              >
-                GABUNG
-              </a>
-            </div>
+            )}
           </div>
 
           {/* Social Icons */}
           <div className="lg:col-span-2 flex justify-center lg:justify-end gap-2">
-            <a href="https://instagram.com/didesa.id" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-pink-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none">
-              <Instagram className="w-4 h-4" />
-            </a>
-            <a href="https://tiktok.com/@didesa.id" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none">
-              <Music className="w-4 h-4" />
-            </a>
+            {globalFooterSocial1Link && (
+              <a href={globalFooterSocial1Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none overflow-hidden">
+                {renderSocialIcon(globalFooterSocial1Icon)}
+              </a>
+            )}
+            {globalFooterSocial2Link && (
+              <a href={globalFooterSocial2Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none overflow-hidden">
+                {renderSocialIcon(globalFooterSocial2Icon)}
+              </a>
+            )}
           </div>
 
         </div>

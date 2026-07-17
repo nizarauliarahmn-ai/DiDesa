@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Settings, Save, Image, Palette, Globe, CheckCircle, AlertCircle, Trash2, FileText, UploadCloud } from 'lucide-react';
+import { Settings, Save, Image, Palette, Globe, CheckCircle, AlertCircle, Trash2, FileText, UploadCloud, Type, Mail, Phone, Link, Share2 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 
@@ -8,9 +8,47 @@ export default function AdminGlobalBranding() {
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalPrintFooter, setGlobalPrintFooter] = useState(() => localStorage.getItem('global_print_footer') ?? 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia');
+  
+  // Footer settings
+  const [globalFooterDesc, setGlobalFooterDesc] = useState(() => localStorage.getItem('global_footer_desc') ?? 'Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.');
+  const [globalFooterEmail, setGlobalFooterEmail] = useState(() => localStorage.getItem('global_footer_email') ?? 'info@didesa.id');
+  const [globalFooterPhone, setGlobalFooterPhone] = useState(() => localStorage.getItem('global_footer_phone') ?? '+62 813-4686-7519');
+  const [globalFooterAffiliateTitle, setGlobalFooterAffiliateTitle] = useState(() => localStorage.getItem('global_footer_affiliate_title') ?? 'AFFILIATOR');
+  const [globalFooterAffiliateSubtitle, setGlobalFooterAffiliateSubtitle] = useState(() => localStorage.getItem('global_footer_affiliate_subtitle') ?? 'Mendigitalisasi desa & raih komisi nyata.');
+  const [globalFooterAffiliateLink, setGlobalFooterAffiliateLink] = useState(() => localStorage.getItem('global_footer_affiliate_link') ?? 'https://wa.me/6281346867519?text=Affiliator');
+  const [globalFooterSocial1Icon, setGlobalFooterSocial1Icon] = useState(() => localStorage.getItem('global_footer_social1_icon') ?? 'instagram');
+  const [globalFooterSocial1Link, setGlobalFooterSocial1Link] = useState(() => localStorage.getItem('global_footer_social1_link') ?? 'https://instagram.com/didesa.id');
+  const [globalFooterSocial2Icon, setGlobalFooterSocial2Icon] = useState(() => localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
+  const [globalFooterSocial2Link, setGlobalFooterSocial2Link] = useState(() => localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
+  const [globalFooterCopyright, setGlobalFooterCopyright] = useState(() => localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const social1InputRef = useRef<HTMLInputElement>(null);
+  const social2InputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (file: File, setter: (url: string) => void) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `asset-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('public-assets')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('public-assets')
+        .getPublicUrl(filePath);
+
+      setter(publicUrl);
+    } catch (error) {
+      console.error('Error uploading:', error);
+      alert('Gagal mengunggah. Pastikan ukuran file tidak terlalu besar.');
+    }
+  };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -30,13 +68,35 @@ export default function AdminGlobalBranding() {
     localStorage.setItem('global_app_logo', globalLogo);
     localStorage.setItem('global_app_color', globalColor);
     localStorage.setItem('global_print_footer', globalPrintFooter);
+    localStorage.setItem('global_footer_desc', globalFooterDesc);
+    localStorage.setItem('global_footer_email', globalFooterEmail);
+    localStorage.setItem('global_footer_phone', globalFooterPhone);
+    localStorage.setItem('global_footer_affiliate_title', globalFooterAffiliateTitle);
+    localStorage.setItem('global_footer_affiliate_subtitle', globalFooterAffiliateSubtitle);
+    localStorage.setItem('global_footer_affiliate_link', globalFooterAffiliateLink);
+    localStorage.setItem('global_footer_social1_icon', globalFooterSocial1Icon);
+    localStorage.setItem('global_footer_social1_link', globalFooterSocial1Link);
+    localStorage.setItem('global_footer_social2_icon', globalFooterSocial2Icon);
+    localStorage.setItem('global_footer_social2_link', globalFooterSocial2Link);
+    localStorage.setItem('global_footer_copyright', globalFooterCopyright);
     
     try {
       const settingsToSave = [
         { key: 'global_app_name', value: globalName },
         { key: 'global_app_logo', value: globalLogo },
         { key: 'global_app_color', value: globalColor },
-        { key: 'global_print_footer', value: globalPrintFooter }
+        { key: 'global_print_footer', value: globalPrintFooter },
+        { key: 'global_footer_desc', value: globalFooterDesc },
+        { key: 'global_footer_email', value: globalFooterEmail },
+        { key: 'global_footer_phone', value: globalFooterPhone },
+        { key: 'global_footer_affiliate_title', value: globalFooterAffiliateTitle },
+        { key: 'global_footer_affiliate_subtitle', value: globalFooterAffiliateSubtitle },
+        { key: 'global_footer_affiliate_link', value: globalFooterAffiliateLink },
+        { key: 'global_footer_social1_icon', value: globalFooterSocial1Icon },
+        { key: 'global_footer_social1_link', value: globalFooterSocial1Link },
+        { key: 'global_footer_social2_icon', value: globalFooterSocial2Icon },
+        { key: 'global_footer_social2_link', value: globalFooterSocial2Link },
+        { key: 'global_footer_copyright', value: globalFooterCopyright }
       ];
       supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'key' }).then();
     } catch (e) {
@@ -62,23 +122,68 @@ export default function AdminGlobalBranding() {
       const defaultLogo = '';
       const defaultColor = '#047857';
       const defaultFooter = 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
+      
+      const defaultFooterDesc = 'Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.';
+      const defaultFooterEmail = 'info@didesa.id';
+      const defaultFooterPhone = '+62 813-4686-7519';
+      const defaultFooterAffiliateTitle = 'AFFILIATOR';
+      const defaultFooterAffiliateSubtitle = 'Mendigitalisasi desa & raih komisi nyata.';
+      const defaultFooterAffiliateLink = 'https://wa.me/6281346867519?text=Affiliator';
+      const defaultFooterSocial1Icon = 'instagram';
+      const defaultFooterSocial1Link = 'https://instagram.com/didesa.id';
+      const defaultFooterSocial2Icon = 'tiktok';
+      const defaultFooterSocial2Link = 'https://tiktok.com/@didesa.id';
+      const defaultFooterCopyright = '© 2026 • HAK CIPTA DILINDUNGI';
 
       setGlobalName(defaultName);
       setGlobalLogo(defaultLogo);
       setGlobalColor(defaultColor);
       setGlobalPrintFooter(defaultFooter);
+      setGlobalFooterDesc(defaultFooterDesc);
+      setGlobalFooterEmail(defaultFooterEmail);
+      setGlobalFooterPhone(defaultFooterPhone);
+      setGlobalFooterAffiliateTitle(defaultFooterAffiliateTitle);
+      setGlobalFooterAffiliateSubtitle(defaultFooterAffiliateSubtitle);
+      setGlobalFooterAffiliateLink(defaultFooterAffiliateLink);
+      setGlobalFooterSocial1Icon(defaultFooterSocial1Icon);
+      setGlobalFooterSocial1Link(defaultFooterSocial1Link);
+      setGlobalFooterSocial2Icon(defaultFooterSocial2Icon);
+      setGlobalFooterSocial2Link(defaultFooterSocial2Link);
+      setGlobalFooterCopyright(defaultFooterCopyright);
 
       localStorage.setItem('global_app_name', defaultName);
       localStorage.setItem('global_app_logo', defaultLogo);
       localStorage.setItem('global_app_color', defaultColor);
       localStorage.setItem('global_print_footer', defaultFooter);
+      localStorage.setItem('global_footer_desc', defaultFooterDesc);
+      localStorage.setItem('global_footer_email', defaultFooterEmail);
+      localStorage.setItem('global_footer_phone', defaultFooterPhone);
+      localStorage.setItem('global_footer_affiliate_title', defaultFooterAffiliateTitle);
+      localStorage.setItem('global_footer_affiliate_subtitle', defaultFooterAffiliateSubtitle);
+      localStorage.setItem('global_footer_affiliate_link', defaultFooterAffiliateLink);
+      localStorage.setItem('global_footer_social1_icon', defaultFooterSocial1Icon);
+      localStorage.setItem('global_footer_social1_link', defaultFooterSocial1Link);
+      localStorage.setItem('global_footer_social2_icon', defaultFooterSocial2Icon);
+      localStorage.setItem('global_footer_social2_link', defaultFooterSocial2Link);
+      localStorage.setItem('global_footer_copyright', defaultFooterCopyright);
 
       try {
         const resetSettings = [
           { key: 'global_app_name', value: defaultName },
           { key: 'global_app_logo', value: defaultLogo },
           { key: 'global_app_color', value: defaultColor },
-          { key: 'global_print_footer', value: defaultFooter }
+          { key: 'global_print_footer', value: defaultFooter },
+          { key: 'global_footer_desc', value: defaultFooterDesc },
+          { key: 'global_footer_email', value: defaultFooterEmail },
+          { key: 'global_footer_phone', value: defaultFooterPhone },
+          { key: 'global_footer_affiliate_title', value: defaultFooterAffiliateTitle },
+          { key: 'global_footer_affiliate_subtitle', value: defaultFooterAffiliateSubtitle },
+          { key: 'global_footer_affiliate_link', value: defaultFooterAffiliateLink },
+          { key: 'global_footer_social1_icon', value: defaultFooterSocial1Icon },
+          { key: 'global_footer_social1_link', value: defaultFooterSocial1Link },
+          { key: 'global_footer_social2_icon', value: defaultFooterSocial2Icon },
+          { key: 'global_footer_social2_link', value: defaultFooterSocial2Link },
+          { key: 'global_footer_copyright', value: defaultFooterCopyright }
         ];
         supabase.from('saas_settings').upsert(resetSettings, { onConflict: 'key' }).then();
       } catch (e) {}
@@ -180,6 +285,201 @@ export default function AdminGlobalBranding() {
                   rows={3}
                 />
                 <p className="text-[10px] text-slate-400 font-medium">Gunakan tag HTML ringan seperti &lt;strong&gt; atau &lt;br&gt; jika diperlukan.</p>
+              </div>
+
+              <div className="space-y-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Globe size={20} className="text-emerald-600" />
+                  Informasi Footer Website
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4 col-span-1 md:col-span-2">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                      <Type size={16} className="text-slate-500" />
+                      Deskripsi Pendek Footer
+                    </label>
+                    <textarea 
+                      value={globalFooterDesc}
+                      onChange={(e) => setGlobalFooterDesc(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                      <Mail size={16} className="text-slate-500" />
+                      Email Kontak
+                    </label>
+                    <input 
+                      type="text" 
+                      value={globalFooterEmail}
+                      onChange={(e) => setGlobalFooterEmail(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                      <Phone size={16} className="text-slate-500" />
+                      Nomor Telepon
+                    </label>
+                    <input 
+                      type="text" 
+                      value={globalFooterPhone}
+                      onChange={(e) => setGlobalFooterPhone(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                    />
+                  </div>
+
+                  <div className="space-y-4 col-span-1 md:col-span-2">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                      <Type size={16} className="text-slate-500" />
+                      Teks Hak Cipta
+                    </label>
+                    <input 
+                      type="text" 
+                      value={globalFooterCopyright}
+                      onChange={(e) => setGlobalFooterCopyright(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4 space-y-4">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Link size={16} className="text-emerald-600" />
+                    Banner Affiliator
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Judul (Label)</label>
+                      <input 
+                        type="text" 
+                        value={globalFooterAffiliateTitle}
+                        onChange={(e) => setGlobalFooterAffiliateTitle(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Teks Subtitle</label>
+                      <input 
+                        type="text" 
+                        value={globalFooterAffiliateSubtitle}
+                        onChange={(e) => setGlobalFooterAffiliateSubtitle(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                      />
+                    </div>
+                    <div className="space-y-4 col-span-1 md:col-span-2">
+                      <label className="text-xs font-bold text-slate-500 uppercase">Tautan (Link Tujuan)</label>
+                      <input 
+                        type="text" 
+                        value={globalFooterAffiliateLink}
+                        onChange={(e) => setGlobalFooterAffiliateLink(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 space-y-4">
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Share2 size={16} className="text-emerald-600" />
+                    Sosial Media
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Ikon Sosmed 1 (Upload)</label>
+                        <div className="mt-2 flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700">
+                            {globalFooterSocial1Icon ? (
+                              globalFooterSocial1Icon.startsWith('http') || globalFooterSocial1Icon.startsWith('data:') ? (
+                                <img src={globalFooterSocial1Icon} alt="Social 1" className="w-6 h-6 object-contain" />
+                              ) : (
+                                <span className="text-[10px] text-slate-400 font-medium">Lama</span>
+                              )
+                            ) : (
+                              <Image size={16} className="text-slate-400" />
+                            )}
+                          </div>
+                          <button
+                            onClick={() => social1InputRef.current?.click()}
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+                          >
+                            Upload Ikon
+                          </button>
+                          <input 
+                            type="file"
+                            ref={social1InputRef}
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) handleImageUpload(e.target.files[0], setGlobalFooterSocial1Icon);
+                            }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-2">Gunakan gambar persegi (PNG/SVG) transparan.</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Tautan Sosmed 1</label>
+                        <input 
+                          type="text" 
+                          value={globalFooterSocial1Link}
+                          onChange={(e) => setGlobalFooterSocial1Link(e.target.value)}
+                          className="w-full mt-2 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Ikon Sosmed 2 (Upload)</label>
+                        <div className="mt-2 flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-slate-700">
+                            {globalFooterSocial2Icon ? (
+                              globalFooterSocial2Icon.startsWith('http') || globalFooterSocial2Icon.startsWith('data:') ? (
+                                <img src={globalFooterSocial2Icon} alt="Social 2" className="w-6 h-6 object-contain" />
+                              ) : (
+                                <span className="text-[10px] text-slate-400 font-medium">Lama</span>
+                              )
+                            ) : (
+                              <Image size={16} className="text-slate-400" />
+                            )}
+                          </div>
+                          <button
+                            onClick={() => social2InputRef.current?.click()}
+                            className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors"
+                          >
+                            Upload Ikon
+                          </button>
+                          <input 
+                            type="file"
+                            ref={social2InputRef}
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) handleImageUpload(e.target.files[0], setGlobalFooterSocial2Icon);
+                            }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-2">Gunakan gambar persegi (PNG/SVG) transparan.</p>
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Tautan Sosmed 2</label>
+                        <input 
+                          type="text" 
+                          value={globalFooterSocial2Link}
+                          onChange={(e) => setGlobalFooterSocial2Link(e.target.value)}
+                          className="w-full mt-2 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 transition-all text-sm"
+                          placeholder="https://..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

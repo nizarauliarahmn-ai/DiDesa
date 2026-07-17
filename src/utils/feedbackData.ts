@@ -17,28 +17,7 @@ export const getFeedbacks = (): Feedback[] => {
   if (saved) return JSON.parse(saved);
   
   // Default sample data
-  return [
-    {
-      id: 1,
-      nama: 'Budi Santoso',
-      desa: 'Desa Sukamakmur',
-      email: 'budi@desa.id',
-      pesan: 'Mohon tambahkan fitur cetak kartu keluarga secara mandiri.',
-      tanggal: '2026-07-09',
-      status: 'Baru',
-      kategori: 'Saran'
-    },
-    {
-      id: 2,
-      nama: 'Siti Aminah',
-      desa: 'Desa Sukamaju',
-      email: 'siti@desa.id',
-      pesan: 'Aplikasi sering logout sendiri saat sedang mengisi form surat.',
-      tanggal: '2026-07-08',
-      status: 'Dibaca',
-      kategori: 'Bug'
-    }
-  ];
+  return [];
 };
 
 export const addFeedback = (feedback: Omit<Feedback, 'id' | 'status'>) => {

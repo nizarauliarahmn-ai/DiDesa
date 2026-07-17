@@ -19,17 +19,7 @@ export default function AdminAparatur() {
       if (stored) return JSON.parse(stored);
     } catch (e) {}
     return [
-      { name: 'Fazakkir Rahmad', role: 'Kepala Desa', nip: '-' },
-      { name: 'Siti Aminah', role: 'Sekretaris Desa', nip: '198510122010122003' },
-      { name: 'Muhammad Noor', role: 'Kasi Pemerintahan', nip: '198704152014021002' },
-      { name: 'Ahmad Rifai', role: 'Kasi Kesejahteraan', nip: '-' },
-      { name: 'Rahmadi', role: 'Kasi Pelayanan', nip: '-' },
-      { name: 'H. Supian', role: 'Kaur Keuangan', nip: '-' },
-      { name: 'Sri Wahyuni', role: 'Kaur Umum', nip: '-' },
-      { name: 'Budi Santoso', role: 'Ketua BPD', nip: '-' },
-      { name: 'Dewi Lestari', role: 'Ketua LPM', nip: '-' },
-      { name: 'Siti Rohani', role: 'Ketua PKK', nip: '-' },
-      { name: 'Dimas Aditya', role: 'Ketua Karang Taruna', nip: '-' },
+      { name: 'Belum Diatur', role: 'Kepala Desa', nip: '-' },
     ];
   });
   const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || 'Fazakkir Rahmad');

@@ -79,7 +79,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           email: email,
           role: 'saas_admin' as const,
           name: 'Pemilik Platform (SaaS)',
-          avatar: 'https://i.pravatar.cc/150?img=60'
+          avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=SaaS'
         };
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
         onLoginSuccess(loggedUser);
@@ -106,7 +106,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           role: 'kades' as const,
           name: `Super Admin ${matchingTenantKades.nama_desa}`,
           tenantId: matchingTenantKades.id,
-          avatar: 'https://i.pravatar.cc/150?img=47'
+          avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Kades'
         };
         localStorage.setItem('kop_desa', matchingTenantKades.nama_desa);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
@@ -123,7 +123,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           role: 'admin' as const,
           name: `Admin ${matchingTenantAdmin.nama_desa}`,
           tenantId: matchingTenantAdmin.id,
-          avatar: 'https://i.pravatar.cc/150?img=12'
+          avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Admin'
         };
         localStorage.setItem('kop_desa', matchingTenantAdmin.nama_desa);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
@@ -146,9 +146,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         
         const loggedUser = {
           email: email || (isSuper ? 'kades@sukamakmur.desa.id' : 'admin@sukamakmur.desa.id'),
-          role: role as any,
+          role: isSuper ? 'kades' : 'admin',
           name: role === 'saas_admin' ? 'Pemilik Platform' : role === 'kades' ? (localStorage.getItem('village_super_admin') || 'Super Admin') : 'Admin',
-          avatar: isSuper ? 'https://i.pravatar.cc/150?img=47' : 'https://i.pravatar.cc/150?img=12'
+          avatar: isSuper ? 'https://api.dicebear.com/9.x/micah/svg?seed=Kades' : 'https://api.dicebear.com/9.x/micah/svg?seed=Admin'
         };
 
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
