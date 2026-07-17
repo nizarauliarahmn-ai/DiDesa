@@ -343,7 +343,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         {/* Footer */}
         <p className="text-[10px] text-center text-gray-400 mt-6 leading-relaxed">
           Sistem Informasi Administrasi Desa & Layanan Mandiri Terintegrasi.<br />
-          © {new Date().getFullYear()} {desaName}. Seluruh Hak Cipta Dilindungi.
+          &copy; {new Date().getFullYear()} {globalName}. Seluruh Hak Cipta Dilindungi.
         </p>
       </div>
 
