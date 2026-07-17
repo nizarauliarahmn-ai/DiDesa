@@ -434,7 +434,13 @@ export default function AdminTenants() {
         </div>
       ) : (
         <>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+          {/* Print Header */}
+          <div className="hidden print:block mb-8 text-center border-b pb-4">
+            <h1 className="text-2xl font-bold text-black uppercase tracking-wider">Data Kredensial Klien DiDesa</h1>
+            <p className="text-sm text-gray-600 mt-1">Dicetak pada: {new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 print:hidden">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight flex items-center gap-2">
                 <Server className="w-6 h-6 text-emerald-600" />
@@ -478,7 +484,7 @@ export default function AdminTenants() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
             <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center gap-4">
               <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 shrink-0 animate-pulse">
                 <Database size={24} />
@@ -509,8 +515,8 @@ export default function AdminTenants() {
           </div>
 
           {/* Tenant List */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
-            <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden print:border-none print:shadow-none">
+            <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 gap-4 print:hidden">
               <div className="relative w-full sm:w-80">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input 
@@ -751,13 +757,22 @@ export default function AdminTenants() {
                                   <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
                                   <button
                                     onClick={() => {
+                                      // Save current search query
+                                      const prevQuery = searchQuery;
                                       setSearchQuery(tenant.nama_desa);
-                                      setTimeout(() => window.print(), 100);
+                                      
+                                      // Wait for re-render, then print
+                                      setTimeout(() => {
+                                        window.print();
+                                        
+                                        // Reset search query after print dialog closes
+                                        setTimeout(() => setSearchQuery(prevQuery), 500);
+                                      }, 300);
                                     }}
                                     className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-blue-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
                                     <Printer size={13} className="text-gray-400" />
-                                    <span>Cetak</span>
+                                    <span>Cetak Kredensial</span>
                                   </button>
                                   <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
                                   <button
