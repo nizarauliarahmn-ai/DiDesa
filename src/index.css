@@ -4,6 +4,44 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* Brand Green (Emerald Override) */
+  --color-emerald-50: #ebf6f1;
+  --color-emerald-100: #cce9dd;
+  --color-emerald-200: #99d0ba;
+  --color-emerald-300: #66b896;
+  --color-emerald-400: #33a072;
+  --color-emerald-500: #008757;
+  --color-emerald-600: #007a4e;
+  --color-emerald-700: #00603d;
+  --color-emerald-800: #00472d;
+  --color-emerald-900: #002e1d;
+  --color-emerald-950: #00170e;
+
+  /* Brand Yellow (Amber Override) */
+  --color-amber-50: #fffceb;
+  --color-amber-100: #fff7cc;
+  --color-amber-200: #ffeb99;
+  --color-amber-300: #ffdf66;
+  --color-amber-400: #ffd433;
+  --color-amber-500: #ffcc26;
+  --color-amber-600: #e6b822;
+  --color-amber-700: #b38f1a;
+  --color-amber-800: #806613;
+  --color-amber-900: #4c3d0b;
+  --color-amber-950: #261f05;
+
+  --color-yellow-50: var(--color-amber-50);
+  --color-yellow-100: var(--color-amber-100);
+  --color-yellow-200: var(--color-amber-200);
+  --color-yellow-300: var(--color-amber-300);
+  --color-yellow-400: var(--color-amber-400);
+  --color-yellow-500: var(--color-amber-500);
+  --color-yellow-600: var(--color-amber-600);
+  --color-yellow-700: var(--color-amber-700);
+  --color-yellow-800: var(--color-amber-800);
+  --color-yellow-900: var(--color-amber-900);
+  --color-yellow-950: var(--color-amber-950);
+
   --color-tertiary: #0054a7;
   --color-on-tertiary-fixed-variant: #00468c;
   --color-surface-variant: #e2e2e2;
