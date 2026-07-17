@@ -129,7 +129,7 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
               <p class="font-extrabold text-[14px] uppercase tracking-wider text-slate-800 dark:text-slate-100 leading-tight mb-0.5">${dataWarga.kabupaten.toUpperCase()}</p>
               <p class="font-bold text-[14px] uppercase tracking-wider text-slate-800 dark:text-slate-100 leading-tight mb-0.5">${dataWarga.kecamatan.toUpperCase()}</p>
               <p class="font-black text-[26px] tracking-wide text-emerald-950 uppercase mt-1 leading-tight mb-1">${dataWarga.village.toUpperCase()}</p>
-              <p class="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug mt-1">Alamat Kantor Pelayanan: Jl. Keramat No. 12 Wasah Hilir, Kode Pos 71253</p>
+              <p class="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug mt-1">Alamat Kantor Pelayanan: Jl. Keramat No. 12 Sukamakmur, Kode Pos 71253</p>
               </div>
             </div>
           </div>
@@ -217,12 +217,12 @@ export default function AdminSuratMasterTemplate() {
     {
       nik: '3275010101700001',
       name: 'BUDI SANTOSO',
-      birthPlace: 'Wasah Hilir',
+      birthPlace: 'Sukamakmur',
       birthDate: '12-06-1985',
       gender: 'Laki-laki',
       address: 'Dusun Krajan',
       rtRw: 'RT 02/RW 01',
-      village: 'Desa Wasah Hilir',
+      village: 'Desa Sukamakmur',
       kecamatan: 'Kecamatan Simpur',
       kabupaten: 'Kabupaten Hulu Sungai Selatan'
     },
@@ -234,7 +234,7 @@ export default function AdminSuratMasterTemplate() {
       gender: 'Perempuan',
       address: 'Dusun Sejahtera',
       rtRw: 'RT 05/RW 02',
-      village: 'Desa Wasah Hilir',
+      village: 'Desa Sukamakmur',
       kecamatan: 'Kecamatan Simpur',
       kabupaten: 'Kabupaten Hulu Sungai Selatan'
     }
@@ -680,7 +680,7 @@ export default function AdminSuratMasterTemplate() {
                       <div style={{ fontWeight: 800, fontSize: '14px', textTransform: 'uppercase', color: '#111', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>{selectedResident.kabupaten.toUpperCase()}</div>
                       <div style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', color: '#111', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>{selectedResident.kecamatan.toUpperCase()}</div>
                       <div style={{ fontWeight: 900, fontSize: '26px', color: '#022c22', letterSpacing: '0.5px', textTransform: 'uppercase', lineHeight: '1.1', margin: '2px 0 3px 0' }}>{selectedResident.village.toUpperCase()}</div>
-                      <div style={{ fontSize: '10.5px', color: '#111', textTransform: 'capitalize', lineHeight: '1.15', margin: '2px 0 1px 0' }}>Alamat Kantor Pelayanan: Jl. Keramat No. 12 Wasah Hilir, Kode Pos 71253</div>
+                      <div style={{ fontSize: '10.5px', color: '#111', textTransform: 'capitalize', lineHeight: '1.15', margin: '2px 0 1px 0' }}>Alamat Kantor Pelayanan: Jl. Keramat No. 12 Sukamakmur, Kode Pos 71253</div>
                     </div>
                   </div>
 

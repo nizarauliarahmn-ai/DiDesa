@@ -107,12 +107,12 @@ export default function AdminSuratSDU({
     includeCamat: false,
     
     // Kop Settings
-    namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
+    namaDesa: localStorage.getItem('kop_desa') || 'Sukamakmur',
     namaKecamatan: localStorage.getItem('kop_kecamatan') || 'Simpur',
     namaKabupaten: localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan',
     namaProvinsi: localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan',
     alamatKantor: localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261',
-    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesawasahhilir@gmail.com',
+    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com',
   });
 
   const [previewZoom, setPreviewZoom] = useState(0.45);
@@ -172,7 +172,7 @@ export default function AdminSuratSDU({
         rtRw: `${data.rt || '001'} / ${data.rw || '001'}`,
         rt_rw: `${data.rt || '001'}/${data.rw || '001'}`,
         domicileStatus: data.sifatDomisili === 'Menetap' ? 'Sesuai KTP' : 'Domisili Sementara',
-        desa: data.desa || localStorage.getItem('kop_desa') || 'Wasah Hilir',
+        desa: data.desa || localStorage.getItem('kop_desa') || 'Sukamakmur',
         initials: existing ? (existing.initials || computedInitials) : computedInitials,
         age: existing ? (existing.age || computedAge) : computedAge,
       };
@@ -310,7 +310,7 @@ export default function AdminSuratSDU({
       rt: formData.sifatDomisili === 'Menetap' ? (formData.rtSekarang || formData.rt) : (formData.rtSekarang || formData.rt),
       rw: formData.sifatDomisili === 'Menetap' ? (formData.rwSekarang || formData.rw) : (formData.rwSekarang || formData.rw),
       sifatDomisili: formData.sifatDomisili,
-      desa: formData.namaDesa || localStorage.getItem('kop_desa') || 'Wasah Hilir'
+      desa: formData.namaDesa || localStorage.getItem('kop_desa') || 'Sukamakmur'
     });
 
     const content = generateHTML();
@@ -447,7 +447,7 @@ export default function AdminSuratSDU({
 
     const activeKabupaten = localStorage.getItem('kop_kabupaten') || formData.namaKabupaten || 'Hulu Sungai Selatan';
     const activeKecamatan = localStorage.getItem('kop_kecamatan') || formData.namaKecamatan || 'Simpur';
-    const activeDesa = localStorage.getItem('kop_desa') || formData.namaDesa || 'Wasah Hilir';
+    const activeDesa = localStorage.getItem('kop_desa') || formData.namaDesa || 'Sukamakmur';
     const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
     const activeProvinsi = localStorage.getItem('kop_provinsi') || formData.namaProvinsi || 'Kalimantan Selatan';
 
@@ -474,7 +474,7 @@ export default function AdminSuratSDU({
             <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKecamatan.toUpperCase()}</div>
             <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">DESA ${activeDesa.toUpperCase()}</div>
             <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${activeAlamat}</div>
-            <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${formData.kontakKantor || '0813 4686 7519, pemdeswasahhilir@gmail.com'}</div>
+            <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${formData.kontakKantor || '0813 4686 7519, pemdessukamakmur@gmail.com'}</div>
           </div>
           </div>
         </div>

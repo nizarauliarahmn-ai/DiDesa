@@ -63,7 +63,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
     }
 
     // 3. Fallback Khusus Lingkungan Development / Vercel Preview
-    console.warn("Tenant Resolver: No subdomain or auth found. Falling back to default DEV tenant (Wasah Hilir).");
+    console.warn("Tenant Resolver: No subdomain or auth found. Falling back to default DEV tenant (Sukamakmur).");
     cachedTenantId = '11111111-1111-1111-1111-111111111111';
     
     isResolving = false;

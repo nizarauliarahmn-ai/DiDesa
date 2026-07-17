@@ -14,7 +14,7 @@ export default function Header({
   setActiveTab?: (tab: string) => void;
   onLogout?: () => void;
 }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
   const [appTheme, setAppTheme] = React.useState(() => localStorage.getItem('app_theme') || 'light');
@@ -24,7 +24,7 @@ export default function Header({
     window.addEventListener('app_theme_updated', syncTheme);
     
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
     };
     const handleBrandingUpdate = () => {
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');

@@ -13,11 +13,11 @@ export default function AdminPengaturan() {
   useEffect(() => {
     resolveCurrentTenant().then(setTenantId);
   }, []);
-  const [villageName, setVillageName] = useState(() => localStorage.getItem('village_name') || 'WASAH HILIR');
+  const [villageName, setVillageName] = useState(() => localStorage.getItem('village_name') || 'Sukamakmur');
   const [kecamatan, setKecamatan] = useState(() => localStorage.getItem('village_kecamatan') || 'Kecamatan Simpur');
   const [kabupaten, setKabupaten] = useState(() => localStorage.getItem('village_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [alamat, setAlamat] = useState(() => localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
-  const [kontak, setKontak] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdeswasahhilir@gmail.com');
+  const [kontak, setKontak] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
   
   const [welcomeBannerUrl, setWelcomeBannerUrl] = useState(() => localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000');

@@ -3,12 +3,12 @@ import { Map as MapIcon, Maximize, Star, Phone, Shield, X } from 'lucide-react';
 import KalenderDesa from './KalenderDesa';
 
 export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: string) => void }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [showIdmModal, setShowIdmModal] = React.useState(false);
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
     };
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     return () => {

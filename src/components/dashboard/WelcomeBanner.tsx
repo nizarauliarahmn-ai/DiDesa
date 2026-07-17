@@ -2,7 +2,7 @@ import React from 'react';
 import { Sparkles } from 'lucide-react';
 
 export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: string) => void }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
   const [welcomeBannerUrl, setWelcomeBannerUrl] = React.useState(() => localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000');
   const [welcomeBannerYOffset, setWelcomeBannerYOffset] = React.useState(() => localStorage.getItem('village_welcome_banner_y_offset') || '50');
@@ -10,7 +10,7 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
       setWelcomeBannerUrl(localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000');
       setWelcomeBannerYOffset(localStorage.getItem('village_welcome_banner_y_offset') || '50');
       setWelcomeBannerZoom(localStorage.getItem('village_welcome_banner_zoom') || '100');

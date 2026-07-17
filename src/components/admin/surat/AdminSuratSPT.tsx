@@ -92,7 +92,7 @@ export default function AdminSuratSPT({
   const camatPangkat = localStorage.getItem('village_signature_left_pangkat') || '';
   const camatNip = localStorage.getItem('village_signature_left_nip') || '';
   const activeKecamatan = cleanStr(localStorage.getItem('kop_kecamatan') || 'Simpur', /^kecamatan\s+/i);
-  const activeDesa = cleanStr(localStorage.getItem('kop_desa') || 'Wasah Hilir', /^(desa|kelurahan)\s+/i);
+  const activeDesa = cleanStr(localStorage.getItem('kop_desa') || 'Sukamakmur', /^(desa|kelurahan)\s+/i);
   const activeKabupaten = cleanStr(localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan', /^(kabupaten|kota)\s+/i);
 
   // ─── State ───

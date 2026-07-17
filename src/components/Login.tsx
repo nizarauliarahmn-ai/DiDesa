@@ -16,7 +16,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Village Settings for Dynamic branding in login screen
-  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [kabupatenName, setKabupatenName] = useState(() => localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
 
@@ -34,7 +34,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
         if (data) {
           setCurrentTenant(data);
-          setDesaName(data.nama_desa || 'Desa Wasah Hilir');
+          setDesaName(data.nama_desa || 'Desa Sukamakmur');
           // Update global names based on tenant
         }
       }
@@ -42,7 +42,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     initializeTenant();
     
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
       setKabupatenName(localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
       setLogoUrl(localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
     };
@@ -145,7 +145,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         }
         
         const loggedUser = {
-          email: email || (isSuper ? 'kades@wasahhilir.desa.id' : 'admin@wasahhilir.desa.id'),
+          email: email || (isSuper ? 'kades@sukamakmur.desa.id' : 'admin@sukamakmur.desa.id'),
           role: role as any,
           name: role === 'saas_admin' ? 'Pemilik Platform' : role === 'kades' ? (localStorage.getItem('village_super_admin') || 'Super Admin') : 'Admin',
           avatar: isSuper ? 'https://i.pravatar.cc/150?img=47' : 'https://i.pravatar.cc/150?img=12'
@@ -158,7 +158,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         const loggedUser = {
           email: email,
           role: 'public' as const,
-          name: email.split('@')[0].toUpperCase().replace('.', ' ') || 'Warga Wasah Hilir',
+          name: email.split('@')[0].toUpperCase().replace('.', ' ') || 'Warga Sukamakmur',
           avatar: 'https://i.pravatar.cc/150?img=11'
         };
 
@@ -292,7 +292,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={role === 'admin' ? (currentTenant?.admin_email || 'admin@wasahhilir.desa.id') : 'warga@wasahhilir.desa.id'}
+                placeholder={role === 'admin' ? (currentTenant?.admin_email || 'admin@sukamakmur.desa.id') : 'warga@sukamakmur.desa.id'}
                 className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
               />
             </div>

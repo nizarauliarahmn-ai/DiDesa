@@ -16,7 +16,7 @@ export default function Sidebar({
   isMobileMenuOpen?: boolean;
   setIsMobileMenuOpen?: (val: boolean) => void;
 }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [authUser, setAuthUser] = React.useState<{ name: string; email: string; avatar: string } | null>(null);
 
   // Global Branding
@@ -34,7 +34,7 @@ export default function Sidebar({
     loadAuthUser();
 
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
     };
 
     const handleBrandingUpdate = () => {
@@ -138,7 +138,7 @@ export default function Sidebar({
           <img src={authUser?.avatar || "https://i.pravatar.cc/150?img=11"} alt="Profile" className="w-10 h-10 rounded-full border-2 border-emerald-100 object-cover" />
           <div className="overflow-hidden flex-1">
             <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{authUser?.name || "Akses Publik"}</p>
-            <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate font-semibold">{authUser?.email || "warga@wasahhilir.desa.id"}</p>
+            <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate font-semibold">{authUser?.email || "warga@sukamakmur.desa.id"}</p>
           </div>
         </div>
         <button 

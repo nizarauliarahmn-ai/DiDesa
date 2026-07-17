@@ -21,7 +21,7 @@ export const getFeedbacks = (): Feedback[] => {
     {
       id: 1,
       nama: 'Budi Santoso',
-      desa: 'Desa Wasah Hilir',
+      desa: 'Desa Sukamakmur',
       email: 'budi@desa.id',
       pesan: 'Mohon tambahkan fitur cetak kartu keluarga secara mandiri.',
       tanggal: '2026-07-09',

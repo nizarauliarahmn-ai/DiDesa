@@ -116,12 +116,12 @@ export default function AdminSuratSKL({
   const [includeCamat, setIncludeCamat] = useState(false);
   
   // Kop Settings
-  const namaDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+  const namaDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
   const namaKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
   const namaKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
   const namaProvinsi = localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan';
   const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-  const kontakKantor = localStorage.getItem('kop_kontak') || '081346867519 | pemdesawasahhilir@gmail.com';
+  const kontakKantor = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
 
   const [previewZoom, setPreviewZoom] = useState(0.38);
   const dragProps = useDragScroll();

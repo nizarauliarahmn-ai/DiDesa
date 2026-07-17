@@ -154,7 +154,7 @@ export default function AdminSuratPenomoran() {
     const year = date.getFullYear();
     const year2D = String(year).slice(-2);
     const villageName =
-      localStorage.getItem("village_name") || "Desa Wasah Hilir";
+      localStorage.getItem("village_name") || "Desa Sukamakmur";
     const kecamatan =
       localStorage.getItem("village_kecamatan") || "Kecamatan Simpur";
     const kabupaten =
@@ -162,7 +162,7 @@ export default function AdminSuratPenomoran() {
       "Pemerintah Kabupaten Hulu Sungai Selatan";
 
     const getDesaInitial = (name: string) => {
-      if (name.toLowerCase().includes("wasah hilir")) return "WHi";
+      if (name.toLowerCase().includes("Sukamakmur")) return "WHi";
       if (name.toLowerCase().includes("sukamaju")) return "DS-SKM";
       const words = name
         .replace(/desa|kelurahan/gi, "")
@@ -262,7 +262,7 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
     const existingReqs = JSON.parse(localStorage.getItem("saas_letter_requests") || "[]");
     const newReq = {
       id: Date.now().toString(),
-      villageName: localStorage.getItem("village_name") || "Desa Wasah Hilir",
+      villageName: localStorage.getItem("village_name") || "Desa Sukamakmur",
       letterName: saasLetterName.toUpperCase().trim(),
       fileName: saasLetterFile.name,
       fileData: fileData, // Base64 content for downloading

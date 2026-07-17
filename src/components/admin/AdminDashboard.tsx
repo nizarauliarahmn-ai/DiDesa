@@ -10,7 +10,7 @@ import { getSaaSLogs, SaaSLog } from '../../utils/saasLogs';
 export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
   const [residents, setResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [aspirasiList, setAspirasiList] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [authUser, setAuthUser] = useState<any>(null);
@@ -21,7 +21,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
     setAuthUser(user);
 
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
     };
     const handleFeedbackUpdate = () => {
       setFeedbacks(getFeedbacks());
@@ -125,7 +125,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
     
     // Simulating app usage data
     const usageData = [
-      { name: 'Desa Wasah Hilir', users: 124, surat: 850, uptime: '99.9%' },
+      { name: 'Desa Sukamakmur', users: 124, surat: 850, uptime: '99.9%' },
       { name: 'Desa Sukamaju', users: 89, surat: 420, uptime: '99.8%' },
       { name: 'Desa Melati', users: 210, surat: 1100, uptime: '99.9%' },
       { name: 'Desa Anggrek', users: 56, surat: 280, uptime: '99.7%' },

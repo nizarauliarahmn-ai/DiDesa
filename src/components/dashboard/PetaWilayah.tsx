@@ -37,7 +37,7 @@ function decimalToDMS(lat: number, lng: number): string {
 export default function PetaWilayah() {
   const [selectedPoi, setSelectedPoi] = useState<PointOfInterest | null>(null);
 
-  const villageName = localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Wasah Hilir';
+  const villageName = localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur';
   const kadesName = localStorage.getItem('kop_kades') || 'Fazakkir Rahmad';
   const villageAlamat = localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur';
   
@@ -69,7 +69,7 @@ export default function PetaWilayah() {
       category: 'infrastruktur',
       coordinates: decimalToDMS(villageLat - 0.003694, villageLng - 0.004889),
       address: 'Kawasan Pertanian Handil Galam, RT 06',
-      officer: 'Gapoktan Wasah Hilir',
+      officer: 'Gapoktan Sukamakmur',
       desc: 'Infrastruktur penghubung jalan usaha tani yang memudahkan sirkulasi panen padi dan pupuk menuju sawah warga.',
       image: 'https://images.unsplash.com/photo-1541888081156-fce1fa5427d6?auto=format&fit=crop&q=80&w=600',
       x: 18,

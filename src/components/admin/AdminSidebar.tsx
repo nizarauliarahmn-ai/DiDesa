@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 import { getFeedbacks } from '../../utils/feedbackData';
 
 export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogout, isMobileMenuOpen, setIsMobileMenuOpen }: { setView: (view: 'public' | 'admin') => void, activeTab: string, setActiveTab: (tab: string) => void, onLogout: () => void, isMobileMenuOpen?: boolean, setIsMobileMenuOpen?: (val: boolean) => void }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [authUser, setAuthUser] = React.useState<{ name: string; email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; avatar: string } | null>(null);
   const [unreadFeedbacks, setUnreadFeedbacks] = useState(0);
   
@@ -23,7 +23,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
     loadAuthUser();
 
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
     };
 
     const handleBrandingUpdate = () => {

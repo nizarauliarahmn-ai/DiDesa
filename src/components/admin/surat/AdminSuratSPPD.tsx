@@ -56,7 +56,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [officers, setOfficers] = useState<any[]>([]);
 
   // Desa Settings
-  const [desaName, setDesaName] = useState('Desa Wasah Hilir');
+  const [desaName, setDesaName] = useState('Desa Sukamakmur');
   const [namaKades, setNamaKades] = useState('FAZAKKIR RAHMAD');
   const [roleKades, setRoleKades] = useState('Kepala Desa');
   const [nipKades, setNipKades] = useState('');
@@ -118,7 +118,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   // Detail Perjalanan
   const [maksudPerjalanan, setMaksudPerjalanan] = useState(editData?.maksudPerjalanan || '');
   const [alatAngkut, setAlatAngkut] = useState(editData?.alatAngkut || '');
-  const [tempatBerangkat, setTempatBerangkat] = useState(editData?.tempatBerangkat || 'Desa Wasah Hilir');
+  const [tempatBerangkat, setTempatBerangkat] = useState(editData?.tempatBerangkat || 'Desa Sukamakmur');
   const [tempatTujuan, setTempatTujuan] = useState(editData?.tempatTujuan || '');
   const [lamaPerjalanan, setLamaPerjalanan] = useState(editData?.lamaPerjalanan || '1 (Satu) Hari');
   const [tanggalBerangkat, setTanggalBerangkat] = useState(editData?.tanggalBerangkat || '');
@@ -135,7 +135,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const dragProps = useDragScroll();
 
   useEffect(() => {
-    setDesaName(localStorage.getItem('kop_desa') || 'Wasah Hilir');
+    setDesaName(localStorage.getItem('kop_desa') || 'Sukamakmur');
     setNamaKades(localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD');
     setRoleKades('Kepala Desa');
     
@@ -298,9 +298,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const generateHTML = () => {
     const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
     const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
-    const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+    const activeDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
     const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdeswasahhilir@gmail.com';
+    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const isAn = roleKades.toLowerCase() !== 'kepala desa';
     const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();

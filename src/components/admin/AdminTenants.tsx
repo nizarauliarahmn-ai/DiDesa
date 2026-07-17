@@ -878,7 +878,7 @@ export default function AdminTenants() {
                       value={formData.nama_desa} 
                       onChange={e => setFormData({...formData, nama_desa: e.target.value})} 
                       className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
-                      placeholder="Contoh: Desa Wasah Hilir" 
+                      placeholder="Contoh: Desa Sukamakmur" 
                     />
                   </div>
                   <div>
@@ -900,7 +900,7 @@ export default function AdminTenants() {
                       value={formData.domain} 
                       onChange={e => setFormData({...formData, domain: e.target.value})} 
                       className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
-                      placeholder="Contoh: wasahhilir.sistemdidesa.id" 
+                      placeholder="Contoh: sukamakmur.sistemdidesa.id" 
                     />
                   </div>
                 </div>
