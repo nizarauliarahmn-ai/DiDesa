@@ -228,10 +228,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           avatar: 'https://i.pravatar.cc/150?img=12'
         };
       } else {
-        setEmail('warga@wasahhilir.desa.id');
+        const wargaDomain = currentTenant?.domain || 'wasahhilir.desa.id';
+        const wargaEmail = `warga@${wargaDomain}`;
+        setEmail(wargaEmail);
         setPassword('warga123');
         loggedUser = {
-          email: 'warga@wasahhilir.desa.id',
+          email: wargaEmail,
           role: 'public' as const,
           tenantId: currentTenant?.id || '11111111-1111-1111-1111-111111111111',
           name: `Warga ${fallbackDesaName}`,
@@ -482,7 +484,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                   Warga
                 </span>
               </div>
-              <p className="text-[10px] text-sky-800/70 truncate font-semibold">Username: warga@wasahhilir.desa.id | Pass: warga123</p>
+              <p className="text-[10px] text-sky-800/70 truncate font-semibold">Username: warga@{currentTenant?.domain || 'wasahhilir.desa.id'} | Pass: warga123</p>
             </div>
           </button>
 
