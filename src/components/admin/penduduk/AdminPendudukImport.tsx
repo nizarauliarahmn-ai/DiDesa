@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { X, Upload, Download, Check, CheckCircle, AlertCircle, ArrowRight, FileText, Database, Loader2 } from 'lucide-react';
+import { read, utils } from 'xlsx';
 import { showToast } from '../../../utils/toast';
 
 interface AdminPendudukImportProps {
@@ -115,11 +116,10 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
     setStep(2);
   };
 
-  // Handle local file upload
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setFileName(file.name);
+  // Helper to process both CSV and Excel
+  const processFile = (file: File) => {
+    setFileName(file.name);
+    if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target && typeof event.target.result === 'string') {
@@ -127,6 +127,32 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
         }
       };
       reader.readAsText(file, "UTF-8");
+    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target && event.target.result) {
+          try {
+            const data = new Uint8Array(event.target.result as ArrayBuffer);
+            const workbook = read(data, { type: 'array' });
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const csvString = utils.sheet_to_csv(worksheet);
+            handleCSVContentLoaded(csvString);
+          } catch (error) {
+            showToast("Gagal membaca file Excel", "error");
+          }
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      showToast("Mohon unggah file dengan format .csv atau .xlsx", "error");
+    }
+  };
+
+  // Handle local file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      processFile(e.target.files[0]);
     }
   };
 
@@ -138,19 +164,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
-        setFileName(file.name);
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target && typeof event.target.result === 'string') {
-            handleCSVContentLoaded(event.target.result);
-          }
-        };
-        reader.readAsText(file, "UTF-8");
-      } else {
-        showToast("Mohon unggah file dengan format .csv", "error");
-      }
+      processFile(e.dataTransfer.files[0]);
     }
   };
 
@@ -412,7 +426,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                 <input 
                   type="file" 
                   id="modal-file-upload" 
-                  accept=".csv, .txt" 
+                  accept=".csv, .txt, .xlsx, .xls" 
                   className="hidden" 
                   onChange={handleFileUpload}
                 />
