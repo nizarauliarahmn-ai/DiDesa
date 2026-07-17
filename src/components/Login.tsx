@@ -338,7 +338,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             <span>{isLoading ? 'Menghubungkan...' : 'Masuk Sekarang'}</span>
             {!isLoading && <ArrowRight size={14} />}
           </button>
-
+        </form>
 
         {/* Footer */}
         <p className="text-[10px] text-center text-gray-400 mt-6 leading-relaxed">
