@@ -243,6 +243,10 @@ export default function AdminTenants() {
                 .bg-gray-100 { background: #f3f4f6; color: #374151; }
                 .text-blue-600 { color: #2563eb; }
                 .flex { display: flex; align-items: center; gap: 4px; }
+                .print-hide { display: none !important; }
+                .print-show { display: block !important; }
+                .print-show-inline { display: inline-block !important; }
+                svg { width: 14px; height: 14px; display: inline-block; vertical-align: middle; flex-shrink: 0; }
               </style>
             </head>
             <body>
@@ -661,12 +665,17 @@ export default function AdminTenants() {
                               </span>
                             </div>
                             
+                            <div className="hidden print-show mt-2">
+                              <span className="text-[10px] text-gray-500 block mb-0.5">URL Akses Portal:</span>
+                              <span className="font-mono text-xs font-bold text-emerald-700 break-all">{window.location.origin}/?tenant={tenant.domain}</span>
+                            </div>
+
                             {tenant.domain && (
                               <a 
                                 href={`/?tenant=${tenant.domain}`} 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1.5 rounded-lg border border-emerald-200 transition-colors w-fit group/link"
+                                className="print-hide flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1.5 rounded-lg border border-emerald-200 transition-colors w-fit group/link"
                               >
                                 <ExternalLink size={13} className="group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
                                 Buka Portal Web
@@ -686,7 +695,7 @@ export default function AdminTenants() {
                               </span>
                               <button 
                                 onClick={() => handleCopyToClipboard(kadEmail, `${tenant.id}-kademail`)}
-                                className="p-0.5 text-gray-400 hover:text-emerald-600"
+                                className="print-hide p-0.5 text-gray-400 hover:text-emerald-600"
                                 title="Salin Email"
                               >
                                 {copiedId === `${tenant.id}-kademail` ? <Check size={12} className="text-emerald-600" /> : <Copy size={11} />}
@@ -702,7 +711,7 @@ export default function AdminTenants() {
                               </span>
                               <button 
                                 onClick={() => handleCopyToClipboard(kadPass, `${tenant.id}-kadpass`)}
-                                className="p-0.5 text-gray-400 hover:text-emerald-600"
+                                className="print-hide p-0.5 text-gray-400 hover:text-emerald-600"
                                 title="Salin Password"
                               >
                                 {copiedId === `${tenant.id}-kadpass` ? <Check size={12} className="text-emerald-600" /> : <Copy size={11} />}
@@ -722,7 +731,7 @@ export default function AdminTenants() {
                               </span>
                               <button 
                                 onClick={() => handleCopyToClipboard(admEmail, `${tenant.id}-admemail`)}
-                                className="p-0.5 text-gray-400 hover:text-emerald-600"
+                                className="print-hide p-0.5 text-gray-400 hover:text-emerald-600"
                                 title="Salin Email"
                               >
                                 {copiedId === `${tenant.id}-admemail` ? <Check size={12} className="text-emerald-600" /> : <Copy size={11} />}
@@ -738,7 +747,7 @@ export default function AdminTenants() {
                               </span>
                               <button 
                                 onClick={() => handleCopyToClipboard(admPass, `${tenant.id}-admpass`)}
-                                className="p-0.5 text-gray-400 hover:text-emerald-600"
+                                className="print-hide p-0.5 text-gray-400 hover:text-emerald-600"
                                 title="Salin Password"
                               >
                                 {copiedId === `${tenant.id}-admpass` ? <Check size={12} className="text-emerald-600" /> : <Copy size={11} />}
