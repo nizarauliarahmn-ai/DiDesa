@@ -209,11 +209,13 @@ html, body, #root {
 }
 
 @media print {
-  body, html, .dark {
+  body, html, .dark, #root {
     background-color: white !important;
     color: black !important;
     height: auto !important;
+    min-height: 0 !important;
     overflow: visible !important;
+    display: block !important;
   }
   
   * {
@@ -221,6 +223,15 @@ html, body, #root {
     print-color-adjust: exact !important;
     box-shadow: none !important;
     text-shadow: none !important;
+  }
+  
+  /* Force all height-constraining wrappers to expand */
+  .h-screen, .h-full, .min-h-screen, .min-h-full, div[style*="opacity"] {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   /* Force background colors to show up in print */

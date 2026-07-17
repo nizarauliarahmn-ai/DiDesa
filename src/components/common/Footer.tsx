@@ -99,7 +99,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   return (
     <footer 
       ref={footerRef}
-      className={`fixed bottom-[70px] lg:bottom-0 ${
+      className={`print:hidden fixed bottom-[70px] lg:bottom-0 ${
         isAdmin 
           ? 'left-4 lg:left-[calc(18rem+1.5rem)] right-4 lg:right-6' 
           : 'left-4 lg:left-1/2 right-4 lg:right-auto lg:-translate-x-1/2 lg:w-[calc(100%-4rem)] max-w-7xl'
