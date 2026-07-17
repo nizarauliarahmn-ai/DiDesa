@@ -208,3 +208,25 @@ html, body, #root {
   }
 }
 
+@media print {
+  body, html, .dark {
+    background-color: white !important;
+    color: black !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Force background colors to show up in print */
+  .bg-emerald-50, .bg-emerald-100, .bg-emerald-600, .bg-amber-50, .bg-sky-50 {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+

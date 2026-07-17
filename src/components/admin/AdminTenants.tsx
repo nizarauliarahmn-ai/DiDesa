@@ -528,16 +528,16 @@ export default function AdminTenants() {
               </div>
             </div>
             
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-50/50 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 font-bold border-b border-gray-100 dark:border-slate-800 uppercase text-[11px] tracking-wider">
+            <div className="overflow-x-auto print:overflow-visible">
+              <table className="w-full text-left text-sm print:text-xs">
+                <thead className="bg-gray-50/50 dark:bg-slate-800/50 text-gray-500 dark:text-slate-400 font-bold border-b border-gray-100 dark:border-slate-800 uppercase text-[11px] tracking-wider print:bg-white print:text-black">
                   <tr>
                     <th className="px-6 py-4">Instansi Klien</th>
                     <th className="px-6 py-4">Domain / Subdomain</th>
                     <th className="px-6 py-4">Kredensial Super Admin</th>
                     <th className="px-6 py-4">Kredensial Admin</th>
                     <th className="px-6 py-4 text-center">Status</th>
-                    <th className="px-6 py-4 text-right">Aksi</th>
+                    <th className="px-6 py-4 text-right print:hidden">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -704,7 +704,7 @@ export default function AdminTenants() {
                         </td>
 
                         {/* Action Buttons */}
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-6 py-4 text-right print:hidden">
                           <div className="flex justify-end items-center gap-2 relative">
                             {/* Lihat Sandi Button */}
                             <button
