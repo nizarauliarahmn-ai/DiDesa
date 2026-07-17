@@ -6,6 +6,7 @@ import { Users, FileText, Gift, MessageSquare, TrendingUp, ChevronDown, UserPlus
 import { getAspirasi } from '../../utils/aspirasiData';
 import { getFeedbacks, Feedback } from '../../utils/feedbackData';
 import { getSaaSLogs, SaaSLog } from '../../utils/saasLogs';
+import { supabase } from '../../utils/supabase';
 
 export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
   const [residents, setResidents] = useState<any[]>([]);
@@ -15,10 +16,21 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [authUser, setAuthUser] = useState<any>(null);
   const [saasLogs, setSaasLogs] = useState<SaaSLog[]>([]);
+  const [saasTenants, setSaasTenants] = useState<any[]>([]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('didesa_auth_user') || '{}');
     setAuthUser(user);
+
+    if (user.role === 'saas_admin') {
+      const fetchTenants = async () => {
+        const { data } = await supabase.from('tenants').select('*');
+        if (data) {
+          setSaasTenants(data);
+        }
+      };
+      fetchTenants();
+    }
 
     const handleSettingsUpdate = () => {
       setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
@@ -119,18 +131,26 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   const aspirasiSelesai = aspirasiList.filter(a => a.status === 'Selesai').length;
 
   if (authUser?.role === 'saas_admin') {
-    const totalDesa = 5; // Mock
-    const totalWargaEkosistem = residents.length * totalDesa;
-    const totalSuratEkosistem = 12480; // Mock
+    const totalDesa = saasTenants.length || 0;
+    const totalWargaEkosistem = residents.length * (totalDesa || 1); // Mock extrapolation
+    const totalSuratEkosistem = 12480; // Global aggregated mock
     
-    // Simulating app usage data
-    const usageData = [
-      { name: 'Desa Sukamakmur', users: 124, surat: 850, uptime: '99.9%' },
-      { name: 'Desa Sukamaju', users: 89, surat: 420, uptime: '99.8%' },
-      { name: 'Desa Melati', users: 210, surat: 1100, uptime: '99.9%' },
-      { name: 'Desa Anggrek', users: 56, surat: 280, uptime: '99.7%' },
-      { name: 'Desa Mawar', users: 145, surat: 760, uptime: '99.9%' },
-    ];
+    // Simulating app usage data mapped to real tenants
+    const usageData = saasTenants.map((t) => {
+      // Deterministic pseudo-randomness based on tenant id length so it stays constant per tenant
+      const seed = t.id.length || 5;
+      return {
+        name: t.nama_desa,
+        users: (seed * 15) % 300 + 50,
+        surat: (seed * 45) % 1500 + 100,
+        uptime: (99 + (seed % 10) / 10).toFixed(2) + '%'
+      };
+    });
+
+    // Fallback if no tenants yet
+    if (usageData.length === 0) {
+      usageData.push({ name: 'Memuat Data...', users: 0, surat: 0, uptime: '0.00%' });
+    }
 
     return (
       <div className="max-w-[1440px] mx-auto space-y-6 pb-24">
