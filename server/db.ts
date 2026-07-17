@@ -302,7 +302,7 @@ function normalizeResident(res: any) {
 }
 
 // Unified residents CRUD functions
-export async function getResidents(): Promise<any[]> {
+export async function getResidents(tenant_id?: string): Promise<any[]> {
   // Try Drizzle PostgreSQL first
   if (drizzleDb) {
     try {
@@ -336,11 +336,17 @@ export async function getResidents(): Promise<any[]> {
       // (e.g. for 3,000 residents: 0-999, 1000-1999, 2000-2999, 3000-3999) 
       // so there is absolutely no limit and it will never miss any residents.
       while (hasMore) {
-        const { data, error } = await supabase
+        let query = supabase
           .from("residents")
           .select("*")
           .order("name", { ascending: true })
           .range(from, from + step - 1);
+
+        if (tenant_id) {
+          query = query.eq("tenant_id", tenant_id);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         if (!data || data.length === 0) {

@@ -262,7 +262,8 @@ app.post("/api/global-settings", async (req, res) => {
 // GET all residents
 app.get("/api/residents", async (req, res) => {
   try {
-    const residents = await getResidents();
+    const tenant_id = req.query.tenant_id as string | undefined;
+    const residents = await getResidents(tenant_id);
     res.json(residents);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
