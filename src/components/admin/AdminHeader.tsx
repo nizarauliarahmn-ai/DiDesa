@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Bell, Menu, Database, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon, Sun } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 import { showToast } from '../../utils/toast';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function AdminHeader({ 
   setActiveTab, 
@@ -67,18 +69,21 @@ export default function AdminHeader({
   useEffect(() => {
     if (searchQuery.trim().length >= 2 && !hasLoadedResidents && !loadingResidents) {
       setLoadingResidents(true);
-      fetch('/api/residents')
-        .then(res => { if (!res.ok) throw new Error(); return res.json(); })
-        .then(data => {
-          if (Array.isArray(data)) {
-            setResidents(data);
-          }
-          setHasLoadedResidents(true);
+      resolveCurrentTenant().then(tenantId => {
+        if (!tenantId) {
           setLoadingResidents(false);
-        })
-        .catch(() => {
-          setLoadingResidents(false);
-        });
+          return;
+        }
+        supabase.from('residents').select('*').eq('tenant_id', tenantId)
+          .then(({ data }) => {
+            if (data) {
+              const formatted = data.map(r => ({ ...r, noKk: r.no_kk }));
+              setResidents(formatted.filter(r => r.is_deleted !== 1));
+            }
+            setHasLoadedResidents(true);
+            setLoadingResidents(false);
+          });
+      });
     }
   }, [searchQuery, hasLoadedResidents, loadingResidents]);
 
@@ -135,19 +140,27 @@ export default function AdminHeader({
   };
 
   useEffect(() => {
-    fetch('/api/db-status')
-      .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })
-      .then(data => setDbStatus(data))
-      .catch(err => console.error("Error loading db status:", err));
+    setDbStatus({ engine: 'Supabase (Multi-Tenant)' });
 
-    const loadNotifications = () => {
-      fetch('/api/notifications')
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          return res.json();
-        })
-        .then(data => {
-          if (Array.isArray(data)) {
+    const loadNotifications = async () => {
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) return;
+      
+      const { data } = await supabase.from('notifications')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('timestamp', { ascending: false });
+        
+      if (data && Array.isArray(data)) {
+        const formattedData = data.map(n => ({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          category: n.category,
+          time: n.time || '',
+          timestamp: n.timestamp,
+          isRead: n.is_read
+        }));
             try {
               const authUserStr = localStorage.getItem('didesa_auth_user');
               const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
@@ -191,15 +204,11 @@ export default function AdminHeader({
               const count = modifiedData.filter((n: any) => !n.isRead).length;
               setUnreadCount(count);
             } catch(e) {
-              setNotifications(data);
-              const count = data.filter((n: any) => !n.isRead).length;
+              setNotifications(formattedData);
+              const count = formattedData.filter((n: any) => !n.isRead).length;
               setUnreadCount(count);
             }
           }
-        })
-        .catch(err => {
-          // Silent catch for network errors during dev server restarts
-        });
     };
 
     loadNotifications();

@@ -26,21 +26,6 @@ export default function AdminGlobalBranding() {
   const handleSave = async () => {
     setIsSaving(true);
     
-    try {
-      await fetch('/api/global-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          global_app_name: globalName,
-          global_app_logo: globalLogo,
-          global_app_color: globalColor,
-          global_print_footer: globalPrintFooter
-        })
-      });
-    } catch (err) {
-      console.error('Failed to save global settings on backend:', err);
-    }
-
     localStorage.setItem('global_app_name', globalName);
     localStorage.setItem('global_app_logo', globalLogo);
     localStorage.setItem('global_app_color', globalColor);
@@ -82,21 +67,6 @@ export default function AdminGlobalBranding() {
       setGlobalLogo(defaultLogo);
       setGlobalColor(defaultColor);
       setGlobalPrintFooter(defaultFooter);
-
-      try {
-        await fetch('/api/global-settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            global_app_name: defaultName,
-            global_app_logo: defaultLogo,
-            global_app_color: defaultColor,
-            global_print_footer: defaultFooter
-          })
-        });
-      } catch (err) {
-        console.error('Failed to reset global settings on backend:', err);
-      }
 
       localStorage.setItem('global_app_name', defaultName);
       localStorage.setItem('global_app_logo', defaultLogo);

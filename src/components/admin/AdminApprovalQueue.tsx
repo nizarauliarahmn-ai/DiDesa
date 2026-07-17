@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Check, X, ShieldAlert, User, Calendar, Trash2, ArrowRightLeft, FileText, AlertCircle, RefreshCw } from 'lucide-react';
 import { showToast } from '../../utils/toast';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 interface PendingApprovalItem {
   nik: string;
@@ -26,22 +28,48 @@ export default function AdminApprovalQueue() {
   const [actioningNik, setActioningNik] = useState<string | null>(null);
   const [selectedDetails, setSelectedDetails] = useState<PendingApprovalItem | null>(null);
 
+  const [tenantId, setTenantId] = useState<string | null>(null);
+
   const fetchApprovals = async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/approvals', { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setApprovals(data);
-      } else {
-        throw new Error('Gagal mengambil antrean konfirmasi');
+    const resolvedTenant = await resolveCurrentTenant();
+    setTenantId(resolvedTenant);
+
+    if (resolvedTenant) {
+      try {
+        const { data, error } = await supabase
+          .from('residents')
+          .select('*')
+          .eq('tenant_id', resolvedTenant)
+          .eq('status', 'pending_approval');
+          
+        if (error) throw error;
+        
+        if (data) {
+          const formatted = data.map(r => ({
+            nik: r.nik,
+            name: r.name,
+            gender: r.gender,
+            rtRw: r.rt_rw,
+            birthPlace: r.birth_place,
+            birthDate: r.birth_date,
+            pendingMeta: {
+              nik: r.nik,
+              name: r.name,
+              actionType: 'delete' as const, // Currently we only support delete approval in the refactored flow
+              originalStatus: 'Aktif',
+              requestDate: new Date().toISOString(),
+              details: null
+            }
+          }));
+          setApprovals(formatted);
+        }
+      } catch (err: any) {
+        console.error(err);
+        showToast(err.message || 'Gagal memuat antrean konfirmasi.', 'error');
       }
-    } catch (err: any) {
-      console.error(err);
-      showToast(err.message || 'Gagal memuat antrean konfirmasi.', 'error');
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -49,50 +77,53 @@ export default function AdminApprovalQueue() {
   }, []);
 
   const handleApprove = async (nik: string, name: string, actionType: 'delete' | 'move' | 'edit' | 'status_change') => {
+    if (!tenantId) return;
     setActioningNik(nik);
     try {
-      const res = await fetch(`/api/residents/${nik}/approve`, {
-        method: 'POST',
-      });
-      if (res.ok) {
-        showToast(
-          `Pengajuan ${actionType === 'delete' ? 'Hapus' : actionType === 'move' ? 'Pindah' : 'Perubahan'} untuk warga ${name} berhasil disetujui!`,
-          'success'
-        );
-        // Refresh
+      let error = null;
+      if (actionType === 'delete') {
+        const { error: dbError } = await supabase
+          .from('residents')
+          .update({ is_deleted: 1, status: 'Dihapus', status_color: 'gray' })
+          .eq('nik', nik)
+          .eq('tenant_id', tenantId);
+        error = dbError;
+      }
+      
+      if (!error) {
+        showToast(`Pengajuan ${actionType === 'delete' ? 'Hapus' : actionType === 'move' ? 'Pindah' : 'Perubahan'} untuk warga ${name} berhasil disetujui!`, 'success');
         await fetchApprovals();
-        // Dispatch global event to update notifications count if any
         window.dispatchEvent(new Event('notifications_updated'));
       } else {
-        throw new Error('Gagal memproses persetujuan.');
+        throw error;
       }
     } catch (err: any) {
-      showToast(err.message || 'Gagal memproses persetujuan.', 'error');
+      showToast(`Gagal memproses persetujuan: ${err.message}`, 'error');
     } finally {
       setActioningNik(null);
     }
   };
 
   const handleReject = async (nik: string, name: string, actionType: 'delete' | 'move' | 'edit' | 'status_change') => {
+    if (!tenantId) return;
     setActioningNik(nik);
     try {
-      const res = await fetch(`/api/residents/${nik}/reject`, {
-        method: 'POST',
-      });
-      if (res.ok) {
-        showToast(
-          `Pengajuan ${actionType === 'delete' ? 'Hapus' : actionType === 'move' ? 'Pindah' : 'Perubahan'} untuk warga ${name} telah ditolak. Status kembali normal.`,
-          'info'
-        );
-        // Refresh
+      // Revert status to default 'Aktif'
+      const { error } = await supabase
+        .from('residents')
+        .update({ status: 'Aktif', status_color: 'emerald' })
+        .eq('nik', nik)
+        .eq('tenant_id', tenantId);
+        
+      if (!error) {
+        showToast(`Pengajuan untuk warga ${name} telah ditolak. Status kembali normal.`, 'info');
         await fetchApprovals();
-        // Dispatch global event
         window.dispatchEvent(new Event('notifications_updated'));
       } else {
-        throw new Error('Gagal memproses penolakan.');
+        throw error;
       }
     } catch (err: any) {
-      showToast(err.message || 'Gagal memproses penolakan.', 'error');
+      showToast(`Gagal memproses penolakan: ${err.message}`, 'error');
     } finally {
       setActioningNik(null);
     }

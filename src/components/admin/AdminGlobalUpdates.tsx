@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Megaphone, Trash2, Rocket, ShieldCheck, Zap, Info, Clock, AlertCircle } from 'lucide-react';
+import { supabase } from '../../utils/supabase';
 
 interface GlobalUpdate {
   id: string;
@@ -26,9 +27,12 @@ export default function AdminGlobalUpdates() {
   const fetchUpdates = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/global-updates');
-      if (res.ok) {
-        const data = await res.json();
+      const { data, error } = await supabase
+        .from('global_updates')
+        .select('*')
+        .order('release_date', { ascending: false });
+
+      if (data && !error) {
         setUpdates(data);
       }
     } catch (err) {
@@ -46,12 +50,15 @@ export default function AdminGlobalUpdates() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/global-updates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (res.ok) {
+      const payload = {
+        id: `update-${Date.now()}`,
+        ...formData,
+        release_date: new Date().toISOString().split('T')[0],
+        is_active: 1
+      };
+
+      const { error } = await supabase.from('global_updates').insert([payload]);
+      if (!error) {
         setIsModalOpen(false);
         setFormData({ title: '', version: '', content: '', type: 'feature' });
         fetchUpdates();

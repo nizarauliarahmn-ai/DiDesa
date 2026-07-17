@@ -13,6 +13,8 @@ import {
   Check, 
   AlertCircle 
 } from 'lucide-react';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 interface NotificationItem {
   id: string;
@@ -59,15 +61,34 @@ export default function AdminNotifikasi({
   const [simCategory, setSimCategory] = useState<"Residents" | "Services" | "Assistance" | "System">("System");
   const [showSimModal, setShowSimModal] = useState(false);
   const [simSuccess, setSimSuccess] = useState(false);
+  const [tenantId, setTenantId] = useState<string | null>(null);
 
   // Fetch notifications from API
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/notifications');
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data);
+      const resolvedTenant = await resolveCurrentTenant();
+      setTenantId(resolvedTenant);
+
+      if (resolvedTenant) {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('tenant_id', resolvedTenant)
+          .order('timestamp', { ascending: false });
+
+        if (data && !error) {
+          const formatted = data.map(n => ({
+            id: n.id,
+            title: n.title,
+            message: n.message,
+            category: n.category as any,
+            time: n.time || '',
+            timestamp: n.timestamp,
+            isRead: n.is_read
+          }));
+          setNotifications(formatted);
+        }
       }
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -85,11 +106,15 @@ export default function AdminNotifikasi({
 
   // Mark all as read
   const handleMarkAllAsRead = async () => {
+    if (!tenantId) return;
     try {
-      const res = await fetch('/api/notifications/read-all', {
-        method: 'POST',
-      });
-      if (res.ok) {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('tenant_id', tenantId)
+        .eq('is_read', false);
+
+      if (!error) {
         // Optimistic UI update or refresh
         setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       }
@@ -101,22 +126,24 @@ export default function AdminNotifikasi({
   // Add custom simulated notification
   const handleSimulateNotification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!simTitle || !simMessage) return;
+    if (!simTitle || !simMessage || !tenantId) return;
 
     try {
-      const res = await fetch('/api/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: simTitle,
-          message: simMessage,
-          category: simCategory
-        })
-      });
+      const newId = `notif-${Date.now()}`;
+      const payload = {
+        id: newId,
+        tenant_id: tenantId,
+        title: simTitle,
+        message: simMessage,
+        category: simCategory,
+        time: 'Baru saja',
+        is_read: false
+      };
 
-      if (res.ok) {
-        const newNotif = await res.json();
-        setNotifications(prev => [newNotif, ...prev]);
+      const { error } = await supabase.from('notifications').insert([payload]);
+
+      if (!error) {
+        await fetchNotifications(); // Refresh to get proper timestamp
         setSimTitle("");
         setSimMessage("");
         setSimSuccess(true);
@@ -131,7 +158,11 @@ export default function AdminNotifikasi({
   };
 
   // Toggle specific notification read state (local memory helper)
-  const toggleReadStatus = (id: string) => {
+  const toggleReadStatus = async (id: string) => {
+    const notif = notifications.find(n => n.id === id);
+    if (notif && tenantId) {
+      await supabase.from('notifications').update({ is_read: !notif.isRead }).eq('id', id).eq('tenant_id', tenantId);
+    }
     setNotifications(prev => prev.map(n => {
       if (n.id === id) {
         return { ...n, isRead: !n.isRead };

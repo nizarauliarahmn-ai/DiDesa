@@ -1,13 +1,14 @@
 import NumberCounter from '../common/NumberCounter';
-import { fetchResidentsCached } from '../../utils/apiCache';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Baby, Smile, User, Sparkles, Zap } from 'lucide-react';
+import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Baby, Smile, User, Sparkles, Zap, Trash2 } from 'lucide-react';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
 import AdminPendudukArchive from './penduduk/AdminPendudukArchive';
 import { showToast } from '../../utils/toast';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 const FILTERS = ["Semua", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
 
@@ -26,7 +27,7 @@ export default function AdminPenduduk({
 }) {
   const [residents, setResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [localDebouncedSearchQuery, setLocalDebouncedSearchQuery] = useState('');
   
@@ -61,70 +62,100 @@ export default function AdminPenduduk({
     setCurrentPage(1);
   }, [debouncedSearchQuery, activeFilter, sortOrder]);
 
-  const fetchResidents = () => {
+  const fetchResidents = async () => {
     setLoading(true);
-    fetchResidentsCached()
-      .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })
-      .then(data => {
-        setResidents(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error loading residents:", err);
-        setLoading(false);
-      });
+    const resolvedTenant = await resolveCurrentTenant();
+    setTenantId(resolvedTenant);
+
+    if (resolvedTenant) {
+      const { data, error } = await supabase
+        .from('residents')
+        .select('*')
+        .eq('tenant_id', resolvedTenant)
+        .order('name', { ascending: true });
+        
+      if (!error && data) {
+        const formatted = data.map(r => ({
+           ...r,
+           noKk: r.no_kk,
+           rtRw: r.rt_rw,
+           birthPlace: r.birth_place,
+           birthDate: r.birth_date,
+           bloodType: r.blood_type,
+           domicileStatus: r.domicile_status,
+           familyRelation: r.family_relation,
+           fatherName: r.father_name,
+           motherName: r.mother_name,
+           activeAids: typeof r.active_aids === 'string' ? JSON.parse(r.active_aids) : (r.active_aids || []),
+           genderColor: r.gender_color,
+           statusColor: r.status_color
+        }));
+        setResidents(formatted.filter(r => r.is_deleted !== 1));
+      } else if (error) {
+        console.error("Error fetching residents from Supabase:", error);
+      }
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetch('/api/supabase-status')
-      .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })
-      .then(status => setSupabaseStatus(status))
-      .catch(err => console.error("Error loading Supabase status:", err));
-
     fetchResidents();
   }, []);
 
-  const handleSavePenduduk = (savedResident: any) => {
+  const handleSavePenduduk = async (savedResident: any) => {
+    if (!tenantId) {
+      showToast("Gagal menyimpan, ID Desa tidak ditemukan.", "error");
+      return;
+    }
     const isEdit = !!editingPenduduk && !!editingPenduduk.nik;
-    const method = isEdit ? 'PUT' : 'POST';
-    const url = isEdit ? `/api/residents/${editingPenduduk.nik}` : '/api/residents';
+    
+    const dbPayload = {
+      tenant_id: tenantId,
+      nik: savedResident.nik,
+      initials: savedResident.initials || '',
+      name: savedResident.name,
+      gender: savedResident.gender,
+      gender_color: savedResident.genderColor,
+      rt_rw: savedResident.rtRw,
+      rt: savedResident.rt,
+      rw: savedResident.rw,
+      status: savedResident.status,
+      status_color: savedResident.statusColor,
+      age: parseInt(savedResident.age || 0),
+      birth_place: savedResident.birthPlace,
+      birth_date: savedResident.birthDate,
+      blood_type: savedResident.bloodType,
+      religion: savedResident.religion,
+      job: savedResident.job,
+      address: savedResident.address,
+      desa: savedResident.desa,
+      domicile_status: savedResident.domicileStatus,
+      family_relation: savedResident.familyRelation,
+      education: savedResident.education,
+      photo: savedResident.photo,
+      no_kk: savedResident.noKk,
+      father_name: savedResident.fatherName,
+      mother_name: savedResident.motherName,
+      active_aids: savedResident.activeAids || []
+    };
 
-    fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(savedResident)
-    })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error('Gagal menyimpan data ke database');
-        }
-        return res.json();
-      })
-      .then(data => {
-        setResidents(prev => {
-          if (isEdit) {
-            return prev.map(r => r.nik === editingPenduduk.nik ? savedResident : r);
-          } else {
-            return [savedResident, ...prev];
-          }
-        });
-        showToast(isEdit ? `Data warga ${savedResident.name} berhasil diperbarui!` : `Warga baru ${savedResident.name} berhasil didaftarkan!`, "success");
-      })
-      .catch(err => {
-        console.error("Error saving resident to database:", err);
-        // Optimistic update
-        setResidents(prev => {
-          if (isEdit) {
-            return prev.map(r => r.nik === editingPenduduk.nik ? savedResident : r);
-          } else {
-            return [savedResident, ...prev];
-          }
-        });
-        showToast(isEdit ? `Gagal menyimpan data warga!` : `Gagal menambahkan warga baru!`, "error");
-      });
-
+    if (isEdit) {
+      const { error } = await supabase.from('residents').update(dbPayload).eq('nik', dbPayload.nik).eq('tenant_id', tenantId);
+      if (!error) {
+        showToast(`Data warga ${savedResident.name} berhasil diperbarui!`, "success");
+        fetchResidents();
+      } else {
+        showToast(`Gagal: ${error.message}`, "error");
+      }
+    } else {
+      const { error } = await supabase.from('residents').insert([dbPayload]);
+      if (!error) {
+        showToast(`Warga baru ${savedResident.name} berhasil didaftarkan!`, "success");
+        fetchResidents();
+      } else {
+        showToast(`Gagal: ${error.message}`, "error");
+      }
+    }
     setEditingPenduduk(null);
   };
 
@@ -182,24 +213,24 @@ export default function AdminPenduduk({
   const villageName = localStorage.getItem('village_name') || 'Desa Sukamaju';
 
   const handleRequestDelete = async (nik: string, name: string) => {
+    if (!tenantId) return;
     if (!confirm(`Anda yakin ingin mengajukan penghapusan data penduduk ${name}? Data tidak akan dihapus langsung, melainkan menunggu persetujuan Super Admin.`)) return;
     
     try {
-      const res = await fetch(`/api/residents/${nik}/request-approval`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actionType: 'delete' })
-      });
-      if (res.ok) {
+      const { error } = await supabase.from('residents')
+        .update({ status: 'pending_approval', status_color: 'amber' })
+        .eq('nik', nik)
+        .eq('tenant_id', tenantId);
+        
+      if (!error) {
         showToast(`Pengajuan hapus data ${name} berhasil dikirim ke Super Admin!`, 'success');
         fetchResidents();
-        // Dispatch global event for notification bubble update
         window.dispatchEvent(new Event('notifications_updated'));
       } else {
-        throw new Error('Gagal mengajukan penghapusan');
+        throw error;
       }
     } catch (err: any) {
-      showToast(err.message, 'error');
+      showToast(`Gagal: ${err.message}`, 'error');
     }
   };
 

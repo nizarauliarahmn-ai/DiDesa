@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import ConfirmModal from '../common/ConfirmModal';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function AdminBantuan({
   searchQuery: externalSearchQuery,
@@ -32,6 +34,7 @@ export default function AdminBantuan({
   const [residents, setResidents] = useState<any[]>([]);
   const [dbEngine, setDbEngine] = useState<string>("Loading...");
   const [loading, setLoading] = useState(true);
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<string>("BLT Dana Desa");
   
   // Custom confirm state
@@ -109,17 +112,36 @@ export default function AdminBantuan({
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/residents");
-      if (res.ok) {
-        const data = await res.json();
-        setResidents(data);
+      const resolvedTenant = await resolveCurrentTenant();
+      setTenantId(resolvedTenant);
+
+      if (resolvedTenant) {
+        const { data, error } = await supabase
+          .from('residents')
+          .select('*')
+          .eq('tenant_id', resolvedTenant)
+          .order('name', { ascending: true });
+
+        if (data && !error) {
+           const formatted = data.map(r => ({
+             ...r,
+             noKk: r.no_kk,
+             rtRw: r.rt_rw,
+             birthPlace: r.birth_place,
+             birthDate: r.birth_date,
+             bloodType: r.blood_type,
+             domicileStatus: r.domicile_status,
+             familyRelation: r.family_relation,
+             fatherName: r.father_name,
+             motherName: r.mother_name,
+             activeAids: typeof r.active_aids === 'string' ? JSON.parse(r.active_aids) : (r.active_aids || []),
+             genderColor: r.gender_color,
+             statusColor: r.status_color
+           }));
+           setResidents(formatted.filter(r => r.is_deleted !== 1));
+        }
       }
-      
-      const dbStatusRes = await fetch("/api/db-status");
-      if (dbStatusRes.ok) {
-        const dbStatus = await dbStatusRes.json();
-        setDbEngine(dbStatus.engine);
-      }
+      setDbEngine("Supabase (Multi-Tenant)");
     } catch (err) {
       console.error("Failed to fetch data:", err);
     } finally {
@@ -185,18 +207,20 @@ export default function AdminBantuan({
         const updatedAids = (targetResident.activeAids || []).filter((aid: string) => aid !== programToRemove);
 
         try {
-          const res = await fetch(`/api/residents/${nik}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ activeAids: updatedAids })
-          });
+          if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+          
+          const { error } = await supabase
+            .from('residents')
+            .update({ active_aids: updatedAids })
+            .eq('nik', nik)
+            .eq('tenant_id', tenantId);
 
-          if (res.ok) {
+          if (!error) {
             // Update local state directly
             setResidents(prev => prev.map(r => r.nik === nik ? { ...r, activeAids: updatedAids } : r));
             showToast(`Berhasil mengeluarkan ${targetResident.name} dari program ${programToRemove}`, "success");
           } else {
-            throw new Error("Gagal mengupdate data di database");
+            throw error;
           }
         } catch (err: any) {
           showToast(err.message || "Gagal mengeluarkan warga dari program bantuan", "error");
@@ -221,20 +245,22 @@ export default function AdminBantuan({
     setIsSaving(true);
 
     try {
-      const res = await fetch(`/api/residents/${selectedResidentNik}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ activeAids: updatedAids })
-      });
+      if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+      
+      const { error } = await supabase
+        .from('residents')
+        .update({ active_aids: updatedAids })
+        .eq('nik', selectedResidentNik)
+        .eq('tenant_id', tenantId);
 
-      if (res.ok) {
+      if (!error) {
         setResidents(prev => prev.map(r => r.nik === selectedResidentNik ? { ...r, activeAids: updatedAids } : r));
         setShowModal(false);
         setSelectedResidentNik("");
         setSearchResidentQuery("");
         showToast(`Berhasil menambahkan ${targetResident.name} ke program ${selectedProgram}`, "success");
       } else {
-        throw new Error("Gagal menyimpan data ke database");
+        throw error;
       }
     } catch (err: any) {
       showToast(err.message || "Gagal menambahkan warga ke program bantuan", "error");
@@ -262,25 +288,32 @@ export default function AdminBantuan({
     setIsSaving(true);
 
     try {
-      const res = await fetch(`/api/residents/${selectedResidentNik}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ activeAids: updatedAids })
-      });
+      if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+      
+      const { error } = await supabase
+        .from('residents')
+        .update({ active_aids: updatedAids })
+        .eq('nik', selectedResidentNik)
+        .eq('tenant_id', tenantId);
 
-      if (res.ok) {
+      if (!error) {
         setResidents(prev => prev.map(r => r.nik === selectedResidentNik ? { ...r, activeAids: updatedAids } : r));
-        setShowAddView(false);
+        
+        // Reset form
         setSelectedResidentNik("");
         setSearchResidentQuery("");
         setFormProgram("");
+        setFormAmount("300000");
+        setFormFunding("");
         setCriteriaChecked({});
+        setShowAddView(false);
+        
         showToast(`Berhasil menambahkan ${targetResident.name} ke program ${formProgram}`, "success");
       } else {
-        throw new Error("Gagal menyimpan data ke database");
+        throw error;
       }
     } catch (err: any) {
-      showToast(err.message || "Gagal menambahkan warga ke program bantuan", "error");
+      showToast(err.message || "Gagal menyimpan data", "error");
     } finally {
       setIsSaving(false);
     }
