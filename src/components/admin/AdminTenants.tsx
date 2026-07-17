@@ -5,7 +5,7 @@ import {
   Database, Plus, Search, Server, Activity, Users, MoreVertical, 
   Globe, ShieldCheck, X, Megaphone, Building2, MessageSquare, 
   Trash2, CheckCircle, ExternalLink, Edit, Key, Copy, Check, 
-  Lock, Mail, Eye, EyeOff, CheckCircle2, AlertTriangle
+  Lock, Mail, Eye, EyeOff, CheckCircle2, AlertTriangle, Printer
 } from 'lucide-react';
 import AdminGlobalUpdates from './AdminGlobalUpdates';
 import { getFeedbacks, updateFeedbackStatus, deleteFeedback, Feedback } from '../../utils/feedbackData';
@@ -444,6 +444,21 @@ export default function AdminTenants() {
             </div>
             <button 
               onClick={() => {
+                window.print();
+                addSaaSLog({
+                  admin: authUser?.name || 'SaaS Admin',
+                  aksi: 'Cetak Laporan Klien',
+                  target: 'Semua Klien',
+                  status: 'Berhasil'
+                });
+              }}
+              className="print:hidden flex items-center gap-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors shadow-sm active:scale-95 shrink-0"
+            >
+              <Printer size={16} />
+              Cetak Laporan
+            </button>
+            <button 
+              onClick={() => {
                 setFormData({
                   nama_desa: '',
                   kode_desa: '',
@@ -455,7 +470,7 @@ export default function AdminTenants() {
                 });
                 setIsModalOpen(true);
               }} 
-              className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-md dark:shadow-none hover:shadow-lg active:scale-95 shrink-0"
+              className="print:hidden flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-md dark:shadow-none hover:shadow-lg active:scale-95 shrink-0"
             >
               <Plus size={16} />
               Tambah Desa Klien
@@ -732,6 +747,17 @@ export default function AdminTenants() {
                                   >
                                     <Edit size={13} className="text-gray-400" />
                                     <span>Edit</span>
+                                  </button>
+                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
+                                  <button
+                                    onClick={() => {
+                                      setSearchQuery(tenant.nama_desa);
+                                      setTimeout(() => window.print(), 100);
+                                    }}
+                                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-blue-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
+                                  >
+                                    <Printer size={13} className="text-gray-400" />
+                                    <span>Cetak</span>
                                   </button>
                                   <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
                                   <button
