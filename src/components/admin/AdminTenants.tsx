@@ -672,7 +672,7 @@ export default function AdminTenants() {
 
                             {tenant.domain && (
                               <a 
-                                href={`/?tenant=${tenant.domain}`} 
+                                href={`/?tenant=${tenant.domain}&preview=true`} 
                                 target="_blank" 
                                 rel="noreferrer"
                                 className="print-hide flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1.5 rounded-lg border border-emerald-200 transition-colors w-fit group/link"

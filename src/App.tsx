@@ -39,11 +39,17 @@ import IntroductionTour from './components/IntroductionTour';
 
 export default function App() {
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
+    if (new URLSearchParams(window.location.search).get('preview') === 'true') {
+      return null;
+    }
     const saved = localStorage.getItem('didesa_auth_user');
     return saved ? JSON.parse(saved) : null;
   });
 
   const [view, setView] = useState<'public' | 'admin'>(() => {
+    if (new URLSearchParams(window.location.search).get('preview') === 'true') {
+      return 'admin';
+    }
     const saved = localStorage.getItem('didesa_auth_user');
     if (saved) {
       const parsed = JSON.parse(saved);
