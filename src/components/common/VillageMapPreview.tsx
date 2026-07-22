@@ -7,6 +7,7 @@ interface VillageMapPreviewProps {
   lat: number;
   lng: number;
   onOpenModal: () => void;
+  buttonText?: string;
 }
 
 function decimalToDMS(lat: number, lng: number): string {
@@ -23,7 +24,7 @@ function decimalToDMS(lat: number, lng: number): string {
   return `${latD}°${latM}'${latS}"${latDir} ${lngD}°${lngM}'${lngS}"${lngDir}`;
 }
 
-export default function VillageMapPreview({ lat, lng, onOpenModal }: VillageMapPreviewProps) {
+export default function VillageMapPreview({ lat, lng, onOpenModal, buttonText }: VillageMapPreviewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -97,7 +98,7 @@ export default function VillageMapPreview({ lat, lng, onOpenModal }: VillageMapP
       <div ref={mapRef} className="w-full h-full z-0 pointer-events-none" />
 
       {/* Overlay & Interactive Controls */}
-      <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/30 transition-all z-10 flex flex-col items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-slate-950/30 transition-all z-10 flex flex-col items-center justify-center p-4 opacity-0 group-hover:opacity-100 duration-300">
         <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-xl border border-white/80 dark:border-slate-800 shadow-md mb-3 transition-transform group-hover:scale-105">
           <p className="text-[11px] font-mono font-black text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -113,7 +114,7 @@ export default function VillageMapPreview({ lat, lng, onOpenModal }: VillageMapP
           className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-xl border border-emerald-500/50 flex items-center gap-2 transition-all"
         >
           <Map className="w-4 h-4" /> 
-          <span>Set Ulang Titik Peta</span>
+          <span>{buttonText || 'Set Ulang Titik Peta'}</span>
           <Maximize2 className="w-3.5 h-3.5 opacity-70" />
         </button>
       </div>

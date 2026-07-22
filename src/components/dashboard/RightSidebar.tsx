@@ -1,14 +1,19 @@
 import React from 'react';
 import { Map as MapIcon, Maximize, Star, Phone, Shield, X } from 'lucide-react';
 import KalenderDesa from './KalenderDesa';
+import VillageMapPreview from '../common/VillageMapPreview';
 
 export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: string) => void }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [showIdmModal, setShowIdmModal] = React.useState(false);
+  const [villageLat, setVillageLat] = React.useState(() => parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
+  const [villageLng, setVillageLng] = React.useState(() => parseFloat(localStorage.getItem('village_lng') || '115.227889'));
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
       setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+      setVillageLat(parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
+      setVillageLng(parseFloat(localStorage.getItem('village_lng') || '115.227889'));
     };
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     return () => {
@@ -33,20 +38,13 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
             <Maximize className="w-4 h-4" />
           </button>
         </div>
-        <div className="h-56 relative group overflow-hidden bg-gray-100 dark:bg-slate-800">
-          <img 
-            src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" 
-            alt="Map" 
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700" 
+        <div className="p-5 pb-0">
+          <VillageMapPreview 
+            lat={villageLat} 
+            lng={villageLng} 
+            onOpenModal={() => onTabChange && onTabChange('peta_wilayah')} 
+            buttonText="Buka Peta Interaktif"
           />
-          <div className="absolute inset-0 bg-emerald-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-            <button 
-              onClick={() => onTabChange && onTabChange('peta_wilayah')}
-              className="bg-white dark:bg-slate-900 text-emerald-800 px-5 py-2.5 rounded-xl font-bold text-sm shadow-xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 cursor-pointer"
-            >
-              Buka Peta Interaktif
-            </button>
-          </div>
         </div>
         <div className="p-5 bg-white dark:bg-slate-900">
           <div className="grid grid-cols-2 gap-3">
