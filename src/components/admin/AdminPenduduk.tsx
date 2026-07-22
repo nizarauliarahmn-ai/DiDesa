@@ -85,7 +85,8 @@ export default function AdminPenduduk({
         .from('residents')
         .select('*')
         .eq('tenant_id', resolvedTenant)
-        .order('name', { ascending: true });
+        .order('name', { ascending: true })
+        .limit(10000);
         
       if (!error && data) {
         const formatted = data.map(r => ({
