@@ -167,7 +167,10 @@ export default function App() {
     const handleAuthUserUpdate = () => {
       const saved = localStorage.getItem('didesa_auth_user');
       if (saved) {
-        setUser(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+        setAdminTab('dashboard');
+        setPublicTab('dashboard');
       }
     };
     window.addEventListener('auth_user_updated', handleAuthUserUpdate);
@@ -186,6 +189,8 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('didesa_auth_user');
     setUser(null);
+    setAdminTab('dashboard');
+    setPublicTab('dashboard');
   };
 
   // If not authenticated, force login screen
@@ -194,6 +199,8 @@ export default function App() {
       <>
         <Login onLoginSuccess={(loggedInUser) => {
           setUser(loggedInUser);
+          setAdminTab('dashboard');
+          setPublicTab('dashboard');
           setView(loggedInUser.role === 'public' ? 'public' : 'admin');
         }} />
         <ToastContainer />
