@@ -56,6 +56,19 @@ export default function AdminPenduduk({
   const [currentPage, setCurrentPage] = useState(1);
   const [showAiAnalysis, setShowAiAnalysis] = useState(false);
   const itemsPerPage = 10;
+  const [villageName, setVillageName] = useState('Desa');
+
+  useEffect(() => {
+    const branding = localStorage.getItem('global_branding');
+    if (branding) {
+      try {
+        const parsed = JSON.parse(branding);
+        if (parsed.app_name) {
+          setVillageName(parsed.app_name);
+        }
+      } catch(e) {}
+    }
+  }, []);
 
   // Reset current page when debounced search query, filter or sorting changes
   useEffect(() => {
