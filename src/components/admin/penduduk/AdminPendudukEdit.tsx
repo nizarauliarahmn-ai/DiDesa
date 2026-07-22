@@ -6,6 +6,7 @@ import {
   Check, Save, Briefcase, GraduationCap, Home, Heart, Trash2 
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { capitalizeWords, parseAddressString } from '../../../utils/textUtils';
 
 interface AdminPendudukEditProps {
   onBack: () => void;
@@ -275,7 +276,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   type="text"
                   value={name}
                   onChange={(e) => {
-                    setName(e.target.value);
+                    setName(capitalizeWords(e.target.value));
                     if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
                   }}
                   className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
@@ -344,7 +345,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   type="text"
                   value={birthPlace}
                   onChange={(e) => {
-                    setBirthPlace(e.target.value);
+                    setBirthPlace(capitalizeWords(e.target.value));
                     if (errors.birthPlace) setErrors(prev => ({ ...prev, birthPlace: '' }));
                   }}
                   className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
@@ -422,7 +423,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 <input 
                   type="text"
                   value={fatherName}
-                  onChange={(e) => setFatherName(e.target.value)}
+                  onChange={(e) => setFatherName(capitalizeWords(e.target.value))}
                   className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
                   placeholder="Masukkan nama ayah kandung..."
                 />
@@ -433,7 +434,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 <input 
                   type="text"
                   value={motherName}
-                  onChange={(e) => setMotherName(e.target.value)}
+                  onChange={(e) => setMotherName(capitalizeWords(e.target.value))}
                   className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
                   placeholder="Masukkan nama ibu kandung..."
                 />
@@ -451,22 +452,34 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
-              <div className="md:col-span-6 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Alamat Lengkap</label>
-                <textarea 
-                  rows={2}
-                  value={address}
-                  onChange={(e) => {
-                    setAddress(e.target.value);
-                    if (errors.address) setErrors(prev => ({ ...prev, address: '' }));
-                  }}
-                  className={`w-full px-4 py-3 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none ${
-                    errors.address ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                  }`}
-                  placeholder="Nama jalan, nomor rumah, dsb..."
-                ></textarea>
-                {errors.address && <p className="text-xs text-red-500 font-semibold">{errors.address}</p>}
-              </div>
+                <div className="md:col-span-6 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Alamat Lengkap</label>
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Smart Autofill RT/RW Aktif</span>
+                  </div>
+                  <textarea 
+                    rows={2}
+                    value={address}
+                    onChange={(e) => {
+                      const rawVal = e.target.value;
+                      if (/\b(RT|RW)\b/i.test(rawVal)) {
+                        const parsed = parseAddressString(rawVal, rt, rw);
+                        setAddress(parsed.address);
+                        if (parsed.rt) handleRtChange(parsed.rt);
+                        if (parsed.rw) setRw(parsed.rw);
+                        showToast(`Otomatis mengekstrak RT: ${parsed.rt}, RW: ${parsed.rw}`, 'info');
+                      } else {
+                        setAddress(capitalizeWords(rawVal));
+                      }
+                      if (errors.address) setErrors(prev => ({ ...prev, address: '' }));
+                    }}
+                    className={`w-full px-4 py-3 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none ${
+                      errors.address ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                    }`}
+                    placeholder="Nama jalan, nomor rumah... (Jika ditempel dengan RT/RW, sistem otomatis memisahkan RT & RW!)"
+                  ></textarea>
+                  {errors.address && <p className="text-xs text-red-500 font-semibold">{errors.address}</p>}
+                </div>
 
               {/* RT Dropdown select list */}
               <div className="md:col-span-2 space-y-1">
