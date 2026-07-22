@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { 
+
   ArrowLeft, Camera, Info, MapPin, Users, User, 
   Check, Save, Briefcase, GraduationCap, Home, Heart, Trash2 
 } from 'lucide-react';
@@ -72,6 +74,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
   // Errors state
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Auto populate RW: rt 01/02 -> rw 01; rt 03/04 -> rw 02
   const handleRtChange = (val: string) => {
@@ -132,11 +135,15 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!validateForm()) {
       showToast('Mohon lengkapi semua data formulir dengan benar.', 'error');
       return;
     }
+    setShowConfirmModal(true);
+  };
+
+  const executeSave = async () => {
 
     // Determine age from birthDate
     const birthYear = new Date(birthDate).getFullYear();
@@ -689,6 +696,94 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" 
+              onClick={() => setShowConfirmModal(false)} 
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-lg border border-gray-100 dark:border-slate-800 flex flex-col max-h-[90vh]"
+            >
+              <div className="flex items-center gap-4 mb-5 shrink-0">
+                <div className="p-4 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                  <Check className="w-8 h-8" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                    Konfirmasi Penyimpanan
+                  </h3>
+                  <p className="text-sm font-semibold text-gray-500 dark:text-slate-400 mt-1">
+                    Pastikan data yang Anda masukkan sudah benar.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-2 mb-6 space-y-4">
+                <div className="bg-gray-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-gray-100 dark:border-slate-700/50">
+                  <h4 className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-3">Data Pokok Terisi</h4>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700 dark:text-slate-300">
+                    {[
+                      { label: 'Nama', val: name },
+                      { label: 'NIK', val: nik },
+                      { label: 'No KK', val: noKk },
+                      { label: 'TTL', val: `${birthPlace}, ${birthDate}` },
+                      { label: 'Pekerjaan', val: job },
+                      { label: 'Pendidikan', val: education },
+                    ].filter(item => item.val).map((item, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                        <span><span className="font-semibold">{item.label}:</span> Terisi</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {(!fatherName || !motherName || !photoPreview) && (
+                  <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-800/30">
+                    <h4 className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider mb-3">Bagian Masih Kosong (Opsional)</h4>
+                    <ul className="text-sm text-rose-800 dark:text-rose-300 space-y-2">
+                      {!fatherName && <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Nama Ayah Kandung belum diisi</li>}
+                      {!motherName && <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Nama Ibu Kandung belum diisi</li>}
+                      {!photoPreview && <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Foto Penduduk belum diunggah</li>}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 py-3.5 px-4 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-sm rounded-xl transition-colors cursor-pointer"
+                >
+                  Edit Kembali
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    executeSave();
+                  }}
+                  className="flex-1 py-3.5 px-4 text-white font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20"
+                >
+                  <Save className="w-4 h-4" />
+                  Ya, Simpan Data
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
