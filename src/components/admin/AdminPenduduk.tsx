@@ -555,6 +555,7 @@ export default function AdminPenduduk({
                 paginatedData.map((item, index) => (
                   <TableRow 
                     key={index}
+                    item={item}
                     nik={item.nik} 
                     noKk={item.noKk}
                     kepalaKeluarga={getKepalaKeluarga(item.noKk)}
@@ -568,6 +569,8 @@ export default function AdminPenduduk({
                     statusColor={item.statusColor}
                     avatarColor={item.avatarColor}
                     activeAids={item.activeAids || []}
+                    onEdit={(selectedItem: any) => setEditingPenduduk(selectedItem)}
+                    onRequestDelete={(nik: string, name: string) => handleRequestDelete(nik, name)}
                   />
                 ))
               ) : (
@@ -705,7 +708,7 @@ export default function AdminPenduduk({
 }
 
 
-const TableRow = React.memo(({ nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, statusColor, avatarColor, activeAids }: any) => {
+const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
   const getBadgeColors = (color: string) => {
     switch (color) {
       case 'blue': return 'bg-blue-50 text-blue-700 border-blue-100';
@@ -764,10 +767,10 @@ const TableRow = React.memo(({ nik, noKk, kepalaKeluarga, initials, name, age, g
           <button data-action="view" className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Detail">
             <Eye className="w-4 h-4" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); setEditingPenduduk({ nik, name, noKk, gender, rtRw, rt, rw, status, age, birthPlace, birthDate, bloodType, religion, job, address, desa, domicileStatus, familyRelation, education, photo, fatherName, motherName, activeAids }); }} disabled={status === 'pending_approval'} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Edit">
+          <button onClick={(e) => { e.stopPropagation(); if (onEdit) onEdit(item || { nik, name, noKk, gender, rtRw, status, age }); }} disabled={status === 'pending_approval'} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Edit">
             <Edit2 className="w-4 h-4" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); handleRequestDelete(nik, name); }} disabled={status === 'pending_approval'} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Hapus">
+          <button onClick={(e) => { e.stopPropagation(); if (onRequestDelete) onRequestDelete(nik, name); }} disabled={status === 'pending_approval'} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Hapus">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>
