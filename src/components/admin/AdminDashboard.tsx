@@ -172,27 +172,46 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
 
     return (
       <div className="max-w-[1440px] mx-auto space-y-6 pb-24">
-        {/* SaaS Header */}
-        <div className="flex justify-between items-end">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">SaaS Command Center</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Pemantauan ekosistem digitalisasi desa lintas wilayah</p>
-          </div>
-          <div className="flex gap-3">
-            <button 
-              onClick={() => setActiveTab?.('log_aktivitas')}
-              className="px-6 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all flex items-center gap-2"
-            >
-              <Clock size={18} />
-              <span>Log Sistem</span>
-            </button>
-            <button 
-              onClick={() => setActiveTab?.('tenants')}
-              className="px-6 py-2.5 bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-xl shadow-emerald-200 hover:bg-emerald-800 transition-all flex items-center gap-2"
-            >
-              <Building2 size={18} />
-              <span>Manajemen Desa</span>
-            </button>
+        {/* SaaS Command Center Large Hero Banner */}
+        <div className="relative rounded-3xl sm:rounded-[32px] overflow-hidden bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 p-6 sm:p-8 md:p-10 lg:p-12 shadow-xl border border-slate-800 text-white group">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-center gap-6">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>SaaS Master Control Center</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
+                Pusat Komando Ekosistem DiDesa
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300 max-w-xl font-medium leading-relaxed">
+                Pemantauan performa real-time, manajemen klien instansi desa, dan tata kelola branding masal secara terpusat.
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap sm:flex-nowrap gap-3 shrink-0">
+              <button 
+                onClick={() => setActiveTab?.('global_branding')}
+                className="w-full sm:w-auto px-5 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer active:scale-95"
+              >
+                <PenTool size={16} />
+                <span>Branding Global</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab?.('log_aktivitas')}
+                className="w-full sm:w-auto px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <Clock size={16} />
+                <span>Log Sistem</span>
+              </button>
+              <button 
+                onClick={() => setActiveTab?.('tenants')}
+                className="w-full sm:w-auto px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+              >
+                <Building2 size={16} />
+                <span>Manajemen Desa</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -429,17 +448,119 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6 pb-24">
+    <div className="max-w-[1440px] mx-auto space-y-6 pb-24 px-2 sm:px-4">
+      {/* Large Village Admin Hero Banner */}
+      <div className="relative rounded-3xl sm:rounded-[32px] overflow-hidden bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 p-6 sm:p-8 md:p-10 lg:p-12 shadow-xl border border-emerald-800/30 text-white group">
+        {/* Background Image with Overlay */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center opacity-30 transition-transform duration-700 group-hover:scale-105" 
+          style={{ 
+            backgroundImage: `url("${localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000'}")`,
+            backgroundPosition: `center ${localStorage.getItem('village_welcome_banner_y_offset') || '50'}%`
+          }} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-emerald-950/95 via-emerald-900/85 to-emerald-950/60 z-0" />
+
+        {/* Decorative Glow Elements */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between lg:items-center gap-8">
+          <div className="max-w-2xl space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+                Pusat Operasional Administrasi
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+                <Building2 className="w-3.5 h-3.5 text-indigo-300" />
+                {desaName}
+              </span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
+              Selamat Datang Kembali, <br className="hidden sm:inline" />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 via-teal-200 to-amber-300">
+                {authUser?.name || 'Administrator'}
+              </span>
+            </h1>
+
+            <p className="text-sm sm:text-base text-emerald-100/90 leading-relaxed max-w-xl font-medium">
+              Kelola layanan surat, data kependudukan, dan aspirasi warga {desaName} secara terpadu, cepat, dan transparan dari satu dasbor operasional.
+            </p>
+
+            {/* Quick Action Buttons Grid */}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <button
+                onClick={() => setActiveTab?.('surat')}
+                className="w-full sm:w-auto px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-emerald-900/40 hover:shadow-emerald-400/30 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Buat Surat Baru</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab?.('penduduk')}
+                className="w-full sm:w-auto px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl font-bold text-xs sm:text-sm backdrop-blur-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
+                <Users className="w-4 h-4 text-emerald-300" />
+                <span>Data Penduduk ({totalResidents})</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab?.('ai_assistant')}
+                className="w-full sm:w-auto px-5 py-3 bg-indigo-600/80 hover:bg-indigo-600 text-white border border-indigo-400/40 rounded-xl font-bold text-xs sm:text-sm backdrop-blur-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 text-indigo-200" />
+                <span>Asisten AI Desa</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab?.('pengaturan')}
+                className="w-full sm:w-auto px-4 py-3 bg-white/5 hover:bg-white/15 text-emerald-100 border border-white/10 rounded-xl font-bold text-xs sm:text-sm backdrop-blur-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
+              >
+                <span>Pengaturan Desa</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Live Hero Metrics Widget */}
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4 shrink-0 w-full lg:w-72">
+            <div className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shrink-0">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-emerald-200 uppercase tracking-widest">Total Warga</p>
+                <h4 className="text-xl sm:text-2xl font-extrabold text-white"><NumberCounter end={totalResidents} /></h4>
+                <p className="text-[9px] text-emerald-300/80 font-bold">Terdata Aktif</p>
+              </div>
+            </div>
+
+            <div className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-amber-200 uppercase tracking-widest">Surat Selesai</p>
+                <h4 className="text-xl sm:text-2xl font-extrabold text-white"><NumberCounter end={letterHistory.length} /></h4>
+                <p className="text-[9px] text-amber-300/80 font-bold">Terverifikasi</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-6">
         <div className="flex justify-between items-end">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Ringkasan Administrasi</h2>
-            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Pantauan layanan surat dan aspirasi warga hari ini di {desaName}</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Ringkasan Administrasi</h2>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-slate-400 mt-1">Pantauan layanan surat dan aspirasi warga hari ini di {desaName}</p>
           </div>
         </div>
 
         {/* Top Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           <div className="standard-card p-6 border-l-4 border-primary">
             <div className="flex justify-between items-start mb-4">
               <div className="w-10 h-10 bg-primary-container/10 rounded-lg flex items-center justify-center text-primary">
