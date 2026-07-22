@@ -160,16 +160,16 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
       {/* Brand Bar */}
       <div className="h-[55px] px-4 md:px-8 flex items-center justify-between border-b border-white/20">
         <div className="flex items-center gap-3 transition-transform duration-500 group-hover:translate-y-[-2px]">
-          {globalLogo ? (
-            <img src={globalLogo} alt={globalName} className="h-6 w-auto max-w-[120px] object-contain" />
-          ) : (
-            <div 
-              className="w-5 h-5 rounded flex items-center justify-center text-white font-black text-[8px] shadow-sm dark:shadow-none shrink-0"
-              style={{ backgroundColor: globalColor }}
-            >
-              {globalName.charAt(0)}
-            </div>
-          )}
+          <div 
+            className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-[9px] shadow-sm dark:shadow-none shrink-0 overflow-hidden"
+            style={{ backgroundColor: globalColor }}
+          >
+            {globalLogo ? (
+              <img src={globalLogo} alt={globalName} className="w-4 h-4 object-contain" />
+            ) : (
+              globalName.charAt(0)
+            )}
+          </div>
           <div className="flex items-baseline gap-2">
             <span className="text-[11px] font-black tracking-tight text-slate-800 dark:text-slate-100 uppercase">{globalName} Indonesia</span>
             {globalFooterCopyright && (
