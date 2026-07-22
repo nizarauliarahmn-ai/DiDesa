@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Map, Pin, Navigation, RefreshCw, ZoomIn, Info, Activity, Landmark, Heart, Users } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { showToast } from '../../utils/toast';
 
 interface PointOfInterest {
@@ -43,6 +45,38 @@ export default function PetaWilayah() {
   
   const villageLat = parseFloat(localStorage.getItem('village_lat') || '-2.797806');
   const villageLng = parseFloat(localStorage.getItem('village_lng') || '115.227889');
+
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        center: [villageLat, villageLng],
+        zoom: 14,
+        zoomControl: false,
+        dragging: true,
+        scrollWheelZoom: false,
+      });
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap &copy; CARTO'
+      }).addTo(map);
+
+      mapInstanceRef.current = map;
+    } else {
+      mapInstanceRef.current.setView([villageLat, villageLng]);
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [villageLat, villageLng]);
 
   const borderUtara = localStorage.getItem('village_border_utara') || 'Berbatasan langsung dengan Desa Wasah Hulu, Kecamatan Simpur.';
   const borderSelatan = localStorage.getItem('village_border_selatan') || 'Berbatasan langsung dengan Desa Garunggangan, Kecamatan Kandangan.';
@@ -141,22 +175,8 @@ export default function PetaWilayah() {
 
             {/* Virtual Map Stage */}
             <div className="h-96 w-full rounded-2xl relative overflow-hidden bg-emerald-50 border border-emerald-100/50 shadow-inner group">
-              {/* Styled Abstract Map Background */}
-              <div className="absolute inset-0 z-0">
-                {/* River abstract visual overlay */}
-                <div className="absolute top-[20%] left-0 w-full h-8 bg-blue-400/30 -rotate-12 blur-[1px]" />
-                <div className="absolute top-0 left-[40%] w-6 h-full bg-blue-400/20 rotate-45 blur-[1px]" />
-                
-                {/* Green/Agriculture zones */}
-                <div className="absolute bottom-[10%] right-[10%] w-[35%] h-[35%] bg-emerald-100/60 rounded-full blur-2xl" />
-                <div className="absolute top-[10%] left-[5%] w-[40%] h-[30%] bg-emerald-100/40 rounded-full blur-2xl" />
-                
-                {/* Grid markings */}
-                <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#0d631b_1px,transparent_1px),linear-gradient(to_bottom,#0d631b_1px,transparent_1px)] bg-[size:40px_40px]" />
-                
-                {/* Boundary line */}
-                <div className="absolute inset-8 border-2 border-dashed border-emerald-800/20 rounded-3xl" />
-              </div>
+              {/* Leaflet Live Tile Map Container */}
+              <div ref={mapContainerRef} className="absolute inset-0 z-0 opacity-90" />
 
               {/* Dynamic POI Pins */}
               {pois.map((poi) => {

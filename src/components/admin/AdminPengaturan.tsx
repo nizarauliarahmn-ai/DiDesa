@@ -7,6 +7,7 @@ import {
   Palette, Smartphone, Compass, Settings
 } from 'lucide-react';
 import VillageMapModal from '../common/VillageMapModal';
+import VillageMapPreview from '../common/VillageMapPreview';
 
 export default function AdminPengaturan() {
   const [tenantId, setTenantId] = useState<string | null>(null);
@@ -398,24 +399,11 @@ export default function AdminPengaturan() {
               </h3>
             </div>
             <div className="p-5 space-y-4">
-              <div className="aspect-video bg-gray-100 dark:bg-slate-800 rounded-xl relative overflow-hidden group border border-gray-200 dark:border-slate-700">
-                <img 
-                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                  className="w-full h-full object-cover opacity-70 group-hover:opacity-50 transition-opacity"
-                  alt="Map Placeholder"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                   <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur px-3 py-1.5 rounded-lg border border-white shadow-sm dark:shadow-none mb-2">
-                     <p className="text-[10px] font-mono font-bold text-gray-700 dark:text-slate-300">{decimalToDMS(villageLat, villageLng)}</p>
-                   </div>
-                   <button 
-                     onClick={() => setIsMapModalOpen(true)}
-                     className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg dark:shadow-none flex items-center gap-1.5 transition-all"
-                   >
-                     <Map className="w-3.5 h-3.5" /> Set Ulang Titik
-                   </button>
-                </div>
-              </div>
+              <VillageMapPreview
+                lat={villageLat}
+                lng={villageLng}
+                onOpenModal={() => setIsMapModalOpen(true)}
+              />
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Latitude</label>
