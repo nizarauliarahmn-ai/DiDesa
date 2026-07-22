@@ -11,6 +11,17 @@ export default function AdminPendudukPrint({ onBack, data }: AdminPendudukPrintP
     window.print();
   };
 
+  const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
+  const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
+  const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
+  const activeDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
+  const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
+  const kadesName = localStorage.getItem('village_kades_name') || 'Ahmaduddin Noor';
+  const kadesNip = localStorage.getItem('village_kades_nip') || '19750520 200501 1 005';
+  const appName = localStorage.getItem('global_app_name') || 'DiDesa';
+  
+  const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
   return (
     <div className="bg-white dark:bg-slate-900 min-h-screen text-gray-900 dark:text-white font-sans">
       <style>
@@ -62,13 +73,14 @@ export default function AdminPendudukPrint({ onBack, data }: AdminPendudukPrintP
           {/* Document Header */}
           <div className="flex mb-6 flex-col items-center text-center gap-2 border-b-2 border-gray-900 pb-4">
             <div className="flex items-center gap-4 mb-2">
-              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center border-2 border-emerald-100">
-                <span className="material-symbols-outlined text-3xl text-emerald-700">account_balance</span>
+              <div className="w-20 h-24 flex items-center justify-center overflow-hidden">
+                <img src={villageLogo} alt="Logo Desa" className="w-full h-full object-contain" />
               </div>
-              <div className="text-left">
-                <h2 className="text-2xl font-bold text-emerald-800 leading-tight">PEMERINTAH KABUPATEN DESA DIGITAL</h2>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">KECAMATAN MODERNISASI</h3>
-                <p className="text-xs font-semibold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Jl. Raya Digital No. 45, Desa Inovasi, Kode Pos 40123</p>
+              <div className="text-center flex-1 pr-20">
+                <h2 className="text-[17px] font-bold text-gray-900 leading-tight uppercase tracking-wide">{activeKabupaten}</h2>
+                <h3 className="text-[17px] font-bold text-gray-900 leading-tight uppercase tracking-wide">{activeKecamatan}</h3>
+                <h1 className="text-2xl font-black text-gray-900 leading-tight uppercase tracking-wider mt-1 mb-1">DESA {activeDesa}</h1>
+                <p className="text-xs font-medium text-gray-700">{activeAlamat}</p>
               </div>
             </div>
             <div className="w-full mt-4">
@@ -238,23 +250,23 @@ export default function AdminPendudukPrint({ onBack, data }: AdminPendudukPrintP
             <div className="flex mb-6 flex-col items-center">
               <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-20">Penduduk yang bersangkutan,</p>
               <div className="w-40 h-[1px] bg-gray-400 mb-2"></div>
-              <p className="text-sm font-bold uppercase text-gray-900 dark:text-white">{data?.name || "Ahmad Bukhori"}</p>
+              <p className="text-sm font-bold uppercase text-gray-900 dark:text-white">{data?.name || "Nama Penduduk"}</p>
             </div>
             <div className="flex mb-6 flex-col items-center text-center">
-              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-1">Desa Digital, 24 Mei 2024</p>
-              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-6">Sekretaris Desa,</p>
-              <div className="w-48 h-20 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg flex items-center justify-center mb-4 bg-gray-50 dark:bg-slate-800">
-                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">Cap Desa & TTD</span>
+              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-1">{activeDesa}, {today}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-6">Kepala Desa,</p>
+              <div className="w-48 h-20 flex items-center justify-center mb-4">
+                {/* Tanda tangan bisa ditempatkan di sini */}
               </div>
-              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white">Budi Santoso, S.Sos</p>
-              <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mt-1">NIP. 19850520 201001 1 005</p>
+              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white">{kadesName}</p>
+              <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mt-1">NIP. {kadesNip}</p>
             </div>
           </div>
 
           {/* Document ID & QR */}
           <div className="mt-8 pt-4 border-t border-gray-200 dark:border-slate-700 flex justify-between items-end">
             <div className="flex mb-6 flex-col gap-1">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Generated by DiDesa Digital Infrastructure Ecosystem</p>
+              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Generated by {appName} Digital Infrastructure</p>
               <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">Dokumen ini diterbitkan secara elektronik dan sah sesuai hukum yang berlaku.</p>
             </div>
             <div className="flex items-center gap-3">
