@@ -472,7 +472,10 @@ export default function AdminPendudukDetail({
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <Users className="w-5 h-5 text-emerald-700" />
               </div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-lg">Hubungan Keluarga</h4>
+              <div>
+                <h4 className="font-bold text-gray-900 dark:text-white text-lg">Anggota Kartu Keluarga</h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Relasi dihitung terhadap Kepala Keluarga</p>
+              </div>
             </div>
             <span className="text-sm font-bold text-gray-500 dark:text-slate-400 font-mono bg-gray-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-700">
               KK: {data?.noKk || data?.no_kk || "-"}
