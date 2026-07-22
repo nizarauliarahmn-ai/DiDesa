@@ -110,10 +110,18 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         return;
       }
 
-      // Check credentials in Supabase tenants table
+      // MUST STRICTLY ENFORCE: Only check credentials against the CURRENT domain/tenant!
+      if (!currentTenant?.id) {
+        showToast('Domain atau Desa tidak valid. Silakan gunakan link website desa Anda yang benar.', 'error');
+        setIsLoading(false);
+        return;
+      }
+
+      // Check credentials in Supabase tenants table, STRICTLY for the current tenant
       const { data: tenantMatches, error } = await supabase
         .from('tenants')
         .select('*')
+        .eq('id', currentTenant.id) // SECURITY FIX: Lock query to the active domain's tenant ID
         .or(`admin_email.eq."${email}",kades_email.eq."${email}"`);
 
       if (error) throw error;
@@ -155,42 +163,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         return;
       }
 
-      // Fallback to default demo logins if matching failed
-      const lowerEmail = email.toLowerCase();
-      const isSuper = lowerEmail.includes('kades') || lowerEmail.includes('super') || password.toLowerCase().includes('super') || password.toLowerCase().includes('kades');
-      const isSaaS = lowerEmail.includes('saas') || lowerEmail === 'admin@sistemdidesa.id';
-      const isPublic = !lowerEmail.includes('admin') && !lowerEmail.includes('kades') && !lowerEmail.includes('saas') && !isSuper;
+      // Jika tidak ada yang cocok di database
+      showToast('Email atau kata sandi salah! Pastikan kredensial Anda terdaftar di desa ini.', 'error');
+      setIsLoading(false);
+      return;
 
-      if (!isPublic) {
-        if (password.length < 3) {
-          showToast('Kata sandi terlalu pendek (minimal 3 karakter)!', 'error');
-          setIsLoading(false);
-          return;
-        }
-        
-        const targetRole = isSaaS ? 'saas_admin' : isSuper ? 'kades' : 'admin';
-        const loggedUser = {
-          email: email || (isSuper ? 'kades@sukamakmur.desa.id' : 'admin@sukamakmur.desa.id'),
-          role: targetRole as any,
-          name: isSaaS ? 'Pemilik Platform' : isSuper ? (localStorage.getItem('village_super_admin') || 'Super Admin Desa') : 'Admin Desa',
-          avatar: isSaaS ? 'https://api.dicebear.com/9.x/micah/svg?seed=SaaS' : isSuper ? 'https://api.dicebear.com/9.x/micah/svg?seed=Kades' : 'https://api.dicebear.com/9.x/micah/svg?seed=Admin'
-        };
-
-        localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
-        onLoginSuccess(loggedUser);
-        showToast(`Selamat datang kembali, ${loggedUser.name}!`, 'success');
-      } else {
-        const loggedUser = {
-          email: email,
-          role: 'public' as const,
-          name: email.split('@')[0].toUpperCase().replace('.', ' ') || 'Warga Sukamakmur',
-          avatar: 'https://i.pravatar.cc/150?img=11'
-        };
-
-        localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
-        onLoginSuccess(loggedUser);
-        showToast(`Selamat datang di Portal Layanan Publik, ${loggedUser.name}!`, 'success');
-      }
     } catch (err) {
       console.error(err);
       showToast('Terjadi kesalahan koneksi, masuk menggunakan mode demo offline.', 'error');
