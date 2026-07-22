@@ -246,12 +246,12 @@ app.get("/api/global-settings", async (req, res) => {
 // POST update global settings
 app.post("/api/global-settings", async (req, res) => {
   try {
-    const { global_app_name, global_app_logo, global_app_color, global_print_footer } = req.body;
-    if (global_app_name !== undefined) await saveGlobalSetting("global_app_name", global_app_name);
-    if (global_app_logo !== undefined) await saveGlobalSetting("global_app_logo", global_app_logo);
-    if (global_app_color !== undefined) await saveGlobalSetting("global_app_color", global_app_color);
-    if (global_print_footer !== undefined) await saveGlobalSetting("global_print_footer", global_print_footer);
-    
+    const payload = req.body || {};
+    for (const [key, value] of Object.entries(payload)) {
+      if (typeof value === "string") {
+        await saveGlobalSetting(key, value);
+      }
+    }
     const settings = await getGlobalSettings();
     res.json({ success: true, settings });
   } catch (err: any) {

@@ -133,51 +133,15 @@ export default function App() {
         const response = await fetch('/api/global-settings');
         if (response.ok) {
           const settings = await response.json();
-          const localName = localStorage.getItem('global_app_name');
-          const localLogo = localStorage.getItem('global_app_logo');
-          const localColor = localStorage.getItem('global_app_color');
-          const localFooter = localStorage.getItem('global_print_footer');
-
-          let needSyncBack = false;
-          const syncPayload: any = {};
-
-          if (settings.global_app_name) {
-            localStorage.setItem('global_app_name', settings.global_app_name);
-          } else if (localName) {
-            syncPayload.global_app_name = localName;
-            needSyncBack = true;
+          if (settings && typeof settings === 'object') {
+            Object.entries(settings).forEach(([key, val]) => {
+              if (typeof val === 'string') {
+                localStorage.setItem(key, val);
+              }
+            });
+            window.dispatchEvent(new Event('global_branding_updated'));
+            window.dispatchEvent(new Event('village_settings_updated'));
           }
-
-          if (settings.global_app_logo) {
-            localStorage.setItem('global_app_logo', settings.global_app_logo);
-          } else if (localLogo) {
-            syncPayload.global_app_logo = localLogo;
-            needSyncBack = true;
-          }
-
-          if (settings.global_app_color) {
-            localStorage.setItem('global_app_color', settings.global_app_color);
-          } else if (localColor) {
-            syncPayload.global_app_color = localColor;
-            needSyncBack = true;
-          }
-
-          if (settings.global_print_footer) {
-            localStorage.setItem('global_print_footer', settings.global_print_footer);
-          } else if (localFooter) {
-            syncPayload.global_print_footer = localFooter;
-            needSyncBack = true;
-          }
-
-          if (needSyncBack) {
-            fetch('/api/global-settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(syncPayload)
-            }).catch(console.error);
-          }
-          
-          window.dispatchEvent(new Event('global_branding_updated'));
         }
       } catch (err) {
         console.warn('Gagal sinkronisasi konfigurasi global dari server:', err);

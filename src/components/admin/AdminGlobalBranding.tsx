@@ -80,27 +80,34 @@ export default function AdminGlobalBranding() {
     localStorage.setItem('global_footer_social2_link', globalFooterSocial2Link);
     localStorage.setItem('global_footer_copyright', globalFooterCopyright);
     
+    const payload = {
+      global_app_name: globalName,
+      global_app_logo: globalLogo,
+      global_app_color: globalColor,
+      global_print_footer: globalPrintFooter,
+      global_footer_desc: globalFooterDesc,
+      global_footer_email: globalFooterEmail,
+      global_footer_phone: globalFooterPhone,
+      global_footer_affiliate_title: globalFooterAffiliateTitle,
+      global_footer_affiliate_subtitle: globalFooterAffiliateSubtitle,
+      global_footer_affiliate_link: globalFooterAffiliateLink,
+      global_footer_social1_icon: globalFooterSocial1Icon,
+      global_footer_social1_link: globalFooterSocial1Link,
+      global_footer_social2_icon: globalFooterSocial2Icon,
+      global_footer_social2_link: globalFooterSocial2Link,
+      global_footer_copyright: globalFooterCopyright
+    };
+
     try {
-      const settingsToSave = [
-        { key: 'global_app_name', value: globalName },
-        { key: 'global_app_logo', value: globalLogo },
-        { key: 'global_app_color', value: globalColor },
-        { key: 'global_print_footer', value: globalPrintFooter },
-        { key: 'global_footer_desc', value: globalFooterDesc },
-        { key: 'global_footer_email', value: globalFooterEmail },
-        { key: 'global_footer_phone', value: globalFooterPhone },
-        { key: 'global_footer_affiliate_title', value: globalFooterAffiliateTitle },
-        { key: 'global_footer_affiliate_subtitle', value: globalFooterAffiliateSubtitle },
-        { key: 'global_footer_affiliate_link', value: globalFooterAffiliateLink },
-        { key: 'global_footer_social1_icon', value: globalFooterSocial1Icon },
-        { key: 'global_footer_social1_link', value: globalFooterSocial1Link },
-        { key: 'global_footer_social2_icon', value: globalFooterSocial2Icon },
-        { key: 'global_footer_social2_link', value: globalFooterSocial2Link },
-        { key: 'global_footer_copyright', value: globalFooterCopyright }
-      ];
-      supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'key' }).then();
+      await fetch('/api/global-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const settingsToSave = Object.entries(payload).map(([key, value]) => ({ key, value }));
+      await supabase.from('global_settings').upsert(settingsToSave, { onConflict: 'key' });
     } catch (e) {
-      console.error(e);
+      console.error('Error saving global settings:', e);
     }
     
     addSaaSLog({
@@ -167,25 +174,32 @@ export default function AdminGlobalBranding() {
       localStorage.setItem('global_footer_social2_link', defaultFooterSocial2Link);
       localStorage.setItem('global_footer_copyright', defaultFooterCopyright);
 
+      const resetPayload = {
+        global_app_name: defaultName,
+        global_app_logo: defaultLogo,
+        global_app_color: defaultColor,
+        global_print_footer: defaultFooter,
+        global_footer_desc: defaultFooterDesc,
+        global_footer_email: defaultFooterEmail,
+        global_footer_phone: defaultFooterPhone,
+        global_footer_affiliate_title: defaultFooterAffiliateTitle,
+        global_footer_affiliate_subtitle: defaultFooterAffiliateSubtitle,
+        global_footer_affiliate_link: defaultFooterAffiliateLink,
+        global_footer_social1_icon: defaultFooterSocial1Icon,
+        global_footer_social1_link: defaultFooterSocial1Link,
+        global_footer_social2_icon: defaultFooterSocial2Icon,
+        global_footer_social2_link: defaultFooterSocial2Link,
+        global_footer_copyright: defaultFooterCopyright
+      };
+
       try {
-        const resetSettings = [
-          { key: 'global_app_name', value: defaultName },
-          { key: 'global_app_logo', value: defaultLogo },
-          { key: 'global_app_color', value: defaultColor },
-          { key: 'global_print_footer', value: defaultFooter },
-          { key: 'global_footer_desc', value: defaultFooterDesc },
-          { key: 'global_footer_email', value: defaultFooterEmail },
-          { key: 'global_footer_phone', value: defaultFooterPhone },
-          { key: 'global_footer_affiliate_title', value: defaultFooterAffiliateTitle },
-          { key: 'global_footer_affiliate_subtitle', value: defaultFooterAffiliateSubtitle },
-          { key: 'global_footer_affiliate_link', value: defaultFooterAffiliateLink },
-          { key: 'global_footer_social1_icon', value: defaultFooterSocial1Icon },
-          { key: 'global_footer_social1_link', value: defaultFooterSocial1Link },
-          { key: 'global_footer_social2_icon', value: defaultFooterSocial2Icon },
-          { key: 'global_footer_social2_link', value: defaultFooterSocial2Link },
-          { key: 'global_footer_copyright', value: defaultFooterCopyright }
-        ];
-        supabase.from('saas_settings').upsert(resetSettings, { onConflict: 'key' }).then();
+        await fetch('/api/global-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(resetPayload)
+        });
+        const resetSettings = Object.entries(resetPayload).map(([key, value]) => ({ key, value }));
+        await supabase.from('global_settings').upsert(resetSettings, { onConflict: 'key' });
       } catch (e) {}
 
       window.dispatchEvent(new Event('global_branding_updated'));
