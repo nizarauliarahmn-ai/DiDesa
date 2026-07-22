@@ -185,7 +185,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
-                  {familyMembers.length > 0 ? (
+                  {familyMembers.length > 1 ? (
                     familyMembers.map((member: any, i: number) => (
                       <tr key={i}>
                         <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
@@ -197,7 +197,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                   ) : (
                     <tr>
                       <td colSpan={4} className="px-4 py-4 text-sm text-center text-gray-400 italic">
-                        Tidak ada data anggota keluarga
+                        Tidak ada data anggota keluarga lain
                       </td>
                     </tr>
                   )}
