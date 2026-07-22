@@ -217,7 +217,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             {globalName}
           </h1>
           <p className="text-xs font-bold text-emerald-800/70 dark:text-emerald-400/70 uppercase tracking-widest leading-none">
-            Portal Digital Terpadu
+            Sistem Digitalisasi {desaName.startsWith('Desa') ? desaName : `Desa ${desaName}`}
           </p>
         </div>
 
