@@ -99,9 +99,19 @@ export default function AdminNotifikasi({
 
   useEffect(() => {
     fetchNotifications();
+    
+    // Listen for custom event to trigger immediate refresh
+    const handleNotificationUpdate = () => {
+      fetchNotifications();
+    };
+    window.addEventListener('notifications_updated', handleNotificationUpdate);
+
     // Poll every 15 seconds to keep dashboard notification center live and ticking!
     const interval = setInterval(fetchNotifications, 15000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('notifications_updated', handleNotificationUpdate);
+    };
   }, []);
 
   // Mark all as read

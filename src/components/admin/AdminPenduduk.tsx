@@ -156,6 +156,17 @@ export default function AdminPenduduk({
       const { error } = await supabase.from('residents').update(dbPayload).eq('nik', dbPayload.nik).eq('tenant_id', tenantId);
       if (!error) {
         showToast(`Data warga ${savedResident.name} berhasil diperbarui!`, "success");
+        // Log notification
+        await supabase.from('notifications').insert([{
+          id: `notif-${Date.now()}`,
+          tenant_id: tenantId,
+          title: "Data Penduduk Diperbarui",
+          message: `Data penduduk ${savedResident.name} (NIK: ${savedResident.nik}) telah diperbarui.`,
+          category: "Residents",
+          is_read: false,
+          timestamp: new Date().toISOString()
+        }]);
+        window.dispatchEvent(new Event('notifications_updated'));
         fetchResidents();
       } else {
         showToast(`Gagal: ${error.message}`, "error");
@@ -164,6 +175,17 @@ export default function AdminPenduduk({
       const { error } = await supabase.from('residents').insert([dbPayload]);
       if (!error) {
         showToast(`Warga baru ${savedResident.name} berhasil didaftarkan!`, "success");
+        // Log notification
+        await supabase.from('notifications').insert([{
+          id: `notif-${Date.now()}`,
+          tenant_id: tenantId,
+          title: "Penduduk Baru Ditambahkan",
+          message: `Penduduk baru ${savedResident.name} (NIK: ${savedResident.nik}) telah ditambahkan.`,
+          category: "Residents",
+          is_read: false,
+          timestamp: new Date().toISOString()
+        }]);
+        window.dispatchEvent(new Event('notifications_updated'));
         fetchResidents();
       } else {
         showToast(`Gagal: ${error.message}`, "error");
@@ -255,6 +277,18 @@ export default function AdminPenduduk({
 
         if (error) throw error;
         showToast(`Data ${name} berhasil dipindahkan ke Tong Sampah (Recycle Bin)!`, 'success');
+        
+        // Log notification
+        await supabase.from('notifications').insert([{
+          id: `notif-${Date.now()}`,
+          tenant_id: tenantId,
+          title: "Penduduk Masuk Tong Sampah",
+          message: `Data penduduk ${name} (NIK: ${nik}) dipindahkan ke Tong Sampah oleh Super Admin.`,
+          category: "Residents",
+          is_read: false,
+          timestamp: new Date().toISOString()
+        }]);
+
       } else {
         // Admin biasa: Send for Super Admin approval
         const { error } = await supabase.from('residents')
@@ -264,9 +298,20 @@ export default function AdminPenduduk({
 
         if (error) throw error;
         showToast(`Pengajuan hapus data ${name} berhasil dikirim ke Super Admin!`, 'success');
-        window.dispatchEvent(new Event('notifications_updated'));
+        
+        // Log notification
+        await supabase.from('notifications').insert([{
+          id: `notif-${Date.now()}`,
+          tenant_id: tenantId,
+          title: "Pengajuan Hapus Penduduk",
+          message: `Admin Desa mengajukan penghapusan untuk data penduduk ${name} (NIK: ${nik}).`,
+          category: "Residents",
+          is_read: false,
+          timestamp: new Date().toISOString()
+        }]);
       }
-
+      
+      window.dispatchEvent(new Event('notifications_updated'));
       fetchResidents();
       setDeleteConfirmModal(null);
     } catch (err: any) {
