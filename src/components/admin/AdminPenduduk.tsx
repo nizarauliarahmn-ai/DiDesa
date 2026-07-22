@@ -156,6 +156,25 @@ export default function AdminPenduduk({
       const { error } = await supabase.from('residents').update(dbPayload).eq('nik', dbPayload.nik).eq('tenant_id', tenantId);
       if (!error) {
         showToast(`Data warga ${savedResident.name} berhasil diperbarui!`, "success");
+        
+        // Optimistic UI Update
+        const updatedRes = { 
+          ...dbPayload, 
+          noKk: dbPayload.no_kk, 
+          rtRw: dbPayload.rt_rw, 
+          birthPlace: dbPayload.birth_place, 
+          birthDate: dbPayload.birth_date, 
+          bloodType: dbPayload.blood_type, 
+          domicileStatus: dbPayload.domicile_status, 
+          familyRelation: dbPayload.family_relation, 
+          fatherName: dbPayload.father_name, 
+          motherName: dbPayload.mother_name, 
+          activeAids: dbPayload.active_aids, 
+          genderColor: dbPayload.gender_color, 
+          statusColor: dbPayload.status_color 
+        };
+        setResidents(prev => prev.map(r => r.nik === dbPayload.nik ? { ...r, ...updatedRes } : r));
+
         // Log notification
         await supabase.from('notifications').insert([{
           id: `notif-${Date.now()}`,
@@ -190,6 +209,29 @@ export default function AdminPenduduk({
       const { error } = await supabase.from('residents').insert([dbPayload]);
       if (!error) {
         showToast(`Warga baru ${savedResident.name} berhasil didaftarkan!`, "success");
+        
+        // Optimistic UI Update
+        const newRes = { 
+          ...dbPayload, 
+          noKk: dbPayload.no_kk, 
+          rtRw: dbPayload.rt_rw, 
+          birthPlace: dbPayload.birth_place, 
+          birthDate: dbPayload.birth_date, 
+          bloodType: dbPayload.blood_type, 
+          domicileStatus: dbPayload.domicile_status, 
+          familyRelation: dbPayload.family_relation, 
+          fatherName: dbPayload.father_name, 
+          motherName: dbPayload.mother_name, 
+          activeAids: dbPayload.active_aids, 
+          genderColor: dbPayload.gender_color, 
+          statusColor: dbPayload.status_color,
+          is_deleted: 0
+        };
+        setResidents(prev => {
+          const newList = [...prev, newRes];
+          return newList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        });
+
         // Log notification
         await supabase.from('notifications').insert([{
           id: `notif-${Date.now()}`,
@@ -211,10 +253,12 @@ export default function AdminPenduduk({
 
   const filteredData = useMemo(() => {
     let result = residents.filter((item) => {
-      // Search filter
-      const matchesSearch = 
-        item.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) || 
-        item.nik.includes(debouncedSearchQuery);
+      // Safe Search filter
+      const safeName = (item.name || '').toLowerCase();
+      const safeNik = (item.nik || '').toString();
+      const query = (debouncedSearchQuery || '').toLowerCase();
+      
+      const matchesSearch = safeName.includes(query) || safeNik.includes(query);
 
       // Category filter
       let matchesFilter = true;
