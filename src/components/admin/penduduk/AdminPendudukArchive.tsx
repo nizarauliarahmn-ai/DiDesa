@@ -56,9 +56,9 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
     fetchArchived();
   }, []);
 
-  const handleRestore = async (nik: string, name: string) => {
-    if (!confirm(`Kembalikan data ${name} ke tabel utama?`)) return;
-    
+  const [confirmModal, setConfirmModal] = useState<{ action: 'restore' | 'delete', nik: string, name: string } | null>(null);
+
+  const executeRestore = async (nik: string, name: string) => {
     setActioningNik(nik);
     try {
       const tenantId = await resolveCurrentTenant();
@@ -70,8 +70,22 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
 
       if (error) throw error;
       showToast(`Data ${name} berhasil dipulihkan dari Tong Sampah!`, 'success');
+      
+      // Log notification
+      await supabase.from('notifications').insert([{
+        id: `notif-${Date.now()}`,
+        tenant_id: tenantId,
+        title: "Penduduk Dipulihkan",
+        message: `Data penduduk ${name} (NIK: ${nik}) telah dipulihkan (Restore) dari Tong Sampah.`,
+        category: "Residents",
+        is_read: false,
+        timestamp: new Date().toISOString()
+      }]);
+      window.dispatchEvent(new Event('notifications_updated'));
+
       await fetchArchived();
       window.dispatchEvent(new Event('village_settings_updated'));
+      setConfirmModal(null);
     } catch (err: any) {
       showToast(`Gagal memulihkan: ${err.message}`, 'error');
     } finally {
@@ -79,9 +93,7 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
     }
   };
 
-  const handleHardDelete = async (nik: string, name: string) => {
-    if (!confirm(`PERINGATAN! Anda yakin ingin menghapus permanen data ${name}? Data tidak dapat dikembalikan lagi.`)) return;
-    
+  const executeHardDelete = async (nik: string, name: string) => {
     setActioningNik(nik);
     try {
       const tenantId = await resolveCurrentTenant();
@@ -93,7 +105,21 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
 
       if (error) throw error;
       showToast(`Data ${name} berhasil dihapus permanen!`, 'success');
+      
+      // Log notification
+      await supabase.from('notifications').insert([{
+        id: `notif-${Date.now()}`,
+        tenant_id: tenantId,
+        title: "Data Penduduk Dihapus Permanen",
+        message: `Data penduduk ${name} (NIK: ${nik}) telah dihapus permanen dari sistem.`,
+        category: "Residents",
+        is_read: false,
+        timestamp: new Date().toISOString()
+      }]);
+      window.dispatchEvent(new Event('notifications_updated'));
+
       await fetchArchived();
+      setConfirmModal(null);
     } catch (err: any) {
       showToast(`Gagal menghapus: ${err.message}`, 'error');
     } finally {
@@ -169,14 +195,14 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex gap-2 justify-end">
                         <button
-                          onClick={() => handleRestore(r.nik, r.name)}
+                          onClick={() => setConfirmModal({ action: 'restore', nik: r.nik, name: r.name })}
                           disabled={actioningNik === r.nik}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 border border-emerald-100 dark:border-emerald-800/30 cursor-pointer"
                         >
                           <RotateCcw size={14} /> Restore (Pulihkan)
                         </button>
                         <button
-                          onClick={() => handleHardDelete(r.nik, r.name)}
+                          onClick={() => setConfirmModal({ action: 'delete', nik: r.nik, name: r.name })}
                           disabled={actioningNik === r.nik}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 border border-rose-100 dark:border-rose-800/30 cursor-pointer"
                         >
@@ -191,6 +217,97 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
           </table>
         </div>
       )}
+
+      {/* Modal Konfirmasi Restore / Hard Delete */}
+      <AnimatePresence>
+        {confirmModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" 
+              onClick={() => setConfirmModal(null)} 
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-md border border-gray-100 dark:border-slate-800"
+            >
+              <div className="flex items-center gap-4 mb-5">
+                <div className={`p-4 rounded-2xl shrink-0 ${confirmModal.action === 'restore' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
+                  {confirmModal.action === 'restore' ? (
+                    <RotateCcw className="w-8 h-8" strokeWidth={2.5} />
+                  ) : (
+                    <Trash2 className="w-8 h-8" strokeWidth={2.5} />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">
+                    {confirmModal.action === 'restore' ? 'Pulihkan Data?' : 'Hapus Permanen?'}
+                  </h3>
+                  <p className="text-sm font-semibold text-gray-500 dark:text-slate-400 mt-1">
+                    Aksi oleh Super Admin
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 dark:bg-slate-800/80 p-5 rounded-2xl mb-8 border border-gray-100 dark:border-slate-700/50">
+                <p className="text-sm text-gray-700 dark:text-slate-300 leading-relaxed">
+                  Apakah Anda yakin ingin {confirmModal.action === 'restore' ? 'memulihkan' : 'menghapus permanen'} data penduduk <strong>{confirmModal.name}</strong> (NIK: <span className={`font-mono font-bold ${confirmModal.action === 'restore' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>{confirmModal.nik}</span>)?
+                </p>
+                
+                {confirmModal.action === 'delete' && (
+                  <div className="mt-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/30 p-4 rounded-xl flex gap-3">
+                    <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-rose-800 dark:text-rose-300 font-medium leading-relaxed">
+                      Data yang dihapus permanen akan hilang selamanya dan tidak dapat dikembalikan lagi dalam bentuk apa pun.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal(null)}
+                  className="flex-1 py-3.5 px-4 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-sm rounded-xl transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirmModal.action === 'restore') executeRestore(confirmModal.nik, confirmModal.name);
+                    else executeHardDelete(confirmModal.nik, confirmModal.name);
+                  }}
+                  disabled={actioningNik !== null}
+                  className={`flex-1 py-3.5 px-4 text-white font-bold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+                    confirmModal.action === 'restore' 
+                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' 
+                      : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
+                  }`}
+                >
+                  {actioningNik ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : confirmModal.action === 'restore' ? (
+                    <>
+                      <RotateCcw className="w-4 h-4" />
+                      Pulihkan
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Hapus
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
