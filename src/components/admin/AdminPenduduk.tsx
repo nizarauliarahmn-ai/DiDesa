@@ -172,7 +172,13 @@ export default function AdminPenduduk({
         showToast(`Gagal: ${error.message}`, "error");
       }
     } else {
-      const { error } = await supabase.from('residents').insert([dbPayload]);
+      // Create a new payload with a guaranteed unique ID to prevent PK conflicts
+      const insertPayload = { 
+        ...dbPayload, 
+        id: crypto.randomUUID ? crypto.randomUUID() : `res-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+      
+      const { error } = await supabase.from('residents').insert([insertPayload]);
       if (!error) {
         showToast(`Warga baru ${savedResident.name} berhasil didaftarkan!`, "success");
         // Log notification
