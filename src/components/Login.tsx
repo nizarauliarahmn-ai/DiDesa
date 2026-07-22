@@ -134,21 +134,24 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       }
 
       // Fallback to default demo logins if matching failed
-      const isSuper = role === 'kades' || role === 'saas_admin' || email.includes('kades') || email.includes('saas');
-      const isAdminUser = role === 'admin' || role === 'kades' || role === 'saas_admin' || email.includes('admin') || isSuper;
+      const lowerEmail = email.toLowerCase();
+      const isSuper = lowerEmail.includes('kades') || lowerEmail.includes('super') || password.toLowerCase().includes('super') || password.toLowerCase().includes('kades');
+      const isSaaS = lowerEmail.includes('saas') || lowerEmail === 'admin@sistemdidesa.id';
+      const isPublic = role === 'public' && !lowerEmail.includes('admin') && !lowerEmail.includes('kades');
 
-      if (isAdminUser) {
+      if (!isPublic) {
         if (password.length < 3) {
           showToast('Kata sandi terlalu pendek (minimal 3 karakter)!', 'error');
           setIsLoading(false);
           return;
         }
         
+        const targetRole = isSaaS ? 'saas_admin' : isSuper ? 'kades' : 'admin';
         const loggedUser = {
           email: email || (isSuper ? 'kades@sukamakmur.desa.id' : 'admin@sukamakmur.desa.id'),
-          role: isSuper ? 'kades' : 'admin',
-          name: role === 'saas_admin' ? 'Pemilik Platform' : role === 'kades' ? (localStorage.getItem('village_super_admin') || 'Super Admin') : 'Admin',
-          avatar: isSuper ? 'https://api.dicebear.com/9.x/micah/svg?seed=Kades' : 'https://api.dicebear.com/9.x/micah/svg?seed=Admin'
+          role: targetRole as any,
+          name: isSaaS ? 'Pemilik Platform' : isSuper ? (localStorage.getItem('village_super_admin') || 'Super Admin Desa') : 'Admin Desa',
+          avatar: isSaaS ? 'https://api.dicebear.com/9.x/micah/svg?seed=SaaS' : isSuper ? 'https://api.dicebear.com/9.x/micah/svg?seed=Kades' : 'https://api.dicebear.com/9.x/micah/svg?seed=Admin'
         };
 
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
@@ -248,35 +251,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           </button>
         </div>
 
-        {/* Sub-role Selector for Admin */}
-        {(role === 'admin' || role === 'kades') && (
-          <div className="flex gap-2 p-1 bg-emerald-50/50 rounded-2xl mb-6 border border-emerald-100/50">
-            <button
-              type="button"
-              onClick={() => setRole('admin')}
-              className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold transition-all flex items-center justify-center gap-1.5 ${
-                role === 'admin'
-                  ? 'bg-emerald-800 text-white shadow-sm dark:shadow-none font-black'
-                  : 'text-emerald-800/70 hover:bg-emerald-50 hover:text-emerald-900'
-              }`}
-            >
-              <User size={12} />
-              <span>Admin</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('kades')}
-              className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold transition-all flex items-center justify-center gap-1.5 ${
-                role === 'kades'
-                  ? 'bg-emerald-800 text-white shadow-sm dark:shadow-none font-black'
-                  : 'text-emerald-800/70 hover:bg-emerald-50 hover:text-emerald-900'
-              }`}
-            >
-              <ShieldCheck size={12} />
-              <span>Super Admin</span>
-            </button>
-          </div>
-        )}
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
