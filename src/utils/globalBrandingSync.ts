@@ -131,19 +131,12 @@ export function subscribeGlobalBrandingRealtime(): () => void {
 }
 
 /**
- * Saves global settings to Supabase and localStorage atomically.
- * After saving, dispatches 'global_branding_updated'.
+ * Saves global settings to Supabase STRICTLY ONLINE.
+ * Updates localStorage and dispatches event ONLY when Supabase cloud accepts the write.
  */
 export async function saveGlobalBrandingToSupabase(
   settings: Record<string, string>
 ): Promise<{ success: boolean; error?: string }> {
-  // 1. Save to localStorage immediately so UI is fast
-  Object.entries(settings).forEach(([key, value]) => {
-    localStorage.setItem(key, value);
-  });
-  window.dispatchEvent(new Event('global_branding_updated'));
-
-  // 2. Persist to Supabase
   try {
     const rows = Object.entries(settings).map(([key, value]) => ({ key, value }));
     const { error } = await supabase
@@ -151,14 +144,20 @@ export async function saveGlobalBrandingToSupabase(
       .upsert(rows, { onConflict: 'key' });
 
     if (error) {
-      console.error('[GlobalBranding] Supabase save error:', error.message);
+      console.error('[GlobalBranding] Supabase online save failed:', error.message);
       return { success: false, error: error.message };
     }
+
+    // Only update localStorage cache IF online Supabase write succeeded
+    Object.entries(settings).forEach(([key, value]) => {
+      localStorage.setItem(key, value);
+    });
+    window.dispatchEvent(new Event('global_branding_updated'));
 
     _lastSynced = Date.now();
     return { success: true };
   } catch (err: any) {
-    console.error('[GlobalBranding] Save failed:', err);
+    console.error('[GlobalBranding] Online save failed:', err);
     return { success: false, error: String(err) };
   }
 }

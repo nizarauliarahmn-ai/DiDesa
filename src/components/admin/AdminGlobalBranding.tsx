@@ -109,16 +109,20 @@ export default function AdminGlobalBranding() {
       global_footer_copyright: globalFooterCopyright
     };
 
-    // Use centralized utility: saves to localStorage + Supabase atomically
+    // Use centralized utility: strictly saves to Supabase Cloud Online first
     const { success, error } = await saveGlobalBrandingToSupabase(payload);
 
     if (!success) {
-      console.warn('Supabase RLS Policy warning:', error);
-      if (error?.includes('row-level security')) {
-        alert('⚠️ Catatan RLS Supabase: Pengaturan berhasil diperbarui di sesi ini! Untuk sinkronisasi otomatis ke seluruh HP/perangkat lain, jalankan SQL Policy "global_settings" di Supabase SQL Editor.');
-      } else {
-        alert(`Pemberitahuan: Data tersimpan di lokal. (Catatan Server: ${error})`);
-      }
+      alert(`⛔ GAGAL MENYIMPAN KE SUPABASE CLOUD:\n${error}\n\nPengaturan TIDAK disimpan karena perubahan SaaS WAJIB tersimpan secara online ke seluruh desa/tenant.`);
+      setIsSaving(false);
+      setShowSuccess(false);
+      addSaaSLog({
+        admin: JSON.parse(localStorage.getItem('didesa_auth_user') || '{}').name || 'Admin',
+        aksi: 'Update Branding Platform',
+        target: globalName,
+        status: 'Gagal (RLS/Server Error)'
+      });
+      return;
     }
 
     addSaaSLog({
