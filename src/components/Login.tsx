@@ -194,7 +194,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const welcomeBannerUrl = localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 p-4 relative overflow-hidden transition-colors duration-500">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 p-4 relative overflow-hidden transition-colors duration-500">
       {/* Decorative Blur Orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-400/20 blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-300/20 blur-[100px] pointer-events-none" />
@@ -203,17 +203,17 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       <div className="absolute inset-0 bg-[radial-gradient(#047857_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] dark:opacity-[0.05] pointer-events-none z-0" />
 
       {/* Glassmorphism Login Card Container */}
-      <div className="w-full max-w-[420px] bg-white/70 dark:bg-slate-900/75 backdrop-blur-2xl rounded-[32px] border border-white/80 dark:border-slate-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-emerald-950/20 p-8 sm:p-10 relative z-10 animate-in fade-in zoom-in-95 duration-300">
+      <div className="w-full max-w-[420px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[32px] border border-white/90 dark:border-slate-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-emerald-950/20 p-8 sm:p-10 relative z-10 animate-in fade-in zoom-in-95 duration-300">
         
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-8">
-          {globalLogo ? (
-            <img src={globalLogo} alt={globalName} className="h-20 w-auto max-w-[240px] object-contain animate-fade-in mb-4 drop-shadow-sm" />
-          ) : (
-            <div 
-              className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-4 transition-all duration-300 overflow-hidden shrink-0"
-              style={{ backgroundColor: globalColor }}
-            >
+          <div 
+            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-4 transition-all duration-300 overflow-hidden shrink-0"
+            style={{ backgroundColor: globalColor }}
+          >
+            {globalLogo ? (
+              <img src={globalLogo} alt={globalName} className="w-10 h-10 object-contain animate-fade-in" />
+            ) : (
               <svg viewBox="0 0 100 100" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
                 {/* Smart Village building icon in white */}
                 <path d="M50 20 L80 45 L70 45 L70 75 L30 75 L30 45 L20 45 Z" fill="white" />
@@ -224,8 +224,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <line x1="30" y1="45" x2="50" y2="52" stroke="#34d399" strokeWidth="2" />
                 <line x1="70" y1="45" x2="50" y2="52" stroke="#34d399" strokeWidth="2" />
               </svg>
-            </div>
-          )}
+            )}
+          </div>
           
           <h1 className="text-2xl font-black tracking-tight leading-none mb-2" style={{ color: globalColor }}>
             {globalName}
