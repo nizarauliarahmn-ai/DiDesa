@@ -207,9 +207,11 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
           </div>
 
           {/* Riwayat Layanan & Bantuan */}
-          <div className="mb-8">
-            <h4 className="font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 uppercase tracking-wide">Riwayat Layanan Administrasi & Sosial</h4>
-            <div className="border rounded-xl overflow-hidden bg-white dark:bg-slate-900">
+          <div className="flex mb-8 flex-col gap-2 mt-4">
+            <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
+              <span className="material-symbols-outlined text-xl">history</span> Riwayat Layanan Administrasi & Sosial
+            </h5>
+            <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-2">
               <table className="w-full text-left">
                 <thead className="bg-gray-100 dark:bg-slate-800">
                   <tr>
