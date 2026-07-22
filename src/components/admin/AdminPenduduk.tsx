@@ -129,7 +129,6 @@ export default function AdminPenduduk({
       }
     }
     setLoading(false);
-    setHasLoadedResidents(true);
   };
 
   useEffect(() => {
