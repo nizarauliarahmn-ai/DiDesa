@@ -9,14 +9,21 @@ interface PointOfInterest {
   name: string;
   category: 'kantor' | 'infrastruktur' | 'kesehatan' | 'ibadah' | 'pertanian';
   coordinates: string;
+  lat: number;
+  lng: number;
   address: string;
   officer: string;
   desc: string;
   image: string;
-  // Position on the mock interactive map (percentages)
-  x: number; 
-  y: number;
 }
+
+const svgIcons = {
+  kantor: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>`,
+  infrastruktur: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-navigation"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`,
+  kesehatan: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
+  ibadah: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+  pertanian: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
+};
 
 function decimalToDMS(lat: number, lng: number): string {
   const latDirection = lat >= 0 ? 'N' : 'S';
@@ -48,6 +55,7 @@ export default function PetaWilayah() {
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -65,6 +73,8 @@ export default function PetaWilayah() {
         attribution: '&copy; OpenStreetMap &copy; CARTO'
       }).addTo(map);
 
+      const markersLayer = L.layerGroup().addTo(map);
+      markersLayerRef.current = markersLayer;
       mapInstanceRef.current = map;
     } else {
       mapInstanceRef.current.setView([villageLat, villageLng]);
@@ -74,6 +84,7 @@ export default function PetaWilayah() {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
+        markersLayerRef.current = null;
       }
     };
   }, [villageLat, villageLng]);
@@ -89,61 +100,61 @@ export default function PetaWilayah() {
       id: 'poi-1',
       name: `Kantor Balai ${villageName}`,
       category: 'kantor',
+      lat: villageLat,
+      lng: villageLng,
       coordinates: decimalToDMS(villageLat, villageLng),
       address: villageAlamat,
       officer: `${kadesName} (Kepala Desa)`,
       desc: `Pusat pelayanan administrasi kependudukan, musyawarah warga, dan seluruh urusan tata pamong ${villageName}.`,
       image: 'https://images.unsplash.com/photo-1577086664693-894d8405334a?auto=format&fit=crop&q=80&w=600',
-      x: 35,
-      y: 45
     },
     {
       id: 'poi-2',
       name: 'Jembatan Usaha Tani RW 03',
       category: 'infrastruktur',
+      lat: villageLat - 0.003694,
+      lng: villageLng - 0.004889,
       coordinates: decimalToDMS(villageLat - 0.003694, villageLng - 0.004889),
       address: 'Kawasan Pertanian Handil Galam, RT 06',
       officer: 'Gapoktan Sukamakmur',
       desc: 'Infrastruktur penghubung jalan usaha tani yang memudahkan sirkulasi panen padi dan pupuk menuju sawah warga.',
       image: 'https://images.unsplash.com/photo-1541888081156-fce1fa5427d6?auto=format&fit=crop&q=80&w=600',
-      x: 18,
-      y: 72
     },
     {
       id: 'poi-3',
       name: 'Pos Kesehatan Desa (Poskesdes)',
       category: 'kesehatan',
+      lat: villageLat + 0.001000,
+      lng: villageLng - 0.000444,
       coordinates: decimalToDMS(villageLat + 0.001000, villageLng - 0.000444),
       address: 'Jalan Kenanga RT 03 RW 01',
       officer: 'Siti Aminah, Amd.Keb (Bidan Desa)',
       desc: 'Pelayanan kesehatan tingkat pertama, posyandu balita & lansia, imunisasi, KB, serta konsultasi gizi sehat.',
       image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&q=80&w=600',
-      x: 62,
-      y: 28
     },
     {
       id: 'poi-4',
       name: 'Masjid Jami Al-Ittihad',
       category: 'ibadah',
+      lat: villageLat - 0.000806,
+      lng: villageLng + 0.001722,
       coordinates: decimalToDMS(villageLat - 0.000806, villageLng + 0.001722),
       address: 'Jalan Keramat RT 01 RW 01',
       officer: 'H. Abdul Kadir (Ketua Pengurus)',
       desc: 'Masjid jami utama desa untuk ibadah sholat berjamaah, pengajian berkala, serta pusat bimbingan keagamaan warga.',
       image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=80&w=600',
-      x: 50,
-      y: 60
     },
     {
       id: 'poi-5',
       name: 'Kawasan Lumbung Pertanian Organik',
       category: 'pertanian',
+      lat: villageLat - 0.005389,
+      lng: villageLng + 0.004917,
       coordinates: decimalToDMS(villageLat - 0.005389, villageLng + 0.004917),
       address: 'Wilayah Sawah Garapan Selatan',
       officer: 'Mulyadi (Koordinator Kelompok Tani)',
       desc: 'Sentra persawahan organik percontohan dengan sistem irigasi berkelanjutan yang didukung penuh oleh program bantuan desa.',
       image: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80&w=600',
-      x: 75,
-      y: 80
     }
   ];
 
@@ -151,6 +162,44 @@ export default function PetaWilayah() {
     setSelectedPoi(poi);
     showToast(`Membuka info: ${poi.name}`, 'info');
   };
+
+  useEffect(() => {
+    if (!mapInstanceRef.current || !markersLayerRef.current) return;
+    
+    // Clear existing markers
+    markersLayerRef.current.clearLayers();
+
+    pois.forEach(poi => {
+      const isSelected = selectedPoi?.id === poi.id;
+      
+      const pinHtml = `
+        <div class="relative group/pin cursor-pointer w-full h-full flex items-center justify-center">
+          ${!isSelected ? '<span class="absolute inline-flex h-8 w-8 rounded-full bg-emerald-400 opacity-75 animate-ping"></span>' : ''}
+          <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 transition-all duration-200 ${
+            isSelected 
+              ? 'bg-amber-500 border-white text-white scale-125 z-20' 
+              : 'bg-white border-emerald-700 text-emerald-800'
+          }">
+            ${svgIcons[poi.category]}
+          </div>
+          <span class="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-900/95 text-[10px] font-bold text-white px-2 py-1 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200 pointer-events-none z-30">
+            ${poi.name.split(' ').slice(-2).join(' ')}
+          </span>
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        html: pinHtml,
+        className: 'custom-poi-marker',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+
+      const marker = L.marker([poi.lat, poi.lng], { icon });
+      marker.on('click', () => handleMarkerClick(poi));
+      marker.addTo(markersLayerRef.current!);
+    });
+  }, [pois, selectedPoi]);
 
   return (
     <div className="space-y-6">
@@ -178,46 +227,7 @@ export default function PetaWilayah() {
               {/* Leaflet Live Tile Map Container */}
               <div ref={mapContainerRef} className="absolute inset-0 z-0 opacity-90" />
 
-              {/* Dynamic POI Pins */}
-              {pois.map((poi) => {
-                const isSelected = selectedPoi?.id === poi.id;
-                return (
-                  <button
-                    key={poi.id}
-                    onClick={() => handleMarkerClick(poi)}
-                    style={{ left: `${poi.x}%`, top: `${poi.y}%` }}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 z-10 p-2 focus:outline-none transition-all duration-300"
-                    title={poi.name}
-                  >
-                    <div className="relative group/pin">
-                      {/* Ripple pulse wave for unselected pins */}
-                      {!isSelected && (
-                        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping -inset-1"></span>
-                      )}
-                      
-                      {/* Circle Pin Frame */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg dark:shadow-none border-2 transition-all duration-200 ${
-                        isSelected 
-                          ? 'bg-amber-500 border-white text-white scale-125 z-20' 
-                          : 'bg-white dark:bg-slate-900 border-emerald-700 text-emerald-800 hover:bg-emerald-50 hover:scale-110'
-                      }`}>
-                        {poi.category === 'kantor' && <Landmark className="w-4 h-4" />}
-                        {poi.category === 'infrastruktur' && <Navigation className="w-4 h-4" />}
-                        {poi.category === 'kesehatan' && <Heart className="w-4 h-4" />}
-                        {poi.category === 'ibadah' && <Info className="w-4 h-4" />}
-                        {poi.category === 'pertanian' && <Users className="w-4 h-4" />}
-                      </div>
-
-                      {/* Floating tag on hover */}
-                      <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-900/95 text-[10px] font-bold text-white px-2 py-1 rounded-lg shadow-md dark:shadow-none whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200 pointer-events-none z-30">
-                        {poi.name.split(' ').slice(-2).join(' ')}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-
-              <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-md dark:shadow-none text-[10px] space-y-1 z-10 font-bold">
+              <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-md dark:shadow-none text-[10px] space-y-1 z-10 font-bold pointer-events-none">
                 <p className="text-gray-400 uppercase tracking-widest text-[8px] mb-1.5">LEGENDA PETA</p>
                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-700" /> <span>Fasilitas Publik / Administrasi</span></div>
                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> <span>Titik Terpilih</span></div>
