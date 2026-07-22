@@ -11,7 +11,6 @@ interface LoginProps {
 export default function Login({ onLoginSuccess }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'admin' | 'kades' | 'saas_admin' | 'public'>('admin');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,18 +27,32 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [currentTenant, setCurrentTenant] = useState<any>(null);
 
   useEffect(() => {
-    const initializeTenant = async () => {
-      const tenantId = await resolveCurrentTenant();
-      if (tenantId) {
-        const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
-        if (data) {
-          setCurrentTenant(data);
-          setDesaName(data.nama_desa || 'Desa Sukamakmur');
-          // Update global names based on tenant
+    const initializeTenantAndBranding = async () => {
+      try {
+        // Fetch Tenant
+        const tenantId = await resolveCurrentTenant();
+        if (tenantId) {
+          const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
+          if (data) {
+            setCurrentTenant(data);
+            setDesaName(data.nama_desa || 'Desa Sukamakmur');
+          }
         }
+        
+        // Fetch Global SaaS Branding Online
+        const { data: brandingData } = await supabase.from('global_settings').select('key, value');
+        if (brandingData && brandingData.length > 0) {
+          brandingData.forEach((setting: any) => {
+            if (setting.key === 'global_app_name') setGlobalName(setting.value);
+            if (setting.key === 'global_app_logo') setGlobalLogo(setting.value);
+            if (setting.key === 'global_app_color') setGlobalColor(setting.value);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch online settings:', error);
       }
     };
-    initializeTenant();
+    initializeTenantAndBranding();
     
     const handleSettingsUpdate = () => {
       setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
@@ -137,7 +150,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       const lowerEmail = email.toLowerCase();
       const isSuper = lowerEmail.includes('kades') || lowerEmail.includes('super') || password.toLowerCase().includes('super') || password.toLowerCase().includes('kades');
       const isSaaS = lowerEmail.includes('saas') || lowerEmail === 'admin@sistemdidesa.id';
-      const isPublic = role === 'public' && !lowerEmail.includes('admin') && !lowerEmail.includes('kades');
+      const isPublic = !lowerEmail.includes('admin') && !lowerEmail.includes('kades') && !lowerEmail.includes('saas') && !isSuper;
 
       if (!isPublic) {
         if (password.length < 3) {
@@ -181,25 +194,24 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const welcomeBannerUrl = localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000';
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden px-4 py-10 bg-slate-100/70 dark:bg-slate-950 transition-colors">
-      {/* Dynamic Light Emerald & Teal Glassmorphism Orbs */}
-      <div className="absolute top-1/4 -right-20 w-[550px] h-[550px] bg-emerald-300/35 dark:bg-emerald-950/30 rounded-full blur-[110px] pointer-events-none animate-pulse duration-1000" />
-      <div className="absolute bottom-1/4 -left-20 w-[500px] h-[500px] bg-teal-200/40 dark:bg-teal-950/30 rounded-full blur-[100px] pointer-events-none animate-pulse duration-700" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-emerald-100/50 dark:bg-emerald-900/10 rounded-full blur-[150px] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 p-4 relative overflow-hidden transition-colors duration-500">
+      {/* Decorative Blur Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-400/20 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-300/20 blur-[100px] pointer-events-none" />
 
       {/* Subtle Dot Grid Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(#047857_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.04] dark:opacity-[0.06] pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(#047857_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] dark:opacity-[0.05] pointer-events-none z-0" />
 
       {/* Glassmorphism Login Card Container */}
-      <div className="w-full max-w-[460px] bg-white/70 dark:bg-slate-900/75 backdrop-blur-2xl rounded-[32px] border border-white/80 dark:border-slate-800/80 shadow-2xl shadow-emerald-950/10 p-6 sm:p-8 relative z-10 animate-in fade-in zoom-in-95 duration-300">
+      <div className="w-full max-w-[420px] bg-white/70 dark:bg-slate-900/75 backdrop-blur-2xl rounded-[32px] border border-white/80 dark:border-slate-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-emerald-950/20 p-8 sm:p-10 relative z-10 animate-in fade-in zoom-in-95 duration-300">
         
-        {/* Brand Header with Frosted Glass Badge */}
-        <div className="flex flex-col items-center text-center mb-6 bg-white/60 dark:bg-slate-800/40 rounded-2xl p-5 border border-emerald-100/70 dark:border-slate-800/60 backdrop-blur-md shadow-sm">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center text-center mb-8">
           {globalLogo ? (
-            <img src={globalLogo} alt={globalName} className="h-16 w-auto max-w-[240px] object-contain animate-fade-in mb-3" />
+            <img src={globalLogo} alt={globalName} className="h-20 w-auto max-w-[240px] object-contain animate-fade-in mb-4 drop-shadow-sm" />
           ) : (
             <div 
-              className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-3 transition-all duration-300 overflow-hidden shrink-0"
+              className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-4 transition-all duration-300 overflow-hidden shrink-0"
               style={{ backgroundColor: globalColor }}
             >
               <svg viewBox="0 0 100 100" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -215,53 +227,18 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             </div>
           )}
           
-          <h1 className="text-2xl font-black tracking-tight leading-none mb-1.5" style={{ color: globalColor }}>
+          <h1 className="text-2xl font-black tracking-tight leading-none mb-2" style={{ color: globalColor }}>
             {globalName}
           </h1>
-          <p className="text-[11px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest leading-none">
-            Sistem Digitalisasi Desa
+          <p className="text-xs font-bold text-emerald-800/70 dark:text-emerald-400/70 uppercase tracking-widest leading-none">
+            Portal Digital Terpadu
           </p>
         </div>
 
-        {/* Tab Selector for Login Role */}
-        <div className="grid grid-cols-2 gap-2 p-1.5 bg-slate-50 dark:bg-slate-800 rounded-2xl mb-6">
-          <button
-            type="button"
-            onClick={() => {
-              setRole('admin');
-              setEmail('');
-              setPassword('');
-            }}
-            className={`py-2.5 rounded-xl text-xs font-extrabold transition-all ${
-              role === 'admin' || role === 'kades'
-                ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none'
-                : 'text-gray-500 dark:text-slate-400 hover:text-gray-800'
-            }`}
-          >
-            Sistem Admin Desa
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setRole('public');
-              setEmail('');
-              setPassword('');
-            }}
-            className={`py-2.5 rounded-xl text-xs font-extrabold transition-all ${
-              role === 'public'
-                ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none'
-                : 'text-gray-500 dark:text-slate-400 hover:text-gray-800'
-            }`}
-          >
-            Portal Layanan Warga
-          </button>
-        </div>
-
-
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
               Email atau Nama Pengguna
             </label>
             <div className="relative">
@@ -272,7 +249,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={role === 'admin' ? (currentTenant?.admin_email || 'admin@sukamakmur.desa.id') : 'warga@sukamakmur.desa.id'}
+                placeholder={currentTenant?.admin_email || 'admin@sukamakmur.desa.id'}
                 className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
               />
             </div>
