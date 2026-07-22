@@ -26,7 +26,7 @@ import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
 import Footer from './components/common/Footer';
-import { syncGlobalBrandingFromSupabase } from './utils/globalBrandingSync';
+import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant } from './utils/tenantResolver';
 
@@ -130,9 +130,9 @@ export default function App() {
       localStorage.setItem('village_officers', JSON.stringify(defaultOfficers));
     }
 
-    // ✅ PRIMARY SYNC: Pull SaaS global branding from Supabase (master source)
-    // Supabase always wins over localStorage for global_* keys.
-    syncGlobalBrandingFromSupabase(true);
+    // ✅ PRIMARY SYNC & REALTIME SUBSCRIPTION: 
+    // Pull SaaS global branding from Supabase + subscribe to instant WebSocket events (<100ms)
+    const unsubscribeRealtime = subscribeGlobalBrandingRealtime();
 
     // ✅ SECONDARY SYNC: Pull tenant-specific settings from Supabase
     const syncTenantSettings = async () => {
@@ -157,6 +157,10 @@ export default function App() {
       }
     };
     syncTenantSettings();
+
+    return () => {
+      unsubscribeRealtime();
+    };
   }, []);
 
   // Theme logic

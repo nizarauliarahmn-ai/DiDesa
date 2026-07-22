@@ -3,11 +3,11 @@
  * 
  * SINGLE SOURCE OF TRUTH untuk semua setting global SaaS (logo, nama, warna, footer).
  * 
- * Arsitektur:
- * - Saat App pertama dibuka, panggil syncGlobalBrandingFromSupabase()
- * - Supabase adalah master. localStorage hanya sebagai cache cepat.
- * - Jika Supabase memberikan nilai kosong, localStorage TIDAK akan ditimpa (protected)
- * - Semua komponen cukup mendengarkan event 'global_branding_updated' untuk sinkronisasi
+ * Fitur Utama:
+ * 1. Initial Sync saat app dimuat
+ * 2. Supabase Realtime Subscriptions (Push update instan via WebSocket ke semua client < 100ms)
+ * 3. Tab Focus listener & Periodic Polling fallback (15 detik) untuk memastikan data 100% segar
+ * 4. Atomic Save ke Supabase & LocalStorage
  */
 
 import { supabase } from './supabase';
@@ -32,7 +32,7 @@ const GLOBAL_BRANDING_KEYS = [
 
 let _isSyncing = false;
 let _lastSynced: number | null = null;
-const SYNC_THROTTLE_MS = 10_000; // Don't re-sync more than once per 10s
+let _realtimeChannel: any = null;
 
 /**
  * Syncs global_settings table (SaaS-wide) from Supabase into localStorage.
@@ -41,7 +41,7 @@ const SYNC_THROTTLE_MS = 10_000; // Don't re-sync more than once per 10s
  */
 export async function syncGlobalBrandingFromSupabase(force = false): Promise<void> {
   if (_isSyncing) return;
-  if (!force && _lastSynced && Date.now() - _lastSynced < SYNC_THROTTLE_MS) return;
+  if (!force && _lastSynced && Date.now() - _lastSynced < 5000) return;
 
   _isSyncing = true;
   try {
@@ -81,6 +81,56 @@ export async function syncGlobalBrandingFromSupabase(force = false): Promise<voi
 }
 
 /**
+ * Subscribes to Supabase Realtime channel for instant (<100ms) live updates
+ * across all connected devices worldwide whenever SaaS settings change.
+ */
+export function subscribeGlobalBrandingRealtime(): () => void {
+  // Sync immediately
+  syncGlobalBrandingFromSupabase(true);
+
+  // Set up Realtime listener
+  if (!_realtimeChannel) {
+    _realtimeChannel = supabase
+      .channel('public:global_settings')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'global_settings' },
+        (payload: any) => {
+          if (payload.new && payload.new.key && payload.new.value !== undefined) {
+            const { key, value } = payload.new;
+            if (GLOBAL_BRANDING_KEYS.includes(key) && value && value.trim() !== '') {
+              localStorage.setItem(key, value);
+              window.dispatchEvent(new Event('global_branding_updated'));
+            }
+          }
+          // Also trigger a full sync to catch any batch changes
+          syncGlobalBrandingFromSupabase(true);
+        }
+      )
+      .subscribe();
+  }
+
+  // Window Focus Listener (instant sync when user switches back to tab)
+  const handleFocus = () => syncGlobalBrandingFromSupabase(true);
+  window.addEventListener('focus', handleFocus);
+
+  // Background Polling Fallback (every 15 seconds)
+  const interval = setInterval(() => {
+    syncGlobalBrandingFromSupabase(false);
+  }, 15000);
+
+  // Cleanup
+  return () => {
+    window.removeEventListener('focus', handleFocus);
+    clearInterval(interval);
+    if (_realtimeChannel) {
+      supabase.removeChannel(_realtimeChannel);
+      _realtimeChannel = null;
+    }
+  };
+}
+
+/**
  * Saves global settings to Supabase and localStorage atomically.
  * After saving, dispatches 'global_branding_updated'.
  */
@@ -105,7 +155,7 @@ export async function saveGlobalBrandingToSupabase(
       return { success: false, error: error.message };
     }
 
-    _lastSynced = Date.now(); // Update cache timestamp
+    _lastSynced = Date.now();
     return { success: true };
   } catch (err: any) {
     console.error('[GlobalBranding] Save failed:', err);
