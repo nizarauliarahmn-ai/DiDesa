@@ -8,7 +8,13 @@
  */
 export function capitalizeWords(str: string): string {
   if (!str) return str;
-  return str.replace(/\b[a-z]/g, (char) => char.toUpperCase());
+  return str
+    .split(' ')
+    .map(word => {
+      if (!word) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
 }
 
 export interface ParsedAddress {

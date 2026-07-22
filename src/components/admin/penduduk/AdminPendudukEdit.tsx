@@ -46,22 +46,22 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   };
 
   // Form State
-  const [name, setName] = useState(data?.name || '');
+  const [name, setName] = useState(capitalizeWords(data?.name || ''));
   const [nik, setNik] = useState(data?.nik || '');
-  const [noKk, setNoKk] = useState(data?.noKk || '320412008890001'); // Added KK Number state
+  const [noKk, setNoKk] = useState(data?.noKk || '320412008890001');
   const [gender, setGender] = useState(data?.gender || 'Laki-laki');
-  const [birthPlace, setBirthPlace] = useState(data?.birthPlace || 'Bandung');
+  const [birthPlace, setBirthPlace] = useState(capitalizeWords(data?.birthPlace || ''));
   const [birthDate, setBirthDate] = useState(data?.birthDate || '1995-01-01');
   const [bloodType, setBloodType] = useState(data?.bloodType || 'O');
   const [religion, setReligion] = useState(data?.religion || 'Islam');
   const [job, setJob] = useState(data?.job || 'Wiraswasta');
-  const [fatherName, setFatherName] = useState(data?.fatherName || '');
-  const [motherName, setMotherName] = useState(data?.motherName || '');
+  const [fatherName, setFatherName] = useState(capitalizeWords(data?.fatherName || ''));
+  const [motherName, setMotherName] = useState(capitalizeWords(data?.motherName || ''));
   
-  const [address, setAddress] = useState(data?.address || 'Jl. Cempaka No. 42');
+  const [address, setAddress] = useState(capitalizeWords(data?.address || ''));
   const [rt, setRt] = useState(data?.rt || '01');
   const [rw, setRw] = useState(data?.rw || '01');
-  const [desa, setDesa] = useState(() => data?.desa || getCleanedVillageName());
+  const [desa, setDesa] = useState(() => capitalizeWords(data?.desa || getCleanedVillageName()));
   const [domicileStatus, setDomicileStatus] = useState(data?.domicileStatus || 'Sesuai KTP');
   
   const [familyRelation, setFamilyRelation] = useState(data?.familyRelation || 'Kepala Keluarga');
