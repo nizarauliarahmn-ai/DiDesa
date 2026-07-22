@@ -4,6 +4,17 @@ import App from './App.tsx';
 import { SupabaseSync } from './components/SupabaseSync';
 import './index.css';
 
+// Unregister any rogue Service Workers from previous PWA setups to prevent aggressive caching
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+      console.log('Unregistered rogue service worker:', registration);
+    }
+  });
+}
+
+
 // Client-side API Mock for Serverless environments (like Vercel)
 if (
   window.location.hostname.includes('vercel') || 
