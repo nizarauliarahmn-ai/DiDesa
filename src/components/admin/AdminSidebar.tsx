@@ -156,20 +156,20 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
       {/* Brand */}
       <div className="p-6 flex items-center gap-4 mb-4">
-        <div 
-          className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner shrink-0"
-          style={{ backgroundColor: globalColor }}
-        >
-          {globalLogo ? (
-            <img src={globalLogo} alt="Logo" className="w-6 h-6 object-contain" />
-          ) : (
+        {globalLogo ? (
+          <img src={globalLogo} alt={globalName} className="h-10 w-auto max-w-[140px] object-contain rounded-xl shrink-0" />
+        ) : (
+          <div 
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner shrink-0"
+            style={{ backgroundColor: globalColor }}
+          >
             <Building2 className="text-white w-6 h-6" />
-          )}
-        </div>
+          </div>
+        )}
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: globalColor }}>{globalName}</h1>
-            <span className="text-[9px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-1.5 py-0.5 rounded-full">v3.0</span>
+            <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v4.0</span>
           </div>
           <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1">
             {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
