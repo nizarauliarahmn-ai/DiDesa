@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Settings, Save, Image, Palette, Globe, CheckCircle, AlertCircle, Trash2, FileText, UploadCloud, Type, Mail, Phone, Link, Share2 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
+import { saveGlobalBrandingToSupabase, syncGlobalBrandingFromSupabase } from '../../utils/globalBrandingSync';
 
 export default function AdminGlobalBranding() {
   const [globalName, setGlobalName] = useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
@@ -27,41 +28,30 @@ export default function AdminGlobalBranding() {
   const social1InputRef = useRef<HTMLInputElement>(null);
   const social2InputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch global_settings from Supabase on mount for cross-device sync
+  // Fetch global_settings from Supabase on mount (Supabase is master, not localStorage)
   useEffect(() => {
-    const loadFromSupabase = async () => {
-      try {
-        const { data } = await supabase.from('global_settings').select('key, value');
-        if (data && data.length > 0) {
-          const apply = (key: string, setter: (v: string) => void) => {
-            const row = data.find((r: any) => r.key === key);
-            if (row && row.value && row.value.trim() !== '') {
-              setter(row.value);
-              localStorage.setItem(key, row.value);
-            }
-          };
-          apply('global_app_name', setGlobalName);
-          apply('global_app_logo', setGlobalLogo);
-          apply('global_app_color', setGlobalColor);
-          apply('global_print_footer', setGlobalPrintFooter);
-          apply('global_footer_desc', setGlobalFooterDesc);
-          apply('global_footer_email', setGlobalFooterEmail);
-          apply('global_footer_phone', setGlobalFooterPhone);
-          apply('global_footer_affiliate_title', setGlobalFooterAffiliateTitle);
-          apply('global_footer_affiliate_subtitle', setGlobalFooterAffiliateSubtitle);
-          apply('global_footer_affiliate_link', setGlobalFooterAffiliateLink);
-          apply('global_footer_social1_icon', setGlobalFooterSocial1Icon);
-          apply('global_footer_social1_link', setGlobalFooterSocial1Link);
-          apply('global_footer_social2_icon', setGlobalFooterSocial2Icon);
-          apply('global_footer_social2_link', setGlobalFooterSocial2Link);
-          apply('global_footer_copyright', setGlobalFooterCopyright);
-          window.dispatchEvent(new Event('global_branding_updated'));
-        }
-      } catch (err) {
-        console.warn('Gagal ambil global_settings dari Supabase:', err);
-      }
-    };
-    loadFromSupabase();
+    syncGlobalBrandingFromSupabase(true).then(() => {
+      // After sync, read the fresh values into component state
+      const apply = (key: string, setter: (v: string) => void) => {
+        const val = localStorage.getItem(key);
+        if (val && val.trim() !== '') setter(val);
+      };
+      apply('global_app_name', setGlobalName);
+      apply('global_app_logo', setGlobalLogo);
+      apply('global_app_color', setGlobalColor);
+      apply('global_print_footer', setGlobalPrintFooter);
+      apply('global_footer_desc', setGlobalFooterDesc);
+      apply('global_footer_email', setGlobalFooterEmail);
+      apply('global_footer_phone', setGlobalFooterPhone);
+      apply('global_footer_affiliate_title', setGlobalFooterAffiliateTitle);
+      apply('global_footer_affiliate_subtitle', setGlobalFooterAffiliateSubtitle);
+      apply('global_footer_affiliate_link', setGlobalFooterAffiliateLink);
+      apply('global_footer_social1_icon', setGlobalFooterSocial1Icon);
+      apply('global_footer_social1_link', setGlobalFooterSocial1Link);
+      apply('global_footer_social2_icon', setGlobalFooterSocial2Icon);
+      apply('global_footer_social2_link', setGlobalFooterSocial2Link);
+      apply('global_footer_copyright', setGlobalFooterCopyright);
+    });
   }, []);
 
   const handleImageUpload = async (file: File, setter: (url: string) => void) => {
@@ -100,24 +90,8 @@ export default function AdminGlobalBranding() {
 
   const handleSave = async () => {
     setIsSaving(true);
-    
-    localStorage.setItem('global_app_name', globalName);
-    localStorage.setItem('global_app_logo', globalLogo);
-    localStorage.setItem('global_app_color', globalColor);
-    localStorage.setItem('global_print_footer', globalPrintFooter);
-    localStorage.setItem('global_footer_desc', globalFooterDesc);
-    localStorage.setItem('global_footer_email', globalFooterEmail);
-    localStorage.setItem('global_footer_phone', globalFooterPhone);
-    localStorage.setItem('global_footer_affiliate_title', globalFooterAffiliateTitle);
-    localStorage.setItem('global_footer_affiliate_subtitle', globalFooterAffiliateSubtitle);
-    localStorage.setItem('global_footer_affiliate_link', globalFooterAffiliateLink);
-    localStorage.setItem('global_footer_social1_icon', globalFooterSocial1Icon);
-    localStorage.setItem('global_footer_social1_link', globalFooterSocial1Link);
-    localStorage.setItem('global_footer_social2_icon', globalFooterSocial2Icon);
-    localStorage.setItem('global_footer_social2_link', globalFooterSocial2Link);
-    localStorage.setItem('global_footer_copyright', globalFooterCopyright);
-    
-    const payload = {
+
+    const payload: Record<string, string> = {
       global_app_name: globalName,
       global_app_logo: globalLogo,
       global_app_color: globalColor,
@@ -135,28 +109,22 @@ export default function AdminGlobalBranding() {
       global_footer_copyright: globalFooterCopyright
     };
 
-    try {
-      await fetch('/api/global-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const settingsToSave = Object.entries(payload).map(([key, value]) => ({ key, value }));
-      await supabase.from('global_settings').upsert(settingsToSave, { onConflict: 'key' });
-    } catch (e) {
-      console.error('Error saving global settings:', e);
+    // Use centralized utility: saves to localStorage + Supabase atomically
+    const { success, error } = await saveGlobalBrandingToSupabase(payload);
+
+    if (!success) {
+      alert(`Gagal menyimpan ke Supabase: ${error}`);
     }
-    
+
     addSaaSLog({
       admin: JSON.parse(localStorage.getItem('didesa_auth_user') || '{}').name || 'Admin',
       aksi: 'Update Branding Platform',
       target: globalName,
-      status: 'Berhasil'
+      status: success ? 'Berhasil' : 'Gagal'
     });
 
     setIsSaving(false);
-    setShowSuccess(true);
-    window.dispatchEvent(new Event('global_branding_updated'));
+    setShowSuccess(success);
     setTimeout(() => setShowSuccess(false), 3000);
   };
 

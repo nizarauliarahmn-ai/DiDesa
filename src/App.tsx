@@ -26,6 +26,9 @@ import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
 import Footer from './components/common/Footer';
+import { syncGlobalBrandingFromSupabase } from './utils/globalBrandingSync';
+import { supabase } from './utils/supabase';
+import { resolveCurrentTenant } from './utils/tenantResolver';
 
 // Public views
 import TransparansiDana from './components/dashboard/TransparansiDana';
@@ -127,27 +130,33 @@ export default function App() {
       localStorage.setItem('village_officers', JSON.stringify(defaultOfficers));
     }
 
-    // Sinkronisasi branding/settings global dari database (multi-browser & multi-device sync)
-    const syncGlobalSettings = async () => {
+    // ✅ PRIMARY SYNC: Pull SaaS global branding from Supabase (master source)
+    // Supabase always wins over localStorage for global_* keys.
+    syncGlobalBrandingFromSupabase(true);
+
+    // ✅ SECONDARY SYNC: Pull tenant-specific settings from Supabase
+    const syncTenantSettings = async () => {
       try {
-        const response = await fetch('/api/global-settings');
-        if (response.ok) {
-          const settings = await response.json();
-          if (settings && typeof settings === 'object') {
-            Object.entries(settings).forEach(([key, val]) => {
-              if (typeof val === 'string') {
-                localStorage.setItem(key, val);
-              }
-            });
-            window.dispatchEvent(new Event('global_branding_updated'));
-            window.dispatchEvent(new Event('village_settings_updated'));
-          }
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+        const { data } = await supabase
+          .from('saas_settings')
+          .select('key, value')
+          .eq('tenant_id', tid);
+        if (data && data.length > 0) {
+          data.forEach((row: any) => {
+            if (row.value !== null && row.value !== undefined && row.value !== '') {
+              localStorage.setItem(row.key, row.value);
+            }
+          });
+          window.dispatchEvent(new Event('village_settings_updated'));
+          window.dispatchEvent(new Event('app_theme_updated'));
         }
       } catch (err) {
-        console.warn('Gagal sinkronisasi konfigurasi global dari server:', err);
+        console.warn('[App] Gagal sinkronisasi pengaturan desa:', err);
       }
     };
-    syncGlobalSettings();
+    syncTenantSettings();
   }, []);
 
   // Theme logic
