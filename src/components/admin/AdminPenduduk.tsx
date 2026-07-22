@@ -172,6 +172,21 @@ export default function AdminPenduduk({
         showToast(`Gagal: ${error.message}`, "error");
       }
     } else {
+      // Pre-check: NIK sudah terdaftar?
+      const { data: existing } = await supabase
+        .from('residents')
+        .select('nik')
+        .eq('nik', savedResident.nik)
+        .maybeSingle();
+
+      if (existing) {
+        showToast(
+          `NIK ${savedResident.nik} sudah terdaftar! Periksa kembali NIK yang Anda masukkan.`,
+          "error"
+        );
+        return;
+      }
+
       const { error } = await supabase.from('residents').insert([dbPayload]);
       if (!error) {
         showToast(`Warga baru ${savedResident.name} berhasil didaftarkan!`, "success");
