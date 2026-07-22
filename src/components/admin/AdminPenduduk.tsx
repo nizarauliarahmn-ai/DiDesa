@@ -306,7 +306,28 @@ export default function AdminPenduduk({
       result = [...result].sort((a, b) => {
         const kkA = a.noKk || '';
         const kkB = b.noKk || '';
-        return kkA.localeCompare(kkB);
+        if (kkA !== kkB) {
+          return kkA.localeCompare(kkB);
+        }
+        
+        // Jika KK sama, urutkan berdasarkan Hubungan Keluarga
+        const relationPriority = (relation: string) => {
+          const r = (relation || '').toLowerCase();
+          if (r.includes('kepala')) return 1;
+          if (r.includes('istri')) return 2;
+          if (r.includes('anak')) return 3;
+          return 4;
+        };
+        
+        const prioA = relationPriority(a.familyRelation);
+        const prioB = relationPriority(b.familyRelation);
+        
+        if (prioA !== prioB) {
+          return prioA - prioB;
+        }
+        
+        // Jika status hubungannya juga sama, urutkan A-Z
+        return (a.name || '').localeCompare(b.name || '');
       });
     } else if (sortOrder === 'A-Z Nama') {
       result = [...result].sort((a, b) => a.name.localeCompare(b.name));
