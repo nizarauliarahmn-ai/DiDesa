@@ -6,6 +6,7 @@ import {
   Building2, MapPin, Save, Image as ImageIcon, Check, Bot, Layout, Upload, Map,
   Palette, Smartphone, Compass, Settings
 } from 'lucide-react';
+import VillageMapModal from '../common/VillageMapModal';
 
 export default function AdminPengaturan() {
   const [tenantId, setTenantId] = useState<string | null>(null);
@@ -469,63 +470,17 @@ export default function AdminPengaturan() {
         </div>
       </div>
 
-      {isMapModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm bg-slate-900/40">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800">
-              <div>
-                <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                  <Compass className="w-6 h-6 text-emerald-600" />
-                  Tetapkan Koordinat Desa
-                </h3>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">Visualisasi Peta DiDesa</p>
-              </div>
-            </div>
-            <div className="p-6 bg-white dark:bg-slate-900 flex-1 overflow-y-auto space-y-4">
-              <div className="relative w-full aspect-video bg-emerald-50 rounded-2xl overflow-hidden border-2 border-emerald-100 shadow-inner">
-                {/* Simulated Map Background */}
-                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-                <div 
-                  className="absolute inset-0 z-20"
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    const percentX = (x / rect.width) - 0.5;
-                    const percentY = (y / rect.height) - 0.5;
-                    const factorY = -0.01;
-                    const factorX = 0.01;
-                    setVillageLat(parseFloat((-2.797806 + (percentY * factorY)).toFixed(6)));
-                    setVillageLng(parseFloat((115.227889 + (percentX * factorX)).toFixed(6)));
-                  }}
-                ></div>
-                {(() => {
-                  const baseLat = -2.797806;
-                  const baseLng = 115.227889;
-                  const factorY = -0.01;
-                  const factorX = 0.01;
-                  const percentY = Math.max(-0.45, Math.min(0.45, (villageLat - baseLat) / factorY)) + 0.5;
-                  const percentX = Math.max(-0.45, Math.min(0.45, (villageLng - baseLng) / factorX)) + 0.5;
-                  return (
-                    <div 
-                      className="absolute z-30 flex flex-col items-center pointer-events-none transition-all duration-300 ease-out"
-                      style={{ top: `${percentY * 100}%`, left: `${percentX * 100}%`, transform: 'translate(-50%, -100%)' }}
-                    >
-                      <div className="bg-red-600 text-white p-3 rounded-2xl shadow-xl flex items-center justify-center border-2 border-white scale-110">
-                        <Building2 className="w-6 h-6" />
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-            <div className="p-6 bg-slate-50 dark:bg-slate-800 border-t border-slate-100 dark:border-slate-800 flex gap-3">
-              <button onClick={() => setIsMapModalOpen(false)} className="flex-1 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 py-3 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700">Batal</button>
-              <button onClick={() => setIsMapModalOpen(false)} className="flex-1 bg-emerald-700 text-white py-3 rounded-xl font-bold hover:bg-emerald-800">Simpan Koordinat</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <VillageMapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        lat={villageLat}
+        lng={villageLng}
+        villageName={villageName}
+        onSave={(newLat, newLng) => {
+          setVillageLat(newLat);
+          setVillageLng(newLng);
+        }}
+      />
     </div>
   );
 }
