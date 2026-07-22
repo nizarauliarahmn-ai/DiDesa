@@ -76,20 +76,41 @@ export default function AdminPenduduk({
   }, [debouncedSearchQuery, activeFilter, sortOrder]);
 
   const fetchResidents = async () => {
-    setLoading(true);
+    if (residents.length === 0) setLoading(true);
     const resolvedTenant = await resolveCurrentTenant();
     setTenantId(resolvedTenant);
 
     if (resolvedTenant) {
-      const { data, error } = await supabase
-        .from('residents')
-        .select('*')
-        .eq('tenant_id', resolvedTenant)
-        .order('name', { ascending: true })
-        .limit(10000);
-        
-      if (!error && data) {
-        const formatted = data.map(r => ({
+      let allData: any[] = [];
+      let hasMore = true;
+      let page = 0;
+      const pageSize = 1000;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('residents')
+          .select('*')
+          .eq('tenant_id', resolvedTenant)
+          .order('name', { ascending: true })
+          .range(page * pageSize, (page + 1) * pageSize - 1);
+          
+        if (error) {
+          console.error("Error fetching residents from Supabase:", error);
+          hasMore = false;
+        } else if (data) {
+          allData = [...allData, ...data];
+          if (data.length < pageSize) {
+            hasMore = false;
+          } else {
+            page++;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      if (allData.length > 0) {
+        const formatted = allData.map(r => ({
            ...r,
            noKk: r.no_kk,
            rtRw: r.rt_rw,
@@ -104,12 +125,11 @@ export default function AdminPenduduk({
            genderColor: r.gender_color,
            statusColor: r.status_color
         }));
-        setResidents(formatted.filter(r => r.is_deleted !== 1));
-      } else if (error) {
-        console.error("Error fetching residents from Supabase:", error);
+        setResidents(formatted.filter(r => String(r.is_deleted) !== '1' && r.is_deleted !== true));
       }
     }
     setLoading(false);
+    setHasLoadedResidents(true);
   };
 
   useEffect(() => {
