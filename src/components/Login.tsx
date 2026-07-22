@@ -181,19 +181,20 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const welcomeBannerUrl = localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000';
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden px-4 py-10 bg-slate-50 dark:bg-slate-900 transition-colors">
-      {/* Subtle Light Emerald Background Ambient Orbs */}
-      <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-emerald-100/50 dark:bg-emerald-950/20 rounded-full blur-[140px] pointer-events-none -mr-32 -mt-32" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-50/80 dark:bg-slate-800/40 rounded-full blur-[120px] pointer-events-none -ml-24 -mb-24" />
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden px-4 py-10 bg-slate-100/70 dark:bg-slate-950 transition-colors">
+      {/* Dynamic Light Emerald & Teal Glassmorphism Orbs */}
+      <div className="absolute top-1/4 -right-20 w-[550px] h-[550px] bg-emerald-300/35 dark:bg-emerald-950/30 rounded-full blur-[110px] pointer-events-none animate-pulse duration-1000" />
+      <div className="absolute bottom-1/4 -left-20 w-[500px] h-[500px] bg-teal-200/40 dark:bg-teal-950/30 rounded-full blur-[100px] pointer-events-none animate-pulse duration-700" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-emerald-100/50 dark:bg-emerald-900/10 rounded-full blur-[150px] pointer-events-none" />
 
-      {/* Subtle Dot Grid Pattern for Clean Tech Aesthetics */}
-      <div className="absolute inset-0 bg-[radial-gradient(#047857_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] dark:opacity-[0.05] pointer-events-none z-0" />
+      {/* Subtle Dot Grid Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(#047857_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.04] dark:opacity-[0.06] pointer-events-none z-0" />
 
-      {/* Login Card Container */}
-      <div className="w-full max-w-[460px] bg-white dark:bg-slate-900 rounded-[32px] border border-emerald-100/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 p-6 sm:p-8 relative z-10 animate-in fade-in zoom-in-95 duration-300">
+      {/* Glassmorphism Login Card Container */}
+      <div className="w-full max-w-[460px] bg-white/70 dark:bg-slate-900/75 backdrop-blur-2xl rounded-[32px] border border-white/80 dark:border-slate-800/80 shadow-2xl shadow-emerald-950/10 p-6 sm:p-8 relative z-10 animate-in fade-in zoom-in-95 duration-300">
         
-        {/* Brand Header */}
-        <div className="flex flex-col items-center text-center mb-6 bg-emerald-50/40 dark:bg-slate-800/50 rounded-2xl p-5 border border-emerald-100/60 dark:border-slate-800">
+        {/* Brand Header with Frosted Glass Badge */}
+        <div className="flex flex-col items-center text-center mb-6 bg-white/60 dark:bg-slate-800/40 rounded-2xl p-5 border border-emerald-100/70 dark:border-slate-800/60 backdrop-blur-md shadow-sm">
           <div 
             className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-3 transition-all duration-300 overflow-hidden"
             style={{ backgroundColor: globalColor }}
