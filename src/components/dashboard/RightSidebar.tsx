@@ -2,24 +2,82 @@ import React from 'react';
 import { Map as MapIcon, Maximize, Star, Phone, Shield, X } from 'lucide-react';
 import KalenderDesa from './KalenderDesa';
 import VillageMapPreview from '../common/VillageMapPreview';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: string) => void }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [showIdmModal, setShowIdmModal] = React.useState(false);
   const [villageLat, setVillageLat] = React.useState(() => parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
   const [villageLng, setVillageLng] = React.useState(() => parseFloat(localStorage.getItem('village_lng') || '115.227889'));
+  const [luasWilayah, setLuasWilayah] = React.useState(() => localStorage.getItem('village_luas_wilayah') || '4.2 km²');
+  const [ketinggian, setKetinggian] = React.useState(() => localStorage.getItem('village_ketinggian') || '120 mdpl');
+  const [idmSkor, setIdmSkor] = React.useState(() => localStorage.getItem('village_idm_skor') || '0.892');
+  const [idmIks, setIdmIks] = React.useState(() => localStorage.getItem('village_idm_iks') || '0.912');
+  const [idmIke, setIdmIke] = React.useState(() => localStorage.getItem('village_idm_ike') || '0.865');
+  const [idmIkl, setIdmIkl] = React.useState(() => localStorage.getItem('village_idm_ikl') || '0.900');
+  const [kontakAmbulans, setKontakAmbulans] = React.useState(() => localStorage.getItem('village_kontak_ambulans') || '0812-3456-7890');
+  const [kontakBabinsa, setKontakBabinsa] = React.useState(() => localStorage.getItem('village_kontak_babinsa') || '0821-xxxx-xxxx');
+
+  // Fetch settings from Supabase on mount for cross-device sync
+  React.useEffect(() => {
+    const fetchFromSupabase = async () => {
+      try {
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+        const { data } = await supabase.from('saas_settings').select('key, value').eq('tenant_id', tid);
+        if (data && data.length > 0) {
+          const map: Record<string, string> = {};
+          data.forEach((r: any) => { map[r.key] = r.value; });
+          const applyIfSet = (key: string, setter: (v: string) => void) => {
+            if (map[key] && map[key].trim() !== '') {
+              setter(map[key]);
+              localStorage.setItem(key, map[key]);
+            }
+          };
+          applyIfSet('kop_desa', setDesaName);
+          applyIfSet('village_luas_wilayah', setLuasWilayah);
+          applyIfSet('village_ketinggian', setKetinggian);
+          applyIfSet('village_idm_skor', setIdmSkor);
+          applyIfSet('village_idm_iks', setIdmIks);
+          applyIfSet('village_idm_ike', setIdmIke);
+          applyIfSet('village_idm_ikl', setIdmIkl);
+          applyIfSet('village_kontak_ambulans', setKontakAmbulans);
+          applyIfSet('village_kontak_babinsa', setKontakBabinsa);
+          if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
+          if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
+        }
+      } catch (err) {
+        console.warn('Gagal mengambil data dari Supabase (RightSidebar):', err);
+      }
+    };
+    fetchFromSupabase();
+  }, []);
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
       setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
       setVillageLat(parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
       setVillageLng(parseFloat(localStorage.getItem('village_lng') || '115.227889'));
+      setLuasWilayah(localStorage.getItem('village_luas_wilayah') || '4.2 km²');
+      setKetinggian(localStorage.getItem('village_ketinggian') || '120 mdpl');
+      setIdmSkor(localStorage.getItem('village_idm_skor') || '0.892');
+      setIdmIks(localStorage.getItem('village_idm_iks') || '0.912');
+      setIdmIke(localStorage.getItem('village_idm_ike') || '0.865');
+      setIdmIkl(localStorage.getItem('village_idm_ikl') || '0.900');
+      setKontakAmbulans(localStorage.getItem('village_kontak_ambulans') || '0812-3456-7890');
+      setKontakBabinsa(localStorage.getItem('village_kontak_babinsa') || '0821-xxxx-xxxx');
     };
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     return () => {
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
     };
   }, []);
+
+  const idmSkorNum = parseFloat(idmSkor) || 0.892;
+  const idmIksNum = parseFloat(idmIks) || 0.912;
+  const idmIkeNum = parseFloat(idmIke) || 0.865;
+  const idmIklNum = parseFloat(idmIkl) || 0.900;
 
   return (
     <div className="space-y-6">
@@ -50,11 +108,11 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
           <div className="grid grid-cols-2 gap-3">
             <div className="text-center p-3 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100/50">
               <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Luas Wilayah</p>
-              <p className="font-bold text-gray-900 dark:text-white">4.2 km²</p>
+              <p className="font-bold text-gray-900 dark:text-white">{luasWilayah}</p>
             </div>
             <div className="text-center p-3 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100/50">
               <p className="text-[10px] font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Ketinggian</p>
-              <p className="font-bold text-gray-900 dark:text-white">120 mdpl</p>
+              <p className="font-bold text-gray-900 dark:text-white">{ketinggian}</p>
             </div>
           </div>
         </div>
@@ -73,7 +131,7 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
           </div>
         </div>
         <p className="text-emerald-50/90 text-sm leading-relaxed mb-8 relative z-10">
-          Skor IDM: 0.892. {desaName.replace(/desa|kelurahan/gi, '').trim()} termasuk dalam jajaran 10 besar desa mandiri di kabupaten.
+          Skor IDM: {idmSkor}. {desaName.replace(/desa|kelurahan/gi, '').trim()} termasuk dalam jajaran 10 besar desa mandiri di kabupaten.
         </p>
         <button 
           onClick={() => setShowIdmModal(true)}
@@ -104,16 +162,16 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
 
             <div className="space-y-4 text-xs font-semibold">
               <div className="space-y-1.5">
-                <div className="flex justify-between"><span>Indeks Ketahanan Sosial (IKS)</span><span className="text-emerald-700">0.912</span></div>
-                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '91.2%' }} /></div>
+                <div className="flex justify-between"><span>Indeks Ketahanan Sosial (IKS)</span><span className="text-emerald-700">{idmIks}</span></div>
+                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: `${idmIksNum * 100}%` }} /></div>
               </div>
               <div className="space-y-1.5">
-                <div className="flex justify-between"><span>Indeks Ketahanan Ekonomi (IKE)</span><span className="text-emerald-700">0.865</span></div>
-                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '86.5%' }} /></div>
+                <div className="flex justify-between"><span>Indeks Ketahanan Ekonomi (IKE)</span><span className="text-emerald-700">{idmIke}</span></div>
+                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: `${idmIkeNum * 100}%` }} /></div>
               </div>
               <div className="space-y-1.5">
-                <div className="flex justify-between"><span>Indeks Ketahanan Ekologi (IKL)</span><span className="text-emerald-700">0.900</span></div>
-                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: '90%' }} /></div>
+                <div className="flex justify-between"><span>Indeks Ketahanan Ekologi (IKL)</span><span className="text-emerald-700">{idmIkl}</span></div>
+                <div className="h-2 bg-gray-100 dark:bg-slate-800 rounded-full overflow-hidden"><div className="bg-emerald-600 h-full" style={{ width: `${idmIklNum * 100}%` }} /></div>
               </div>
             </div>
 
@@ -128,22 +186,22 @@ export default function RightSidebar({ onTabChange }: { onTabChange?: (tab: stri
       <section className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-5 px-1">Kontak Darurat</h4>
         <div className="space-y-3">
-          <a href="tel:081234567890" className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
+          <a href={`tel:${kontakAmbulans.replace(/[-\s]/g, '')}`} className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
             <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center text-red-500 group-hover:scale-105 transition-transform">
               <Phone className="w-5 h-5" />
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-white mb-0.5">Ambulans Desa</p>
-              <p className="text-xs font-medium text-gray-500 dark:text-slate-400">0812-3456-7890</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-slate-400">{kontakAmbulans}</p>
             </div>
           </a>
-          <a href="tel:082100000000" className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
+          <a href={`tel:${kontakBabinsa.replace(/[-\s]/g, '')}`} className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-2xl transition-colors border border-transparent hover:border-gray-100 group">
             <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-105 transition-transform">
               <Shield className="w-5 h-5" />
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900 dark:text-white mb-0.5">Babinsa / Bhabinkamtibmas</p>
-              <p className="text-xs font-medium text-gray-500 dark:text-slate-400">0821-xxxx-xxxx</p>
+              <p className="text-xs font-medium text-gray-500 dark:text-slate-400">{kontakBabinsa}</p>
             </div>
           </a>
         </div>

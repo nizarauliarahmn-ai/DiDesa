@@ -11,10 +11,6 @@ import VillageMapPreview from '../common/VillageMapPreview';
 
 export default function AdminPengaturan() {
   const [tenantId, setTenantId] = useState<string | null>(null);
-
-  useEffect(() => {
-    resolveCurrentTenant().then(setTenantId);
-  }, []);
   const [villageName, setVillageName] = useState(() => localStorage.getItem('village_name') || 'Sukamakmur');
   const [kecamatan, setKecamatan] = useState(() => localStorage.getItem('village_kecamatan') || 'Kecamatan Simpur');
   const [kabupaten, setKabupaten] = useState(() => localStorage.getItem('village_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
@@ -34,6 +30,52 @@ export default function AdminPengaturan() {
   const [villageLng, setVillageLng] = useState(() => parseFloat(localStorage.getItem('village_lng') || '115.227889'));
 
   const [appTheme, setAppTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
+
+  // Fetch settings from Supabase on mount to keep device-agnostic sync
+  useEffect(() => {
+    const loadFromSupabase = async () => {
+      const tid = await resolveCurrentTenant();
+      setTenantId(tid);
+      if (!tid) return;
+      try {
+        const { data } = await supabase.from('saas_settings').select('key, value').eq('tenant_id', tid);
+        if (data && data.length > 0) {
+          const map: Record<string, string> = {};
+          data.forEach((r: any) => { map[r.key] = r.value; });
+          const set = (key: string, setter: (v: string) => void, fallback?: string) => {
+            const val = map[key];
+            if (val !== undefined && val !== null && val !== '') {
+              setter(val);
+              localStorage.setItem(key, val);
+            } else if (fallback) {
+              setter(fallback);
+            }
+          };
+          set('village_name', setVillageName);
+          set('kop_desa', setVillageName); // keep in sync
+          set('village_kecamatan', setKecamatan);
+          set('village_kabupaten', setKabupaten);
+          set('village_alamat', setAlamat);
+          set('kop_kontak', setKontak);
+          set('kop_logo_url', setLogoUrl);
+          set('village_welcome_banner_url', setWelcomeBannerUrl);
+          set('village_welcome_banner_y_offset', setWelcomeBannerYOffset);
+          set('village_welcome_banner_zoom', setWelcomeBannerZoom);
+          set('village_aspirasi_banner_url', setAspirasiBannerUrl);
+          set('village_aspirasi_banner_y_offset', setAspirasiBannerYOffset);
+          set('village_aspirasi_banner_zoom', setAspirasiBannerZoom);
+          set('app_theme', setAppTheme);
+          if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
+          if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
+          window.dispatchEvent(new Event('village_settings_updated'));
+          window.dispatchEvent(new Event('app_theme_updated'));
+        }
+      } catch (err) {
+        console.warn('Gagal mengambil pengaturan dari Supabase:', err);
+      }
+    };
+    loadFromSupabase();
+  }, []);
 
   const handleThemeChange = (theme: string) => {
     setAppTheme(theme);

@@ -46,12 +46,80 @@ function decimalToDMS(lat: number, lng: number): string {
 export default function PetaWilayah() {
   const [selectedPoi, setSelectedPoi] = useState<PointOfInterest | null>(null);
 
-  const villageName = localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur';
-  const kadesName = localStorage.getItem('kop_kades') || 'Fazakkir Rahmad';
-  const villageAlamat = localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur';
-  
-  const villageLat = parseFloat(localStorage.getItem('village_lat') || '-2.797806');
-  const villageLng = parseFloat(localStorage.getItem('village_lng') || '115.227889');
+  const [villageName, setVillageName] = useState(() => localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur');
+  const [kadesName, setKadesName] = useState(() => localStorage.getItem('kop_kades') || 'Kepala Desa');
+  const [villageAlamat, setVillageAlamat] = useState(() => localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
+  const [villageLat, setVillageLat] = useState(() => parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
+  const [villageLng, setVillageLng] = useState(() => parseFloat(localStorage.getItem('village_lng') || '115.227889'));
+  const [borderUtara, setBorderUtara] = useState(() => localStorage.getItem('village_border_utara') || 'Berbatasan langsung dengan Desa Wasah Hulu, Kecamatan Simpur.');
+  const [borderSelatan, setBorderSelatan] = useState(() => localStorage.getItem('village_border_selatan') || 'Berbatasan langsung dengan Desa Garunggangan, Kecamatan Kandangan.');
+  const [borderTimur, setBorderTimur] = useState(() => localStorage.getItem('village_border_timur') || 'Berbatasan dengan Area Persawahan Produktif Desa Amparaya.');
+  const [borderBarat, setBorderBarat] = useState(() => localStorage.getItem('village_border_barat') || 'Berbatasan dengan Sungai Mati / Batas Alam Kali Simpur.');
+  const [luasPemukiman, setLuasPemukiman] = useState(() => localStorage.getItem('village_luas_pemukiman') || '1.2 km² (28.5%)');
+  const [luasSawah, setLuasSawah] = useState(() => localStorage.getItem('village_luas_sawah') || '2.5 km² (59.5%)');
+  const [luasPerkebunan, setLuasPerkebunan] = useState(() => localStorage.getItem('village_luas_perkebunan') || '0.5 km² (12.0%)');
+  const [suhuRata, setSuhuRata] = useState(() => localStorage.getItem('village_suhu_rata') || '26°C - 32°C');
+  const [curahHujan, setCurahHujan] = useState(() => localStorage.getItem('village_curah_hujan') || '2.200 mm/tahun');
+
+  // Fetch from Supabase on mount for full cross-device sync
+  useEffect(() => {
+    const fetchFromSupabase = async () => {
+      try {
+        const { resolveCurrentTenant } = await import('../../utils/tenantResolver');
+        const { supabase } = await import('../../utils/supabase');
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+        const { data } = await supabase.from('saas_settings').select('key, value').eq('tenant_id', tid);
+        if (data && data.length > 0) {
+          const map: Record<string, string> = {};
+          data.forEach((r: any) => { map[r.key] = r.value; });
+          const applyIfSet = (key: string, setter: (v: string) => void) => {
+            if (map[key] && map[key].trim() !== '') {
+              setter(map[key]);
+              localStorage.setItem(key, map[key]);
+            }
+          };
+          applyIfSet('kop_desa', setVillageName);
+          applyIfSet('village_name', setVillageName);
+          applyIfSet('kop_kades', setKadesName);
+          applyIfSet('kop_alamat', setVillageAlamat);
+          applyIfSet('village_border_utara', setBorderUtara);
+          applyIfSet('village_border_selatan', setBorderSelatan);
+          applyIfSet('village_border_timur', setBorderTimur);
+          applyIfSet('village_border_barat', setBorderBarat);
+          applyIfSet('village_luas_pemukiman', setLuasPemukiman);
+          applyIfSet('village_luas_sawah', setLuasSawah);
+          applyIfSet('village_luas_perkebunan', setLuasPerkebunan);
+          applyIfSet('village_suhu_rata', setSuhuRata);
+          applyIfSet('village_curah_hujan', setCurahHujan);
+          if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
+          if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
+        }
+      } catch (err) {
+        console.warn('Gagal mengambil data peta dari Supabase:', err);
+      }
+    };
+    fetchFromSupabase();
+
+    const handleSettingsUpdate = () => {
+      setVillageName(localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur');
+      setKadesName(localStorage.getItem('kop_kades') || 'Kepala Desa');
+      setVillageAlamat(localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
+      setVillageLat(parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
+      setVillageLng(parseFloat(localStorage.getItem('village_lng') || '115.227889'));
+      setBorderUtara(localStorage.getItem('village_border_utara') || 'Berbatasan langsung dengan Desa Wasah Hulu, Kecamatan Simpur.');
+      setBorderSelatan(localStorage.getItem('village_border_selatan') || 'Berbatasan langsung dengan Desa Garunggangan, Kecamatan Kandangan.');
+      setBorderTimur(localStorage.getItem('village_border_timur') || 'Berbatasan dengan Area Persawahan Produktif Desa Amparaya.');
+      setBorderBarat(localStorage.getItem('village_border_barat') || 'Berbatasan dengan Sungai Mati / Batas Alam Kali Simpur.');
+      setLuasPemukiman(localStorage.getItem('village_luas_pemukiman') || '1.2 km² (28.5%)');
+      setLuasSawah(localStorage.getItem('village_luas_sawah') || '2.5 km² (59.5%)');
+      setLuasPerkebunan(localStorage.getItem('village_luas_perkebunan') || '0.5 km² (12.0%)');
+      setSuhuRata(localStorage.getItem('village_suhu_rata') || '26°C - 32°C');
+      setCurahHujan(localStorage.getItem('village_curah_hujan') || '2.200 mm/tahun');
+    };
+    window.addEventListener('village_settings_updated', handleSettingsUpdate);
+    return () => window.removeEventListener('village_settings_updated', handleSettingsUpdate);
+  }, []);
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -89,10 +157,6 @@ export default function PetaWilayah() {
     };
   }, [villageLat, villageLng]);
 
-  const borderUtara = localStorage.getItem('village_border_utara') || 'Berbatasan langsung dengan Desa Wasah Hulu, Kecamatan Simpur.';
-  const borderSelatan = localStorage.getItem('village_border_selatan') || 'Berbatasan langsung dengan Desa Garunggangan, Kecamatan Kandangan.';
-  const borderTimur = localStorage.getItem('village_border_timur') || 'Berbatasan dengan Area Persawahan Produktif Desa Amparaya.';
-  const borderBarat = localStorage.getItem('village_border_barat') || 'Berbatasan dengan Sungai Mati / Batas Alam Kali Simpur.';
 
   // Create local relative POIs based on the configured center point
   const pois: PointOfInterest[] = [
@@ -282,24 +346,24 @@ export default function PetaWilayah() {
             <div className="space-y-3 text-xs">
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Pemukiman</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">1.2 km² (28.5%)</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">{luasPemukiman}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Sawah Irigasi</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">2.5 km² (59.5%)</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">{luasSawah}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Perkebunan</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">0.5 km² (12.0%)</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">{luasPerkebunan}</span>
               </div>
               <div className="h-px bg-gray-50 dark:bg-slate-800" />
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Suhu Rata-rata</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">26°C - 32°C</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">{suhuRata}</span>
               </div>
               <div className="flex justify-between items-center py-1">
                 <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Curah Hujan Tahunan</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">2.200 mm/tahun</span>
+                <span className="font-bold text-gray-800 dark:text-slate-100">{curahHujan}</span>
               </div>
             </div>
           </div>

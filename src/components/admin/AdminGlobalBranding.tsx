@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Settings, Save, Image, Palette, Globe, CheckCircle, AlertCircle, Trash2, FileText, UploadCloud, Type, Mail, Phone, Link, Share2 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
@@ -26,6 +26,43 @@ export default function AdminGlobalBranding() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const social1InputRef = useRef<HTMLInputElement>(null);
   const social2InputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch global_settings from Supabase on mount for cross-device sync
+  useEffect(() => {
+    const loadFromSupabase = async () => {
+      try {
+        const { data } = await supabase.from('global_settings').select('key, value');
+        if (data && data.length > 0) {
+          const apply = (key: string, setter: (v: string) => void) => {
+            const row = data.find((r: any) => r.key === key);
+            if (row && row.value && row.value.trim() !== '') {
+              setter(row.value);
+              localStorage.setItem(key, row.value);
+            }
+          };
+          apply('global_app_name', setGlobalName);
+          apply('global_app_logo', setGlobalLogo);
+          apply('global_app_color', setGlobalColor);
+          apply('global_print_footer', setGlobalPrintFooter);
+          apply('global_footer_desc', setGlobalFooterDesc);
+          apply('global_footer_email', setGlobalFooterEmail);
+          apply('global_footer_phone', setGlobalFooterPhone);
+          apply('global_footer_affiliate_title', setGlobalFooterAffiliateTitle);
+          apply('global_footer_affiliate_subtitle', setGlobalFooterAffiliateSubtitle);
+          apply('global_footer_affiliate_link', setGlobalFooterAffiliateLink);
+          apply('global_footer_social1_icon', setGlobalFooterSocial1Icon);
+          apply('global_footer_social1_link', setGlobalFooterSocial1Link);
+          apply('global_footer_social2_icon', setGlobalFooterSocial2Icon);
+          apply('global_footer_social2_link', setGlobalFooterSocial2Link);
+          apply('global_footer_copyright', setGlobalFooterCopyright);
+          window.dispatchEvent(new Event('global_branding_updated'));
+        }
+      } catch (err) {
+        console.warn('Gagal ambil global_settings dari Supabase:', err);
+      }
+    };
+    loadFromSupabase();
+  }, []);
 
   const handleImageUpload = async (file: File, setter: (url: string) => void) => {
     try {
