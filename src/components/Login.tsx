@@ -195,13 +195,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         
         {/* Brand Header with Frosted Glass Badge */}
         <div className="flex flex-col items-center text-center mb-6 bg-white/60 dark:bg-slate-800/40 rounded-2xl p-5 border border-emerald-100/70 dark:border-slate-800/60 backdrop-blur-md shadow-sm">
-          <div 
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-3 transition-all duration-300 overflow-hidden"
-            style={{ backgroundColor: globalColor }}
-          >
-            {globalLogo ? (
-              <img src={globalLogo} alt="Logo" className="w-11 h-11 object-contain animate-fade-in" />
-            ) : (
+          {globalLogo ? (
+            <img src={globalLogo} alt={globalName} className="h-16 w-auto max-w-[240px] object-contain animate-fade-in mb-3" />
+          ) : (
+            <div 
+              className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-3 transition-all duration-300 overflow-hidden shrink-0"
+              style={{ backgroundColor: globalColor }}
+            >
               <svg viewBox="0 0 100 100" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
                 {/* Smart Village building icon in white */}
                 <path d="M50 20 L80 45 L70 45 L70 75 L30 75 L30 45 L20 45 Z" fill="white" />
@@ -212,8 +212,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <line x1="30" y1="45" x2="50" y2="52" stroke="#34d399" strokeWidth="2" />
                 <line x1="70" y1="45" x2="50" y2="52" stroke="#34d399" strokeWidth="2" />
               </svg>
-            )}
-          </div>
+            </div>
+          )}
           
           <h1 className="text-2xl font-black tracking-tight leading-none mb-1.5" style={{ color: globalColor }}>
             {globalName}
