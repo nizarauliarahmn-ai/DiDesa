@@ -178,17 +178,29 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
 
+  const welcomeBannerUrl = localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000';
+
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-800 relative overflow-hidden px-4 py-8">
-      {/* Dynamic Background Gradients */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-x-12 -translate-y-12"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-x-12 translate-y-12"></div>
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden px-4 py-8 bg-slate-950">
+      {/* Background Image with Blur & Scale */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center scale-105 filter blur-xl opacity-45 transition-all duration-700"
+        style={{ backgroundImage: `url("${welcomeBannerUrl}")` }}
+      />
+      
+      {/* Rich Multi-Gradient Backdrop Layer */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-emerald-950/85 to-slate-950/95 z-0" />
+
+      {/* Floating Animated Ambient Glow Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-teal-500/15 rounded-full blur-[100px] pointer-events-none animate-pulse" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       {/* Login Card Container */}
-      <div className="w-full max-w-[480px] bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 p-6 md:p-8 relative z-10">
+      <div className="w-full max-w-[480px] bg-white/95 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[32px] border border-white/50 dark:border-slate-800 shadow-2xl shadow-emerald-950/40 p-6 md:p-8 relative z-10 animate-in fade-in zoom-in-95 duration-500">
         
         {/* Brand Header */}
-        <div className="flex flex-col items-center text-center mb-8 bg-slate-50/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col items-center text-center mb-6 bg-slate-50/80 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-100 dark:border-slate-800 backdrop-blur-md">
           <div 
             className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-3 transition-all duration-300 overflow-hidden"
             style={{ backgroundColor: globalColor }}
@@ -212,7 +224,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <h1 className="text-2xl font-black tracking-tight leading-none mb-1.5" style={{ color: globalColor }}>
             {globalName}
           </h1>
-          <p className="text-[11px] font-black text-emerald-800 uppercase tracking-widest leading-none">
+          <p className="text-[11px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-widest leading-none">
             Sistem Digitalisasi Desa
           </p>
         </div>
