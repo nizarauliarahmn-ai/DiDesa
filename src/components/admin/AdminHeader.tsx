@@ -467,10 +467,10 @@ export default function AdminHeader({
                 <CheckCircle className="w-3.5 h-3.5" />
                 PostgreSQL Aktif
               </span>
-            ) : dbStatus.engine === "Supabase" ? (
+            ) : dbStatus.engine.includes("Supabase") ? (
               <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/50 px-2.5 py-1 rounded-full">
                 <CheckCircle className="w-3.5 h-3.5" />
-                Supabase Aktif
+                Online (Supabase Cloud)
               </span>
             ) : (
               <span 
