@@ -43,9 +43,18 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         const { data: brandingData } = await supabase.from('global_settings').select('key, value');
         if (brandingData && brandingData.length > 0) {
           brandingData.forEach((setting: any) => {
-            if (setting.key === 'global_app_name') setGlobalName(setting.value);
-            if (setting.key === 'global_app_logo') setGlobalLogo(setting.value);
-            if (setting.key === 'global_app_color') setGlobalColor(setting.value);
+            if (setting.key === 'global_app_name' && setting.value && setting.value.trim() !== '') {
+              setGlobalName(setting.value);
+              localStorage.setItem('global_app_name', setting.value);
+            }
+            if (setting.key === 'global_app_logo' && setting.value && setting.value.trim() !== '') {
+              setGlobalLogo(setting.value);
+              localStorage.setItem('global_app_logo', setting.value);
+            }
+            if (setting.key === 'global_app_color' && setting.value && setting.value.trim() !== '') {
+              setGlobalColor(setting.value);
+              localStorage.setItem('global_app_color', setting.value);
+            }
           });
         }
       } catch (error) {
