@@ -1,7 +1,7 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Baby, Smile, User, Sparkles, Zap, Trash2 } from 'lucide-react';
+import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Baby, Smile, User, Sparkles, Zap, Trash2, Clock, AlertCircle } from 'lucide-react';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
@@ -210,27 +210,56 @@ export default function AdminPenduduk({
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
 
-  const villageName = localStorage.getItem('village_name') || 'Desa Sukamaju';
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ nik: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleRequestDelete = async (nik: string, name: string) => {
-    if (!tenantId) return;
-    if (!confirm(`Anda yakin ingin mengajukan penghapusan data penduduk ${name}? Data tidak akan dihapus langsung, melainkan menunggu persetujuan Super Admin.`)) return;
-    
+  const authUser = useMemo(() => {
     try {
-      const { error } = await supabase.from('residents')
-        .update({ status: 'pending_approval', status_color: 'amber' })
-        .eq('nik', nik)
-        .eq('tenant_id', tenantId);
-        
-      if (!error) {
-        showToast(`Pengajuan hapus data ${name} berhasil dikirim ke Super Admin!`, 'success');
-        fetchResidents();
-        window.dispatchEvent(new Event('notifications_updated'));
+      return JSON.parse(localStorage.getItem('didesa_auth_user') || '{}');
+    } catch (e) {
+      return {};
+    }
+  }, []);
+
+  const isSuperAdmin = authUser.role === 'kades' || authUser.role === 'saas_admin';
+
+  const handleRequestDelete = (nik: string, name: string) => {
+    setDeleteConfirmModal({ nik, name });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteConfirmModal || !tenantId) return;
+    const { nik, name } = deleteConfirmModal;
+    setIsDeleting(true);
+
+    try {
+      if (isSuperAdmin) {
+        // Super Admin: Move directly to Trash Bin (soft delete)
+        const { error } = await supabase.from('residents')
+          .update({ is_deleted: 1, status: 'archived' })
+          .eq('nik', nik)
+          .eq('tenant_id', tenantId);
+
+        if (error) throw error;
+        showToast(`Data ${name} berhasil dipindahkan ke Tong Sampah (Recycle Bin)!`, 'success');
       } else {
-        throw error;
+        // Admin biasa: Send for Super Admin approval
+        const { error } = await supabase.from('residents')
+          .update({ status: 'pending_approval', status_color: 'amber' })
+          .eq('nik', nik)
+          .eq('tenant_id', tenantId);
+
+        if (error) throw error;
+        showToast(`Pengajuan hapus data ${name} berhasil dikirim ke Super Admin!`, 'success');
+        window.dispatchEvent(new Event('notifications_updated'));
       }
+
+      fetchResidents();
+      setDeleteConfirmModal(null);
     } catch (err: any) {
       showToast(`Gagal: ${err.message}`, 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -700,6 +729,93 @@ export default function AdminPenduduk({
                 Tutup Analisis
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Custom Delete Confirmation Modal */}
+      {deleteConfirmModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 relative overflow-hidden">
+            
+            {/* Header Icon */}
+            <div className="flex items-center gap-4">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
+                isSuperAdmin ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-800/40' : 'bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800/40'
+              }`}>
+                {isSuperAdmin ? <Trash2 className="w-7 h-7" /> : <Clock className="w-7 h-7" />}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-snug">
+                  {isSuperAdmin ? 'Pindahkan ke Tong Sampah?' : 'Ajukan Penghapusan Penduduk?'}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">
+                  {isSuperAdmin ? 'Aksi Penghapusan oleh Super Admin' : 'Antrean Persetujuan Super Admin'}
+                </p>
+              </div>
+            </div>
+
+            {/* Description Body */}
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/60 rounded-2xl border border-gray-100 dark:border-slate-700/60 text-xs leading-relaxed space-y-3">
+              <p className="text-gray-700 dark:text-slate-300">
+                {isSuperAdmin ? (
+                  <>
+                    Apakah Anda yakin ingin menghapus data penduduk <strong className="text-gray-900 dark:text-white font-bold">{deleteConfirmModal.name}</strong> (NIK: <code className="font-mono text-emerald-600 font-bold">{deleteConfirmModal.nik}</code>)?
+                  </>
+                ) : (
+                  <>
+                    Apakah Anda yakin ingin mengajukan penghapusan data penduduk <strong className="text-gray-900 dark:text-white font-bold">{deleteConfirmModal.name}</strong> (NIK: <code className="font-mono text-emerald-600 font-bold">{deleteConfirmModal.nik}</code>)?
+                  </>
+                )}
+              </p>
+              
+              <div className={`p-3 rounded-xl border text-[11px] font-semibold flex items-start gap-2.5 ${
+                isSuperAdmin ? 'bg-rose-50/80 dark:bg-rose-950/40 border-rose-200 dark:border-rose-800/50 text-rose-800 dark:text-rose-300' : 'bg-amber-50/80 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/50 text-amber-800 dark:text-amber-300'
+              }`}>
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>
+                  {isSuperAdmin 
+                    ? 'Data penduduk ini akan dipindahkan ke Tong Sampah (Recycle Bin) dan akan terhapus otomatis secara permanen setelah 30 hari. Anda dapat memulihkannya kembali dari Tong Sampah kapan saja.' 
+                    : 'Data tidak akan langsung hilang dari sistem, melainkan dikirim ke antrean persetujuan Super Admin.'
+                  }
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmModal(null)}
+                disabled={isDeleting}
+                className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                onClick={executeDelete}
+                disabled={isDeleting}
+                className={`flex-1 py-3 px-4 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer ${
+                  isSuperAdmin ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20' : 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
+                }`}
+              >
+                {isDeleting ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : isSuperAdmin ? (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Pindahkan ke Tong Sampah
+                  </>
+                ) : (
+                  <>
+                    <Clock className="w-4 h-4" />
+                    Kirim Pengajuan
+                  </>
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
       )}

@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { RefreshCw, Trash2, RotateCcw, AlertCircle, ArrowLeft } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 
 interface Resident {
   nik: string;
   name: string;
   noKk?: string;
-  gender: string;
-  rtRw: string;
+  gender?: string;
+  rtRw?: string;
 }
 
 export default function AdminPendudukArchive({ onBack }: { onBack: () => void }) {
@@ -19,12 +21,28 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
   const fetchArchived = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/residents/archived');
-      if (res.ok) {
-        const data = await res.json();
-        setArchived(data);
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) {
+        setArchived([]);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('residents')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .or('is_deleted.eq.1,status.eq.archived,status.eq.deleted');
+
+      if (!error && data) {
+        setArchived(data.map((r: any) => ({
+          nik: r.nik,
+          name: r.name,
+          noKk: r.no_kk || r.noKk,
+          gender: r.gender,
+          rtRw: r.rt_rw || r.rtRw
+        })));
       } else {
-        throw new Error('Gagal memuat arsip');
+        throw error || new Error('Gagal memuat arsip');
       }
     } catch (err: any) {
       console.error(err);
@@ -43,15 +61,19 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
     
     setActioningNik(nik);
     try {
-      const res = await fetch(`/api/residents/${nik}/restore`, { method: 'POST' });
-      if (res.ok) {
-        showToast(`Data ${name} berhasil dikembalikan!`, 'success');
-        await fetchArchived();
-      } else {
-        throw new Error('Gagal mengembalikan data');
-      }
+      const tenantId = await resolveCurrentTenant();
+      const { error } = await supabase
+        .from('residents')
+        .update({ is_deleted: 0, status: 'Aktif', status_color: 'emerald' })
+        .eq('nik', nik)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+      showToast(`Data ${name} berhasil dipulihkan dari Tong Sampah!`, 'success');
+      await fetchArchived();
+      window.dispatchEvent(new Event('village_settings_updated'));
     } catch (err: any) {
-      showToast(err.message, 'error');
+      showToast(`Gagal memulihkan: ${err.message}`, 'error');
     } finally {
       setActioningNik(null);
     }
@@ -62,15 +84,18 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
     
     setActioningNik(nik);
     try {
-      const res = await fetch(`/api/residents/${nik}/hard-delete`, { method: 'DELETE' });
-      if (res.ok) {
-        showToast(`Data ${name} berhasil dihapus permanen!`, 'success');
-        await fetchArchived();
-      } else {
-        throw new Error('Gagal menghapus permanen');
-      }
+      const tenantId = await resolveCurrentTenant();
+      const { error } = await supabase
+        .from('residents')
+        .delete()
+        .eq('nik', nik)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+      showToast(`Data ${name} berhasil dihapus permanen!`, 'success');
+      await fetchArchived();
     } catch (err: any) {
-      showToast(err.message, 'error');
+      showToast(`Gagal menghapus: ${err.message}`, 'error');
     } finally {
       setActioningNik(null);
     }
@@ -86,33 +111,33 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
       <div className="flex items-center gap-3 mb-6">
         <button 
           onClick={onBack}
-          className="p-2 bg-gray-50 dark:bg-slate-800 text-gray-500 hover:text-gray-900 rounded-lg transition-colors"
+          className="p-2 bg-gray-50 dark:bg-slate-800 text-gray-500 hover:text-gray-900 rounded-lg transition-colors cursor-pointer"
         >
           <ArrowLeft size={18} />
         </button>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Trash2 className="text-rose-500" size={24} />
-          Tong Sampah (Data Terhapus)
+          Tong Sampah (Recycle Bin Data Penduduk)
         </h2>
       </div>
 
       <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/30 p-4 rounded-xl flex items-start gap-3 mb-6">
         <AlertCircle className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" size={18} />
         <p className="text-sm text-rose-800 dark:text-rose-300">
-          Data di bawah ini adalah data penduduk yang telah disetujui penghapusannya oleh Super Admin. 
-          Anda dapat memulihkannya kembali atau menghapusnya secara permanen dari server.
+          Data di bawah ini adalah data penduduk yang telah dipindahkan ke <strong>Tong Sampah (Recycle Bin)</strong>. 
+          Data ini akan terhapus otomatis secara permanen setelah 30 hari. Super Admin dapat memulihkannya (*Restore*) kembali ke tabel utama atau menghapusnya secara permanen.
         </p>
       </div>
 
       {loading ? (
         <div className="py-24 text-center">
           <RefreshCw className="w-10 h-10 text-emerald-700 animate-spin mx-auto mb-4" />
-          <p className="text-sm font-bold text-gray-500">Memuat arsip...</p>
+          <p className="text-sm font-bold text-gray-500">Memuat tong sampah...</p>
         </div>
       ) : archived.length === 0 ? (
         <div className="py-24 text-center bg-gray-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-slate-700">
           <Trash2 className="w-12 h-12 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-          <p className="font-bold text-gray-500 dark:text-slate-400">Tong sampah kosong.</p>
+          <p className="font-bold text-gray-500 dark:text-slate-400">Tong sampah kosong. Tidak ada data penduduk yang terhapus.</p>
         </div>
       ) : (
         <div className="overflow-x-auto border border-gray-100 dark:border-slate-800 rounded-xl">
@@ -146,14 +171,14 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
                         <button
                           onClick={() => handleRestore(r.nik, r.name)}
                           disabled={actioningNik === r.nik}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 border border-emerald-100 dark:border-emerald-800/30"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 border border-emerald-100 dark:border-emerald-800/30 cursor-pointer"
                         >
-                          <RotateCcw size={14} /> Restore
+                          <RotateCcw size={14} /> Restore (Pulihkan)
                         </button>
                         <button
                           onClick={() => handleHardDelete(r.nik, r.name)}
                           disabled={actioningNik === r.nik}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 border border-rose-100 dark:border-rose-800/30"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-lg text-xs font-bold transition-colors disabled:opacity-50 border border-rose-100 dark:border-rose-800/30 cursor-pointer"
                         >
                           <Trash2 size={14} /> Hapus Permanen
                         </button>
