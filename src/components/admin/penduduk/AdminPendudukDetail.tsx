@@ -281,8 +281,14 @@ export default function AdminPendudukDetail({
     });
   }, [data, residents]);
 
+  useEffect(() => {
+    if (!data && residents.length > 0) {
+      onBack();
+    }
+  }, [data, residents]);
+
   if (isPrinting) {
-    return <AdminPendudukPrint data={data} onBack={() => setIsPrinting(false)} />;
+    return <AdminPendudukPrint data={data} familyMembers={familyMembers} residentLetters={residentLetters} onBack={() => setIsPrinting(false)} />;
   }
 
   const isPending = data?.status === 'pending_approval';

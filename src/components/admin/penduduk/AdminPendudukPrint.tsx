@@ -4,9 +4,11 @@ import { ArrowLeft, Printer, User } from 'lucide-react';
 interface AdminPendudukPrintProps {
   onBack: () => void;
   data: any;
+  familyMembers?: any[];
+  residentLetters?: any[];
 }
 
-export default function AdminPendudukPrint({ onBack, data }: AdminPendudukPrintProps) {
+export default function AdminPendudukPrint({ onBack, data, familyMembers = [], residentLetters = [] }: AdminPendudukPrintProps) {
   const handlePrint = () => {
     window.print();
   };
@@ -183,63 +185,70 @@ export default function AdminPendudukPrint({ onBack, data }: AdminPendudukPrintP
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">Siti Aminah</td>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">3273010505800002</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300">Istri</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300">Kawin</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">Zaki Ramadhan</td>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">3273011212050004</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300">Anak</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300">Belum Kawin</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">Nabila Putri</td>
-                    <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">3273011406100003</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300">Anak</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300">Belum Kawin</td>
-                  </tr>
+                  {familyMembers.length > 0 ? (
+                    familyMembers.map((member: any, i: number) => (
+                      <tr key={i}>
+                        <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
+                        <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.familyRelation || '-'}</td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.maritalStatus || '-'}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-4 text-sm text-center text-gray-400 italic">
+                        Tidak ada data anggota keluarga
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          {/* Riwayat Administrasi */}
-          <div className="flex mb-6 flex-col gap-2 mt-4">
-            <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
-              <span className="material-symbols-outlined text-xl">history_edu</span> Riwayat Layanan & Bantuan
-            </h5>
-            <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-2">
+          {/* Riwayat Layanan & Bantuan */}
+          <div className="mb-8">
+            <h4 className="font-bold text-gray-900 dark:text-white mb-4 border-b pb-2 uppercase tracking-wide">Riwayat Layanan Administrasi & Sosial</h4>
+            <div className="border rounded-xl overflow-hidden bg-white dark:bg-slate-900">
               <table className="w-full text-left">
                 <thead className="bg-gray-100 dark:bg-slate-800">
                   <tr>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Jenis Layanan</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Keterangan</th>
+                    <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
+                    <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Layanan</th>
+                    <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</th>
+                    <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-slate-400">15 Okt 2023</td>
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">Bantuan BLT-DD</td>
-                    <td className="px-4 py-3 text-sm font-bold text-emerald-700">Diterima</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-slate-400">Tahap III 2023</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-slate-400">02 Sep 2023</td>
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">Surat Keterangan Usaha</td>
-                    <td className="px-4 py-3 text-sm font-bold text-emerald-700">Selesai</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-slate-400">Keperluan Kredit KUR</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-slate-400">12 Jan 2023</td>
-                    <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">Pemutakhiran Data</td>
-                    <td className="px-4 py-3 text-sm font-bold text-emerald-700">Selesai</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-600 dark:text-slate-400">Update Pekerjaan & Gelar</td>
-                  </tr>
+                  {residentLetters.length > 0 ? (
+                    residentLetters.map((letter: any, i: number) => (
+                      <tr key={`letter-${i}`}>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">{new Date(letter.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                        <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">{letter.jenisSurat}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">Penerbitan Surat</td>
+                        <td className="px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400">Selesai</td>
+                      </tr>
+                    ))
+                  ) : null}
+                  
+                  {data?.activeAids && data.activeAids.length > 0 ? (
+                    data.activeAids.map((aid: string, i: number) => (
+                      <tr key={`aid-${i}`}>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-slate-400">-</td>
+                        <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">{aid}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700 dark:text-slate-300">Program Bantuan Sosial Aktif</td>
+                        <td className="px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400">Aktif</td>
+                      </tr>
+                    ))
+                  ) : null}
+
+                  {residentLetters.length === 0 && (!data?.activeAids || data.activeAids.length === 0) && (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-4 text-sm text-center text-gray-400 italic">
+                        Belum ada riwayat layanan atau bantuan
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -265,10 +274,10 @@ export default function AdminPendudukPrint({ onBack, data }: AdminPendudukPrintP
 
           {/* Document ID & QR */}
           <div className="mt-8 pt-4 border-t border-gray-200 dark:border-slate-700 flex justify-between items-end">
-            <div className="flex mb-6 flex-col gap-1">
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{appName}</p>
-              <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">{localStorage.getItem('global_footer_copyright') || '© 2026 - HAK CIPTA DILINDUNGI'}</p>
-            </div>
+            <div 
+              className="text-[10px] text-gray-500 dark:text-slate-400 font-medium leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia' }}
+            />
             <div className="flex items-center gap-3">
               <div className="text-right">
                 <p className="text-[10px] font-bold text-gray-900 dark:text-white uppercase tracking-wider">Verifikasi Digital:</p>
