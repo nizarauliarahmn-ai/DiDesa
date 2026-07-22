@@ -156,16 +156,16 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
       {/* Brand */}
       <div className="p-6 flex items-center gap-4 mb-4">
-        {globalLogo ? (
-          <img src={globalLogo} alt={globalName} className="h-10 w-auto max-w-[140px] object-contain rounded-xl shrink-0" />
-        ) : (
-          <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner shrink-0"
-            style={{ backgroundColor: globalColor }}
-          >
+        <div 
+          className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner shrink-0 overflow-hidden"
+          style={{ backgroundColor: globalColor }}
+        >
+          {globalLogo ? (
+            <img src={globalLogo} alt={globalName} className="w-6 h-6 object-contain" />
+          ) : (
             <Building2 className="text-white w-6 h-6" />
-          </div>
-        )}
+          )}
+        </div>
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: globalColor }}>{globalName}</h1>
