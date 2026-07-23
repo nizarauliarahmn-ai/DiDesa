@@ -11,11 +11,12 @@ export function getPrintSignatureHTML(
   includeCamatOverride?: boolean
 ): string {
   const isDual = includeCamatOverride === true;
-  const isAn = jabatanPejabat.toLowerCase() !== 'kepala desa';
+  const isAn = (jabatanPejabat || '').toLowerCase() !== 'kepala desa';
 
   // Uppercase only the name part, preserving the degree
-  const parts = namaPejabat.split(',');
-  const namePart = parts[0].toUpperCase();
+  const safeNamaPejabat = namaPejabat || '';
+  const parts = safeNamaPejabat.split(',');
+  const namePart = parts[0] ? parts[0].toUpperCase() : '';
   const titlePart = parts.slice(1).join(',');
   const formattedNamaPejabat = titlePart.length > 0 ? `${namePart},${titlePart}` : namePart;
 
@@ -125,7 +126,7 @@ export function getReactSignaturePreview(
   includeCamatOverride?: boolean
 ) {
   const isDual = includeCamatOverride === true;
-  const isAn = jabatanPejabat.toLowerCase() !== 'kepala desa';
+  const isAn = (jabatanPejabat || '').toLowerCase() !== 'kepala desa';
 
   const sigLeftRoleRaw = localStorage.getItem('village_signature_left_role') || 'Camat Simpur';
   let sigLeftRole = sigLeftRoleRaw;
