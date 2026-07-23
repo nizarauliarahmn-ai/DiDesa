@@ -207,33 +207,58 @@ export default function AdminBukuTamu() {
   const todayCount = entries.filter(e => e.status === 'hadir').length;
 
   const handlePrint = () => {
-    const kopDesa = localStorage.getItem('kop_desa') || 'Desa';
+    const logoUrl = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
+    const kabupatenName = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
+    const kecamatanName = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
+    const desaName = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
+    const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261';
+    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
+    const customFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     
     const printContent = `
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Laporan Buku Tamu - ${kopDesa}</title>
+          <title>Laporan Buku Tamu - ${desaName}</title>
           <style>
             @media print {
-              @page { margin: 1.5cm; size: landscape; }
+              @page { size: landscape; margin: 0 !important; }
+              body { padding: 1.5cm; }
             }
-            body { font-family: Arial, sans-serif; padding: 20px; color: black; background: white; }
-            .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 15px; }
-            .title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px; }
-            .subtitle { font-size: 14px; margin: 0; color: #333; }
+            body { font-family: Arial, sans-serif; padding: 20px; color: black; background: white; margin: 0; }
+            .kop-surat { display: flex; gap: 15px; align-items: center; border-bottom: 2.5px solid #111; padding-bottom: 10px; margin-bottom: 20px; font-family: "Times New Roman", Times, serif; }
+            .logo-wrap { width: 90px; height: 100px; flex: none; display: flex; align-items: center; justify-content: center; }
+            .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+            .kop-text { flex: 1; text-align: center; padding-right: 90px; }
+            .kop-text h2 { margin: 0 0 2px 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1; font-weight: bold; }
+            .kop-text h1 { margin: 2px 0 3px 0; font-size: 24px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.1; font-weight: 900; }
+            .kop-text p { margin: 1px 0; font-size: 11px; line-height: 1.15; }
+            .report-title { text-align: center; margin-bottom: 20px; }
+            .report-title h3 { font-size: 18px; text-transform: uppercase; font-weight: bold; margin: 0 0 5px 0; text-decoration: underline; }
+            .report-title p { font-size: 12px; margin: 0; color: #333; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
             th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .status-hadir { color: #0369a1; font-weight: bold; }
-            .status-selesai { color: #4b5563; }
             .meta { font-size: 10px; color: #666; margin-top: 3px; display: block; }
+            .footer-notes { margin-top: 40px; padding-top: 10px; border-top: 1px solid #ccc; font-size: 10px; color: #666; text-align: left; font-family: sans-serif; }
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1 class="title">LAPORAN BUKU TAMU</h1>
-            <p class="subtitle">${kopDesa.toUpperCase()} - Dicetak pada ${new Date().toLocaleString('id-ID')}</p>
+          <div class="kop-surat">
+            <div class="logo-wrap">
+              <img src="${logoUrl}" />
+            </div>
+            <div class="kop-text">
+              <h2>${kabupatenName.toUpperCase()}</h2>
+              <h2>${kecamatanName.toUpperCase()}</h2>
+              <h1>${desaName.toUpperCase()}</h1>
+              <p>${alamatKantor}</p>
+              <p>${kontakKantor}</p>
+            </div>
+          </div>
+          <div class="report-title">
+            <h3>LAPORAN BUKU TAMU</h3>
+            <p>Dicetak pada ${new Date().toLocaleString('id-ID')}</p>
           </div>
           <table>
             <thead>
@@ -261,6 +286,9 @@ export default function AdminBukuTamu() {
               `).join('')}
             </tbody>
           </table>
+          <div class="footer-notes">
+            ${customFooter}
+          </div>
         </body>
       </html>
     `;
