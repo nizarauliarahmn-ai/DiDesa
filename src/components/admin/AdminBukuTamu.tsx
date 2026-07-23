@@ -242,8 +242,8 @@ export default function AdminBukuTamu() {
                 <th style="width: 25%">Nama Lengkap / NIK</th>
                 <th style="width: 15%">Instansi / Asal</th>
                 <th style="width: 20%">Keperluan & Tujuan</th>
-                <th style="width: 25%">Waktu Kunjungan</th>
-                <th style="width: 5%">Status</th>
+                <th style="width: 20%">Waktu Kunjungan</th>
+                <th style="width: 15%">Tanda Tangan</th>
               </tr>
             </thead>
             <tbody>
@@ -254,7 +254,9 @@ export default function AdminBukuTamu() {
                   <td>${e.instansi || '-'}</td>
                   <td>${e.keperluan}<span class="meta">${e.tujuan_temu ? `Tujuan: ${e.tujuan_temu}` : ''}</span></td>
                   <td>${fmtTime(e.tanggal_masuk)}<span class="meta">${fmtDate(e.tanggal_masuk)}</span></td>
-                  <td class="${e.status === 'hadir' ? 'status-hadir' : 'status-selesai'}">${e.status.toUpperCase()}</td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    ${e.signature_url ? `<img src="${e.signature_url}" style="max-height: 40px; max-width: 80px; object-fit: contain;" alt="TTD"/>` : '-'}
+                  </td>
                 </tr>
               `).join('')}
             </tbody>
