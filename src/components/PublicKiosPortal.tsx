@@ -120,8 +120,18 @@ export default function PublicKiosPortal() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 text-center text-gray-400 dark:text-slate-500 font-medium">
-        &copy; {new Date().getFullYear()} DiDesa. Seluruh Hak Cipta Dilindungi.
+      <footer className="py-6 flex flex-col items-center justify-center gap-4 text-gray-400 dark:text-slate-500 font-medium z-10 relative">
+        <button 
+          onClick={() => {
+            const p = new URLSearchParams(window.location.search);
+            const t = p.get('tenant') || p.get('t_id');
+            window.location.search = t ? `?tenant=${t}` : '';
+          }}
+          className="text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-bold hover:underline transition-colors flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 px-4 py-2 rounded-full backdrop-blur-sm"
+        >
+          Kunjungi Portal Warga <ArrowRight className="w-4 h-4" />
+        </button>
+        <p>&copy; {new Date().getFullYear()} DiDesa. Seluruh Hak Cipta Dilindungi.</p>
       </footer>
     </div>
   );

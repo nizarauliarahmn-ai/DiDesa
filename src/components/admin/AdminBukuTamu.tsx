@@ -94,7 +94,24 @@ export default function AdminBukuTamu() {
   }, []);
 
   useEffect(() => { 
-    if (tenantId) fetchEntries(); 
+    if (tenantId) {
+      fetchEntries();
+      
+      const channel = supabase.channel('admin-bukutamu-changes')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'guest_book',
+          filter: `tenant_id=eq.${tenantId}`
+        }, () => {
+          fetchEntries();
+        })
+        .subscribe();
+        
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [fetchEntries, tenantId]);
 
   // Lookup resident by NIK from scanner
