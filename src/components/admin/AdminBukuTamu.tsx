@@ -603,20 +603,20 @@ export default function AdminBukuTamu() {
                 Batal
               </button>
               <button
-                onClick={() => handleSave(false)}
+                onClick={() => handleSave(true)}
                 disabled={isSaving}
                 className="flex-1 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-sm font-bold rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               >
-                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                Simpan & Tambah Lagi
+                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                Simpan & Tutup
               </button>
               <button
-                onClick={() => handleSave(true)}
+                onClick={() => handleSave(false)}
                 disabled={isSaving}
                 className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               >
-                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Simpan & Tutup
+                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                Simpan & Tambah Lagi
               </button>
             </div>
           </div>
