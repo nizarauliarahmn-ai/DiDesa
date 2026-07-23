@@ -3,9 +3,10 @@ import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { capitalizeWords } from '../utils/textUtils';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import SignatureCanvas from 'react-signature-canvas';
 import {
   BookOpen, QrCode, User, MapPin, Briefcase, ChevronRight,
-  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search
+  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search, FileSignature
 } from 'lucide-react';
 
 const KEPERLUAN_OPTIONS = [
@@ -36,18 +37,30 @@ export default function PublicBukuTamu() {
     keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: ''
   });
   const [isKioskMode, setIsKioskMode] = useState(false);
+  const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
+  
+  const signatureRef = React.useRef<any>(null);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantParam = urlParams.get('tenant');
+    const tIdParam = urlParams.get('t_id');
+    const tName = urlParams.get('t_name');
+    
+    if (urlParams.get('tab') === 'buku_tamu') {
+      setIsKioskMode(true);
+      if (!tenantParam && !tIdParam) {
+        setIsTenantValid(false);
+        return; // strictly block if accessed via Kios mode without tenant
+      }
+    }
+    
+    setIsTenantValid(true);
+
     resolveCurrentTenant().then(id => {
       if (id) setTenantId(id);
     });
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const tName = urlParams.get('t_name');
-    if (urlParams.get('tab') === 'buku_tamu') {
-      setIsKioskMode(true);
-    }
-    
     if (tName) {
       setDesaName(tName);
     } else {
@@ -75,6 +88,7 @@ export default function PublicBukuTamu() {
     setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
     setManualNik('');
     setError('');
+    signatureRef.current?.clear();
   };
 
   const lookupNik = async (nik: string) => {
@@ -129,10 +143,36 @@ export default function PublicBukuTamu() {
   };
 
   const handleSubmit = async () => {
-    if (!form.nama.trim()) { setError('Nama wajib diisi.'); return; }
+    if (!form.nama || !form.keperluan) {
+      setError('Mohon lengkapi Nama dan Keperluan.');
+      return;
+    }
+    
     setIsSaving(true);
     setError('');
     try {
+      let signatureUrl = null;
+      if (signatureRef.current && !signatureRef.current.isEmpty()) {
+        const dataUrl = signatureRef.current.getTrimmedCanvas().toDataURL('image/png');
+        try {
+          const res = await fetch(dataUrl);
+          const blob = await res.blob();
+          const fileName = `${tenantId}/${Date.now()}-ttd.png`;
+          const { error: uploadError } = await supabase.storage
+            .from('signatures')
+            .upload(fileName, blob, { contentType: 'image/png', cacheControl: '3600' });
+            
+          if (uploadError) {
+            console.error('Failed to upload signature', uploadError);
+          } else {
+            const { data: publicUrlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
+            signatureUrl = publicUrlData.publicUrl;
+          }
+        } catch (e) {
+          console.error('Error processing signature', e);
+        }
+      }
+
       const { error: err } = await supabase.from('guest_book').insert([{
         id: `guest-${Date.now()}`,
         tenant_id: tenantId,
@@ -142,6 +182,7 @@ export default function PublicBukuTamu() {
         instansi: capitalizeWords(form.instansi),
         keperluan: form.keperluan,
         tujuan_temu: capitalizeWords(form.tujuan_temu),
+        signature_url: signatureUrl,
         tanggal_masuk: new Date().toISOString(),
         tanggal_keluar: null,
         status: 'hadir',
@@ -171,6 +212,18 @@ export default function PublicBukuTamu() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex flex-col items-center justify-center p-4 relative">
       
+      {isTenantValid === false && (
+        <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8">
+          <div className="bg-white rounded-3xl p-10 max-w-lg text-center shadow-2xl">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🔒</span>
+            </div>
+            <h2 className="text-3xl font-bold text-slate-800 mb-4">Akses Ditolak</h2>
+            <p className="text-slate-600 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda agar kode desa dapat terbaca dengan benar.</p>
+          </div>
+        </div>
+      )}
+
       {isKioskMode && step === 'form' && (
         <div className="absolute top-8 left-8">
           <button 
@@ -285,6 +338,23 @@ export default function PublicBukuTamu() {
                   placeholder="Nama staf / bagian yang dituju..."
                   className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:border-emerald-500 outline-none transition-all"
                 />
+              </div>
+              
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Tanda Tangan</label>
+                <div className="border-2 border-gray-200 rounded-xl bg-gray-50 h-32 relative overflow-hidden">
+                  <SignatureCanvas 
+                    ref={signatureRef}
+                    canvasProps={{className: 'signatureCanvas w-full h-32 cursor-crosshair'}}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => signatureRef.current?.clear()}
+                    className="absolute top-2 right-2 text-[10px] font-bold bg-white text-gray-500 px-2 py-1 rounded shadow border hover:text-red-500"
+                  >
+                    Hapus
+                  </button>
+                </div>
               </div>
             </div>
 

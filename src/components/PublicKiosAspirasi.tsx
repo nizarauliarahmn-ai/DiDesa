@@ -12,7 +12,8 @@ export default function PublicKiosAspirasi() {
   const [kategori, setKategori] = useState('');
   const [pesan, setPesan] = useState('');
   const [isAnonim, setIsAnonim] = useState(false);
-  const [desaName, setDesaName] = useState('Desa Sukamakmur');
+  const [desaName, setDesaName] = useState('');
+  const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
 
   const categories = [
     'Infrastruktur & Fasilitas Umum',
@@ -24,6 +25,16 @@ export default function PublicKiosAspirasi() {
   ];
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantParam = urlParams.get('tenant');
+    const tIdParam = urlParams.get('t_id');
+    
+    if (!tenantParam && !tIdParam) {
+      setIsTenantValid(false);
+      return;
+    }
+    setIsTenantValid(true);
+
     const storedDesa = localStorage.getItem('kop_desa') || localStorage.getItem('village_name');
     if (storedDesa) setDesaName(storedDesa);
   }, []);
@@ -60,14 +71,17 @@ export default function PublicKiosAspirasi() {
     const pengirimNik = isAnonim ? 'Dirahasiakan' : verifiedResident.nik;
 
     // Notify admin
-    fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    import('../utils/supabase').then(({ supabase }) => {
+      supabase.from('notifications').insert([{
+        id: `notif-${Date.now()}`,
+        tenant_id: new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown',
         title: `Aspirasi Kios: ${kategori}`,
         message: `${pengirim} mengirim pengaduan/aspirasi: "${pesan.trim()}"`,
-        category: 'Services'
-      })
+        category: 'Services',
+        type: 'info',
+        is_read: false,
+        timestamp: new Date().toISOString()
+      }]).then(() => {});
     }).catch(console.error);
 
     setStep(3);
@@ -81,6 +95,18 @@ export default function PublicKiosAspirasi() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans select-none relative overflow-hidden">
       
+      {isTenantValid === false && (
+        <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8">
+          <div className="bg-white rounded-3xl p-10 max-w-lg text-center shadow-2xl">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🔒</span>
+            </div>
+            <h2 className="text-3xl font-bold text-slate-800 mb-4">Akses Ditolak</h2>
+            <p className="text-slate-600 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda.</p>
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
       <header className="bg-white shadow-sm px-8 py-4 flex items-center justify-between z-10 relative">
         <div className="flex items-center gap-4">

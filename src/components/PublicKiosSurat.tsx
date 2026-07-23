@@ -10,12 +10,26 @@ export default function PublicKiosSurat() {
   const [step, setStep] = useState(1);
   const [nik, setNik] = useState('');
   const [verifiedResident, setVerifiedResident] = useState<any>(null);
+  const [isManualEntry, setIsManualEntry] = useState(false);
+  const [manualName, setManualName] = useState('');
+  
   const [letterTypes, setLetterTypes] = useState<LetterClassification[]>([]);
   const [selectedLetter, setSelectedLetter] = useState<LetterClassification | null>(null);
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [desaName, setDesaName] = useState('Desa Sukamakmur');
+  const [desaName, setDesaName] = useState('');
+  const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tenantParam = urlParams.get('tenant');
+    const tIdParam = urlParams.get('t_id');
+    
+    if (!tenantParam && !tIdParam) {
+      setIsTenantValid(false);
+      return;
+    }
+    setIsTenantValid(true);
+
     const types = getLetterClassifications().filter(t => t.isVisible);
     setLetterTypes(types);
     
@@ -38,11 +52,23 @@ export default function PublicKiosSurat() {
         setVerifiedResident(match);
         setStep(2);
       } else {
-        showToast('Data NIK tidak ditemukan di database desa', 'error');
+        setIsManualEntry(true);
       }
     } catch (err) {
       showToast('Terjadi kesalahan saat memverifikasi NIK', 'error');
     }
+  };
+
+  const handleManualEntryContinue = () => {
+    if (!manualName.trim()) {
+      showToast('Harap masukkan nama lengkap Anda', 'error');
+      return;
+    }
+    setVerifiedResident({
+      nik: nik,
+      name: manualName.trim()
+    });
+    setStep(2);
   };
 
   const handleSelectLetter = (lt: LetterClassification) => {
@@ -109,14 +135,17 @@ export default function PublicKiosSurat() {
     addLetterHistory(newLetter);
 
     // Notify admin
-    fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    import('../utils/supabase').then(({ supabase }) => {
+      supabase.from('notifications').insert([{
+        id: `notif-${Date.now()}`,
+        tenant_id: new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown',
         title: 'Permohonan Surat Kios',
         message: `Warga atas nama ${verifiedResident.name} (NIK: ${verifiedResident.nik}) mengajukan ${selectedLetter.jenis}.`,
-        category: 'Services'
-      })
+        category: 'Services',
+        type: 'info',
+        is_read: false,
+        timestamp: new Date().toISOString()
+      }]).then(() => {});
     }).catch(console.error);
 
     setStep(4);
@@ -187,6 +216,18 @@ export default function PublicKiosSurat() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans select-none relative overflow-hidden">
       
+      {isTenantValid === false && (
+        <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8">
+          <div className="bg-white rounded-3xl p-10 max-w-lg text-center shadow-2xl">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🔒</span>
+            </div>
+            <h2 className="text-3xl font-bold text-slate-800 mb-4">Akses Ditolak</h2>
+            <p className="text-slate-600 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda.</p>
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
       <header className="bg-white shadow-sm px-8 py-4 flex items-center justify-between z-10 relative">
         <div className="flex items-center gap-4">
@@ -233,21 +274,56 @@ export default function PublicKiosSurat() {
               <h2 className="text-4xl font-black text-slate-800 mb-4">Verifikasi Identitas</h2>
               <p className="text-xl text-slate-500 mb-8">Silakan masukkan 16 digit NIK Anda untuk melanjutkan permohonan surat.</p>
               
-              <input 
-                type="text" // Using text to allow virtual numpad integration later if needed
-                value={nik}
-                onChange={(e) => setNik(e.target.value.replace(/\D/g, '').slice(0, 16))}
-                className="w-full text-center text-4xl font-mono tracking-[0.2em] p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 outline-none"
-                placeholder="0000000000000000"
-              />
+              {!isManualEntry ? (
+                <>
+                  <input 
+                    type="text" // Using text to allow virtual numpad integration later if needed
+                    value={nik}
+                    onChange={(e) => setNik(e.target.value.replace(/\D/g, '').slice(0, 16))}
+                    className="w-full text-center text-4xl font-mono tracking-[0.2em] p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 outline-none"
+                    placeholder="0000000000000000"
+                  />
 
-              <button 
-                onClick={handleVerifyNik}
-                disabled={nik.length < 16}
-                className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-blue-600/30"
-              >
-                Lanjutkan
-              </button>
+                  <button 
+                    onClick={handleVerifyNik}
+                    disabled={nik.length < 16}
+                    className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-blue-600/30"
+                  >
+                    Lanjutkan
+                  </button>
+                </>
+              ) : (
+                <div className="space-y-6 text-left">
+                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 mb-6">
+                    <p className="font-medium">Data NIK tidak ditemukan di database warga. Silakan masukkan nama lengkap Anda untuk melanjutkan secara manual.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xl font-bold text-gray-700 mb-2">Nama Lengkap Sesuai KTP</label>
+                    <input 
+                      type="text"
+                      value={manualName}
+                      onChange={(e) => setManualName(e.target.value)}
+                      className="w-full p-4 text-xl rounded-2xl border-2 border-gray-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 outline-none transition-all uppercase"
+                      placeholder="NAMA LENGKAP"
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <button 
+                      onClick={() => setIsManualEntry(false)}
+                      className="w-1/3 py-5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xl font-bold rounded-2xl transition-colors"
+                    >
+                      Batal
+                    </button>
+                    <button 
+                      onClick={handleManualEntryContinue}
+                      disabled={!manualName.trim()}
+                      className="w-2/3 py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xl font-bold rounded-2xl transition-colors shadow-lg shadow-blue-600/30"
+                    >
+                      Lanjutkan Formulir
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 

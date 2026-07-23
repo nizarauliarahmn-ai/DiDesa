@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, FileText, Megaphone, ArrowRight, Home } from 'lucide-react';
 import { motion } from 'motion/react';
+import { resolveCurrentTenant } from '../utils/tenantResolver';
 
 export default function PublicKiosPortal() {
-  const [desaName, setDesaName] = useState('Desa Sukamakmur');
+  const [desaName, setDesaName] = useState('');
+  const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
   
   useEffect(() => {
-    // Attempt to get desa name from URL if provided by Kiosk link, or localStorage
     const urlParams = new URLSearchParams(window.location.search);
+    const tenantParam = urlParams.get('tenant');
+    const tIdParam = urlParams.get('t_id');
+    
+    if (!tenantParam && !tIdParam) {
+      setIsTenantValid(false);
+      return;
+    }
+
+    setIsTenantValid(true);
+    // Attempt to get desa name from URL if provided by Kiosk link, or localStorage
     const tName = urlParams.get('t_name');
     if (tName) {
       setDesaName(tName);
@@ -25,6 +36,19 @@ export default function PublicKiosPortal() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans select-none overflow-hidden relative">
+      
+      {isTenantValid === false && (
+        <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8">
+          <div className="bg-white rounded-3xl p-10 max-w-lg text-center shadow-2xl">
+            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🔒</span>
+            </div>
+            <h2 className="text-3xl font-bold text-slate-800 mb-4">Akses Ditolak</h2>
+            <p className="text-slate-600 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda agar kode desa dapat terbaca dengan benar.</p>
+          </div>
+        </div>
+      )}
+
       {/* Background decorations */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-emerald-600/90 to-teal-800/90 rounded-b-[4rem] z-0 shadow-2xl"></div>
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
@@ -97,7 +121,7 @@ export default function PublicKiosPortal() {
 
       {/* Footer */}
       <footer className="py-6 text-center text-gray-400 dark:text-slate-500 font-medium">
-        DiDesa Smart Village System &copy; {new Date().getFullYear()}
+        &copy; {new Date().getFullYear()} DiDesa. Seluruh Hak Cipta Dilindungi.
       </footer>
     </div>
   );
