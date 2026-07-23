@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { showToast } from '../../utils/toast';
 import { capitalizeWords } from '../../utils/textUtils';
 import AdminQRScanner from './AdminQRScanner';
 import { QRCodeSVG } from 'qrcode.react';
+import { useReactToPrint } from 'react-to-print';
 import {
   BookOpen, Plus, QrCode, Search, Filter, Printer, Download,
   LogIn, LogOut, Clock, User, MapPin, Building2, ChevronDown,
@@ -45,6 +46,13 @@ export default function AdminBukuTamu() {
   const [showModal, setShowModal] = useState(false);
   const [showPrintQR, setShowPrintQR] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const qrPrintRef = useRef<HTMLDivElement>(null);
+  
+  const handlePrintQRContent = useReactToPrint({
+    contentRef: qrPrintRef,
+    documentTitle: 'Cetak_QR_Kiosk_Buku_Tamu',
+  });
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -173,60 +181,6 @@ export default function AdminBukuTamu() {
   const todayCount = entries.filter(e => e.status === 'hadir').length;
 
   const handlePrint = () => window.print();
-
-  const handlePrintQRContent = () => {
-    const svgElement = document.querySelector('#qr-print-area svg');
-    if (!svgElement) return;
-
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = 'none';
-    document.body.appendChild(iframe);
-
-    const doc = iframe.contentWindow?.document;
-    if (doc) {
-      doc.open();
-      doc.write(`
-        <html>
-          <head>
-            <title>Cetak QR Kiosk Buku Tamu</title>
-            <style>
-              body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-              h2 { font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; color: #111827; }
-              p { font-size: 18px; color: #64748b; margin-bottom: 48px; font-weight: 500; }
-              .qr-box { padding: 40px; border: 3px solid #e2e8f0; border-radius: 40px; margin-bottom: 48px; background: white; }
-              .footer { font-weight: bold; font-size: 20px; color: #047857; display: flex; align-items: center; justify-content: center; gap: 10px; }
-              svg { width: 350px; height: 350px; }
-            </style>
-          </head>
-          <body>
-            <h2>Buku Tamu Digital</h2>
-            <p>Scan QR Code di bawah ini untuk mengisi daftar hadir secara mandiri.</p>
-            <div class="qr-box">
-              ${svgElement.outerHTML}
-            </div>
-            <div class="footer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Powered by DiDesa
-            </div>
-          </body>
-        </html>
-      `);
-      doc.close();
-      
-      iframe.contentWindow?.focus();
-      setTimeout(() => {
-        iframe.contentWindow?.print();
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      }, 500);
-    }
-  };
 
   const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -523,8 +477,8 @@ export default function AdminBukuTamu() {
       {/* Print QR Kiosk Modal */}
       {showPrintQR && (
         <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div id="qr-print-area" className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 print:hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-emerald-700" />
                 QR Code Kiosk
@@ -536,26 +490,21 @@ export default function AdminBukuTamu() {
             
             <div className="p-8 flex flex-col items-center text-center">
               <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-wider mb-2">Buku Tamu Digital</h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400 font-medium mb-8">Scan QR Code di bawah ini untuk mengisi daftar hadir secara mandiri.</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 font-medium mb-8">Ini adalah pratinjau. Klik "Mulai Mencetak" untuk mengeprint format Kertas A4/A5.</p>
               
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <QRCodeSVG 
                   value={`${window.location.origin}/?tab=buku_tamu`} 
-                  size={250} 
+                  size={200} 
                   level="H"
                   includeMargin={false}
                 />
-              </div>
-              
-              <div className="mt-8 flex items-center gap-2 text-emerald-700 font-bold">
-                <BookOpen className="w-5 h-5" />
-                <p>Powered by DiDesa</p>
               </div>
             </div>
             
             <div className="p-5 border-t border-gray-100 dark:border-slate-800">
               <button 
-                onClick={handlePrintQRContent} 
+                onClick={() => handlePrintQRContent()} 
                 className="w-full py-3 bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-800 transition-all shadow-md"
               >
                 <Printer className="w-5 h-5" />
@@ -565,6 +514,28 @@ export default function AdminBukuTamu() {
           </div>
         </div>
       )}
+
+      {/* Hidden layout for react-to-print */}
+      <div style={{ position: 'absolute', left: '-9999px', top: '-9999px', visibility: 'hidden' }}>
+        <div ref={qrPrintRef} className="bg-white w-full h-full min-h-screen flex flex-col items-center justify-center p-10 text-center" style={{ fontFamily: 'sans-serif' }}>
+          <h2 className="text-4xl font-black text-gray-900 uppercase tracking-wider mb-4">Buku Tamu Digital</h2>
+          <p className="text-xl text-gray-600 font-medium mb-12 max-w-md mx-auto">Scan QR Code di bawah ini menggunakan kamera HP Anda untuk mengisi daftar hadir secara mandiri.</p>
+          
+          <div className="bg-white p-12 rounded-[3rem] shadow-xl border-4 border-gray-100 mb-12 inline-block">
+            <QRCodeSVG 
+              value={`${window.location.origin}/?tab=buku_tamu`} 
+              size={400} 
+              level="H"
+              includeMargin={false}
+            />
+          </div>
+          
+          <div className="mt-auto pt-10 flex items-center gap-3 text-emerald-700 font-bold text-2xl">
+            <BookOpen className="w-8 h-8" />
+            <p>Powered by DiDesa</p>
+          </div>
+        </div>
+      </div>
 
       {/* Print-only styles */}
       <style>{`
