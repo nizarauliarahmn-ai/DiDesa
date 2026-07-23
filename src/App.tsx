@@ -44,6 +44,12 @@ import IntroductionTour from './components/IntroductionTour';
 import PrintQRKiosk from './components/admin/PrintQRKiosk';
 
 export default function App() {
+  // Khusus untuk Halaman Print (Terisolasi dari semua layout)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('print') === 'qr_kiosk') {
+    return <PrintQRKiosk />;
+  }
+
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
     if (new URLSearchParams(window.location.search).get('preview') === 'true') {
       return null;
@@ -321,11 +327,6 @@ export default function App() {
     );
   }
 
-  // Khusus untuk Halaman Print (Terisolasi dari semua layout)
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('print') === 'qr_kiosk') {
-    return <PrintQRKiosk />;
-  }
 
   // Khusus untuk Kiosk Buku Tamu Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)
   if (publicTab === 'buku_tamu') {
