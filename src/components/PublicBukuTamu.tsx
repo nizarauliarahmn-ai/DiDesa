@@ -227,7 +227,7 @@ export default function PublicBukuTamu() {
       {isKioskMode && step === 'form' && (
         <div className="absolute top-8 left-8">
           <button 
-            onClick={() => window.location.search = '?tab=kios'}
+            onClick={() => { const p = new URLSearchParams(window.location.search); const t = p.get('tenant') || p.get('t_id'); window.location.search = t ? `?tenant=${t}&tab=kios` : '?tab=kios'; }}
             className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-colors backdrop-blur-md"
           >
             <Home className="w-5 h-5" /> Kembali ke Beranda
