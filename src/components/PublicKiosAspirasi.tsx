@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Megaphone, CheckCircle2, User, Home, ArrowLeft } from 'lucide-react';
-import { fetchResidentsCached } from '../utils/apiCache';
+import { Megaphone, CheckCircle2, Home } from 'lucide-react';
 import { showToast } from '../utils/toast';
 
 export default function PublicKiosAspirasi() {
   const [step, setStep] = useState(1);
-  const [nik, setNik] = useState('');
-  const [verifiedResident, setVerifiedResident] = useState<any>(null);
+  const [namaPengirim, setNamaPengirim] = useState('');
   
   const [kategori, setKategori] = useState('');
   const [pesan, setPesan] = useState('');
-  const [isAnonim, setIsAnonim] = useState(false);
   const [desaName, setDesaName] = useState('');
   const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
 
@@ -39,36 +36,13 @@ export default function PublicKiosAspirasi() {
     if (storedDesa) setDesaName(storedDesa);
   }, []);
 
-  const handleVerifyNik = async () => {
-    if (nik.length < 16) {
-      showToast('NIK harus 16 digit', 'error');
-      return;
-    }
-    
-    try {
-      const res = await fetchResidentsCached();
-      if (!res.ok) throw new Error('Network response was not ok');
-      const residents = await res.json();
-      const match = residents.find((r: any) => r.nik === nik);
-      if (match) {
-        setVerifiedResident(match);
-        setStep(2);
-      } else {
-        showToast('Data NIK tidak ditemukan di database desa', 'error');
-      }
-    } catch (err) {
-      showToast('Terjadi kesalahan saat memverifikasi NIK', 'error');
-    }
-  };
-
   const handleSubmit = () => {
-    if (!verifiedResident || !kategori || !pesan.trim()) {
+    if (!kategori || !pesan.trim()) {
       showToast('Harap lengkapi kategori dan isi aduan', 'error');
       return;
     }
 
-    const pengirim = isAnonim ? 'Warga Anonim' : verifiedResident.name;
-    const pengirimNik = isAnonim ? 'Dirahasiakan' : verifiedResident.nik;
+    const pengirim = namaPengirim.trim() || 'Warga Anonim';
 
     // Notify admin
     import('../utils/supabase').then(({ supabase }) => {
@@ -84,7 +58,7 @@ export default function PublicKiosAspirasi() {
       }]).then(() => {});
     }).catch(console.error);
 
-    setStep(3);
+    setStep(2);
     
     // Auto reset after 10s
     setTimeout(() => {
@@ -121,7 +95,7 @@ export default function PublicKiosAspirasi() {
           </div>
         </div>
         
-        {step < 3 && (
+        {step === 1 && (
           <button 
             onClick={() => { const p = new URLSearchParams(window.location.search); const t = p.get('tenant') || p.get('t_id'); window.location.search = t ? `?tenant=${t}&tab=kios` : '?tab=kios'; }}
             className="flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full font-bold transition-colors"
@@ -131,63 +105,20 @@ export default function PublicKiosAspirasi() {
         )}
       </header>
 
-      {/* Progress Bar */}
-      {step < 3 && (
-        <div className="w-full h-2 bg-slate-200">
-          <div className="h-full bg-amber-500 transition-all duration-500" style={{ width: `${(step / 2) * 100}%` }}></div>
-        </div>
-      )}
-
       {/* Main Content area */}
       <main className="flex-1 relative flex items-center justify-center p-8">
         <AnimatePresence mode="wait">
           
-          {/* STEP 1: NIK Verification */}
+          {/* STEP 1: Form Aduan */}
           {step === 1 && (
             <motion.div 
               key="step1"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -50 }}
-              className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-2xl text-center"
-            >
-              <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <User className="w-12 h-12 text-amber-500" />
-              </div>
-              <h2 className="text-4xl font-black text-slate-800 mb-4">Verifikasi Identitas</h2>
-              <p className="text-xl text-slate-500 mb-8">Silakan masukkan 16 digit NIK Anda untuk melanjutkan. (Identitas Anda dapat disembunyikan nanti).</p>
-              
-              <input 
-                type="text"
-                value={nik}
-                onChange={(e) => setNik(e.target.value.replace(/\D/g, '').slice(0, 16))}
-                className="w-full text-center text-4xl font-mono tracking-[0.2em] p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus:border-amber-500 focus:ring-4 focus:ring-amber-200 outline-none"
-                placeholder="0000000000000000"
-              />
-
-              <button 
-                onClick={handleVerifyNik}
-                disabled={nik.length < 16}
-                className="w-full py-5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-amber-500/30"
-              >
-                Lanjutkan
-              </button>
-            </motion.div>
-          )}
-
-          {/* STEP 2: Form Aduan */}
-          {step === 2 && (
-            <motion.div 
-              key="step2"
-              initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
               className="w-full max-w-4xl bg-white p-10 rounded-3xl shadow-xl"
             >
-              <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
-                <button onClick={() => setStep(1)} className="p-3 bg-slate-50 rounded-full hover:bg-slate-100">
-                  <ArrowLeft className="w-6 h-6" />
-                </button>
-                <div>
-                  <h2 className="text-3xl font-black text-slate-800">Tuliskan Aspirasi Anda</h2>
-                  <p className="text-slate-500 text-lg">Pesan Anda akan langsung diterima oleh Kepala Desa.</p>
-                </div>
+              <div className="mb-8 pb-6 border-b border-gray-100">
+                <h2 className="text-3xl font-black text-slate-800">Tuliskan Aspirasi Anda</h2>
+                <p className="text-slate-500 text-lg">Pesan Anda akan langsung diterima oleh Kepala Desa tanpa perlu menggunakan NIK.</p>
               </div>
               
               <div className="space-y-8">
@@ -220,34 +151,32 @@ export default function PublicKiosAspirasi() {
                   />
                 </div>
 
-                <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
+                <div>
+                  <label className="block text-xl font-bold text-gray-700 mb-3">Nama Anda <span className="text-slate-400 font-normal">(Opsional)</span></label>
                   <input
-                    type="checkbox"
-                    id="anonim"
-                    checked={isAnonim}
-                    onChange={(e) => setIsAnonim(e.target.checked)}
-                    className="w-6 h-6 text-amber-500 border-gray-300 rounded focus:ring-amber-500"
+                    type="text"
+                    value={namaPengirim}
+                    onChange={(e) => setNamaPengirim(e.target.value)}
+                    className="w-full p-6 text-xl rounded-2xl border-2 border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-200 outline-none transition-all"
+                    placeholder="Kosongkan jika ingin mengirim secara anonim (rahasia)"
                   />
-                  <label htmlFor="anonim" className="text-lg font-medium text-slate-700 select-none cursor-pointer flex-1">
-                    Kirim secara anonim (Sembunyikan identitas saya dari laporan)
-                  </label>
                 </div>
 
                 <button 
                   onClick={handleSubmit}
                   disabled={!kategori || !pesan.trim()}
-                  className="w-full py-5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-amber-500/30"
+                  className="w-full py-5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-amber-500/30 mt-4"
                 >
-                  Kirim Laporan
+                  Kirim Laporan Sekarang
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* STEP 3: Success */}
-          {step === 3 && (
+          {/* STEP 2: Success */}
+          {step === 2 && (
             <motion.div 
-              key="step3"
+              key="step2"
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
               className="bg-white p-12 rounded-3xl shadow-xl w-full max-w-2xl text-center"
             >
