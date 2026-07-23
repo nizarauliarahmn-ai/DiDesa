@@ -129,7 +129,7 @@ export default function AdminBukuTamu() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (closeModal = true) => {
     if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
     if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
 
@@ -174,7 +174,11 @@ export default function AdminBukuTamu() {
 
       if (err) throw err;
       showToast(`Tamu ${capitalizeWords(form.nama)} berhasil dicatat!`, 'success');
-      setShowModal(false);
+      if (closeModal) {
+        setShowModal(false);
+      } else {
+        signatureRef.current?.clear();
+      }
       setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
       fetchEntries();
     } catch {
@@ -594,17 +598,25 @@ export default function AdminBukuTamu() {
               </button>
             </div>
 
-            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex gap-3">
-              <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex gap-2">
+              <button onClick={() => setShowModal(false)} className="flex-none px-4 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
                 Batal
               </button>
               <button
-                onClick={handleSave}
+                onClick={() => handleSave(false)}
                 disabled={isSaving}
-                className="flex-1 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 bg-teal-600 text-white text-sm font-bold rounded-xl hover:bg-teal-700 transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
+              >
+                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                Simpan & Tambah Lagi
+              </button>
+              <button
+                onClick={() => handleSave(true)}
+                disabled={isSaving}
+                className="flex-1 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
               >
                 {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Simpan & Check-In
+                Simpan & Tutup
               </button>
             </div>
           </div>
