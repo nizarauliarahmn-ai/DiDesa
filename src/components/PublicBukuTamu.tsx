@@ -19,11 +19,11 @@ const KEPERLUAN_OPTIONS = [
   'Lainnya',
 ];
 
-type KioskStep = 'welcome' | 'scan' | 'form' | 'success';
+type KioskStep = 'form' | 'success';
 
 export default function PublicBukuTamu() {
   const [tenantId, setTenantId] = useState<string | null>(null);
-  const [step, setStep] = useState<KioskStep>('welcome');
+  const [step, setStep] = useState<KioskStep>('form');
   const [desaName, setDesaName] = useState('Desa');
   const [scanMode, setScanMode] = useState<'qr' | 'manual'>('qr');
   const [isLookingUp, setIsLookingUp] = useState(false);
@@ -165,103 +165,58 @@ export default function PublicBukuTamu() {
       {/* Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
 
-        {/* WELCOME */}
-        {step === 'welcome' && (
-          <div className="p-8 text-center space-y-4">
-            <h2 className="text-xl font-bold text-gray-900">Selamat Datang!</h2>
-            <p className="text-sm text-gray-500">Silakan daftarkan kehadiran Anda sebagai tamu hari ini.</p>
-            <button
-              onClick={() => { setScanMode('qr'); setStep('scan'); }}
-              className="w-full py-4 bg-emerald-700 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all flex items-center justify-center gap-3 text-base shadow-sm"
-            >
-              <QrCode className="w-6 h-6" />
-              Scan QR / Barcode KTP
-            </button>
-            <button
-              onClick={() => { setScanMode('manual'); setStep('scan'); }}
-              className="w-full py-4 border-2 border-gray-200 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-base"
-            >
-              <Keyboard className="w-6 h-6" />
-              Input NIK Manual
-            </button>
-            <button
-              onClick={() => { resetForm(); setStep('form'); }}
-              className="w-full py-3 text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors"
-            >
-              Tamu dari luar (tanpa NIK)
-            </button>
-          </div>
-        )}
-
-        {/* SCAN / MANUAL NIK */}
-        {step === 'scan' && (
-          <div className="p-6 space-y-4">
-            <div className="flex items-center gap-3 mb-2">
-              <button onClick={() => setStep('welcome')} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <h2 className="font-bold text-gray-900">{scanMode === 'qr' ? 'Scan QR Code / KTP' : 'Masukkan NIK'}</h2>
-            </div>
-
-            {isLookingUp ? (
-              <div className="py-16 text-center">
-                <RefreshCw className="w-8 h-8 text-emerald-700 animate-spin mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-600">Mencari data Anda...</p>
-              </div>
-            ) : scanMode === 'qr' ? (
-              <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 relative">
-                <Scanner
-                  onScan={handleScan}
-                  onError={(e) => setError(String(e))}
-                />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-52 h-52 border-2 border-emerald-400 rounded-xl opacity-80 animate-pulse" />
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3 py-4">
-                <input
-                  type="tel"
-                  data-no-cap
-                  maxLength={16}
-                  value={manualNik}
-                  onChange={(e) => { setManualNik(e.target.value.replace(/\D/g, '')); setError(''); }}
-                  placeholder="Masukkan 16 digit NIK KTP..."
-                  className="w-full h-14 px-4 border-2 border-gray-200 rounded-2xl text-center text-xl font-mono font-bold text-gray-900 focus:border-emerald-500 outline-none transition-all tracking-widest"
-                  autoFocus
-                />
-                <button
-                  onClick={handleManualNik}
-                  className="w-full py-4 bg-emerald-700 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all text-base flex items-center justify-center gap-2"
-                >
-                  Cari Data <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-
-            {error && (
-              <div className="bg-red-50 text-red-600 text-sm font-medium p-3 rounded-xl border border-red-100">
-                {error}
-              </div>
-            )}
-
-            <p className="text-[11px] text-gray-400 text-center">
-              Arahkan kamera ke QR Code atau barcode belakang KTP Anda.
-            </p>
-          </div>
-        )}
-
         {/* FORM */}
         {step === 'form' && (
           <div className="p-6">
             <div className="flex items-center gap-3 mb-5">
-              <button onClick={() => setStep('welcome')} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
               <h2 className="font-bold text-gray-900">Data Kunjungan</h2>
             </div>
+            
+            {error && (
+              <div className="bg-red-50 text-red-600 text-sm font-medium p-3 mb-4 rounded-xl border border-red-100">
+                {error}
+              </div>
+            )}
+
+            {isLookingUp && (
+              <div className="py-4 text-center">
+                <RefreshCw className="w-6 h-6 text-emerald-700 animate-spin mx-auto mb-2" />
+                <p className="text-sm font-medium text-gray-600">Mencari data...</p>
+              </div>
+            )}
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">NIK (Opsional)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="tel"
+                    data-no-cap
+                    maxLength={16}
+                    value={form.nik}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '');
+                      setForm(p => ({ ...p, nik: val }));
+                      if (val.length === 16) {
+                        lookupNik(val);
+                      }
+                    }}
+                    placeholder="16 Digit NIK KTP..."
+                    className="flex-1 h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-mono text-gray-900 focus:border-emerald-500 outline-none transition-all"
+                  />
+                  <button
+                    onClick={(e) => {
+                       e.preventDefault();
+                       if (form.nik.length === 16) lookupNik(form.nik);
+                       else setError('NIK harus 16 digit.');
+                    }}
+                    className="h-12 px-4 bg-emerald-100 text-emerald-700 font-bold rounded-xl hover:bg-emerald-200 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1">Isi NIK untuk otomatis melengkapi nama & alamat (khusus warga).</p>
+              </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Nama Lengkap *</label>
                 <input
