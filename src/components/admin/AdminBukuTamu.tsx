@@ -48,6 +48,7 @@ export default function AdminBukuTamu() {
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: '', nama: '' });
   const signatureRef = React.useRef<any>(null);
   const [showPrintQR, setShowPrintQR] = useState(false);
@@ -131,7 +132,7 @@ export default function AdminBukuTamu() {
     }
   };
 
-  const handleSave = async (closeModal = true) => {
+  const handleSave = async () => {
     if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
     if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
 
@@ -175,13 +176,7 @@ export default function AdminBukuTamu() {
       }]);
 
       if (err) throw err;
-      showToast(`Tamu ${capitalizeWords(form.nama)} berhasil dicatat!`, 'success');
-      if (closeModal) {
-        setShowModal(false);
-      } else {
-        signatureRef.current?.clear();
-      }
-      setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
+      setSaveSuccess(true);
       fetchEntries();
     } catch {
       showToast('Gagal menyimpan data tamu.', 'error');
@@ -526,12 +521,51 @@ export default function AdminBukuTamu() {
                 <Plus className="w-5 h-5 text-emerald-700" />
                 Data Tamu Baru
               </h3>
-              <button onClick={() => setShowModal(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+              <button onClick={() => {
+                setShowModal(false);
+                setTimeout(() => setSaveSuccess(false), 300);
+              }} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            {saveSuccess ? (
+              <div className="p-10 text-center">
+                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Terima Kasih!</h3>
+                <p className="text-gray-500 dark:text-slate-400 mb-8">Data tamu atas nama <strong>{form.nama}</strong> telah berhasil dicatat ke dalam sistem.</p>
+                
+                <div className="flex gap-3 justify-center">
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      setTimeout(() => {
+                        setSaveSuccess(false);
+                        setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
+                      }, 300);
+                    }}
+                    className="px-6 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+                  >
+                    Tutup
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSaveSuccess(false);
+                      setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
+                      setTimeout(() => signatureRef.current?.clear(), 100);
+                    }}
+                    className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Tambah Tamu Lagi
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
               {/* NIK & scan button */}
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK (Opsional)</label>
@@ -626,27 +660,21 @@ export default function AdminBukuTamu() {
               </button>
             </div>
 
-            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex gap-2.5 bg-gray-50/50 dark:bg-slate-900/50">
-              <button onClick={() => setShowModal(false)} className="flex-none px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
-                Batal
-              </button>
-              <button
-                onClick={() => handleSave(true)}
-                disabled={isSaving}
-                className="flex-1 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-sm font-bold rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Simpan & Tutup
-              </button>
-              <button
-                onClick={() => handleSave(false)}
-                disabled={isSaving}
-                className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-              >
-                {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                Simpan & Tambah Lagi
-              </button>
-            </div>
+                <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 bg-gray-50/50 dark:bg-slate-900/50">
+                  <button onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                  >
+                    {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                    Simpan Data
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
