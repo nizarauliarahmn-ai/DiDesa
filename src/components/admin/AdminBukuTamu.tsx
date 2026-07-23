@@ -180,7 +180,87 @@ export default function AdminBukuTamu() {
 
   const todayCount = entries.filter(e => e.status === 'hadir').length;
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    const kopDesa = localStorage.getItem('kop_desa') || 'Desa';
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Laporan Buku Tamu - ${kopDesa}</title>
+          <style>
+            @media print {
+              @page { margin: 1.5cm; size: landscape; }
+            }
+            body { font-family: Arial, sans-serif; padding: 20px; color: black; background: white; }
+            .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 15px; }
+            .title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px; }
+            .subtitle { font-size: 14px; margin: 0; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
+            th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .status-hadir { color: #0369a1; font-weight: bold; }
+            .status-selesai { color: #4b5563; }
+            .meta { font-size: 10px; color: #666; margin-top: 3px; display: block; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1 class="title">LAPORAN BUKU TAMU</h1>
+            <p class="subtitle">${kopDesa.toUpperCase()} - Dicetak pada ${new Date().toLocaleString('id-ID')}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 5%">No</th>
+                <th style="width: 25%">Nama Lengkap / NIK</th>
+                <th style="width: 15%">Instansi / Asal</th>
+                <th style="width: 20%">Keperluan & Tujuan</th>
+                <th style="width: 15%">Waktu Masuk</th>
+                <th style="width: 15%">Waktu Keluar</th>
+                <th style="width: 5%">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map((e, i) => `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td><strong>${e.nama}</strong><span class="meta">NIK: ${e.nik || '-'}</span></td>
+                  <td>${e.instansi || '-'}</td>
+                  <td>${e.keperluan}<span class="meta">${e.tujuan_temu ? `Tujuan: ${e.tujuan_temu}` : ''}</span></td>
+                  <td>${fmtTime(e.tanggal_masuk)}<span class="meta">${fmtDate(e.tanggal_masuk)}</span></td>
+                  <td>${e.tanggal_keluar ? `${fmtTime(e.tanggal_keluar)}<span class="meta">${fmtDate(e.tanggal_keluar)}</span>` : '-'}</td>
+                  <td class="${e.status === 'hadir' ? 'status-hadir' : 'status-selesai'}">${e.status.toUpperCase()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+    
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(printContent);
+      doc.close();
+      
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }, 500);
+    }
+  };
 
   const handleDownloadQR = () => {
     const svg = document.querySelector('#qr-kiosk-svg');
@@ -564,30 +644,7 @@ export default function AdminBukuTamu() {
         </div>
       </div>
 
-      {/* Print-only styles */}
-      <style>{`
-        @media print {
-          /* Reset basic layout yang sering merusak print di React (flex/overflow) */
-          body, html, #root, .overflow-y-auto, .overflow-hidden, main, .flex-1 { 
-            overflow: visible !important; 
-            height: auto !important; 
-            max-height: none !important;
-            display: block !important;
-          }
-          
-          /* Sembunyikan elemen UI dasar */
-          .print\\:hidden, button, nav, aside, header { display: none !important; }
-          
-          /* === MODE CETAK TABEL BUKU TAMU === */
-          /* Sembunyikan modal/overlay lainnya saat nge-print tabel */
-          .fixed { display: none !important; }
-          body { background: white !important; }
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #ddd; padding: 6px 10px; font-size: 11px; color: black; }
-          th { background: #f3f4f6 !important; font-weight: bold; text-transform: uppercase; color: black; }
-          h2 { font-size: 18px; font-weight: bold; margin-bottom: 4px; color: black; }
-        }
-      `}</style>
+      {/* Style print bawaan yang mengganggu dihapus karena kita sudah pakai iframe murni */}
     </div>
   );
 }
