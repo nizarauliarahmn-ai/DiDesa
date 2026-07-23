@@ -594,7 +594,7 @@ export default function AdminBukuTamu() {
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <QRCodeSVG 
                   id="qr-kiosk-svg"
-                  value={`${window.location.origin}/?tab=buku_tamu`} 
+                  value={`${window.location.origin}/?tab=buku_tamu&t_id=${tenantId || ''}&t_name=${encodeURIComponent(localStorage.getItem('kop_desa') || '')}`} 
                   size={200} 
                   level="H"
                   includeMargin={false}
@@ -630,7 +630,7 @@ export default function AdminBukuTamu() {
           
           <div className="bg-white p-12 rounded-[3rem] shadow-xl border-4 border-gray-100 mb-12 inline-block">
             <QRCodeSVG 
-              value={`${window.location.origin}/?tab=buku_tamu`} 
+              value={`${window.location.origin}/?tab=buku_tamu&t_id=${tenantId || ''}&t_name=${encodeURIComponent(localStorage.getItem('kop_desa') || '')}`} 
               size={400} 
               level="H"
               includeMargin={false}

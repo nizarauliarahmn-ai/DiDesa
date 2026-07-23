@@ -21,8 +21,17 @@ export async function resolveCurrentTenant(): Promise<string | null> {
   isResolving = true;
 
   try {
-    // 1. Cek Parameter URL khusus untuk testing (Misal di Vercel: didesa.vercel.app?tenant=sukamakmur)
+    // 1. Cek Parameter URL khusus untuk testing atau QR Code
     const urlParams = new URLSearchParams(window.location.search);
+    
+    // Bypass query if direct UUID is provided (e.g. from QR code)
+    const directId = urlParams.get('t_id');
+    if (directId) {
+      cachedTenantId = directId;
+      isResolving = false;
+      return directId;
+    }
+
     const tenantParam = urlParams.get('tenant');
     let subdomain: string | null = tenantParam;
 

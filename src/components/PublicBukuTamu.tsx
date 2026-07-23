@@ -41,15 +41,22 @@ export default function PublicBukuTamu() {
       if (id) setTenantId(id);
     });
 
-    const branding = localStorage.getItem('global_branding');
-    if (branding) {
-      try {
-        const p = JSON.parse(branding);
-        if (p.village_name) setDesaName(p.village_name);
-      } catch {}
+    const urlParams = new URLSearchParams(window.location.search);
+    const tName = urlParams.get('t_name');
+    
+    if (tName) {
+      setDesaName(tName);
+    } else {
+      const branding = localStorage.getItem('global_branding');
+      if (branding) {
+        try {
+          const p = JSON.parse(branding);
+          if (p.village_name) setDesaName(p.village_name);
+        } catch {}
+      }
+      const kop = localStorage.getItem('kop_desa');
+      if (kop) setDesaName(capitalizeWords(kop));
     }
-    const kop = localStorage.getItem('kop_desa');
-    if (kop) setDesaName(capitalizeWords(kop));
   }, []);
 
   // Auto-reset to welcome after 60 seconds of inactivity on success
