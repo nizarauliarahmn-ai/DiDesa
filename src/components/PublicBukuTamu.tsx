@@ -62,7 +62,7 @@ export default function PublicBukuTamu() {
   // Auto-reset to welcome after 60 seconds of inactivity on success
   useEffect(() => {
     if (step === 'success') {
-      const timer = setTimeout(() => { setStep('welcome'); resetForm(); }, 10000);
+      const timer = setTimeout(() => { setStep('form'); resetForm(); }, 10000);
       return () => clearTimeout(timer);
     }
   }, [step]);
@@ -292,7 +292,7 @@ export default function PublicBukuTamu() {
             </div>
             <p className="text-xs text-gray-400">Halaman akan otomatis kembali dalam 10 detik...</p>
             <button
-              onClick={() => { setStep('welcome'); resetForm(); }}
+              onClick={() => { setStep('form'); resetForm(); }}
               className="w-full py-3 border-2 border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
             >
               <Home className="w-4 h-4" />
