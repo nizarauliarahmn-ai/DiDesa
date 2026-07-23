@@ -10,7 +10,7 @@ import { useReactToPrint } from 'react-to-print';
 import {
   BookOpen, Plus, QrCode, Search, Filter, Printer, Download,
   LogIn, LogOut, Clock, User, MapPin, Building2, ChevronDown,
-  RefreshCw, CheckCircle2, X, Calendar
+  RefreshCw, CheckCircle2, X, Calendar, Trash2
 } from 'lucide-react';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 
@@ -196,6 +196,17 @@ export default function AdminBukuTamu() {
     if (!error) {
       showToast(`${nama} telah check-out.`, 'success');
       fetchEntries();
+    }
+  };
+
+  const handleDelete = async (id: string, nama: string) => {
+    if (!window.confirm(`Apakah Anda yakin ingin menghapus data tamu ${nama}?`)) return;
+    const { error } = await supabase.from('guest_book').delete().eq('id', id);
+    if (!error) {
+      showToast(`${nama} berhasil dihapus.`, 'success');
+      fetchEntries();
+    } else {
+      showToast('Gagal menghapus data tamu.', 'error');
     }
   };
 
@@ -441,14 +452,15 @@ export default function AdminBukuTamu() {
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Tujuan Temu</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Waktu</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">TTD</th>
+              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
             {loading ? (
-              <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
+              <tr><td colSpan={7} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-16 text-center">
+                <td colSpan={7} className="px-5 py-16 text-center">
                   <BookOpen className="w-12 h-12 text-gray-200 dark:text-slate-700 mx-auto mb-3" />
                   <p className="text-sm text-gray-400 font-medium">Belum ada tamu hari ini</p>
                   <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">Klik "Tambah Tamu" atau "Scan QR / NIK" untuk mencatat tamu baru</p>
@@ -481,6 +493,15 @@ export default function AdminBukuTamu() {
                     ) : (
                       <span className="text-[11px] text-gray-400 italic">-</span>
                     )}
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <button
+                      onClick={() => handleDelete(entry.id, entry.nama)}
+                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                      title="Hapus Data Tamu"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </td>
                 </tr>
               ))
