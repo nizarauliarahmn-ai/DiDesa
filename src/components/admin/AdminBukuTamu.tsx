@@ -226,9 +226,19 @@ export default function AdminBukuTamu() {
           <style>
             @media print {
               @page { size: landscape; margin: 0 !important; }
-              body { padding: 1.5cm; }
+              .saas-global-footer {
+                position: fixed !important;
+                bottom: 15mm !important;
+                left: 15mm !important;
+                right: 15mm !important;
+                background: white !important;
+              }
+              .content-wrapper {
+                padding-bottom: 25mm !important;
+              }
             }
-            body { font-family: Arial, sans-serif; padding: 20px; color: black; background: white; margin: 0; }
+            body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; }
+            .content-wrapper { padding: 1.5cm; }
             .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 15px; }
             .title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px; }
             .subtitle { font-size: 14px; margin: 0; color: #333; }
@@ -240,7 +250,8 @@ export default function AdminBukuTamu() {
           </style>
         </head>
         <body>
-          <div class="header">
+          <div class="content-wrapper">
+            <div class="header">
             <h1 class="title">LAPORAN BUKU TAMU</h1>
             <p class="subtitle">${desaName.toUpperCase()} - Dicetak pada ${new Date().toLocaleString('id-ID')}</p>
           </div>
@@ -270,6 +281,7 @@ export default function AdminBukuTamu() {
               `).join('')}
             </tbody>
           </table>
+          </div>
           ${SAAS_CONFIG.globalFooterHTML}
         </body>
       </html>
