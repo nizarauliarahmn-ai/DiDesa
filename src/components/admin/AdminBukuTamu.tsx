@@ -598,14 +598,14 @@ export default function AdminBukuTamu() {
               </button>
             </div>
 
-            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex gap-2">
-              <button onClick={() => setShowModal(false)} className="flex-none px-4 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex gap-2.5 bg-gray-50/50 dark:bg-slate-900/50">
+              <button onClick={() => setShowModal(false)} className="flex-none px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
                 Batal
               </button>
               <button
                 onClick={() => handleSave(false)}
                 disabled={isSaving}
-                className="flex-1 py-2.5 bg-teal-600 text-white text-sm font-bold rounded-xl hover:bg-teal-700 transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-sm font-bold rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/50 hover:border-emerald-300 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                 Simpan & Tambah Lagi
@@ -613,7 +613,7 @@ export default function AdminBukuTamu() {
               <button
                 onClick={() => handleSave(true)}
                 disabled={isSaving}
-                className="flex-1 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
               >
                 {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Simpan & Tutup
