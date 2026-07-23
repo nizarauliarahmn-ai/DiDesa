@@ -1,3 +1,6 @@
+import { supabase } from './supabase';
+import { resolveCurrentTenant } from './tenantResolver';
+
 export interface LetterHistory {
   id: string;
   nomor: string;
@@ -6,152 +9,121 @@ export interface LetterHistory {
   nama: string;
   tanggal: string;
   keperluan: string;
-  status: 'Selesai' | 'Proses' | 'Dibatalkan';
+  status: 'Selesai' | 'Proses' | 'Dibatalkan' | 'pending';
   data?: any;
 }
 
-const INITIAL_HISTORY: LetterHistory[] = [
-  {
-    id: 'h-1',
-    nomor: '145/001/DS-SKD/V/2024',
-    jenis: 'Surat Keterangan Domisili',
-    nik: '3201020405060001',
-    nama: 'Ahmad Bukhori',
-    tanggal: '24 Mei 2024',
-    keperluan: 'Persyaratan Administrasi Pernikahan',
-    status: 'Selesai'
-  },
-  {
-    id: 'h-2',
-    nomor: '500/012/DS-SKU/VI/2024',
-    jenis: 'Surat Keterangan Usaha',
-    nik: '1111111111110001',
-    nama: 'Suherman',
-    tanggal: '12 Juni 2024',
-    keperluan: 'Pengajuan Kredit Usaha Rakyat (KUR)',
-    status: 'Selesai'
-  },
-  {
-    id: 'h-3',
-    nomor: '474/029/DS-SPT/VII/2024',
-    jenis: 'Surat Pengurusan Taspen',
-    nik: '2222222222220001',
-    nama: 'Bambang Wijaya',
-    tanggal: '10 Juli 2024',
-    keperluan: 'Klaim Asuransi Pensiun Taspen',
-    status: 'Selesai'
-  },
-  {
-    id: 'h-4',
-    nomor: '400/015/DS-SKTM/VI/2024',
-    jenis: 'SKTM',
-    nik: '3333333333330001',
-    nama: 'Kartono',
-    tanggal: '15 Juni 2024',
-    keperluan: 'Keringanan Biaya Rumah Sakit',
-    status: 'Selesai'
-  }
-];
-
-export function getLetterHistory(): LetterHistory[] {
-  const tenantId = localStorage.getItem('didesa_active_tenant_id') || 'default';
-  const storageKey = `letter_history_${tenantId}`;
-  const stored = localStorage.getItem(storageKey);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch (e) {
-      // fallback
+export async function fetchLetterHistoryAsync(): Promise<LetterHistory[]> {
+  const tenantId = await resolveCurrentTenant();
+  if (!tenantId) return [];
+  
+  try {
+    const { data, error } = await supabase
+      .from('surat')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false });
+      
+    if (error) throw error;
+    
+    if (data) {
+      return data.map((r: any) => ({
+        id: r.id,
+        nomor: r.nomor || '-',
+        jenis: r.jenis_surat,
+        nik: r.nik || '-',
+        nama: r.nama || '-',
+        tanggal: new Date(r.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        keperluan: r.keterangan || '-',
+        status: r.status === 'pending' ? 'Proses' : r.status,
+        data: r.data
+      }));
     }
-  } else {
-    // Save initial history so it persists
-    localStorage.setItem(storageKey, JSON.stringify(INITIAL_HISTORY));
+  } catch (e) {
+    console.error("Error fetching letter history:", e);
   }
-  return INITIAL_HISTORY;
+  return [];
 }
 
-export function saveLetterHistory(history: LetterHistory[]) {
-  const tenantId = localStorage.getItem('didesa_active_tenant_id') || 'default';
-  const storageKey = `letter_history_${tenantId}`;
-  localStorage.setItem(storageKey, JSON.stringify(history));
+export function getLetterHistory(): LetterHistory[] {
+  // DEPRECATED: Returns empty array, use fetchLetterHistoryAsync instead
+  return [];
+}
+
+export async function saveLetterHistory(history: LetterHistory[]) {
+  // DEPRECATED
 }
 
 export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHistory {
-  const history = getLetterHistory();
-  const newLetter: LetterHistory = {
-    ...letter,
-    id: `letter-${Date.now()}`
-  };
-  const updated = [newLetter, ...history];
-  saveLetterHistory(updated);
-  return newLetter;
+  // DEPRECATED
+  return { ...letter, id: 'temp' } as LetterHistory;
 }
 
-export function getResidentLetters(nik: string, name: string): LetterHistory[] {
-  const history = getLetterHistory();
-  return history.filter(item => 
+export async function fetchResidentLettersAsync(nik: string, name: string): Promise<LetterHistory[]> {
+  const all = await fetchLetterHistoryAsync();
+  return all.filter(item => 
     (item.nik && item.nik === nik) || 
     (item.nama && (item.nama || '').toLowerCase() === (name || '').toLowerCase())
   );
 }
 
+export function getResidentLetters(nik: string, name: string): LetterHistory[] {
+  // DEPRECATED
+  return [];
+}
+
+export async function deleteLetterHistoryAsync(id: string): Promise<LetterHistory[]> {
+  try {
+    await supabase.from('surat').delete().eq('id', id);
+    return await fetchLetterHistoryAsync();
+  } catch (e) {
+    console.error("Error deleting letter:", e);
+    return await fetchLetterHistoryAsync();
+  }
+}
+
 export function deleteLetterHistory(id: string): LetterHistory[] {
-  const history = getLetterHistory();
-  const updated = history.filter(item => item.id !== id);
-  saveLetterHistory(updated);
-  return updated;
+  // DEPRECATED
+  return [];
+}
+
+export async function updateLetterHistoryAsync(id: string, updatedFields: Partial<LetterHistory>): Promise<LetterHistory[]> {
+  try {
+    const updatePayload: any = {};
+    if (updatedFields.status) {
+      updatePayload.status = updatedFields.status === 'Proses' ? 'pending' : updatedFields.status;
+    }
+    if (updatedFields.nomor) updatePayload.nomor = updatedFields.nomor;
+    
+    await supabase.from('surat').update(updatePayload).eq('id', id);
+    return await fetchLetterHistoryAsync();
+  } catch (e) {
+    return await fetchLetterHistoryAsync();
+  }
 }
 
 export function updateLetterHistory(id: string, updatedFields: Partial<LetterHistory>): LetterHistory[] {
-  const history = getLetterHistory();
-  const updated = history.map(item => {
-    if (item.id === id) {
-      return { ...item, ...updatedFields };
-    }
-    return item;
-  });
-  saveLetterHistory(updated);
-  return updated;
+  // DEPRECATED
+  return [];
+}
+
+export async function cancelLetterHistoryAsync(id: string): Promise<LetterHistory[]> {
+  return updateLetterHistoryAsync(id, { status: 'Dibatalkan' });
 }
 
 export function cancelLetterHistory(id: string): LetterHistory[] {
-  return updateLetterHistory(id, { status: 'Dibatalkan' });
+  // DEPRECATED
+  return [];
 }
 
-export function getLetterFullData(letter: LetterHistory): any {
+export async function getLetterFullData(letter: LetterHistory): Promise<any> {
   if (letter.data) return letter.data;
   
-  // Fallback to searching local riwayat
-  const typeMapping: Record<string, string> = {
-    'SKP': 'riwayat_surat_skp',
-    'SKD': 'riwayat_surat_sktm',
-    'SKU': 'riwayat_surat_sku',
-    'SKM': 'riwayat_surat_skm',
-    'SKTM': 'riwayat_surat_sktm',
-    'SPH': 'riwayat_surat_sph',
-    'SK PENGHASILAN': 'riwayat_surat_skph',
-    'Surat Pengantar Nikah': 'riwayat_surat_nikah'
-  };
+  try {
+    const { data } = await supabase.from('surat').select('data').eq('id', letter.id).single();
+    if (data && data.data) return data.data;
+  } catch (e) {}
 
-  const key = typeMapping[letter.jenis];
-  if (key) {
-    try {
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          const found = parsed.find(item => item.nomor === letter.nomor);
-          if (found && found.data) {
-            return found.data;
-          }
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  // Fallback
   return {
     nomorSurat: letter.nomor,
     nama: letter.nama,

@@ -5,7 +5,7 @@ import {
   ShieldCheck, FileText, Send, History, CheckCircle, Clock, AlertTriangle, 
   Printer, X, Eye, ZoomIn, ZoomOut, Search, UserCheck, MessageSquare, AlertCircle
 } from 'lucide-react';
-import { getResidentLetters, addLetterHistory, LetterHistory } from '../../utils/letterHistory';
+import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHistory';
 import { showToast } from '../../utils/toast';
 import { getLetterClassifications, LetterClassification } from '../../utils/letterClassifications';
 
@@ -24,6 +24,7 @@ export default function LayananMandiri() {
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [purpose, setPurpose] = useState('');
   const [additionalText, setAdditionalText] = useState('');
+  const [personalLetters, setPersonalLetters] = useState<LetterHistory[]>([]);
 
   // Aspiration Form States
   const [aspirationCategory, setAspirationCategory] = useState('Infrastruktur');
@@ -83,11 +84,18 @@ export default function LayananMandiri() {
     showToast('Sesi mandiri ditutup.', 'info');
   };
 
-  // Personal Letter Requests list
-  const personalLetters = useMemo(() => {
-    if (!verifiedResident) return [];
-    return getResidentLetters(verifiedResident.nik, verifiedResident.name);
-  }, [verifiedResident, letterType]); // trigger update on letter submit
+  const loadPersonalLetters = async () => {
+    if (verifiedResident) {
+      const letters = await fetchResidentLettersAsync(verifiedResident.nik, verifiedResident.name);
+      setPersonalLetters(letters);
+    } else {
+      setPersonalLetters([]);
+    }
+  };
+
+  useEffect(() => {
+    loadPersonalLetters();
+  }, [verifiedResident, letterType]);
 
   const handleRequestLetter = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,32 +123,37 @@ export default function LayananMandiri() {
     const currentYear = new Date().getFullYear();
     const finalNumber = `140/${formatNum}/DS-${shortDesa}/${code}/${currentYear}`;
 
-    // Create a new letter record
-    const newLetter = {
-      nomor: finalNumber,
-      jenis: letterType,
-      nik: verifiedResident.nik,
-      nama: verifiedResident.name,
-      tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-      keperluan: purpose.trim(),
-      status: 'Proses' as const // Citizens file in queue state
-    };
+    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
+    
+    import('../../utils/supabase').then(async ({ supabase }) => {
+      try {
+        await supabase.from('surat').insert([{
+          tenant_id: tenantId,
+          jenis_surat: letterType,
+          keterangan: purpose.trim(),
+          status: 'pending',
+          nomor: finalNumber,
+          nik: verifiedResident.nik,
+          nama: verifiedResident.name,
+          data: null
+        }]);
 
-    // Add to localStorage letters history list
-    addLetterHistory(newLetter);
-
-    // Call server notification endpoint to alert the admin panel in real-time
-    fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: 'Pengajuan Surat Online Mandiri',
-        message: `Warga atas nama ${verifiedResident.name} (NIK: ${verifiedResident.nik}) mengajukan ${letterType} untuk keperluan: ${purpose.trim()}`,
-        category: 'Services'
-      })
-    })
-    .then(r => r.json())
-    .catch(err => console.error("Notification post failed:", err));
+        await supabase.from('notifications').insert([{
+          id: `notif-${Date.now()}`,
+          tenant_id: tenantId,
+          title: 'Permohonan Layanan Mandiri',
+          message: `Warga atas nama ${verifiedResident.name} (NIK: ${verifiedResident.nik}) mengajukan ${letterType} untuk keperluan: ${purpose.trim()}`,
+          category: 'Services',
+          type: 'info',
+          is_read: false,
+          timestamp: new Date().toISOString()
+        }]);
+        
+        loadPersonalLetters();
+      } catch (err) {
+        console.error("Notification post failed:", err);
+      }
+    });
 
     setPurpose('');
     setAdditionalText('');
@@ -156,24 +169,35 @@ export default function LayananMandiri() {
       return;
     }
 
-    // Trigger notification to admin
-    fetch('/api/notifications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: `Aspirasi Warga: ${aspirationCategory}`,
-        message: `${verifiedResident.name} mengirim pengaduan/aspirasi: "${aspirationMessage.trim()}"`,
-        category: 'Services'
-      })
-    })
-    .then(r => r.json())
-    .then(() => {
-      showToast('Aspirasi & Pengaduan Anda berhasil dikirim ke Pemdes!', 'success');
-      setAspirationMessage('');
-    })
-    .catch(err => {
-      console.error("Aspiration submit error:", err);
-      showToast('Gagal mengirim aspirasi, silakan coba beberapa saat lagi.', 'error');
+    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
+    
+    import('../../utils/supabase').then(async ({ supabase }) => {
+      try {
+        await supabase.from('aspirasi').insert([{
+          tenant_id: tenantId,
+          kategori: aspirationCategory,
+          pesan: aspirationMessage.trim(),
+          nama_pengirim: verifiedResident.name,
+          status: 'Baru'
+        }]);
+
+        await supabase.from('notifications').insert([{
+          id: `notif-${Date.now()}`,
+          tenant_id: tenantId,
+          title: `Aspirasi Warga: ${aspirationCategory}`,
+          message: `${verifiedResident.name} mengirim pengaduan/aspirasi: "${aspirationMessage.trim()}"`,
+          category: 'Services',
+          type: 'info',
+          is_read: false,
+          timestamp: new Date().toISOString()
+        }]);
+        
+        showToast('Aspirasi & Pengaduan Anda berhasil dikirim ke Pemdes!', 'success');
+        setAspirationMessage('');
+      } catch (err) {
+        console.error("Aspiration submit error:", err);
+        showToast('Gagal mengirim aspirasi, silakan coba beberapa saat lagi.', 'error');
+      }
     });
   };
 

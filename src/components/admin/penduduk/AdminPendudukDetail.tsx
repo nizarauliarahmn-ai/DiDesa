@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ArrowLeft, Printer, Edit2, BarChart2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert } from 'lucide-react';
+import { Download, Mail, Phone, MoreVertical, Archive, HandHeart, History, AlertCircle, Eye, AlertTriangle } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
-import { getResidentLetters } from '../../../utils/letterHistory';
+import { fetchResidentLettersAsync, LetterHistory } from '../../../utils/letterHistory';
 import ConfirmModal from '../../common/ConfirmModal';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -57,9 +58,14 @@ export default function AdminPendudukDetail({
     });
   };
 
-  const residentLetters = useMemo(() => {
-    if (!data?.nik) return [];
-    return getResidentLetters(data.nik, data.name || "");
+  const [residentLetters, setResidentLetters] = useState<LetterHistory[]>([]);
+
+  useEffect(() => {
+    if (data?.nik) {
+      fetchResidentLettersAsync(data.nik, data.name || "").then(setResidentLetters);
+    } else {
+      setResidentLetters([]);
+    }
   }, [data]);
 
   const ALL_AID_PROGRAMS = useMemo(() => [

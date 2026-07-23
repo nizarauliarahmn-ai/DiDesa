@@ -81,7 +81,7 @@ export default function PublicKiosSurat() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!verifiedResident || !selectedLetter) return;
     
     // Validate required fields
@@ -121,32 +121,37 @@ export default function PublicKiosSurat() {
       }
     }
 
-    const newLetter = {
-      nomor: finalNumber,
-      jenis: selectedLetter.jenis,
-      nik: verifiedResident.nik,
-      nama: verifiedResident.name,
-      tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-      keperluan: formattedKeperluan,
-      status: 'Proses' as const,
-      data: selectedLetter.fields ? formData : undefined
-    };
+    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
 
-    addLetterHistory(newLetter);
+    try {
+      const { supabase } = await import('../utils/supabase');
+      
+      // 1. Insert into surat
+      await supabase.from('surat').insert([{
+        tenant_id: tenantId,
+        jenis_surat: selectedLetter.jenis,
+        keterangan: formattedKeperluan,
+        status: 'pending',
+        nomor: finalNumber,
+        nik: verifiedResident.nik,
+        nama: verifiedResident.name,
+        data: selectedLetter.fields ? formData : null
+      }]);
 
-    // Notify admin
-    import('../utils/supabase').then(({ supabase }) => {
-      supabase.from('notifications').insert([{
+      // 2. Insert into notifications
+      await supabase.from('notifications').insert([{
         id: `notif-${Date.now()}`,
-        tenant_id: new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown',
+        tenant_id: tenantId,
         title: 'Permohonan Surat Kios',
         message: `Warga atas nama ${verifiedResident.name} (NIK: ${verifiedResident.nik}) mengajukan ${selectedLetter.jenis}.`,
         category: 'Services',
         type: 'info',
         is_read: false,
         timestamp: new Date().toISOString()
-      }]).then(() => {});
-    }).catch(console.error);
+      }]);
+    } catch (error) {
+      console.error("Gagal mengirim data ke server:", error);
+    }
 
     setStep(4);
     

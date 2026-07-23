@@ -3,7 +3,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
   Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Pencil, Ban
 } from 'lucide-react';
-import { getLetterHistory, LetterHistory, deleteLetterHistory, saveLetterHistory, cancelLetterHistory } from '../../../utils/letterHistory';
+import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync } from '../../../utils/letterHistory';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -106,8 +106,7 @@ export default function AdminSuratDashboard({
   }));
 
   useEffect(() => {
-    setSuratList(getLetterHistory());
-    
+    fetchLetterHistoryAsync().then(setSuratList);
     // Fetch residents for accurate preview mapping
     fetchResidentsCached()
       .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })
@@ -177,34 +176,35 @@ export default function AdminSuratDashboard({
     }, 200);
   };
 
-  const handleDeleteSurat = () => {
-    if (!suratToDelete) return;
-    const updated = deleteLetterHistory(suratToDelete.id);
+  const handleDelete = async (surat: LetterHistory) => {
+    const updated = await deleteLetterHistoryAsync(surat.id);
     setSuratList(updated);
-    setSelectedSuratIds(prev => prev.filter(id => id !== suratToDelete.id));
-    showToast(`Arsip surat "${suratToDelete.nomor}" berhasil dihapus.`, 'success');
+    showToast(`Arsip surat berhasil dihapus.`, 'success');
     setSuratToDelete(null);
-    if (selectedSurat && selectedSurat.id === suratToDelete.id) {
+    if (selectedSurat && selectedSurat.id === surat.id) {
       setSelectedSurat(null);
     }
   };
 
-  const handleCancelSurat = () => {
-    if (!suratToCancel) return;
-    const updated = cancelLetterHistory(suratToCancel.id);
+  const handleCancel = async (surat: LetterHistory) => {
+    const updated = await cancelLetterHistoryAsync(surat.id);
     setSuratList(updated);
-    showToast(`Surat "${suratToCancel.nomor}" telah dibatalkan.`, 'success');
+    showToast(`Permohonan surat berhasil dibatalkan.`, 'success');
     setSuratToCancel(null);
-    if (selectedSurat && selectedSurat.id === suratToCancel.id) {
-      setSelectedSurat(null);
+    if (selectedSurat && selectedSurat.id === surat.id) {
+      setSelectedSurat(updated.find(u => u.id === surat.id) || null);
     }
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedSuratIds.length === 0) return;
-    const history = getLetterHistory();
-    const updated = history.filter(item => !selectedSuratIds.includes(item.id));
-    saveLetterHistory(updated);
+    
+    // We have to delete sequentially or adapt bulk delete. Sequential is fine.
+    for (const id of selectedSuratIds) {
+       await deleteLetterHistoryAsync(id);
+    }
+    const updated = await fetchLetterHistoryAsync();
+    
     setSuratList(updated);
     showToast(`${selectedSuratIds.length} arsip surat berhasil dihapus secara masal.`, 'success');
     setSelectedSuratIds([]);

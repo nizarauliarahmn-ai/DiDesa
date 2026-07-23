@@ -36,27 +36,41 @@ export default function PublicKiosAspirasi() {
     if (storedDesa) setDesaName(storedDesa);
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!kategori || !pesan.trim()) {
       showToast('Harap lengkapi kategori dan isi aduan', 'error');
       return;
     }
 
     const pengirim = namaPengirim.trim() || 'Warga Anonim';
+    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
 
-    // Notify admin
-    import('../utils/supabase').then(({ supabase }) => {
-      supabase.from('notifications').insert([{
+    try {
+      const { supabase } = await import('../utils/supabase');
+      
+      // 1. Insert into aspirasi
+      await supabase.from('aspirasi').insert([{
+        tenant_id: tenantId,
+        kategori: kategori,
+        pesan: pesan.trim(),
+        nama_pengirim: pengirim,
+        status: 'Baru'
+      }]);
+
+      // 2. Insert into notifications
+      await supabase.from('notifications').insert([{
         id: `notif-${Date.now()}`,
-        tenant_id: new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown',
+        tenant_id: tenantId,
         title: `Aspirasi Kios: ${kategori}`,
         message: `${pengirim} mengirim pengaduan/aspirasi: "${pesan.trim()}"`,
         category: 'Services',
         type: 'info',
         is_read: false,
         timestamp: new Date().toISOString()
-      }]).then(() => {});
-    }).catch(console.error);
+      }]);
+    } catch (error) {
+      console.error("Gagal mengirim data ke server:", error);
+    }
 
     setStep(2);
     

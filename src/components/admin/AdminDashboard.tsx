@@ -7,7 +7,7 @@ import { getAspirasi } from '../../utils/aspirasiData';
 import { getFeedbacks, Feedback } from '../../utils/feedbackData';
 import { getSaaSLogs, SaaSLog } from '../../utils/saasLogs';
 import { supabase } from '../../utils/supabase';
-import { getLetterHistory, LetterHistory } from '../../utils/letterHistory';
+import { fetchLetterHistoryAsync, LetterHistory } from '../../utils/letterHistory';
 import { getLetterClassifications } from '../../utils/letterClassifications';
 
 export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
@@ -65,16 +65,17 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
     setAspirasiList(getAspirasi());
     setFeedbacks(getFeedbacks());
 
-    const history = getLetterHistory();
-    setLetterHistory(history);
-    
-    // hitung layanan terpopuler
-    if (history.length > 0) {
-      const counts: Record<string, number> = {};
-      history.forEach(h => { counts[h.jenis] = (counts[h.jenis] || 0) + 1; });
-      const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
-      setPopulerSurat(sorted[0][0]);
-    }
+    fetchLetterHistoryAsync().then(history => {
+      setLetterHistory(history);
+      
+      // hitung layanan terpopuler
+      if (history.length > 0) {
+        const counts: Record<string, number> = {};
+        history.forEach(h => { counts[h.jenis] = (counts[h.jenis] || 0) + 1; });
+        const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+        setPopulerSurat(sorted[0][0]);
+      }
+    });
 
     setActiveServicesCount(getLetterClassifications().length);
 
