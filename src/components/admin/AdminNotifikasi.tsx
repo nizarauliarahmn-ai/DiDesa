@@ -104,12 +104,17 @@ export default function AdminNotifikasi({
     const handleNotificationUpdate = () => {
       fetchNotifications();
     };
-    window.addEventListener('notifications_updated', handleNotificationUpdate);
+    
+    const channel = supabase
+      .channel('notifications_page_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+         fetchNotifications();
+      })
+      .subscribe();
 
-    // Poll every 15 seconds to keep dashboard notification center live and ticking!
-    const interval = setInterval(fetchNotifications, 15000);
+    window.addEventListener('notifications_updated', handleNotificationUpdate);
     return () => {
-      clearInterval(interval);
+      supabase.removeChannel(channel);
       window.removeEventListener('notifications_updated', handleNotificationUpdate);
     };
   }, []);

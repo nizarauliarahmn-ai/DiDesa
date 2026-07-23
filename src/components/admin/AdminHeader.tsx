@@ -212,8 +212,16 @@ export default function AdminHeader({
     };
 
     loadNotifications();
-    const interval = setInterval(loadNotifications, 8000);
-    return () => clearInterval(interval);
+    const channel = supabase
+      .channel('notifications_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+         loadNotifications();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleMarkAllAsRead = async () => {

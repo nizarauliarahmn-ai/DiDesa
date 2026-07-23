@@ -143,6 +143,19 @@ export default function PublicBukuTamu() {
         status: 'hadir',
       }]);
       if (err) throw err;
+
+      // Create Notification for Admin
+      await supabase.from('notifications').insert([{
+        id: `notif-${Date.now()}`,
+        tenant_id: tenantId,
+        title: 'Tamu Baru',
+        message: `${capitalizeWords(form.nama)} telah hadir. Keperluan: ${form.keperluan}`,
+        category: 'Buku Tamu',
+        type: 'info',
+        is_read: false,
+        timestamp: new Date().toISOString()
+      }]);
+      
       setStep('success');
     } catch {
       setError('Gagal menyimpan. Mohon coba lagi.');
