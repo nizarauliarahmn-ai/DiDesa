@@ -50,6 +50,18 @@ export default function App() {
     return <PrintQRKiosk />;
   }
 
+  // Khusus untuk Kiosk Buku Tamu Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)
+  // Ini harus ditaruh SEBELUM pengecekan login (!user) agar tamu bisa scan QR dari HP mereka tanpa harus punya akun/login
+  const isKiosk = urlParams.get('tab') === 'buku_tamu';
+  if (isKiosk) {
+    return (
+      <>
+        <PublicBukuTamu />
+        <ToastContainer />
+      </>
+    );
+  }
+
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
     if (new URLSearchParams(window.location.search).get('preview') === 'true') {
       return null;
@@ -107,7 +119,7 @@ export default function App() {
     }, 300);
     return () => clearTimeout(timer);
   }, [globalSearch]);
-  const [publicTab, setPublicTab] = useState('dashboard');
+  const [publicTab, setPublicTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isImpersonated, setIsImpersonated] = useState(() => {
     const saved = localStorage.getItem('didesa_auth_user');
@@ -327,16 +339,6 @@ export default function App() {
     );
   }
 
-
-  // Khusus untuk Kiosk Buku Tamu Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)
-  if (publicTab === 'buku_tamu') {
-    return (
-      <>
-        <PublicBukuTamu />
-        <ToastContainer />
-      </>
-    );
-  }
 
   return (
     <div className="flex h-screen bg-gray-50/50 dark:bg-slate-800/50 text-gray-900 dark:text-white font-sans overflow-hidden">
