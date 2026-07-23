@@ -12,6 +12,7 @@ import {
   LogIn, LogOut, Clock, User, MapPin, Building2, ChevronDown,
   RefreshCw, CheckCircle2, X, Calendar
 } from 'lucide-react';
+import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 
 interface GuestEntry {
   id: string;
@@ -219,7 +220,9 @@ export default function AdminBukuTamu() {
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="UTF-8">
           <title>Laporan Buku Tamu - ${desaName}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @media print {
               @page { size: landscape; margin: 0 !important; }
@@ -267,9 +270,7 @@ export default function AdminBukuTamu() {
               `).join('')}
             </tbody>
           </table>
-          <div class="footer-notes">
-            ${customFooter}
-          </div>
+          ${SAAS_CONFIG.globalFooterHTML}
         </body>
       </html>
     `;
