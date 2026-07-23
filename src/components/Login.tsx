@@ -15,7 +15,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Village Settings for Dynamic branding in login screen
-  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || '');
   const [kabupatenName, setKabupatenName] = useState(() => localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
 
@@ -35,7 +35,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
           if (data) {
             setCurrentTenant(data);
-            setDesaName(data.nama_desa || 'Desa Sukamakmur');
+            setDesaName(data.nama_desa || '');
           }
         }
         
@@ -64,7 +64,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     initializeTenantAndBranding();
     
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+      setDesaName(localStorage.getItem('kop_desa') || '');
       setKabupatenName(localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
       setLogoUrl(localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
     };
@@ -217,7 +217,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             {globalName}
           </h1>
           <p className="text-xs font-bold text-emerald-800/70 dark:text-emerald-400/70 uppercase tracking-widest leading-none">
-            Sistem Digitalisasi {desaName.startsWith('Desa') ? desaName : `Desa ${desaName}`}
+            Sistem Digitalisasi {desaName ? (desaName.startsWith('Desa') ? desaName : `Desa ${desaName}`) : 'Desa'}
           </p>
         </div>
 

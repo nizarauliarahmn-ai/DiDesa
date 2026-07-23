@@ -62,12 +62,13 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       }
     }
 
-    // 3. Fallback Khusus Lingkungan Development / Vercel Preview
-    console.warn("Tenant Resolver: No subdomain or auth found. Falling back to default DEV tenant (Sukamakmur).");
-    cachedTenantId = '22222222-2222-2222-2222-222222222222';
+    // 3. Jika tidak ada yang cocok, kembalikan null. 
+    // PELANGGARAN ATURAN: Dilarang keras melakukan fallback ke ID desa tertentu (misal Sukamakmur) 
+    // karena aplikasi ini adalah Multi-Tenant. Biarkan UI menangani null (misal: halaman error atau generic login).
+    console.warn("Tenant Resolver: No subdomain or auth found. Returning null.");
     
     isResolving = false;
-    return cachedTenantId;
+    return null;
 
   } catch (error) {
     console.error("Failed to resolve tenant:", error);

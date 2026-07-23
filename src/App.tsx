@@ -218,6 +218,9 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('didesa_auth_user');
+    localStorage.removeItem('kop_desa');
+    localStorage.removeItem('kop_kabupaten');
+    localStorage.removeItem('kop_logo_url');
     setUser(null);
     setAdminTab('dashboard');
     setPublicTab('dashboard');
