@@ -174,6 +174,60 @@ export default function AdminBukuTamu() {
 
   const handlePrint = () => window.print();
 
+  const handlePrintQRContent = () => {
+    const svgElement = document.querySelector('#qr-print-area svg');
+    if (!svgElement) return;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(`
+        <html>
+          <head>
+            <title>Cetak QR Kiosk Buku Tamu</title>
+            <style>
+              body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+              h2 { font-size: 32px; font-weight: 900; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; color: #111827; }
+              p { font-size: 18px; color: #64748b; margin-bottom: 48px; font-weight: 500; }
+              .qr-box { padding: 40px; border: 3px solid #e2e8f0; border-radius: 40px; margin-bottom: 48px; background: white; }
+              .footer { font-weight: bold; font-size: 20px; color: #047857; display: flex; align-items: center; justify-content: center; gap: 10px; }
+              svg { width: 350px; height: 350px; }
+            </style>
+          </head>
+          <body>
+            <h2>Buku Tamu Digital</h2>
+            <p>Scan QR Code di bawah ini untuk mengisi daftar hadir secara mandiri.</p>
+            <div class="qr-box">
+              ${svgElement.outerHTML}
+            </div>
+            <div class="footer">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Powered by DiDesa
+            </div>
+          </body>
+        </html>
+      `);
+      doc.close();
+      
+      iframe.contentWindow?.focus();
+      setTimeout(() => {
+        iframe.contentWindow?.print();
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+      }, 500);
+    }
+  };
+
   const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -499,13 +553,13 @@ export default function AdminBukuTamu() {
               </div>
             </div>
             
-            <div className="p-5 border-t border-gray-100 dark:border-slate-800 print:hidden">
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800">
               <button 
-                onClick={() => window.print()} 
-                className="w-full py-3 bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-800 transition-all"
+                onClick={handlePrintQRContent} 
+                className="w-full py-3 bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-800 transition-all shadow-md"
               >
                 <Printer className="w-5 h-5" />
-                Cetak Halaman Ini
+                Mulai Mencetak Kertas QR
               </button>
             </div>
           </div>
@@ -526,31 +580,14 @@ export default function AdminBukuTamu() {
           /* Sembunyikan elemen UI dasar */
           .print\\:hidden, button, nav, aside, header { display: none !important; }
           
-          ${showPrintQR ? `
-            /* === MODE CETAK QR KIOSK === */
-            body * { visibility: hidden; }
-            #qr-print-area, #qr-print-area * { visibility: visible; }
-            #qr-print-area {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100vw;
-              margin: 0;
-              padding: 40px;
-              box-shadow: none !important;
-              border: none !important;
-              background: white !important;
-            }
-          ` : `
-            /* === MODE CETAK TABEL BUKU TAMU === */
-            /* Sembunyikan modal/overlay lainnya saat nge-print tabel */
-            .fixed { display: none !important; }
-            body { background: white !important; }
-            table { width: 100%; border-collapse: collapse; }
-            th, td { border: 1px solid #ddd; padding: 6px 10px; font-size: 11px; color: black; }
-            th { background: #f3f4f6 !important; font-weight: bold; text-transform: uppercase; color: black; }
-            h2 { font-size: 18px; font-weight: bold; margin-bottom: 4px; color: black; }
-          `}
+          /* === MODE CETAK TABEL BUKU TAMU === */
+          /* Sembunyikan modal/overlay lainnya saat nge-print tabel */
+          .fixed { display: none !important; }
+          body { background: white !important; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #ddd; padding: 6px 10px; font-size: 11px; color: black; }
+          th { background: #f3f4f6 !important; font-weight: bold; text-transform: uppercase; color: black; }
+          h2 { font-size: 18px; font-weight: bold; margin-bottom: 4px; color: black; }
         }
       `}</style>
     </div>
