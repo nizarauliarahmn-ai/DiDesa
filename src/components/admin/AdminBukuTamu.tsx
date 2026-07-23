@@ -3,6 +3,7 @@ import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { showToast } from '../../utils/toast';
 import { capitalizeWords } from '../../utils/textUtils';
+import SignatureCanvas from 'react-signature-canvas';
 import AdminQRScanner from './AdminQRScanner';
 import { QRCodeSVG } from 'qrcode.react';
 import { useReactToPrint } from 'react-to-print';
@@ -44,6 +45,7 @@ export default function AdminBukuTamu() {
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const signatureRef = React.useRef<any>(null);
   const [showPrintQR, setShowPrintQR] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -140,6 +142,7 @@ export default function AdminBukuTamu() {
         instansi: capitalizeWords(form.instansi),
         keperluan: form.keperluan,
         tujuan_temu: capitalizeWords(form.tujuan_temu),
+        signature_base64: signatureRef.current?.isEmpty() ? null : signatureRef.current?.getTrimmedCanvas().toDataURL('image/png'),
         tanggal_masuk: new Date().toISOString(),
         tanggal_keluar: null,
         status: 'hadir',
@@ -216,8 +219,7 @@ export default function AdminBukuTamu() {
                 <th style="width: 25%">Nama Lengkap / NIK</th>
                 <th style="width: 15%">Instansi / Asal</th>
                 <th style="width: 20%">Keperluan & Tujuan</th>
-                <th style="width: 15%">Waktu Masuk</th>
-                <th style="width: 15%">Waktu Keluar</th>
+                <th style="width: 25%">Waktu Kunjungan</th>
                 <th style="width: 5%">Status</th>
               </tr>
             </thead>
@@ -229,7 +231,6 @@ export default function AdminBukuTamu() {
                   <td>${e.instansi || '-'}</td>
                   <td>${e.keperluan}<span class="meta">${e.tujuan_temu ? `Tujuan: ${e.tujuan_temu}` : ''}</span></td>
                   <td>${fmtTime(e.tanggal_masuk)}<span class="meta">${fmtDate(e.tanggal_masuk)}</span></td>
-                  <td>${e.tanggal_keluar ? `${fmtTime(e.tanggal_keluar)}<span class="meta">${fmtDate(e.tanggal_keluar)}</span>` : '-'}</td>
                   <td class="${e.status === 'hadir' ? 'status-hadir' : 'status-selesai'}">${e.status.toUpperCase()}</td>
                 </tr>
               `).join('')}
