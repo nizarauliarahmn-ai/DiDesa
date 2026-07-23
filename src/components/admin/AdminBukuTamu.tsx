@@ -468,8 +468,8 @@ export default function AdminBukuTamu() {
 
       {/* Print QR Kiosk Modal */}
       {showPrintQR && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 print:bg-white print:p-0 print:block">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden print:shadow-none print:border-none print:max-w-none">
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div id="qr-print-area" className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 print:hidden">
               <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-emerald-700" />
@@ -515,12 +515,42 @@ export default function AdminBukuTamu() {
       {/* Print-only styles */}
       <style>{`
         @media print {
-          .print\\:hidden, button, nav, aside { display: none !important; }
-          body { background: white !important; }
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #ddd; padding: 6px 10px; font-size: 11px; }
-          th { background: #f3f4f6 !important; font-weight: bold; text-transform: uppercase; }
-          h2 { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+          /* Reset basic layout yang sering merusak print di React (flex/overflow) */
+          body, html, #root, .overflow-y-auto, .overflow-hidden, main, .flex-1 { 
+            overflow: visible !important; 
+            height: auto !important; 
+            max-height: none !important;
+            display: block !important;
+          }
+          
+          /* Sembunyikan elemen UI dasar */
+          .print\\:hidden, button, nav, aside, header { display: none !important; }
+          
+          ${showPrintQR ? `
+            /* === MODE CETAK QR KIOSK === */
+            body * { visibility: hidden; }
+            #qr-print-area, #qr-print-area * { visibility: visible; }
+            #qr-print-area {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100vw;
+              margin: 0;
+              padding: 40px;
+              box-shadow: none !important;
+              border: none !important;
+              background: white !important;
+            }
+          ` : `
+            /* === MODE CETAK TABEL BUKU TAMU === */
+            /* Sembunyikan modal/overlay lainnya saat nge-print tabel */
+            .fixed { display: none !important; }
+            body { background: white !important; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 6px 10px; font-size: 11px; color: black; }
+            th { background: #f3f4f6 !important; font-weight: bold; text-transform: uppercase; color: black; }
+            h2 { font-size: 18px; font-weight: bold; margin-bottom: 4px; color: black; }
+          `}
         }
       `}</style>
     </div>
