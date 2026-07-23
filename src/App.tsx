@@ -98,10 +98,6 @@ export default function App() {
     localStorage.setItem('data_wipe_v1', 'true');
   }
 
-  // Migrate old demo name to new demo name
-  if (localStorage.getItem('kop_desa') === 'Desa Wasah Hilir' || localStorage.getItem('kop_desa') === 'Wasah Hilir') {
-    localStorage.setItem('kop_desa', 'Desa Sukamakmur');
-  }
 
   const [adminTab, setAdminTab] = useState('dashboard');
   const [presetResident, setPresetResident] = useState<any>(null);
