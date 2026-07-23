@@ -76,6 +76,10 @@ export default function AdminSurat({
       setActiveTab('nikah');
     } else if (jenis === 'SPT' || jenis === 'SURAT PENGURUSAN TASPEN') {
       setActiveTab('spt');
+    } else if (jenis === 'SPPD' || jenis === 'SURAT PERINTAH PERJALANAN DINAS') {
+      setActiveTab('sppd');
+    } else if (jenis === 'SKL' || jenis === 'SURAT KETERANGAN KELAHIRAN') {
+      setActiveTab('skl');
     }
   };
 

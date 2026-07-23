@@ -387,19 +387,20 @@ export default function AdminSuratDashboard({
 
     const getKlasifikasiFromSurat = (s: LetterHistory) => {
       const typeLower = (s.jenis || '').toLowerCase();
-      if (typeLower.includes('kematian') || typeLower === 'skm' || s.nomor.includes('/SKM/')) return 'SKM';
-      if (typeLower.includes('ahli waris') || typeLower === 'skaw' || s.nomor.includes('/SKAW/')) return 'SKAW';
-      if (typeLower.includes('tidak mampu') || typeLower.includes('sktm') || s.nomor.includes('/SKTM/')) return 'SKTM';
-      if (typeLower.includes('usaha') || typeLower === 'sku' || s.nomor.includes('/SKU/')) return 'SKU';
-      if (typeLower.includes('penghasilan') || typeLower === 'skph' || s.nomor.includes('/SKPH/')) return 'SKPH';
-      if (typeLower.includes('belum menikah') || typeLower.includes('belum kawin') || typeLower === 'skbm' || s.nomor.includes('/SKBM/')) return 'SKBM';
-      if (typeLower.includes('kelahiran') || typeLower.includes('lahir') || typeLower === 'skl' || s.nomor.includes('/SKL/')) return 'SKL';
-      if (typeLower.includes('pindah') || typeLower === 'sph' || s.nomor.includes('/SPH/')) return 'SPH';
-      if (typeLower.includes('kehilangan') || typeLower === 'skh' || s.nomor.includes('/SKH/')) return 'SKH';
-      if (typeLower.includes('undangan') || typeLower === 'und' || s.nomor.includes('/UND/')) return 'UND';
-      if (typeLower === 'su' || s.nomor.includes('/SU/') || typeLower.includes('umum') || typeLower.includes('dinas')) return 'SU';
-      if (typeLower.includes('domisili') || typeLower === 'skd' || typeLower === 'sdp' || s.nomor.includes('/SKD/') || s.nomor.includes('/SDP/')) return 'SDP';
-      if (typeLower.includes('pengantar') || typeLower === 'skp' || s.nomor.includes('/SKP/')) return 'SKP';
+      const nomorSafe = (s.nomor || '');
+      if (typeLower.includes('kematian') || typeLower === 'skm' || nomorSafe.includes('/SKM/')) return 'SKM';
+      if (typeLower.includes('ahli waris') || typeLower === 'skaw' || nomorSafe.includes('/SKAW/')) return 'SKAW';
+      if (typeLower.includes('tidak mampu') || typeLower.includes('sktm') || nomorSafe.includes('/SKTM/')) return 'SKTM';
+      if (typeLower.includes('usaha') || typeLower === 'sku' || nomorSafe.includes('/SKU/')) return 'SKU';
+      if (typeLower.includes('penghasilan') || typeLower === 'skph' || nomorSafe.includes('/SKPH/')) return 'SKPH';
+      if (typeLower.includes('belum menikah') || typeLower.includes('belum kawin') || typeLower === 'skbm' || nomorSafe.includes('/SKBM/')) return 'SKBM';
+      if (typeLower.includes('kelahiran') || typeLower.includes('lahir') || typeLower === 'skl' || nomorSafe.includes('/SKL/')) return 'SKL';
+      if (typeLower.includes('pindah') || typeLower === 'sph' || nomorSafe.includes('/SPH/')) return 'SPH';
+      if (typeLower.includes('kehilangan') || typeLower === 'skh' || nomorSafe.includes('/SKH/')) return 'SKH';
+      if (typeLower.includes('undangan') || typeLower === 'und' || nomorSafe.includes('/UND/')) return 'UND';
+      if (typeLower === 'su' || nomorSafe.includes('/SU/') || typeLower.includes('umum') || typeLower.includes('dinas')) return 'SU';
+      if (typeLower.includes('domisili') || typeLower === 'skd' || typeLower === 'sdp' || nomorSafe.includes('/SKD/') || nomorSafe.includes('/SDP/')) return 'SDP';
+      if (typeLower.includes('pengantar') || typeLower === 'skp' || nomorSafe.includes('/SKP/')) return 'SKP';
       return typeLower.toUpperCase();
     };
 
