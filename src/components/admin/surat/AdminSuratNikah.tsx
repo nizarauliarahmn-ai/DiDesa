@@ -989,8 +989,8 @@ export default function AdminSuratNikah({
                   <div className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-64 overflow-y-auto">
                     {(() => {
                       const filtered = residents.filter(r => 
-                        r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        r.nik.includes(searchQuery)
+                        (r.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || 
+                        (r.nik || '').includes(searchQuery || '')
                       );
                       
                       if (filtered.length === 0) {

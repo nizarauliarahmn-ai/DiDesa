@@ -573,8 +573,8 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
 
   const filteredResidents = searchQuery.trim().length > 0
     ? residents.filter(r => 
-        r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.nik.includes(searchQuery)
+        (r.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) ||
+        (r.nik || '').includes(searchQuery || '')
       )
     : [];
 

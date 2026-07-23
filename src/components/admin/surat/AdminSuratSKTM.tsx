@@ -484,8 +484,8 @@ export default function AdminSuratSKTM({
   };
 
   const filteredResidents = residents.filter(r => 
-    r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    r.nik.includes(searchQuery)
+    (r.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || 
+    (r.nik || '').includes(searchQuery || '')
   ).slice(0, 5);
 
   return (

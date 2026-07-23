@@ -218,30 +218,30 @@ export default function AdminSuratDashboard({
     if (!selectedSurat) return null;
     return residents.find(r => 
       (r.nik && r.nik === selectedSurat.nik) || 
-      (r.name && r.name.toLowerCase() === selectedSurat.nama.toLowerCase())
+      (r.name && (r.name || '').toLowerCase() === (selectedSurat.nama || '').toLowerCase())
     );
   }, [selectedSurat, residents]);
 
   const filteredSurat = useMemo(() => {
     return suratList.filter((surat) => {
       const matchesSearch = 
-        surat.nomor.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-        surat.nama.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
+        (surat.nomor || '').toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
+        (surat.nama || '').toLowerCase().includes(debouncedSearchQuery.toLowerCase());
 
       let matchesType = true;
       if (selectedType) {
         if (selectedType === 'domisili') {
-          matchesType = surat.jenis.toLowerCase().includes('domisili');
+          matchesType = (surat.jenis || '').toLowerCase().includes('domisili');
         } else if (selectedType === 'sktm') {
-          matchesType = surat.jenis.toLowerCase() === 'sktm';
+          matchesType = (surat.jenis || '').toLowerCase() === 'sktm';
         } else if (selectedType === 'sku') {
-          matchesType = surat.jenis.toLowerCase().includes('usaha') || surat.jenis.toLowerCase().includes('sku');
+          matchesType = (surat.jenis || '').toLowerCase().includes('usaha') || (surat.jenis || '').toLowerCase().includes('sku');
         } else if (selectedType === 'skph') {
-          matchesType = surat.jenis.toLowerCase().includes('penghasilan') || surat.jenis.toLowerCase().includes('skph');
+          matchesType = (surat.jenis || '').toLowerCase().includes('penghasilan') || (surat.jenis || '').toLowerCase().includes('skph');
         } else if (selectedType === 'spt') {
-          matchesType = surat.jenis.toLowerCase() === 'spt' || surat.jenis.toLowerCase().includes('taspen');
+          matchesType = (surat.jenis || '').toLowerCase() === 'spt' || (surat.jenis || '').toLowerCase().includes('taspen');
         } else if (selectedType === 'sppd') {
-          matchesType = surat.jenis.toLowerCase().includes('sppd') || surat.jenis.toLowerCase().includes('perjalanan dinas') || surat.jenis.toLowerCase().includes('surat tugas');
+          matchesType = (surat.jenis || '').toLowerCase().includes('sppd') || (surat.jenis || '').toLowerCase().includes('perjalanan dinas') || (surat.jenis || '').toLowerCase().includes('surat tugas');
         }
       }
 
@@ -386,7 +386,7 @@ export default function AdminSuratDashboard({
   };
 
     const getKlasifikasiFromSurat = (s: LetterHistory) => {
-      const typeLower = s.jenis.toLowerCase();
+      const typeLower = (s.jenis || '').toLowerCase();
       if (typeLower.includes('kematian') || typeLower === 'skm' || s.nomor.includes('/SKM/')) return 'SKM';
       if (typeLower.includes('ahli waris') || typeLower === 'skaw' || s.nomor.includes('/SKAW/')) return 'SKAW';
       if (typeLower.includes('tidak mampu') || typeLower.includes('sktm') || s.nomor.includes('/SKTM/')) return 'SKTM';
