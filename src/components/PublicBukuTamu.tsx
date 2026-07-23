@@ -1,0 +1,352 @@
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../utils/supabase';
+import { resolveCurrentTenant } from '../utils/tenantResolver';
+import { capitalizeWords } from '../utils/textUtils';
+import { Scanner } from '@yudiel/react-qr-scanner';
+import {
+  BookOpen, QrCode, User, MapPin, Briefcase, ChevronRight,
+  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home
+} from 'lucide-react';
+
+const KEPERLUAN_OPTIONS = [
+  'Mengurus Surat Keterangan',
+  'Konsultasi / Pengaduan',
+  'Urusan Administrasi',
+  'Kunjungan Dinas',
+  'Bantuan Sosial',
+  'Urusan Tanah / Aset',
+  'Silaturahmi',
+  'Lainnya',
+];
+
+type KioskStep = 'welcome' | 'scan' | 'form' | 'success';
+
+export default function PublicBukuTamu() {
+  const [tenantId, setTenantId] = useState<string | null>(null);
+  const [step, setStep] = useState<KioskStep>('welcome');
+  const [desaName, setDesaName] = useState('Desa');
+  const [scanMode, setScanMode] = useState<'qr' | 'manual'>('qr');
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [manualNik, setManualNik] = useState('');
+
+  const [form, setForm] = useState({
+    nik: '', nama: '', alamat: '', instansi: '',
+    keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: ''
+  });
+
+  useEffect(() => {
+    resolveCurrentTenant().then(id => {
+      if (id) setTenantId(id);
+    });
+
+    const branding = localStorage.getItem('global_branding');
+    if (branding) {
+      try {
+        const p = JSON.parse(branding);
+        if (p.village_name) setDesaName(p.village_name);
+      } catch {}
+    }
+    const kop = localStorage.getItem('kop_desa');
+    if (kop) setDesaName(capitalizeWords(kop));
+  }, []);
+
+  // Auto-reset to welcome after 60 seconds of inactivity on success
+  useEffect(() => {
+    if (step === 'success') {
+      const timer = setTimeout(() => { setStep('welcome'); resetForm(); }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+
+  const resetForm = () => {
+    setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
+    setManualNik('');
+    setError('');
+  };
+
+  const lookupNik = async (nik: string) => {
+    setIsLookingUp(true);
+    setError('');
+    try {
+      const { data } = await supabase
+        .from('residents')
+        .select('name, address, rt, rw')
+        .eq('nik', nik)
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (data) {
+        setForm({
+          nik,
+          nama: capitalizeWords(data.name || ''),
+          alamat: capitalizeWords(`${data.address || ''} RT ${data.rt || ''} RW ${data.rw || ''}`),
+          instansi: 'Warga Desa',
+          keperluan: KEPERLUAN_OPTIONS[0],
+          tujuan_temu: '',
+        });
+      } else {
+        setForm(prev => ({ ...prev, nik, nama: '', alamat: '', instansi: '' }));
+      }
+      setStep('form');
+    } finally {
+      setIsLookingUp(false);
+    }
+  };
+
+  const handleScan = (results: any) => {
+    if (!results || results.length === 0) return;
+    const result = results[0].rawValue;
+    if (!result) return;
+    const nikMatch = result.match(/\b(\d{16})\b/);
+    if (nikMatch) {
+      lookupNik(nikMatch[1]);
+    } else {
+      try {
+        const p = JSON.parse(result);
+        if (p.nik) { lookupNik(p.nik); return; }
+      } catch {}
+      setError('QR tidak dikenali. Coba scan ulang atau masukkan NIK manual.');
+    }
+  };
+
+  const handleManualNik = () => {
+    const clean = manualNik.replace(/\D/g, '');
+    if (clean.length !== 16) { setError('NIK harus 16 digit.'); return; }
+    lookupNik(clean);
+  };
+
+  const handleSubmit = async () => {
+    if (!form.nama.trim()) { setError('Nama wajib diisi.'); return; }
+    setIsSaving(true);
+    setError('');
+    try {
+      const { error: err } = await supabase.from('guest_book').insert([{
+        id: `guest-${Date.now()}`,
+        tenant_id: tenantId,
+        nik: form.nik || null,
+        nama: capitalizeWords(form.nama),
+        alamat: capitalizeWords(form.alamat),
+        instansi: capitalizeWords(form.instansi),
+        keperluan: form.keperluan,
+        tujuan_temu: capitalizeWords(form.tujuan_temu),
+        tanggal_masuk: new Date().toISOString(),
+        tanggal_keluar: null,
+        status: 'hadir',
+      }]);
+      if (err) throw err;
+      setStep('success');
+    } catch {
+      setError('Gagal menyimpan. Mohon coba lagi.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex flex-col items-center justify-center p-4">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+          <BookOpen className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-2xl md:text-3xl font-bold text-white">Buku Tamu Digital</h1>
+        <p className="text-emerald-200 mt-1 font-medium">{desaName}</p>
+      </div>
+
+      {/* Card */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
+
+        {/* WELCOME */}
+        {step === 'welcome' && (
+          <div className="p-8 text-center space-y-4">
+            <h2 className="text-xl font-bold text-gray-900">Selamat Datang!</h2>
+            <p className="text-sm text-gray-500">Silakan daftarkan kehadiran Anda sebagai tamu hari ini.</p>
+            <button
+              onClick={() => { setScanMode('qr'); setStep('scan'); }}
+              className="w-full py-4 bg-emerald-700 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all flex items-center justify-center gap-3 text-base shadow-sm"
+            >
+              <QrCode className="w-6 h-6" />
+              Scan QR / Barcode KTP
+            </button>
+            <button
+              onClick={() => { setScanMode('manual'); setStep('scan'); }}
+              className="w-full py-4 border-2 border-gray-200 text-gray-700 font-bold rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-3 text-base"
+            >
+              <Keyboard className="w-6 h-6" />
+              Input NIK Manual
+            </button>
+            <button
+              onClick={() => { resetForm(); setStep('form'); }}
+              className="w-full py-3 text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors"
+            >
+              Tamu dari luar (tanpa NIK)
+            </button>
+          </div>
+        )}
+
+        {/* SCAN / MANUAL NIK */}
+        {step === 'scan' && (
+          <div className="p-6 space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <button onClick={() => setStep('welcome')} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <h2 className="font-bold text-gray-900">{scanMode === 'qr' ? 'Scan QR Code / KTP' : 'Masukkan NIK'}</h2>
+            </div>
+
+            {isLookingUp ? (
+              <div className="py-16 text-center">
+                <RefreshCw className="w-8 h-8 text-emerald-700 animate-spin mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-600">Mencari data Anda...</p>
+              </div>
+            ) : scanMode === 'qr' ? (
+              <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 relative">
+                <Scanner
+                  onScan={handleScan}
+                  onError={(e) => setError(String(e))}
+                  components={{
+                    audio: false,
+                    finder: false
+                  }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="w-52 h-52 border-2 border-emerald-400 rounded-xl opacity-80 animate-pulse" />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 py-4">
+                <input
+                  type="tel"
+                  data-no-cap
+                  maxLength={16}
+                  value={manualNik}
+                  onChange={(e) => { setManualNik(e.target.value.replace(/\D/g, '')); setError(''); }}
+                  placeholder="Masukkan 16 digit NIK KTP..."
+                  className="w-full h-14 px-4 border-2 border-gray-200 rounded-2xl text-center text-xl font-mono font-bold text-gray-900 focus:border-emerald-500 outline-none transition-all tracking-widest"
+                  autoFocus
+                />
+                <button
+                  onClick={handleManualNik}
+                  className="w-full py-4 bg-emerald-700 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all text-base flex items-center justify-center gap-2"
+                >
+                  Cari Data <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+
+            {error && (
+              <div className="bg-red-50 text-red-600 text-sm font-medium p-3 rounded-xl border border-red-100">
+                {error}
+              </div>
+            )}
+
+            <p className="text-[11px] text-gray-400 text-center">
+              Arahkan kamera ke QR Code atau barcode belakang KTP Anda.
+            </p>
+          </div>
+        )}
+
+        {/* FORM */}
+        {step === 'form' && (
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <button onClick={() => setStep('welcome')} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <h2 className="font-bold text-gray-900">Data Kunjungan</h2>
+            </div>
+
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Nama Lengkap *</label>
+                <input
+                  type="text"
+                  value={form.nama}
+                  onChange={(e) => setForm(p => ({ ...p, nama: capitalizeWords(e.target.value) }))}
+                  placeholder="Nama Anda..."
+                  className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:border-emerald-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Asal / Instansi</label>
+                <input
+                  type="text"
+                  value={form.instansi}
+                  onChange={(e) => setForm(p => ({ ...p, instansi: capitalizeWords(e.target.value) }))}
+                  placeholder="Desa / instansi asal..."
+                  className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:border-emerald-500 outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Keperluan *</label>
+                <select
+                  value={form.keperluan}
+                  onChange={(e) => setForm(p => ({ ...p, keperluan: e.target.value }))}
+                  className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:border-emerald-500 outline-none transition-all bg-white cursor-pointer"
+                >
+                  {KEPERLUAN_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Menemui Siapa / Bagian</label>
+                <input
+                  type="text"
+                  value={form.tujuan_temu}
+                  onChange={(e) => setForm(p => ({ ...p, tujuan_temu: capitalizeWords(e.target.value) }))}
+                  placeholder="Nama staf / bagian yang dituju..."
+                  className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:border-emerald-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 text-red-600 text-sm font-medium p-3 rounded-xl border border-red-100 mt-3">
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={handleSubmit}
+              disabled={isSaving}
+              className="mt-5 w-full py-4 bg-emerald-700 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all text-base disabled:opacity-60 flex items-center justify-center gap-2 shadow-sm"
+            >
+              {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+              Daftar Hadir
+            </button>
+          </div>
+        )}
+
+        {/* SUCCESS */}
+        {step === 'success' && (
+          <div className="p-8 text-center space-y-5">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-10 h-10 text-emerald-700" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Terima Kasih!</h2>
+              <p className="text-emerald-700 font-bold text-lg mt-1">{form.nama}</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Kehadiran Anda telah tercatat.<br />
+                Silakan menunggu di ruang tamu.
+              </p>
+            </div>
+            <p className="text-xs text-gray-400">Halaman akan otomatis kembali dalam 10 detik...</p>
+            <button
+              onClick={() => { setStep('welcome'); resetForm(); }}
+              className="w-full py-3 border-2 border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+            >
+              <Home className="w-4 h-4" />
+              Kembali ke Halaman Utama
+            </button>
+          </div>
+        )}
+      </div>
+
+      <p className="text-emerald-300 text-xs mt-6 text-center">
+        Sistem Buku Tamu Digital &bull; Powered by DiDesa
+      </p>
+    </div>
+  );
+}

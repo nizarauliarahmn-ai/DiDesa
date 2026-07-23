@@ -17,6 +17,8 @@ import AdminNotifikasi from './components/admin/AdminNotifikasi';
 import AdminApprovalQueue from './components/admin/AdminApprovalQueue';
 import AdminTenants from './components/admin/AdminTenants';
 import AdminAspirasi from './components/admin/AdminAspirasi';
+import AdminBukuTamu from './components/admin/AdminBukuTamu';
+import PublicBukuTamu from './components/PublicBukuTamu';
 import AdminAiAssistant from './components/admin/AdminAiAssistant';
 import AdminSaaSLogs from './components/admin/AdminSaaSLogs';
 import AdminGlobalBranding from './components/admin/AdminGlobalBranding';
@@ -274,6 +276,7 @@ export default function App() {
                     debouncedSearchQuery={debouncedSearch}
                   />
                 )}
+                {adminTab === 'buku_tamu' && <AdminBukuTamu />}
                 {adminTab === 'antrean' && (user.role === 'kades' || user.role === 'saas_admin') && <AdminApprovalQueue />}
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
@@ -314,6 +317,16 @@ export default function App() {
         <ToastContainer />
         <GlobalUpdateNotifier />
       </div>
+    );
+  }
+
+  // Khusus untuk Kiosk Buku Tamu Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)
+  if (publicTab === 'buku_tamu') {
+    return (
+      <>
+        <PublicBukuTamu />
+        <ToastContainer />
+      </>
     );
   }
 

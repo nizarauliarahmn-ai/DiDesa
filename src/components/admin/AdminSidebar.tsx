@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen } from 'lucide-react';
 import { X } from 'lucide-react';
 import { getFeedbacks } from '../../utils/feedbackData';
 import { supabase } from '../../utils/supabase';
@@ -196,6 +196,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pelayanan Publik</p>
             <NavItem id="tour-surat" icon={<FileText size={18} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
             <NavItem icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} />
+              <NavItem icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); }} />
             {authUser?.role === 'kades' && <NavItem icon={<ShieldCheck size={18} className="text-amber-600 animate-pulse" />} label="Antrean Konfirmasi" active={activeTab === 'antrean'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('antrean'); }} /> }
             
             <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Lainnya</p>

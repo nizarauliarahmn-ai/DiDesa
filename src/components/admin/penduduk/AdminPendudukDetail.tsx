@@ -4,6 +4,7 @@ import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
 import { getResidentLetters } from '../../../utils/letterHistory';
 import ConfirmModal from '../../common/ConfirmModal';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface AdminPendudukDetailProps {
   onBack: () => void;
@@ -339,9 +340,21 @@ export default function AdminPendudukDetail({
                   {data?.status || 'Aktif'}
                 </span>
               </h2>
-              <p className="font-mono text-gray-500 dark:text-slate-400 text-xs mt-0.5">
-                NIK: {data?.nik || "-"} • {data?.familyRelation || "Kepala Keluarga"}
-              </p>
+              <div className="flex items-center gap-3 mt-1">
+                <p className="font-mono text-gray-500 dark:text-slate-400 text-xs">
+                  NIK: {data?.nik || "-"} • {data?.familyRelation || "Kepala Keluarga"}
+                </p>
+                {data?.nik && (
+                  <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center group relative cursor-help">
+                    <QRCodeSVG value={data.nik} size={20} />
+                    {/* Tooltip on hover */}
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-2 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                      <p className="text-[10px] font-bold text-gray-500 text-center mb-1 whitespace-nowrap">Scan Kunjungan Tamu</p>
+                      <QRCodeSVG value={data.nik} size={120} />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
