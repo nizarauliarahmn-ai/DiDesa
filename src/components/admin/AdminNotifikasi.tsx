@@ -192,9 +192,9 @@ export default function AdminNotifikasi({
       if (debouncedSearchQuery.trim() !== "") {
         const q = debouncedSearchQuery.toLowerCase();
         return (
-          notif.title.toLowerCase().includes(q) ||
-          notif.message.toLowerCase().includes(q) ||
-          notif.category.toLowerCase().includes(q)
+          (notif.title || '').toLowerCase().includes(q) ||
+          (notif.message || '').toLowerCase().includes(q) ||
+          (notif.category || '').toLowerCase().includes(q)
         );
       }
 

@@ -303,7 +303,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
     const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
-    const isAn = roleKades.toLowerCase() !== 'kepala desa';
+    const isAn = (roleKades || '').toLowerCase() !== 'kepala desa';
     const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
     const rightRoleHtml = isAn ? `a.n. Kepala Desa ${cleanDesaName},<br/>${roleKades}` : `${roleKades}`;
 

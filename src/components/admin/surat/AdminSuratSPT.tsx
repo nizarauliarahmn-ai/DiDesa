@@ -70,10 +70,10 @@ const cleanStr = (s: string, regex: RegExp) => (s || '').replace(regex, '');
 
 // Map familyRelation to Ahli Waris relationship label
 const mapFamilyRelation = (rel: string = '', gender: string = ''): string => {
-  const r = rel.toLowerCase();
+  const r = (rel || '').toLowerCase();
   if (r.includes('istri') || r.includes('suami')) return rel;
   if (r.includes('anak')) return 'Anak Kandung';
-  if (r.includes('kepala')) return gender.toLowerCase().includes('perempuan') ? 'Istri' : 'Suami';
+  if (r.includes('kepala')) return (gender || '').toLowerCase().includes('perempuan') ? 'Istri' : 'Suami';
   return rel || 'Anggota Keluarga';
 };
 
@@ -189,8 +189,8 @@ export default function AdminSuratSPT({
       // Sort: Istri/Suami first, then Anak
       const sorted = [...family].sort((a, b) => {
         const priority = (rel: string = '') => {
-          const r = rel.toLowerCase();
-          if (r.includes('istri') || r.includes('suami')) return 1;
+          const r = (rel || '').toLowerCase();
+          if (r.includes('istri') || r.includes('suami') || r.includes('kepala')) return 1;
           if (r.includes('anak')) return 2;
           return 3;
         };
@@ -500,7 +500,7 @@ export default function AdminSuratSPT({
         Semasa hidupnya almarhum <strong>${v(selectedPewaris?.name).toUpperCase()}</strong> pernah menikah 1 (satu) kali dengan
         istri/suami yang bernama <strong>${activeHeirs[0]?.editedName || '-'}</strong>
         lahir di ${activeHeirs[0]?.editedBirthPlace || '-'} pada tanggal ${fmtDate(activeHeirs[0]?.editedBirthDate)}.
-        Dari pernikahannya telah dilahirkan ${activeHeirs.filter(h => h.editedRelationship.toLowerCase().includes('anak')).length} orang anak, yaitu:
+        Dari pernikahannya telah dilahirkan ${activeHeirs.filter(h => (h.editedRelationship || '').toLowerCase().includes('anak')).length} orang anak, yaitu:
       </p>
 
       <table style="width:100%;border-collapse:collapse;margin-top:8px;margin-bottom:10px;font-size:11.5px;" border="1">

@@ -170,10 +170,10 @@ export default function AdminBukuTamu() {
 
   const filtered = useMemo(() => {
     return entries.filter(e => {
-      const matchSearch = e.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchSearch = (e.nama || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (e.nik || '').includes(searchQuery) ||
-        e.keperluan.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchStatus = filterStatus === 'Semua' || e.status === filterStatus.toLowerCase();
+        (e.keperluan || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchStatus = filterStatus === 'Semua' || (e.status || '') === filterStatus.toLowerCase();
       return matchSearch && matchStatus;
     });
   }, [entries, searchQuery, filterStatus]);
