@@ -579,6 +579,20 @@ export default function AdminBukuTamu() {
               </div>
             </div>
 
+            <div className="px-5 pb-5">
+              <label className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-2 mt-4">Tanda Tangan Tamu</label>
+              <div className="border-2 border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white">
+                <SignatureCanvas 
+                  ref={signatureRef}
+                  penColor="black"
+                  canvasProps={{className: 'signatureCanvas w-full h-32 cursor-crosshair'}}
+                />
+              </div>
+              <button type="button" onClick={() => signatureRef.current?.clear()} className="mt-2 text-xs text-emerald-600 font-medium hover:underline">
+                Bersihkan Tanda Tangan
+              </button>
+            </div>
+
             <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex gap-3">
               <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
                 Batal
