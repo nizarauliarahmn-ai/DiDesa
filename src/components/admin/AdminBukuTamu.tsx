@@ -182,6 +182,25 @@ export default function AdminBukuTamu() {
 
   const handlePrint = () => window.print();
 
+  const handleDownloadQR = () => {
+    const svg = document.querySelector('#qr-kiosk-svg');
+    if (!svg) return;
+    
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'QR_Buku_Tamu_DiDesa.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showToast('QR Code berhasil diunduh (Format SVG)', 'success');
+  };
+
   const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -494,6 +513,7 @@ export default function AdminBukuTamu() {
               
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <QRCodeSVG 
+                  id="qr-kiosk-svg"
                   value={`${window.location.origin}/?tab=buku_tamu`} 
                   size={200} 
                   level="H"
@@ -502,7 +522,14 @@ export default function AdminBukuTamu() {
               </div>
             </div>
             
-            <div className="p-5 border-t border-gray-100 dark:border-slate-800">
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex flex-col gap-3">
+              <button 
+                onClick={handleDownloadQR} 
+                className="w-full py-3 bg-white border-2 border-emerald-700 text-emerald-700 font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-50 transition-all shadow-sm"
+              >
+                <Download className="w-5 h-5" />
+                Download (Simpan ke Laptop)
+              </button>
               <button 
                 onClick={() => window.open('/?print=qr_kiosk', '_blank')} 
                 className="w-full py-3 bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-800 transition-all shadow-md"
