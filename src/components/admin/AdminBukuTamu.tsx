@@ -16,12 +16,13 @@ import {
 interface GuestEntry {
   id: string;
   tenant_id: string;
-  nik: string;
+  nik: string | null;
   nama: string;
-  alamat: string;
-  instansi: string;
+  alamat: string | null;
+  instansi: string | null;
   keperluan: string;
-  tujuan_temu: string;
+  tujuan_temu: string | null;
+  signature_url?: string | null;
   tanggal_masuk: string;
   tanggal_keluar: string | null;
   status: 'hadir' | 'selesai';
@@ -398,15 +399,7 @@ export default function AdminBukuTamu() {
           onChange={(e) => setFilterDate(e.target.value)}
           className="h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
         />
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 text-gray-900 dark:text-white cursor-pointer"
-        >
-          <option>Semua</option>
-          <option>Hadir</option>
-          <option>Selesai</option>
-        </select>
+
       </div>
 
       {/* Table */}
@@ -418,18 +411,16 @@ export default function AdminBukuTamu() {
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tamu</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden md:table-cell">Keperluan</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Tujuan Temu</th>
-              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Masuk</th>
-              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden sm:table-cell">Keluar</th>
-              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
+              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Waktu</th>
+              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">TTD</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
             {loading ? (
-              <tr><td colSpan={8} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
+              <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-5 py-16 text-center">
+                <td colSpan={6} className="px-5 py-16 text-center">
                   <BookOpen className="w-12 h-12 text-gray-200 dark:text-slate-700 mx-auto mb-3" />
                   <p className="text-sm text-gray-400 font-medium">Belum ada tamu hari ini</p>
                   <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">Klik "Tambah Tamu" atau "Scan QR / NIK" untuk mencatat tamu baru</p>
@@ -450,31 +441,17 @@ export default function AdminBukuTamu() {
                     </span>
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-700 dark:text-slate-300 hidden lg:table-cell">{entry.tujuan_temu || '-'}</td>
-                  <td className="px-5 py-4 text-sm font-mono text-gray-700 dark:text-slate-300">
-                    {fmtTime(entry.tanggal_masuk)}
-                  </td>
-                  <td className="px-5 py-4 text-sm font-mono text-gray-500 dark:text-slate-400 hidden sm:table-cell">
-                    {entry.tanggal_keluar ? fmtTime(entry.tanggal_keluar) : <span className="text-gray-300 dark:text-slate-600">-</span>}
+                  <td className="px-5 py-4">
+                    <span className="text-sm font-bold text-gray-900 dark:text-white block">{fmtTime(entry.tanggal_masuk)}</span>
+                    <span className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-0.5">{fmtDate(entry.tanggal_masuk)}</span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold uppercase ${
-                      entry.status === 'hadir'
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                        : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400'
-                    }`}>
-                      {entry.status === 'hadir' ? <LogIn className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
-                      {entry.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    {entry.status === 'hadir' && (
-                      <button
-                        onClick={() => handleCheckOut(entry.id, entry.nama)}
-                        className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 rounded-lg transition-colors"
-                      >
-                        <LogOut className="w-3 h-3" />
-                        Selesai
-                      </button>
+                    {entry.signature_url ? (
+                      <div className="h-10 w-20 bg-white border border-gray-200 rounded flex items-center justify-center overflow-hidden">
+                        <img src={entry.signature_url} alt="TTD" className="max-w-full max-h-full object-contain" />
+                      </div>
+                    ) : (
+                      <span className="text-[11px] text-gray-400 italic">-</span>
                     )}
                   </td>
                 </tr>
