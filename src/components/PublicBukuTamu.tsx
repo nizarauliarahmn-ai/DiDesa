@@ -5,7 +5,7 @@ import { capitalizeWords } from '../utils/textUtils';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import {
   BookOpen, QrCode, User, MapPin, Briefcase, ChevronRight,
-  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home
+  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search
 } from 'lucide-react';
 
 const KEPERLUAN_OPTIONS = [
