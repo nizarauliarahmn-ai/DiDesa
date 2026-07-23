@@ -132,8 +132,30 @@ export default function AdminBukuTamu() {
     if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
 
     setIsSaving(true);
+    let signatureUrl = null;
+    if (signatureRef.current && !signatureRef.current.isEmpty()) {
+      try {
+        const dataUrl = signatureRef.current.getTrimmedCanvas().toDataURL('image/png');
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const fileName = `${tenantId}/${Date.now()}.png`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('signatures')
+          .upload(fileName, blob, { contentType: 'image/png' });
+          
+        if (uploadError) {
+          console.error('Failed to upload signature', uploadError);
+        } else if (uploadData) {
+          const { data: publicUrlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
+          signatureUrl = publicUrlData.publicUrl;
+        }
+      } catch (e) {
+        console.error('Error processing signature', e);
+      }
+    }
+
     try {
-      const { error } = await supabase.from('guest_book').insert([{
+      const { error: err } = await supabase.from('guest_book').insert([{
         id: `guest-${Date.now()}`,
         tenant_id: tenantId,
         nik: form.nik || null,
@@ -142,7 +164,7 @@ export default function AdminBukuTamu() {
         instansi: capitalizeWords(form.instansi),
         keperluan: form.keperluan,
         tujuan_temu: capitalizeWords(form.tujuan_temu),
-        signature_base64: signatureRef.current?.isEmpty() ? null : signatureRef.current?.getTrimmedCanvas().toDataURL('image/png'),
+        signature_url: signatureUrl,
         tanggal_masuk: new Date().toISOString(),
         tanggal_keluar: null,
         status: 'hadir',
