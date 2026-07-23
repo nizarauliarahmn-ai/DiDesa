@@ -1,3 +1,4 @@
+import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
@@ -818,7 +819,16 @@ export default function AdminSuratSKD({
                     rows={2}
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={formData.alamat}
-                    onChange={(e) => setFormData({...formData, alamat: e.target.value})}
+                    onChange={(e) => {
+  const val = e.target.value;
+  const parsed = parseAddress(val);
+  setFormData(prev => ({
+    ...prev,
+    alamat: parsed.cleanAddress,
+    ...(parsed.rt ? { rt: parsed.rt } : {}),
+    ...(parsed.rw ? { rw: parsed.rw } : {})
+  }));
+}}
                   />
                 </div>
                 <div className="md:col-span-1 space-y-2">
@@ -840,7 +850,18 @@ export default function AdminSuratSKD({
                         rows={2}
                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                         value={formData.alamatSekarang}
-                        onChange={(e) => setFormData({...formData, alamatSekarang: e.target.value})}
+                        onChange={(e) => {
+  const val = e.target.value;
+  const parsed = parseAddress(val);
+  setFormData(prev => ({
+    ...prev,
+    alamatSekarang: parsed.cleanAddress,
+    ...(parsed.rt ? { rtSekarang: parsed.rt } : {}),
+    ...(parsed.rw ? { rwSekarang: parsed.rw } : {}),
+    ...(parsed.desa ? { desaSekarang: parsed.desa } : {}),
+    ...(parsed.kec ? { kecamatanSekarang: parsed.kec } : {})
+  }));
+}}
                         placeholder="Contoh: Jl. Bungur Raya No. 12"
                       />
                     </div>
