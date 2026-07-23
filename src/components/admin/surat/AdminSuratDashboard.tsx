@@ -407,7 +407,16 @@ export default function AdminSuratDashboard({
     const code = getKlasifikasiFromSurat(surat);
     const isSU = code === 'SU' || code === 'UND';
     
-    const sd = surat.data || {};
+    const rawData = surat.data || {};
+    const sd = {
+      ...rawData,
+      usahaName: rawData.nama_usaha || rawData.usahaName,
+      usahaJenis: rawData.jenis_usaha || rawData.usahaJenis,
+      usahaAlamat: rawData.alamat_usaha || rawData.usahaAlamat,
+      namaPasangan: rawData.nama_pasangan || rawData.namaPasangan,
+      nikPasangan: rawData.nik_pasangan || rawData.nikPasangan,
+      tanggalNikah: rawData.tanggal_nikah || rawData.tanggalNikah
+    };
     const name = sd.nama || residentObj?.name || surat.nama;
     const nik = sd.nik || residentObj?.nik || surat.nik || '-';
     const birthPlace = sd.tempatLahir || residentObj?.birthPlace || '-';
@@ -721,6 +730,14 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Nama tersebut di atas adalah benar-benar warga / penduduk yang berdomisili di Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')} dan yang bersangkutan benar-benar tergolong keluarga <strong className="italic">Kurang Mampu (Miskin)</strong>.
                     </p>
+                    {(sd.pekerjaan_ortu || sd.penghasilan) && (
+                      <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
+                        <tbody>
+                          {sd.pekerjaan_ortu && <tr><td style={{width: '40%'}}>Pekerjaan Orang Tua / Wali</td><td style={{width: '3%'}}>:</td><td>{sd.pekerjaan_ortu}</td></tr>}
+                          {sd.penghasilan && <tr><td>Rata-rata Penghasilan</td><td>:</td><td>Rp {Number(sd.penghasilan).toLocaleString('id-ID')}</td></tr>}
+                        </tbody>
+                      </table>
+                    )}
                     {penutup(surat.keperluan, 'Tidak Mampu')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
                   </>

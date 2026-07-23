@@ -1,12 +1,22 @@
+export interface LetterField {
+  id: string;
+  label: string;
+  type: 'text' | 'number' | 'date' | 'textarea' | 'select';
+  options?: string[];
+  placeholder?: string;
+  required?: boolean;
+}
+
 export interface LetterClassification {
   id: string;
   jenis: string;
   klasifikasi: string; // The abbreviation (e.g. SKD, SKU)
   kodeKlasifikasi: string;
-    deskripsi?: string; // The numeric archive classification (e.g. "145", "400")
+  deskripsi?: string; // The numeric archive classification (e.g. "145", "400")
   noUrutTerakhir: number;
   isVisible?: boolean;
   isSaaSDisabled?: boolean;
+  fields?: LetterField[]; // Dynamic fields for forms
 }
 
 export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
@@ -16,14 +26,35 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '4', jenis: 'SK AHLI WARIS', klasifikasi: 'SKAW', kodeKlasifikasi: '474', deskripsi: 'Surat Keterangan & Pernyataan Ahli Waris', noUrutTerakhir: 2, isVisible: true },
   { id: '5', jenis: 'SK DOMISILI PERORANGAN', klasifikasi: 'SDP', kodeKlasifikasi: '145', noUrutTerakhir: 18, isVisible: true },
   { id: '6', jenis: 'SURAT KETERANGAN UMUM', klasifikasi: 'SKUM', kodeKlasifikasi: '400', noUrutTerakhir: 4, isVisible: true },
-  { id: '7', jenis: 'SK NIKAH', klasifikasi: 'SKN', kodeKlasifikasi: '474', noUrutTerakhir: 8, isVisible: true },
-  { id: '8', jenis: 'SKTM', klasifikasi: 'SKTM', kodeKlasifikasi: '400', noUrutTerakhir: 15, isVisible: true },
+  { 
+    id: '7', jenis: 'SK NIKAH', klasifikasi: 'SKN', kodeKlasifikasi: '474', noUrutTerakhir: 8, isVisible: true,
+    fields: [
+      { id: 'nama_pasangan', label: 'Nama Calon Pasangan', type: 'text', required: true, placeholder: 'Contoh: Siti Aminah' },
+      { id: 'nik_pasangan', label: 'NIK Calon Pasangan', type: 'text', required: true, placeholder: '16 Digit NIK' },
+      { id: 'tanggal_nikah', label: 'Rencana Tanggal Menikah', type: 'date', required: true }
+    ]
+  },
+  { 
+    id: '8', jenis: 'SKTM', klasifikasi: 'SKTM', kodeKlasifikasi: '400', noUrutTerakhir: 15, isVisible: true,
+    fields: [
+      { id: 'pekerjaan_ortu', label: 'Pekerjaan Orang Tua / Wali', type: 'text', required: true },
+      { id: 'penghasilan', label: 'Rata-rata Penghasilan Per Bulan', type: 'number', required: true, placeholder: 'Dalam Rupiah' },
+      { id: 'tujuan', label: 'Tujuan Pembuatan SKTM', type: 'text', required: true, placeholder: 'Contoh: Keringanan Biaya Rumah Sakit / Sekolah' }
+    ]
+  },
   { id: '9', jenis: 'SK KEPEMILIKAN TANAH', klasifikasi: 'SKKT', kodeKlasifikasi: '593', noUrutTerakhir: 1, isVisible: true },
   { id: '10', jenis: 'SK BELUM MENIKAH', klasifikasi: 'SKBM', kodeKlasifikasi: '474', deskripsi: 'Surat Keterangan Belum Pernah Menikah', noUrutTerakhir: 6, isVisible: true },
   { id: '11', jenis: 'SK KEHILANGAN', klasifikasi: 'SKH', kodeKlasifikasi: '331', deskripsi: 'Surat Pengantar Keterangan Kehilangan', noUrutTerakhir: 9, isVisible: true },
   { id: '12', jenis: 'SURAT KETERANGAN PINDAH', klasifikasi: 'SKP', kodeKlasifikasi: '475', deskripsi: 'Surat Pengantar Keterangan Pindah Antar Daerah', noUrutTerakhir: 0, isVisible: true },
   { id: '14', jenis: 'SURAT REKOMENDASI', klasifikasi: 'SRI', kodeKlasifikasi: '100', deskripsi: 'Surat Rekomendasi / Pengantar Izin', noUrutTerakhir: 3, isVisible: true },
-  { id: '15', jenis: 'SK USAHA', klasifikasi: 'SKU', kodeKlasifikasi: '500', deskripsi: 'Surat Keterangan Tempat Usaha', noUrutTerakhir: 11, isVisible: true },
+  { 
+    id: '15', jenis: 'SK USAHA', klasifikasi: 'SKU', kodeKlasifikasi: '500', deskripsi: 'Surat Keterangan Tempat Usaha', noUrutTerakhir: 11, isVisible: true,
+    fields: [
+      { id: 'nama_usaha', label: 'Nama Usaha / Toko', type: 'text', required: true, placeholder: 'Contoh: Warung Berkah' },
+      { id: 'jenis_usaha', label: 'Jenis Usaha', type: 'text', required: true, placeholder: 'Contoh: Kelontong / Pertanian' },
+      { id: 'alamat_usaha', label: 'Alamat Usaha', type: 'textarea', required: true }
+    ]
+  },
   { id: '16', jenis: 'KEUANGAN', klasifikasi: 'KEU', kodeKlasifikasi: '900', deskripsi: 'Surat Keterangan Laporan Keuangan', noUrutTerakhir: 5, isVisible: true },
   { id: '17', jenis: 'SK LAHIR', klasifikasi: 'SKL', kodeKlasifikasi: '474.1', noUrutTerakhir: 4, isVisible: true },
   { id: '18', jenis: 'JUAL BELI TANAH', klasifikasi: 'JBT', kodeKlasifikasi: '593', noUrutTerakhir: 1, isVisible: true },

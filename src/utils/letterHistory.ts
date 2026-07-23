@@ -54,7 +54,9 @@ const INITIAL_HISTORY: LetterHistory[] = [
 ];
 
 export function getLetterHistory(): LetterHistory[] {
-  const stored = localStorage.getItem('letter_history');
+  const tenantId = localStorage.getItem('didesa_active_tenant_id') || 'default';
+  const storageKey = `letter_history_${tenantId}`;
+  const stored = localStorage.getItem(storageKey);
   if (stored) {
     try {
       return JSON.parse(stored);
@@ -63,13 +65,15 @@ export function getLetterHistory(): LetterHistory[] {
     }
   } else {
     // Save initial history so it persists
-    localStorage.setItem('letter_history', JSON.stringify(INITIAL_HISTORY));
+    localStorage.setItem(storageKey, JSON.stringify(INITIAL_HISTORY));
   }
   return INITIAL_HISTORY;
 }
 
 export function saveLetterHistory(history: LetterHistory[]) {
-  localStorage.setItem('letter_history', JSON.stringify(history));
+  const tenantId = localStorage.getItem('didesa_active_tenant_id') || 'default';
+  const storageKey = `letter_history_${tenantId}`;
+  localStorage.setItem(storageKey, JSON.stringify(history));
 }
 
 export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHistory {

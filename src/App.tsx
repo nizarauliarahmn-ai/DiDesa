@@ -42,6 +42,9 @@ import AspirasiWarga from './components/dashboard/AspirasiWarga';
 import AiAssistant from './components/dashboard/AiAssistant';
 import IntroductionTour from './components/IntroductionTour';
 import PrintQRKiosk from './components/admin/PrintQRKiosk';
+import PublicKiosPortal from './components/PublicKiosPortal';
+import PublicKiosSurat from './components/PublicKiosSurat';
+import PublicKiosAspirasi from './components/PublicKiosAspirasi';
 
 export default function App() {
   // Khusus untuk Halaman Print (Terisolasi dari semua layout)
@@ -50,16 +53,21 @@ export default function App() {
     return <PrintQRKiosk />;
   }
 
-  // Khusus untuk Kiosk Buku Tamu Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)
-  // Ini harus ditaruh SEBELUM pengecekan login (!user) agar tamu bisa scan QR dari HP mereka tanpa harus punya akun/login
-  const isKiosk = urlParams.get('tab') === 'buku_tamu';
-  if (isKiosk) {
-    return (
-      <>
-        <PublicBukuTamu />
-        <ToastContainer />
-      </>
-    );
+  // Khusus untuk Kiosk Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)
+  // Ini harus ditaruh SEBELUM pengecekan login (!user) agar warga bisa menggunakan Kiosk tanpa harus punya akun/login
+  const tabParam = urlParams.get('tab');
+  
+  if (tabParam === 'kios') {
+    return <><PublicKiosPortal /><ToastContainer /></>;
+  }
+  if (tabParam === 'buku_tamu') {
+    return <><PublicBukuTamu /><ToastContainer /></>;
+  }
+  if (tabParam === 'kios_surat') {
+    return <><PublicKiosSurat /><ToastContainer /></>;
+  }
+  if (tabParam === 'kios_aspirasi') {
+    return <><PublicKiosAspirasi /><ToastContainer /></>;
   }
 
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {

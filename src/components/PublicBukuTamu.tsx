@@ -35,6 +35,7 @@ export default function PublicBukuTamu() {
     nik: '', nama: '', alamat: '', instansi: '',
     keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: ''
   });
+  const [isKioskMode, setIsKioskMode] = useState(false);
 
   useEffect(() => {
     resolveCurrentTenant().then(id => {
@@ -43,6 +44,9 @@ export default function PublicBukuTamu() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const tName = urlParams.get('t_name');
+    if (urlParams.get('tab') === 'buku_tamu') {
+      setIsKioskMode(true);
+    }
     
     if (tName) {
       setDesaName(tName);
@@ -165,9 +169,21 @@ export default function PublicBukuTamu() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 flex flex-col items-center justify-center p-4 relative">
+      
+      {isKioskMode && step === 'form' && (
+        <div className="absolute top-8 left-8">
+          <button 
+            onClick={() => window.location.search = '?tab=kios'}
+            className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full font-bold transition-colors backdrop-blur-md"
+          >
+            <Home className="w-5 h-5" /> Kembali ke Beranda
+          </button>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 mt-12 md:mt-0">
         <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
           <BookOpen className="w-8 h-8 text-white" />
         </div>
