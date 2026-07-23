@@ -120,7 +120,28 @@ export default function AdminSurat({
         </button>
       </div>
 
-      <div className="pt-4">
+      <div className="pt-4 admin-surat-wrapper" onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          if (document.activeElement?.tagName.toLowerCase() === 'textarea') return;
+          if (document.activeElement?.tagName.toLowerCase() === 'button') {
+            const btn = document.activeElement as HTMLButtonElement;
+            if (btn.type === 'button' && !btn.className.includes('submit')) return;
+          }
+          
+          e.preventDefault();
+          const container = e.currentTarget;
+          const focusable = container.querySelectorAll(
+            'input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])'
+          ) as NodeListOf<HTMLElement>;
+          
+          const elements = Array.from(focusable).filter(el => el.tabIndex !== -1 && el.offsetParent !== null);
+          const index = elements.indexOf(document.activeElement as HTMLElement);
+          
+          if (index > -1 && index < elements.length - 1) {
+            elements[index + 1].focus();
+          }
+        }
+      }}>
         {activeTab === 'dashboard' && (
           <AdminSuratDashboard 
             onBuatSurat={() => changeTab('buat')} 

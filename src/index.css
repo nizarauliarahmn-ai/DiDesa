@@ -300,3 +300,30 @@ input[data-no-cap],
 textarea[data-no-cap] {
   text-transform: none !important;
 }
+
+/* ============================================================
+   GLOBAL FOCUS HIGHLIGHT: Green highlight for active inputs
+   ============================================================ */
+.admin-surat-wrapper input:focus, 
+.admin-surat-wrapper select:focus, 
+.admin-surat-wrapper textarea:focus,
+input.focus-green:focus,
+select.focus-green:focus,
+textarea.focus-green:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2) !important;
+  outline: none !important;
+  background-color: #ecfdf5 !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.dark .admin-surat-wrapper input:focus, 
+.dark .admin-surat-wrapper select:focus, 
+.dark .admin-surat-wrapper textarea:focus,
+.dark input.focus-green:focus,
+.dark select.focus-green:focus,
+.dark textarea.focus-green:focus {
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
+}
