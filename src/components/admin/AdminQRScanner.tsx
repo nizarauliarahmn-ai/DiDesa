@@ -78,10 +78,6 @@ export default function AdminQRScanner({ onResult, onClose }: AdminQRScannerProp
               <Scanner
                 onScan={handleScan}
                 onError={(e) => setError(String(e))}
-                components={{
-                  audio: false,
-                  finder: false
-                }}
               />
               {/* Scanning overlay */}
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">

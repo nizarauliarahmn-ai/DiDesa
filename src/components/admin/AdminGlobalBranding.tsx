@@ -120,7 +120,7 @@ export default function AdminGlobalBranding() {
         admin: JSON.parse(localStorage.getItem('didesa_auth_user') || '{}').name || 'Admin',
         aksi: 'Update Branding Platform',
         target: globalName,
-        status: 'Gagal (RLS/Server Error)'
+        status: 'Gagal'
       });
       return;
     }

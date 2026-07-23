@@ -7,7 +7,6 @@ export interface LetterClassification {
   noUrutTerakhir: number;
   isVisible?: boolean;
   isSaaSDisabled?: boolean;
-  deskripsi?: string;
 }
 
 export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [

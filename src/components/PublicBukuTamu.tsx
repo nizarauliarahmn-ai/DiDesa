@@ -206,10 +206,6 @@ export default function PublicBukuTamu() {
                 <Scanner
                   onScan={handleScan}
                   onError={(e) => setError(String(e))}
-                  components={{
-                    audio: false,
-                    finder: false
-                  }}
                 />
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="w-52 h-52 border-2 border-emerald-400 rounded-xl opacity-80 animate-pulse" />

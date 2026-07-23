@@ -114,7 +114,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [dasarNo, setDasarNo] = useState('');
   const [dasarTgl, setDasarTgl] = useState('');
   const [namaPPTK, setNamaPPTK] = useState(editData?.namaPPTK || '');
-  const [kepadaYth, setKepadaYth] = useState(editData?.kepadaYth || `Kepala ${SAAS_CONFIG.desaName}`);
+  const [kepadaYth, setKepadaYth] = useState(editData?.kepadaYth || `Kepala Desa`);
 
   // Detail Perjalanan
   const [maksudPerjalanan, setMaksudPerjalanan] = useState(editData?.maksudPerjalanan || '');
@@ -183,13 +183,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
   const handleRecord = () => {
     if (!nomorSurat) {
-      showToast('error', 'Nomor surat wajib diisi');
+      showToast('Nomor surat wajib diisi', 'error');
       return;
     }
     
     setIsSaving(true);
     try {
-      const payload = {
+      const formDataPayload = {
         klasifikasi: 'SPPD',
         nomorSurat: nomorSurat,
         tanggal: new Date().toISOString(),
@@ -210,16 +210,27 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         kepadaYth
       };
 
+      const payload = {
+        jenis: 'SPPD',
+        nomor: nomorSurat,
+        nama: pelaksanaList[0]?.nama || 'Pelaksana',
+        nik: pelaksanaList[0]?.nip || '-',
+        tanggal: new Date().toISOString(),
+        status: 'Selesai' as const,
+        keperluan: maksudPerjalanan || 'Perjalanan Dinas',
+        formData: formDataPayload
+      };
+
       if (editLetterId) {
         updateLetterHistory(editLetterId, payload);
-        showToast('success', 'Surat SPPD berhasil diperbarui!');
+        showToast('Surat SPPD berhasil diperbarui!', 'success');
       } else {
         addLetterHistory(payload);
-        showToast('success', 'Surat SPPD berhasil dicatat!');
+        showToast('Surat SPPD berhasil dicatat!', 'success');
       }
       setHasRecorded(true);
     } catch (e) {
-      showToast('error', 'Gagal mencatat surat');
+      showToast('Gagal mencatat surat', 'error');
     } finally {
       setIsSaving(false);
     }

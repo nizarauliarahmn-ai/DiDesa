@@ -30,7 +30,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
 
@@ -176,7 +176,6 @@ export default function AdminSurat({
         )}
         {activeTab === 'skl' && (
           <AdminSuratSKL 
-            presetResident={presetResident}
             editData={editData}
             editLetterId={editLetterId}
             onBack={() => changeTab('buat')} 
