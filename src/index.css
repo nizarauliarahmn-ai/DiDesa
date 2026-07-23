@@ -279,3 +279,24 @@ html, body, #root {
   }
 }
 
+/* ============================================================
+   GLOBAL AUTO-CAPITALIZE: Semua input teks & textarea
+   Berlaku untuk seluruh form di aplikasi DiDesa
+   ============================================================ */
+input[type="text"]:not([data-no-cap]),
+input[type="search"]:not([data-no-cap]),
+textarea:not([data-no-cap]) {
+  text-transform: capitalize;
+}
+
+/* Kolom yang TIDAK perlu dikapitalisasi: NIK, No. KK, email, password, nomor surat, dll */
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[data-no-cap],
+textarea[data-no-cap] {
+  text-transform: none !important;
+}

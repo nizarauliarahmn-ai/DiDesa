@@ -13,6 +13,7 @@ import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHist
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
+import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 interface Resident {
@@ -215,14 +216,14 @@ export default function AdminSuratSKM({
 
     setFormData(prev => ({
       ...prev,
-      nama: res.name,
+      nama: capitalizeResidentFields(res).name,
       nik: res.nik,
-      tempatLahir: res.birthPlace,
+      tempatLahir: capitalizeResidentFields(res).birthPlace,
       tanggalLahir: res.birthDate,
       jenisKelamin: res.gender || 'Laki-Laki',
       agama: (res as any).religion || 'Islam',
       pekerjaan: res.job || 'Wiraswasta',
-      alamat: res.address,
+      alamat: capitalizeResidentFields(res).address,
       rt: rt || '001',
       rw: rw || '001',
     }));

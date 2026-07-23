@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { getLetterClassifications, generateLetterNumber, getGlobalSequenceNumber } from '../../../utils/letterClassifications';

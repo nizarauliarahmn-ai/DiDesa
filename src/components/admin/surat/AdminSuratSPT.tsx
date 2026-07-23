@@ -13,6 +13,7 @@ import {
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
+import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 // ===================== INTERFACES =====================

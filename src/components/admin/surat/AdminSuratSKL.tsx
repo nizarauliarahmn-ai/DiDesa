@@ -13,6 +13,7 @@ import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHist
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
+import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 interface Resident {
@@ -219,9 +220,9 @@ export default function AdminSuratSKL({
     setAyahData(prev => ({
       ...prev,
       nik: res.nik,
-      nama: res.name,
+      nama: capitalizeResidentFields(res).name,
       pekerjaan: res.job || '',
-      alamat: res.address || ''
+      alamat: capitalizeResidentFields(res).address || ''
     }));
     setSearchQuery('');
   };

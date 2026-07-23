@@ -65,3 +65,21 @@ export function parseAddressString(input: string, currentRt = '', currentRw = ''
     rw: extractedRw
   };
 }
+
+/**
+ * Capitalizes all relevant string fields from a resident object.
+ * Use when auto-filling surat/SK form data from resident selection.
+ */
+export function capitalizeResidentFields(res: any): any {
+  if (!res) return res;
+  const cap = capitalizeWords;
+  return {
+    ...res,
+    name: cap(res.name || ''),
+    birthPlace: cap(res.birthPlace || ''),
+    address: cap(res.address || ''),
+    fatherName: cap(res.fatherName || ''),
+    motherName: cap(res.motherName || ''),
+    desa: cap(res.desa || ''),
+  };
+}

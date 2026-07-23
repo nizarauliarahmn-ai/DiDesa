@@ -10,6 +10,7 @@ import { getLetterClassifications, saveLetterClassifications, incrementSequenceN
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
+import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 export default function AdminSuratNikah({ 
