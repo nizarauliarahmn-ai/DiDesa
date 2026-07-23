@@ -837,7 +837,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       </div>
                       {activePelaksanaDropdown === pelaksana.id && pelaksana.nama.length > 1 && (
                         <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700 max-h-60 overflow-y-auto z-50">
-                          {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(pelaksana.nama.toLowerCase()) || (r.nik || r.nip || '').includes(pelaksana.nama)).slice(0, 5).map((res: any, idx: number) => (
+                          {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes((pelaksana?.nama || '').toLowerCase()) || (r.nik || r.nip || '').includes(pelaksana.nama)).slice(0, 5).map((res: any, idx: number) => (
                             <button
                               key={res.nik || res.nip || idx}
                               onMouseDown={(e) => {
@@ -927,7 +927,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                                 />
                                 {activePengikutDropdown === `${pelaksana.id}-${index}` && p.nama.length > 1 && (
                                   <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-100 dark:border-slate-700 max-h-48 overflow-y-auto z-50">
-                                    {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes(p.nama.toLowerCase()) || (r.nik || r.nip || '').includes(p.nama)).slice(0, 5).map((res: any, idx: number) => (
+                                    {[...officers, ...residents].filter((r: any) => (r.name || r.nama || '').toLowerCase().includes((p?.nama || '').toLowerCase()) || (r.nik || r.nip || '').includes(p.nama)).slice(0, 5).map((res: any, idx: number) => (
                                       <button
                                         key={res.nik || res.nip || idx}
                                         onMouseDown={(e) => {

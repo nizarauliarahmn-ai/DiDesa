@@ -96,12 +96,12 @@ export default function AdminHeader({
   ];
 
   const filteredQuickLinks = searchQuery.trim().length > 0 
-    ? quickLinks.filter(link => link.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? quickLinks.filter(link => link.(name || '').toLowerCase().includes(searchQuery.toLowerCase()))
     : [];
 
   const filteredResidents = searchQuery.trim().length >= 2
     ? residents.filter(r => 
-        (r.name && r.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (r.name && r.(name || '').toLowerCase().includes(searchQuery.toLowerCase())) ||
         (r.nik && r.nik.includes(searchQuery)) ||
         (r.noKk && r.noKk.includes(searchQuery))
       ).slice(0, 5)
@@ -316,7 +316,7 @@ export default function AdminHeader({
     }
     
     // Navigation logic
-    const title = item.title.toLowerCase();
+    const title = (item.title || '').toLowerCase();
     const msg = item.message.toLowerCase();
     
     if (title.includes('persetujuan') || title.includes('approval') || msg.includes('menunggu persetujuan')) {

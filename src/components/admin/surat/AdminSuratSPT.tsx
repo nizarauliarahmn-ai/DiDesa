@@ -687,7 +687,7 @@ export default function AdminSuratSPT({
 
   // ─── Filtered pewaris search ───
   const filteredPewaris = allResidents.filter(r =>
-    r.name.toLowerCase().includes(pewarisQuery.toLowerCase()) ||
+    (r.name || '').toLowerCase().includes((pewarisQuery || '').toLowerCase()) ||
     r.nik.includes(pewarisQuery)
   ).slice(0, 8);
 

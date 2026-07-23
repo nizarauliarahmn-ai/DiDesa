@@ -178,9 +178,9 @@ export default function BeritaDesa() {
   const filteredNews = processedNews.filter(item => {
     const matchesCategory = activeCategory === 'Semua' || item.tag === activeCategory;
     const matchesSearch = 
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.fullContent.toLowerCase().includes(searchQuery.toLowerCase());
+      (item.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.fullContent || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 

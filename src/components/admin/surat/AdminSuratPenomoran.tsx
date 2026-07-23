@@ -162,8 +162,8 @@ export default function AdminSuratPenomoran() {
       "Pemerintah Kabupaten Hulu Sungai Selatan";
 
     const getDesaInitial = (name: string) => {
-      if (name.toLowerCase().includes("Sukamakmur")) return "WHi";
-      if (name.toLowerCase().includes("sukamaju")) return "DS-SKM";
+      if ((name || '').toLowerCase().includes("Sukamakmur")) return "WHi";
+      if ((name || '').toLowerCase().includes("sukamaju")) return "DS-SKM";
       const words = name
         .replace(/desa|kelurahan/gi, "")
         .trim()
@@ -228,10 +228,10 @@ const handleSaveSettings = () => {
 
 const filteredItems = classifications.filter(
   (item) =>
-    item.jenis.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.klasifikasi.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.jenis || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (item.klasifikasi || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
     (item.kodeKlasifikasi &&
-      item.kodeKlasifikasi.toLowerCase().includes(searchQuery.toLowerCase())),
+      (item.kodeKlasifikasi || '').toLowerCase().includes(searchQuery.toLowerCase())),
 );
 
 const handleOpenSaaSRequest = () => {

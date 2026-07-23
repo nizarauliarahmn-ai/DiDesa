@@ -82,8 +82,8 @@ export default function TransparansiDana() {
         activeTab === 'semua' || 
         item.category === activeTab;
       const matchesSearch = 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.sector.toLowerCase().includes(searchQuery.toLowerCase());
+        item.(name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.sector || '').toLowerCase().includes(searchQuery.toLowerCase());
       return matchesTab && matchesSearch;
     });
   }, [activeTab, searchQuery]);
