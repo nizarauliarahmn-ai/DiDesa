@@ -232,7 +232,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 <User size={16} />
               </span>
               <input
-                type="text"
+                type="email"
+                data-no-cap
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@desa.id"
@@ -256,6 +257,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               </span>
               <input
                 type={showPassword ? 'text' : 'password'}
+                data-no-cap
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
