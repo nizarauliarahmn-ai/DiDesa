@@ -87,7 +87,7 @@ export function getResidentLetters(nik: string, name: string): LetterHistory[] {
   const history = getLetterHistory();
   return history.filter(item => 
     (item.nik && item.nik === nik) || 
-    (item.nama && item.nama.toLowerCase() === name.toLowerCase())
+    (item.nama && (item.nama || '').toLowerCase() === (name || '').toLowerCase())
   );
 }
 

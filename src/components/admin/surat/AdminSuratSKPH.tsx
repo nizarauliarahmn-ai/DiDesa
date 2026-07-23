@@ -51,7 +51,7 @@ export default function AdminSuratSKPH({
   // Prefill in edit mode
   useEffect(() => {
     if (editData) {
-      setFormData(editData);
+      setFormData(prev => ({ ...prev, ...editData }));
     }
   }, [editData]);
 

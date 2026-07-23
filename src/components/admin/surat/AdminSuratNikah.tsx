@@ -40,7 +40,7 @@ export default function AdminSuratNikah({
   // Prefill in edit mode
   useEffect(() => {
     if (editData) {
-      setFormData(editData);
+      setFormData(prev => ({ ...prev, ...editData }));
     }
   }, [editData]);
 
