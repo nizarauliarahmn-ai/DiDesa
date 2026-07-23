@@ -41,6 +41,7 @@ import ProfilDesa from './components/dashboard/ProfilDesa';
 import AspirasiWarga from './components/dashboard/AspirasiWarga';
 import AiAssistant from './components/dashboard/AiAssistant';
 import IntroductionTour from './components/IntroductionTour';
+import PrintQRKiosk from './components/admin/PrintQRKiosk';
 
 export default function App() {
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
@@ -318,6 +319,12 @@ export default function App() {
         <GlobalUpdateNotifier />
       </div>
     );
+  }
+
+  // Khusus untuk Halaman Print (Terisolasi dari semua layout)
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('print') === 'qr_kiosk') {
+    return <PrintQRKiosk />;
   }
 
   // Khusus untuk Kiosk Buku Tamu Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)

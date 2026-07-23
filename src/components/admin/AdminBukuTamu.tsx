@@ -504,11 +504,11 @@ export default function AdminBukuTamu() {
             
             <div className="p-5 border-t border-gray-100 dark:border-slate-800">
               <button 
-                onClick={() => handlePrintQRContent()} 
+                onClick={() => window.open('/?print=qr_kiosk', '_blank')} 
                 className="w-full py-3 bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-emerald-800 transition-all shadow-md"
               >
                 <Printer className="w-5 h-5" />
-                Mulai Mencetak Kertas QR
+                Buka Halaman Cetak
               </button>
             </div>
           </div>
