@@ -4,6 +4,7 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { showToast } from '../../utils/toast';
 import { capitalizeWords } from '../../utils/textUtils';
 import SignatureCanvas from 'react-signature-canvas';
+import ConfirmModal from '../common/ConfirmModal';
 import AdminQRScanner from './AdminQRScanner';
 import { QRCodeSVG } from 'qrcode.react';
 import { useReactToPrint } from 'react-to-print';
@@ -47,6 +48,7 @@ export default function AdminBukuTamu() {
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: '', nama: '' });
   const signatureRef = React.useRef<any>(null);
   const [showPrintQR, setShowPrintQR] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -199,8 +201,13 @@ export default function AdminBukuTamu() {
     }
   };
 
-  const handleDelete = async (id: string, nama: string) => {
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus data tamu ${nama}?`)) return;
+  const handleDelete = (id: string, nama: string) => {
+    setDeleteConfirm({ isOpen: true, id, nama });
+  };
+
+  const executeDelete = async () => {
+    const { id, nama } = deleteConfirm;
+    setDeleteConfirm({ isOpen: false, id: '', nama: '' });
     const { error } = await supabase.from('guest_book').delete().eq('id', id);
     if (!error) {
       showToast(`${nama} berhasil dihapus.`, 'success');
@@ -716,6 +723,15 @@ export default function AdminBukuTamu() {
       </div>
 
       {/* Style print bawaan yang mengganggu dihapus karena kita sudah pakai iframe murni */}
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        title="Hapus Data Tamu"
+        message={<>Apakah Anda yakin ingin menghapus data tamu <strong>{deleteConfirm.nama}</strong>? Tindakan ini tidak dapat dibatalkan.</>}
+        confirmText="Ya, Hapus"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteConfirm({ isOpen: false, id: '', nama: '' })}
+        type="danger"
+      />
     </div>
   );
 }
