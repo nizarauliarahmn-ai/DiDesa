@@ -170,7 +170,7 @@ export default function AdminBukuTamu() {
         status: 'hadir',
       }]);
 
-      if (error) throw error;
+      if (err) throw err;
       showToast(`Tamu ${capitalizeWords(form.nama)} berhasil dicatat!`, 'success');
       setShowModal(false);
       setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
