@@ -225,16 +225,43 @@ export function getLetterClassifications(): LetterClassification[] {
 }
 
 export function saveLetterClassifications(classifications: LetterClassification[]) {
-  // Check if any classification has a different noUrutTerakhir than the current global sequence
+  // Optimistic UI update
   const currentGlobal = getGlobalSequenceNumber();
   const changedClass = classifications.find(c => c.noUrutTerakhir !== currentGlobal);
   if (changedClass) {
-    // A classification's noUrutTerakhir was manually updated or set in the modal
     localStorage.setItem('global_letter_sequence_number', String(changedClass.noUrutTerakhir));
-    // Make sure all classifications in this list use the same updated value
     classifications = classifications.map(c => ({ ...c, noUrutTerakhir: changedClass.noUrutTerakhir }));
   }
   localStorage.setItem('letter_classifications', JSON.stringify(classifications));
+  
+  // Background sync to Supabase
+  setTimeout(async () => {
+    try {
+      const { supabase } = await import('./supabase');
+      const { resolveCurrentTenant } = await import('./tenantResolver');
+      const tenantId = await resolveCurrentTenant();
+      
+      if (tenantId) {
+        const payload = classifications.map(c => ({
+          id: c.id,
+          tenant_id: tenantId,
+          jenis: c.jenis,
+          klasifikasi: c.klasifikasi,
+          kode_klasifikasi: c.kodeKlasifikasi,
+          deskripsi: c.deskripsi,
+          no_urut_terakhir: c.noUrutTerakhir,
+          is_visible: c.isVisible,
+          is_saas_disabled: c.isSaaSDisabled,
+          fields: c.fields || null,
+          updated_at: new Date().toISOString()
+        }));
+        
+        await supabase.from('letter_classifications').upsert(payload, { onConflict: 'id' });
+      }
+    } catch (e) {
+      console.error('Failed to sync letter classifications to Supabase:', e);
+    }
+  }, 10);
 }
 
 export function getNextSequenceNumber(klasifikasi: string): number {
@@ -262,6 +289,29 @@ export function incrementSequenceNumber(klasifikasi: string) {
   
   localStorage.setItem(`last_year_global`, String(currentYear));
   saveGlobalSequenceNumber(nextVal);
+  
+  // Also push to Supabase in background
+  setTimeout(async () => {
+    try {
+      const { supabase } = await import('./supabase');
+      const { resolveCurrentTenant } = await import('./tenantResolver');
+      const tenantId = await resolveCurrentTenant();
+      
+      if (tenantId) {
+        // Just push the sequence number to the first classification record as a master record,
+        // or trigger a function. We'll update the global sequence by updating the max number.
+        // The most robust way is to update all active classifications in Supabase.
+        const classes = getLetterClassifications();
+        if (classes.length > 0) {
+          await supabase.from('letter_classifications')
+            .update({ no_urut_terakhir: nextVal })
+            .eq('tenant_id', tenantId);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to sync sequence number to Supabase:', e);
+    }
+  }, 10);
   
   // Dispatch event to refresh UI
   window.dispatchEvent(new Event('letter_classifications_updated'));

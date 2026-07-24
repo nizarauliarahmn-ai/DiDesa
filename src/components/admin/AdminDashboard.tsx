@@ -4,8 +4,8 @@ import { fetchResidentsCached } from '../../utils/apiCache';
 import React, { useState, useEffect } from 'react';
 import { Users, FileText, Gift, MessageSquare, TrendingUp, ChevronDown, UserPlus, PenTool, ExternalLink, Loader2, Building2, BarChart3, Clock, AlertTriangle, CheckCircle2, MessageCircle, Sparkles } from 'lucide-react';
 import { getAspirasi } from '../../utils/aspirasiData';
-import { getFeedbacks, Feedback } from '../../utils/feedbackData';
-import { getSaaSLogs, SaaSLog } from '../../utils/saasLogs';
+import { fetchFeedbacksAsync, Feedback } from '../../utils/feedbackData';
+import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
 import { supabase } from '../../utils/supabase';
 import { fetchLetterHistoryAsync, LetterHistory } from '../../utils/letterHistory';
 import { getLetterClassifications } from '../../utils/letterClassifications';
@@ -41,10 +41,10 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
       setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
     };
     const handleFeedbackUpdate = () => {
-      setFeedbacks(getFeedbacks());
+      fetchFeedbacksAsync().then(setFeedbacks);
     };
     const handleSaaSLogsUpdate = () => {
-      setSaasLogs(getSaaSLogs().slice(0, 5));
+      fetchSaaSLogs().then(logs => setSaasLogs(logs.slice(0, 5)));
     };
 
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
@@ -63,7 +63,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   useEffect(() => {
     // load aspirasi & feedback
     setAspirasiList(getAspirasi());
-    setFeedbacks(getFeedbacks());
+    fetchFeedbacksAsync().then(setFeedbacks);
 
     fetchLetterHistoryAsync().then(history => {
       setLetterHistory(history);

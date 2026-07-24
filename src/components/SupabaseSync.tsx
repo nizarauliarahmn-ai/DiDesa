@@ -57,6 +57,30 @@ export function SupabaseSync() {
             window.dispatchEvent(new Event('brandingUpdated'));
           }
         }
+        
+        // Sync Letter Classifications from Supabase
+        const { data: classData, error: classError } = await supabase
+          .from('letter_classifications')
+          .select('*')
+          .eq('tenant_id', tenantId);
+          
+        if (!classError && classData && classData.length > 0 && isMounted) {
+          // Format them to match LetterClassification interface
+          const mapped = classData.map(c => ({
+            id: c.id,
+            jenis: c.jenis,
+            klasifikasi: c.klasifikasi,
+            kodeKlasifikasi: c.kode_klasifikasi,
+            deskripsi: c.deskripsi,
+            noUrutTerakhir: c.no_urut_terakhir,
+            isVisible: c.is_visible,
+            isSaaSDisabled: c.is_saas_disabled,
+            fields: c.fields
+          }));
+          localStorage.setItem('letter_classifications', JSON.stringify(mapped));
+          window.dispatchEvent(new Event('letter_classifications_updated'));
+        }
+
       } catch (e) {
         console.error('Failed to sync settings:', e);
       }
@@ -88,6 +112,19 @@ export function SupabaseSync() {
               window.dispatchEvent(new Event('brandingUpdated'));
             }
           }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'letter_classifications',
+          filter: `tenant_id=eq.${tenantId}`
+        },
+        () => {
+          // Re-fetch on change
+          fetchSettings();
         }
       )
       .subscribe();

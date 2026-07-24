@@ -1528,7 +1528,7 @@ export default function AdminSuratDashboard({
                 Kembali
               </button>
               <button 
-                onClick={handleCancelSurat}
+                onClick={() => suratToCancel && handleCancel(suratToCancel)}
                 className="flex-1 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all"
               >
                 Ya, Batalkan
@@ -1559,7 +1559,7 @@ export default function AdminSuratDashboard({
                 Batal
               </button>
               <button 
-                onClick={handleDeleteSurat}
+                onClick={() => suratToDelete && handleDelete(suratToDelete)}
                 className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm dark:shadow-none transition-all"
               >
                 Ya, Hapus

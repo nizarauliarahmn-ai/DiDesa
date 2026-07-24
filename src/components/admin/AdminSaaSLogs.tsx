@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Database, Search, Filter, Trash2, Download, AlertCircle, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
-import { getSaaSLogs, SaaSLog } from '../../utils/saasLogs';
+import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
 
 export default function AdminSaaSLogs() {
   const [logs, setLogs] = useState<SaaSLog[]>([]);
@@ -9,7 +9,7 @@ export default function AdminSaaSLogs() {
   const [filterStatus, setFilterStatus] = useState<string>('Semua');
 
   useEffect(() => {
-    const handleUpdate = () => setLogs(getSaaSLogs());
+    const handleUpdate = () => fetchSaaSLogs().then(setLogs);
     handleUpdate();
     window.addEventListener('saas_logs_updated', handleUpdate);
     return () => window.removeEventListener('saas_logs_updated', handleUpdate);
