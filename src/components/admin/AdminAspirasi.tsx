@@ -1,8 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, CheckCircle, Clock, AlertTriangle, Eye, X, MessageSquareText, UploadCloud, Edit2, MessageCircle, Printer, Calendar } from 'lucide-react';
-import { getAspirasi, updateAspirasiStatus, Aspirasi } from '../../utils/aspirasiData';
 import { showToast } from '../../utils/toast';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
+export interface Aspirasi {
+  id: string;
+  sender: string;
+  category: string;
+  subject: string;
+  content: string;
+  fileName?: string | null;
+  adminResponse?: {
+    text: string;
+    fileName?: string | null;
+    date: string;
+  } | null;
+  status: 'Menunggu' | 'Proses' | 'Selesai';
+  date: string;
+}
 
 
 export default function AdminAspirasi({
@@ -139,20 +155,68 @@ export default function AdminAspirasi({
   };
 
 
-  React.useEffect(() => {
-    const loadAspirasi = () => setAspirasiList(getAspirasi());
+  useEffect(() => {
+    const loadAspirasi = async () => {
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) return;
+
+      const { data, error } = await supabase
+        .from('aspirasi')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false });
+
+      if (data) {
+        const formatted: Aspirasi[] = data.map((item: any) => ({
+          id: item.id,
+          sender: item.nama_pengirim || 'Anonim',
+          category: item.kategori,
+          subject: item.kategori, // Since kiosk only sends kategori and pesan
+          content: item.pesan,
+          status: item.status === 'Baru' ? 'Menunggu' : item.status,
+          date: item.created_at,
+          fileName: null,
+          adminResponse: item.tanggapan_admin ? {
+            text: item.tanggapan_admin,
+            fileName: item.file_bukti || null,
+            date: item.tanggapan_date || item.created_at
+          } : null
+        }));
+        setAspirasiList(formatted);
+      }
+    };
     loadAspirasi();
-    window.addEventListener('didesa_aspirasi_updated', loadAspirasi);
-    return () => window.removeEventListener('didesa_aspirasi_updated', loadAspirasi);
+    
+    const channel = supabase
+      .channel('aspirasi_admin_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'aspirasi' }, () => {
+         loadAspirasi();
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
-  const handleUpdateStatus = () => {
+  const handleUpdateStatus = async () => {
     if (!selectedAspirasi) return;
     
-    updateAspirasiStatus(selectedAspirasi.id, newStatus, responseText ? {
-      text: responseText,
-      fileName: proofFile ? proofFile.name : null
-    } : undefined);
+    const { error } = await supabase
+      .from('aspirasi')
+      .update({
+        status: newStatus === 'Menunggu' ? 'Baru' : newStatus,
+        tanggapan_admin: responseText || null,
+        tanggapan_date: responseText ? new Date().toISOString() : null,
+        file_bukti: proofFile ? proofFile.name : null
+      })
+      .eq('id', selectedAspirasi.id);
+
+    if (error) {
+      showToast('Gagal memperbarui status aspirasi', 'error');
+      console.error(error);
+      return;
+    }
     
     showToast('Status aspirasi berhasil diperbarui', 'success');
     setSelectedAspirasi({ 
