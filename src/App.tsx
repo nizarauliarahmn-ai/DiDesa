@@ -79,7 +79,11 @@ export default function App() {
   });
 
   const [view, setView] = useState<'public' | 'admin'>(() => {
-    if (new URLSearchParams(window.location.search).get('preview') === 'true') {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'public' || urlParams.get('tab') === 'layanan_mandiri' || urlParams.get('portal') === 'warga') {
+      return 'public';
+    }
+    if (urlParams.get('preview') === 'true') {
       return 'admin';
     }
     const saved = localStorage.getItem('didesa_auth_user');
