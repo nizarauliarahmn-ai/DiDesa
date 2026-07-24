@@ -290,9 +290,11 @@ export default function PublicKiosSurat() {
               <p className="text-xl text-slate-500 mb-8">Silakan masukkan 16 digit NIK Anda untuk melanjutkan permohonan surat.</p>
               
               {!isManualEntry ? (
-                <>
+                <div className="flex flex-col items-center w-full">
                   <input 
-                    type="text" // Using text to allow virtual numpad integration later if needed
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     value={nik}
                     onChange={(e) => setNik(e.target.value.replace(/\D/g, '').slice(0, 16))}
                     className="w-full text-center text-4xl font-mono tracking-[0.2em] p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 outline-none"
@@ -306,11 +308,21 @@ export default function PublicKiosSurat() {
                   >
                     Lanjutkan
                   </button>
-                </>
+
+                  <button 
+                    onClick={() => setIsManualEntry(true)}
+                    className="mt-6 text-blue-600 font-bold text-lg hover:underline transition-colors"
+                  >
+                    Bukan Penduduk Desa? Isi Data Manual
+                  </button>
+                </div>
               ) : (
-                <div className="space-y-6 text-left">
+                <div className="space-y-6 text-left w-full">
                   <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 mb-6">
-                    <p className="font-medium">Data NIK tidak ditemukan di database warga. Silakan masukkan nama lengkap Anda untuk melanjutkan secara manual.</p>
+                    <p className="font-medium">
+                      {nik.length === 16 ? "Data NIK tidak ditemukan di database warga. " : ""}
+                      Silakan masukkan identitas Anda untuk melanjutkan permohonan.
+                    </p>
                   </div>
                   <div>
                     <label className="block text-xl font-bold text-gray-700 mb-2">Nama Lengkap Sesuai KTP</label>
