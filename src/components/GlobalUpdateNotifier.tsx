@@ -12,9 +12,14 @@ interface GlobalUpdate {
   type: string;
 }
 
-export const GlobalUpdateNotifier: React.FC = () => {
+interface Props {
+  isBusy?: boolean;
+}
+
+export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false }) => {
   const [latestUpdate, setLatestUpdate] = useState<GlobalUpdate | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [pendingReload, setPendingReload] = useState(false);
   
   // Global Branding
   const [globalName, setGlobalName] = useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
@@ -25,7 +30,13 @@ export const GlobalUpdateNotifier: React.FC = () => {
       setGlobalName(localStorage.getItem('global_app_name') || 'DiDesa');
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
     };
+    
+    const handleForceReload = () => {
+      setPendingReload(true);
+    };
+
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
+    window.addEventListener('force_reload_requested', handleForceReload);
 
     const fetchUpdates = async () => {
       try {
@@ -49,8 +60,21 @@ export const GlobalUpdateNotifier: React.FC = () => {
     };
 
     fetchUpdates();
-    return () => window.removeEventListener('global_branding_updated', handleBrandingUpdate);
+    return () => {
+      window.removeEventListener('global_branding_updated', handleBrandingUpdate);
+      window.removeEventListener('force_reload_requested', handleForceReload);
+    };
   }, []);
+
+  // Graceful reload observer
+  useEffect(() => {
+    if (pendingReload) {
+      if (!isBusy) {
+        // Safe to reload immediately
+        window.location.reload();
+      }
+    }
+  }, [pendingReload, isBusy]);
 
   const handleClose = () => {
     if (latestUpdate) {
@@ -77,11 +101,30 @@ export const GlobalUpdateNotifier: React.FC = () => {
     }
   };
 
-  if (!latestUpdate) return null;
+  if (!latestUpdate && !pendingReload) return null;
 
   return (
-    <AnimatePresence>
-      {isVisible && (
+    <>
+      <AnimatePresence>
+        {pendingReload && isBusy && (
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] max-w-lg w-[calc(100%-2rem)] bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-blue-100 dark:border-blue-900 p-4 flex items-start gap-4"
+          >
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg shrink-0">
+              <Rocket className="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Versi Baru Tersedia!</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">Sistem baru saja diperbarui. Jangan khawatir, silakan selesaikan pengisian form Anda. Aplikasi akan dimuat ulang secara otomatis saat Anda kembali ke layar utama.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence>
+        {isVisible && latestUpdate && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -149,7 +192,8 @@ export const GlobalUpdateNotifier: React.FC = () => {
             </div>
           </motion.div>
         </div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+    </>
   );
 };

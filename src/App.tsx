@@ -249,10 +249,14 @@ export default function App() {
           setView(loggedInUser.role === 'public' ? 'public' : 'admin');
         }} />
         <ToastContainer />
-        <GlobalUpdateNotifier />
+        <GlobalUpdateNotifier isBusy={false} />
       </>
     );
   }
+
+  // Determine if the user is in a "busy" state where reloading would cause data loss
+  const isBusy = (view === 'admin' && adminTab === 'surat' && document.querySelector('form') !== null) || 
+                 (view === 'public' && publicTab === 'layanan_surat');
 
   if (view === 'admin' && user) {
     return (
@@ -345,7 +349,7 @@ export default function App() {
         </div>
         <IntroductionTour role={user.role} />
         <ToastContainer />
-        <GlobalUpdateNotifier />
+        <GlobalUpdateNotifier isBusy={isBusy} />
       </div>
     );
   }
@@ -447,7 +451,7 @@ export default function App() {
       </div>
       <IntroductionTour role={user?.role || 'public'} />
       <ToastContainer />
-      <GlobalUpdateNotifier />
+      <GlobalUpdateNotifier isBusy={isBusy} />
     </div>
   );
 }

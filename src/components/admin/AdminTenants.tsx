@@ -375,44 +375,68 @@ export default function AdminTenants() {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-slate-700">
+      <div className="flex justify-between items-center border-b border-gray-200 dark:border-slate-700">
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab('tenants')}
+            className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === 'tenants' 
+                ? 'border-emerald-600 text-emerald-700' 
+                : 'border-transparent text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            <Server size={18} />
+            Manajemen Klien & Kredensial
+          </button>
+          <button
+            onClick={() => setActiveTab('updates')}
+            className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === 'updates' 
+                ? 'border-emerald-600 text-emerald-700' 
+                : 'border-transparent text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            <Megaphone size={18} />
+            Update Global
+          </button>
+          <button
+            onClick={() => setActiveTab('feedback')}
+            className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
+              activeTab === 'feedback' 
+                ? 'border-emerald-600 text-emerald-700' 
+                : 'border-transparent text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            <MessageSquare size={18} />
+            Feedback Pengguna
+            {feedbacks.filter(f => f.status === 'Baru').length > 0 && (
+              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1 animate-pulse">
+                {feedbacks.filter(f => f.status === 'Baru').length}
+              </span>
+            )}
+          </button>
+        </div>
+        
         <button
-          onClick={() => setActiveTab('tenants')}
-          className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-            activeTab === 'tenants' 
-              ? 'border-emerald-600 text-emerald-700' 
-              : 'border-transparent text-gray-400 hover:text-gray-600'
-          }`}
+          onClick={async () => {
+            if (window.confirm('Yakin ingin memaksa seluruh layar Kios & Admin se-Indonesia memuat ulang secara otomatis sekarang? Pastikan Anda baru saja merilis pembaruan baru.')) {
+              try {
+                await supabase.channel('global-broadcast').send({
+                  type: 'broadcast',
+                  event: 'force-reload',
+                  payload: { timestamp: Date.now() }
+                });
+                showToast('Perintah muat ulang berhasil dikirim ke semua perangkat!', 'success');
+              } catch (e) {
+                showToast('Gagal mengirim perintah', 'error');
+              }
+            }
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95"
+          title="Paksa seluruh layar memuat ulang versi terbaru"
         >
-          <Server size={18} />
-          Manajemen Klien & Kredensial
-        </button>
-        <button
-          onClick={() => setActiveTab('updates')}
-          className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-            activeTab === 'updates' 
-              ? 'border-emerald-600 text-emerald-700' 
-              : 'border-transparent text-gray-400 hover:text-gray-600'
-          }`}
-        >
-          <Megaphone size={18} />
-          Update Global
-        </button>
-        <button
-          onClick={() => setActiveTab('feedback')}
-          className={`px-6 py-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-            activeTab === 'feedback' 
-              ? 'border-emerald-600 text-emerald-700' 
-              : 'border-transparent text-gray-400 hover:text-gray-600'
-          }`}
-        >
-          <MessageSquare size={18} />
-          Feedback Pengguna
-          {feedbacks.filter(f => f.status === 'Baru').length > 0 && (
-            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1 animate-pulse">
-              {feedbacks.filter(f => f.status === 'Baru').length}
-            </span>
-          )}
+          <Activity size={14} className="animate-pulse" />
+          Paksa Refresh Global
         </button>
       </div>
 

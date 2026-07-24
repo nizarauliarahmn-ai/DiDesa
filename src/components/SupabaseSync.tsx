@@ -127,6 +127,9 @@ export function SupabaseSync() {
           fetchSettings();
         }
       )
+      .on('broadcast', { event: 'force-reload' }, () => {
+        window.dispatchEvent(new Event('force_reload_requested'));
+      })
       .subscribe();
 
     return () => {
