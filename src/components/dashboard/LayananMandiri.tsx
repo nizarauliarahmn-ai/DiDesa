@@ -8,6 +8,7 @@ import {
 import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHistory';
 import { showToast } from '../../utils/toast';
 import { getLetterClassifications, LetterClassification } from '../../utils/letterClassifications';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function LayananMandiri() {
   const [nikInput, setNikInput] = useState('');
@@ -123,10 +124,13 @@ export default function LayananMandiri() {
     const currentYear = new Date().getFullYear();
     const finalNumber = `140/${formatNum}/DS-${shortDesa}/${code}/${currentYear}`;
 
-    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
-    
-    import('../../utils/supabase').then(async ({ supabase }) => {
-      try {
+    resolveCurrentTenant().then(tenantId => {
+      if (!tenantId) {
+        showToast('Gagal memproses surat, Tenant ID tidak ditemukan.', 'error');
+        return;
+      }
+      import('../../utils/supabase').then(async ({ supabase }) => {
+        try {
         await supabase.from('surat').insert([{
           tenant_id: tenantId,
           jenis_surat: letterType,
@@ -154,6 +158,7 @@ export default function LayananMandiri() {
         console.error("Notification post failed:", err);
       }
     });
+    });
 
     setPurpose('');
     setAdditionalText('');
@@ -169,10 +174,13 @@ export default function LayananMandiri() {
       return;
     }
 
-    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
-    
-    import('../../utils/supabase').then(async ({ supabase }) => {
-      try {
+    resolveCurrentTenant().then(tenantId => {
+      if (!tenantId) {
+        showToast('Gagal mengirim aspirasi, Tenant ID tidak ditemukan.', 'error');
+        return;
+      }
+      import('../../utils/supabase').then(async ({ supabase }) => {
+        try {
         await supabase.from('aspirasi').insert([{
           tenant_id: tenantId,
           kategori: aspirationCategory,
@@ -198,6 +206,7 @@ export default function LayananMandiri() {
         console.error("Aspiration submit error:", err);
         showToast('Gagal mengirim aspirasi, silakan coba beberapa saat lagi.', 'error');
       }
+    });
     });
   };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Megaphone, CheckCircle2, Home } from 'lucide-react';
 import { showToast } from '../utils/toast';
+import { resolveCurrentTenant } from '../utils/tenantResolver';
 
 export default function PublicKiosAspirasi() {
   const [step, setStep] = useState(1);
@@ -43,7 +44,12 @@ export default function PublicKiosAspirasi() {
     }
 
     const pengirim = namaPengirim.trim() || 'Warga Anonim';
-    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
+    const tenantId = await resolveCurrentTenant();
+    
+    if (!tenantId) {
+      showToast('Gagal memproses aspirasi, Tenant ID tidak ditemukan.', 'error');
+      return;
+    }
 
     try {
       const { supabase } = await import('../utils/supabase');

@@ -196,8 +196,13 @@ export default function AdminHeader({
               const readIds = readIdsStr ? JSON.parse(readIdsStr) : [];
               
               const modifiedData = roleData.map(n => ({
-                ...n,
-                isRead: readIds.includes(n.id)
+                id: n.id,
+                title: n.title,
+                message: n.message,
+                category: n.category,
+                time: n.time || '',
+                timestamp: n.timestamp,
+                isRead: Boolean(n.is_read || readIds.includes(n.id))
               }));
               
               setNotifications(modifiedData);
@@ -226,8 +231,6 @@ export default function AdminHeader({
 
   const handleMarkAllAsRead = async () => {
     try {
-      // Don't modify backend so it doesn't affect other roles
-      // Instead, save to local storage for this role
       const allIds = notifications.map(n => n.id);
       const authUserStr = localStorage.getItem('didesa_auth_user');
       const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
@@ -235,40 +238,48 @@ export default function AdminHeader({
       
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
+
+      const tenantId = await resolveCurrentTenant();
+      if (tenantId) {
+        await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('tenant_id', tenantId);
+      }
     } catch (err) {
       console.error("Error marking all as read:", err);
     }
   };
 
-  const handleToggleRead = (id: string) => {
-    setNotifications(prev => prev.map(n => {
-      if (n.id === id) {
-        const newState = !n.isRead;
-        try {
-           const authUserStr = localStorage.getItem('didesa_auth_user');
-           const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
-           const readIdsStr = localStorage.getItem(`didesa_read_notifs_${role}`);
-           let readIds = readIdsStr ? JSON.parse(readIdsStr) : [];
-           if (newState) {
-             if (!readIds.includes(id)) readIds.push(id);
-           } else {
-             readIds = readIds.filter((rid: string) => rid !== id);
-           }
-           localStorage.setItem(`didesa_read_notifs_${role}`, JSON.stringify(readIds));
-        } catch(e) {}
-        return { ...n, isRead: newState };
+  const handleToggleRead = async (id: string) => {
+    const target = notifications.find(n => n.id === id);
+    if (!target) return;
+    const newState = !target.isRead;
+
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: newState } : n));
+    setUnreadCount(prev => Math.max(0, newState ? prev - 1 : prev + 1));
+
+    try {
+      const authUserStr = localStorage.getItem('didesa_auth_user');
+      const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
+      const readIdsStr = localStorage.getItem(`didesa_read_notifs_${role}`);
+      let readIds = readIdsStr ? JSON.parse(readIdsStr) : [];
+      if (newState) {
+        if (!readIds.includes(id)) readIds.push(id);
+      } else {
+        readIds = readIds.filter((rid: string) => rid !== id);
       }
-      return n;
-    }));
-    
-    // Recalculate count
-    setTimeout(() => {
-      setNotifications(current => {
-        const count = current.filter((n: any) => !n.isRead).length;
-        setUnreadCount(count);
-        return current;
-      });
-    }, 50);
+      localStorage.setItem(`didesa_read_notifs_${role}`, JSON.stringify(readIds));
+
+      if (!id.startsWith('saas-req-')) {
+        await supabase
+          .from('notifications')
+          .update({ is_read: newState })
+          .eq('id', id);
+      }
+    } catch (e) {
+      console.error("Error toggling read state:", e);
+    }
   };
 
   const getCategoryMeta = (cat: string) => {

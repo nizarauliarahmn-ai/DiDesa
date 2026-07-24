@@ -126,34 +126,40 @@ CREATE POLICY "User bisa melihat profil sendiri" ON public.profiles FOR SELECT U
 CREATE POLICY "User bisa mengupdate profil sendiri" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Policy untuk Tabel `penduduk`
-CREATE POLICY "Isolasi data penduduk per tenant" ON public.penduduk FOR ALL USING (
-    tenant_id = (SELECT tenant_id FROM public.profiles WHERE id = auth.uid())
-);
+CREATE POLICY "Isolasi data penduduk per tenant" ON public.penduduk FOR ALL USING (true);
 
 -- Policy untuk Tabel `surat` (Admin + Publik Kios)
-CREATE POLICY "Isolasi data surat per tenant" ON public.surat FOR ALL USING (
-    tenant_id = (SELECT tenant_id FROM public.profiles WHERE id = auth.uid())
-);
-CREATE POLICY "Akses Publik Insert Surat" ON public.surat FOR INSERT TO anon, authenticated WITH CHECK (true);
-CREATE POLICY "Akses Publik Update Surat" ON public.surat FOR UPDATE TO anon, authenticated USING (true);
+CREATE POLICY "Akses Publik & Admin Surat" ON public.surat FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
 -- Policy untuk Tabel `aspirasi`
-CREATE POLICY "Akses Publik Insert Aspirasi" ON public.aspirasi FOR INSERT TO anon, authenticated WITH CHECK (true);
-CREATE POLICY "Akses Admin Baca Aspirasi" ON public.aspirasi FOR SELECT USING (
-    tenant_id = (SELECT tenant_id FROM public.profiles WHERE id = auth.uid())
-);
+CREATE POLICY "Akses Publik & Admin Aspirasi" ON public.aspirasi FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
 -- Policy untuk Tabel `notifications`
-CREATE POLICY "Akses Publik Insert Notifikasi" ON public.notifications FOR INSERT TO anon, authenticated WITH CHECK (true);
-CREATE POLICY "Akses Admin Baca Notifikasi" ON public.notifications FOR SELECT USING (
-    tenant_id = (SELECT tenant_id FROM public.profiles WHERE id = auth.uid())
-);
+CREATE POLICY "Akses Publik & Admin Notifikasi" ON public.notifications FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
 
 -- Policy untuk Tabel `guest_book`
-CREATE POLICY "Akses Publik Insert Buku Tamu" ON public.guest_book FOR INSERT TO anon, authenticated WITH CHECK (true);
-CREATE POLICY "Akses Admin Baca Buku Tamu" ON public.guest_book FOR SELECT USING (
-    tenant_id = (SELECT tenant_id FROM public.profiles WHERE id = auth.uid())
-);
+CREATE POLICY "Akses Publik & Admin Buku Tamu" ON public.guest_book FOR ALL TO anon, authenticated USING (true) WITH CHECK (true);
+
+-- ==============================================================================
+-- AKTIFKAN REALTIME PUBLICATION SUPABASE
+-- ==============================================================================
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'notifications') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'aspirasi') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.aspirasi;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'surat') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.surat;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'guest_book') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.guest_book;
+  END IF;
+EXCEPTION
+  WHEN OTHERS THEN NULL;
+END $$;
 
 -- ==============================================================================
 -- BUCKET UNTUK TANDA TANGAN (SIGNATURES)

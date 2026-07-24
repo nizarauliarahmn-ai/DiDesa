@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft } from 'lucide-react';
 import { getLetterClassifications, LetterClassification } from '../utils/letterClassifications';
+import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { addLetterHistory } from '../utils/letterHistory';
 import { fetchResidentsCached } from '../utils/apiCache';
 import { showToast } from '../utils/toast';
@@ -121,7 +122,12 @@ export default function PublicKiosSurat() {
       }
     }
 
-    const tenantId = new URLSearchParams(window.location.search).get('tenant') || new URLSearchParams(window.location.search).get('t_id') || 'unknown';
+    const tenantId = await resolveCurrentTenant();
+
+    if (!tenantId) {
+      showToast('Gagal memproses surat, Tenant ID tidak ditemukan.', 'error');
+      return;
+    }
 
     try {
       const { supabase } = await import('../utils/supabase');
