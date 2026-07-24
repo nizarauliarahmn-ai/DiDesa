@@ -272,10 +272,11 @@ export default function AdminHeader({
       localStorage.setItem(`didesa_read_notifs_${role}`, JSON.stringify(readIds));
 
       if (!id.startsWith('saas-req-')) {
-        await supabase
+        const { error } = await supabase
           .from('notifications')
           .update({ is_read: newState })
           .eq('id', id);
+        if (error) console.error('Gagal update is_read di Supabase:', error);
       }
     } catch (e) {
       console.error("Error toggling read state:", e);

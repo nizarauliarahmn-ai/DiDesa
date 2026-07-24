@@ -238,8 +238,8 @@ export default function App() {
     setPublicTab('dashboard');
   };
 
-  // If not authenticated, force login screen
-  if (!user) {
+  // If not authenticated, force login screen UNLESS view is public
+  if (!user && view !== 'public') {
     return (
       <>
         <Login onLoginSuccess={(loggedInUser) => {
@@ -254,7 +254,7 @@ export default function App() {
     );
   }
 
-  if (view === 'admin') {
+  if (view === 'admin' && user) {
     return (
       <div className="flex h-screen bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-sans overflow-hidden print:h-auto print:overflow-visible print:block">
         <AdminSidebar setView={setView} activeTab={adminTab} setActiveTab={setAdminTab} onLogout={handleLogout} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
@@ -368,14 +368,20 @@ export default function App() {
             <div className="max-w-7xl mx-auto mb-6 flex justify-between items-center w-full">
               <div></div>
               <div className="flex gap-3">
-                 {(user.role === 'admin' || user.role === 'kades' || user.role === 'saas_admin') && (
+                 {(user?.role === 'admin' || user?.role === 'kades' || user?.role === 'saas_admin') && (
                    <button onClick={() => setView('admin')} className="bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-700 transition-colors cursor-pointer">
                      Masuk Mode Admin Desa
                    </button>
                  )}
-                 <button onClick={handleLogout} className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none border border-rose-200 transition-colors cursor-pointer">
-                   Keluar Sesi
-                 </button>
+                 {user ? (
+                   <button onClick={handleLogout} className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none border border-rose-200 transition-colors cursor-pointer">
+                     Keluar Sesi
+                   </button>
+                 ) : (
+                   <button onClick={() => setView('admin')} className="bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-700 transition-colors cursor-pointer">
+                     Masuk / Login
+                   </button>
+                 )}
               </div>
             </div>
             
@@ -439,7 +445,7 @@ export default function App() {
           </button>
         </nav>
       </div>
-      <IntroductionTour role={user.role} />
+      <IntroductionTour role={user?.role || 'public'} />
       <ToastContainer />
       <GlobalUpdateNotifier />
     </div>

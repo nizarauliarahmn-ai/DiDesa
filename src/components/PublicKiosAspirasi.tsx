@@ -64,16 +64,16 @@ export default function PublicKiosAspirasi() {
       }]);
 
       // 2. Insert into notifications
-      await supabase.from('notifications').insert([{
+      const { error: notifErr } = await supabase.from('notifications').insert([{
         id: `notif-${Date.now()}`,
         tenant_id: tenantId,
         title: `Aspirasi Kios: ${kategori}`,
         message: `${pengirim} mengirim pengaduan/aspirasi: "${pesan.trim()}"`,
         category: 'Services',
-        type: 'info',
         is_read: false,
         timestamp: new Date().toISOString()
       }]);
+      if (notifErr) console.error('Gagal membuat notif aspirasi:', notifErr);
     } catch (error) {
       console.error("Gagal mengirim data ke server:", error);
     }

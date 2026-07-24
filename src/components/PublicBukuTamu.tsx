@@ -6,8 +6,9 @@ import { Scanner } from '@yudiel/react-qr-scanner';
 import SignatureCanvas from 'react-signature-canvas';
 import {
   BookOpen, QrCode, User, MapPin, Briefcase, ChevronRight,
-  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search, FileSignature
+  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search, FileSignature, X
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const KEPERLUAN_OPTIONS = [
   'Mengurus Surat Keterangan',
@@ -36,7 +37,9 @@ export default function PublicBukuTamu() {
     nik: '', nama: '', alamat: '', instansi: '',
     keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: ''
   });
+  const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(false);
   const [isKioskMode, setIsKioskMode] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
   const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
   
   const signatureRef = React.useRef<any>(null);
@@ -190,16 +193,16 @@ export default function PublicBukuTamu() {
       if (err) throw err;
 
       // Create Notification for Admin
-      await supabase.from('notifications').insert([{
+      const { error: notifErr } = await supabase.from('notifications').insert([{
         id: `notif-${Date.now()}`,
         tenant_id: tenantId,
         title: 'Tamu Baru',
         message: `${capitalizeWords(form.nama)} telah hadir. Keperluan: ${form.keperluan}`,
         category: 'Buku Tamu',
-        type: 'info',
         is_read: false,
         timestamp: new Date().toISOString()
       }]);
+      if (notifErr) console.error('Gagal membuat notifikasi tamu:', notifErr);
       
       setStep('success');
     } catch {
@@ -236,13 +239,47 @@ export default function PublicBukuTamu() {
       )}
 
       {/* Header */}
-      <div className="text-center mb-8 mt-12 md:mt-0">
+      <div className="text-center mb-8 mt-12 md:mt-0 relative">
         <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
           <BookOpen className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-2xl md:text-3xl font-bold text-white">Buku Tamu Digital</h1>
         <p className="text-emerald-200 mt-1 font-medium">{desaName}</p>
+
+        {isKioskMode && (
+          <button 
+            onClick={() => setShowQrCode(true)}
+            className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm font-semibold transition-all backdrop-blur-md border border-white/20 shadow-lg"
+          >
+            <QrCode className="w-5 h-5" /> Isi Buku Tamu di HP Sendiri
+          </button>
+        )}
       </div>
+
+      {/* QR Code Modal */}
+      {showQrCode && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative animate-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowQrCode(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-full p-2 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <QrCode className="w-8 h-8 text-emerald-600" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Scan untuk Mengisi</h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+              Gunakan kamera HP Anda untuk memindai kode QR ini. Anda dapat mengisi buku tamu secara mandiri tanpa perlu antre di tablet.
+            </p>
+            
+            <div className="bg-white border-2 border-dashed border-gray-200 p-4 rounded-2xl inline-block mx-auto mb-2">
+              <QRCodeSVG value={window.location.href} size={200} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
@@ -364,10 +401,24 @@ export default function PublicBukuTamu() {
               </div>
             )}
 
+            <div className="mt-4">
+              <label className="flex items-start gap-3 p-4 bg-rose-50 rounded-xl border border-rose-100 cursor-pointer hover:bg-rose-100 transition-colors">
+                <input 
+                  type="checkbox" 
+                  checked={isDisclaimerChecked}
+                  onChange={(e) => setIsDisclaimerChecked(e.target.checked)}
+                  className="mt-0.5 w-5 h-5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                />
+                <span className="text-xs font-medium text-rose-900 leading-snug">
+                  Saya menyatakan bertanggung jawab penuh atas kebenaran data dan informasi yang saya berikan. Segala bentuk pemalsuan data dapat diproses sesuai hukum yang berlaku.
+                </span>
+              </label>
+            </div>
+
             <button
               onClick={handleSubmit}
-              disabled={isSaving}
-              className="mt-5 w-full py-4 bg-emerald-700 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all text-base disabled:opacity-60 flex items-center justify-center gap-2 shadow-sm"
+              disabled={isSaving || !isDisclaimerChecked}
+              className={`mt-5 w-full py-4 text-white font-bold rounded-2xl transition-all text-base flex items-center justify-center gap-2 shadow-sm ${(!isSaving && isDisclaimerChecked) ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-gray-400 cursor-not-allowed'}`}
             >
               {isSaving ? <RefreshCw className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
               Daftar Hadir

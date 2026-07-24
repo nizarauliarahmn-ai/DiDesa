@@ -19,6 +19,7 @@ export default function PublicKiosSurat() {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [desaName, setDesaName] = useState('');
   const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
+  const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -145,21 +146,22 @@ export default function PublicKiosSurat() {
       }]);
 
       // 2. Insert into notifications
-      await supabase.from('notifications').insert([{
+      const { error: notifErr } = await supabase.from('notifications').insert([{
         id: `notif-${Date.now()}`,
         tenant_id: tenantId,
         title: 'Permohonan Surat Kios',
         message: `Warga atas nama ${verifiedResident.name} (NIK: ${verifiedResident.nik}) mengajukan ${selectedLetter.jenis}.`,
         category: 'Services',
-        type: 'info',
         is_read: false,
         timestamp: new Date().toISOString()
       }]);
+      if (notifErr) console.error('Gagal membuat notif surat:', notifErr);
     } catch (error) {
       console.error("Gagal mengirim data ke server:", error);
     }
 
     setStep(4);
+    setIsDisclaimerChecked(false);
     
     // Auto reset after 10s
     setTimeout(() => {
@@ -400,10 +402,25 @@ export default function PublicKiosSurat() {
               <div className="max-h-[50vh] overflow-y-auto pr-4 pb-8 custom-scrollbar">
                 {renderDynamicForm()}
               </div>
+
+              <div className="mt-2 mb-8">
+                <label className="flex items-start gap-4 p-5 bg-rose-50 rounded-2xl border border-rose-100 cursor-pointer hover:bg-rose-100 transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={isDisclaimerChecked}
+                    onChange={(e) => setIsDisclaimerChecked(e.target.checked)}
+                    className="mt-1 w-6 h-6 text-emerald-600 rounded-md border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <span className="text-lg font-medium text-rose-900 leading-snug">
+                    Saya menyatakan bertanggung jawab penuh atas kebenaran data dan informasi yang saya berikan. Segala bentuk pemalsuan data dapat diproses sesuai hukum yang berlaku.
+                  </span>
+                </label>
+              </div>
               
               <button 
                 onClick={handleSubmit}
-                className="w-full mt-8 py-5 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-blue-600/30"
+                disabled={!isDisclaimerChecked}
+                className={`w-full py-5 text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg ${isDisclaimerChecked ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30' : 'bg-gray-400 cursor-not-allowed shadow-none'}`}
               >
                 Kirim Permohonan
               </button>

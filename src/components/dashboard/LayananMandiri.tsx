@@ -25,6 +25,7 @@ export default function LayananMandiri() {
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [purpose, setPurpose] = useState('');
   const [additionalText, setAdditionalText] = useState('');
+  const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(false);
   const [personalLetters, setPersonalLetters] = useState<LetterHistory[]>([]);
 
   // Aspiration Form States
@@ -142,16 +143,16 @@ export default function LayananMandiri() {
           data: null
         }]);
 
-        await supabase.from('notifications').insert([{
+        const { error: notifErr1 } = await supabase.from('notifications').insert([{
           id: `notif-${Date.now()}`,
           tenant_id: tenantId,
           title: 'Permohonan Layanan Mandiri',
           message: `Warga atas nama ${verifiedResident.name} (NIK: ${verifiedResident.nik}) mengajukan ${letterType} untuk keperluan: ${purpose.trim()}`,
           category: 'Services',
-          type: 'info',
           is_read: false,
           timestamp: new Date().toISOString()
         }]);
+        if (notifErr1) console.error('Gagal insert notif permohonan:', notifErr1);
         
         loadPersonalLetters();
       } catch (err) {
@@ -162,6 +163,7 @@ export default function LayananMandiri() {
 
     setPurpose('');
     setAdditionalText('');
+    setIsDisclaimerChecked(false);
     showToast('Pengajuan permohonan surat berhasil dikirim! Menunggu persetujuan admin.', 'success');
     setActiveSubTab('riwayat');
   };
@@ -189,16 +191,16 @@ export default function LayananMandiri() {
           status: 'Baru'
         }]);
 
-        await supabase.from('notifications').insert([{
+        const { error: notifErr2 } = await supabase.from('notifications').insert([{
           id: `notif-${Date.now()}`,
           tenant_id: tenantId,
           title: `Aspirasi Warga: ${aspirationCategory}`,
           message: `${verifiedResident.name} mengirim pengaduan/aspirasi: "${aspirationMessage.trim()}"`,
           category: 'Services',
-          type: 'info',
           is_read: false,
           timestamp: new Date().toISOString()
         }]);
+        if (notifErr2) console.error('Gagal insert notif aspirasi:', notifErr2);
         
         showToast('Aspirasi & Pengaduan Anda berhasil dikirim ke Pemdes!', 'success');
         setAspirationMessage('');
@@ -468,9 +470,25 @@ export default function LayananMandiri() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <label className="flex items-start gap-3 p-3 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-100 dark:border-rose-900/30 cursor-pointer hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        required
+                        checked={isDisclaimerChecked}
+                        onChange={(e) => setIsDisclaimerChecked(e.target.checked)}
+                        className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                      />
+                      <span className="text-[11px] font-medium text-rose-800 dark:text-rose-200 leading-snug">
+                        Saya menyatakan bertanggung jawab penuh atas kebenaran data dan informasi yang saya berikan. Segala bentuk pemalsuan data dapat diproses sesuai hukum yang berlaku.
+                      </span>
+                    </label>
+                  </div>
+
                   <button 
                     type="submit"
-                    className="flex items-center justify-center gap-2 bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl text-xs hover:bg-emerald-800 transition-all shadow-sm dark:shadow-none active:scale-95"
+                    disabled={!isDisclaimerChecked}
+                    className={`flex items-center justify-center gap-2 font-bold px-6 py-3 rounded-xl text-xs transition-all shadow-sm dark:shadow-none ${isDisclaimerChecked ? 'bg-emerald-700 text-white hover:bg-emerald-800 active:scale-95' : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-slate-700 dark:text-slate-500'}`}
                   >
                     <Send className="w-4 h-4" /> Kirim Pengajuan Surat
                   </button>
