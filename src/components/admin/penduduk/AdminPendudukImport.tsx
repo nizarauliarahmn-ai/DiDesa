@@ -18,7 +18,7 @@ const FIELD_DEFINITIONS = [
   { key: 'bloodType', label: 'Golongan Darah', required: false, synonyms: ['golongan darah', 'goldar', 'blood', 'gol_darah'] },
   { key: 'religion', label: 'Agama', required: false, synonyms: ['agama', 'religion'] },
   { key: 'job', label: 'Pekerjaan', required: false, synonyms: ['pekerjaan', 'kerja', 'job', 'work'] },
-  { key: 'status', label: 'Status Perkawinan', required: false, synonyms: ['status', 'perkawinan', 'marital', 'status kawin', 'status_kawin'] },
+  { key: 'maritalStatus', label: 'Status Perkawinan', required: false, synonyms: ['status', 'perkawinan', 'marital', 'status kawin', 'status_kawin'] },
   { key: 'rt', label: 'RT', required: false, synonyms: ['rt', 'rukun tetangga'] },
   { key: 'rw', label: 'RW', required: false, synonyms: ['rw', 'rukun warga'] },
   { key: 'desa', label: 'Desa', required: false, synonyms: ['desa', 'kelurahan', 'desa_kelurahan'] },
@@ -238,25 +238,24 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
       res.age = parsedAge || 30;
 
       // Status Perkawinan normalization
-      if (res.status) {
-        const lowerStatus = res.status.toLowerCase();
+      if (res.maritalStatus) {
+        const lowerStatus = res.maritalStatus.toLowerCase();
         if (lowerStatus.includes('belum') || lowerStatus.includes('single') || lowerStatus === 'b') {
-          res.status = 'Belum Kawin';
-          res.statusColor = 'gray';
+          res.maritalStatus = 'Belum Kawin';
         } else if (lowerStatus.includes('cerai mati')) {
-          res.status = 'Cerai Mati';
-          res.statusColor = 'gray';
+          res.maritalStatus = 'Cerai Mati';
         } else if (lowerStatus.includes('cerai')) {
-          res.status = 'Cerai Hidup';
-          res.statusColor = 'gray';
+          res.maritalStatus = 'Cerai Hidup';
         } else {
-          res.status = 'Kawin';
-          res.statusColor = 'emerald';
+          res.maritalStatus = 'Kawin';
         }
       } else {
-        res.status = 'Belum Kawin';
-        res.statusColor = 'gray';
+        res.maritalStatus = 'Belum Kawin';
       }
+
+      // Default status
+      res.status = 'Aktif';
+      res.statusColor = 'emerald';
 
       // RT/RW formatting
       const rtVal = (res.rt || '').padStart(2, '0');
@@ -618,7 +617,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                             <td className="px-4 py-2.5 font-bold text-slate-900 dark:text-white">{res.name || '(Kosong)'}</td>
                             <td className="px-4 py-2.5">{res.gender}</td>
                             <td className="px-4 py-2.5 font-mono">{res.rtRw}</td>
-                            <td className="px-4 py-2.5">{res.status}</td>
+                            <td className="px-4 py-2.5">{res.maritalStatus}</td>
                           </tr>
                         );
                       })}

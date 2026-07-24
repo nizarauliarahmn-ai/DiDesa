@@ -437,7 +437,7 @@ export default function AdminPenduduk({
       mimeType = 'application/json';
     } else {
       // CSV format
-      const headers = ['NIK', 'No KK', 'Nama Lengkap', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Golongan Darah', 'Agama', 'Pekerjaan', 'Status Perkawinan', 'RT', 'RW', 'Desa', 'Alamat', 'Status Domisili', 'Hubungan Keluarga', 'Pendidikan', 'Nama Ayah Kandung', 'Nama Ibu Kandung'];
+      const headers = ['NIK', 'No KK', 'Nama Lengkap', 'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Golongan Darah', 'Agama', 'Pekerjaan', 'Status Keberadaan', 'Status Perkawinan', 'RT', 'RW', 'Desa', 'Alamat', 'Status Domisili', 'Hubungan Keluarga', 'Pendidikan', 'Nama Ayah Kandung', 'Nama Ibu Kandung'];
       const rows = residents.map(r => [
         `"${r.nik || ''}"`,
         `"${r.noKk || ''}"`,
@@ -448,7 +448,8 @@ export default function AdminPenduduk({
         `"${r.bloodType || ''}"`,
         `"${r.religion || ''}"`,
         `"${r.job || ''}"`,
-        `"${r.status || ''}"`,
+        `"${r.status || 'Aktif'}"`,
+        `"${r.maritalStatus || 'Belum Kawin'}"`,
         `"${r.rt || ''}"`,
         `"${r.rw || ''}"`,
         `"${r.desa || ''}"`,
@@ -708,7 +709,7 @@ export default function AdminPenduduk({
               <tr>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">NIK / No. KK</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Nama Lengkap / KK</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Status / Gender</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Status Kependudukan / Gender</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Umur</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">RT/RW</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Bantuan Aktif</th>
@@ -753,6 +754,7 @@ export default function AdminPenduduk({
                     genderColor={item.genderColor} 
                     rtRw={item.rtRw} 
                     status={item.status} 
+                    maritalStatus={item.maritalStatus}
                     statusColor={item.statusColor}
                     avatarColor={item.avatarColor}
                     activeAids={item.activeAids || []}
@@ -982,7 +984,7 @@ export default function AdminPenduduk({
 }
 
 
-const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
+const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, maritalStatus, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
   const getBadgeColors = (color: string) => {
     switch (color) {
       case 'blue': return 'bg-blue-50 text-blue-700 border-blue-100';
@@ -1003,8 +1005,13 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-bold text-gray-900 dark:text-white">{name}</span>
+            {maritalStatus && (
+              <span className="bg-blue-100 text-blue-800 text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
+                {maritalStatus}
+              </span>
+            )}
             {status === 'pending_approval' && (
               <span className="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-200 shadow-sm dark:shadow-none shrink-0 uppercase tracking-wider">
                 Menunggu Konfirmasi

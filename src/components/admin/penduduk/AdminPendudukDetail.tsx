@@ -345,6 +345,11 @@ export default function AdminPendudukDetail({
                 <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">
                   {data?.status || 'Aktif'}
                 </span>
+                {data?.maritalStatus && (
+                  <span className="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">
+                    {data.maritalStatus}
+                  </span>
+                )}
               </h2>
               <div className="flex items-center gap-3 mt-1">
                 <p className="font-mono text-gray-500 dark:text-slate-400 text-xs">
