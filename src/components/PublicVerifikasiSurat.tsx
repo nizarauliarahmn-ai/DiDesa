@@ -101,7 +101,9 @@ export default function PublicVerifikasiSurat() {
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
                 <div>
-                  <h4 className="font-extrabold text-sm uppercase tracking-wide text-emerald-800 dark:text-emerald-300">DOKUMEN TERVERIFIKASI SAH & RESMI</h4>
+                  <h4 className="font-extrabold text-sm uppercase tracking-wide text-emerald-800 dark:text-emerald-300">
+                    DOKUMEN TERVERIFIKASI SAH & RESMI VIA PLATFORM DiDesa
+                  </h4>
                   <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
                     Dokumen ini terdaftar secara sah dalam arsip pelayanan elektronik Pemerintah Desa.
                   </p>
