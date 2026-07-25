@@ -62,23 +62,50 @@ export default function AdminBukuTamu() {
   const [form, setForm] = useState({
     nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0]
   });
+  
+  const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  useEffect(() => {
+    if (!tenantId) return;
+    const channel = supabase.channel(`kiosk-notif-${tenantId}`);
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        broadcastChannelRef.current = channel;
+      }
+    });
+    return () => {
+      supabase.removeChannel(channel);
+      broadcastChannelRef.current = null;
+    };
+  }, [tenantId]);
 
   const handleSendToKiosk = () => {
     if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
     if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
 
-    const channel = supabase.channel(`kiosk-notif-${tenantId}`);
-    channel.send({
-      type: 'broadcast',
-      event: 'incoming-guest',
-      payload: {
-        nik: form.nik,
-        nama: form.nama,
-        alamat: form.alamat,
-        instansi: form.instansi,
-        keperluan: form.keperluan
-      }
-    });
+    const payload = {
+      nik: form.nik,
+      nama: form.nama,
+      alamat: form.alamat,
+      instansi: form.instansi,
+      keperluan: form.keperluan
+    };
+
+    if (broadcastChannelRef.current) {
+      broadcastChannelRef.current.send({
+        type: 'broadcast',
+        event: 'incoming-guest',
+        payload
+      });
+    } else {
+      // Fallback if not connected yet
+      const tempChannel = supabase.channel(`kiosk-notif-${tenantId}`);
+      tempChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          tempChannel.send({ type: 'broadcast', event: 'incoming-guest', payload });
+        }
+      });
+    }
     
     showToast('Data berhasil dikirim ke layar Kios.', 'success');
     setShowModal(false);
