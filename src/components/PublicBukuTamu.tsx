@@ -35,7 +35,7 @@ export default function PublicBukuTamu() {
 
   const [form, setForm] = useState({
     nik: '', nama: '', alamat: '', instansi: '',
-    keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: ''
+    keperluan: KEPERLUAN_OPTIONS[0]
   });
   const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(false);
   const [isKioskMode, setIsKioskMode] = useState(false);
@@ -88,7 +88,7 @@ export default function PublicBukuTamu() {
   }, [step]);
 
   const resetForm = () => {
-    setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
+    setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] });
     setManualNik('');
     setError('');
     signatureRef.current?.clear();
@@ -111,8 +111,7 @@ export default function PublicBukuTamu() {
           nama: capitalizeWords(data.name || ''),
           alamat: capitalizeWords(`${data.address || ''} RT ${data.rt || ''} RW ${data.rw || ''}`),
           instansi: 'Warga Desa',
-          keperluan: KEPERLUAN_OPTIONS[0],
-          tujuan_temu: '',
+          keperluan: KEPERLUAN_OPTIONS[0]
         });
       } else {
         setForm(prev => ({ ...prev, nik, nama: '', alamat: '', instansi: '' }));
@@ -184,7 +183,7 @@ export default function PublicBukuTamu() {
         alamat: capitalizeWords(form.alamat),
         instansi: capitalizeWords(form.instansi),
         keperluan: form.keperluan,
-        tujuan_temu: capitalizeWords(form.tujuan_temu),
+        tujuan_temu: '-',
         signature_url: signatureUrl,
         tanggal_masuk: new Date().toISOString(),
         tanggal_keluar: null,
@@ -347,12 +346,12 @@ export default function PublicBukuTamu() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Asal / Instansi</label>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Asal / Alamat / Instansi</label>
                 <input
                   type="text"
                   value={form.instansi}
-                  onChange={(e) => setForm(p => ({ ...p, instansi: capitalizeWords(e.target.value) }))}
-                  placeholder="Desa / instansi asal..."
+                  onChange={(e) => setForm(p => ({ ...p, instansi: capitalizeWords(e.target.value), alamat: capitalizeWords(e.target.value) }))}
+                  placeholder="Desa / kota / instansi asal..."
                   className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:border-emerald-500 outline-none transition-all"
                 />
               </div>
@@ -366,22 +365,13 @@ export default function PublicBukuTamu() {
                   {KEPERLUAN_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
                 </select>
               </div>
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Menemui Siapa / Bagian</label>
-                <input
-                  type="text"
-                  value={form.tujuan_temu}
-                  onChange={(e) => setForm(p => ({ ...p, tujuan_temu: capitalizeWords(e.target.value) }))}
-                  placeholder="Nama staf / bagian yang dituju..."
-                  className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-900 focus:border-emerald-500 outline-none transition-all"
-                />
-              </div>
               
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Tanda Tangan</label>
                 <div className="border-2 border-gray-200 rounded-xl bg-gray-50 h-32 relative overflow-hidden">
                   <SignatureCanvas 
                     ref={signatureRef}
+                    clearOnResize={false}
                     canvasProps={{className: 'signatureCanvas w-full h-32 cursor-crosshair'}}
                   />
                   <button 

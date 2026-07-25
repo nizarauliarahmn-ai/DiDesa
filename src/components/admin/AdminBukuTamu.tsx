@@ -63,9 +63,8 @@ export default function AdminBukuTamu() {
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
 
-  // Form state
   const [form, setForm] = useState({
-    nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: ''
+    nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0]
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isLookingUp, setIsLookingUp] = useState(false);
@@ -185,7 +184,7 @@ export default function AdminBukuTamu() {
         alamat: capitalizeWords(form.alamat),
         instansi: capitalizeWords(form.instansi),
         keperluan: form.keperluan,
-        tujuan_temu: capitalizeWords(form.tujuan_temu),
+        tujuan_temu: '-',
         signature_url: signatureUrl,
         tanggal_masuk: new Date().toISOString(),
         tanggal_keluar: null,
@@ -306,7 +305,7 @@ export default function AdminBukuTamu() {
                   <td>${i + 1}</td>
                   <td><strong>${e.nama}</strong><span class="meta">NIK: ${e.nik || '-'}</span></td>
                   <td>${e.instansi || '-'}</td>
-                  <td>${e.keperluan}<span class="meta">${e.tujuan_temu ? `Tujuan: ${e.tujuan_temu}` : ''}</span></td>
+                  <td>${e.keperluan}</td>
                   <td>${fmtTime(e.tanggal_masuk)}<span class="meta">${fmtDate(e.tanggal_masuk)}</span></td>
                   <td style="text-align: center; vertical-align: middle;">
                     ${e.signature_url ? `<img src="${e.signature_url}" style="max-height: 40px; max-width: 80px; object-fit: contain;" alt="TTD"/>` : '-'}
@@ -411,7 +410,7 @@ export default function AdminBukuTamu() {
             Cetak QR Kiosk
           </button>
           <button
-            onClick={() => { setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' }); setShowModal(true); }}
+            onClick={() => { setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] }); setShowModal(true); }}
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all shadow-sm"
           >
             <Plus className="w-4 h-4" />
@@ -468,7 +467,6 @@ export default function AdminBukuTamu() {
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">No</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tamu</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden md:table-cell">Keperluan</th>
-              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden lg:table-cell">Tujuan Temu</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Waktu</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">TTD</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Aksi</th>
@@ -476,10 +474,10 @@ export default function AdminBukuTamu() {
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
             {loading ? (
-              <tr><td colSpan={7} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
+              <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-5 py-16 text-center">
+                <td colSpan={6} className="px-5 py-16 text-center">
                   <BookOpen className="w-12 h-12 text-gray-200 dark:text-slate-700 mx-auto mb-3" />
                   <p className="text-sm text-gray-400 font-medium">Belum ada tamu hari ini</p>
                   <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">Klik "Tambah Tamu" atau "Scan QR / NIK" untuk mencatat tamu baru</p>
@@ -499,7 +497,6 @@ export default function AdminBukuTamu() {
                       {entry.keperluan}
                     </span>
                   </td>
-                  <td className="px-5 py-4 text-sm text-gray-700 dark:text-slate-300 hidden lg:table-cell">{entry.tujuan_temu || '-'}</td>
                   <td className="px-5 py-4">
                     <span className="text-sm font-bold text-gray-900 dark:text-white block">{fmtTime(entry.tanggal_masuk)}</span>
                     <span className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-0.5">{fmtDate(entry.tanggal_masuk)}</span>
@@ -560,7 +557,7 @@ export default function AdminBukuTamu() {
                       setShowModal(false);
                       setTimeout(() => {
                         setSaveSuccess(false);
-                        setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
+                        setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] });
                       }, 300);
                     }}
                     className="px-6 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
@@ -570,7 +567,7 @@ export default function AdminBukuTamu() {
                   <button
                     onClick={() => {
                       setSaveSuccess(false);
-                      setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0], tujuan_temu: '' });
+                      setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] });
                       setTimeout(() => signatureRef.current?.clear(), 100);
                     }}
                     className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2"
@@ -617,30 +614,18 @@ export default function AdminBukuTamu() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Asal / Instansi</label>
-                  <input
-                    type="text"
-                    value={form.instansi}
-                    onChange={(e) => setForm(prev => ({ ...prev, instansi: capitalizeWords(e.target.value) }))}
-                    placeholder="Instansi / Desa..."
-                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tujuan Temu</label>
-                  <input
-                    type="text"
-                    value={form.tujuan_temu}
-                    onChange={(e) => setForm(prev => ({ ...prev, tujuan_temu: capitalizeWords(e.target.value) }))}
-                    placeholder="Nama/Bagian yg dituju..."
-                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Asal / Alamat / Instansi</label>
+                <input
+                  type="text"
+                  value={form.instansi}
+                  onChange={(e) => setForm(prev => ({ ...prev, instansi: capitalizeWords(e.target.value), alamat: capitalizeWords(e.target.value) }))}
+                  placeholder="Desa / kota / instansi asal..."
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1 mt-3">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Keperluan <span className="text-red-500">*</span></label>
                 <select
                   value={form.keperluan}
@@ -650,17 +635,6 @@ export default function AdminBukuTamu() {
                   {KEPERLUAN_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
                 </select>
               </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Alamat Asal</label>
-                <textarea
-                  rows={2}
-                  value={form.alamat}
-                  onChange={(e) => setForm(prev => ({ ...prev, alamat: capitalizeWords(e.target.value) }))}
-                  placeholder="Alamat tempat tinggal tamu..."
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none bg-white dark:bg-slate-900"
-                />
-              </div>
             </div>
 
             <div className="px-5 pb-5">
@@ -669,6 +643,7 @@ export default function AdminBukuTamu() {
                 <SignatureCanvas 
                   ref={signatureRef}
                   penColor="black"
+                  clearOnResize={false}
                   canvasProps={{className: 'signatureCanvas w-full h-32 cursor-crosshair'}}
                 />
               </div>
