@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BookOpen, FileText, Megaphone, ArrowRight, Home } from 'lucide-react';
 import { motion } from 'motion/react';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
+import { supabase } from '../utils/supabase';
 
 export default function PublicKiosPortal() {
   const [desaName, setDesaName] = useState('');
@@ -26,6 +27,24 @@ export default function PublicKiosPortal() {
       const storedDesa = localStorage.getItem('kop_desa') || localStorage.getItem('village_name');
       if (storedDesa) setDesaName(storedDesa);
     }
+    
+    // Setup listener so that if admin pushes a guest while Kiosk is on home, it auto navigates
+    resolveCurrentTenant().then((id) => {
+      if (!id) return;
+      const channel = supabase.channel(`kiosk-notif-${id}`)
+        .on('broadcast', { event: 'incoming-guest' }, ({ payload }) => {
+          localStorage.setItem('kiosk_incoming_guest', JSON.stringify(payload));
+          const p = new URLSearchParams(window.location.search);
+          p.set('tab', 'buku_tamu');
+          window.location.search = p.toString();
+        })
+        .subscribe();
+      
+      return () => {
+        supabase.removeChannel(channel);
+      }
+    });
+
   }, []);
 
   const navigateTo = (tab: string) => {

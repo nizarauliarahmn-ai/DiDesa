@@ -108,6 +108,20 @@ export default function PublicBukuTamu() {
 
   // Auto-reset to welcome after 60 seconds of inactivity on success
   useEffect(() => {
+    // Check for auto-redirected incoming guest payload
+    const incomingPayloadStr = localStorage.getItem('kiosk_incoming_guest');
+    if (incomingPayloadStr) {
+      try {
+        const payload = JSON.parse(incomingPayloadStr);
+        setForm(payload);
+        setStep('form');
+        showToast('Data diterima dari Admin. Silakan periksa dan berikan Tanda Tangan.', 'info');
+        localStorage.removeItem('kiosk_incoming_guest');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     if (step === 'success') {
       const timer = setTimeout(() => { setStep('form'); resetForm(); }, 10000);
       return () => clearTimeout(timer);
