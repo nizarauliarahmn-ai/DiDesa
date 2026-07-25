@@ -15,7 +15,8 @@ import {
   X,
   Trash2,
   Database,
-  CheckCircle2
+  CheckCircle2,
+  FileText
 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import ConfirmModal from '../common/ConfirmModal';
@@ -81,6 +82,8 @@ export default function AdminBantuan({
   
   // Modal states
   const [showModal, setShowModal] = useState(false);
+  const [showBaModal, setShowBaModal] = useState(false);
+  const [disbursedNiks, setDisbursedNiks] = useState<string[]>([]);
   const [searchResidentQuery, setSearchResidentQuery] = useState("");
   const [selectedResidentNik, setSelectedResidentNik] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -940,6 +943,13 @@ export default function AdminBantuan({
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => setShowBaModal(true)}
+              className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Cetak BA Musdes
+            </button>
             <div className="relative flex-1 sm:w-[240px]">
               <input 
                 type="text" 
@@ -959,8 +969,8 @@ export default function AdminBantuan({
               <tr>
                 <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">NIK / NAMA</th>
                 <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">DUSUN / RT / RW</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">BANTUAN LAIN</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">STATUS</th>
+                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">DTKS & BANTUAN LAIN</th>
+                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">STATUS & SALUR</th>
                 <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">AKSI</th>
               </tr>
             </thead>
@@ -1000,30 +1010,67 @@ export default function AdminBantuan({
                         {resident.desa || "Sukamaju"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
                       </td>
                       <td className="px-6 py-4">
-                        {otherAids.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {otherAids.map((aid: string) => (
-                              <span key={aid} className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded-md border border-red-100">
-                                {aid}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-xs text-gray-400">-</span>
-                        )}
+                        <div className="flex flex-col gap-1">
+                          <span className="inline-flex items-center gap-1 w-max px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-extrabold rounded border border-indigo-100">
+                            Terdaftar DTKS
+                          </span>
+                          {otherAids.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {otherAids.map((aid: string) => (
+                                <span key={aid} className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded-md border border-red-100">
+                                  {aid}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400 font-medium">Bantuan Tunggal</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4">
-                        {isOverlap ? (
-                          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] border border-red-200">
-                            <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
-                            Tumpang Tindih
-                          </div>
-                        ) : (
-                          <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-bold text-[10px] border border-emerald-200">
-                            <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
-                            Sesuai / Valid
-                          </div>
-                        )}
+                        <div className="flex flex-col gap-1.5 items-start">
+                          {isOverlap ? (
+                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] border border-red-200">
+                              <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
+                              Tumpang Tindih
+                            </div>
+                          ) : (
+                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-bold text-[10px] border border-emerald-200">
+                              <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
+                              Valid / Sesuai
+                            </div>
+                          )}
+
+                          <button
+                            onClick={() => {
+                              const isAlready = disbursedNiks.includes(resident.nik);
+                              if (isAlready) {
+                                setDisbursedNiks(prev => prev.filter(n => n !== resident.nik));
+                                showToast(`Status penyaluran ${resident.name} diubah menjadi Belum Salur`, "info");
+                              } else {
+                                setDisbursedNiks(prev => [...prev, resident.nik]);
+                                showToast(`Berhasil menandai ${resident.name} telah menerima salur ${selectedProgram}`, "success");
+                              }
+                            }}
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-1 ${
+                              disbursedNiks.includes(resident.nik)
+                                ? 'bg-emerald-600 text-white border-emerald-700'
+                                : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-700'
+                            }`}
+                          >
+                            {disbursedNiks.includes(resident.nik) ? (
+                              <>
+                                <CheckCircle2 className="w-3 h-3 text-white" />
+                                Terisi Salur (Tahap I)
+                              </>
+                            ) : (
+                              <>
+                                <Banknote className="w-3 h-3" />
+                                Tandai Disalurkan
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-center">
                         {showOverlapOnly ? (
@@ -1174,6 +1221,115 @@ export default function AdminBantuan({
               >
                 {isSaving ? "Menyimpan..." : "Simpan Penerima"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Berita Acara Musdes */}
+      {showBaModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 my-8 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 print:hidden">
+              <div className="flex items-center gap-2">
+                <FileText className="w-6 h-6 text-indigo-600" />
+                <h3 className="font-bold text-xl text-gray-900 dark:text-white">Dokumen Berita Acara Musdes</h3>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => window.print()}
+                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-95"
+                >
+                  <Download className="w-4 h-4" /> Cetak Dokumen (PDF)
+                </button>
+                <button 
+                  onClick={() => setShowBaModal(false)}
+                  className="p-2 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-full text-gray-500 dark:text-slate-400 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-8 md:p-12 space-y-8 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-serif leading-relaxed text-sm print:p-0 print:text-black">
+              {/* KOP Desa Header */}
+              <div className="text-center border-b-4 border-double border-gray-900 dark:border-white pb-6 space-y-1">
+                <h2 className="text-xl font-bold uppercase tracking-wider">PEMERINTAH KABUPATEN BOGOR</h2>
+                <h1 className="text-2xl font-black uppercase tracking-wide">KECAMATAN CIBINONG — DESA SUKAMAJU</h1>
+                <p className="text-xs font-sans text-gray-600 dark:text-slate-400 italic">Jl. Raya Sukamaju No. 01, Kode Pos 16910 • Website: sukamaju.desa.id</p>
+              </div>
+
+              {/* Document Title */}
+              <div className="text-center space-y-1">
+                <h3 className="text-lg font-bold uppercase underline tracking-wide">BERITA ACARA MUSYAWARAH DESA</h3>
+                <p className="text-xs font-sans font-bold text-gray-700 dark:text-slate-300">
+                  PENETAPAN KELUARGA PENERIMA MANFAAT (KPM) PROGRAM {selectedProgram.toUpperCase()} TAHUN 2026
+                </p>
+                <p className="text-xs font-sans text-gray-500">Nomor: 140 / BA-MUSDES / {new Date().getFullYear()}</p>
+              </div>
+
+              {/* Preamble */}
+              <div className="space-y-3 text-justify font-sans text-xs md:text-sm">
+                <p>
+                  Pada hari ini <strong>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>, bertempat di Balai Desa Sukamaju, telah diselenggarakan Musyawarah Desa (Musdes) penetapan usulan calon Keluarga Penerima Manfaat (KPM) program bantuan sosial <strong>{selectedProgram}</strong>.
+                </p>
+                <p>
+                  Berdasarkan verifikasi kriteria kelayakan dan ketersediaan anggaran desa, disepakati bahwa nama-nama warga masyarakat di bawah ini dinyatakan <strong>SAH dan LAYAK</strong> sebagai penerima bantuan:
+                </p>
+              </div>
+
+              {/* Recipients Table */}
+              <div className="overflow-x-auto font-sans">
+                <table className="w-full border-collapse border border-gray-400 text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 dark:bg-slate-800 text-center font-bold">
+                      <th className="border border-gray-400 px-3 py-2 w-10">NO</th>
+                      <th className="border border-gray-400 px-3 py-2">NIK</th>
+                      <th className="border border-gray-400 px-3 py-2">NAMA LENGKAP</th>
+                      <th className="border border-gray-400 px-3 py-2">ALAMAT / RT / RW</th>
+                      <th className="border border-gray-400 px-3 py-2">STATUS KRITERIA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredResidents.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="border border-gray-400 px-3 py-4 text-center text-gray-500 italic">Belum ada penerima bantuan yang ditetapkan dalam program ini.</td>
+                      </tr>
+                    ) : (
+                      filteredResidents.map((res, index) => (
+                        <tr key={res.nik} className="hover:bg-gray-50">
+                          <td className="border border-gray-400 px-3 py-2 text-center font-bold">{index + 1}</td>
+                          <td className="border border-gray-400 px-3 py-2 font-mono font-semibold">{res.nik}</td>
+                          <td className="border border-gray-400 px-3 py-2 font-bold">{res.name}</td>
+                          <td className="border border-gray-400 px-3 py-2">RT {res.rt || "-"} / RW {res.rw || "-"}, Desa Sukamaju</td>
+                          <td className="border border-gray-400 px-3 py-2 text-center font-semibold text-emerald-700">Terverifikasi Layak</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Closing */}
+              <p className="font-sans text-xs md:text-sm text-justify">
+                Demikian Berita Acara ini dibuat dan disahkan dengan penuh tanggung jawab untuk dipergunakan sebagaimana mestinya.
+              </p>
+
+              {/* Signatures Grid */}
+              <div className="pt-8 font-sans text-xs grid grid-cols-3 gap-6 text-center">
+                <div className="space-y-16">
+                  <p className="font-bold">Ketua BPD Sukamaju</p>
+                  <p className="font-bold underline uppercase">( H. AHMYAD SODIK, S.IP )</p>
+                </div>
+                <div className="space-y-16">
+                  <p className="font-bold">Sekretaris Desa</p>
+                  <p className="font-bold underline uppercase">( MUHAMMAD RIFQI, S.KOM )</p>
+                </div>
+                <div className="space-y-16">
+                  <p className="font-bold">Kepala Desa Sukamaju</p>
+                  <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
