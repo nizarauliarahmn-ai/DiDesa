@@ -227,7 +227,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
               <div className="flex flex-col items-start">
                 <div className="flex items-center gap-1.5">
                   <span className={`text-sm font-bold ${activeTab === 'ai_assistant' ? 'text-indigo-900' : 'text-gray-700 dark:text-slate-300'}`}>Asisten AI</span>
-                  <span className="bg-amber-500 text-white text-[8px] font-black px-1 py-0.2 rounded-full border border-white shadow-sm dark:shadow-none">DEV</span>
                 </div>
                 <span className="text-[9px] text-indigo-500 font-bold tracking-wider uppercase flex items-center gap-1">
                   <Sparkles size={8} /> Pintar
