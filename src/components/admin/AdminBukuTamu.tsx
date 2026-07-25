@@ -10,7 +10,7 @@ import { useReactToPrint } from 'react-to-print';
 import {
   BookOpen, Plus, QrCode, Search, Filter, Printer, Download,
   LogIn, LogOut, Clock, User, MapPin, Building2, ChevronDown,
-  RefreshCw, CheckCircle2, X, Calendar, Trash2
+  RefreshCw, CheckCircle2, X, Calendar, Trash2, Send
 } from 'lucide-react';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 
@@ -57,6 +57,33 @@ export default function AdminBukuTamu() {
   });
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0]
+  });
+
+  const handleSendToKiosk = () => {
+    if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
+    if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
+
+    const channel = supabase.channel(`kiosk-notif-${tenantId}`);
+    channel.send({
+      type: 'broadcast',
+      event: 'incoming-guest',
+      payload: {
+        nik: form.nik,
+        nama: form.nama,
+        alamat: form.alamat,
+        instansi: form.instansi,
+        keperluan: form.keperluan
+      }
+    });
+    
+    showToast('Data berhasil dikirim ke layar Kios.', 'success');
+    setShowModal(false);
+    setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] });
+  };
 
   const fetchEntries = useCallback(async () => {
     if (!tenantId) return;
@@ -301,7 +328,7 @@ export default function AdminBukuTamu() {
             Cetak QR Kiosk
           </button>
           <button
-            onClick={() => window.open(`/?tab=buku_tamu&tenant=${tenantId}`, '_blank')}
+            onClick={() => { setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] }); setShowModal(true); }}
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all shadow-sm"
           >
             <Plus className="w-4 h-4" />
@@ -416,6 +443,89 @@ export default function AdminBukuTamu() {
           </tbody>
         </table>
       </div>
+
+      {/* Add Guest Modal (Broadcast) */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+              <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                <Send className="w-5 h-5 text-emerald-700" />
+                Kirim Data ke Kios
+              </h3>
+              <button onClick={() => setShowModal(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 p-3 rounded-xl text-sm mb-2 flex gap-3 items-start border border-blue-100 dark:border-blue-800">
+                <BookOpen className="w-5 h-5 shrink-0 mt-0.5" />
+                <p>Data yang diinput akan dikirim langsung ke layar Tablet Kios. Tamu hanya perlu membubuhkan tanda tangannya di layar sana.</p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK (Opsional)</label>
+                <input
+                  type="tel"
+                  data-no-cap
+                  maxLength={16}
+                  value={form.nik}
+                  onChange={(e) => setForm(prev => ({ ...prev, nik: e.target.value.replace(/\D/g, '') }))}
+                  placeholder="16 digit NIK..."
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-mono text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  value={form.nama}
+                  onChange={(e) => setForm(prev => ({ ...prev, nama: capitalizeWords(e.target.value) }))}
+                  placeholder="Nama tamu..."
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Asal / Alamat / Instansi</label>
+                <input
+                  type="text"
+                  value={form.instansi}
+                  onChange={(e) => setForm(prev => ({ ...prev, instansi: capitalizeWords(e.target.value), alamat: capitalizeWords(e.target.value) }))}
+                  placeholder="Desa / kota / instansi asal..."
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                />
+              </div>
+
+              <div className="space-y-1 mt-3">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Keperluan <span className="text-red-500">*</span></label>
+                <select
+                  value={form.keperluan}
+                  onChange={(e) => setForm(prev => ({ ...prev, keperluan: e.target.value }))}
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                >
+                  {KEPERLUAN_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 bg-gray-50/50 dark:bg-slate-900/50">
+              <button onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
+                Batal
+              </button>
+              <button
+                onClick={handleSendToKiosk}
+                className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                Kirim ke Layar Kiosk
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Print QR Kiosk Modal */}
       {showPrintQR && (

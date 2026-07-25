@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { capitalizeWords } from '../utils/textUtils';
+import { showToast } from '../utils/toast';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import SignatureCanvas from 'react-signature-canvas';
 import {
@@ -78,6 +79,28 @@ export default function PublicBukuTamu() {
       if (kop) setDesaName(capitalizeWords(kop));
     }
   }, []);
+
+  // Listener for incoming broadcasts from Admin Dashboard
+  useEffect(() => {
+    if (!tenantId) return;
+
+    const channel = supabase.channel(`kiosk-notif-${tenantId}`)
+      .on('broadcast', { event: 'incoming-guest' }, ({ payload }) => {
+        setForm(payload);
+        setStep('form');
+        showToast('Data diterima dari Admin. Silakan periksa dan berikan Tanda Tangan.', 'info');
+        
+        // Optional: you can automatically scroll to the signature field here
+        setTimeout(() => {
+          document.querySelector('.signatureCanvas')?.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tenantId]);
 
   // Auto-reset to welcome after 60 seconds of inactivity on success
   useEffect(() => {
