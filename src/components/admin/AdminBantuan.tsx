@@ -763,19 +763,6 @@ export default function AdminBantuan({
 
   return (
     <div className="max-w-6xl mx-auto pb-24 space-y-6">
-      {/* DB Engine Indicator Header Badge */}
-      <div className="flex justify-end">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 text-xs font-bold border border-gray-200 dark:border-slate-700 shadow-sm dark:shadow-none">
-          <Database className="w-4 h-4 text-emerald-600 animate-pulse" />
-          <span>Koneksi Live:</span>
-          <span className={`px-2 py-0.5 rounded-md font-extrabold text-[10px] ${
-            dbEngine === 'Drizzle' ? 'bg-indigo-100 text-indigo-700' : 
-            dbEngine === 'Supabase' ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'
-          }`}>
-            {dbEngine.toUpperCase()} ENGINE
-          </span>
-        </div>
-      </div>
 
       {/* Success Notification */}
       {message && (
