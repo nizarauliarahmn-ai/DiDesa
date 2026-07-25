@@ -200,6 +200,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             {authUser?.role === 'kades' && <NavItem icon={<ShieldCheck size={18} className="text-amber-600 animate-pulse" />} label="Antrean Konfirmasi" active={activeTab === 'antrean'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('antrean'); }} /> }
             
             <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Lainnya</p>
+            <NavItem icon={<BookOpen size={18} className="text-emerald-600" />} label="Panduan & Tutorial" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
             <NavItem icon={<Settings size={18} />} label="Pengaturan" active={activeTab === 'pengaturan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pengaturan'); }} />
           </>
         ) : (
@@ -208,6 +209,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem icon={<Building2 size={18} className="text-blue-600" />} label="Manajemen Klien" active={activeTab === 'tenants'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('tenants'); }} badgeCount={unreadFeedbacks} />
             <NavItem icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
             <NavItem icon={<FileText size={18} className="text-emerald-600" />} label="Template Surat Global" active={activeTab === 'template_surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('template_surat'); }} />
+            <NavItem icon={<BookOpen size={18} className="text-teal-600" />} label="Panduan & Documentation" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
             <NavItem icon={<Settings size={18} />} label="Branding Platform" active={activeTab === 'global_branding'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('global_branding'); }} />
           </>
         )}

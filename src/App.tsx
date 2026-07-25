@@ -23,6 +23,7 @@ import AdminAiAssistant from './components/admin/AdminAiAssistant';
 import AdminSaaSLogs from './components/admin/AdminSaaSLogs';
 import AdminGlobalBranding from './components/admin/AdminGlobalBranding';
 import AdminSaaSTemplateSurat from './components/admin/AdminSaaSTemplateSurat';
+import AdminPanduan from './components/admin/AdminPanduan';
 import ToastContainer from './components/common/ToastContainer';
 import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
@@ -311,6 +312,7 @@ export default function App() {
                   />
                 )}
                 {adminTab === 'buku_tamu' && <AdminBukuTamu />}
+                {adminTab === 'panduan' && <AdminPanduan />}
                 {adminTab === 'antrean' && (user.role === 'kades' || user.role === 'saas_admin') && <AdminApprovalQueue />}
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
