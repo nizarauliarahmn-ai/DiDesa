@@ -19,6 +19,7 @@ import AdminTenants from './components/admin/AdminTenants';
 import AdminAspirasi from './components/admin/AdminAspirasi';
 import AdminBukuTamu from './components/admin/AdminBukuTamu';
 import PublicBukuTamu from './components/PublicBukuTamu';
+import PublicVerifikasiSurat from './components/PublicVerifikasiSurat';
 import AdminAiAssistant from './components/admin/AdminAiAssistant';
 import AdminSaaSLogs from './components/admin/AdminSaaSLogs';
 import AdminGlobalBranding from './components/admin/AdminGlobalBranding';
@@ -69,6 +70,9 @@ export default function App() {
   }
   if (tabParam === 'kios_aspirasi') {
     return <><PublicKiosAspirasi /><ToastContainer /></>;
+  }
+  if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat') {
+    return <><PublicVerifikasiSurat /><ToastContainer /></>;
   }
 
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
