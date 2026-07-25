@@ -1,3 +1,6 @@
+import { supabase } from './supabase';
+import { resolveCurrentTenant } from './tenantResolver';
+
 let residentsCache: Promise<any[]> | null = null;
 let cacheTime = 0;
 
@@ -10,21 +13,52 @@ export function fetchResidentsCached(force = false) {
     }));
   }
   
-  const authUserStr = localStorage.getItem('didesa_auth_user');
-  let url = '/api/residents';
-  if (authUserStr) {
-    try {
-      const authUser = JSON.parse(authUserStr);
-      if (authUser && authUser.tenantId) {
-        url = `/api/residents?tenant_id=${authUser.tenantId}`;
+  const req = (async () => {
+    let tenantId = null;
+    const authUserStr = localStorage.getItem('didesa_auth_user');
+    if (authUserStr) {
+      try {
+        const authUser = JSON.parse(authUserStr);
+        if (authUser && authUser.tenantId) {
+          tenantId = authUser.tenantId;
+        }
+      } catch(e) {}
+    }
+
+    if (!tenantId) {
+      tenantId = await resolveCurrentTenant();
+    }
+    
+    if (!tenantId) return [];
+
+    let allData: any[] = [];
+    let hasMore = true;
+    let page = 0;
+    const pageSize = 1000;
+
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('residents')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+        
+      if (error) {
+        console.error("Error fetching residents from Supabase for cache:", error);
+        hasMore = false;
+      } else if (data) {
+        allData = [...allData, ...data];
+        if (data.length < pageSize) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      } else {
+        hasMore = false;
       }
-    } catch(e) {}
-  }
-  
-  const req = fetch(url).then(res => {
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    return res.json();
-  });
+    }
+    return allData;
+  })();
   
   residentsCache = req;
   cacheTime = Date.now();
