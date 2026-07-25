@@ -32,6 +32,24 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       return directId;
     }
 
+    // SECURITY FIX: If user is logged in AND not accessing a public kiosk route,
+    // strictly enforce their authenticated tenantId to prevent URL manipulation.
+    const isPublicRoute = urlParams.get('mode') === 'public' || urlParams.get('tab') === 'kios' || urlParams.get('tab') === 'buku_tamu' || urlParams.get('tab') === 'kios_surat' || urlParams.get('tab') === 'kios_aspirasi';
+    
+    if (!isPublicRoute) {
+      const localAuth = localStorage.getItem('didesa_auth_user');
+      if (localAuth) {
+        try {
+          const user = JSON.parse(localAuth);
+          if (user && user.tenantId) {
+            cachedTenantId = user.tenantId;
+            isResolving = false;
+            return user.tenantId;
+          }
+        } catch(e) {}
+      }
+    }
+
     const tenantParam = urlParams.get('tenant');
     let subdomain: string | null = tenantParam;
 
@@ -68,6 +86,18 @@ export async function resolveCurrentTenant(): Promise<string | null> {
         cachedTenantId = userTenant;
         isResolving = false;
         return userTenant;
+      }
+    } else {
+      const localAuth = localStorage.getItem('didesa_auth_user');
+      if (localAuth) {
+        try {
+          const user = JSON.parse(localAuth);
+          if (user && user.tenantId) {
+             cachedTenantId = user.tenantId;
+             isResolving = false;
+             return user.tenantId;
+          }
+        } catch (e) {}
       }
     }
 
