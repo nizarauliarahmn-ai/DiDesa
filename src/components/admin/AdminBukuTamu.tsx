@@ -5,7 +5,6 @@ import { showToast } from '../../utils/toast';
 import { capitalizeWords } from '../../utils/textUtils';
 import SignatureCanvas from 'react-signature-canvas';
 import ConfirmModal from '../common/ConfirmModal';
-import AdminQRScanner from './AdminQRScanner';
 import { QRCodeSVG } from 'qrcode.react';
 import { useReactToPrint } from 'react-to-print';
 import {
@@ -46,11 +45,7 @@ export default function AdminBukuTamu() {
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [entries, setEntries] = useState<GuestEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showScanner, setShowScanner] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ isOpen: false, id: '', nama: '' });
-  const signatureRef = React.useRef<any>(null);
   const [showPrintQR, setShowPrintQR] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -62,12 +57,6 @@ export default function AdminBukuTamu() {
   });
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
-
-  const [form, setForm] = useState({
-    nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0]
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLookingUp, setIsLookingUp] = useState(false);
 
   const fetchEntries = useCallback(async () => {
     if (!tenantId) return;
@@ -113,93 +102,7 @@ export default function AdminBukuTamu() {
     }
   }, [fetchEntries, tenantId]);
 
-  // Lookup resident by NIK from scanner
-  const handleNikFound = async (nik: string) => {
-    setShowScanner(false);
-    setIsLookingUp(true);
-    setForm(prev => ({ ...prev, nik }));
 
-    try {
-      const { data } = await supabase
-        .from('residents')
-        .select('name, address, rt, rw')
-        .eq('nik', nik)
-        .eq('tenant_id', tenantId)
-        .single();
-
-      if (data) {
-        setForm(prev => ({
-          ...prev,
-          nik,
-          nama: capitalizeWords(data.name || ''),
-          alamat: capitalizeWords(`${data.address || ''} RT ${data.rt || ''} RW ${data.rw || ''}`),
-          instansi: 'Warga Desa',
-        }));
-        showToast(`Data warga ditemukan: ${capitalizeWords(data.name)}`, 'success');
-      } else {
-        setForm(prev => ({ ...prev, nik, nama: '', alamat: '', instansi: '' }));
-        showToast('NIK tidak ditemukan di database. Silakan isi manual.', 'info');
-      }
-    } catch {
-      showToast('Gagal mencari data. Silakan isi manual.', 'error');
-    } finally {
-      setIsLookingUp(false);
-      setShowModal(true);
-    }
-  };
-
-  const handleSave = async () => {
-    if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
-    if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
-
-    setIsSaving(true);
-    let signatureUrl = null;
-    if (signatureRef.current && !signatureRef.current.isEmpty()) {
-      try {
-        const dataUrl = signatureRef.current.getTrimmedCanvas().toDataURL('image/png');
-        const res = await fetch(dataUrl);
-        const blob = await res.blob();
-        const fileName = `${tenantId}/${Date.now()}.png`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('signatures')
-          .upload(fileName, blob, { contentType: 'image/png' });
-          
-        if (uploadError) {
-          console.error('Failed to upload signature', uploadError);
-        } else if (uploadData) {
-          const { data: publicUrlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
-          signatureUrl = publicUrlData.publicUrl;
-        }
-      } catch (e) {
-        console.error('Error processing signature', e);
-      }
-    }
-
-    try {
-      const { error: err } = await supabase.from('guest_book').insert([{
-        id: `guest-${Date.now()}`,
-        tenant_id: tenantId,
-        nik: form.nik || null,
-        nama: capitalizeWords(form.nama),
-        alamat: capitalizeWords(form.alamat),
-        instansi: capitalizeWords(form.instansi),
-        keperluan: form.keperluan,
-        tujuan_temu: '-',
-        signature_url: signatureUrl,
-        tanggal_masuk: new Date().toISOString(),
-        tanggal_keluar: null,
-        status: 'hadir',
-      }]);
-
-      if (err) throw err;
-      setSaveSuccess(true);
-      fetchEntries();
-    } catch {
-      showToast('Gagal menyimpan data tamu.', 'error');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleCheckOut = async (id: string, nama: string) => {
     const { error } = await supabase
@@ -367,18 +270,6 @@ export default function AdminBukuTamu() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto animate-in fade-in duration-300">
-      {/* Scanner Modal */}
-      {showScanner && <AdminQRScanner onResult={handleNikFound} onClose={() => setShowScanner(false)} />}
-
-      {/* Looking up overlay */}
-      {isLookingUp && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center shadow-2xl">
-            <RefreshCw className="w-8 h-8 text-emerald-700 animate-spin mx-auto mb-3" />
-            <p className="font-bold text-gray-900 dark:text-white">Mencari data warga...</p>
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -410,7 +301,7 @@ export default function AdminBukuTamu() {
             Cetak QR Kiosk
           </button>
           <button
-            onClick={() => { setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] }); setShowModal(true); }}
+            onClick={() => window.open(`/?tab=buku_tamu&tenant=${tenantId}`, '_blank')}
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all shadow-sm"
           >
             <Plus className="w-4 h-4" />
@@ -525,151 +416,6 @@ export default function AdminBukuTamu() {
           </tbody>
         </table>
       </div>
-
-      {/* Add Guest Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
-              <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
-                <Plus className="w-5 h-5 text-emerald-700" />
-                Data Tamu Baru
-              </h3>
-              <button onClick={() => {
-                setShowModal(false);
-                setTimeout(() => setSaveSuccess(false), 300);
-              }} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {saveSuccess ? (
-              <div className="p-10 text-center">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Terima Kasih!</h3>
-                <p className="text-gray-500 dark:text-slate-400 mb-8">Data tamu atas nama <strong>{form.nama}</strong> telah berhasil dicatat ke dalam sistem.</p>
-                
-                <div className="flex gap-3 justify-center">
-                  <button
-                    onClick={() => {
-                      setShowModal(false);
-                      setTimeout(() => {
-                        setSaveSuccess(false);
-                        setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] });
-                      }, 300);
-                    }}
-                    className="px-6 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
-                  >
-                    Tutup
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSaveSuccess(false);
-                      setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] });
-                      setTimeout(() => signatureRef.current?.clear(), 100);
-                    }}
-                    className="px-6 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2"
-                  >
-                    <Plus className="w-5 h-5" />
-                    Tambah Tamu Lagi
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
-              {/* NIK & scan button */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK (Opsional)</label>
-                <div className="flex gap-2">
-                  <input
-                    type="tel"
-                    data-no-cap
-                    maxLength={16}
-                    value={form.nik}
-                    onChange={(e) => setForm(prev => ({ ...prev, nik: e.target.value.replace(/\D/g, '') }))}
-                    placeholder="16 digit NIK..."
-                    className="flex-1 h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-mono text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                  />
-                  <button
-                    onClick={() => { setShowModal(false); setShowScanner(true); }}
-                    className="h-11 px-3 bg-gray-900 dark:bg-slate-700 text-white rounded-xl hover:bg-gray-800 transition-all"
-                    title="Scan QR"
-                  >
-                    <QrCode className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap <span className="text-red-500">*</span></label>
-                <input
-                  type="text"
-                  value={form.nama}
-                  onChange={(e) => setForm(prev => ({ ...prev, nama: capitalizeWords(e.target.value) }))}
-                  placeholder="Nama tamu..."
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Asal / Alamat / Instansi</label>
-                <input
-                  type="text"
-                  value={form.instansi}
-                  onChange={(e) => setForm(prev => ({ ...prev, instansi: capitalizeWords(e.target.value), alamat: capitalizeWords(e.target.value) }))}
-                  placeholder="Desa / kota / instansi asal..."
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                />
-              </div>
-
-              <div className="space-y-1 mt-3">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Keperluan <span className="text-red-500">*</span></label>
-                <select
-                  value={form.keperluan}
-                  onChange={(e) => setForm(prev => ({ ...prev, keperluan: e.target.value }))}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
-                >
-                  {KEPERLUAN_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
-                </select>
-              </div>
-            </div>
-
-            <div className="px-5 pb-5">
-              <label className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-2 mt-4">Tanda Tangan Tamu</label>
-              <div className="border-2 border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white">
-                <SignatureCanvas 
-                  ref={signatureRef}
-                  penColor="black"
-                  clearOnResize={false}
-                  canvasProps={{className: 'signatureCanvas w-full h-32 cursor-crosshair'}}
-                />
-              </div>
-              <button type="button" onClick={() => signatureRef.current?.clear()} className="mt-2 text-xs text-emerald-600 font-medium hover:underline">
-                Bersihkan Tanda Tangan
-              </button>
-            </div>
-
-                <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 bg-gray-50/50 dark:bg-slate-900/50">
-                  <button onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
-                    Batal
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                  >
-                    {isSaving ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                    Simpan Data
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Print QR Kiosk Modal */}
       {showPrintQR && (
