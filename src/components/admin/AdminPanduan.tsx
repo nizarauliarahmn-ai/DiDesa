@@ -8,7 +8,7 @@ import {
 import { showToast } from '../../utils/toast';
 
 export default function AdminPanduan() {
-  const [activeCategory, setActiveCategory] = useState<'kiosk' | 'surat' | 'bansos' | 'saas' | 'faq'>('kiosk');
+  const [activeCategory, setActiveCategory] = useState<'kiosk' | 'surat' | 'bansos' | 'pengaturan' | 'faq'>('kiosk');
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
@@ -114,14 +114,14 @@ export default function AdminPanduan() {
         </button>
 
         <button
-          onClick={() => setActiveCategory('saas')}
+          onClick={() => setActiveCategory('pengaturan' as any)}
           className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
-            activeCategory === 'saas'
+            activeCategory === ('pengaturan' as any)
               ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
               : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
           }`}
         >
-          <Building2 size={18} /> Manajemen SaaS & Domain
+          <Building2 size={18} /> Pengaturan KOP & Profil Desa
         </button>
 
         <button
@@ -347,34 +347,32 @@ export default function AdminPanduan() {
           </div>
         )}
 
-        {/* CATEGORY 4: MANAGEMENT SAAS & DOMAIN */}
-        {activeCategory === 'saas' && (
+        {/* CATEGORY 4: PENGATURAN KOP & PROFIL DESA */}
+        {activeCategory === 'pengaturan' && (
           <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 animate-in fade-in duration-300">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4">
-              Panduan Manajemen SaaS & Penambahan Desa Baru (Pemilik Platform)
+              Panduan Pengaturan KOP Surat, Logo & Profil Desa
             </h2>
 
             <div className="space-y-6">
               
-              <div className="p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 space-y-2">
-                <h4 className="font-bold text-indigo-950 dark:text-indigo-200">1. Cara Menambah Desa / Tenant Baru</h4>
-                <ol className="list-decimal pl-5 text-xs text-indigo-900 dark:text-indigo-300 space-y-1.5">
-                  <li>Login menggunakan Akun Pemilik SaaS (`admin@sistemdidesa.id`).</li>
-                  <li>Buka menu **Manajemen Klien** di sidebar sebelah kiri.</li>
-                  <li>Klik tombol **+ Tambah Desa Baru**.</li>
-                  <li>Isi nama desa, nama kabupaten, kode subdomain (misal: `wasahhilir`), serta email & password akun admin desa tersebut.</li>
-                  <li>Klik **Simpan**. Desa baru langsung aktif dan siap digunakan secara mandiri!</li>
+              <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 space-y-2">
+                <h4 className="font-bold text-emerald-950 dark:text-emerald-200">1. Mengatur KOP Surat Resmi & Logo Desa</h4>
+                <ol className="list-decimal pl-5 text-xs text-emerald-900 dark:text-emerald-300 space-y-1.5">
+                  <li>Buka menu **Pengaturan** di sidebar sebelah kiri.</li>
+                  <li>Isi nama lengkap desa, nama kecamatan, kabupaten, alamat kantor desa, serta kode pos.</li>
+                  <li>Unggah **Logo Kabupaten** dan **Logo Desa** resmi. Logo ini akan otomatis tampil di bagian atas (*header*) semua surat administrasi yang dicetak.</li>
+                  <li>Klik **Simpan Pengaturan**.</li>
                 </ol>
               </div>
 
-              <div className="p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 space-y-2">
-                <h4 className="font-bold text-emerald-950 dark:text-emerald-200">2. Menghubungkan Domain Sendiri (`didesa.id`) di Vercel</h4>
-                <ol className="list-decimal pl-5 text-xs text-emerald-900 dark:text-emerald-300 space-y-1.5">
-                  <li>Beli domain pilihan Anda (misal `didesa.id` di Niagahoster / Rumahweb / Cloudflare).</li>
-                  <li>Buka Dashboard **Vercel** proyek ini → pilih **Settings** → **Domains**.</li>
-                  <li>Masukkan nama domain utama Anda (`didesa.id`) dan wildcard subdomain (`*.didesa.id`).</li>
-                  <li>Ubah CNAME dan A Record pada DNS Domain Anda sesuai petunjuk Vercel.</li>
-                  <li>Setiap desa kini dapat diakses profesional via `namadesa.didesa.id`!</li>
+              <div className="p-5 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 space-y-2">
+                <h4 className="font-bold text-indigo-950 dark:text-indigo-200">2. Mengatur Pejabat Penandatangan & TTD Digital</h4>
+                <ol className="list-decimal pl-5 text-xs text-indigo-900 dark:text-indigo-300 space-y-1.5">
+                  <li>Buka menu **Aparatur Desa** atau **Pengaturan**.</li>
+                  <li>Masukkan nama lengkap dan NIP Kepala Desa serta Sekretaris Desa.</li>
+                  <li>Bubuhkan atau unggah gambar **Tanda Tangan Digital** Kepala Desa agar verifikasi surat bisa berjalan secara otomatis dan sah.</li>
+                  <li>Klik **Simpan**.</li>
                 </ol>
               </div>
 
@@ -394,19 +392,19 @@ export default function AdminPanduan() {
               {[
                 {
                   q: "Mengapa data yang dikirim dari laptop admin tidak muncul otomatis di layar tablet Kios?",
-                  a: "Pastikan dua hal: (1) Layar tablet dalam keadaan terbuka di alamat Kios (`?tenant=namadesa&tab=kios`), dan (2) Titik sinyal indikator di pojok kanan atas tablet berwarna HIJAU (SUBSCRIBED). Jika warna titik masih kuning, silakan muat ulang (refresh) browser tablet tersebut."
+                  a: "Pastikan dua hal: (1) Layar tablet dalam keadaan terbuka di alamat Kios (?tenant=namadesa&tab=kios), dan (2) Titik sinyal indikator di pojok kanan atas tablet berwarna HIJAU (SUBSCRIBED). Jika warna titik masih kuning, silakan muat ulang (refresh) browser tablet tersebut."
                 },
                 {
                   q: "Bagaimana jika tablet milik desa tidak memiliki kamera untuk scan QR Code?",
                   a: "Tidak masalah sama sekali. Warga tetap bisa mengisi buku tamu atau mengajukan surat dengan memilih tombol 'Input Manual NIK / Nama' di layar Kios tanpa perlu memindai kamera."
                 },
                 {
-                  q: "Apakah data antara Desa A dan Desa B bisa saling tertukar?",
+                  q: "Apakah data antara desa kami dan desa lain bisa saling tertukar?",
                   a: "Tidak bisa. Aplikasi ini menggunakan sistem keamanan Multi-Tenant Supabase. Setiap data desa diisolasi penuh menggunakan ID unik (UUID) 36 karakter yang tidak bisa ditebak."
                 },
                 {
-                  q: "Apakah saya bisa mengubah logo, nama platform, atau warna tema aplikasi ini?",
-                  a: "Bisa! Login sebagai SaaS Admin, lalu buka menu 'Branding Platform'. Anda dapat merubah nama platform, logo global, dan warna tema secara realtime tanpa harus mengubah kode sama sekali."
+                  q: "Bagaimana cara mencetak surat dengan KOP desa resmi?",
+                  a: "Atur terlebih dahulu nama desa dan logo desa di menu Pengaturan. Setelah itu, setiap kali Anda mengeklik cetak surat di menu Surat & Administrasi, KOP surat resmi akan otomatis terpasang rapi."
                 }
               ].map((faq, idx) => (
                 <div 
