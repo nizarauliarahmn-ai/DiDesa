@@ -63,21 +63,8 @@ export default function AdminBukuTamu() {
     nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0]
   });
   
-  const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  // Remove the useEffect and useRef for broadcastChannelRef since we will create it on demand
 
-  useEffect(() => {
-    if (!tenantId) return;
-    const channel = supabase.channel(`kiosk-notif-${tenantId}`);
-    channel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        broadcastChannelRef.current = channel;
-      }
-    });
-    return () => {
-      supabase.removeChannel(channel);
-      broadcastChannelRef.current = null;
-    };
-  }, [tenantId]);
 
   const handleSendToKiosk = () => {
     if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
@@ -91,21 +78,19 @@ export default function AdminBukuTamu() {
       keperluan: form.keperluan
     };
 
-    if (broadcastChannelRef.current) {
-      broadcastChannelRef.current.send({
-        type: 'broadcast',
-        event: 'incoming-guest',
-        payload
-      });
-    } else {
-      // Fallback if not connected yet
-      const tempChannel = supabase.channel(`kiosk-notif-${tenantId}`);
-      tempChannel.subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          tempChannel.send({ type: 'broadcast', event: 'incoming-guest', payload });
-        }
-      });
-    }
+    const channel = supabase.channel(`kiosk-notif-${tenantId}`);
+    channel.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        channel.send({
+          type: 'broadcast',
+          event: 'incoming-guest',
+          payload
+        }).then(() => {
+          // Clean up the channel after sending
+          supabase.removeChannel(channel);
+        });
+      }
+    });
     
     showToast('Data berhasil dikirim ke layar Kios.', 'success');
     setShowModal(false);
