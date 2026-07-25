@@ -421,12 +421,18 @@ export default function AdminTenants() {
           onClick={async () => {
             if (window.confirm('Yakin ingin memaksa seluruh layar Kios & Admin se-Indonesia memuat ulang secara otomatis sekarang? Pastikan Anda baru saja merilis pembaruan baru.')) {
               try {
-                await supabase.channel('global-broadcast').send({
-                  type: 'broadcast',
-                  event: 'force-reload',
-                  payload: { timestamp: Date.now() }
+                const channel = supabase.channel('global-broadcast');
+                channel.subscribe(async (status) => {
+                  if (status === 'SUBSCRIBED') {
+                    await channel.send({
+                      type: 'broadcast',
+                      event: 'force-reload',
+                      payload: { timestamp: Date.now() }
+                    });
+                    showToast('Perintah muat ulang berhasil dikirim ke semua perangkat!', 'success');
+                    setTimeout(() => { supabase.removeChannel(channel); }, 1000);
+                  }
                 });
-                showToast('Perintah muat ulang berhasil dikirim ke semua perangkat!', 'success');
               } catch (e) {
                 showToast('Gagal mengirim perintah', 'error');
               }

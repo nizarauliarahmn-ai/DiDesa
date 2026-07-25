@@ -127,6 +127,11 @@ export function SupabaseSync() {
           fetchSettings();
         }
       )
+      .subscribe();
+
+    // 4. Global Broadcast Subscription (Cross-Tenant)
+    const globalChannel = supabase
+      .channel('global-broadcast')
       .on('broadcast', { event: 'force-reload' }, () => {
         window.dispatchEvent(new Event('force_reload_requested'));
       })
@@ -135,6 +140,7 @@ export function SupabaseSync() {
     return () => {
       isMounted = false;
       supabase.removeChannel(channel);
+      supabase.removeChannel(globalChannel);
     };
   }, [tenantId]);
 
