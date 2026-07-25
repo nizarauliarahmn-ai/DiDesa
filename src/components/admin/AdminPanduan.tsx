@@ -8,7 +8,7 @@ import {
 import { showToast } from '../../utils/toast';
 
 export default function AdminPanduan() {
-  const [activeCategory, setActiveCategory] = useState<'kiosk' | 'surat' | 'bansos' | 'pengaturan' | 'faq'>('kiosk');
+  const [activeCategory, setActiveCategory] = useState<'kiosk' | 'surat' | 'bansos' | 'pengaturan' | 'faq' | 'ai'>('kiosk');
   const [searchQuery, setSearchQuery] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
@@ -122,6 +122,17 @@ export default function AdminPanduan() {
           }`}
         >
           <Building2 size={18} /> Pengaturan KOP & Profil Desa
+        </button>
+
+        <button
+          onClick={() => setActiveCategory('ai')}
+          className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
+            activeCategory === 'ai'
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+              : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
+          }`}
+        >
+          <Sparkles size={18} /> Pengaturan Asisten AI (Desi)
         </button>
 
         <button
@@ -426,6 +437,51 @@ export default function AdminPanduan() {
                 </div>
               ))}
 
+            </div>
+          </div>
+        )}
+
+        {/* CATEGORY 6: ASISTEN AI */}
+        {activeCategory === 'ai' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4 flex items-center gap-2">
+                <Sparkles className="text-indigo-500" /> Panduan Pengaturan Asisten AI (Desi)
+              </h2>
+              
+              <div className="prose prose-emerald dark:prose-invert max-w-none">
+                <p className="text-gray-600 dark:text-slate-400">
+                  Desi (Asisten AI DiDesa) menggunakan teknologi Google Gemini untuk menjawab pertanyaan secara cerdas berdasarkan data desa Anda. 
+                  Sistem ini menggunakan token yang dihitung per desa, sehingga setiap desa perlu mengkonfigurasi <strong>API Key Gemini</strong> mereka sendiri.
+                </p>
+
+                <h3 className="text-lg font-bold mt-8 mb-4">Langkah 1: Mendapatkan API Key Gratis</h3>
+                <ol className="list-decimal pl-5 space-y-3 text-gray-600 dark:text-slate-400">
+                  <li>Buka situs <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline font-medium">Google AI Studio</a>.</li>
+                  <li>Login menggunakan akun Google (email) yang akan didedikasikan untuk desa ini.</li>
+                  <li>Klik tombol <strong>Create API Key</strong> (Buat Kunci API).</li>
+                  <li>Salin (Copy) kode unik API Key yang muncul. Kode ini bersifat rahasia.</li>
+                </ol>
+
+                <h3 className="text-lg font-bold mt-8 mb-4">Langkah 2: Memasukkan API Key ke DiDesa</h3>
+                <ol className="list-decimal pl-5 space-y-3 text-gray-600 dark:text-slate-400">
+                  <li>Buka tab menu <strong>Asisten AI (Desi)</strong> di sidebar kiri bawah.</li>
+                  <li>Jika belum pernah diatur, akan muncul form <strong>Konfigurasi API Key AI</strong>. (Jika ingin mengganti kunci yang lama, klik tombol <strong>Ganti API Key</strong> di pojok kanan atas layar AI).</li>
+                  <li>Paste (Tempelkan) API Key yang telah Anda salin sebelumnya ke dalam kolom yang tersedia.</li>
+                  <li>Klik <strong>Simpan</strong>.</li>
+                </ol>
+
+                <div className="mt-8 p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-2xl border border-indigo-100 dark:border-indigo-900/50 flex items-start gap-4">
+                  <ShieldCheck size={24} className="shrink-0 mt-0.5 text-indigo-600 dark:text-indigo-400" />
+                  <div>
+                    <h4 className="font-bold text-indigo-900 dark:text-indigo-300">Keamanan Terjamin</h4>
+                    <p className="text-sm text-indigo-800 dark:text-indigo-400 mt-1 leading-relaxed">
+                      API Key ini tidak dikirim ke server pusat kami. API Key disimpan secara lokal (di browser komputer/perangkat Anda) khusus untuk desa ini. 
+                      Pastikan teknisi atau admin desa menyetel API Key ini di komputer utama balai desa yang digunakan untuk mengakses dashboard DiDesa.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
