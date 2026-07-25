@@ -26,6 +26,7 @@ type KioskStep = 'form' | 'success';
 
 export default function PublicBukuTamu() {
   const [tenantId, setTenantId] = useState<string | null>(null);
+  const [wsStatus, setWsStatus] = useState<string>('connecting');
   const [step, setStep] = useState<KioskStep>('form');
   const [desaName, setDesaName] = useState('Desa');
   const [scanMode, setScanMode] = useState<'qr' | 'manual'>('qr');
@@ -84,7 +85,7 @@ export default function PublicBukuTamu() {
   useEffect(() => {
     if (!tenantId) return;
 
-    const channel = supabase.channel(`kiosk-notif-${tenantId}`)
+    const channel = supabase.channel(`kiosk-notif-${tenantId}`, { config: { broadcast: { ack: true } } })
       .on('broadcast', { event: 'incoming-guest' }, ({ payload }) => {
         setForm(payload);
         setStep('form');
@@ -95,10 +96,13 @@ export default function PublicBukuTamu() {
           document.querySelector('.signatureCanvas')?.scrollIntoView({ behavior: 'smooth' });
         }, 300);
       })
-      .subscribe();
+      .subscribe((status) => {
+        setWsStatus(status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      setWsStatus('disconnected');
     };
   }, [tenantId]);
 
@@ -246,6 +250,14 @@ export default function PublicBukuTamu() {
             <h2 className="text-3xl font-bold text-slate-800 mb-4">Akses Ditolak</h2>
             <p className="text-slate-600 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda agar kode desa dapat terbaca dengan benar.</p>
           </div>
+        </div>
+      )}
+
+      {/* Debug Indicator */}
+      {isKioskMode && tenantId && (
+        <div className="absolute top-4 right-4 flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full z-50">
+          <div className={`w-2.5 h-2.5 rounded-full ${wsStatus === 'SUBSCRIBED' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+          <span className="text-[10px] text-white/90 font-mono font-medium">{wsStatus}</span>
         </div>
       )}
 
