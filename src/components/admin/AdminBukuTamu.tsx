@@ -495,11 +495,18 @@ export default function AdminBukuTamu() {
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK (Opsional)</label>
                 <input
+                  id="input-nik"
                   type="tel"
                   data-no-cap
                   maxLength={16}
                   value={form.nik}
                   onChange={(e) => setForm(prev => ({ ...prev, nik: e.target.value.replace(/\D/g, '') }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      document.getElementById('input-nama')?.focus();
+                    }
+                  }}
                   placeholder="16 digit NIK..."
                   className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-mono text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
                 />
@@ -508,9 +515,16 @@ export default function AdminBukuTamu() {
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap <span className="text-red-500">*</span></label>
                 <input
+                  id="input-nama"
                   type="text"
                   value={form.nama}
                   onChange={(e) => setForm(prev => ({ ...prev, nama: capitalizeWords(e.target.value) }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      document.getElementById('input-instansi')?.focus();
+                    }
+                  }}
                   placeholder="Nama tamu..."
                   className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
                 />
@@ -519,9 +533,16 @@ export default function AdminBukuTamu() {
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Asal / Alamat / Instansi</label>
                 <input
+                  id="input-instansi"
                   type="text"
                   value={form.instansi}
                   onChange={(e) => setForm(prev => ({ ...prev, instansi: capitalizeWords(e.target.value), alamat: capitalizeWords(e.target.value) }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      document.getElementById('input-keperluan')?.focus();
+                    }
+                  }}
                   placeholder="Desa / kota / instansi asal..."
                   className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
                 />
@@ -530,8 +551,15 @@ export default function AdminBukuTamu() {
               <div className="space-y-1 mt-3">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Keperluan <span className="text-red-500">*</span></label>
                 <select
+                  id="input-keperluan"
                   value={form.keperluan}
                   onChange={(e) => setForm(prev => ({ ...prev, keperluan: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSendToKiosk();
+                    }
+                  }}
                   className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
                 >
                   {KEPERLUAN_OPTIONS.map(opt => <option key={opt}>{opt}</option>)}
