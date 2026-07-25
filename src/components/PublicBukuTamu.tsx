@@ -41,7 +41,6 @@ export default function PublicBukuTamu() {
   const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(false);
   const [isKioskMode, setIsKioskMode] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
-  const [showKtpScanner, setShowKtpScanner] = useState(false);
   const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
   
   const signatureRef = React.useRef<any>(null);
@@ -304,52 +303,6 @@ export default function PublicBukuTamu() {
         </div>
       )}
 
-      {/* KTP Scanner Modal */}
-      {showKtpScanner && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-200">
-            <button 
-              onClick={() => setShowKtpScanner(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-2 z-10"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <h3 className="text-xl font-bold text-slate-800 mb-4 text-center mt-2">Scan Barcode KTP</h3>
-            <div className="rounded-2xl overflow-hidden border-2 border-emerald-200 relative bg-black aspect-square">
-              <Scanner
-                onScan={(results) => {
-                  if (!results || results.length === 0) return;
-                  const result = results[0].rawValue;
-                  if (!result) return;
-                  const nikMatch = result.match(/\b(\d{16})\b/);
-                  if (nikMatch) {
-                    const scannedNik = nikMatch[1];
-                    setForm(p => ({ ...p, nik: scannedNik }));
-                    lookupNik(scannedNik);
-                    setShowKtpScanner(false);
-                    showToast('NIK berhasil dipindai!', 'success');
-                  } else {
-                    setError('QR tidak dikenali sebagai NIK KTP.');
-                    setShowKtpScanner(false);
-                  }
-                }}
-                onError={(e) => {
-                  console.error(e);
-                  setError('Kamera tidak dapat diakses.');
-                  setShowKtpScanner(false);
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-48 border-2 border-emerald-400 rounded-xl opacity-80 animate-pulse" />
-              </div>
-            </div>
-            <p className="text-xs text-center text-gray-500 mt-4 leading-relaxed">
-              Arahkan kamera ke barcode di bagian belakang KTP tamu. Pastikan pencahayaan cukup.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden">
 
@@ -401,16 +354,6 @@ export default function PublicBukuTamu() {
                     className="h-12 px-4 bg-emerald-100 text-emerald-700 font-bold rounded-xl hover:bg-emerald-200 transition-all flex items-center justify-center gap-2"
                   >
                     <Search className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowKtpScanner(true);
-                    }}
-                    className="h-12 px-4 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
-                    title="Scan Barcode KTP"
-                  >
-                    <QrCode className="w-5 h-5" />
                   </button>
                 </div>
                 <p className="text-[10px] text-gray-400 mt-1">Isi NIK untuk otomatis melengkapi nama & alamat (khusus warga).</p>
