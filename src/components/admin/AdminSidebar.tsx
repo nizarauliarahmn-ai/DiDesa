@@ -58,6 +58,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   // Global Branding
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
+  const [globalDesiLogo, setGlobalDesiLogo] = React.useState(() => localStorage.getItem('global_desi_logo') || '');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -122,6 +123,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
     const handleBrandingUpdate = () => {
       setGlobalName(localStorage.getItem('global_app_name') || 'DiDesa');
       setGlobalLogo(localStorage.getItem('global_app_logo') || '');
+      setGlobalDesiLogo(localStorage.getItem('global_desi_logo') || '');
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
     };
 
@@ -221,8 +223,12 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
           >
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center gap-3 relative z-10">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner text-white">
-                <Bot size={16} />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner text-white overflow-hidden">
+                {globalDesiLogo ? (
+                  <img src={globalDesiLogo} alt="Desi Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <Bot size={16} />
+                )}
               </div>
               <div className="flex flex-col items-start">
                 <div className="flex items-center gap-1.5">

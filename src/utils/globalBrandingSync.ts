@@ -15,6 +15,7 @@ import { supabase } from './supabase';
 const GLOBAL_BRANDING_KEYS = [
   'global_app_name',
   'global_app_logo', 
+  'global_desi_logo',
   'global_app_color',
   'global_print_footer',
   'global_footer_desc',
@@ -180,6 +181,7 @@ export function getAllGlobalBranding() {
   return {
     name: getGlobalBranding('global_app_name', 'DiDesa'),
     logo: getGlobalBranding('global_app_logo', ''),
+    desiLogo: getGlobalBranding('global_desi_logo', ''),
     color: getGlobalBranding('global_app_color', '#047857'),
     printFooter: getGlobalBranding('global_print_footer', 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>'),
     footerDesc: getGlobalBranding('global_footer_desc', 'Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.'),

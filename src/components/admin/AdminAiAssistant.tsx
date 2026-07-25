@@ -16,6 +16,7 @@ export default function AdminAiAssistant() {
   const [apiKey, setApiKey] = useState('');
   const [inputApiKey, setInputApiKey] = useState('');
   const [showConfig, setShowConfig] = useState(false);
+  const [globalDesiLogo, setGlobalDesiLogo] = useState(() => localStorage.getItem('global_desi_logo') || '');
 
   useEffect(() => {
     const authUserStr = localStorage.getItem('didesa_auth_user');
@@ -34,6 +35,12 @@ export default function AdminAiAssistant() {
     } else {
       setShowConfig(true);
     }
+    
+    const handleBrandingUpdate = () => {
+      setGlobalDesiLogo(localStorage.getItem('global_desi_logo') || '');
+    };
+    window.addEventListener('global_branding_updated', handleBrandingUpdate);
+    return () => window.removeEventListener('global_branding_updated', handleBrandingUpdate);
   }, []);
 
   const scrollToBottom = () => {
@@ -145,8 +152,12 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
     <div className="max-w-4xl mx-auto pb-24 h-[calc(100vh-80px)] flex flex-col px-4 sm:px-0">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner text-white">
-            <Bot size={24} />
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner text-white overflow-hidden shrink-0">
+            {globalDesiLogo ? (
+              <img src={globalDesiLogo} alt="Desi" className="w-full h-full object-cover" />
+            ) : (
+              <Bot size={24} />
+            )}
           </div>
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -226,8 +237,12 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
                   key={i} 
                   className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
                 >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-gray-100 dark:bg-slate-800' : 'bg-indigo-100 text-indigo-600'}`}>
-                    {msg.role === 'user' ? <User size={14} className="text-gray-600 dark:text-slate-400" /> : <Bot size={14} />}
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden ${msg.role === 'user' ? 'bg-gray-100 dark:bg-slate-800' : 'bg-indigo-100 text-indigo-600'}`}>
+                    {msg.role === 'user' ? (
+                      <User size={14} className="text-gray-600 dark:text-slate-400" />
+                    ) : (
+                      globalDesiLogo ? <img src={globalDesiLogo} alt="Desi" className="w-full h-full object-cover" /> : <Bot size={14} />
+                    )}
                   </div>
                   <div className={`p-4 rounded-2xl text-sm font-medium ${msg.role === 'user' ? 'bg-emerald-600 text-white rounded-tr-sm' : 'bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-tl-sm border border-gray-100 dark:border-slate-800'}`}>
                     {msg.role === 'ai' ? (
@@ -246,8 +261,8 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
                   animate={{ opacity: 1, y: 0 }}
                   className="flex gap-3 max-w-[85%]"
                 >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-indigo-100 text-indigo-600">
-                    <Bot size={14} />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-indigo-100 text-indigo-600 overflow-hidden">
+                    {globalDesiLogo ? <img src={globalDesiLogo} alt="Desi" className="w-full h-full object-cover" /> : <Bot size={14} />}
                   </div>
                   <div className="p-4 rounded-2xl text-sm font-medium bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-tl-sm border border-gray-100 dark:border-slate-800 flex items-center gap-2">
                     <Loader2 size={14} className="animate-spin text-indigo-500" />

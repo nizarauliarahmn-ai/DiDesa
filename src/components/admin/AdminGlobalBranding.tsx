@@ -7,6 +7,7 @@ import { saveGlobalBrandingToSupabase, syncGlobalBrandingFromSupabase } from '..
 export default function AdminGlobalBranding() {
   const [globalName, setGlobalName] = useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
+  const [globalDesiLogo, setGlobalDesiLogo] = useState(() => localStorage.getItem('global_desi_logo') || '');
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalPrintFooter, setGlobalPrintFooter] = useState(() => localStorage.getItem('global_print_footer') ?? 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia');
   
@@ -25,6 +26,7 @@ export default function AdminGlobalBranding() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const desiLogoInputRef = useRef<HTMLInputElement>(null);
   const social1InputRef = useRef<HTMLInputElement>(null);
   const social2InputRef = useRef<HTMLInputElement>(null);
 
@@ -38,6 +40,7 @@ export default function AdminGlobalBranding() {
       };
       apply('global_app_name', setGlobalName);
       apply('global_app_logo', setGlobalLogo);
+      apply('global_desi_logo', setGlobalDesiLogo);
       apply('global_app_color', setGlobalColor);
       apply('global_print_footer', setGlobalPrintFooter);
       apply('global_footer_desc', setGlobalFooterDesc);
@@ -88,12 +91,24 @@ export default function AdminGlobalBranding() {
     }
   };
 
+  const handleDesiLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setGlobalDesiLogo(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
 
     const payload: Record<string, string> = {
       global_app_name: globalName,
       global_app_logo: globalLogo,
+      global_desi_logo: globalDesiLogo,
       global_app_color: globalColor,
       global_print_footer: globalPrintFooter,
       global_footer_desc: globalFooterDesc,
@@ -277,6 +292,38 @@ export default function AdminGlobalBranding() {
                   </button>
                 </div>
                 <p className="text-[10px] text-slate-400 font-medium">Gunakan URL gambar publik atau unggah file langsung (maks 2MB) dengan latar belakang transparan.</p>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Image size={18} className="text-indigo-600" />
+                  Logo Asisten AI (Desi)
+                </label>
+                <div className="flex gap-3">
+                  <input 
+                    type="text" 
+                    value={globalDesiLogo}
+                    onChange={(e) => setGlobalDesiLogo(e.target.value)}
+                    className="flex-1 px-5 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all text-sm font-mono"
+                    placeholder="https://example.com/desi-logo.png"
+                  />
+                  <input
+                    type="file"
+                    ref={desiLogoInputRef}
+                    accept="image/*"
+                    onChange={handleDesiLogoUpload}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => desiLogoInputRef.current?.click()}
+                    className="px-6 py-4 bg-indigo-50 text-indigo-700 font-bold border border-indigo-200 rounded-2xl hover:bg-indigo-100 transition-colors flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <UploadCloud size={20} />
+                    Unggah Logo AI
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium">Jika dikosongkan, akan menggunakan icon robot bawaan.</p>
               </div>
 
               <div className="space-y-4">
