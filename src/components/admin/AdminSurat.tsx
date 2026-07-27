@@ -54,31 +54,31 @@ export default function AdminSurat({
     setEditLetterId(letter.id);
 
     const jenis = letter.jenis?.toUpperCase() || '';
-    if (jenis === 'SKP') {
+    if (jenis.includes('SKP') || jenis.includes('PINDAH')) {
       setActiveTab('skp');
-    } else if (jenis === 'SDP' || jenis === 'SKD' || jenis === 'SURAT KETERANGAN DOMISILI' || jenis === 'SK DOMISILI PERORANGAN') {
+    } else if (jenis.includes('SDP') || jenis.includes('SKD') || jenis.includes('DOMISILI PERORANGAN')) {
       setActiveTab('skd');
-    } else if (jenis === 'SDU' || jenis === 'SK DOMISILI USAHA') {
+    } else if (jenis.includes('SDU') || jenis.includes('DOMISILI USAHA')) {
       setActiveTab('sdu');
-    } else if (jenis === 'SKM' || jenis === 'SURAT KETERANGAN KEMATIAN') {
+    } else if (jenis.includes('SKM') || jenis.includes('KEMATIAN')) {
       setActiveTab('skm');
-    } else if (jenis === 'SKU' || jenis === 'SURAT KETERANGAN USAHA') {
+    } else if (jenis.includes('SKU') || jenis.includes('USAHA')) {
       setActiveTab('sku');
-    } else if (jenis === 'SKTM') {
+    } else if (jenis.includes('SKTM') || jenis.includes('TIDAK MAMPU')) {
       setActiveTab('sktm');
-    } else if (jenis === 'SKBM' || jenis === 'SK BELUM MENIKAH') {
+    } else if (jenis.includes('SKBM') || jenis.includes('BELUM MENIKAH')) {
       setActiveTab('skbm');
-    } else if (jenis === 'SK KEHILANGAN' || jenis === 'SKH') {
+    } else if (jenis.includes('SKH') || jenis.includes('KEHILANGAN')) {
       setActiveTab('skh');
-    } else if (jenis === 'SK PENGHASILAN' || jenis === 'SKPH') {
+    } else if (jenis.includes('SKPH') || jenis.includes('PENGHASILAN')) {
       setActiveTab('skph');
-    } else if (jenis === 'SURAT PENGANTAR NIKAH' || jenis === 'SKN') {
+    } else if (jenis.includes('SKN') || jenis.includes('PENGANTAR NIKAH')) {
       setActiveTab('nikah');
-    } else if (jenis === 'SPT' || jenis === 'SURAT PENGURUSAN TASPEN') {
+    } else if (jenis.includes('SPT') || jenis.includes('TASPEN')) {
       setActiveTab('spt');
-    } else if (jenis === 'SPPD' || jenis === 'SURAT PERINTAH PERJALANAN DINAS') {
+    } else if (jenis.includes('SPPD') || jenis.includes('PERJALANAN DINAS')) {
       setActiveTab('sppd');
-    } else if (jenis === 'SKL' || jenis === 'SURAT KETERANGAN KELAHIRAN') {
+    } else if (jenis.includes('SKL') || jenis.includes('KELAHIRAN')) {
       setActiveTab('skl');
     }
   };
