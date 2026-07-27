@@ -153,12 +153,24 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
               {/* Mockup Content */}
               <div className="p-6 space-y-4">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                     <Building2 className="text-white" size={24} />
-                  </div>
+                  {globalLogo ? (
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg p-2"
+                      style={{ backgroundColor: globalColor }}
+                    >
+                      <img src={globalLogo} alt="Logo Desa" className="w-full h-full object-contain" />
+                    </div>
+                  ) : (
+                    <div 
+                      className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+                      style={{ backgroundColor: globalColor }}
+                    >
+                       <Building2 className="text-white" size={24} />
+                    </div>
+                  )}
                   <div>
                     <h3 className="font-bold text-lg text-slate-800 dark:text-white leading-tight">Desa Sukamakmur</h3>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold tracking-wide">PORTAL WARGA</p>
+                    <p className="text-xs font-bold tracking-wide" style={{ color: globalColor }}>PORTAL WARGA</p>
                   </div>
                 </div>
 
