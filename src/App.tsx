@@ -85,18 +85,31 @@ export default function App() {
 
   const [view, setView] = useState<'public' | 'admin'>(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'admin') {
+      return 'admin';
+    }
     if (urlParams.get('mode') === 'public' || urlParams.get('tab') === 'layanan_mandiri' || urlParams.get('portal') === 'warga') {
       return 'public';
     }
     if (urlParams.get('preview') === 'true') {
       return 'admin';
     }
+
+    // Domain utama (sistemdidesa.id / www.sistemdidesa.id) SELALU menampilkan Landing Page Publik!
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+    const isRootDomain = parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost';
+
+    if (isRootDomain && urlParams.get('mode') !== 'admin') {
+      return 'public';
+    }
+
     const saved = localStorage.getItem('didesa_auth_user');
     if (saved) {
       const parsed = JSON.parse(saved);
       return parsed.role === 'public' ? 'public' : 'admin';
     }
-    return 'admin';
+    return 'public';
   });
 
   // Clear cache to force reload letter classifications
