@@ -35,12 +35,20 @@ interface RtRwEntry { no: string; name: string; }
 export default function AdminSuratSKTM({ 
   onBack,
   editData,
-  editLetterId
+  editLetterId,
+  presetResident
 }: { 
   onBack: () => void;
   editData?: any;
   editLetterId?: string | null;
+  presetResident?: any;
 }) {
+  React.useEffect(() => {
+    if (presetResident) {
+      handleSelectResident(presetResident);
+    }
+  }, [presetResident]);
+
   const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SKTM', 'Surat Keterangan Tidak Mampu / Miskin');
   const templateKode = useLetterKode('SKTM');

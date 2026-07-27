@@ -41,12 +41,20 @@ interface ManualFollower {
 export default function AdminSuratSKP({ 
   onBack,
   editData,
-  editLetterId
+  editLetterId,
+  presetResident
 }: { 
   onBack: () => void;
   editData?: any;
   editLetterId?: string | null;
+  presetResident?: any;
 }) {
+  React.useEffect(() => {
+    if (presetResident) {
+      handleSelectResident(presetResident);
+    }
+  }, [presetResident]);
+
   const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SKP', 'Formulir pembuatan Surat Keterangan Pindah Domisili Antar Wilayah');
   const templateKode = useLetterKode('SKP');

@@ -53,12 +53,20 @@ const INDONESIAN_MONTHS = [
 export default function AdminSuratSKU({ 
   onBack,
   editData,
-  editLetterId
+  editLetterId,
+  presetResident
 }: { 
   onBack: () => void;
   editData?: any;
   editLetterId?: string | null;
+  presetResident?: any;
 }) {
+  React.useEffect(() => {
+    if (presetResident) {
+      handleSelectResident(presetResident);
+    }
+  }, [presetResident]);
+
   const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SKU', 'Surat Keterangan Usaha Mikro / Menengah');
   const templateKode = useLetterKode('SKU');

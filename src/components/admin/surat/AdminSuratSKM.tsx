@@ -33,12 +33,20 @@ interface Resident {
 export default function AdminSuratSKM({ 
   onBack,
   editData,
-  editLetterId
+  editLetterId,
+  presetResident
 }: { 
   onBack: () => void;
   editData?: any;
   editLetterId?: string | null;
+  presetResident?: any;
 }) {
+  React.useEffect(() => {
+    if (presetResident) {
+      handleSelectResident(presetResident);
+    }
+  }, [presetResident]);
+
   const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SKM', 'Surat Keterangan Kematian / Miskin');
   const templateKode = useLetterKode('SKM');

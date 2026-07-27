@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AdminSuratDashboard from './surat/AdminSuratDashboard';
+import AdminSuratInbox from './surat/AdminSuratInbox';
 import AdminSuratBuat from './surat/AdminSuratBuat';
 import AdminSuratPenomoran from './surat/AdminSuratPenomoran';
 import AdminSuratNikah from './surat/AdminSuratNikah';
@@ -16,6 +17,7 @@ import AdminSuratSDU from './surat/AdminSuratSDU';
 import AdminSuratSPT from './surat/AdminSuratSPT';
 import AdminSuratSPPD from './surat/AdminSuratSPPD';
 import { getLetterFullData } from '../../utils/letterHistory';
+import { fetchResidentsCached } from '../../utils/apiCache';
 
 export default function AdminSurat({ 
   presetResident, 
@@ -30,13 +32,15 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
+  const [localPresetResident, setLocalPresetResident] = useState<any>(null);
 
   const changeTab = (tab: any) => {
     setEditData(null);
     setEditLetterId(null);
+    setLocalPresetResident(null);
     if (onClearPresetResident && tab !== 'buat') {
       onClearPresetResident();
     }
@@ -52,6 +56,22 @@ export default function AdminSurat({
     
     setEditData(fullData);
     setEditLetterId(letter.id);
+
+    // Auto-fetch resident for Auto-fill functionality
+    if (fullData.nik) {
+      try {
+        const res = await fetchResidentsCached();
+        if (res.ok) {
+          const residents = await res.json();
+          const match = residents.find((r: any) => r.nik === fullData.nik);
+          if (match) {
+            setLocalPresetResident(match);
+          }
+        }
+      } catch (e) {
+        console.error("Error auto-fetching resident:", e);
+      }
+    }
 
     const jenis = letter.jenis?.toUpperCase() || '';
     if (jenis.includes('SKP') || jenis.includes('PINDAH')) {
@@ -107,6 +127,14 @@ export default function AdminSurat({
           Daftar Surat
         </button>
         <button 
+          onClick={() => changeTab('inbox')}
+          className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 flex items-center gap-2 ${activeTab === 'inbox' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
+        >
+          Inbox Permohonan
+          {/* We could add an indicator badge here if we tracked counts globally, but this is sufficient for now */}
+          <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+        </button>
+        <button 
           onClick={() => changeTab('buat')}
           className={`px-6 py-3 font-bold text-sm border-b-2 transition-colors shrink-0 ${activeTab === 'buat' ? 'border-emerald-600 text-emerald-700' : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700'}`}
         >
@@ -151,6 +179,11 @@ export default function AdminSurat({
             debouncedSearchQuery={debouncedSearchQuery}
           />
         )}
+        {activeTab === 'inbox' && (
+          <AdminSuratInbox 
+            onEditLetter={handleEditLetter}
+          />
+        )}
         {activeTab === 'buat' && (
           <AdminSuratBuat 
             presetResident={presetResident}
@@ -172,96 +205,103 @@ export default function AdminSurat({
         )}
         {activeTab === 'nikah' && (
           <AdminSuratNikah 
-            presetResident={presetResident}
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'sktm' && (
           <AdminSuratSKTM 
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'skbm' && (
           <AdminSuratSKBM 
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'skh' && (
           <AdminSuratSKH 
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'skl' && (
           <AdminSuratSKL 
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'skm' && (
           <AdminSuratSKM 
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'sku' && (
           <AdminSuratSKU 
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'skph' && (
           <AdminSuratSKPH 
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'skd' && (
           <AdminSuratSKD 
-            presetResident={presetResident}
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'skp' && (
           <AdminSuratSKP 
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'sdu' && (
           <AdminSuratSDU 
-            presetResident={presetResident}
+            presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'spt' && (
           <AdminSuratSPT 
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'sppd' && (
           <AdminSuratSPPD 
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('buat')} 
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'penomoran' && <AdminSuratPenomoran />}
