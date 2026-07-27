@@ -49,6 +49,48 @@ import PublicKiosSurat from './components/PublicKiosSurat';
 import PublicKiosAspirasi from './components/PublicKiosAspirasi';
 import SaasLandingPage from './components/SaasLandingPage';
 
+function useUrlSync<T extends string>(
+  key: string, 
+  defaultValue: T, 
+  customGetter?: () => T
+): [T, (val: T) => void] {
+  const [state, setState] = useState<T>(() => {
+    if (customGetter) return customGetter();
+    const urlParams = new URLSearchParams(window.location.search);
+    return (urlParams.get(key) as T) || defaultValue;
+  });
+
+  // Kami menggunakan useCallback untuk menghindari customGetter memicu useEffect berulang kali jika tidak perlu
+  // Tapi karena customGetter di-pass sebagai anonymous function, kita akan abaikan dependency-nya dan cukup dengarkan popstate
+  React.useEffect(() => {
+    const handlePopState = () => {
+      if (customGetter) {
+        setState(customGetter());
+      } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        setState((urlParams.get(key) as T) || defaultValue);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [key, defaultValue]);
+
+  const setUrlState = (newState: T) => {
+    setState(newState);
+    const url = new URL(window.location.href);
+    if (newState === defaultValue) {
+      url.searchParams.delete(key);
+    } else {
+      url.searchParams.set(key, String(newState));
+    }
+    if (window.location.href !== url.href) {
+      window.history.pushState({}, '', url);
+    }
+  };
+
+  return [state, setUrlState];
+}
+
 export default function App() {
   // Khusus untuk Halaman Print (Terisolasi dari semua layout)
   const urlParams = new URLSearchParams(window.location.search);
@@ -88,7 +130,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
 
-  const [view, setView] = useState<'public' | 'admin'>(() => {
+  const [view, setView] = useUrlSync<'public' | 'admin'>('mode', 'public', () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('mode') === 'admin') {
       return 'admin';
@@ -130,7 +172,7 @@ export default function App() {
   }
 
 
-  const [adminTab, setAdminTab] = useState('dashboard');
+  const [adminTab, setAdminTab] = useUrlSync<string>('admin_tab', 'dashboard');
   const [presetResident, setPresetResident] = useState<any>(null);
   const [globalSearch, setGlobalSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -146,7 +188,7 @@ export default function App() {
     }, 300);
     return () => clearTimeout(timer);
   }, [globalSearch]);
-  const [publicTab, setPublicTab] = useState(() => new URLSearchParams(window.location.search).get('tab') || 'dashboard');
+  const [publicTab, setPublicTab] = useUrlSync<string>('tab', 'dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isImpersonated, setIsImpersonated] = useState(() => {
     const saved = localStorage.getItem('didesa_auth_user');
