@@ -109,10 +109,21 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button onClick={onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl hover:-translate-y-1 flex items-center justify-center gap-3">
+              <button onClick={onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer">
                 <LayoutDashboard size={20} /> Masuk ke Dashboard Admin
               </button>
-              <button onClick={() => window.alert('Fitur Cari Desa belum aktif di demo ini.')} className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-8 py-4 rounded-2xl font-bold border border-gray-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:-translate-y-1 flex items-center justify-center gap-3">
+              <button 
+                onClick={() => {
+                  const input = window.prompt("Masukkan nama subdomain desa (contoh: sukamakmur):", "sukamakmur");
+                  if (input) {
+                    const domain = window.location.hostname.includes('localhost') 
+                      ? `${window.location.origin}?tenant=${encodeURIComponent(input.trim().toLowerCase())}`
+                      : `https://${encodeURIComponent(input.trim().toLowerCase())}.sistemdidesa.id`;
+                    window.location.href = domain;
+                  }
+                }} 
+                className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-8 py-4 rounded-2xl font-bold border border-gray-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer"
+              >
                 <Search size={20} /> Cari Portal Desa Saya
               </button>
             </div>
@@ -241,6 +252,56 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
         </div>
       </section>
 
+      {/* Keunggulan Section */}
+      <section id="keunggulan" className="py-24 bg-slate-100/50 dark:bg-slate-800/40 border-t border-gray-150 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-black mb-4">Mengapa Desa Memilih DiDesa?</h2>
+            <p className="text-slate-500 dark:text-slate-400">Arsitektur Cloud Multi-Tenant modern yang menjamin keamanan data, transparansi publik, dan kecepatan pelayanan 24/7.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 mb-4 font-black">100%</div>
+              <h3 className="font-bold text-lg mb-2">Cloud Multi-Tenant</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Setiap desa memiliki portal & domain independen tanpa mengganggu desa lain.</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+              <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center text-teal-600 mb-4 font-black">TTE</div>
+              <h3 className="font-bold text-lg mb-2">Resmi & Keabsahan</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Persuratan dilengkapi QR Code Verifikasi Keabsahan Dokumen secara real-time.</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 mb-4 font-black">24/7</div>
+              <h3 className="font-bold text-lg mb-2">Kiosk Anjungan Mandiri</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Warga dapat mengurus surat & melaporkan aspirasi secara mandiri di kantor desa.</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-purple-600 mb-4 font-black">AI</div>
+              <h3 className="font-bold text-lg mb-2">Asisten AI Desa</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Kecerdasan Buatan bawaan untuk membantu analisa APBDes dan pembuatan dokumen.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Integrasi Section */}
+      <section id="integrasi" className="py-20 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-2xl md:text-3xl font-black mb-4">Terintegrasi dengan Ekosistem Digital Nasional</h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-10 text-sm">DiDesa mendukung format standar Kementrian Dalam Negeri, KemenDes PDTT, serta sistem keamanan data nasional.</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 opacity-70 grayscale hover:grayscale-0 transition-all">
+            <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">KEMENDAGRI COMPATIBLE</span>
+            <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">DTKS TERINTEGRASI</span>
+            <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">TTE QR-VERIFIED</span>
+            <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">OPEN-API READY</span>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-emerald-900">
@@ -250,12 +311,17 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
           <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Siap Digitalisasi Desa Anda?</h2>
           <p className="text-emerald-100 text-lg mb-10 max-w-2xl mx-auto">Bergabung dengan ratusan desa lainnya yang telah meningkatkan efisiensi dan pelayanan publik menggunakan platform DiDesa.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-             <button onClick={onLoginClick} className="bg-white text-emerald-900 px-8 py-4 rounded-2xl font-bold shadow-2xl hover:scale-105 transition-transform">
+             <button onClick={onLoginClick} className="bg-white text-emerald-900 px-8 py-4 rounded-2xl font-bold shadow-2xl hover:scale-105 transition-transform cursor-pointer">
                Login ke Sistem Admin
              </button>
-             <button className="bg-emerald-800 text-white border border-emerald-700 px-8 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-colors">
-               Hubungi Tim Penjualan
-             </button>
+             <a 
+               href="https://wa.me/6281234567890?text=Halo%20Tim%20DiDesa,%20saya%20tertarik%20untuk%20konsultasi%20digitalisasi%20desa." 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="bg-emerald-800 text-white border border-emerald-700 px-8 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-colors inline-flex items-center justify-center cursor-pointer"
+             >
+               Hubungi Tim Penjualan (WhatsApp)
+             </a>
           </div>
         </div>
       </section>
