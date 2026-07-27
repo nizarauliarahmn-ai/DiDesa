@@ -29,15 +29,19 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
     };
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
 
-    // Fetch daftar desa dari Supabase (MURNI DATA REAL DARI SUPABASE, TANPA DUMMY)
+    // Fetch daftar desa dari Supabase (MURNI DATA REAL DARI SUPABASE)
     const fetchTenants = async () => {
       try {
         const { data, error } = await supabase
           .from('tenants')
-          .select('id, nama_desa, domain, status, kabupaten, kecamatan, logo_url')
+          .select('*')
           .order('nama_desa', { ascending: true });
 
-        if (data) {
+        if (error) {
+          console.error('[SaasLandingPage] Error fetching tenants:', error);
+        }
+
+        if (data && data.length > 0) {
           setTenants(data);
         } else {
           setTenants([]);
