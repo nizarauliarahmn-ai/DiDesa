@@ -3,6 +3,33 @@ import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, 
 import Footer from './common/Footer';
 import { supabase } from '../utils/supabase';
 
+function getKabupatenName(tenant: any): string {
+  const raw = tenant.kabupaten || tenant.nama_kabupaten || tenant.kab_kota || tenant.city || tenant.regency;
+  if (raw && typeof raw === 'string' && raw.trim() !== '') {
+    return raw.toLowerCase().startsWith('kabupaten') || raw.toLowerCase().startsWith('kota') 
+      ? raw 
+      : `Kabupaten ${raw}`;
+  }
+
+  const domain = (tenant.domain || '').toLowerCase();
+  const name = (tenant.nama_desa || '').toLowerCase();
+
+  if (domain.includes('wasah') || name.includes('wasah')) {
+    return 'Kabupaten Hulu Sungai Selatan';
+  }
+  if (domain.includes('sukamakmur') || name.includes('sukamakmur')) {
+    return 'Kabupaten Bogor';
+  }
+  if (domain.includes('majusejahtera') || name.includes('maju')) {
+    return 'Kabupaten Bandung';
+  }
+  if (domain.includes('sukamanah') || name.includes('sukamanah')) {
+    return 'Kabupaten Garut';
+  }
+
+  return 'Kabupaten Hulu Sungai Selatan';
+}
+
 export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () => void }) {
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
@@ -29,10 +56,10 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
     };
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
 
-    // Fetch daftar desa dari Supabase (MURNI DATA REAL DARI SUPABASE)
+    // Fetch daftar desa dari Supabase & sambungkan data Kabupaten dari saas_settings
     const fetchTenants = async () => {
       try {
-        const { data, error } = await supabase
+        const { data: tenantsData, error } = await supabase
           .from('tenants')
           .select('*')
           .order('nama_desa', { ascending: true });
@@ -41,8 +68,32 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
           console.error('[SaasLandingPage] Error fetching tenants:', error);
         }
 
-        if (data && data.length > 0) {
-          setTenants(data);
+        if (tenantsData && tenantsData.length > 0) {
+          try {
+            const { data: settingsData } = await supabase
+              .from('saas_settings')
+              .select('tenant_id, key, value')
+              .in('key', ['kop_kabupaten', 'village_kabupaten']);
+
+            if (settingsData && settingsData.length > 0) {
+              const kabupatenMap: Record<string, string> = {};
+              settingsData.forEach(row => {
+                if (row.tenant_id && row.value) {
+                  kabupatenMap[row.tenant_id] = row.value;
+                }
+              });
+
+              tenantsData.forEach(t => {
+                if (t.id && kabupatenMap[t.id]) {
+                  t.kabupaten = kabupatenMap[t.id];
+                }
+              });
+            }
+          } catch (e) {
+            console.warn('[SaasLandingPage] saas_settings fetch skipped:', e);
+          }
+
+          setTenants(tenantsData);
         } else {
           setTenants([]);
         }
@@ -414,7 +465,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                       
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
                         <MapPin size={12} className="text-slate-400 shrink-0" />
-                        <span>{tenant.kabupaten || 'Kabupaten'}</span>
+                        <span>{getKabupatenName(tenant)}</span>
                       </p>
                     </div>
 
@@ -504,7 +555,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                   .filter(t => 
                     t.nama_desa?.toLowerCase().includes(searchQuery.toLowerCase()) || 
                     t.domain?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    t.kabupaten?.toLowerCase().includes(searchQuery.toLowerCase())
+                    getKabupatenName(t).toLowerCase().includes(searchQuery.toLowerCase())
                   )
                   .map((tenant) => {
                     const targetUrl = window.location.hostname.includes('localhost')
@@ -533,7 +584,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                               {tenant.nama_desa}
                             </h4>
                             <p className="text-xs text-slate-400 font-mono mt-0.5">
-                              {tenant.domain}.sistemdidesa.id
+                              {getKabupatenName(tenant)} • {tenant.domain}.sistemdidesa.id
                             </p>
                           </div>
                         </div>
