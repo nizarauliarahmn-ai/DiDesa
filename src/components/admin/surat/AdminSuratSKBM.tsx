@@ -33,12 +33,20 @@ interface Resident {
 export default function AdminSuratSKBM({ 
   onBack,
   editData,
-  editLetterId
+  editLetterId,
+  presetResident
 }: { 
   onBack: () => void;
   editData?: any;
   editLetterId?: string | null;
+  presetResident?: any;
 }) {
+  React.useEffect(() => {
+    if (presetResident) {
+      handleSelectResident(presetResident);
+    }
+  }, [presetResident]);
+
   const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SKBM', 'Surat Keterangan Belum Pernah Menikah / Miskin');
   const templateKode = useLetterKode('SKBM');
