@@ -32,28 +32,10 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       return directId;
     }
 
-    // SECURITY FIX: If user is logged in AND not accessing a public kiosk route,
-    // strictly enforce their authenticated tenantId to prevent URL manipulation.
-    const isPublicRoute = urlParams.get('mode') === 'public' || urlParams.get('tab') === 'kios' || urlParams.get('tab') === 'buku_tamu' || urlParams.get('tab') === 'kios_surat' || urlParams.get('tab') === 'kios_aspirasi';
-    
-    if (!isPublicRoute) {
-      const localAuth = localStorage.getItem('didesa_auth_user');
-      if (localAuth) {
-        try {
-          const user = JSON.parse(localAuth);
-          if (user && user.tenantId) {
-            cachedTenantId = user.tenantId;
-            isResolving = false;
-            return user.tenantId;
-          }
-        } catch(e) {}
-      }
-    }
-
     const tenantParam = urlParams.get('tenant');
     let subdomain: string | null = tenantParam;
 
-    // 2. Jika tidak ada parameter, Cek Subdomain (Opsi B)
+    // 2. Jika tidak ada parameter, Cek Subdomain
     if (!subdomain) {
       const hostname = window.location.hostname;
       const parts = hostname.split('.');
@@ -64,6 +46,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       }
     }
 
+    // Jika subdomain ditemukan, ini menjadi prioritas utama.
     if (subdomain) {
       const { data, error } = await supabase
         .from('tenants')
@@ -78,28 +61,21 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       }
     }
 
-    // 2. Fallback: Cek Auth Login (Opsi A)
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session && session.user) {
-      const userTenant = session.user.user_metadata?.tenant_id;
-      if (userTenant) {
-        cachedTenantId = userTenant;
-        isResolving = false;
-        return userTenant;
-      }
-    } else {
-      const localAuth = localStorage.getItem('didesa_auth_user');
-      if (localAuth) {
-        try {
-          const user = JSON.parse(localAuth);
-          if (user && user.tenantId) {
-             cachedTenantId = user.tenantId;
-             isResolving = false;
-             return user.tenantId;
-          }
-        } catch (e) {}
-      }
+    // 3. Fallback: Gunakan sesi otentikasi login
+    // Jika user mengakses halaman admin tanpa subdomain/parameter (atau diakses dari root domain)
+    const localAuth = localStorage.getItem('didesa_auth_user');
+    if (localAuth) {
+      try {
+        const user = JSON.parse(localAuth);
+        if (user && user.tenantId) {
+          cachedTenantId = user.tenantId;
+          isResolving = false;
+          return user.tenantId;
+        }
+      } catch(e) {}
     }
+
+    // (Duplicate fallback blocks removed)
 
     // 3. Jika tidak ada yang cocok, kembalikan null. 
     // PELANGGARAN ATURAN: Dilarang keras melakukan fallback ke ID desa tertentu (misal Sukamakmur) 

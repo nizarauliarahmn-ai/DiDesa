@@ -253,7 +253,7 @@ export default function App() {
     };
   }, []);
 
-  // Theme logic
+  // Theme and Security logic
   React.useEffect(() => {
     const applyTheme = () => {
       const theme = localStorage.getItem('app_theme') || 'light';
@@ -277,6 +277,22 @@ export default function App() {
       }
     };
     window.addEventListener('auth_user_updated', handleAuthUserUpdate);
+
+    // SECURITY: Prevent cross-tenant data leakage on shared origins (localhost/testing)
+    const verifyTenantMatch = async () => {
+      const saved = localStorage.getItem('didesa_auth_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.tenantId && parsed.role !== 'saas_admin') {
+          const currentTenantId = await resolveCurrentTenant();
+          if (currentTenantId && currentTenantId !== parsed.tenantId) {
+            console.warn('[Security] Tenant mismatch detected. Logging out to prevent data leakage.', parsed.tenantId, currentTenantId);
+            handleLogout();
+          }
+        }
+      }
+    };
+    verifyTenantMatch();
 
     return () => {
       window.removeEventListener('app_theme_updated', applyTheme);

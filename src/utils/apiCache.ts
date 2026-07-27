@@ -14,20 +14,7 @@ export function fetchResidentsCached(force = false) {
   }
   
   const req = (async () => {
-    let tenantId = null;
-    const authUserStr = localStorage.getItem('didesa_auth_user');
-    if (authUserStr) {
-      try {
-        const authUser = JSON.parse(authUserStr);
-        if (authUser && authUser.tenantId) {
-          tenantId = authUser.tenantId;
-        }
-      } catch(e) {}
-    }
-
-    if (!tenantId) {
-      tenantId = await resolveCurrentTenant();
-    }
+    const tenantId = await resolveCurrentTenant();
     
     if (!tenantId) return [];
 
