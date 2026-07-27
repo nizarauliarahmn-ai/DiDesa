@@ -33,7 +33,12 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {globalLogo ? (
-              <img src={globalLogo} alt="DiDesa Logo" className="w-10 h-10 rounded-xl object-contain" />
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg p-1.5"
+                style={{ backgroundColor: globalColor }}
+              >
+                <img src={globalLogo} alt="DiDesa Logo" className="w-full h-full object-contain" />
+              </div>
             ) : (
               <div 
                 className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
