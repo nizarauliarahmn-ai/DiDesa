@@ -1,13 +1,19 @@
-import React from 'react';
-import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin } from 'lucide-react';
 import Footer from './common/Footer';
+import { supabase } from '../utils/supabase';
 
 export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () => void }) {
-  const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
-  const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
-  const [globalPhone, setGlobalPhone] = React.useState(() => localStorage.getItem('global_footer_phone') || '+6281346867519');
+  const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
+  const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
+  const [globalPhone, setGlobalPhone] = useState(() => localStorage.getItem('global_footer_phone') || '+6281346867519');
 
-  React.useEffect(() => {
+  // Modal & Tenants state
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [tenants, setTenants] = useState<any[]>([]);
+
+  useEffect(() => {
     // Pastikan tema yang digunakan adalah light/dark sesuai preferensi global
     const theme = localStorage.getItem('app_theme') || 'light';
     if (theme === 'dark') {
@@ -22,6 +28,32 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
       setGlobalPhone(localStorage.getItem('global_footer_phone') || '+6281346867519');
     };
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
+
+    // Fetch daftar desa dari Supabase
+    const fetchTenants = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('tenants')
+          .select('id, nama_desa, domain, status, kabupaten, kecamatan, logo_url')
+          .order('nama_desa', { ascending: true });
+
+        if (data && data.length > 0) {
+          setTenants(data);
+        } else {
+          // Fallback data desa demo jika data kosong
+          setTenants([
+            { id: '1', nama_desa: 'Desa Sukamakmur', domain: 'sukamakmur', kabupaten: 'Kabupaten Bogor', kecamatan: 'Kecamatan Sukamakmur', status: 'active' },
+            { id: '2', nama_desa: 'Desa Maju Sejahtera', domain: 'majusejahtera', kabupaten: 'Kabupaten Bandung', kecamatan: 'Kecamatan Coblong', status: 'active' },
+            { id: '3', nama_desa: 'Desa Sukamanah', domain: 'sukamanah', kabupaten: 'Kabupaten Garut', kecamatan: 'Kecamatan Bayongbong', status: 'active' },
+            { id: '4', nama_desa: 'Desa Sumbermulyo', domain: 'sumbermulyo', kabupaten: 'Kabupaten Bantul', kecamatan: 'Kecamatan Bambanglipuro', status: 'active' }
+          ]);
+        }
+      } catch (err) {
+        console.warn('Gagal memuat tenants:', err);
+      }
+    };
+    fetchTenants();
+
     return () => {
       window.removeEventListener('global_branding_updated', handleBrandingUpdate);
     };
@@ -57,6 +89,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
           <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600 dark:text-slate-300">
             <a href="#fitur" className="hover:text-emerald-600 transition-colors">Fitur</a>
             <a href="#keunggulan" className="hover:text-emerald-600 transition-colors">Keunggulan</a>
+            <a href="#desa-terdaftar" className="hover:text-emerald-600 transition-colors">Desa Terdaftar</a>
             <a href="#integrasi" className="hover:text-emerald-600 transition-colors">Integrasi</a>
           </div>
 
@@ -115,15 +148,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                 <LayoutDashboard size={20} /> Masuk ke Dashboard Admin
               </button>
               <button 
-                onClick={() => {
-                  const input = window.prompt("Masukkan nama subdomain desa (contoh: sukamakmur):", "sukamakmur");
-                  if (input) {
-                    const domain = window.location.hostname.includes('localhost') 
-                      ? `${window.location.origin}?tenant=${encodeURIComponent(input.trim().toLowerCase())}`
-                      : `https://${encodeURIComponent(input.trim().toLowerCase())}.sistemdidesa.id`;
-                    window.location.href = domain;
-                  }
-                }} 
+                onClick={() => setIsSearchModalOpen(true)} 
                 className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-8 py-4 rounded-2xl font-bold border border-gray-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer"
               >
                 <Search size={20} /> Cari Portal Desa Saya
@@ -328,12 +353,202 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
         </div>
       </section>
 
+      {/* Desa Terdaftar Section */}
+      <section id="desa-terdaftar" className="py-24 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold mb-3">
+                <Building2 size={14} /> Ekosistem Desa Terintegrasi
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black">Desa-Desa Pengguna DiDesa</h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-xl">Bergabung bersama desa-desa mandiri di Indonesia yang telah mendigitalisasi pelayanan publik & persuratan warga.</p>
+            </div>
+            
+            <button 
+              onClick={() => setIsSearchModalOpen(true)}
+              className="bg-emerald-50 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-slate-700 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-100 transition-colors flex items-center gap-2"
+            >
+              <Search size={16} /> Cari Desa Lainnya
+            </button>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {tenants.slice(0, 8).map((tenant) => {
+              const targetUrl = window.location.hostname.includes('localhost')
+                ? `${window.location.origin}?tenant=${tenant.domain}`
+                : `https://${tenant.domain}.sistemdidesa.id`;
+
+              return (
+                <div 
+                  key={tenant.id}
+                  className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-3xl border border-gray-200/60 dark:border-slate-700/60 hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div 
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md p-1"
+                        style={{ backgroundColor: globalColor }}
+                      >
+                        {tenant.logo_url ? (
+                          <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain rounded-xl" />
+                        ) : (
+                          <Building2 className="text-white" size={24} />
+                        )}
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Aktif
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors">
+                      {tenant.nama_desa}
+                    </h3>
+                    
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                      <MapPin size={12} className="text-slate-400 shrink-0" />
+                      <span>{tenant.kabupaten || 'Kabupaten Bogor'}</span>
+                    </p>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
+                    <a
+                      href={targetUrl}
+                      className="w-full py-2.5 px-4 bg-white dark:bg-slate-900 hover:bg-emerald-600 hover:text-white border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2 group-hover:shadow-md"
+                    >
+                      <span>Kunjungi Portal</span>
+                      <ExternalLink size={14} />
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Footer is already full width in the component, just render it */}
       <div className="bg-white dark:bg-slate-900 pt-10 border-t border-gray-200 dark:border-slate-800">
          <div className="max-w-7xl mx-auto px-6 text-center text-sm text-slate-500 pb-10">
             &copy; {new Date().getFullYear()} Hak Cipta Dilindungi. <strong className="text-slate-700 dark:text-slate-300">DiDesa</strong> — Solusi Administrasi & Digitalisasi Desa Modern Indonesia.
          </div>
       </div>
+
+      {/* SEARCH PORTAL POPUP MODAL */}
+      {isSearchModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="p-6 pb-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
+                  <Search size={22} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight">Cari Portal Desa</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Temukan portal resmi desa Anda di platform DiDesa</p>
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => setIsSearchModalOpen(false)}
+                className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Search Bar */}
+            <div className="p-6 pb-4 bg-slate-50/50 dark:bg-slate-800/30">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input 
+                  type="text"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Ketik nama desa atau subdomain (misal: Sukamakmur)..."
+                  className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all font-medium text-slate-900 dark:text-white"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Content / Results */}
+            <div className="p-6 overflow-y-auto flex-1 space-y-3">
+              {tenants.filter(t => 
+                t.nama_desa?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                t.domain?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                t.kabupaten?.toLowerCase().includes(searchQuery.toLowerCase())
+              ).length === 0 ? (
+                <div className="text-center py-10 text-slate-400">
+                  <Building2 size={48} className="mx-auto mb-3 opacity-30" />
+                  <p className="font-bold text-slate-600 dark:text-slate-300">Desa "{searchQuery}" tidak ditemukan</p>
+                  <p className="text-xs mt-1">Coba gunakan nama desa lain atau hubungi admin desa Anda.</p>
+                </div>
+              ) : (
+                tenants
+                  .filter(t => 
+                    t.nama_desa?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                    t.domain?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    t.kabupaten?.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((tenant) => {
+                    const targetUrl = window.location.hostname.includes('localhost')
+                      ? `${window.location.origin}?tenant=${tenant.domain}`
+                      : `https://${tenant.domain}.sistemdidesa.id`;
+
+                    return (
+                      <a
+                        key={tenant.id}
+                        href={targetUrl}
+                        className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-gray-150 dark:border-slate-700/60 hover:border-emerald-500 hover:shadow-lg transition-all group"
+                      >
+                        <div className="flex items-center gap-3.5">
+                          <div 
+                            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm p-1 shrink-0"
+                            style={{ backgroundColor: globalColor }}
+                          >
+                            {tenant.logo_url ? (
+                              <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain rounded-lg" />
+                            ) : (
+                              <Building2 className="text-white" size={20} />
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-emerald-600 transition-colors">
+                              {tenant.nama_desa}
+                            </h4>
+                            <p className="text-xs text-slate-400 font-mono mt-0.5">
+                              {tenant.domain}.sistemdidesa.id
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs bg-emerald-50 dark:bg-emerald-900/30 px-3 py-2 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                          <span>Buka Portal</span>
+                          <ChevronRight size={16} />
+                        </div>
+                      </a>
+                    );
+                  })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 text-center text-xs text-slate-400 font-medium">
+              Portal Desa Resmi Berbasis Cloud Multi-Tenant DiDesa
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
