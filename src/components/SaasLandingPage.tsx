@@ -4,30 +4,38 @@ import Footer from './common/Footer';
 import { supabase } from '../utils/supabase';
 
 function getKabupatenName(tenant: any): string {
-  const raw = tenant.kabupaten || tenant.nama_kabupaten || tenant.kab_kota || tenant.city || tenant.regency;
-  if (raw && typeof raw === 'string' && raw.trim() !== '') {
-    return raw.toLowerCase().startsWith('kabupaten') || raw.toLowerCase().startsWith('kota') 
-      ? raw 
-      : `Kabupaten ${raw}`;
-  }
+  let raw = tenant.kabupaten || tenant.nama_kabupaten || tenant.kab_kota || tenant.city || tenant.regency;
+  
+  if (!raw || typeof raw !== 'string' || raw.trim() === '') {
+    const domain = (tenant.domain || '').toLowerCase();
+    const name = (tenant.nama_desa || '').toLowerCase();
 
-  const domain = (tenant.domain || '').toLowerCase();
-  const name = (tenant.nama_desa || '').toLowerCase();
-
-  if (domain.includes('wasah') || name.includes('wasah')) {
+    if (domain.includes('wasah') || name.includes('wasah')) {
+      return 'Kabupaten Hulu Sungai Selatan';
+    }
+    if (domain.includes('sukamakmur') || name.includes('sukamakmur')) {
+      return 'Kabupaten Bogor';
+    }
+    if (domain.includes('majusejahtera') || name.includes('maju')) {
+      return 'Kabupaten Bandung';
+    }
+    if (domain.includes('sukamanah') || name.includes('sukamanah')) {
+      return 'Kabupaten Garut';
+    }
     return 'Kabupaten Hulu Sungai Selatan';
   }
-  if (domain.includes('sukamakmur') || name.includes('sukamakmur')) {
-    return 'Kabupaten Bogor';
-  }
-  if (domain.includes('majusejahtera') || name.includes('maju')) {
-    return 'Kabupaten Bandung';
-  }
-  if (domain.includes('sukamanah') || name.includes('sukamanah')) {
-    return 'Kabupaten Garut';
-  }
 
-  return 'Kabupaten Hulu Sungai Selatan';
+  const isKota = /kota/i.test(raw);
+
+  // Bersihkan awalan berulang seperti "Pemerintah", "Kabupaten", "Kab.", "Kota"
+  let clean = raw.trim()
+    .replace(/^pemerintah\s+/i, '')
+    .replace(/^kabupaten\s+/i, '')
+    .replace(/^kab\.\s+/i, '')
+    .replace(/^kota\s+/i, '')
+    .trim();
+
+  return isKota ? `Kota ${clean}` : `Kabupaten ${clean}`;
 }
 
 export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () => void }) {
