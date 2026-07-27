@@ -31,6 +31,7 @@ export default function AdminPendudukDetail({
   const [isPrinting, setIsPrinting] = useState(false);
   const [showAidModal, setShowAidModal] = useState(false);
   const [selectedNewProgram, setSelectedNewProgram] = useState("BLT Dana Desa");
+  const [selectedNewYear, setSelectedNewYear] = useState(new Date().getFullYear().toString());
   const [isUpdatingAid, setIsUpdatingAid] = useState(false);
   const [aidError, setAidError] = useState("");
 
@@ -75,8 +76,8 @@ export default function AdminPendudukDetail({
   ], []);
 
   const availablePrograms = useMemo(() => {
-    return ALL_AID_PROGRAMS.filter(p => !data?.activeAids?.includes(p));
-  }, [data?.activeAids, ALL_AID_PROGRAMS]);
+    return ALL_AID_PROGRAMS.filter(p => !data?.activeAids?.includes(`${p} (${selectedNewYear})`));
+  }, [data?.activeAids, ALL_AID_PROGRAMS, selectedNewYear]);
 
   useEffect(() => {
     if (availablePrograms.length > 0) {
@@ -195,12 +196,25 @@ export default function AdminPendudukDetail({
   };
 
   const handleAddAid = async (programName: string) => {
+    const aidToSave = `${programName} (${selectedNewYear})`;
     const currentAids = data?.activeAids || [];
-    if (currentAids.includes(programName)) {
-      setAidError("Program bantuan ini sudah aktif untuk warga tersebut.");
+    if (currentAids.includes(aidToSave)) {
+      setAidError(`Program bantuan ini sudah aktif untuk warga tersebut di tahun ${selectedNewYear}.`);
       return;
     }
-    const updatedAids = [...currentAids, programName];
+    
+    // Validasi Anti-Bantuan Ganda
+    if (programName === "BLT Dana Desa") {
+      const hasPKH = currentAids.some((a: string) => a.startsWith("Program Keluarga Harapan (PKH)"));
+      const hasBPNT = currentAids.some((a: string) => a.startsWith("Bantuan Pangan Non-Tunai"));
+      
+      if (hasPKH || hasBPNT) {
+        setAidError("Gagal: Warga sudah terdaftar sebagai penerima PKH/BPNT yang dilarang menerima BLT Dana Desa.");
+        return;
+      }
+    }
+    
+    const updatedAids = [...currentAids, aidToSave];
     setIsUpdatingAid(true);
     setAidError("");
     try {
@@ -750,16 +764,26 @@ export default function AdminPendudukDetail({
 
               <div className="pt-3 border-t border-gray-100 dark:border-slate-800">
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Tambah Program Bantuan</p>
-                {ALL_AID_PROGRAMS.filter(p => !data?.activeAids?.includes(p)).length > 0 ? (
+                {availablePrograms.length > 0 ? (
                   <div className="flex gap-2">
                     <select
                       value={selectedNewProgram}
                       onChange={(e) => setSelectedNewProgram(e.target.value)}
                       className="flex-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
                     >
-                      {ALL_AID_PROGRAMS.filter(p => !data?.activeAids?.includes(p)).map((p) => (
+                      {availablePrograms.map((p) => (
                         <option key={p} value={p}>{p}</option>
                       ))}
+                    </select>
+                    <select
+                      value={selectedNewYear}
+                      onChange={(e) => setSelectedNewYear(e.target.value)}
+                      className="w-24 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
+                    >
+                      <option value="2023">2023</option>
+                      <option value="2024">2024</option>
+                      <option value="2025">2025</option>
+                      <option value="2026">2026</option>
                     </select>
                     <button
                       onClick={() => handleAddAid(selectedNewProgram)}
