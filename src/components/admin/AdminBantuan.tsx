@@ -119,6 +119,7 @@ export default function AdminBantuan({
   const [formAmount, setFormAmount] = useState("300000");
   const [formFunding, setFormFunding] = useState("");
   const [criteriaChecked, setCriteriaChecked] = useState<Record<string, boolean>>({});
+  const [showRecommendations, setShowRecommendations] = useState(false);
 
   // Helper for scoring
   const calculateVulnerabilityScore = (r: any) => {
@@ -158,8 +159,8 @@ export default function AdminBantuan({
         r.nik?.includes(q)
       );
       return list.slice(0, 5); // Limit search results to 5
-    } else {
-      // Smart Recommendation Mode (when search is empty)
+    } else if (showRecommendations) {
+      // Smart Recommendation Mode (when toggled on)
       // Filter out people who already have THIS program
       list = list.filter(r => !(r.activeAids || []).includes(formProgram));
       
@@ -175,7 +176,9 @@ export default function AdminBantuan({
       // Return top 5
       return scoredList.slice(0, 5);
     }
-  }, [residents, formProgram, searchResidentQuery]);
+    
+    return [];
+  }, [residents, formProgram, searchResidentQuery, showRecommendations]);
 
   // Fetch residents and DB status
   const fetchData = async () => {
@@ -478,9 +481,21 @@ export default function AdminBantuan({
 
               <div className="space-y-4">
                 <div className="space-y-1.5 relative">
-                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">
-                    Cari Berdasarkan NIK atau Nama
-                  </label>
+                  <div className="flex items-center justify-between ml-1 mb-1">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                      Cari Berdasarkan NIK atau Nama
+                    </label>
+                    <button 
+                      onClick={() => setShowRecommendations(!showRecommendations)}
+                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors flex items-center gap-1 ${
+                        showRecommendations 
+                          ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                          : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100'
+                      }`}
+                    >
+                      ✨ {showRecommendations ? 'Tutup Rekomendasi' : 'Rekomendasi AI'}
+                    </button>
+                  </div>
                   <div className="relative group">
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-700 transition-colors w-5 h-5" />
                     <input 
@@ -496,10 +511,10 @@ export default function AdminBantuan({
                       className="w-full h-12 pl-11 pr-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900 transition-all"
                     />
                   </div>
-                  <p className="text-[11px] text-gray-400 italic ml-1">Ketik nama/NIK, atau pilih dari Rekomendasi Cerdas AI di bawah.</p>
+                  <p className="text-[11px] text-gray-400 italic ml-1">Ketik nama/NIK, atau klik tombol Rekomendasi AI di atas.</p>
 
                   {/* Suggestion Dropdown */}
-                  {formProgram && !selectedResidentNik && (
+                  {(searchResidentQuery.trim() !== "" || showRecommendations) && !selectedResidentNik && (
                     <div className="absolute left-0 right-0 z-50 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
                       {searchResidentQuery.trim() === "" && searchResultsForAddView.length > 0 && (
                         <div className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-3 py-1.5 uppercase tracking-wider flex items-center gap-1.5">
