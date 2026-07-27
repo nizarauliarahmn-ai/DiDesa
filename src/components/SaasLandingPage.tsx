@@ -5,6 +5,7 @@ import Footer from './common/Footer';
 export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () => void }) {
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
+  const [globalPhone, setGlobalPhone] = React.useState(() => localStorage.getItem('global_footer_phone') || '+6281346867519');
 
   React.useEffect(() => {
     // Pastikan tema yang digunakan adalah light/dark sesuai preferensi global
@@ -18,6 +19,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
     const handleBrandingUpdate = () => {
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
       setGlobalLogo(localStorage.getItem('global_app_logo') || '');
+      setGlobalPhone(localStorage.getItem('global_footer_phone') || '+6281346867519');
     };
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
     return () => {
@@ -315,7 +317,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                Login ke Sistem Admin
              </button>
              <a 
-               href="https://wa.me/6281234567890?text=Halo%20Tim%20DiDesa,%20saya%20tertarik%20untuk%20konsultasi%20digitalisasi%20desa." 
+               href={`https://wa.me/${globalPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Halo Tim DiDesa, saya tertarik untuk konsultasi digitalisasi desa.')}`} 
                target="_blank" 
                rel="noopener noreferrer"
                className="bg-emerald-800 text-white border border-emerald-700 px-8 py-4 rounded-2xl font-bold hover:bg-emerald-700 transition-colors inline-flex items-center justify-center cursor-pointer"
