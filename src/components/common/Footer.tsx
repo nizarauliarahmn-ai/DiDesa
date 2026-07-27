@@ -21,7 +21,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
   
   // Dynamic Footer Settings
-  const [globalFooterDesc, setGlobalFooterDesc] = useState(() => localStorage.getItem('global_footer_desc') ?? 'Solusi Digital Terpadu untuk Tata Kelola & Administrasi Desa Mandiri yang Modern dan Transparan.');
+  const [globalFooterDesc, setGlobalFooterDesc] = useState(() => localStorage.getItem('global_footer_desc') ?? 'DiDesa — Solusi Administrasi & Digitalisasi Desa Modern Indonesia.');
   const [globalFooterEmail, setGlobalFooterEmail] = useState(() => localStorage.getItem('global_footer_email') ?? 'info@didesa.id');
   const [globalFooterPhone, setGlobalFooterPhone] = useState(() => localStorage.getItem('global_footer_phone') ?? '+62 813-4686-7519');
   const [globalFooterAffiliateTitle, setGlobalFooterAffiliateTitle] = useState(() => localStorage.getItem('global_footer_affiliate_title') ?? 'AFFILIATOR');
