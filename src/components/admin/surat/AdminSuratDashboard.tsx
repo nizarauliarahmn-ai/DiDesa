@@ -4,6 +4,7 @@ import {
   Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Pencil, Ban
 } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync } from '../../../utils/letterHistory';
+import { useReactToPrint } from 'react-to-print';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -91,7 +92,6 @@ export default function AdminSuratDashboard({
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [useEsignature, setUseEsignature] = useState<boolean>(true);
   const [zoomLevel, setZoomLevel] = useState(0.65);
-  const [isPrintingSingle, setIsPrintingSingle] = useState(false);
   const [isPrintingTable, setIsPrintingTable] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [printStartDate, setPrintStartDate] = useState('');
@@ -165,16 +165,17 @@ export default function AdminSuratDashboard({
     }, 200);
   };
 
+  const singlePrintRef = useRef<HTMLDivElement>(null);
+  const handleSinglePrint = useReactToPrint({
+    contentRef: singlePrintRef,
+    documentTitle: selectedSurat ? `Surat_${selectedSurat.nomor.replace(/\//g, '_')}` : 'Cetak Surat',
+  });
+
   const triggerSinglePrint = (surat: LetterHistory) => {
     setSelectedSurat(surat);
-    setIsPrintingSingle(true);
+    // Tweak to ensure the DOM is ready before printing
     setTimeout(() => {
-      try {
-        window.print();
-      } catch (e) {
-        setShowPrintWarning(true);
-      }
-      setIsPrintingSingle(false);
+      handleSinglePrint();
     }, 200);
   };
 
@@ -860,79 +861,7 @@ export default function AdminSuratDashboard({
 
   return (
     <div id="admin-surat-dashboard-root" className="space-y-6">
-      {/* Dynamic single A4 printing stylesheet */}
-      {isPrintingSingle && (
-        <style type="text/css" media="print">
-          {`
-            @media print {
-              @page {
-                size: A4 portrait;
-                margin: 20mm 20mm 25mm 20mm !important; /* Proper safe margins (Top, Right, Bottom, Left) */
-              }
-              body {
-                margin: 0 !important;
-                padding: 0 !important;
-                position: relative;
-                min-height: 100vh;
-                background-color: white !important;
-              }
-              /* Hide all dashboard UI elements */
-              aside, header, nav, .tour-container, #hubungi-bantuan-btn {
-                display: none !important;
-              }
-              /* Hide dashboard root except for printable container */
-              #admin-surat-dashboard-root > *:not(#single-letter-print-container-wrapper) {
-                display: none !important;
-              }
-              
-              /* Reset structural layouts to allow natural document flow */
-              html, body, #root, .flex, main, .p-4, .md\\:p-6, .lg\\:p-8, .max-w-6xl {
-                position: static !important;
-                display: block !important;
-                height: auto !important;
-                min-height: 100vh !important;
-                overflow: visible !important;
-                padding: 0 !important;
-                box-shadow: none !important;
-                background: white !important;
-              }
-              
-              #single-letter-print-container-wrapper.printable-area {
-                position: static !important;
-                display: block !important;
-                width: 100% !important;
-                height: auto !important;
-                min-height: 0 !important;
-                margin: 0 !important;
-                padding: 0 !important; /* Managed by @page margin */
-                box-shadow: none !important;
-                border: none !important;
-              }
-
-              #global-print-footer {
-                display: block !important;
-                position: fixed !important;
-                bottom: -15mm !important; /* Positioned perfectly in the bottom margin space */
-                left: 0 !important;
-                right: 0 !important;
-                text-align: right !important;
-                font-size: 8pt !important;
-                color: #94a3b8 !important;
-                z-index: 1000 !important;
-                visibility: visible !important;
-              }
-              #global-print-footer * {
-                visibility: visible !important;
-              }
-            }
-            @media screen {
-              #global-print-footer {
-                display: none !important;
-              }
-            }
-          `}
-        </style>
-      )}
+      {/* Legacy single printing style removed since useReactToPrint is now used */}
 
       {/* Dynamic table landscape printing stylesheet */}
       {isPrintingTable && (
@@ -1391,7 +1320,7 @@ export default function AdminSuratDashboard({
       </div>
 
       {/* Detail Viewer Modal */}
-      {selectedSurat && !isPrintingSingle && (
+      {selectedSurat && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
           <div className="bg-gray-100 dark:bg-slate-800 rounded-2xl max-w-4xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-200 dark:border-slate-700">
             {/* Header */}
@@ -1642,14 +1571,12 @@ export default function AdminSuratDashboard({
 
       {/* Hidden print container for printing a single letter in full resolution */}
       {selectedSurat && (
-        <div id="single-letter-print-container-wrapper" className="hidden print:block bg-white dark:bg-slate-900 text-black p-12 printable-area" style={{ fontFamily: 'Arial, Helvetica, sans-serif', width: '794px', minHeight: '1123px' }}>
+        <div ref={singlePrintRef} id="single-letter-print-container-wrapper" className="hidden print:block bg-white dark:bg-slate-900 text-black p-12 printable-area" style={{ fontFamily: 'Arial, Helvetica, sans-serif', width: '794px', minHeight: '1123px' }}>
           {renderLetterContent(selectedSurat, activeResident)}
-          {isPrintingSingle && (
-            <div 
-              id="global-print-footer"
-              dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }}
-            />
-          )}
+          <div 
+            id="global-print-footer"
+            dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }}
+          />
         </div>
       )}
 
