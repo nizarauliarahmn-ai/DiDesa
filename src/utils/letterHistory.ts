@@ -55,8 +55,26 @@ export async function saveLetterHistory(history: LetterHistory[]) {
 }
 
 export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHistory {
-  // DEPRECATED
-  return { ...letter, id: 'temp' } as LetterHistory;
+  const id = 'temp-' + Date.now();
+  (async () => {
+    try {
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) return;
+      await supabase.from('surat').insert([{
+        tenant_id: tenantId,
+        nomor: letter.nomor,
+        jenis_surat: letter.jenis,
+        nik: letter.nik,
+        nama: letter.nama,
+        keterangan: letter.keperluan,
+        status: letter.status === 'Proses' ? 'pending' : (letter.status || 'pending'),
+        data: letter.data
+      }]);
+    } catch (e) {
+      console.error("Error adding letter history silently:", e);
+    }
+  })();
+  return { ...letter, id } as LetterHistory;
 }
 
 export async function fetchResidentLettersAsync(nik: string, name: string): Promise<LetterHistory[]> {
@@ -89,21 +107,25 @@ export function deleteLetterHistory(id: string): LetterHistory[] {
 
 export async function updateLetterHistoryAsync(id: string, updatedFields: Partial<LetterHistory>): Promise<LetterHistory[]> {
   try {
-    const updatePayload: any = {};
+    const updatePayload: any = { ...updatedFields };
     if (updatedFields.status) {
       updatePayload.status = updatedFields.status === 'Proses' ? 'pending' : updatedFields.status;
     }
     if (updatedFields.nomor) updatePayload.nomor = updatedFields.nomor;
+    if (updatedFields.keperluan) updatePayload.keterangan = updatedFields.keperluan;
+    if (updatedFields.jenis) updatePayload.jenis_surat = updatedFields.jenis;
     
     await supabase.from('surat').update(updatePayload).eq('id', id);
     return await fetchLetterHistoryAsync();
   } catch (e) {
+    console.error("Error updating letter:", e);
     return await fetchLetterHistoryAsync();
   }
 }
 
 export function updateLetterHistory(id: string, updatedFields: Partial<LetterHistory>): LetterHistory[] {
-  // DEPRECATED
+  // Fire and forget since legacy components use this synchronously
+  updateLetterHistoryAsync(id, updatedFields).catch(e => console.error(e));
   return [];
 }
 
