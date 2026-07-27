@@ -47,6 +47,7 @@ import PrintQRKiosk from './components/admin/PrintQRKiosk';
 import PublicKiosPortal from './components/PublicKiosPortal';
 import PublicKiosSurat from './components/PublicKiosSurat';
 import PublicKiosAspirasi from './components/PublicKiosAspirasi';
+import SaasLandingPage from './components/SaasLandingPage';
 
 export default function App() {
   // Khusus untuk Halaman Print (Terisolasi dari semua layout)
@@ -75,6 +76,10 @@ export default function App() {
     return <><PublicVerifikasiSurat /><ToastContainer /></>;
   }
 
+  const hostname = window.location.hostname;
+  const parts = hostname.split('.');
+  const isRootDomain = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost') && !urlParams.get('tenant') && !urlParams.get('t_id');
+
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
     if (new URLSearchParams(window.location.search).get('preview') === 'true') {
       return null;
@@ -96,10 +101,6 @@ export default function App() {
     }
 
     // Domain utama (sistemdidesa.id / www.sistemdidesa.id) SELALU menampilkan Landing Page Publik!
-    const hostname = window.location.hostname;
-    const parts = hostname.split('.');
-    const isRootDomain = parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost';
-
     if (isRootDomain && urlParams.get('mode') !== 'admin') {
       return 'public';
     }
@@ -270,6 +271,11 @@ export default function App() {
         <GlobalUpdateNotifier isBusy={false} />
       </>
     );
+  }
+
+  // Jika kita di domain utama dan di mode publik, tampilkan SaaS Landing Page (Portal Pusat PT)
+  if (view === 'public' && isRootDomain && tabParam !== 'verifikasi' && tabParam !== 'verifikasi_surat') {
+    return <SaasLandingPage onLoginClick={() => setView('admin')} />;
   }
 
   // Determine if the user is in a "busy" state where reloading would cause data loss
