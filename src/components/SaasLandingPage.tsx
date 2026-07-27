@@ -3,6 +3,9 @@ import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, 
 import Footer from './common/Footer';
 
 export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () => void }) {
+  const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
+  const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
+
   React.useEffect(() => {
     // Pastikan tema yang digunakan adalah light/dark sesuai preferensi global
     const theme = localStorage.getItem('app_theme') || 'light';
@@ -11,6 +14,15 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    const handleBrandingUpdate = () => {
+      setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
+      setGlobalLogo(localStorage.getItem('global_app_logo') || '');
+    };
+    window.addEventListener('global_branding_updated', handleBrandingUpdate);
+    return () => {
+      window.removeEventListener('global_branding_updated', handleBrandingUpdate);
+    };
   }, []);
 
   return (
@@ -20,9 +32,18 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
       <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-slate-800/50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo.jpg" alt="DiDesa Logo" className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-emerald-500/20" />
+            {globalLogo ? (
+              <img src={globalLogo} alt="DiDesa Logo" className="w-10 h-10 rounded-xl object-contain" />
+            ) : (
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+                style={{ backgroundColor: globalColor }}
+              >
+                <Globe className="text-white" size={24} strokeWidth={2.5} />
+              </div>
+            )}
             <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-              DiDesa<span className="text-emerald-600">.</span>
+              DiDesa<span style={{ color: globalColor }}>.</span>
             </span>
           </div>
           
