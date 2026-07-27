@@ -120,6 +120,8 @@ export default function AdminBantuan({
   const [formFunding, setFormFunding] = useState("");
   const [criteriaChecked, setCriteriaChecked] = useState<Record<string, boolean>>({});
   const [showRecommendations, setShowRecommendations] = useState(false);
+  const [formYear, setFormYear] = useState(new Date().getFullYear().toString());
+  const [filterYear, setFilterYear] = useState("Semua Tahun");
 
   // Helper for scoring
   const calculateVulnerabilityScore = (r: any) => {
@@ -161,8 +163,8 @@ export default function AdminBantuan({
       return list.slice(0, 5); // Limit search results to 5
     } else if (showRecommendations) {
       // Smart Recommendation Mode (when toggled on)
-      // Filter out people who already have THIS program
-      list = list.filter(r => !(r.activeAids || []).includes(formProgram));
+      // Filter out people who already have THIS program for THIS year
+      list = list.filter(r => !(r.activeAids || []).includes(`${formProgram} (${formYear})`));
       
       // Calculate scores
       const scoredList = list.map(r => ({
@@ -227,12 +229,21 @@ export default function AdminBantuan({
 
   // Compute stats dynamically
   const stats = useMemo(() => {
-    const bltCount = residents.filter(r => r.activeAids?.includes("BLT Dana Desa")).length;
-    const pkhCount = residents.filter(r => r.activeAids?.includes("Program Keluarga Harapan (PKH)")).length;
-    const bpntCount = residents.filter(r => r.activeAids?.includes("Bantuan Pangan Non-Tunai")).length;
+    // Determine the string to match for year filtering
+    const yearMatchStr = filterYear === "Semua Tahun" ? "" : `(${filterYear})`;
+
+    const bltCount = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith("BLT Dana Desa") && a.includes(yearMatchStr))).length;
+    const pkhCount = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith("Program Keluarga Harapan (PKH)") && a.includes(yearMatchStr))).length;
+    const bpntCount = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith("Bantuan Pangan Non-Tunai") && a.includes(yearMatchStr))).length;
     
-    // Residents with multiple aids (Overlap / Tumpang Tindih)
-    const overlapResidents = residents.filter(r => r.activeAids && r.activeAids.length > 1);
+    // Residents with multiple aids (Overlap / Tumpang Tindih) for the selected year
+    const overlapResidents = residents.filter(r => {
+      if (!r.activeAids) return false;
+      const aidsInYear = filterYear === "Semua Tahun" 
+        ? r.activeAids 
+        : r.activeAids.filter((a: string) => a.includes(`(${filterYear})`));
+      return aidsInYear.length > 1;
+    });
     
     return {
       blt: bltCount,
@@ -240,7 +251,7 @@ export default function AdminBantuan({
       bpnt: bpntCount,
       overlaps: overlapResidents
     };
-  }, [residents]);
+  }, [residents, filterYear]);
 
   // Filtered list of residents based on search and selected program
   const filteredResidents = useMemo(() => {
@@ -250,8 +261,9 @@ export default function AdminBantuan({
       // Show only residents with overlap
       list = stats.overlaps;
     } else {
-      // Filter by currently selected program
-      list = residents.filter(r => r.activeAids?.includes(selectedProgram));
+      // Filter by currently selected program and year
+      const yearMatchStr = filterYear === "Semua Tahun" ? "" : `(${filterYear})`;
+      list = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith(selectedProgram) && a.includes(yearMatchStr)));
     }
 
     // Filter by search query
@@ -307,17 +319,21 @@ export default function AdminBantuan({
     const targetResident = residents.find(r => r.nik === selectedResidentNik);
     if (!targetResident) return;
 
+    const aidToSave = `${selectedProgram} (${formYear})`;
     const currentAids = targetResident.activeAids || [];
-    if (currentAids.includes(selectedProgram)) {
-      showToast("Warga ini sudah menerima bantuan program ini.", "error");
+    if (currentAids.includes(aidToSave)) {
+      showToast(`Warga ini sudah menerima bantuan program ini untuk tahun ${formYear}.`, "error");
       return;
     }
 
-    const updatedAids = [...currentAids, selectedProgram];
+    const updatedAids = [...currentAids, aidToSave];
 
     // Poin 1: Validasi Anti-Bantuan Ganda
     if (selectedProgram === "BLT Dana Desa") {
-      if (currentAids.includes("Program Keluarga Harapan (PKH)") || currentAids.includes("Bantuan Pangan Non-Tunai")) {
+      const hasPKH = currentAids.some((a: string) => a.startsWith("Program Keluarga Harapan (PKH)"));
+      const hasBPNT = currentAids.some((a: string) => a.startsWith("Bantuan Pangan Non-Tunai"));
+      
+      if (hasPKH || hasBPNT) {
         showToast("Penyaluran ditolak: Warga sudah terdaftar sebagai penerima PKH/BPNT yang tidak boleh menerima BLT Dana Desa (Tumpang Tindih Terlarang).", "error");
         return;
       }
@@ -659,6 +675,20 @@ export default function AdminBantuan({
                     <option value="Program Keluarga Harapan (PKH)">PKH (Program Keluarga Harapan)</option>
                     <option value="Bantuan Pangan Non-Tunai">BPNT (Bantuan Pangan Non-Tunai)</option>
                     <option value="Bansos Tunai Kemensos">Bansos Tunai Kemensos</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Tahun Anggaran</label>
+                  <select 
+                    value={formYear}
+                    onChange={(e) => setFormYear(e.target.value)}
+                    className="w-full h-12 px-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
+                  >
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
                   </select>
                 </div>
 
@@ -1037,6 +1067,17 @@ export default function AdminBantuan({
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto">
+            <select
+              value={filterYear}
+              onChange={(e) => setFilterYear(e.target.value)}
+              className="px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+            >
+              <option value="Semua Tahun">Semua Tahun</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
             <button
               onClick={() => setShowBaModal(true)}
               className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95"
