@@ -83,7 +83,31 @@ export default function AdminBantuan({
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [showBaModal, setShowBaModal] = useState(false);
-  const [disbursedNiks, setDisbursedNiks] = useState<string[]>([]);
+  const [disbursedNiks, setDisbursedNiks] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem(`disbursed_niks_${selectedProgram}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) { return []; }
+  });
+
+  // Sync disbursement state to localStorage when program changes
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`disbursed_niks_${selectedProgram}`);
+      setDisbursedNiks(stored ? JSON.parse(stored) : []);
+    } catch (e) {
+      setDisbursedNiks([]);
+    }
+  }, [selectedProgram]);
+
+  // Sync disbursement state to localStorage when list changes
+  useEffect(() => {
+    try {
+      if (selectedProgram) {
+        localStorage.setItem(`disbursed_niks_${selectedProgram}`, JSON.stringify(disbursedNiks));
+      }
+    } catch (e) {}
+  }, [disbursedNiks, selectedProgram]);
   const [searchResidentQuery, setSearchResidentQuery] = useState("");
   const [selectedResidentNik, setSelectedResidentNik] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -96,6 +120,32 @@ export default function AdminBantuan({
   const [formFunding, setFormFunding] = useState("");
   const [criteriaChecked, setCriteriaChecked] = useState<Record<string, boolean>>({});
 
+  // Helper for scoring
+  const calculateVulnerabilityScore = (r: any) => {
+    let score = 0;
+    
+    // Age calculation
+    if (r.birthDate) {
+      const birthYear = new Date(r.birthDate).getFullYear();
+      const currentYear = new Date().getFullYear();
+      const age = currentYear - birthYear;
+      if (age >= 60) score += 30;
+      else if (age >= 50) score += 15;
+    }
+    
+    // Job scoring
+    const job = (r.job || '').toLowerCase();
+    if (job.includes('belum') || job.includes('tidak bekerja')) score += 40;
+    if (job.includes('mengurus rumah tangga')) score += 20;
+    if (job.includes('buruh harian lepas') || job.includes('buruh tani')) score += 30;
+    if (job.includes('pensiunan')) score += 10;
+    
+    // Already receiving aids (Penalty)
+    if (r.activeAids && r.activeAids.length > 0) score -= 50;
+
+    return score;
+  };
+
   // Filter residents for search in the dedicated Add Recipient view
   const searchResultsForAddView = useMemo(() => {
     if (!formProgram) return [];
@@ -107,8 +157,24 @@ export default function AdminBantuan({
         r.name?.toLowerCase().includes(q) || 
         r.nik?.includes(q)
       );
+      return list.slice(0, 5); // Limit search results to 5
+    } else {
+      // Smart Recommendation Mode (when search is empty)
+      // Filter out people who already have THIS program
+      list = list.filter(r => !(r.activeAids || []).includes(formProgram));
+      
+      // Calculate scores
+      const scoredList = list.map(r => ({
+        ...r,
+        vulnerabilityScore: calculateVulnerabilityScore(r)
+      }));
+      
+      // Sort by highest score
+      scoredList.sort((a, b) => b.vulnerabilityScore - a.vulnerabilityScore);
+      
+      // Return top 5
+      return scoredList.slice(0, 5);
     }
-    return list.slice(0, 5); // Limit search results to 5
   }, [residents, formProgram, searchResidentQuery]);
 
   // Fetch residents and DB status
@@ -245,6 +311,15 @@ export default function AdminBantuan({
     }
 
     const updatedAids = [...currentAids, selectedProgram];
+
+    // Poin 1: Validasi Anti-Bantuan Ganda
+    if (selectedProgram === "BLT Dana Desa") {
+      if (currentAids.includes("Program Keluarga Harapan (PKH)") || currentAids.includes("Bantuan Pangan Non-Tunai")) {
+        showToast("Penyaluran ditolak: Warga sudah terdaftar sebagai penerima PKH/BPNT yang tidak boleh menerima BLT Dana Desa (Tumpang Tindih Terlarang).", "error");
+        return;
+      }
+    }
+
     setIsSaving(true);
 
     try {
@@ -421,11 +496,16 @@ export default function AdminBantuan({
                       className="w-full h-12 pl-11 pr-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900 transition-all"
                     />
                   </div>
-                  <p className="text-[11px] text-gray-400 italic ml-1">Ketik nama atau NIK warga untuk mulai mencari</p>
+                  <p className="text-[11px] text-gray-400 italic ml-1">Ketik nama/NIK, atau pilih dari Rekomendasi Cerdas AI di bawah.</p>
 
                   {/* Suggestion Dropdown */}
-                  {searchResidentQuery.trim() !== "" && !selectedResidentNik && (
-                    <div className="absolute left-0 right-0 z-50 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden divide-y divide-gray-100 max-h-[220px] overflow-y-auto">
+                  {formProgram && !selectedResidentNik && (
+                    <div className="absolute left-0 right-0 z-50 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
+                      {searchResidentQuery.trim() === "" && searchResultsForAddView.length > 0 && (
+                        <div className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-3 py-1.5 uppercase tracking-wider flex items-center gap-1.5">
+                          ✨ Rekomendasi Cerdas AI
+                        </div>
+                      )}
                       {searchResultsForAddView.length === 0 ? (
                         <p className="p-4 text-xs text-gray-400 text-center font-medium">Warga tidak ditemukan</p>
                       ) : (
@@ -440,7 +520,14 @@ export default function AdminBantuan({
                             className="w-full p-3.5 text-left hover:bg-emerald-50/40 cursor-pointer transition-colors flex justify-between items-center"
                           >
                             <div className="text-left">
-                              <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100">{r.name}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100">{r.name}</p>
+                                {r.vulnerabilityScore !== undefined && searchResidentQuery.trim() === "" && (
+                                  <span className="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                                    Skor: {r.vulnerabilityScore}
+                                  </span>
+                                )}
+                              </div>
                               <p className="text-[11px] font-bold text-gray-500 dark:text-slate-400 font-mono">NIK: {r.nik}</p>
                               {r.status?.toLowerCase().includes('meninggal') && (
                                 <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold rounded">
@@ -927,6 +1014,11 @@ export default function AdminBantuan({
             <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-slate-800 rounded-full text-xs font-bold text-gray-600 dark:text-slate-400">
               {filteredResidents.length} Jiwa
             </span>
+            {!showOverlapOnly && (
+              <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-full text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                {disbursedNiks.length} / {filteredResidents.length} Sudah Salur
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-3 w-full sm:w-auto">
