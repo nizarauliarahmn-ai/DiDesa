@@ -29,7 +29,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
     };
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
 
-    // Fetch daftar desa dari Supabase
+    // Fetch daftar desa dari Supabase (MURNI DATA REAL DARI SUPABASE, TANPA DUMMY)
     const fetchTenants = async () => {
       try {
         const { data, error } = await supabase
@@ -37,19 +37,14 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
           .select('id, nama_desa, domain, status, kabupaten, kecamatan, logo_url')
           .order('nama_desa', { ascending: true });
 
-        if (data && data.length > 0) {
+        if (data) {
           setTenants(data);
         } else {
-          // Fallback data desa demo jika data kosong
-          setTenants([
-            { id: '1', nama_desa: 'Desa Sukamakmur', domain: 'sukamakmur', kabupaten: 'Kabupaten Bogor', kecamatan: 'Kecamatan Sukamakmur', status: 'active' },
-            { id: '2', nama_desa: 'Desa Maju Sejahtera', domain: 'majusejahtera', kabupaten: 'Kabupaten Bandung', kecamatan: 'Kecamatan Coblong', status: 'active' },
-            { id: '3', nama_desa: 'Desa Sukamanah', domain: 'sukamanah', kabupaten: 'Kabupaten Garut', kecamatan: 'Kecamatan Bayongbong', status: 'active' },
-            { id: '4', nama_desa: 'Desa Sumbermulyo', domain: 'sumbermulyo', kabupaten: 'Kabupaten Bantul', kecamatan: 'Kecamatan Bambanglipuro', status: 'active' }
-          ]);
+          setTenants([]);
         }
       } catch (err) {
         console.warn('Gagal memuat tenants:', err);
+        setTenants([]);
       }
     };
     fetchTenants();
@@ -373,58 +368,66 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             </button>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {tenants.slice(0, 8).map((tenant) => {
-              const targetUrl = window.location.hostname.includes('localhost')
-                ? `${window.location.origin}?tenant=${tenant.domain}`
-                : `https://${tenant.domain}.sistemdidesa.id`;
+          {tenants.length === 0 ? (
+            <div className="bg-slate-50 dark:bg-slate-800/40 p-12 rounded-3xl text-center border border-dashed border-gray-300 dark:border-slate-700">
+              <Building2 className="w-12 h-12 text-slate-400 mx-auto mb-3 opacity-40" />
+              <p className="font-bold text-slate-700 dark:text-slate-200">Belum ada desa yang terdaftar secara publik</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Daftarkan desa Anda melalui panel admin SaaS DiDesa.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {tenants.slice(0, 8).map((tenant) => {
+                const targetUrl = window.location.hostname.includes('localhost')
+                  ? `${window.location.origin}?tenant=${tenant.domain}`
+                  : `https://${tenant.domain}.sistemdidesa.id`;
 
-              return (
-                <div 
-                  key={tenant.id}
-                  className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-3xl border border-gray-200/60 dark:border-slate-700/60 hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div 
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md p-1"
-                        style={{ backgroundColor: globalColor }}
-                      >
-                        {tenant.logo_url ? (
-                          <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain rounded-xl" />
-                        ) : (
-                          <Building2 className="text-white" size={24} />
-                        )}
+                return (
+                  <div 
+                    key={tenant.id}
+                    className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-3xl border border-gray-200/60 dark:border-slate-700/60 hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div 
+                          className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md p-1"
+                          style={{ backgroundColor: globalColor }}
+                        >
+                          {tenant.logo_url ? (
+                            <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain rounded-xl" />
+                          ) : (
+                            <Building2 className="text-white" size={24} />
+                          )}
+                        </div>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                          Aktif
+                        </span>
                       </div>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Aktif
-                      </span>
+
+                      <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors">
+                        {tenant.nama_desa}
+                      </h3>
+                      
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                        <MapPin size={12} className="text-slate-400 shrink-0" />
+                        <span>{tenant.kabupaten || 'Kabupaten'}</span>
+                      </p>
                     </div>
 
-                    <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors">
-                      {tenant.nama_desa}
-                    </h3>
-                    
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                      <MapPin size={12} className="text-slate-400 shrink-0" />
-                      <span>{tenant.kabupaten || 'Kabupaten Bogor'}</span>
-                    </p>
+                    <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
+                      <a
+                        href={targetUrl}
+                        className="w-full py-2.5 px-4 bg-white dark:bg-slate-900 hover:bg-emerald-600 hover:text-white border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2 group-hover:shadow-md"
+                      >
+                        <span>Kunjungi Portal</span>
+                        <ExternalLink size={14} />
+                      </a>
+                    </div>
                   </div>
-
-                  <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
-                    <a
-                      href={targetUrl}
-                      className="w-full py-2.5 px-4 bg-white dark:bg-slate-900 hover:bg-emerald-600 hover:text-white border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2 group-hover:shadow-md"
-                    >
-                      <span>Kunjungi Portal</span>
-                      <ExternalLink size={14} />
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
