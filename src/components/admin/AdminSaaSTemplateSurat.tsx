@@ -155,6 +155,8 @@ export default function AdminSaaSTemplateSurat() {
     try {
       supabase.from('saas_settings').upsert({ key: 'saas_global_letter_catalog', value: jsonStr }, { onConflict: 'key' }).then();
     } catch (e) {}
+    window.dispatchEvent(new Event('letter_classifications_updated'));
+    window.dispatchEvent(new Event('village_settings_updated'));
   };
 
   const handleSave = () => {

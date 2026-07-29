@@ -248,6 +248,17 @@ export default function App() {
           }
         }
 
+        // Fetch SaaS Global Letter Catalog if available
+        const { data: globalCatalog } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('key', 'saas_global_letter_catalog')
+          .maybeSingle();
+
+        if (globalCatalog && globalCatalog.value) {
+          localStorage.setItem('saas_global_letter_catalog', globalCatalog.value);
+        }
+
         const { data } = await supabase
           .from('saas_settings')
           .select('key, value')
@@ -261,6 +272,7 @@ export default function App() {
         }
         window.dispatchEvent(new Event('village_settings_updated'));
         window.dispatchEvent(new Event('app_theme_updated'));
+        window.dispatchEvent(new Event('letter_classifications_updated'));
       } catch (err) {
         console.warn('[App] Gagal sinkronisasi pengaturan desa:', err);
       }
