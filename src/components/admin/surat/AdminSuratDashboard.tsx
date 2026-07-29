@@ -3,7 +3,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
   Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Pencil, Ban
 } from 'lucide-react';
-import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync } from '../../../utils/letterHistory';
+import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync, getLetterFullData } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
@@ -1263,7 +1263,10 @@ export default function AdminSuratDashboard({
                     <td className="px-6 py-4 print:hidden text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button 
-                          onClick={() => setSelectedSurat(surat)}
+                          onClick={async () => {
+                            const fullData = await getLetterFullData(surat);
+                            setSelectedSurat({ ...surat, data: fullData });
+                          }}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-800 rounded-lg transition-colors" 
                           title="Lihat Detail Surat"
                         >

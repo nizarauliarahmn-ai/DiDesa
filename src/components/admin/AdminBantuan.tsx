@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   UserPlus, 
   Banknote, 
@@ -122,6 +122,18 @@ export default function AdminBantuan({
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [formYear, setFormYear] = useState(new Date().getFullYear().toString());
   const [filterYear, setFilterYear] = useState("Semua Tahun");
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close recommendations dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowRecommendations(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Helper for scoring
   const calculateVulnerabilityScore = (r: any) => {
@@ -496,7 +508,7 @@ export default function AdminBantuan({
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-1.5 relative">
+                <div ref={searchContainerRef} className="space-y-1.5 relative">
                   <div className="flex items-center justify-between ml-1 mb-1">
                     <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Cari Berdasarkan NIK atau Nama
@@ -547,6 +559,7 @@ export default function AdminBantuan({
                             onClick={() => {
                               setSelectedResidentNik(r.nik);
                               setSearchResidentQuery(r.name);
+                              setShowRecommendations(false);
                             }}
                             className="w-full p-3.5 text-left hover:bg-emerald-50/40 cursor-pointer transition-colors flex justify-between items-center"
                           >
