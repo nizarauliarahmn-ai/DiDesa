@@ -612,7 +612,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Pilih Jenis & Template Surat</h3>
-                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gunakan salah satu dari {classifications.length} jenis surat resmi Sukamakmur</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gunakan salah satu dari {classifications.length} jenis surat resmi {desaName.replace(/^(desa|kelurahan)\s+/i, '')}</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="relative">
