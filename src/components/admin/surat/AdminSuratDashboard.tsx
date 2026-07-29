@@ -1,7 +1,7 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
-  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Pencil, Ban
+  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban
 } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync, getLetterFullData } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
@@ -1280,7 +1280,7 @@ export default function AdminSuratDashboard({
                               className="p-1.5 text-amber-600 hover:bg-amber-50 hover:text-amber-800 rounded-lg transition-colors" 
                               title="Edit Isi Surat"
                             >
-                              <Pencil className="w-4 h-4" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             
                             <button 

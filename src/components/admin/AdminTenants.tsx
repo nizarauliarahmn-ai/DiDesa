@@ -4,7 +4,7 @@ import { supabase } from '../../utils/supabase';
 import { 
   Database, Plus, Search, Server, Activity, Users, MoreVertical, 
   Globe, ShieldCheck, X, Megaphone, Building2, MessageSquare, 
-  Trash2, CheckCircle, ExternalLink, Edit, Key, Copy, Check, 
+  Trash2, CheckCircle, ExternalLink, Edit2, Key, Copy, Check, 
   Lock, Mail, Eye, EyeOff, CheckCircle2, AlertTriangle, Printer
 } from 'lucide-react';
 import AdminGlobalUpdates from './AdminGlobalUpdates';
@@ -844,7 +844,7 @@ export default function AdminTenants() {
                                     onClick={() => handleOpenEditModal(tenant)}
                                     className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-emerald-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
-                                    <Edit size={13} className="text-gray-400" />
+                                    <Edit2 size={13} className="text-gray-400" />
                                     <span>Edit</span>
                                   </button>
                                   <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>

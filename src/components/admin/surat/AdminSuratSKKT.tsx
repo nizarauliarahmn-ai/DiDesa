@@ -313,24 +313,24 @@ export default function AdminSuratSKKT({
     keperluan: 'Kelengkapan Berkas / Sertifikasi Tanah',
 
     // Pejabat & Kop
-    namaPejabat: localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD',
+    namaPejabat: localStorage.getItem('kop_kades') || '',
     jabatanPejabat: 'Kepala Desa',
     includeCamat: false,
-    namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
-    namaKecamatan: localStorage.getItem('kop_kecamatan') || 'Simpur',
-    namaKabupaten: localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan',
-    alamatKantor: localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RW.001 Kodepos 71261',
-    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdessukamakmur@gmail.com',
+    namaDesa: localStorage.getItem('kop_desa') || '',
+    namaKecamatan: localStorage.getItem('kop_kecamatan') || '',
+    namaKabupaten: localStorage.getItem('kop_kabupaten') || '',
+    alamatKantor: localStorage.getItem('kop_alamat') || '',
+    kontakKantor: localStorage.getItem('kop_kontak') || '',
   });
 
   const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
   const letterFont = localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif';
 
-  const activeKabupaten = localStorage.getItem('kop_kabupaten') || formData.namaKabupaten || 'Hulu Sungai Selatan';
-  const activeKecamatan = localStorage.getItem('kop_kecamatan') || formData.namaKecamatan || 'Simpur';
-  const activeDesa = cleanStr(localStorage.getItem('kop_desa') || formData.namaDesa || 'Wasah Hilir', /^(desa|kelurahan)\s+/i);
-  const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || 'Jalan Keramat RT.002 RW.001 Kodepos 71261';
-  const activeKontak = localStorage.getItem('kop_kontak') || formData.kontakKantor || '0813 4686 7519, pemdesawasahhilir@gmail.com';
+  const activeKabupaten = localStorage.getItem('kop_kabupaten') || formData.namaKabupaten || '';
+  const activeKecamatan = localStorage.getItem('kop_kecamatan') || formData.namaKecamatan || '';
+  const activeDesa = cleanStr(localStorage.getItem('kop_desa') || formData.namaDesa || '', /^(desa|kelurahan)\s+/i);
+  const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || '';
+  const activeKontak = localStorage.getItem('kop_kontak') || formData.kontakKantor || '';
 
   useEffect(() => {
     if (editData) {
@@ -363,6 +363,83 @@ export default function AdminSuratSKKT({
     setSearchQuery('');
   };
 
+  const v = (val, fallback = '-') => (val && val.trim() !== '' ? val : fallback);
+  
+  const generateHTML = () => {
+    const today = new Date();
+    const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const printSignatureHTML = getPrintSignatureHTML(activeDesa, tglFormatted, formData.namaPejabat, formData.jabatanPejabat, undefined, formData.includeCamat);
+    
+    return `
+      <!-- KOP SURAT -->
+      <div style="border-bottom:3px solid #000;margin-bottom:12px;">
+        <div style="display:flex;align-items:flex-start;padding-bottom:6px;margin-bottom:1px;font-family:${letterFont};">
+          <div style="display:flex;width:100%;align-items:center;">
+            <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
+              <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
+            </div>
+            <div style="text-align:center;flex:1;padding-right:90px;">
+              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">PEMERINTAH KABUPATEN ${activeKabupaten.toUpperCase()}</div>
+              <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">KECAMATAN ${activeKecamatan.toUpperCase()}</div>
+              <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">DESA ${activeDesa.toUpperCase()}</div>
+              <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${activeAlamat}</div>
+              <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${activeKontak}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- JUDUL SURAT -->
+      <div style="text-align:center;margin-bottom:15px;">
+        <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN KEPEMILIKAN TANAH</h3>
+        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '590/.../DS-SKKT/' + today.getFullYear())}</p>
+      </div>
+
+      <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
+        Yang bertanda tangan di bawah ini Kepala Desa ${activeDesa}, Kecamatan ${activeKecamatan}, Kabupaten ${activeKabupaten}, menerangkan dengan sebenarnya bahwa:
+      </p>
+
+      <!-- DATA PENDUDUK -->
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
+        <tr><td style="width:30%;">a. Nama Lengkap</td><td style="width:3%;">:</td><td><strong>${v(formData.nama)}</strong></td></tr>
+        <tr><td>b. NIK</td><td>:</td><td>${v(formData.nik)}</td></tr>
+        <tr><td>c. Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
+        <tr><td style="vertical-align:top;">d. Alamat Domisili</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)}</td></tr>
+      </table>
+
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
+        Adalah benar-benar pemilik sah atas sebidang tanah yang terletak di <strong>${v(formData.lokasiTanah, `Desa ${activeDesa}`)}</strong> dengan spesifikasi sebagai berikut:
+      </p>
+
+      <!-- DATA TANAH -->
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
+        <tr><td style="width:35%;font-weight:bold;">Nomor Persil / Blok</td><td style="width:3%;">:</td><td>${v(formData.noPersil)}</td></tr>
+        <tr><td style="font-weight:bold;">Luas Obyek Tanah</td><td>:</td><td><strong>${v(formData.luasTanah)}</strong></td></tr>
+        <tr><td style="font-weight:bold;">Status Perolehan</td><td>:</td><td>${v(formData.statusPerolehan)}</td></tr>
+        <tr><td style="font-weight:bold;">Koordinat GPS</td><td>:</td><td>${v(formData.lat)}, ${v(formData.lng)}</td></tr>
+        <tr>
+          <td style="font-weight:bold;vertical-align:top;">Batas-Batas Obyek</td>
+          <td style="vertical-align:top;">:</td>
+          <td>
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+              <tr><td style="width:60px;">Utara</td><td style="width:10px;">:</td><td>${v(formData.batasUtara)}</td></tr>
+              <tr><td>Selatan</td><td>:</td><td>${v(formData.batasSelatan)}</td></tr>
+              <tr><td>Timur</td><td>:</td><td>${v(formData.batasTimur)}</td></tr>
+              <tr><td>Barat</td><td>:</td><td>${v(formData.batasBarat)}</td></tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:25px;font-size:14px;">
+        Demikian Surat Keterangan Kepemilikan Tanah ini dibuat dengan sebenarnya agar dapat dipergunakan untuk <strong>${v(formData.keperluan)}</strong>.
+      </p>
+
+      <!-- TANDA TANGAN -->
+      ${printSignatureHTML}
+    `;
+  };
+
   const handleSave = async () => {
     if (!formData.nama || !formData.nik || !formData.luasTanah) {
       showToast('Mohon lengkapi nama pemohon, NIK, dan luas tanah.', 'error');
@@ -390,88 +467,77 @@ export default function AdminSuratSKKT({
         showToast('Surat SKKT berhasil dibuat dan disimpan ke Arsip!', 'success');
       }
 
-      // Print via isolated iframe
-      const today = new Date();
-      const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-      const printSignatureHTML = getPrintSignatureHTML(activeDesa, tglFormatted, formData.namaPejabat, formData.jabatanPejabat, undefined, formData.includeCamat);
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(el => el.outerHTML)
+        .join('\n');
 
+      const contentHtml = generateHTML();
+      
       const printHTML = `
-        <!DOCTYPE html>
         <html>
-        <head>
-          <title>Cetak Surat SKKT</title>
-          <style>
-            @page { size: A4; margin: 0 !important; }
-            body { margin: 0; padding: 48px; font-family: ${letterFont}; font-size: 13px; line-height: 1.5; color: black; background: white; }
-            .printable-area { width: 100%; box-sizing: border-box; }
-            .kop { border-bottom: 3px double #000; margin-bottom: 15px; padding-bottom: 8px; }
-            .kop-container { display: flex; items-align: center; }
-            .logo { width: 85px; height: 95px; object-fit: contain; margin-right: 15px; }
-            .kop-text { text-align: center; flex: 1; margin-right: 85px; }
-            .title { text-align: center; margin: 15px 0; }
-            .title h3 { text-decoration: underline; margin: 0; font-size: 16px; font-weight: bold; }
-            .table-data { width: 100%; margin-left: 20px; border-collapse: collapse; margin-bottom: 12px; }
-            .table-spec { width: 100%; border-collapse: collapse; margin: 10px 0; border: 1px solid #333; }
-            .table-spec td { padding: 6px; border: 1px solid #333; }
-          </style>
-        </head>
-        <body>
-          <div class="printable-area">
-            <div class="kop">
-              <div class="kop-container">
-                <img src="${villageLogo}" class="logo" />
-                <div class="kop-text">
-                  <div style="font-weight:bold;font-size:14px;text-transform:uppercase;line-height:1.2;">PEMERINTAH KABUPATEN ${activeKabupaten.toUpperCase()}</div>
-                  <div style="font-weight:bold;font-size:14px;text-transform:uppercase;line-height:1.2;">KECAMATAN ${activeKecamatan.toUpperCase()}</div>
-                  <div style="font-weight:900;font-size:24px;text-transform:uppercase;line-height:1.1;margin:3px 0;">DESA ${activeDesa.toUpperCase()}</div>
-                  <div style="font-size:10.5px;line-height:1.2;">${activeAlamat}</div>
-                  <div style="font-size:10.5px;line-height:1.2;">${activeKontak}</div>
-                </div>
+          <head>
+            <title>Cetak SKKT - ${formData.nama}</title>
+            ${styles}
+            <style>
+              @page { size: A4; margin: 0 !important; }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                background: white; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+              }
+              .page { 
+                width: 210mm; 
+                height: 297mm; 
+                margin: 0; 
+                box-sizing: border-box; 
+                background: white; 
+                position: relative; 
+                overflow: hidden;
+              }
+              .printable-area {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 56px 75px !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+                transform: none !important;
+                visibility: visible !important;
+                font-family: ${letterFont};
+                font-size: 13px;
+                line-height: 1.5;
+              }
+              .printable-area * {
+                visibility: visible !important;
+              }
+              /* Hide crop marks in print */
+              .crop-mark { 
+                display: none !important; 
+              }
+              @media print {
+                body, .page { 
+                  width: 210mm; 
+                  height: 297mm; 
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="page">
+              <div class="printable-area bg-white dark:bg-slate-900 text-black">
+                ${contentHtml}
               </div>
             </div>
-
-            <div class="title">
-              <h3>SURAT KETERANGAN KEPEMILIKAN TANAH</h3>
-              <p style="margin:2px 0;font-size:13px;font-family:monospace;">Nomor: ${formData.nomorSurat || '590/.../DS-SKKT/' + today.getFullYear()}</p>
-            </div>
-
-            <p style="text-align:justify;">Yang bertanda tangan di bawah ini Kepala Desa ${activeDesa}, Kecamatan ${activeKecamatan}, Kabupaten ${activeKabupaten}, menerangkan dengan sebenarnya bahwa:</p>
-
-            <table class="table-data">
-              <tr><td style="width:30%;">Nama Lengkap</td><td style="width:3%;">:</td><td><strong>${(formData.nama || '-').toUpperCase()}</strong></td></tr>
-              <tr><td>NIK</td><td>:</td><td style="font-family:monospace;">${formData.nik || '-'}</td></tr>
-              <tr><td>Pekerjaan</td><td>:</td><td>${formData.pekerjaan || '-'}</td></tr>
-              <tr><td>Alamat Domisili</td><td>:</td><td>${formData.alamat || '-'}</td></tr>
-            </table>
-
-            <p style="text-align:justify;">Adalah benar-benar pemilik sah atas sebidang tanah yang terletak di <strong>${formData.lokasiTanah || `Desa ${activeDesa}`}</strong> dengan spesifikasi sebagai berikut:</p>
-
-            <table class="table-spec">
-              <tr><td style="width:35%;font-weight:bold;background:#f9f9f9;">Nomor Persil / Blok</td><td>${formData.noPersil || '-'}</td></tr>
-              <tr><td style="font-weight:bold;background:#f9f9f9;">Luas Obyek Tanah</td><td><strong>${formData.luasTanah || '-'}</strong></td></tr>
-              <tr><td style="font-weight:bold;background:#f9f9f9;">Status Perolehan</td><td>${formData.statusPerolehan || '-'}</td></tr>
-              <tr><td style="font-weight:bold;background:#f9f9f9;">Koordinat GPS</td><td style="font-family:monospace;">${formData.lat}, ${formData.lng}</td></tr>
-              <tr>
-                <td style="font-weight:bold;background:#f9f9f9;vertical-align:top;">Batas-Batas Obyek</td>
-                <td>
-                  Utara: ${formData.batasUtara || '-'}<br/>
-                  Selatan: ${formData.batasSelatan || '-'}<br/>
-                  Timur: {formData.batasTimur || '-'}<br/>
-                  Barat: ${formData.batasBarat || '-'}
-                </td>
-              </tr>
-            </table>
-
-            <p style="text-align:justify;">Demikian Surat Keterangan Kepemilikan Tanah ini dibuat dengan sebenarnya agar dapat dipergunakan untuk <strong>${formData.keperluan}</strong>.</p>
-
-            <div style="margin-top:40px;">
-              ${printSignatureHTML}
-            </div>
-          </div>
-          <script>
-            window.onload = () => { setTimeout(() => { window.print(); }, 400); };
-          </script>
-        </body>
+          </body>
         </html>
       `;
 
@@ -481,6 +547,14 @@ export default function AdminSuratSKKT({
           doc.open();
           doc.write(printHTML);
           doc.close();
+          setTimeout(() => {
+            try {
+              iframeRef.current.contentWindow?.focus();
+              iframeRef.current.contentWindow?.print();
+            } catch (e) {
+              window.print();
+            }
+          }, 500);
         }
       }
 
@@ -551,7 +625,7 @@ export default function AdminSuratSKKT({
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nama Pemohon</label>
-                <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value })} className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-slate-800 font-semibold" />
+                <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-slate-800 font-semibold" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIK Pemohon</label>
@@ -569,7 +643,7 @@ export default function AdminSuratSKKT({
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nomor Persil / Blok</label>
-                <input type="text" placeholder="Contoh: Persil 12 / Block B" value={formData.noPersil} onChange={e => setFormData({ ...formData, noPersil: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="Contoh: Persil 12 / Block B" value={formData.noPersil} onChange={e => setFormData({ ...formData, noPersil: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Luas Tanah (m²)</label>
@@ -577,11 +651,11 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Status Perolehan</label>
-                <input type="text" placeholder="Jual Beli / Hibah / Waris" value={formData.statusPerolehan} onChange={e => setFormData({ ...formData, statusPerolehan: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="Jual Beli / Hibah / Waris" value={formData.statusPerolehan} onChange={e => setFormData({ ...formData, statusPerolehan: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Lokasi Obyek Tanah</label>
-                <input type="text" placeholder="Nama Jalan / RT / RW / Dusun" value={formData.lokasiTanah} onChange={e => setFormData({ ...formData, lokasiTanah: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="Nama Jalan / RT / RW / Dusun" value={formData.lokasiTanah} onChange={e => setFormData({ ...formData, lokasiTanah: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
             </div>
 
@@ -591,19 +665,19 @@ export default function AdminSuratSKKT({
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <span className="text-gray-500 block text-[10px]">Batas Utara</span>
-                  <input type="text" placeholder="Tanah milik Bpk. Ahmad" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full p-2 border rounded-lg" />
+                  <input type="text" placeholder="Tanah milik Bpk. Ahmad" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Batas Selatan</span>
-                  <input type="text" placeholder="Jalan Desa / Parit" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full p-2 border rounded-lg" />
+                  <input type="text" placeholder="Jalan Desa / Parit" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Batas Timur</span>
-                  <input type="text" placeholder="Tanah milik Ibu Hj. Siti" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full p-2 border rounded-lg" />
+                  <input type="text" placeholder="Tanah milik Ibu Hj. Siti" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Batas Barat</span>
-                  <input type="text" placeholder="Sungai / Jalan Tani" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full p-2 border rounded-lg" />
+                  <input type="text" placeholder="Sungai / Jalan Tani" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
                 </div>
               </div>
             </div>
@@ -638,84 +712,50 @@ export default function AdminSuratSKKT({
           </div>
 
           <div 
-            {...dragProps}
-            className="w-full bg-white text-black p-10 shadow-xl rounded-lg font-serif border border-gray-300 overflow-x-auto select-none"
-            style={{ transform: `scale(${previewZoom})`, transformOrigin: 'top left', width: `${100 / previewZoom}%` }}
+            ref={dragProps.ref}
+            onMouseDown={dragProps.onMouseDown}
+            onMouseLeave={dragProps.onMouseLeave}
+            onMouseUp={dragProps.onMouseUp}
+            onMouseMove={dragProps.onMouseMove}
+            style={{ ...dragProps.style }}
+            className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
           >
-            {/* KOP SURAT RESMI */}
-            <div className="border-b-4 border-double border-black pb-3 mb-6 font-serif">
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-24 flex-none flex items-center justify-center overflow-hidden">
-                  <img src={villageLogo} alt="Logo" className="w-full h-full object-contain" />
-                </div>
-                <div className="text-center flex-1 pr-20">
-                  <h4 className="font-bold text-xs uppercase tracking-wider leading-tight">PEMERINTAH KABUPATEN {activeKabupaten.toUpperCase()}</h4>
-                  <h4 className="font-bold text-xs uppercase tracking-wider leading-tight">KECAMATAN {activeKecamatan.toUpperCase()}</h4>
-                  <h3 className="font-black text-xl uppercase tracking-widest leading-tight my-0.5">DESA {activeDesa.toUpperCase()}</h3>
-                  <p className="text-[10px] leading-tight mt-1 capitalize text-gray-700">{activeAlamat}</p>
-                  <p className="text-[9.5px] leading-tight text-gray-700">{activeKontak}</p>
-                </div>
-              </div>
+            <div 
+              style={{
+                width: `${794 * previewZoom}px`,
+                height: `${1123 * previewZoom}px`,
+                overflow: 'hidden',
+                position: 'relative',
+                boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                borderRadius: '12px',
+                transition: 'width 0.2s ease-out, height 0.2s ease-out'
+              }}
+              className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
+            >
+              <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+              <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+              <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+              <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+
+              <div 
+                className="bg-white dark:bg-slate-900 shrink-0"
+                style={{ 
+                  width: '794px', 
+                  height: '1123px', 
+                  padding: '56px 75px',
+                  transform: `scale(${previewZoom})`,
+                  transformOrigin: 'top left',
+                  fontFamily: letterFont,
+                  fontSize: '13px',
+                  lineHeight: '1.45',
+                  position: 'relative',
+                  color: 'black',
+                  boxSizing: 'border-box'
+                }}
+                dangerouslySetInnerHTML={{ __html: generateHTML() }}
+              />
             </div>
-
-            {/* JUDUL SURAT */}
-            <div className="text-center my-5">
-              <p className="font-bold text-sm uppercase underline tracking-wider">SURAT KETERANGAN KEPEMILIKAN TANAH</p>
-              <p className="font-mono text-xs mt-0.5">Nomor: {formData.nomorSurat || `590/.../DS-SKKT/${new Date().getFullYear()}`}</p>
-            </div>
-
-            {/* REDAKSI */}
-            <p className="text-justify text-xs leading-relaxed indent-8 mb-3">
-              Yang bertanda tangan di bawah ini Kepala Desa {activeDesa}, Kecamatan {activeKecamatan}, Kabupaten {activeKabupaten}, menerangkan dengan sebenarnya bahwa:
-            </p>
-
-            <table className="w-full ml-6 text-xs leading-relaxed mb-3">
-              <tbody>
-                <tr><td className="w-36 font-semibold">a. Nama Lengkap</td><td className="w-3">:</td><td className="font-bold uppercase">{formData.nama || '-'}</td></tr>
-                <tr><td className="font-semibold">b. NIK</td><td>:</td><td className="font-mono">{formData.nik || '-'}</td></tr>
-                <tr><td className="font-semibold">c. Pekerjaan</td><td>:</td><td>{formData.pekerjaan || '-'}</td></tr>
-                <tr><td className="font-semibold">d. Alamat Domisili</td><td>:</td><td>{formData.alamat || '-'}</td></tr>
-              </tbody>
-            </table>
-
-            <p className="text-justify text-xs leading-relaxed indent-8 mb-3">
-              Adalah benar-benar pemilik sah atas sebidang tanah yang terletak di <strong>{formData.lokasiTanah || `Desa ${activeDesa}`}</strong> dengan spesifikasi sebagai berikut:
-            </p>
-
-            <table className="w-full ml-6 text-xs leading-relaxed border-collapse border border-black mb-4">
-              <tbody>
-                <tr className="border-b border-black"><td className="p-2 w-40 font-bold bg-gray-50">Nomor Persil / Blok</td><td className="p-2">{formData.noPersil || '-'}</td></tr>
-                <tr className="border-b border-black"><td className="p-2 font-bold bg-gray-50">Luas Obyek Tanah</td><td className="p-2 font-bold">{formData.luasTanah || '-'}</td></tr>
-                <tr className="border-b border-black"><td className="p-2 font-bold bg-gray-50">Status Perolehan</td><td className="p-2">{formData.statusPerolehan || '-'}</td></tr>
-                <tr className="border-b border-black"><td className="p-2 font-bold bg-gray-50">Koordinat GPS</td><td className="p-2 font-mono">{formData.lat}, {formData.lng}</td></tr>
-                <tr>
-                  <td className="p-2 font-bold bg-gray-50 align-top">Batas-Batas Obyek</td>
-                  <td className="p-2">
-                    Utara: {formData.batasUtara || '-'}<br/>
-                    Selatan: {formData.batasSelatan || '-'}<br/>
-                    Timur: {formData.batasTimur || '-'}<br/>
-                    Barat: {formData.batasBarat || '-'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <p className="text-justify text-xs leading-relaxed indent-8 mb-4">
-              Demikian Surat Keterangan Kepemilikan Tanah ini dibuat dengan sebenarnya agar dapat dipergunakan untuk <strong>{formData.keperluan}</strong>.
-            </p>
-
-            {/* TANDA TANGAN */}
-            <div className="mt-8 flex justify-end">
-              <div className="text-center w-56 font-serif">
-                <p className="text-xs">Desa {activeDesa}, {todayStr}</p>
-                <p className="font-bold text-xs mt-1 uppercase">Kepala Desa {activeDesa}</p>
-                <div className="h-16"></div>
-                <p className="font-bold text-xs underline uppercase">{formData.namaPejabat}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+          </div>\n        </div>\n      </div>
 
       {/* Interactive Satellite Map Picker Modal */}
       {showMapModal && (
