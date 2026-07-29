@@ -210,7 +210,7 @@ export default function AdminSuratMasterTemplate() {
   );
   
   // Simulation template selection
-  const [selectedTemplate, setSelectedTemplate] = useState<'KTP' | 'SKTM' | 'SKU'>('KTP');
+  const [selectedTemplate, setSelectedTemplate] = useState<'KTP' | 'SKTM' | 'SKU' | 'SKKT'>('KTP');
   
   // Simulation state for resident selection
   const [mockResidents, setMockResidents] = useState<ResidentData[]>([
@@ -286,6 +286,18 @@ export default function AdminSuratMasterTemplate() {
             Demikian surat keterangan usaha ini dibuat agar kiranya pihak lembaga pembiayaan perbankan dapat memproses dan memberikan fasilitas kemudahan permodalan demi kemakmuran UMKM desa kita.
           </p>
         `;
+      case 'SKKT':
+        return `
+          <p class="indent-8 text-justify">
+            Menerangkan dengan sebenarnya bahwa warga tersebut di atas adalah benar-benar memiliki sebidang tanah yang terletak di wilayah domisili kami, dengan rincian dan batas-batas tanah yang telah diverifikasi sesuai dengan catatan registrasi pertanahan desa.
+          </p>
+          <p class="indent-8 text-justify">
+            Surat Keterangan Kepemilikan Tanah (SKKT) ini diterbitkan atas permohonan warga yang bersangkutan guna keperluan pengurusan administrasi pertanahan, sebagai bukti awal penguasaan fisik secara sah, dan tidak dalam status sengketa dengan pihak manapun.
+          </p>
+          <p class="indent-8 text-justify">
+            Demikian surat keterangan ini kami berikan untuk dipergunakan secara jujur, bertanggung jawab, dan sesuai dengan ketentuan peraturan perundang-undangan yang berlaku.
+          </p>
+        `;
     }
   };
 
@@ -301,7 +313,9 @@ export default function AdminSuratMasterTemplate() {
       ? 'SURAT PENGANTAR KTP' 
       : selectedTemplate === 'SKTM' 
         ? 'SURAT KETERANGAN TIDAK MAMPU' 
-        : 'SURAT KETERANGAN USAHA';
+        : selectedTemplate === 'SKKT'
+          ? 'SURAT KETERANGAN KEPEMILIKAN TANAH'
+          : 'SURAT KETERANGAN USAHA';
 
     const fullPrintHTML = generateSuratCetak(letterTitle, getTemplateContent(), selectedResident);
 
@@ -680,7 +694,7 @@ export default function AdminSuratMasterTemplate() {
                       <div style={{ fontWeight: 800, fontSize: '14px', textTransform: 'uppercase', color: '#111', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>{selectedResident.kabupaten.toUpperCase()}</div>
                       <div style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', color: '#111', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>{selectedResident.kecamatan.toUpperCase()}</div>
                       <div style={{ fontWeight: 900, fontSize: '26px', color: '#022c22', letterSpacing: '0.5px', textTransform: 'uppercase', lineHeight: '1.1', margin: '2px 0 3px 0' }}>{selectedResident.village.toUpperCase()}</div>
-                      <div style={{ fontSize: '10.5px', color: '#111', textTransform: 'capitalize', lineHeight: '1.15', margin: '2px 0 1px 0' }}>Alamat Kantor Pelayanan: Jl. Keramat No. 12 Sukamakmur, Kode Pos 71253</div>
+                      <div style={{ fontSize: '10.5px', color: '#111', textTransform: 'capitalize', lineHeight: '1.15', margin: '2px 0 1px 0' }}>{localStorage.getItem('kop_alamat') || `Alamat Kantor Pelayanan: Jl. Keramat No. 12 ${selectedResident.village}, Kode Pos 71253`}</div>
                     </div>
                   </div>
 
@@ -691,7 +705,9 @@ export default function AdminSuratMasterTemplate() {
                         ? 'SURAT PENGANTAR KTP' 
                         : selectedTemplate === 'SKTM' 
                           ? 'SURAT KETERANGAN TIDAK MAMPU' 
-                          : 'SURAT KETERANGAN USAHA'}
+                          : selectedTemplate === 'SKKT'
+                            ? 'SURAT KETERANGAN KEPEMILIKAN TANAH'
+                            : 'SURAT KETERANGAN USAHA'}
                     </p>
                     <p className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 mt-1">Nomor: 474/023/WHi-PEM/2026</p>
                   </div>

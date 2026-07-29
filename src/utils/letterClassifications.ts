@@ -168,9 +168,9 @@ export function getLetterClassifications(): LetterClassification[] {
       mapped = mapped.map(item => {
         const saasMatch = saasTemplates.find(s => s.id === item.id || s.klasifikasi === item.klasifikasi);
         if (saasMatch) {
+          // Sync visibility: SaaS enabled = force visible; SaaS disabled = force hidden; otherwise keep tenant's choice
           const isSaaSDisabled = saasMatch.isVisible === false;
-          // Sync visibility directly with SaaS configuration: if SaaS enabled (true), force true for village catalog
-          const newIsVisible = saasMatch.isVisible === true ? true : (isSaaSDisabled ? false : item.isVisible);
+          const newIsVisible = saasMatch.isVisible === true ? true : isSaaSDisabled ? false : item.isVisible;
 
           if (item.jenis !== saasMatch.jenis || 
               item.klasifikasi !== saasMatch.klasifikasi || 
@@ -325,13 +325,11 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
   const year = date.getFullYear();
   const year2D = String(year).slice(-2);
   
-  const villageName = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
-  const kecamatan = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
-  const kabupaten = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
+  const villageName = localStorage.getItem('kop_desa') || '';
+  const kecamatan = localStorage.getItem('kop_kecamatan') || '';
+  const kabupaten = localStorage.getItem('kop_kabupaten') || '';
   
   const getDesaInitial = (name: string) => {
-    if (name.toLowerCase().includes('Sukamakmur')) return 'WHi';
-    if (name.toLowerCase().includes('sukamaju')) return 'DS-SKM';
     const words = name.replace(/desa|kelurahan/gi, '').trim().split(/\s+/);
     if (words.length >= 2) {
       return words.map(w => w[0]).join('').toUpperCase();

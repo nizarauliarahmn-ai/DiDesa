@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Edit3, Trash2, CheckCircle2, X } from 'lucide-react';
+import { FileText, Plus, Search, Edit2, Trash2, CheckCircle2, X } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 
@@ -351,7 +351,7 @@ export default function AdminSaaSTemplateSurat() {
                         className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors"
                         title="Edit Template"
                       >
-                        <Edit3 className="w-4 h-4" />
+                        <Edit2 className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDelete(item.id)}

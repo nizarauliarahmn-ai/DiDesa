@@ -202,9 +202,9 @@ export default function AdminBukuTamu() {
     const logoUrl = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const kabupatenName = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
     const kecamatanName = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
-    const desaName = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
-    const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261';
-    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
+    const desaName = localStorage.getItem('kop_desa') || 'Desa';
+    const alamatKantor = localStorage.getItem('kop_alamat') || 'Alamat Kantor Pelayanan Desa';
+    const kontakKantor = localStorage.getItem('kop_kontak') || '-';
     const customFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     
     const printContent = `
@@ -604,7 +604,7 @@ export default function AdminBukuTamu() {
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                 <QRCodeSVG 
                   id="qr-kiosk-svg"
-                  value={`${window.location.origin}/?tab=buku_tamu&t_id=${tenantId || ''}&t_name=${encodeURIComponent(localStorage.getItem('kop_desa') || '')}`} 
+                  value={`${window.location.origin}/?tab=buku_tamu&t_id=${tenantId || ''}`} 
                   size={200} 
                   level="H"
                   includeMargin={false}
@@ -640,7 +640,7 @@ export default function AdminBukuTamu() {
           
           <div className="bg-white p-12 rounded-[3rem] shadow-xl border-4 border-gray-100 mb-12 inline-block">
             <QRCodeSVG 
-              value={`${window.location.origin}/?tab=buku_tamu&t_id=${tenantId || ''}&t_name=${encodeURIComponent(localStorage.getItem('kop_desa') || '')}`} 
+              value={`${window.location.origin}/?tab=buku_tamu&t_id=${tenantId || ''}`} 
               size={400} 
               level="H"
               includeMargin={false}
