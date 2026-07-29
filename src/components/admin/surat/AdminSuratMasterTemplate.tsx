@@ -129,7 +129,7 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
               <p class="font-extrabold text-[14px] uppercase tracking-wider text-slate-800 dark:text-slate-100 leading-tight mb-0.5">${dataWarga.kabupaten.toUpperCase()}</p>
               <p class="font-bold text-[14px] uppercase tracking-wider text-slate-800 dark:text-slate-100 leading-tight mb-0.5">${dataWarga.kecamatan.toUpperCase()}</p>
               <p class="font-black text-[26px] tracking-wide text-emerald-950 uppercase mt-1 leading-tight mb-1">${dataWarga.village.toUpperCase()}</p>
-              <p class="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug mt-1">Alamat Kantor Pelayanan: Jl. Keramat No. 12 Sukamakmur, Kode Pos 71253</p>
+              <p class="text-[10.5px] text-slate-500 dark:text-slate-400 leading-snug mt-1">${localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || `Jalan Keramat, ${dataWarga.village}, ${dataWarga.kecamatan}, ${dataWarga.kabupaten}`}</p>
               </div>
             </div>
           </div>
