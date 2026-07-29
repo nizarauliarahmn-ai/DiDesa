@@ -705,8 +705,13 @@ export default function AdminSuratSKKT({
             </p>
 
             {/* TANDA TANGAN */}
-            <div className="mt-8">
-              {reactSig}
+            <div className="mt-8 flex justify-end">
+              <div className="text-center w-56 font-serif">
+                <p className="text-xs">Desa {activeDesa}, {todayStr}</p>
+                <p className="font-bold text-xs mt-1 uppercase">Kepala Desa {activeDesa}</p>
+                <div className="h-16"></div>
+                <p className="font-bold text-xs underline uppercase">{formData.namaPejabat}</p>
+              </div>
             </div>
           </div>
         </div>
