@@ -166,13 +166,11 @@ export function getLetterClassifications(): LetterClassification[] {
       
       // Merge updates from SaaS (jenis, klasifikasi, kodeKlasifikasi, isVisible)
       mapped = mapped.map(item => {
-        const saasMatch = saasTemplates.find(s => s.id === item.id);
+        const saasMatch = saasTemplates.find(s => s.id === item.id || s.klasifikasi === item.klasifikasi);
         if (saasMatch) {
           const isSaaSDisabled = saasMatch.isVisible === false;
-          let newIsVisible = item.isVisible;
-          if (isSaaSDisabled) {
-            newIsVisible = false;
-          }
+          // Sync visibility directly with SaaS configuration: if SaaS enabled (true), force true for village catalog
+          const newIsVisible = saasMatch.isVisible === true ? true : (isSaaSDisabled ? false : item.isVisible);
 
           if (item.jenis !== saasMatch.jenis || 
               item.klasifikasi !== saasMatch.klasifikasi || 

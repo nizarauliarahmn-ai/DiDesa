@@ -62,8 +62,18 @@ export default function PublicBukuTamu() {
     
     setIsTenantValid(true);
 
-    resolveCurrentTenant().then(id => {
-      if (id) setTenantId(id);
+    resolveCurrentTenant().then(async id => {
+      if (id) {
+        setTenantId(id);
+        if (!tName) {
+          try {
+            const { data } = await supabase.from('tenants').select('name, village_name').eq('id', id).single();
+            if (data && (data.village_name || data.name)) {
+              setDesaName(capitalizeWords(data.village_name || data.name));
+            }
+          } catch (e) {}
+        }
+      }
     });
 
     if (tName) {

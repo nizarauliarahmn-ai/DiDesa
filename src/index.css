@@ -280,12 +280,11 @@ html, body, #root {
 }
 
 /* ============================================================
-   GLOBAL AUTO-CAPITALIZE: Semua input teks & textarea
-   Berlaku untuk seluruh form di aplikasi DiDesa
+   SURAT AUTO-CAPITALIZE: Hanya berlaku di form pembuatan surat
    ============================================================ */
-input[type="text"]:not([data-no-cap]),
-input[type="search"]:not([data-no-cap]),
-textarea:not([data-no-cap]) {
+.admin-surat-wrapper input[type="text"]:not([data-no-cap]),
+.admin-surat-wrapper input[type="search"]:not([data-no-cap]),
+.admin-surat-wrapper textarea:not([data-no-cap]) {
   text-transform: capitalize;
 }
 

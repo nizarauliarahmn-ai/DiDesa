@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   UserPlus, 
   Banknote, 
@@ -22,6 +22,7 @@ import { showToast } from '../../utils/toast';
 import ConfirmModal from '../common/ConfirmModal';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 
 export default function AdminBantuan({
   searchQuery: externalSearchQuery,
@@ -122,6 +123,19 @@ export default function AdminBantuan({
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [formYear, setFormYear] = useState(new Date().getFullYear().toString());
   const [filterYear, setFilterYear] = useState("Semua Tahun");
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedResidentDetailModal, setSelectedResidentDetailModal] = useState<any | null>(null);
+
+  // Close recommendations dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setShowRecommendations(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Helper for scoring
   const calculateVulnerabilityScore = (r: any) => {
@@ -496,7 +510,7 @@ export default function AdminBantuan({
               </div>
 
               <div className="space-y-4">
-                <div className="space-y-1.5 relative">
+                <div ref={searchContainerRef} className="space-y-1.5 relative">
                   <div className="flex items-center justify-between ml-1 mb-1">
                     <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                       Cari Berdasarkan NIK atau Nama
@@ -547,6 +561,7 @@ export default function AdminBantuan({
                             onClick={() => {
                               setSelectedResidentNik(r.nik);
                               setSearchResidentQuery(r.name);
+                              setShowRecommendations(false);
                             }}
                             className="w-full p-3.5 text-left hover:bg-emerald-50/40 cursor-pointer transition-colors flex justify-between items-center"
                           >
@@ -1130,9 +1145,13 @@ export default function AdminBantuan({
                   const isOverlap = (resident.activeAids || []).length > 1;
 
                   return (
-                    <tr key={resident.nik} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
+                    <tr 
+                      key={resident.nik} 
+                      onClick={() => setSelectedResidentDetailModal(resident)}
+                      className="hover:bg-emerald-50/40 dark:hover:bg-slate-800/80 cursor-pointer transition-colors group"
+                    >
                       <td className="px-6 py-4">
-                        <p className="font-bold text-sm text-gray-900 dark:text-white">{resident.nik}</p>
+                        <p className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors">{resident.nik}</p>
                         <p className="text-sm font-semibold text-gray-600 dark:text-slate-400">{resident.name}</p>
                         {resident.status?.toLowerCase().includes('meninggal') && (
                           <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded-md">
@@ -1177,7 +1196,8 @@ export default function AdminBantuan({
                           )}
 
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               const isAlready = disbursedNiks.includes(resident.nik);
                               if (isAlready) {
                                 setDisbursedNiks(prev => prev.filter(n => n !== resident.nik));
@@ -1212,7 +1232,10 @@ export default function AdminBantuan({
                           <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Hapus via Program Utama</p>
                         ) : (
                           <button 
-                            onClick={() => handleRemoveAid(resident.nik, selectedProgram)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveAid(resident.nik, selectedProgram);
+                            }}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs"
                             title="Hapus Penerima"
                           >
@@ -1481,6 +1504,18 @@ export default function AdminBantuan({
         confirmText="Ya, Hapus"
         cancelText="Batal"
       />
+
+      {/* Resident Detail Modal on Row Click */}
+      {selectedResidentDetailModal && (
+        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden my-8 max-h-[90vh] overflow-y-auto">
+            <AdminPendudukDetail 
+              data={selectedResidentDetailModal}
+              onBack={() => setSelectedResidentDetailModal(null)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

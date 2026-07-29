@@ -16,6 +16,7 @@ import AdminSuratSKP from './surat/AdminSuratSKP';
 import AdminSuratSDU from './surat/AdminSuratSDU';
 import AdminSuratSPT from './surat/AdminSuratSPT';
 import AdminSuratSPPD from './surat/AdminSuratSPPD';
+import AdminSuratSKKT from './surat/AdminSuratSKKT';
 import { getLetterFullData } from '../../utils/letterHistory';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
@@ -32,7 +33,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
   const [localPresetResident, setLocalPresetResident] = useState<any>(null);
@@ -100,6 +101,8 @@ export default function AdminSurat({
       setActiveTab('sppd');
     } else if (jenis.includes('SKL') || jenis.includes('KELAHIRAN')) {
       setActiveTab('skl');
+    } else if (jenis.includes('SKKT') || jenis.includes('TANAH')) {
+      setActiveTab('skkt');
     }
   };
 
@@ -200,7 +203,16 @@ export default function AdminSurat({
             onOpenSKL={() => changeTab('skl')}
             onOpenSDU={() => changeTab('sdu')}
             onOpenSPT={() => changeTab('spt')}
-              onOpenSPPD={() => changeTab('sppd')}
+            onOpenSPPD={() => changeTab('sppd')}
+            onOpenSKKT={() => changeTab('skkt')}
+          />
+        )}
+        {activeTab === 'skkt' && (
+          <AdminSuratSKKT 
+            presetResident={localPresetResident || presetResident}
+            editData={editData}
+            editLetterId={editLetterId}
+            onBack={() => changeTab('dashboard')} 
           />
         )}
         {activeTab === 'nikah' && (

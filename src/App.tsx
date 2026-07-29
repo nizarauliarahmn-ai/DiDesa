@@ -229,6 +229,36 @@ export default function App() {
       try {
         const tid = await resolveCurrentTenant();
         if (!tid) return;
+
+        // Fetch tenant details for name fallback
+        const { data: tenant } = await supabase
+          .from('tenants')
+          .select('name, village_name')
+          .eq('id', tid)
+          .single();
+
+        if (tenant) {
+          const tName = tenant.village_name || tenant.name;
+          if (tName) {
+            localStorage.setItem('village_name', tName);
+            const currentKop = localStorage.getItem('kop_desa');
+            if (!currentKop || currentKop === 'Desa Sukamakmur' || currentKop === 'Sukamakmur') {
+              localStorage.setItem('kop_desa', tName.toLowerCase().startsWith('desa') ? tName : `Desa ${tName}`);
+            }
+          }
+        }
+
+        // Fetch SaaS Global Letter Catalog if available
+        const { data: globalCatalog } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('key', 'saas_global_letter_catalog')
+          .maybeSingle();
+
+        if (globalCatalog && globalCatalog.value) {
+          localStorage.setItem('saas_global_letter_catalog', globalCatalog.value);
+        }
+
         const { data } = await supabase
           .from('saas_settings')
           .select('key, value')
@@ -239,9 +269,10 @@ export default function App() {
               localStorage.setItem(row.key, row.value);
             }
           });
-          window.dispatchEvent(new Event('village_settings_updated'));
-          window.dispatchEvent(new Event('app_theme_updated'));
         }
+        window.dispatchEvent(new Event('village_settings_updated'));
+        window.dispatchEvent(new Event('app_theme_updated'));
+        window.dispatchEvent(new Event('letter_classifications_updated'));
       } catch (err) {
         console.warn('[App] Gagal sinkronisasi pengaturan desa:', err);
       }

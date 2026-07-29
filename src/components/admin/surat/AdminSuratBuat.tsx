@@ -50,8 +50,8 @@ const formatMonthYearInIndonesian = (monthYearStr: string): string => {
   return monthYearStr;
 };
 
-export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
-  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void }) {
+export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD, onOpenSKKT }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
+  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void, onOpenSKKT?: () => void }) {
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
@@ -612,7 +612,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Pilih Jenis & Template Surat</h3>
-                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gunakan salah satu dari {classifications.length} jenis surat resmi Sukamakmur</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gunakan salah satu dari {classifications.length} jenis surat resmi {desaName.replace(/^(desa|kelurahan)\s+/i, '')}</p>
               </div>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -725,6 +725,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       }
                       if (t.klasifikasi === 'SPPD') {
                         if (onOpenSPPD) onOpenSPPD();
+                        return;
+                      }
+                      if (t.klasifikasi === 'SKKT') {
+                        if (onOpenSKKT) onOpenSKKT();
                         return;
                       }
                       setSelectedTemplate(t.klasifikasi);
