@@ -163,16 +163,16 @@ export default function AdminSuratSKKT({
   const generatePolygonSVG = () => {
     const pts = formData.polygonPoints;
     if (!pts || pts.length < 3) {
-      return `<div style="width:100%; height:100%; border:1px dashed #94a3b8; background: #f8fafc; display:flex; align-items:center; justify-content:center; color:#64748b; font-size:11px;">Belum ada poligon peta satelit (Klik 'Buka Peta' untuk menggambar)</div>`;
+      return `<div style="width:100%; height:100%; border:1px dashed #000; background: #fff; display:flex; align-items:center; justify-content:center; color:#000; font-size:11px; font-weight:bold;">Belum ada poligon peta satelit (Klik 'Buka Peta' untuk menggambar)</div>`;
     }
     const lats = pts.map((p: any) => p.lat);
     const lngs = pts.map((p: any) => p.lng);
     const minLat = Math.min(...lats), maxLat = Math.max(...lats);
     const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
     
-    const viewWidth = 220;
-    const viewHeight = 220;
-    const padding = 25;
+    const viewWidth = 260;
+    const viewHeight = 260;
+    const padding = 40;
     const drawWidth = viewWidth - 2 * padding;
     const drawHeight = viewHeight - 2 * padding;
     
@@ -196,6 +196,9 @@ export default function AdminSuratSKKT({
 
     const svgPolygonPoints = mappedPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
 
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+
     const edgeLabels = [];
     for (let i = 0; i < mappedPts.length; i++) {
       const p1 = mappedPts[i];
@@ -213,31 +216,43 @@ export default function AdminSuratSKKT({
 
       const midX = (p1.x + p2.x) / 2;
       const midY = (p1.y + p2.y) / 2;
+      const midLat = (p1.lat + p2.lat) / 2;
+      const midLng = (p1.lng + p2.lng) / 2;
+
+      const dLatVal = midLat - centerLat;
+      const dLngVal = midLng - centerLng;
+      let neighborName = '';
+      if (Math.abs(dLatVal) > Math.abs(dLngVal)) {
+        neighborName = dLatVal > 0 ? formData.batasUtara : formData.batasSelatan;
+      } else {
+        neighborName = dLngVal > 0 ? formData.batasTimur : formData.batasBarat;
+      }
 
       edgeLabels.push(`
         <g transform="translate(${midX.toFixed(1)}, ${midY.toFixed(1)})">
-          <rect x="-16" y="-7" width="32" height="13" rx="3" fill="#ffffff" stroke="#059669" stroke-width="0.6" />
-          <text x="0" y="2.5" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#065f46">${distMeters.toFixed(1)}m</text>
+          <rect x="-24" y="-7.5" width="48" height="15" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8" />
+          <text x="0" y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
+          ${neighborName ? `<text x="0" y="${dLatVal > 0 ? -11 : 16}" text-anchor="middle" font-size="7" font-weight="bold" fill="#000000">${neighborName}</text>` : ''}
         </g>
       `);
     }
 
     const vertexElements = mappedPts.map(p => `
       <g transform="translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})">
-        <circle cx="0" cy="0" r="4" fill="#ef4444" stroke="#ffffff" stroke-width="1.2" />
-        <text x="0" y="-6" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#1e293b">P${p.index}</text>
+        <circle cx="0" cy="0" r="3.5" fill="#000000" stroke="#ffffff" stroke-width="1" />
+        <text x="0" y="-5" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P${p.index}</text>
       </g>
     `);
 
     return `
-      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#f8fafc;">
-        <defs>
-          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" />
-        <polygon points="${svgPolygonPoints}" fill="#dcfce7" fill-opacity="0.8" stroke="#059669" stroke-width="2" stroke-linejoin="round" />
+      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff;">
+        <g transform="translate(${viewWidth - 25}, 25)">
+          <line x1="0" y1="24" x2="0" y2="0" stroke="#000000" stroke-width="2" />
+          <polygon points="0,0 -5,10 5,10" fill="#000000" />
+          <text x="0" y="-5" text-anchor="middle" font-weight="bold" font-size="11" fill="#000000">U</text>
+        </g>
+
+        <polygon points="${svgPolygonPoints}" fill="none" stroke="#000000" stroke-width="2" stroke-linejoin="round" />
         ${edgeLabels.join('')}
         ${vertexElements.join('')}
       </svg>
@@ -368,48 +383,9 @@ export default function AdminSuratSKKT({
           <tr><td>LUAS</td><td>:</td><td>± ${v(formData.luasTanah)} Meter</td></tr>
         </table>
 
-        <!-- DIAGRAM BOX PETAK TANAH & KOMPAS -->
-        <div style="border:1.5px solid #000; padding:15px; margin-bottom:15px; position:relative; min-height:330px; display:flex; align-items:center; justify-content:center; background:#fff;">
-          <!-- DIAGRAM TRAPEZOID SKETSA -->
-          <div style="width:82%; height:270px; border:1.5px solid #333; position:relative; margin:auto; background:#ffffff; display:flex; flex-direction:column; justify-content:between;">
-            <!-- NORTH (UTARA) -->
-            <div style="position:absolute; top:-28px; left:50%; transform:translateX(-50%); text-align:center; font-size:11px; font-weight:bold; white-space:nowrap;">
-              ${v(formData.batasUtara)}<br/>
-              <span style="font-size:10px; color:#059669;">${v(formData.ukuranUtara, '-')}</span>
-            </div>
-
-            <!-- SOUTH (SELATAN) -->
-            <div style="position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); text-align:center; font-size:11px; font-weight:bold; white-space:nowrap;">
-              ${v(formData.batasSelatan)}<br/>
-              <span style="font-size:10px; color:#059669;">${v(formData.ukuranSelatan, '-')}</span>
-            </div>
-
-            <!-- EAST (TIMUR - RIGHT) -->
-            <div style="position:absolute; right:-125px; top:50%; transform:translateY(-50%); text-align:left; font-size:11px; font-weight:bold; width:115px;">
-              ${v(formData.batasTimur)}<br/>
-              <span style="font-size:10px; color:#059669;">${v(formData.ukuranTimur, '-')}</span>
-            </div>
-
-            <!-- WEST (BARAT - LEFT) -->
-            <div style="position:absolute; left:-125px; top:50%; transform:translateY(-50%); text-align:right; font-size:11px; font-weight:bold; width:115px;">
-              ${v(formData.batasBarat)}<br/>
-              <span style="font-size:10px; color:#059669;">${v(formData.ukuranBarat, '-')}</span>
-            </div>
-
-            <!-- SKETSA SHAPE INSIDE (FROM POLYGON MAP) -->
-            <div style="width:100%; height:100%; border:1px solid #e2e8f0; background: #ffffff;">
-              ${generatePolygonSVG()}
-            </div>
-          </div>  </div>
-
-          <!-- KOMPAS PANAH ARAH UTARA (U) -> SELATAN (S) DI SEBELAH KANAN -->
-          <div style="position:absolute; right:15px; top:15px; bottom:15px; width:20px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; font-weight:bold; font-size:13px;">
-            <div>U</div>
-            <div style="flex:1; width:2px; background:#000; position:relative; margin:4px 0;">
-              <div style="position:absolute; top:0; left:-4px; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:10px solid #000;"></div>
-            </div>
-            <div>S</div>
-          </div>
+        <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI TANPA BINGKAI KOTAK) -->
+        <div style="width:100%; height:380px; margin-top:10px; margin-bottom:20px; position:relative; background:#ffffff;">
+          ${generatePolygonSVG()}
         </div>
 
         <p style="text-align:justify; margin-bottom:10px; font-size:11px;">
