@@ -2,71 +2,114 @@
 import { resolveCurrentTenant } from './tenantResolver';
 
 // ==========================================
-// 1. SAAS ACTIVITY LOGS
+// 1. SAAS ACTIVITY LOGS (SUPABASE-FIRST via saas_settings)
 // ==========================================
 
 export interface SaaSLog {
   id: string;
-  admin: string; // Actor (bisa SaaS Admin atau nama user desa)
+  admin: string; // Actor (SaaS Admin / Admin Desa)
   aksi: string;
   target: string;
   tanggal: string;
   waktu: string;
   status: 'Berhasil' | 'Gagal' | 'Peringatan';
   category?: 'SaaS Admin' | 'Desa' | 'System' | 'Surat' | 'Penduduk';
-  tenant_name?: string; // Nama desa jika aksinya dari desa
+  tenant_name?: string; // Nama desa
 }
 
 export const fetchSaaSLogs = async (): Promise<SaaSLog[]> => {
-  const { data, error } = await supabase
-    .from('saas_logs')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('saas_settings')
+      .select('value')
+      .eq('key', 'saas_global_activity_logs')
+      .limit(1)
+      .maybeSingle();
 
-  if (error || !data) {
-    console.error('Error fetching SaaS logs:', error);
-    return [];
+    if (!error && data?.value) {
+      const parsed = JSON.parse(data.value);
+      if (Array.isArray(parsed)) {
+        localStorage.setItem('saas_global_activity_logs', data.value);
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching SaaS logs from Supabase:', e);
   }
 
-  return data.map((log: any) => {
-    const d = new Date(log.created_at);
-    return {
-      id: log.id,
-      admin: log.tenant_name || 'System', // Backward compatibility for old records where actor was in tenant_name
-      aksi: log.action,
-      target: log.details || '-',
-      tanggal: d.toISOString().split('T')[0],
-      waktu: d.toTimeString().split(' ')[0],
-      status: log.status || 'Berhasil',
-      category: log.category || 'System',
-      tenant_name: log.village_name || log.tenant_name || '-',
-    };
-  });
+  const stored = localStorage.getItem('saas_global_activity_logs');
+  return stored ? JSON.parse(stored) : [];
 };
 
 export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' | 'tenant_name'>) => {
-  const tenantId = await resolveCurrentTenant();
-  let villageName = '';
+  try {
+    const tenantId = await resolveCurrentTenant();
+    let villageName = log.category === 'SaaS Admin' ? 'Platform SaaS' : 'Desa Client';
 
-  if (tenantId) {
-    const { data } = await supabase.from('tenants').select('village_name, name').eq('id', tenantId).single();
-    if (data) villageName = data.village_name || data.name || '';
-  }
+    if (tenantId) {
+      const { data } = await supabase.from('tenants').select('nama_desa, village_name, name').eq('id', tenantId).single();
+      if (data) villageName = data.nama_desa || data.village_name || data.name || villageName;
+    }
 
-  const { error } = await supabase.from('saas_logs').insert([{
-    action: log.aksi,
-    tenant_name: log.admin, // The actor name
-    details: log.target,
-    status: log.status || 'Berhasil',
-    category: log.category || (tenantId ? 'Desa' : 'SaaS Admin'),
-    tenant_id: tenantId || null,
-    village_name: villageName || null
-  }]);
+    const now = new Date();
+    const newLog: SaaSLog = {
+      id: 'log-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+      admin: log.admin || (tenantId ? 'Admin Desa' : 'SaaS Admin'),
+      aksi: log.aksi,
+      target: log.target,
+      tanggal: now.toISOString().split('T')[0],
+      waktu: now.toTimeString().split(' ')[0],
+      status: log.status || 'Berhasil',
+      category: log.category || (tenantId ? 'Desa' : 'SaaS Admin'),
+      tenant_name: villageName,
+    };
 
-  if (error) {
-    console.error('Error adding SaaS log:', error);
-  } else {
+    const currentLogs = await fetchSaaSLogs();
+    const updatedLogs = [newLog, ...currentLogs].slice(0, 300);
+    const jsonStr = JSON.stringify(updatedLogs);
+
+    const masterTenantId = tenantId || '11111111-1111-1111-1111-111111111111';
+
+    const { data: existing } = await supabase
+      .from('saas_settings')
+      .select('key')
+      .eq('key', 'saas_global_activity_logs')
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from('saas_settings')
+        .update({ value: jsonStr })
+        .eq('key', 'saas_global_activity_logs');
+    } else {
+      await supabase
+        .from('saas_settings')
+        .insert({ tenant_id: masterTenantId, key: 'saas_global_activity_logs', value: jsonStr });
+    }
+
+    // Sync to all other tenant rows if any
+    const { data: allRows } = await supabase
+      .from('saas_settings')
+      .select('tenant_id')
+      .eq('key', 'saas_global_activity_logs');
+
+    if (allRows && allRows.length > 1) {
+      for (const row of allRows) {
+        if (row.tenant_id !== masterTenantId) {
+          await supabase
+            .from('saas_settings')
+            .update({ value: jsonStr })
+            .eq('key', 'saas_global_activity_logs')
+            .eq('tenant_id', row.tenant_id);
+        }
+      }
+    }
+
+    localStorage.setItem('saas_global_activity_logs', jsonStr);
     window.dispatchEvent(new Event('saas_logs_updated'));
+  } catch (e) {
+    console.error('Error adding SaaS log:', e);
   }
 };
 
@@ -74,12 +117,17 @@ let _logsChannel: any = null;
 export function subscribeSaaSLogsRealtime(): () => void {
   if (!_logsChannel) {
     _logsChannel = supabase
-      .channel('public:saas_logs')
+      .channel('public:saas_settings:logs')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'saas_logs' },
-        () => {
-          window.dispatchEvent(new Event('saas_logs_updated'));
+        { event: '*', schema: 'public', table: 'saas_settings' },
+        (payload: any) => {
+          if (payload.new && payload.new.key === 'saas_global_activity_logs') {
+            if (payload.new.value) {
+              localStorage.setItem('saas_global_activity_logs', payload.new.value);
+            }
+            window.dispatchEvent(new Event('saas_logs_updated'));
+          }
         }
       )
       .subscribe();
@@ -103,19 +151,17 @@ export const addSaaSNotification = async (
   message: string,
   villageName?: string
 ) => {
-  // SaaS Admin notifications are distinguished by category = 'System' or 'SaaS Global'
-  // Using 'System' to be compatible with how AdminHeader.tsx currently filters SaaS admin notifs
   const tenantId = await resolveCurrentTenant();
-  
-  const vName = villageName || (tenantId ? 'Desa Klien' : 'Sistem SaaS');
+  const masterTenantId = tenantId || '11111111-1111-1111-1111-111111111111';
 
   const { error } = await supabase.from('notifications').insert([{
+    id: 'notif-saas-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
     title: title,
     message: message,
-    category: 'System', // Special category to fetch for SaaS Admin
+    category: 'System',
     time: 'Baru saja',
     is_read: false,
-    tenant_id: null, // Null means it's a global notification for SaaS Admin
+    tenant_id: masterTenantId,
   }]);
 
   if (error) {

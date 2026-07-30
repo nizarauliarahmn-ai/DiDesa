@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
+import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
+import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { 
   Building2, MapPin, Save, Image as ImageIcon, Check, Bot, Layout, Upload, Map,
@@ -202,6 +203,17 @@ export default function AdminPengaturan() {
           break; // Stop on first error
         }
       }
+
+      const adminUserStr = localStorage.getItem('didesa_auth_user');
+      const adminName = adminUserStr ? JSON.parse(adminUserStr).name : 'Admin Desa';
+
+      addSaaSLog({
+        admin: adminName,
+        aksi: 'Pembaruan Pengaturan Desa',
+        target: 'Profil & Identitas Desa',
+        status: 'Berhasil',
+        category: 'Desa'
+      });
     } catch (err) {
       console.error('Failed to sync settings to Supabase', err);
     }
