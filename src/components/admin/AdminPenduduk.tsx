@@ -8,6 +8,7 @@ import AdminPendudukImport from './penduduk/AdminPendudukImport';
 import AdminPendudukArchive from './penduduk/AdminPendudukArchive';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
+import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 const FILTERS = ["Semua", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
@@ -195,7 +196,18 @@ export default function AdminPenduduk({
         };
         setResidents(prev => prev.map(r => r.nik === dbPayload.nik ? { ...r, ...updatedRes } : r));
 
-        // Log notification
+        // Log notification & SaaS Activity Log
+        const adminUserStr = localStorage.getItem('didesa_auth_user');
+        const adminName = adminUserStr ? JSON.parse(adminUserStr).name : 'Admin Desa';
+
+        addSaaSLog({
+          admin: adminName,
+          aksi: 'Edit Data Penduduk',
+          target: `${savedResident.name} (${savedResident.nik})`,
+          status: 'Berhasil',
+          category: 'Penduduk'
+        });
+
         await supabase.from('notifications').insert([{
           id: `notif-${Date.now()}`,
           tenant_id: tenantId,
@@ -252,7 +264,18 @@ export default function AdminPenduduk({
           return newList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         });
 
-        // Log notification
+        // Log notification & SaaS Activity Log
+        const adminUserStr = localStorage.getItem('didesa_auth_user');
+        const adminName = adminUserStr ? JSON.parse(adminUserStr).name : 'Admin Desa';
+
+        addSaaSLog({
+          admin: adminName,
+          aksi: 'Tambah Warga Baru',
+          target: `${savedResident.name} (${savedResident.nik})`,
+          status: 'Berhasil',
+          category: 'Penduduk'
+        });
+
         await supabase.from('notifications').insert([{
           id: `notif-${Date.now()}`,
           tenant_id: tenantId,
