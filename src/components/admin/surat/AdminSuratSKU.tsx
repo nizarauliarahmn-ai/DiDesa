@@ -973,10 +973,14 @@ export default function AdminSuratSKU({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Estimasi Omset Bulanan (Opsional)</label>
                   <input 
                     type="text"
-                    placeholder="Contoh: Rp 5.000.000,-"
+                    placeholder="Contoh: Rp 5.000.000"
                     className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.usahaOmzet}
-                    onChange={(e) => setFormData({...formData, usahaOmzet: e.target.value})}
+                    onChange={(e) => {
+                      const rawDigits = e.target.value.replace(/\D/g, '');
+                      const formatted = rawDigits ? `Rp ${new Intl.NumberFormat('id-ID').format(Number(rawDigits))}` : '';
+                      setFormData({...formData, usahaOmzet: formatted});
+                    }}
                   />
                 </div>
               </div>

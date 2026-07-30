@@ -1229,8 +1229,12 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       <input 
                         type="text" 
                         value={usahaOmzet}
-                        onChange={(e) => setUsahaOmzet(e.target.value)}
-                        placeholder="Contoh: Rp 5.000.000,-"
+                        onChange={(e) => {
+                          const rawDigits = e.target.value.replace(/\D/g, '');
+                          const formatted = rawDigits ? `Rp ${new Intl.NumberFormat('id-ID').format(Number(rawDigits))}` : '';
+                          setUsahaOmzet(formatted);
+                        }}
+                        placeholder="Contoh: Rp 5.000.000"
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                       />
                     </div>

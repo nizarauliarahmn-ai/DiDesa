@@ -259,6 +259,52 @@ app.post("/api/global-settings", async (req, res) => {
   }
 });
 
+  // Migration route to fix old data
+  app.get("/api/migrate-status", async (req, res) => {
+    try {
+      const residents = await getResidents();
+      let migratedCount = 0;
+      
+      for (const r of residents) {
+        let changed = false;
+        let newStatus = r.status;
+        let newMarital = r.maritalStatus || 'Belum Kawin';
+        
+        const lower = (r.status || '').toLowerCase();
+        
+        if (lower.includes('belum') || lower === 'single') {
+          newStatus = 'Aktif';
+          newMarital = 'Belum Kawin';
+          changed = true;
+        } else if (lower.includes('cerai mati')) {
+          newStatus = 'Aktif';
+          newMarital = 'Cerai Mati';
+          changed = true;
+        } else if (lower.includes('cerai')) {
+          newStatus = 'Aktif';
+          newMarital = 'Cerai Hidup';
+          changed = true;
+        } else if (lower.includes('kawin')) {
+          newStatus = 'Aktif';
+          newMarital = 'Kawin';
+          changed = true;
+        } else if (lower === 'hidup' || lower === 'mati' || lower.includes('wafat')) {
+          newStatus = lower === 'hidup' ? 'Aktif' : 'Meninggal';
+          changed = true;
+        }
+        
+        if (changed) {
+          await updateResident(r.nik, { status: newStatus, maritalStatus: newMarital, statusColor: newStatus === 'Aktif' ? 'emerald' : 'gray' }, true);
+          migratedCount++;
+        }
+      }
+      
+      res.json({ success: true, message: `Successfully migrated ${migratedCount} residents.` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 // GET all residents
 app.get("/api/residents", async (req, res) => {
   try {

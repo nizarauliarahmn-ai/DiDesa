@@ -41,6 +41,46 @@ if (
           updated = true;
         }
       });
+      list.forEach((r: any) => {
+        if (!r.id) {
+          r.id = r.nik;
+          updated = true;
+        }
+        if (!r.maritalStatus && r.status) {
+          const lower = (r.status || '').toLowerCase();
+          let newStatus = r.status;
+          let newMarital = 'Belum Kawin';
+          let changed = false;
+          
+          if (lower.includes('belum') || lower === 'single' || lower === 'b') {
+            newStatus = 'Aktif';
+            newMarital = 'Belum Kawin';
+            changed = true;
+          } else if (lower.includes('cerai mati')) {
+            newStatus = 'Aktif';
+            newMarital = 'Cerai Mati';
+            changed = true;
+          } else if (lower.includes('cerai')) {
+            newStatus = 'Aktif';
+            newMarital = 'Cerai Hidup';
+            changed = true;
+          } else if (lower.includes('kawin')) {
+            newStatus = 'Aktif';
+            newMarital = 'Kawin';
+            changed = true;
+          } else if (lower === 'hidup' || lower === 'mati' || lower.includes('wafat')) {
+            newStatus = lower === 'hidup' ? 'Aktif' : 'Meninggal';
+            changed = true;
+          }
+          
+          if (changed) {
+            r.status = newStatus;
+            r.maritalStatus = newMarital;
+            r.statusColor = newStatus === 'Aktif' ? 'emerald' : 'gray';
+            updated = true;
+          }
+        }
+      });
       if (updated) {
         localStorage.setItem('local_residents', JSON.stringify(list));
       }
