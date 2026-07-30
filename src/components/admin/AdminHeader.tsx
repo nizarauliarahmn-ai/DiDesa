@@ -194,9 +194,9 @@ export default function AdminHeader({
                   });
                 }
               } else if (role === 'kades') {
-                roleData = data.filter(n => n.category === 'System' || n.category === 'Assistance' || (n.title && n.title.toLowerCase().includes('persetujuan')));
+                roleData = data.filter(n => n.category === 'System' || n.category === 'Assistance' || n.category === 'Services' || (n.title && n.title.toLowerCase().includes('persetujuan')));
               } else {
-                roleData = data.filter(n => n.category !== 'System' || n.title.toLowerCase().includes('database'));
+                roleData = data.filter(n => n.category !== 'System' || (n.title && n.title.toLowerCase().includes('database')));
               }
               
               roleData.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
@@ -226,6 +226,8 @@ export default function AdminHeader({
     };
 
     loadNotifications();
+    
+    // Supabase Realtime channel
     const channel = supabase
       .channel('notifications_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
@@ -233,8 +235,18 @@ export default function AdminHeader({
       })
       .subscribe();
 
+    // 3-second Polling fallback to guarantee instant updates
+    const pollInterval = setInterval(() => {
+      loadNotifications();
+    }, 3000);
+
+    const handleCustomNotif = () => loadNotifications();
+    window.addEventListener('didesa_notification_created', handleCustomNotif);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
+      window.removeEventListener('didesa_notification_created', handleCustomNotif);
     };
   }, []);
 
