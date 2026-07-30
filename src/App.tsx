@@ -30,7 +30,7 @@ import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
 import Footer from './components/common/Footer';
-import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime } from './utils/globalBrandingSync';
+import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant } from './utils/tenantResolver';
 
@@ -224,6 +224,10 @@ export default function App() {
     // Pull SaaS global branding from Supabase + subscribe to instant WebSocket events (<100ms)
     const unsubscribeRealtime = subscribeGlobalBrandingRealtime();
 
+    // ✅ SAAS SETTINGS REALTIME: catalog template surat, feature flags, dll.
+    // Menjamin semua perubahan SaaS Admin tersebar ke SEMUA device dalam <2 detik
+    const unsubscribeSaaS = subscribeSaaSSettingsRealtime();
+
     // ✅ SECONDARY SYNC: Pull tenant-specific settings from Supabase
     const syncTenantSettings = async () => {
       try {
@@ -248,17 +252,6 @@ export default function App() {
           }
         }
 
-        // Fetch SaaS Global Letter Catalog if available
-        const { data: globalCatalog } = await supabase
-          .from('saas_settings')
-          .select('value')
-          .eq('key', 'saas_global_letter_catalog')
-          .maybeSingle();
-
-        if (globalCatalog && globalCatalog.value) {
-          localStorage.setItem('saas_global_letter_catalog', globalCatalog.value);
-        }
-
         const { data } = await supabase
           .from('saas_settings')
           .select('key, value')
@@ -281,6 +274,7 @@ export default function App() {
 
     return () => {
       unsubscribeRealtime();
+      unsubscribeSaaS();
     };
   }, []);
 

@@ -26,39 +26,59 @@ export default function AdminSaaSTemplateSurat() {
   });
 
   useEffect(() => {
-    // We fetch global templates from localStorage or fallback
-    import('../../utils/letterClassifications').then((mod) => {
-      const initial = mod.INITIAL_CLASSIFICATIONS;
-      const stored = localStorage.getItem('saas_global_letter_catalog');
-      
-      let merged: any[] = [];
-      if (stored) {
-        const parsedStored = JSON.parse(stored);
-        const missingTemplates = initial.filter(initItem => 
-          !parsedStored.some((storedItem: any) => storedItem.klasifikasi === initItem.klasifikasi)
-        );
-        merged = [...parsedStored, ...missingTemplates];
-      } else {
-        merged = [...initial];
-      }
+    // SUPABASE-FIRST LOAD: selalu fetch dari Supabase, localStorage hanya fallback sementara
+    const loadTemplates = async () => {
+      import('../../utils/letterClassifications').then(async (mod) => {
+        const initial = mod.INITIAL_CLASSIFICATIONS;
 
-      if (!merged.find(m => m.klasifikasi === 'SPPD')) {
-        merged.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
-      }
-
-      // Cleanup Duplicates automatically (by klasifikasi)
-      const uniqueTemplatesMap = new Map();
-      merged.forEach(item => {
-        // Keep the first one found
-        if (!uniqueTemplatesMap.has(item.klasifikasi)) {
-          uniqueTemplatesMap.set(item.klasifikasi, item);
+        // 1. Coba ambil dari Supabase dulu (sumber kebenaran)
+        let supabaseData: any[] | null = null;
+        try {
+          const { data, error } = await supabase
+            .from('saas_settings')
+            .select('value')
+            .eq('key', 'saas_global_letter_catalog')
+            .maybeSingle();
+          if (!error && data?.value) {
+            supabaseData = JSON.parse(data.value);
+          }
+        } catch (e) {
+          console.warn('[SaaSTemplateSurat] Gagal fetch dari Supabase, gunakan localStorage fallback:', e);
         }
-      });
-      const deduplicatedTemplates = Array.from(uniqueTemplatesMap.values());
 
-      setTemplates(deduplicatedTemplates);
-      localStorage.setItem('saas_global_letter_catalog', JSON.stringify(deduplicatedTemplates));
-    });
+        // 2. Jika Supabase berhasil, update localStorage cache
+        if (supabaseData) {
+          localStorage.setItem('saas_global_letter_catalog', JSON.stringify(supabaseData));
+        }
+
+        // 3. Merge dengan initial (tambah yang hilang)
+        const source = supabaseData || (() => {
+          const stored = localStorage.getItem('saas_global_letter_catalog');
+          return stored ? JSON.parse(stored) : null;
+        })() || initial;
+
+        const missingTemplates = initial.filter(initItem =>
+          !source.some((storedItem: any) => storedItem.klasifikasi === initItem.klasifikasi)
+        );
+        let merged = [...source, ...missingTemplates];
+
+        if (!merged.find((m: any) => m.klasifikasi === 'SPPD')) {
+          merged.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
+        }
+
+        // Deduplicate
+        const uniqueTemplatesMap = new Map();
+        merged.forEach((item: any) => {
+          if (!uniqueTemplatesMap.has(item.klasifikasi)) {
+            uniqueTemplatesMap.set(item.klasifikasi, item);
+          }
+        });
+        const deduplicatedTemplates = Array.from(uniqueTemplatesMap.values());
+
+        setTemplates(deduplicatedTemplates);
+      });
+    };
+    loadTemplates();
 
     const storedReqs = localStorage.getItem('saas_letter_requests');
     if (storedReqs) {
@@ -137,29 +157,45 @@ export default function AdminSaaSTemplateSurat() {
     });
   };
 
-  const toggleVisibility = (id: string) => {
+  const toggleVisibility = async (id: string) => {
     const updated = templates.map(t => {
       if (t.id === id) {
         return { ...t, isVisible: t.isVisible === false ? true : false };
       }
       return t;
     });
-    saveTemplates(updated);
-    showToast('Visibilitas template berhasil diubah', 'success');
+    const success = await saveTemplates(updated);
+    if (success) {
+      showToast('Visibilitas template berhasil diubah', 'success');
+    }
   };
 
-  const saveTemplates = (newTemplates: any[]) => {
-    setTemplates(newTemplates);
+  // SUPABASE-FIRST SAVE: Simpan ke Supabase dahulu, baru update localStorage sebagai cache
+  const saveTemplates = async (newTemplates: any[]): Promise<boolean> => {
     const jsonStr = JSON.stringify(newTemplates);
-    localStorage.setItem('saas_global_letter_catalog', jsonStr);
     try {
-      supabase.from('saas_settings').upsert({ key: 'saas_global_letter_catalog', value: jsonStr }, { onConflict: 'key' }).then();
-    } catch (e) {}
-    window.dispatchEvent(new Event('letter_classifications_updated'));
-    window.dispatchEvent(new Event('village_settings_updated'));
+      const { error } = await supabase
+        .from('saas_settings')
+        .upsert({ key: 'saas_global_letter_catalog', value: jsonStr }, { onConflict: 'key' });
+      if (error) {
+        console.error('[SaaSTemplateSurat] Gagal simpan ke Supabase:', error.message);
+        showToast('Gagal menyimpan ke server: ' + error.message, 'error');
+        return false;
+      }
+      // Hanya update state & localStorage SETELAH Supabase berhasil
+      setTemplates(newTemplates);
+      localStorage.setItem('saas_global_letter_catalog', jsonStr);
+      window.dispatchEvent(new Event('letter_classifications_updated'));
+      window.dispatchEvent(new Event('village_settings_updated'));
+      return true;
+    } catch (e: any) {
+      console.error('[SaaSTemplateSurat] Exception saat simpan:', e);
+      showToast('Gagal menyimpan: ' + String(e), 'error');
+      return false;
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.jenis || !formData.klasifikasi || !formData.kodeKlasifikasi) {
       showToast('Harap lengkapi semua field', 'error');
       return;
@@ -169,16 +205,16 @@ export default function AdminSaaSTemplateSurat() {
       const updated = templates.map(t => 
         t.id === editingId ? { ...t, ...formData } : t
       );
-      saveTemplates(updated);
-      showToast('Template berhasil diperbarui', 'success');
+      const ok = await saveTemplates(updated);
+      if (ok) showToast('Template berhasil diperbarui', 'success');
     } else {
       const newTemplate = {
         id: 'global_' + Date.now().toString(),
         ...formData,
         isVisible: true
       };
-      saveTemplates([...templates, newTemplate]);
-      showToast('Template berhasil ditambahkan', 'success');
+      const ok = await saveTemplates([...templates, newTemplate]);
+      if (ok) showToast('Template berhasil ditambahkan', 'success');
     }
     setIsModalOpen(false);
   };
@@ -187,11 +223,11 @@ export default function AdminSaaSTemplateSurat() {
     setDeleteConfirmId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (deleteConfirmId) {
       const updated = templates.filter(t => t.id !== deleteConfirmId);
-      saveTemplates(updated);
-      showToast('Template berhasil dihapus', 'success');
+      const ok = await saveTemplates(updated);
+      if (ok) showToast('Template berhasil dihapus', 'success');
       setDeleteConfirmId(null);
     }
   };
