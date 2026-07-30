@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
+import { addSaaSLog } from './saasLogs';
 
 export interface LetterHistory {
   id: string;
@@ -70,6 +71,23 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
         status: letter.status === 'Proses' ? 'pending' : (letter.status || 'pending'),
         data: letter.data
       }]);
+      
+      let adminName = 'Admin Desa';
+      try {
+        const authStr = localStorage.getItem('didesa_auth_user');
+        if (authStr) {
+          adminName = JSON.parse(authStr).name || 'Admin Desa';
+        }
+      } catch (e) {}
+
+      addSaaSLog({
+        admin: adminName,
+        aksi: 'Pembuatan Surat',
+        target: `${letter.jenis} untuk ${letter.nama}`,
+        status: 'Berhasil',
+        category: 'Surat'
+      });
+
     } catch (e) {
       console.error("Error adding letter history silently:", e);
     }

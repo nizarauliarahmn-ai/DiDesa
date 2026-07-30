@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
+import { addSaaSNotification } from './saasLogs';
 
 export interface Feedback {
   id: string;
@@ -57,6 +58,13 @@ export const addFeedbackAsync = async (feedback: Omit<Feedback, 'id' | 'status' 
     console.error('Error adding feedback:', error);
   } else {
     window.dispatchEvent(new Event('feedback_updated'));
+    // Trigger SaaS notification
+    addSaaSNotification(
+      'feedback',
+      `Feedback Baru: ${feedback.kategori}`,
+      `${feedback.nama} mengirim pesan: "${feedback.pesan.substring(0, 50)}${feedback.pesan.length > 50 ? '...' : ''}"`,
+      feedback.desa
+    );
   }
 };
 
