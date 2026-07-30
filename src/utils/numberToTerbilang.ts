@@ -46,7 +46,7 @@ export function handleRupiahInputChange(
   // Count how many digits were before the cursor in the old value
   const digitsBeforeCursor = oldVal.slice(0, oldCursorPos).replace(/\D/g, '').length;
   
-  // Count delta in total digits
+  // Count delta in total digits between raw input and old value
   const oldTotalDigits = oldVal.replace(/\D/g, '').length;
   const newTotalDigits = rawInput.replace(/\D/g, '').length;
   const deltaDigits = newTotalDigits - oldTotalDigits;
@@ -56,7 +56,7 @@ export function handleRupiahInputChange(
 
   onUpdate(formatted);
 
-  // Restore cursor position preserving digit placement
+  // Restore cursor position preserving exact digit placement like Word
   requestAnimationFrame(() => {
     if (!inputEl) return;
     if (!formatted) {
@@ -81,12 +81,6 @@ export function handleRupiahInputChange(
           break;
         }
       }
-    }
-
-    // Don't place cursor inside or past ",-" suffix if possible
-    const suffixIdx = formatted.indexOf(',-');
-    if (suffixIdx !== -1 && newPos > suffixIdx) {
-      newPos = suffixIdx;
     }
 
     inputEl.setSelectionRange(newPos, newPos);
