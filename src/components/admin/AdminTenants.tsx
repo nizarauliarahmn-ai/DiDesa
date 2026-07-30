@@ -604,6 +604,20 @@ export default function AdminTenants() {
             </div>
           </div>
 
+          {/* Vercel Subdomain Info */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/50 flex items-start gap-3 print:hidden mt-4 mb-4">
+            <Globe className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="space-y-1 text-sm">
+              <p className="font-bold text-blue-900 dark:text-blue-300">Konfigurasi Akses Subdomain (Vercel / Hosting)</p>
+              <p className="text-blue-700 dark:text-blue-400 leading-relaxed text-xs">
+                Secara default, portal web klien dapat diakses via URL fallback <code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded font-mono text-[11px] text-blue-800 dark:text-blue-200">/?tenant=namadesa</code>. 
+                Namun, jika Anda ingin menggunakan format subdomain seperti <code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded font-mono text-[11px] text-blue-800 dark:text-blue-200">namadesa.domainanda.com</code>, 
+                Anda <strong>WAJIB</strong> menambahkan <strong>Wildcard Domain</strong> (<code className="font-mono">*.domainanda.com</code>) pada tab <i>Settings &gt; Domains</i> di dashboard Vercel. 
+                Tanpa pengaturan tersebut di sisi server Vercel, peramban Anda akan mendapatkan halaman error <strong className="text-rose-600">404: DEPLOYMENT_NOT_FOUND</strong>.
+              </p>
+            </div>
+          </div>
+
           {/* Tenant List */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden print:border-none print:shadow-none print:overflow-visible">
             <div className="p-4 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 gap-4 print:hidden">
