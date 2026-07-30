@@ -436,14 +436,17 @@ export default function AdminSuratSKL({
     let html = `
       <div style="background:white;width:794px;min-height:1123px;padding:70px 75px 80px 75px;box-sizing:border-box;position:relative;overflow:hidden;font-family:Arial, sans-serif;color:#000;">
         
-        <!-- KOP SURAT -->
-        <div style="border-bottom:3px solid #000;margin-bottom:12px;">
-          <div style="display:flex;align-items:flex-start;padding-bottom:6px;margin-bottom:1px;font-family:Arial, sans-serif;">
-            <div style="display:flex;width:100%;align-items:center;">
-              <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
-                <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
-              </div>
-              <div style="text-align:center;flex:1;padding-right:90px;">
+        ${generateKopSuratHTML({
+        logoUrl: villageLogo,
+        kabupaten: activeKabupaten,
+        kecamatan: activeKecamatan,
+        desa: activeDesa,
+        alamat: activeAlamat,
+        kontak: activeKontak,
+        fontFamily: letterFont
+      })}
+
+      <div style="text-align:center;flex:1;padding-right:90px;">
                 <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKabupaten.toUpperCase()}</div>
                 <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${namaKecamatan.toUpperCase()}</div>
                 <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">DESA ${namaDesa.toUpperCase()}</div>

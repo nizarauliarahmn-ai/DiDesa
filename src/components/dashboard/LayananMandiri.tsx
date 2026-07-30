@@ -116,6 +116,7 @@ export default function LayananMandiri() {
       'Surat Keterangan Domisili': 'SKD',
       'Surat Pengantar Kehilangan': 'SKH'
     };
+    const code = letterCodeMap[letterType] || 'SKTM';
     const targetClass = classifications.find(c => c.jenis === letterType || c.klasifikasi === code);
     const kodeKlasifikasi = targetClass?.kodeKlasifikasi || '140';
     const finalNumber = generateLetterNumber(code, kodeKlasifikasi);

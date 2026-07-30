@@ -4,6 +4,7 @@ import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
+import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { getLetterClassifications, generateLetterNumber, getGlobalSequenceNumber } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -318,22 +319,15 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
     const rightRoleHtml = isAn ? `a.n. Kepala Desa ${cleanDesaName},<br/>${roleKades}` : `${roleKades}`;
 
-    const kopSuratHTML = `
-        <div style="border-bottom:2px solid #000;margin-bottom:8px;padding-bottom:2px;">
-          <div style="display:flex;align-items:center;font-family:Arial, sans-serif;">
-            <div style="width:75px;height:75px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:10px;">
-              <img src="${villageLogo}" style="width:100%;height:100%;object-fit:contain;" />
-            </div>
-            <div style="text-align:center;flex:1;">
-              <div style="font-weight:bold;font-size:13px;text-transform:uppercase;line-height:1.1;margin:0 0 1px 0;">Pemerintah Kabupaten ${activeKabupaten.toUpperCase()}</div>
-              <div style="font-weight:bold;font-size:13px;text-transform:uppercase;line-height:1.1;margin:0 0 1px 0;">Kecamatan ${activeKecamatan.toUpperCase()}</div>
-              <div style="font-weight:900;font-size:20px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:1px 0 2px 0;">Desa ${activeDesa.toUpperCase()}</div>
-              <div style="font-size:10px;text-transform:capitalize;line-height:1.1;margin:1px 0 0 0;">${activeAlamat}</div>
-              <div style="font-size:10px;line-height:1.1;margin:1px 0 0 0;">${kontakKantor}</div>
-            </div>
-          </div>
-        </div>
-    `;
+    const kopSuratHTML = generateKopSuratHTML({
+      logoUrl: villageLogo,
+      kabupaten: activeKabupaten,
+      kecamatan: activeKecamatan,
+      desa: activeDesa,
+      alamat: activeAlamat,
+      kontak: kontakKantor,
+      fontFamily: 'Arial, sans-serif'
+    });
 
     const allParticipantsFlat = pelaksanaList.flatMap((p) => [
       { ...p, isLeader: true, groupId: p.id },

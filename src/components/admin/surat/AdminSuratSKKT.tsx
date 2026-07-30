@@ -3,11 +3,14 @@ import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compa
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLetterKode } from '../../../hooks/useLetterKode';
+import { getLetterClassifications, generateLetterNumber } from '../../../utils/letterClassifications';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import { generateKopSuratHTML } from '../../../utils/letterFormat';
+import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 
 interface Resident {
   nik: string;
@@ -20,241 +23,7 @@ interface Resident {
   desa: string;
 }
 
-// Sub-component for Interactive Leaflet Satellite Map Picker
-function LandMapPickerModal({
-  initialLat,
-  initialLng,
-  onSave,
-  onClose
-}: {
-  initialLat: string;
-  initialLng: string;
-  onSave: (lat: string, lng: string) => void;
-  onClose: () => void;
-}) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const tileLayerRef = useRef<L.TileLayer | null>(null);
-
-  const [latVal, setLatVal] = useState(initialLat || '-2.797806');
-  const [lngVal, setLngVal] = useState(initialLng || '115.227889');
-  const [mapType, setMapType] = useState<'satellite' | 'street'>('satellite');
-
-  const tileUrls = {
-    satellite: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-    street: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-  };
-
-  const tileAttributions = {
-    satellite: '&copy; Google Maps Satellite Imagery',
-    street: '&copy; OpenStreetMap &copy; CARTO'
-  };
-
-  useEffect(() => {
-    if (!mapContainerRef.current) return;
-
-    const parseLat = parseFloat(latVal) || -2.797806;
-    const parseLng = parseFloat(lngVal) || 115.227889;
-
-    if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        center: [parseLat, parseLng],
-        zoom: 17,
-        zoomControl: true,
-      });
-
-      const tileLayer = L.tileLayer(tileUrls[mapType], {
-        maxZoom: 20,
-        attribution: tileAttributions[mapType]
-      }).addTo(map);
-
-      tileLayerRef.current = tileLayer;
-
-      const customIcon = L.divIcon({
-        className: 'custom-land-pin',
-        html: `
-          <div class="relative flex items-center justify-center">
-            <span class="absolute inline-flex h-10 w-10 rounded-full bg-red-500 opacity-60 animate-ping"></span>
-            <div class="w-9 h-9 rounded-full bg-red-600 border-2 border-white shadow-2xl flex items-center justify-center text-white font-bold text-xs">
-              📍
-            </div>
-          </div>
-        `,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
-      });
-
-      const marker = L.marker([parseLat, parseLng], {
-        draggable: true,
-        icon: customIcon
-      }).addTo(map);
-
-      marker.on('dragend', () => {
-        const position = marker.getLatLng();
-        setLatVal(position.lat.toFixed(6));
-        setLngVal(position.lng.toFixed(6));
-      });
-
-      map.on('click', (e: L.LeafletMouseEvent) => {
-        const { lat, lng } = e.latlng;
-        marker.setLatLng([lat, lng]);
-        setLatVal(lat.toFixed(6));
-        setLngVal(lng.toFixed(6));
-      });
-
-      markerRef.current = marker;
-      mapInstanceRef.current = map;
-    }
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        markerRef.current = null;
-        tileLayerRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (mapInstanceRef.current && tileLayerRef.current) {
-      mapInstanceRef.current.removeLayer(tileLayerRef.current);
-      const newTileLayer = L.tileLayer(tileUrls[mapType], {
-        maxZoom: 20,
-        attribution: tileAttributions[mapType]
-      }).addTo(mapInstanceRef.current);
-      tileLayerRef.current = newTileLayer;
-    }
-  }, [mapType]);
-
-  const handleCoordInputChange = (newLat: string, newLng: string) => {
-    setLatVal(newLat);
-    setLngVal(newLng);
-    const pLat = parseFloat(newLat);
-    const pLng = parseFloat(newLng);
-    if (!isNaN(pLat) && !isNaN(pLng) && mapInstanceRef.current && markerRef.current) {
-      mapInstanceRef.current.setView([pLat, pLng], mapInstanceRef.current.getZoom());
-      markerRef.current.setLatLng([pLat, pLng]);
-    }
-  };
-
-  const handleGetCurrentLocation = () => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude.toFixed(6);
-          const lng = pos.coords.longitude.toFixed(6);
-          handleCoordInputChange(lat, lng);
-          showToast('Koordinat lokasi GPS saat ini berhasil diambil!', 'success');
-        },
-        (err) => {
-          showToast('Gagal mengakses GPS perangkat: ' + err.message, 'error');
-        }
-      );
-    } else {
-      showToast('Browser Anda tidak mendukung lokasi GPS', 'error');
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-gray-50/50 dark:bg-slate-800/50">
-          <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-              <MapIcon className="w-5 h-5 text-emerald-600" /> Penanda Koordinat & Foto Satelit Obyek Tanah
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-              Klik lokasi tanah di peta atau geser pin merah untuk mengambil lokasi GPS tanah secara presisi.
-            </p>
-          </div>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 font-bold rounded-lg text-lg">✕</button>
-        </div>
-
-        <div className="p-4 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
-            <button
-              onClick={() => setMapType('satellite')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                mapType === 'satellite'
-                  ? 'bg-emerald-700 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" /> 🛰️ Satelit & Foto Udara
-            </button>
-            <button
-              onClick={() => setMapType('street')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                mapType === 'street'
-                  ? 'bg-emerald-700 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" /> 🗺️ Peta Jalan
-            </button>
-          </div>
-
-          <button
-            onClick={handleGetCurrentLocation}
-            className="px-3.5 py-1.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition-all flex items-center gap-1.5"
-          >
-            <Navigation className="w-3.5 h-3.5" /> 🎯 Ambil GPS HP / Perangkat
-          </button>
-        </div>
-
-        <div className="relative w-full h-[400px] bg-slate-200">
-          <div ref={mapContainerRef} className="w-full h-full z-0" />
-          <div className="absolute top-3 right-3 bg-black/75 text-white backdrop-blur-md px-3 py-1.5 rounded-xl text-[11px] font-mono shadow-lg z-[10] border border-white/20">
-            📍 Lat: {latVal} | Lng: {lngVal}
-          </div>
-        </div>
-
-        <div className="p-5 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="grid grid-cols-2 gap-3 text-xs w-full sm:w-auto">
-            <div>
-              <span className="font-bold text-gray-500 block mb-1">Latitude</span>
-              <input
-                type="text"
-                value={latVal}
-                onChange={e => handleCoordInputChange(e.target.value, lngVal)}
-                className="w-full sm:w-36 p-2 border border-gray-200 dark:border-slate-700 rounded-xl font-mono text-xs bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <span className="font-bold text-gray-500 block mb-1">Longitude</span>
-              <input
-                type="text"
-                value={lngVal}
-                onChange={e => handleCoordInputChange(latVal, e.target.value)}
-                className="w-full sm:w-36 p-2 border border-gray-200 dark:border-slate-700 rounded-xl font-mono text-xs bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2.5 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl hover:bg-gray-300 transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              onClick={() => {
-                onSave(latVal, lngVal);
-                onClose();
-              }}
-              className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
-            >
-              <MapPin className="w-4 h-4" /> Gunakan Koordinat Ini
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+// Removed inline LandMapPickerModal, replaced by external LandPolygonPickerModal
 
 export default function AdminSuratSKKT({ 
   onBack, 
@@ -321,9 +90,9 @@ export default function AdminSuratSKKT({
     saksi3Nik: '',
 
     // RT & Pejabat
-    nomorRt: '02',
-    namaKetuaRt: 'TAIBAH',
-    namaPejabat: localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || 'PELDA (PURN) FAZAKKIR RAHMAD',
+    nomorRt: '',
+    namaKetuaRt: '',
+    namaPejabat: localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || '',
     jabatanPejabat: localStorage.getItem('village_super_admin_role') || 'Kepala Desa',
     includeCamat: false,
     namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
@@ -332,8 +101,9 @@ export default function AdminSuratSKKT({
     alamatKantor: localStorage.getItem('kop_alamat') || '',
     kontakKantor: localStorage.getItem('kop_kontak') || '',
 
-    lat: '-2.797806',
-    lng: '115.227889',
+    lat: editData?.data?.lat || '',
+    lng: editData?.data?.lng || '',
+    polygonPoints: editData?.data?.polygonPoints || [],
     keperluan: 'Kelengkapan Berkas / Sertifikasi Tanah',
   });
 
@@ -349,6 +119,14 @@ export default function AdminSuratSKKT({
   useEffect(() => {
     if (editData) {
       setFormData(prev => ({ ...prev, ...editData }));
+    } else {
+      const configs = getLetterClassifications();
+      let skkt = configs.find(c => c.klasifikasi === 'SKKT');
+      if (!skkt) {
+        skkt = { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
+      }
+      const generatedNo = generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251');
+      setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
     }
   }, [editData]);
 
@@ -387,36 +165,155 @@ export default function AdminSuratSKKT({
   };
 
   const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? val : fallback);
+  const toTitleCase = (str: string) => {
+    if (!str) return '';
+    return str.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+  };
+
+  const generatePolygonSVG = () => {
+    const pts = formData.polygonPoints;
+    if (!pts || pts.length < 3) {
+      return `<div style="width:100%; height:100%; border:1px dashed #000; background: #fff; display:flex; align-items:center; justify-content:center; color:#000; font-size:11px; font-weight:bold;">Belum ada poligon peta satelit (Klik 'Buka Peta' untuk menggambar)</div>`;
+    }
+    const lats = pts.map((p: any) => p.lat);
+    const lngs = pts.map((p: any) => p.lng);
+    const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+    
+    const viewWidth = 260;
+    const viewHeight = 260;
+    const padding = 55; // Lebarkan padding agar nama tetangga di margin tidak terpotong
+    const drawWidth = viewWidth - 2 * padding;
+    const drawHeight = viewHeight - 2 * padding;
+    
+    const dLat = maxLat - minLat || 0.00001;
+    const dLng = maxLng - minLng || 0.00001;
+    
+    const scaleX = drawWidth / dLng;
+    const scaleY = drawHeight / dLat;
+    const scale = Math.min(scaleX, scaleY);
+    
+    const scaledW = dLng * scale;
+    const scaledH = dLat * scale;
+    const offsetX = (viewWidth - scaledW) / 2;
+    const offsetY = (viewHeight - scaledH) / 2;
+    
+    const mappedPts = pts.map((p: any, i: number) => {
+      const x = offsetX + (p.lng - minLng) * scale;
+      const y = offsetY + (maxLat - p.lat) * scale;
+      return { x, y, lat: p.lat, lng: p.lng, index: i + 1 };
+    });
+
+    const svgPolygonPoints = mappedPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
+    
+    let cx = 0, cy = 0;
+    for (const p of mappedPts) { cx += p.x; cy += p.y; }
+    cx /= mappedPts.length; cy /= mappedPts.length;
+
+    const edgeLabels = [];
+    for (let i = 0; i < mappedPts.length; i++) {
+      const p1 = mappedPts[i];
+      const p2 = mappedPts[(i + 1) % mappedPts.length];
+      
+      const lat1 = p1.lat, lng1 = p1.lng, lat2 = p2.lat, lng2 = p2.lng;
+      const R = 6378137;
+      const dLatRad = (lat2 - lat1) * Math.PI / 180;
+      const dLngRad = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLatRad / 2) * Math.sin(dLatRad / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLngRad / 2) * Math.sin(dLngRad / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distMeters = R * c;
+
+      const midX = (p1.x + p2.x) / 2;
+      const midY = (p1.y + p2.y) / 2;
+      
+      let vx = midX - cx;
+      let vy = midY - cy;
+      const vLen = Math.sqrt(vx * vx + vy * vy) || 1;
+      vx /= vLen; vy /= vLen;
+
+      // Assign neighbor based on outward vector direction (SVG Y is down, so vy < 0 is North)
+      let neighborName = '';
+      if (Math.abs(vy) > Math.abs(vx)) {
+        neighborName = vy < 0 ? formData.batasUtara : formData.batasSelatan;
+      } else {
+        neighborName = vx > 0 ? formData.batasTimur : formData.batasBarat;
+      }
+      
+      const vSafe = (val: string) => val && val.trim() !== '' ? val : '-';
+      const cleanName = vSafe(neighborName);
+
+      const offsetDist = 24; // Push further out to make room for 2 lines of text
+      const textX = midX + vx * offsetDist;
+      const textY = midY + vy * offsetDist;
+
+      edgeLabels.push(`
+        <line x1="${midX}" y1="${midY}" x2="${textX}" y2="${textY}" stroke="#000000" stroke-width="0.5" stroke-dasharray="2 2" />
+        <text x="${textX}" y="${textY - 3}" text-anchor="middle" font-size="7" fill="#000000">${cleanName}</text>
+        <text x="${textX}" y="${textY + 6}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
+      `);
+    }
+
+    const vertexElements = mappedPts.map(p => {
+      let vx = p.x - cx; let vy = p.y - cy;
+      const vLen = Math.sqrt(vx * vx + vy * vy) || 1;
+      vx /= vLen; vy /= vLen;
+      const offsetDist = 12;
+      return `
+      <g>
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="#000000" />
+        <text x="${(p.x + vx * offsetDist).toFixed(1)}" y="${(p.y + vy * offsetDist + 3).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P${p.index}</text>
+      </g>
+    `});
+
+    const vLocal = (val: string) => val && val.trim() !== '' ? val : '-';
+
+    return `
+      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff; overflow:visible;">
+        <!-- Titik Acuan Utara -->
+        <g transform="translate(\${viewWidth - 15}, 15)">
+          <line x1="0" y1="20" x2="0" y2="0" stroke="#000000" stroke-width="1.2" />
+          <polygon points="0,0 -4,8 4,8" fill="#000000" />
+          <text x="0" y="-3" text-anchor="middle" font-weight="bold" font-size="9" fill="#000000">U</text>
+        </g>
+
+        <!-- Garis dan Titik Poligon -->
+        <polygon points="${svgPolygonPoints}" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="round" />
+        ${edgeLabels.join('')}
+        ${vertexElements.join('')}
+      </svg>
+    `;
+  };
+
   
   const generateHTML = () => {
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    const monthRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][today.getMonth()];
-    const globalPrintFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>';
+    
+    const kopSuratHtml = generateKopSuratHTML({
+      kabupaten: activeKabupaten,
+      kecamatan: activeKecamatan,
+      desa: activeDesa,
+      alamat: activeAlamat,
+      kontak: activeKontak,
+      logoUrl: villageLogo,
+      fontFamily: letterFont
+    });
 
-    return `
+    const page1 = `
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
-      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; position:relative; min-height: 1000px; box-sizing: border-box; padding-bottom: 30px;">
+      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; box-sizing: border-box; padding-bottom: 20px;">
         
-        <!-- KOP SURAT -->
-        <div style="border-bottom: 3px solid #000; margin-bottom: 15px;">
-          <div style="display: flex; align-items: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 2px;">
-            <div style="width: 85px; height: 95px; flex: none; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-              <img src="${villageLogo}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-            </div>
-            <div style="text-align: center; flex: 1; padding-right: 105px;">
-              <div style="font-weight: 800; font-size: 16px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">PEMERINTAH KABUPATEN ${v(activeKabupaten).toUpperCase()}</div>
-              <div style="font-weight: 700; font-size: 15px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">KECAMATAN ${v(activeKecamatan).toUpperCase()}</div>
-              <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; color: #000; letter-spacing: 0.5px; margin-bottom: 4px;">DESA ${v(activeDesa).toUpperCase()}</div>
-              <div style="font-size: 11px; color: #333;">${v(activeAlamat)} ${v(activeKontak) ? 'Telp: ' + v(activeKontak) : ''}</div>
-            </div>
-          </div>
-        </div>
+        ${kopSuratHtml}
 
         <!-- JUDUL SURAT -->
-        <div style="text-align:center; margin-top:10px; margin-bottom:16px;">
+        <div style="text-align:center; margin-top:5px; margin-bottom:16px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH</h3>
-          <p style="margin:3px 0 0 0; font-size:12px;">Nomor : ${v(formData.nomorSurat, '251/SKKT/' + monthRoman + '/' + today.getFullYear())}</p>
+          <p style="margin:3px 0 0 0; font-size:12px;">Nomor : ${formData.nomorSurat || '...'}</p>
         </div>
 
         <p style="margin-bottom:6px;">Yang bertanda tangan di bawah ini :</p>
@@ -458,22 +355,20 @@ export default function AdminSuratSKKT({
             <td style="width:20px; vertical-align:top;">1.</td>
             <td style="width:90px; vertical-align:top;">Nama<br/>NIK</td>
             <td style="width:12px; vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${v(formData.saksi1Nama)}</strong><br/>${v(formData.saksi1Nik)}</td>
+            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi1Nama))}</strong><br/>${v(formData.saksi1Nik)}</td>
           </tr>
           <tr>
             <td style="vertical-align:top;">2.</td>
             <td style="vertical-align:top;">Nama<br/>NIK</td>
             <td style="vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${v(formData.saksi2Nama)}</strong><br/>${v(formData.saksi2Nik)}</td>
+            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi2Nama))}</strong><br/>${v(formData.saksi2Nik)}</td>
           </tr>
-          ${formData.saksi3Nama ? `
           <tr>
             <td style="vertical-align:top;">3.</td>
             <td style="vertical-align:top;">Nama<br/>NIK</td>
             <td style="vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${v(formData.saksi3Nama)}</strong><br/>${v(formData.saksi3Nik)}</td>
+            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi3Nama))}</strong><br/>${v(formData.saksi3Nik)}</td>
           </tr>
-          ` : ''}
         </table>
 
         <p style="text-align:justify; margin-bottom:16px; line-height:1.4;">
@@ -485,16 +380,16 @@ export default function AdminSuratSKKT({
           <!-- SAKSI-SAKSI (KIRI) -->
           <div style="width:48%;">
             <p style="margin-bottom:6px; font-weight:bold;">Saksi – Saksi :</p>
-            <p style="margin-bottom:4px;">1. ${v(formData.saksi1Nama)} ( ....................... )</p>
-            <p style="margin-bottom:4px;">2. ${v(formData.saksi2Nama)} ( ....................... )</p>
-            ${formData.saksi3Nama ? `<p style="margin-bottom:4px;">3. ${v(formData.saksi3Nama)} ( ....................... )</p>` : ''}
+            <p style="margin-bottom:4px;">1. ${toTitleCase(v(formData.saksi1Nama))} ( ....................... )</p>
+            <p style="margin-bottom:4px;">2. ${toTitleCase(v(formData.saksi2Nama))} ( ....................... )</p>
+            <p style="margin-bottom:4px;">3. ${toTitleCase(v(formData.saksi3Nama))} ( ....................... )</p>
           </div>
 
           <!-- PEMBUAT PERNYATAAN (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">${activeDesa}, ${tglFormatted}</p>
             <p style="margin-bottom:48px; font-weight:bold;">Yang membuat pernyataan</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.nama)}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.nama)}</p>
           </div>
         </div>
 
@@ -502,41 +397,24 @@ export default function AdminSuratSKKT({
           <!-- KETUA RT (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:48px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '02')}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
+            <p style="margin-bottom:48px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
 
           <!-- KEPALA DESA (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
             <p style="margin-bottom:48px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
         </div>
 
-        <!-- SAAS GLOBAL FOOTER PAGE 1 -->
-        <div style="position:absolute; bottom:0; left:0; right:0; border-top:0.5px solid #cbd5e1; padding-top:4px; font-size:8px; color:#64748b; text-align:left;">
-          ${globalPrintFooter}
-        </div>
       </div>
+    `;
 
+    const page2 = `
       <!-- PAGE 2: GAMBAR SITUASI KASAR TANAH -->
-      <div style="page-break-before: always; font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; position:relative; min-height: 1000px; box-sizing: border-box; padding-top:20px; padding-bottom: 30px;">
-        
-        <!-- KOP SURAT -->
-        <div style="border-bottom: 3px solid #000; margin-bottom: 15px;">
-          <div style="display: flex; align-items: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 2px;">
-            <div style="width: 85px; height: 95px; flex: none; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-              <img src="${villageLogo}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
-            </div>
-            <div style="text-align: center; flex: 1; padding-right: 105px;">
-              <div style="font-weight: 800; font-size: 16px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">PEMERINTAH KABUPATEN ${v(activeKabupaten).toUpperCase()}</div>
-              <div style="font-weight: 700; font-size: 15px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">KECAMATAN ${v(activeKecamatan).toUpperCase()}</div>
-              <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; color: #000; letter-spacing: 0.5px; margin-bottom: 4px;">DESA ${v(activeDesa).toUpperCase()}</div>
-              <div style="font-size: 11px; color: #333;">${v(activeAlamat)} ${v(activeKontak) ? 'Telp: ' + v(activeKontak) : ''}</div>
-            </div>
-          </div>
-        </div>
+      <div style="font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; box-sizing: border-box; padding-bottom: 20px;">
 
         <div style="text-align:center; margin-bottom:15px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">GAMBAR SITUASI KASAR TANAH</h3>
@@ -548,46 +426,9 @@ export default function AdminSuratSKKT({
           <tr><td>LUAS</td><td>:</td><td>± ${v(formData.luasTanah)} Meter</td></tr>
         </table>
 
-        <!-- DIAGRAM BOX PETAK TANAH & KOMPAS -->
-        <div style="border:2px solid #000; padding:25px; margin-bottom:15px; position:relative; min-height:330px; display:flex; align-items:center; justify-content:center; background:#fff;">
-          <!-- DIAGRAM TRAPEZOID SKETSA -->
-          <div style="width:65%; height:220px; border:2px solid #333; position:relative; margin:auto; background:#fafafa; display:flex; flex-direction:column; justify-content:between;">
-            <!-- NORTH (UTARA) -->
-            <div style="position:absolute; top:-28px; left:50%; transform:translateX(-50%); text-align:center; font-size:11px; font-weight:bold; white-space:nowrap;">
-              ${v(formData.batasUtara)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranUtara, '6 Meter')}</span>
-            </div>
-
-            <!-- SOUTH (SELATAN) -->
-            <div style="position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); text-align:center; font-size:11px; font-weight:bold; white-space:nowrap;">
-              ${v(formData.batasSelatan)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranSelatan, '6.5 Meter')}</span>
-            </div>
-
-            <!-- EAST (TIMUR - RIGHT) -->
-            <div style="position:absolute; right:-115px; top:50%; transform:translateY(-50%); text-align:left; font-size:11px; font-weight:bold; width:105px;">
-              ${v(formData.batasTimur)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranTimur, '7 Meter')}</span>
-            </div>
-
-            <!-- WEST (BARAT - LEFT) -->
-            <div style="position:absolute; left:-115px; top:50%; transform:translateY(-50%); text-align:right; font-size:11px; font-weight:bold; width:105px;">
-              ${v(formData.batasBarat)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranBarat, '7 Meter')}</span>
-            </div>
-
-            <!-- SKETSA SHAPE INSIDE -->
-            <div style="width:100%; height:100%; border:1px dashed #666; clip-path: polygon(0% 15%, 85% 0%, 100% 100%, 0% 100%); background: #f0fdf4;"></div>
-          </div>
-
-          <!-- KOMPAS PANAH ARAH UTARA (U) -> SELATAN (S) DI SEBELAH KANAN -->
-          <div style="position:absolute; right:15px; top:15px; bottom:15px; width:20px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; font-weight:bold; font-size:13px;">
-            <div>U</div>
-            <div style="flex:1; width:2px; background:#000; position:relative; margin:4px 0;">
-              <div style="position:absolute; top:0; left:-4px; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-bottom:10px solid #000;"></div>
-            </div>
-            <div>S</div>
-          </div>
+        <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI TANPA BINGKAI KOTAK) -->
+        <div style="width:100%; height:380px; margin-top:10px; margin-bottom:20px; position:relative; background:#ffffff;">
+          ${generatePolygonSVG()}
         </div>
 
         <p style="text-align:justify; margin-bottom:10px; font-size:11px;">
@@ -638,23 +479,21 @@ export default function AdminSuratSKKT({
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
             <p style="margin-bottom:50px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:50px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '02')}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
+            <p style="margin-bottom:50px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
         </div>
 
-        <!-- SAAS GLOBAL FOOTER PAGE 2 -->
-        <div style="position:absolute; bottom:0; left:0; right:0; border-top:0.5px solid #cbd5e1; padding-top:4px; font-size:8px; color:#64748b; text-align:left;">
-          ${globalPrintFooter}
-        </div>
       </div>
     `;
+
+    return [page1, page2];
   };
 
   const handleSave = async () => {
@@ -688,15 +527,20 @@ export default function AdminSuratSKKT({
         .map(el => el.outerHTML)
         .join('\n');
 
-      const contentHtml = generateHTML();
+      const [page1Html, page2Html] = generateHTML();
+      const globalPrintFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>';
       
       const printHTML = `
+        <!DOCTYPE html>
         <html>
           <head>
             <title>Cetak SKKT - ${formData.nama}</title>
             ${styles}
             <style>
-              @page { size: A4; margin: 0 !important; }
+              @page { 
+                size: A4; 
+                margin: 0 !important; 
+              }
               body { 
                 margin: 0; 
                 padding: 0; 
@@ -706,35 +550,41 @@ export default function AdminSuratSKKT({
               }
               .page { 
                 width: 210mm; 
-                margin: 0 auto; 
+                min-height: 297mm; 
+                margin: 0 auto;
+                padding: 45px 55px;
                 box-sizing: border-box; 
                 background: white; 
+                position: relative;
+                page-break-after: always;
+                break-after: page;
               }
-              .printable-area {
-                width: 210mm !important;
-                padding: 45px 55px !important;
-                box-sizing: border-box !important;
-                background: white !important;
-                color: black !important;
+              .page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+              }
+              .footer {
+                position: absolute;
+                bottom: 45px;
+                left: 55px;
+                right: 55px;
+                border-top: 0.5px solid #cbd5e1;
+                padding-top: 4px;
                 font-family: ${letterFont};
-                font-size: 12px;
-                line-height: 1.45;
-              }
-              .printable-area * {
-                visibility: visible !important;
-              }
-              @media print {
-                body, .page { 
-                  width: 210mm; 
-                }
+                font-size: 8px;
+                color: #64748b;
+                text-align: left;
               }
             </style>
           </head>
           <body>
             <div class="page">
-              <div class="printable-area bg-white text-black">
-                ${contentHtml}
-              </div>
+              ${page1Html}
+              <div class="footer">${globalPrintFooter}</div>
+            </div>
+            <div class="page">
+              ${page2Html}
+              <div class="footer">${globalPrintFooter}</div>
             </div>
           </body>
         </html>
@@ -766,8 +616,8 @@ export default function AdminSuratSKKT({
   };
 
   return (
-    <div className="space-y-6">
-      <iframe ref={iframeRef} className="hidden" title="Print Frame SKKT" />
+    <div className="space-y-6 relative">
+      <iframe ref={iframeRef} className="absolute opacity-0 pointer-events-none -z-50 w-[210mm] h-[297mm]" title="Print Frame SKKT" />
 
       {/* Header Bar */}
       <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
@@ -915,15 +765,24 @@ export default function AdminSuratSKKT({
             <div className="p-4 bg-emerald-50/50 dark:bg-slate-800/50 rounded-xl border border-emerald-100 dark:border-slate-700 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-xs text-emerald-900 dark:text-emerald-300">Georeferensi Koordinat Tanah</p>
-                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-mono">Lat: {formData.lat}, Lng: {formData.lng}</p>
+                  <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Koordinat Poligon & Satelit <span className="text-red-500">*</span></label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Klik tombol map untuk menggambar" 
+                      value={formData.polygonPoints?.length > 0 ? `${formData.polygonPoints.length} Titik Terukur` : ''} 
+                      disabled
+                      className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-slate-800 text-emerald-700 font-bold" 
+                    />
+                    <button 
+                      onClick={() => setShowMapModal(true)}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-2 whitespace-nowrap shadow-sm"
+                    >
+                      <MapPin className="w-4 h-4" /> Buka Peta
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-1">Gunakan peta satelit interaktif untuk menggambar batas tanah dan menghitung luas otomatis.</p>
                 </div>
-                <button 
-                  onClick={() => setShowMapModal(true)}
-                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-sm"
-                >
-                  <MapIcon className="w-3.5 h-3.5" /> Tandai di Peta Satelit
-                </button>
               </div>
             </div>
           </div>
@@ -990,7 +849,7 @@ export default function AdminSuratSKKT({
 
             {/* Saksi 3 */}
             <div className="p-3 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 space-y-2 text-xs">
-              <p className="font-bold text-gray-700 dark:text-slate-300">Saksi 3 (Opsional):</p>
+              <p className="font-bold text-gray-700 dark:text-slate-300">Saksi 3:</p>
               <div className="relative">
                 <input 
                   type="text" 
@@ -1016,14 +875,18 @@ export default function AdminSuratSKKT({
             </div>
 
             {/* Section 4: RT & Kades */}
-            <div className="grid grid-cols-2 gap-3 text-xs pt-2">
+            <div className="grid grid-cols-3 gap-3 text-xs pt-2">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nomor RT</label>
                 <input type="text" placeholder="02" value={formData.nomorRt} onChange={e => setFormData({ ...formData, nomorRt: e.target.value })} className="w-full p-2 border rounded-lg" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nama Ketua RT</label>
-                <input type="text" placeholder="TAIBAH" value={formData.namaKetuaRt} onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="Nama Ketua RT" value={formData.namaKetuaRt} onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
+              </div>
+              <div>
+                <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pejabat / Kades</label>
+                <input type="text" placeholder="Nama Kades" value={formData.namaPejabat} onChange={e => setFormData({ ...formData, namaPejabat: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
               </div>
             </div>
           </div>
@@ -1047,48 +910,76 @@ export default function AdminSuratSKKT({
             onMouseUp={dragProps.onMouseUp}
             onMouseMove={dragProps.onMouseMove}
             style={{ ...dragProps.style }}
-            className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8 max-h-[85vh]"
+            className="flex-1 bg-slate-200/40 overflow-auto relative flex flex-col items-center gap-8 p-8 max-h-[85vh]"
           >
-            <div 
-              style={{
-                width: `${794 * previewZoom}px`,
-                overflow: 'hidden',
-                position: 'relative',
-                boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                borderRadius: '12px',
-                transition: 'width 0.2s ease-out'
-              }}
-              className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
-            >
+            {generateHTML().map((pageHtml, index) => (
               <div 
-                className="bg-white dark:bg-slate-900 shrink-0"
-                style={{ 
-                  width: '794px', 
-                  padding: '45px 55px',
-                  transform: `scale(${previewZoom})`,
-                  transformOrigin: 'top left',
-                  fontFamily: letterFont,
-                  fontSize: '12px',
-                  lineHeight: '1.45',
+                key={index}
+                style={{
+                  width: `${794 * previewZoom}px`,
+                  height: `${1123 * previewZoom}px`,
+                  overflow: 'hidden',
                   position: 'relative',
-                  color: 'black',
-                  boxSizing: 'border-box'
+                  boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                  borderRadius: '12px',
+                  transition: 'width 0.2s ease-out, height 0.2s ease-out'
                 }}
-                dangerouslySetInnerHTML={{ __html: generateHTML() }}
-              />
-            </div>
+                className="bg-white dark:bg-slate-900 shrink-0 relative"
+              >
+                <div 
+                  className="bg-white dark:bg-slate-900 shrink-0"
+                  style={{ 
+                    width: '794px', 
+                    height: '1123px',
+                    padding: '45px 55px',
+                    transform: `scale(${previewZoom})`,
+                    transformOrigin: 'top left',
+                    fontFamily: letterFont,
+                    fontSize: '12px',
+                    lineHeight: '1.45',
+                    position: 'relative',
+                    color: 'black',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div dangerouslySetInnerHTML={{ __html: pageHtml }} />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '45px',
+                    left: '55px',
+                    right: '55px',
+                    borderTop: '0.5px solid #cbd5e1',
+                    paddingTop: '4px',
+                    fontSize: '8px',
+                    color: '#64748b',
+                    textAlign: 'left'
+                  }} dangerouslySetInnerHTML={{ __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>' }} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Interactive Satellite Map Picker Modal */}
       {showMapModal && (
-        <LandMapPickerModal
+        <LandPolygonPickerModal
           initialLat={formData.lat}
           initialLng={formData.lng}
-          onSave={(newLat, newLng) => {
-            setFormData(prev => ({ ...prev, lat: newLat, lng: newLng }));
-            showToast(`Koordinat diperbarui: ${newLat}, ${newLng}`, 'success');
+          onSave={(data: PolygonData) => {
+            setFormData(prev => ({ 
+              ...prev, 
+              lat: data.centerLat, 
+              lng: data.centerLng,
+              polygonPoints: data.points,
+              luasTanah: data.area.toFixed(2),
+              ukuranUtara: data.northDistance > 0 ? `${data.northDistance.toFixed(1)} Meter` : prev.ukuranUtara,
+              ukuranSelatan: data.southDistance > 0 ? `${data.southDistance.toFixed(1)} Meter` : prev.ukuranSelatan,
+              ukuranTimur: data.eastDistance > 0 ? `${data.eastDistance.toFixed(1)} Meter` : prev.ukuranTimur,
+              ukuranBarat: data.westDistance > 0 ? `${data.westDistance.toFixed(1)} Meter` : prev.ukuranBarat,
+            }));
+            showToast(`Area berhasil diukur: ${data.area.toFixed(2)} m²`, 'success');
+            setShowMapModal(false);
           }}
           onClose={() => setShowMapModal(false)}
         />
