@@ -163,16 +163,16 @@ export default function AdminSuratSKKT({
   const generatePolygonSVG = () => {
     const pts = formData.polygonPoints;
     if (!pts || pts.length < 3) {
-      return `<div style="width:100%; height:100%; border:1px dashed #666; background: #f0fdf4; display:flex; align-items:center; justify-content:center; color:#666; font-size:10px;">Belum ada poligon peta satelit</div>`;
+      return `<div style="width:100%; height:100%; border:1px dashed #94a3b8; background: #f8fafc; display:flex; align-items:center; justify-content:center; color:#64748b; font-size:11px;">Belum ada poligon peta satelit (Klik 'Buka Peta' untuk menggambar)</div>`;
     }
     const lats = pts.map((p: any) => p.lat);
     const lngs = pts.map((p: any) => p.lng);
     const minLat = Math.min(...lats), maxLat = Math.max(...lats);
     const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
     
-    const viewWidth = 100;
-    const viewHeight = 100;
-    const padding = 15;
+    const viewWidth = 220;
+    const viewHeight = 220;
+    const padding = 25;
     const drawWidth = viewWidth - 2 * padding;
     const drawHeight = viewHeight - 2 * padding;
     
@@ -188,21 +188,58 @@ export default function AdminSuratSKKT({
     const offsetX = (viewWidth - scaledW) / 2;
     const offsetY = (viewHeight - scaledH) / 2;
     
-    const svgPoints = pts.map((p: any) => {
+    const mappedPts = pts.map((p: any, i: number) => {
       const x = offsetX + (p.lng - minLng) * scale;
-      const y = offsetY + (maxLat - p.lat) * scale; // Invert Y because SVG origin is top-left
-      return `${x},${y}`;
-    }).join(' ');
+      const y = offsetY + (maxLat - p.lat) * scale;
+      return { x, y, lat: p.lat, lng: p.lng, index: i + 1 };
+    });
+
+    const svgPolygonPoints = mappedPts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+
+    const edgeLabels = [];
+    for (let i = 0; i < mappedPts.length; i++) {
+      const p1 = mappedPts[i];
+      const p2 = mappedPts[(i + 1) % mappedPts.length];
+      
+      const lat1 = p1.lat, lng1 = p1.lng, lat2 = p2.lat, lng2 = p2.lng;
+      const R = 6378137;
+      const dLatRad = (lat2 - lat1) * Math.PI / 180;
+      const dLngRad = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLatRad / 2) * Math.sin(dLatRad / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLngRad / 2) * Math.sin(dLngRad / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distMeters = R * c;
+
+      const midX = (p1.x + p2.x) / 2;
+      const midY = (p1.y + p2.y) / 2;
+
+      edgeLabels.push(`
+        <g transform="translate(${midX.toFixed(1)}, ${midY.toFixed(1)})">
+          <rect x="-16" y="-7" width="32" height="13" rx="3" fill="#ffffff" stroke="#059669" stroke-width="0.6" />
+          <text x="0" y="2.5" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#065f46">${distMeters.toFixed(1)}m</text>
+        </g>
+      `);
+    }
+
+    const vertexElements = mappedPts.map(p => `
+      <g transform="translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})">
+        <circle cx="0" cy="0" r="4" fill="#ef4444" stroke="#ffffff" stroke-width="1.2" />
+        <text x="0" y="-6" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#1e293b">P${p.index}</text>
+      </g>
+    `);
 
     return `
-      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet">
-        <polygon points="${svgPoints}" fill="#dcfce7" stroke="#16a34a" stroke-width="0.8" stroke-linejoin="round" />
-        <!-- Poin perbatasan -->
-        ${pts.map((p: any) => {
-          const x = offsetX + (p.lng - minLng) * scale;
-          const y = offsetY + (maxLat - p.lat) * scale;
-          return `<circle cx="${x}" cy="${y}" r="1.5" fill="#ef4444" />`;
-        }).join('')}
+      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#f8fafc;">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+        <polygon points="${svgPolygonPoints}" fill="#dcfce7" fill-opacity="0.8" stroke="#059669" stroke-width="2" stroke-linejoin="round" />
+        ${edgeLabels.join('')}
+        ${vertexElements.join('')}
       </svg>
     `;
   };
@@ -332,38 +369,38 @@ export default function AdminSuratSKKT({
         </table>
 
         <!-- DIAGRAM BOX PETAK TANAH & KOMPAS -->
-        <div style="border:2px solid #000; padding:25px; margin-bottom:15px; position:relative; min-height:330px; display:flex; align-items:center; justify-content:center; background:#fff;">
+        <div style="border:1.5px solid #000; padding:15px; margin-bottom:15px; position:relative; min-height:330px; display:flex; align-items:center; justify-content:center; background:#fff;">
           <!-- DIAGRAM TRAPEZOID SKETSA -->
-          <div style="width:65%; height:220px; border:2px solid #333; position:relative; margin:auto; background:#fafafa; display:flex; flex-direction:column; justify-content:between;">
+          <div style="width:82%; height:270px; border:1.5px solid #333; position:relative; margin:auto; background:#ffffff; display:flex; flex-direction:column; justify-content:between;">
             <!-- NORTH (UTARA) -->
             <div style="position:absolute; top:-28px; left:50%; transform:translateX(-50%); text-align:center; font-size:11px; font-weight:bold; white-space:nowrap;">
               ${v(formData.batasUtara)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranUtara, '6 Meter')}</span>
+              <span style="font-size:10px; color:#059669;">${v(formData.ukuranUtara, '-')}</span>
             </div>
 
             <!-- SOUTH (SELATAN) -->
             <div style="position:absolute; bottom:-28px; left:50%; transform:translateX(-50%); text-align:center; font-size:11px; font-weight:bold; white-space:nowrap;">
               ${v(formData.batasSelatan)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranSelatan, '6.5 Meter')}</span>
+              <span style="font-size:10px; color:#059669;">${v(formData.ukuranSelatan, '-')}</span>
             </div>
 
             <!-- EAST (TIMUR - RIGHT) -->
-            <div style="position:absolute; right:-115px; top:50%; transform:translateY(-50%); text-align:left; font-size:11px; font-weight:bold; width:105px;">
+            <div style="position:absolute; right:-125px; top:50%; transform:translateY(-50%); text-align:left; font-size:11px; font-weight:bold; width:115px;">
               ${v(formData.batasTimur)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranTimur, '7 Meter')}</span>
+              <span style="font-size:10px; color:#059669;">${v(formData.ukuranTimur, '-')}</span>
             </div>
 
             <!-- WEST (BARAT - LEFT) -->
-            <div style="position:absolute; left:-115px; top:50%; transform:translateY(-50%); text-align:right; font-size:11px; font-weight:bold; width:105px;">
+            <div style="position:absolute; left:-125px; top:50%; transform:translateY(-50%); text-align:right; font-size:11px; font-weight:bold; width:115px;">
               ${v(formData.batasBarat)}<br/>
-              <span style="font-size:10px; color:#444;">${v(formData.ukuranBarat, '7 Meter')}</span>
+              <span style="font-size:10px; color:#059669;">${v(formData.ukuranBarat, '-')}</span>
             </div>
 
             <!-- SKETSA SHAPE INSIDE (FROM POLYGON MAP) -->
-            <div style="width:100%; height:100%; border:1px solid #d1d5db; background: #f8fafc;">
+            <div style="width:100%; height:100%; border:1px solid #e2e8f0; background: #ffffff;">
               ${generatePolygonSVG()}
             </div>
-          </div>
+          </div>  </div>
 
           <!-- KOMPAS PANAH ARAH UTARA (U) -> SELATAN (S) DI SEBELAH KANAN -->
           <div style="position:absolute; right:15px; top:15px; bottom:15px; width:20px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; font-weight:bold; font-size:13px;">
