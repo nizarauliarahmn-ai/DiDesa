@@ -9,10 +9,15 @@ export interface KopSuratOptions {
 }
 
 export const generateKopSuratHTML = (options: KopSuratOptions = {}) => {
-  const logoUrl = options.logoUrl || localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
-  const kabupaten = options.kabupaten || localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
-  const kecamatan = options.kecamatan || localStorage.getItem('kop_kecamatan') || 'Simpur';
-  const desa = (options.desa || localStorage.getItem('kop_desa') || 'Wasah Hilir').replace(/^(desa|kelurahan)\s+/i, '');
+  const rawKab = options.kabupaten || localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
+  const kabupaten = rawKab.replace(/^(pemerintah\s+kabupaten|kabupaten|kota)\s+/i, '').trim();
+
+  const rawKec = options.kecamatan || localStorage.getItem('kop_kecamatan') || 'Simpur';
+  const kecamatan = rawKec.replace(/^(kecamatan)\s+/i, '').trim();
+
+  const rawDesa = options.desa || localStorage.getItem('kop_desa') || 'Wasah Hilir';
+  const desa = rawDesa.replace(/^(desa|kelurahan)\s+/i, '').trim();
+
   const alamat = options.alamat || localStorage.getItem('kop_alamat') || '';
   const kontak = options.kontak || localStorage.getItem('kop_kontak') || '';
   const font = options.fontFamily || localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif';
