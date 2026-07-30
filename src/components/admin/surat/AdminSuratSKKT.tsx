@@ -323,8 +323,8 @@ export default function AdminSuratSKKT({
     // RT & Pejabat
     nomorRt: '02',
     namaKetuaRt: 'TAIBAH',
-    namaPejabat: localStorage.getItem('kop_kades') || 'PELDA (PURN) FAZAKKIR RAHMAD',
-    jabatanPejabat: 'Kepala Desa',
+    namaPejabat: localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || 'PELDA (PURN) FAZAKKIR RAHMAD',
+    jabatanPejabat: localStorage.getItem('village_super_admin_role') || 'Kepala Desa',
     includeCamat: false,
     namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
     namaKecamatan: localStorage.getItem('kop_kecamatan') || 'Simpur',
@@ -398,6 +398,21 @@ export default function AdminSuratSKKT({
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
       <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; position:relative; min-height: 1000px; box-sizing: border-box; padding-bottom: 30px;">
         
+        <!-- KOP SURAT -->
+        <div style="border-bottom: 3px solid #000; margin-bottom: 15px;">
+          <div style="display: flex; align-items: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 2px;">
+            <div style="width: 85px; height: 95px; flex: none; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+              <img src="${villageLogo}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            </div>
+            <div style="text-align: center; flex: 1; padding-right: 105px;">
+              <div style="font-weight: 800; font-size: 16px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">PEMERINTAH KABUPATEN ${v(activeKabupaten).toUpperCase()}</div>
+              <div style="font-weight: 700; font-size: 15px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">KECAMATAN ${v(activeKecamatan).toUpperCase()}</div>
+              <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; color: #000; letter-spacing: 0.5px; margin-bottom: 4px;">DESA ${v(activeDesa).toUpperCase()}</div>
+              <div style="font-size: 11px; color: #333;">${v(activeAlamat)} ${v(activeKontak) ? 'Telp: ' + v(activeKontak) : ''}</div>
+            </div>
+          </div>
+        </div>
+
         <!-- JUDUL SURAT -->
         <div style="text-align:center; margin-top:10px; margin-bottom:16px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH</h3>
@@ -494,7 +509,7 @@ export default function AdminSuratSKKT({
           <!-- KEPALA DESA (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
-            <p style="margin-bottom:48px; font-weight:bold;">Kepala Desa ${activeDesa}</p>
+            <p style="margin-bottom:48px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
             <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
         </div>
@@ -507,6 +522,22 @@ export default function AdminSuratSKKT({
 
       <!-- PAGE 2: GAMBAR SITUASI KASAR TANAH -->
       <div style="page-break-before: always; font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; position:relative; min-height: 1000px; box-sizing: border-box; padding-top:20px; padding-bottom: 30px;">
+        
+        <!-- KOP SURAT -->
+        <div style="border-bottom: 3px solid #000; margin-bottom: 15px;">
+          <div style="display: flex; align-items: center; border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 2px;">
+            <div style="width: 85px; height: 95px; flex: none; display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+              <img src="${villageLogo}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+            </div>
+            <div style="text-align: center; flex: 1; padding-right: 105px;">
+              <div style="font-weight: 800; font-size: 16px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">PEMERINTAH KABUPATEN ${v(activeKabupaten).toUpperCase()}</div>
+              <div style="font-weight: 700; font-size: 15px; text-transform: uppercase; color: #000; letter-spacing: 1px; margin-bottom: 3px;">KECAMATAN ${v(activeKecamatan).toUpperCase()}</div>
+              <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; color: #000; letter-spacing: 0.5px; margin-bottom: 4px;">DESA ${v(activeDesa).toUpperCase()}</div>
+              <div style="font-size: 11px; color: #333;">${v(activeAlamat)} ${v(activeKontak) ? 'Telp: ' + v(activeKontak) : ''}</div>
+            </div>
+          </div>
+        </div>
+
         <div style="text-align:center; margin-bottom:15px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">GAMBAR SITUASI KASAR TANAH</h3>
         </div>
@@ -606,7 +637,7 @@ export default function AdminSuratSKKT({
           <!-- KEPALA DESA (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
-            <p style="margin-bottom:50px; font-weight:bold;">Kepala Desa ${activeDesa}</p>
+            <p style="margin-bottom:50px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
             <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
