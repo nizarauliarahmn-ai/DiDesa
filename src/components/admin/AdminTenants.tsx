@@ -160,11 +160,13 @@ export default function AdminTenants() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
+      const cleanDomain = (formData.domain || '').toLowerCase().trim().replace(/^https?:\/\//, '').split('.')[0];
       const payload = {
         ...formData,
-        admin_email: formData.admin_email || `admin@${formData.domain || 'desa.id'}`,
+        domain: cleanDomain || formData.domain,
+        admin_email: formData.admin_email || `admin@${cleanDomain || 'desa.id'}`,
         admin_password: formData.admin_password || 'admin123',
-        kades_email: formData.kades_email || `kades@${formData.domain || 'desa.id'}`,
+        kades_email: formData.kades_email || `kades@${cleanDomain || 'desa.id'}`,
         kades_password: formData.kades_password || 'kades123'
       };
 
