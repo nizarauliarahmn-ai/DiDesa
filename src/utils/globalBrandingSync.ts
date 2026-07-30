@@ -157,7 +157,7 @@ export async function syncSaaSSettingsFromSupabase(force = false): Promise<void>
       .from('saas_settings')
       .select('key, value')
       .in('key', SAAS_SETTINGS_GLOBAL_KEYS)
-      .or('tenant_id.eq.saas_global,tenant_id.is.null');
+      .is('tenant_id', null);
 
     if (error) {
       console.warn('[SaaSSettings] Supabase fetch error:', error.message);
