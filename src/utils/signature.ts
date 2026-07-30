@@ -38,9 +38,9 @@ export function getPrintSignatureHTML(
   // Right Side role text
   let rightRoleHtml = '';
   if (isAn) {
-    rightRoleHtml = `a.n. Kepala Desa ${cleanDesaName},<br>${jabatanPejabat}`;
+    rightRoleHtml = `a.n. Kepala Desa,<br>${jabatanPejabat}`;
   } else {
-    rightRoleHtml = `Kepala Desa ${cleanDesaName}`;
+    rightRoleHtml = `Kepala Desa`;
   }
 
   const textAlign = sigAlign === 'left' ? 'left' : 'center';
@@ -153,6 +153,6 @@ export function getReactSignaturePreview(
     sigAlign,
     sigShowMeta,
     sigUnderline,
-    rightRole: isAn ? `a.n. Kepala Desa ${cleanDesaName},\\n${jabatanPejabat}` : `Kepala Desa ${cleanDesaName}`
+    rightRole: isAn ? `a.n. Kepala Desa,\\n${jabatanPejabat}` : `Kepala Desa`
   };
 }
