@@ -399,15 +399,7 @@ export default function AdminSuratSKBM({
     };
 
     return `
-      ${generateKopSuratHTML({
-        logoUrl: villageLogo,
-        kabupaten: activeKabupaten,
-        kecamatan: activeKecamatan,
-        desa: activeDesa,
-        alamat: activeAlamat,
-        kontak: activeKontak,
-        fontFamily: letterFont
-      })}
+      ${generateKopSuratHTML()}
 
       <div style="text-align:center;flex:1;padding-right:90px;">
             <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${activeKabupaten.toUpperCase()}</div>

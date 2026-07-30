@@ -319,15 +319,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
     const rightRoleHtml = isAn ? `a.n. Kepala Desa ${cleanDesaName},<br/>${roleKades}` : `${roleKades}`;
 
-    const kopSuratHTML = generateKopSuratHTML({
-      logoUrl: villageLogo,
-      kabupaten: activeKabupaten,
-      kecamatan: activeKecamatan,
-      desa: activeDesa,
-      alamat: activeAlamat,
-      kontak: kontakKantor,
-      fontFamily: 'Arial, sans-serif'
-    });
+    const kopSuratHTML = generateKopSuratHTML();
 
     const allParticipantsFlat = pelaksanaList.flatMap((p) => [
       { ...p, isLeader: true, groupId: p.id },

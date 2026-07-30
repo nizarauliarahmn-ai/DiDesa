@@ -526,15 +526,7 @@ export default function AdminSuratNikah({
   };
 
   const kopHtml = () => {
-    return generateKopSuratHTML({
-      logoUrl: localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png',
-      kabupaten: v(formData.namaKabupaten),
-      kecamatan: v(formData.namaKecamatan),
-      desa: v(formData.namaDesa),
-      alamat: v(formData.alamatKantor),
-      kontak: v(formData.kontakKantor),
-      fontFamily: letterFont
-    });
+    return generateKopSuratHTML();
   };
 
   const lampiranHtml = (model: string) => {

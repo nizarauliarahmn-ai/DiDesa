@@ -294,15 +294,7 @@ export default function AdminSuratSKKT({
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     
-    const kopSuratHtml = generateKopSuratHTML({
-      kabupaten: activeKabupaten,
-      kecamatan: activeKecamatan,
-      desa: activeDesa,
-      alamat: activeAlamat,
-      kontak: activeKontak,
-      logoUrl: villageLogo,
-      fontFamily: letterFont
-    });
+    const kopSuratHtml = generateKopSuratHTML();
 
     const page1 = `
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
