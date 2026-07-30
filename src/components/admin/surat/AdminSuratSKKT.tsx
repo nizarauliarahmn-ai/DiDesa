@@ -389,6 +389,7 @@ export default function AdminSuratSKKT({
         </div>
 
         <p style="text-align:justify; margin-bottom:10px; font-size:11px;">
+          <span style="font-style:italic; font-weight:bold; display:block; margin-bottom:4px;">* Catatan: Gambar situasi di atas merupakan sketsa gambaran kasar pemetaan bidang tanah.</span>
           Kami yang bertanda tangan di bawah ini adalah yang masing-masing memiliki tanah yang berbatasan dengan tanah yang di terangkan pada gambar di atas , dengan ini membenarkan batas-batas tanah tersebut :
         </p>
 
