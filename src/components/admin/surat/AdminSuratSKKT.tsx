@@ -254,17 +254,17 @@ export default function AdminSuratSKKT({
       const vLen = Math.sqrt(vx * vx + vy * vy) || 1;
       vx /= vLen; vy /= vLen;
       const offsetDist = 12;
-      return \`
+      return `
       <g>
-        <circle cx="\${p.x.toFixed(1)}" cy="\${p.y.toFixed(1)}" r="2.5" fill="#000000" />
-        <text x="\${(p.x + vx * offsetDist).toFixed(1)}" y="\${(p.y + vy * offsetDist + 3).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P\${p.index}</text>
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="#000000" />
+        <text x="${(p.x + vx * offsetDist).toFixed(1)}" y="${(p.y + vy * offsetDist + 3).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P${p.index}</text>
       </g>
-    \`});
+    `});
 
     const vLocal = (val: string) => val && val.trim() !== '' ? val : '-';
 
-    return \`
-      <svg width="100%" height="100%" viewBox="0 0 \${viewWidth} \${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff; overflow:visible;">
+    return `
+      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff; overflow:visible;">
         <!-- Titik Acuan Utara -->
         <g transform="translate(\${viewWidth - 15}, 15)">
           <line x1="0" y1="20" x2="0" y2="0" stroke="#000000" stroke-width="1.2" />
@@ -273,11 +273,11 @@ export default function AdminSuratSKKT({
         </g>
 
         <!-- Garis dan Titik Poligon -->
-        <polygon points="\${svgPolygonPoints}" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="round" />
-        \${edgeLabels.join('')}
-        \${vertexElements.join('')}
+        <polygon points="${svgPolygonPoints}" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="round" />
+        ${edgeLabels.join('')}
+        ${vertexElements.join('')}
       </svg>
-    \`;
+    `;
   };
 
   
