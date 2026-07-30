@@ -67,6 +67,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   const [familyRelation, setFamilyRelation] = useState(data?.familyRelation || 'Kepala Keluarga');
   const [education, setEducation] = useState(data?.education || 'Sarjana (S1)');
   const [residentStatus, setResidentStatus] = useState(data?.status || 'Aktif');
+  const [maritalStatus, setMaritalStatus] = useState(data?.maritalStatus || 'Belum Kawin');
   const [activeAids, setActiveAids] = useState<string[]>(data?.activeAids || []);
 
   // Photo state
@@ -165,6 +166,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       genderColor,
       rtRw: `${rt.padStart(2, '0')} / ${rw.padStart(2, '0')}`,
       status: residentStatus,
+      maritalStatus,
       statusColor,
       initials: name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
       birthPlace,
@@ -673,7 +675,28 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider block">Status Penduduk</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider block">Status Perkawinan</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'].map((status) => (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() => setMaritalStatus(status)}
+                      className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
+                        maritalStatus === status
+                          ? 'border-emerald-600 bg-emerald-50/50 text-emerald-700'
+                          : 'border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50/60'
+                      }`}
+                    >
+                      {maritalStatus === status && <Check className="w-3.5 h-3.5" />}
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider block">Status Keberadaan (Kependudukan)</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['Aktif', 'Pindah', 'Meninggal', 'Ganda'].map((status) => (
                     <button
