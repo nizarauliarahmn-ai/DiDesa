@@ -32,3 +32,63 @@ export function formatRupiahWithTerbilang(val: string): string {
   const kata = terbilang(num);
   return `Rp. ${formattedNum},- (${kata} Rupiah)`;
 }
+
+export function handleRupiahInputChange(
+  e: React.ChangeEvent<HTMLInputElement>,
+  currentValue: string,
+  onUpdate: (formattedValue: string) => void
+) {
+  const inputEl = e.target;
+  const rawInput = inputEl.value;
+  const oldVal = currentValue || '';
+  const oldCursorPos = inputEl.selectionStart || oldVal.length;
+
+  // Count how many digits were before the cursor in the old value
+  const digitsBeforeCursor = oldVal.slice(0, oldCursorPos).replace(/\D/g, '').length;
+  
+  // Count delta in total digits
+  const oldTotalDigits = oldVal.replace(/\D/g, '').length;
+  const newTotalDigits = rawInput.replace(/\D/g, '').length;
+  const deltaDigits = newTotalDigits - oldTotalDigits;
+
+  const targetDigitCount = Math.max(0, digitsBeforeCursor + deltaDigits);
+  const formatted = formatRupiahInput(rawInput);
+
+  onUpdate(formatted);
+
+  // Restore cursor position preserving digit placement
+  requestAnimationFrame(() => {
+    if (!inputEl) return;
+    if (!formatted) {
+      inputEl.setSelectionRange(0, 0);
+      return;
+    }
+
+    if (targetDigitCount === 0) {
+      const prefixIdx = formatted.indexOf('Rp. ');
+      const pos = prefixIdx !== -1 ? prefixIdx + 4 : 0;
+      inputEl.setSelectionRange(pos, pos);
+      return;
+    }
+
+    let digitCounter = 0;
+    let newPos = formatted.length;
+    for (let i = 0; i < formatted.length; i++) {
+      if (/\d/.test(formatted[i])) {
+        digitCounter++;
+        if (digitCounter === targetDigitCount) {
+          newPos = i + 1;
+          break;
+        }
+      }
+    }
+
+    // Don't place cursor inside or past ",-" suffix if possible
+    const suffixIdx = formatted.indexOf(',-');
+    if (suffixIdx !== -1 && newPos > suffixIdx) {
+      newPos = suffixIdx;
+    }
+
+    inputEl.setSelectionRange(newPos, newPos);
+  });
+}

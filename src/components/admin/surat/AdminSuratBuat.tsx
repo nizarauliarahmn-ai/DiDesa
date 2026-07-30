@@ -13,7 +13,7 @@ import { getLetterClassifications, LetterClassification, incrementSequenceNumber
 import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
-import { formatRupiahInput, formatRupiahWithTerbilang } from '../../../utils/numberToTerbilang';
+import { formatRupiahInput, formatRupiahWithTerbilang, handleRupiahInputChange } from '../../../utils/numberToTerbilang';
 
 const BUSINESS_CATEGORIES = [
   "Perdagangan Sembako / Kelontong",
@@ -1230,7 +1230,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       <input 
                         type="text" 
                         value={usahaOmzet}
-                        onChange={(e) => setUsahaOmzet(formatRupiahInput(e.target.value))}
+                        onChange={(e) => handleRupiahInputChange(e, usahaOmzet, (val) => setUsahaOmzet(val))}
                         placeholder="Contoh: Rp. 5.000.000,-"
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                       />

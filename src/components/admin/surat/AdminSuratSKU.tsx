@@ -17,7 +17,7 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import { formatRupiahInput, formatRupiahWithTerbilang } from '../../../utils/numberToTerbilang';
+import { formatRupiahInput, formatRupiahWithTerbilang, handleRupiahInputChange } from '../../../utils/numberToTerbilang';
 
 interface Resident {
   nik: string;
@@ -977,10 +977,7 @@ export default function AdminSuratSKU({
                     placeholder="Contoh: Rp. 5.000.000,-"
                     className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.usahaOmzet}
-                    onChange={(e) => {
-                      const formatted = formatRupiahInput(e.target.value);
-                      setFormData({...formData, usahaOmzet: formatted});
-                    }}
+                    onChange={(e) => handleRupiahInputChange(e, formData.usahaOmzet, (val) => setFormData(prev => ({ ...prev, usahaOmzet: val })))}
                   />
                 </div>
               </div>
