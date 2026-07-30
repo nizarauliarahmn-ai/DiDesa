@@ -42,14 +42,18 @@ export interface RupiahInputProps {
   className?: string;
 }
 
-export function RupiahInput({ value, onChange, placeholder, className }: RupiahInputProps) {
+export function RupiahInput({ value, onChange, placeholder }: RupiahInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<number | null>(null);
+
+  // Extract digits and display only formatted numbers inside the input element
+  const cleanDigits = (value || '').replace(/\D/g, '');
+  const displayValue = cleanDigits ? new Intl.NumberFormat('id-ID').format(Number(cleanDigits)) : '';
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputEl = e.target;
     const rawVal = inputEl.value;
-    const oldVal = value || '';
+    const oldVal = displayValue;
     const oldCursor = inputEl.selectionStart || oldVal.length;
 
     // Digits before old cursor position
@@ -60,26 +64,24 @@ export function RupiahInput({ value, onChange, placeholder, className }: RupiahI
 
     const targetDigitCount = Math.max(0, digitsBeforeCursor + delta);
 
-    // Compute new formatted string
-    const cleanDigits = rawVal.replace(/\D/g, '');
-    let formatted = '';
-    if (cleanDigits) {
-      const num = Number(cleanDigits);
-      const formattedNum = new Intl.NumberFormat('id-ID').format(num);
-      formatted = `Rp. ${formattedNum},-`;
+    const newCleanDigits = rawVal.replace(/\D/g, '');
+    let newDisplay = '';
+    let fullFormatted = '';
+
+    if (newCleanDigits) {
+      const num = Number(newCleanDigits);
+      newDisplay = new Intl.NumberFormat('id-ID').format(num);
+      fullFormatted = `Rp. ${newDisplay},-`;
     }
 
-    // Compute target cursor position in the NEW formatted string
-    let newPos = formatted.length;
-    if (!formatted) {
+    // Compute cursor pos within newDisplay
+    let newPos = newDisplay.length;
+    if (!newDisplay || targetDigitCount === 0) {
       newPos = 0;
-    } else if (targetDigitCount === 0) {
-      const prefixIdx = formatted.indexOf('Rp. ');
-      newPos = prefixIdx !== -1 ? prefixIdx + 4 : 0;
     } else {
       let digitCounter = 0;
-      for (let i = 0; i < formatted.length; i++) {
-        if (/\d/.test(formatted[i])) {
+      for (let i = 0; i < newDisplay.length; i++) {
+        if (/\d/.test(newDisplay[i])) {
           digitCounter++;
           if (digitCounter === targetDigitCount) {
             newPos = i + 1;
@@ -90,7 +92,7 @@ export function RupiahInput({ value, onChange, placeholder, className }: RupiahI
     }
 
     selectionRef.current = newPos;
-    onChange(formatted);
+    onChange(fullFormatted);
   };
 
   useLayoutEffect(() => {
@@ -99,16 +101,22 @@ export function RupiahInput({ value, onChange, placeholder, className }: RupiahI
       inputRef.current.setSelectionRange(pos, pos);
       selectionRef.current = null;
     }
-  }, [value]);
+  }, [displayValue]);
 
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      value={value}
-      onChange={handleInput}
-      placeholder={placeholder}
-      className={className}
-    />
+    <div className="flex items-center w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus-within:ring-2 focus-within:ring-emerald-500">
+      <span className="text-slate-700 dark:text-slate-300 font-bold select-none mr-1.5 shrink-0">Rp.</span>
+      <input
+        ref={inputRef}
+        type="text"
+        value={displayValue}
+        onChange={handleInput}
+        placeholder={placeholder ? placeholder.replace(/^Rp\.\s*/i, '').replace(/,-$/i, '') : '5.000.000'}
+        className="w-full bg-transparent outline-none font-medium text-slate-800 dark:text-slate-100"
+      />
+      {displayValue ? (
+        <span className="text-slate-700 dark:text-slate-300 font-bold select-none ml-0.5 shrink-0">,-</span>
+      ) : null}
+    </div>
   );
 }
