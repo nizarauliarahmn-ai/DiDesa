@@ -25,6 +25,7 @@ import {
 import { showToast } from "../../../utils/toast";
 import ConfirmModal from "../../common/ConfirmModal";
 import { addSaaSNotification } from "../../../utils/saasLogs";
+import { resolveCurrentTenant } from "../../../utils/tenantResolver";
 
 export default function AdminSuratPenomoran() {
   const [format, setFormat] = useState(

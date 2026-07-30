@@ -117,7 +117,7 @@ export function LandPolygonPickerModal({
     polygonLayerRef.current.setLatLngs(points);
 
     // Draw vertex points
-    points.forEach((p, i) => {
+    points.forEach((p) => {
       L.circleMarker(p, { radius: 5, color: 'white', fillColor: '#ef4444', fillOpacity: 1, weight: 2 })
         .addTo(markersGroupRef.current!);
     });
@@ -136,7 +136,7 @@ export function LandPolygonPickerModal({
 
         const icon = L.divIcon({
           className: 'custom-dist-label',
-          html: \`<div style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; font-weight: bold; color: black; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transform: translate(-50%, -50%);">\${dist.toFixed(1)} m</div>\`,
+          html: `<div style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; font-weight: bold; color: black; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transform: translate(-50%, -50%);">${dist.toFixed(1)} m</div>`,
           iconSize: [0, 0]
         });
         L.marker([midLat, midLng], { icon }).addTo(markersGroupRef.current!);
@@ -222,11 +222,11 @@ export function LandPolygonPickerModal({
           <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
             <button
               onClick={() => setMapType('satellite')}
-              className={\`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 \${mapType === 'satellite' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}\`}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${mapType === 'satellite' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
             ><Layers className="w-3.5 h-3.5" /> Satelit</button>
             <button
               onClick={() => setMapType('street')}
-              className={\`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 \${mapType === 'street' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}\`}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${mapType === 'street' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
             ><Compass className="w-3.5 h-3.5" /> Peta Jalan</button>
           </div>
 
