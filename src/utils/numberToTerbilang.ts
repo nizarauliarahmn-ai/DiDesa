@@ -60,7 +60,46 @@ export function RupiahInput({ value, onChange, placeholder }: RupiahInputProps) 
     const digitsBeforeCursor = oldVal.slice(0, oldCursor).replace(/\D/g, '').length;
     const oldTotalDigits = oldVal.replace(/\D/g, '').length;
     const newTotalDigits = rawVal.replace(/\D/g, '').length;
-    const delta = newTotalDigits - oldTotalDigits;
+    let delta = newTotalDigits - oldTotalDigits;
+
+    // Check if user hit Backspace directly over a dot '.' (e.g. "123.|456" -> "123456")
+    const deletedChar = oldVal[oldCursor - 1];
+    if (delta === 0 && deletedChar === '.' && oldCursor > 0) {
+      // User backspaced over a dot -> delete the digit before the dot too so cursor stays seamless
+      const digitsBeforeDot = oldVal.slice(0, oldCursor - 1).replace(/\D/g, '');
+      const digitsAfterDot = oldVal.slice(oldCursor).replace(/\D/g, '');
+      const digitsMinusOne = digitsBeforeDot.slice(0, -1) + digitsAfterDot;
+
+      let newDisplay = '';
+      let fullFormatted = '';
+
+      if (digitsMinusOne) {
+        const num = Number(digitsMinusOne);
+        newDisplay = new Intl.NumberFormat('id-ID').format(num);
+        fullFormatted = `Rp. ${newDisplay},-`;
+      }
+
+      const targetDigitCount = Math.max(0, digitsBeforeCursor - 1);
+      let newPos = newDisplay.length;
+      if (!newDisplay || targetDigitCount === 0) {
+        newPos = 0;
+      } else {
+        let digitCounter = 0;
+        for (let i = 0; i < newDisplay.length; i++) {
+          if (/\d/.test(newDisplay[i])) {
+            digitCounter++;
+            if (digitCounter === targetDigitCount) {
+              newPos = i + 1;
+              break;
+            }
+          }
+        }
+      }
+
+      selectionRef.current = newPos;
+      onChange(fullFormatted);
+      return;
+    }
 
     const targetDigitCount = Math.max(0, digitsBeforeCursor + delta);
 
