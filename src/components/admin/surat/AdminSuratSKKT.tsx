@@ -227,13 +227,25 @@ export default function AdminSuratSKKT({
       const vLen = Math.sqrt(vx * vx + vy * vy) || 1;
       vx /= vLen; vy /= vLen;
 
-      const offsetDist = 18;
+      // Assign neighbor based on outward vector direction (SVG Y is down, so vy < 0 is North)
+      let neighborName = '';
+      if (Math.abs(vy) > Math.abs(vx)) {
+        neighborName = vy < 0 ? formData.batasUtara : formData.batasSelatan;
+      } else {
+        neighborName = vx > 0 ? formData.batasTimur : formData.batasBarat;
+      }
+      
+      const vSafe = (val: string) => val && val.trim() !== '' ? val : '-';
+      const cleanName = vSafe(neighborName);
+
+      const offsetDist = 24; // Push further out to make room for 2 lines of text
       const textX = midX + vx * offsetDist;
       const textY = midY + vy * offsetDist;
 
       edgeLabels.push(`
         <line x1="${midX}" y1="${midY}" x2="${textX}" y2="${textY}" stroke="#000000" stroke-width="0.5" stroke-dasharray="2 2" />
-        <text x="${textX}" y="${textY + 3}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
+        <text x="${textX}" y="${textY - 3}" text-anchor="middle" font-size="7" fill="#000000">${cleanName}</text>
+        <text x="${textX}" y="${textY + 6}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
       `);
     }
 
