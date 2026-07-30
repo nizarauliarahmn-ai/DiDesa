@@ -700,12 +700,15 @@ export default function AdminSuratSKKT({
                 line-height: 1.45;
                 position: relative;
               }
-              .printable-area * {
-                visibility: visible !important;
-              }
               @media print {
-                body, .page { 
-                  width: 210mm; 
+                html, body {
+                  width: 210mm;
+                  margin: 0;
+                  padding: 0;
+                }
+                .page {
+                  page-break-after: always !important;
+                  break-after: page !important;
                 }
               }
             </style>
@@ -752,7 +755,7 @@ export default function AdminSuratSKKT({
 
   return (
     <div className="space-y-6">
-      <iframe ref={iframeRef} className="hidden" title="Print Frame SKKT" />
+      <iframe ref={iframeRef} className="fixed right-0 bottom-0 w-0 h-0 border-0" title="Print Frame SKKT" />
 
       {/* Header Bar */}
       <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
