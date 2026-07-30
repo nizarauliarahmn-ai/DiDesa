@@ -8,6 +8,7 @@ import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 
 interface Resident {
@@ -172,7 +173,7 @@ export default function AdminSuratSKKT({
     
     const viewWidth = 260;
     const viewHeight = 260;
-    const padding = 40;
+    const padding = 55; // Lebarkan padding agar nama tetangga di margin tidak terpotong
     const drawWidth = viewWidth - 2 * padding;
     const drawHeight = viewHeight - 2 * padding;
     
@@ -198,6 +199,10 @@ export default function AdminSuratSKKT({
 
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
+    
+    let cx = 0, cy = 0;
+    for (const p of mappedPts) { cx += p.x; cy += p.y; }
+    cx /= mappedPts.length; cy /= mappedPts.length;
 
     const edgeLabels = [];
     for (let i = 0; i < mappedPts.length; i++) {
@@ -216,59 +221,85 @@ export default function AdminSuratSKKT({
 
       const midX = (p1.x + p2.x) / 2;
       const midY = (p1.y + p2.y) / 2;
-      const midLat = (p1.lat + p2.lat) / 2;
-      const midLng = (p1.lng + p2.lng) / 2;
+      
+      let vx = midX - cx;
+      let vy = midY - cy;
+      const vLen = Math.sqrt(vx * vx + vy * vy) || 1;
+      vx /= vLen; vy /= vLen;
 
-      const dLatVal = midLat - centerLat;
-      const dLngVal = midLng - centerLng;
-      let neighborName = '';
-      if (Math.abs(dLatVal) > Math.abs(dLngVal)) {
-        neighborName = dLatVal > 0 ? formData.batasUtara : formData.batasSelatan;
-      } else {
-        neighborName = dLngVal > 0 ? formData.batasTimur : formData.batasBarat;
-      }
+      const offsetDist = 18;
+      const textX = midX + vx * offsetDist;
+      const textY = midY + vy * offsetDist;
 
       edgeLabels.push(`
-        <g transform="translate(${midX.toFixed(1)}, ${midY.toFixed(1)})">
-          <rect x="-24" y="-7.5" width="48" height="15" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8" />
-          <text x="0" y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
-          ${neighborName ? `<text x="0" y="${dLatVal > 0 ? -11 : 16}" text-anchor="middle" font-size="7" font-weight="bold" fill="#000000">${neighborName}</text>` : ''}
-        </g>
+        <line x1="${midX}" y1="${midY}" x2="${textX}" y2="${textY}" stroke="#000000" stroke-width="0.5" stroke-dasharray="2 2" />
+        <text x="${textX}" y="${textY + 3}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
       `);
     }
 
-    const vertexElements = mappedPts.map(p => `
-      <g transform="translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})">
-        <circle cx="0" cy="0" r="3.5" fill="#000000" stroke="#ffffff" stroke-width="1" />
-        <text x="0" y="-5" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P${p.index}</text>
+    const vertexElements = mappedPts.map(p => {
+      let vx = p.x - cx; let vy = p.y - cy;
+      const vLen = Math.sqrt(vx * vx + vy * vy) || 1;
+      vx /= vLen; vy /= vLen;
+      const offsetDist = 12;
+      return \`
+      <g>
+        <circle cx="\${p.x.toFixed(1)}" cy="\${p.y.toFixed(1)}" r="2.5" fill="#000000" />
+        <text x="\${(p.x + vx * offsetDist).toFixed(1)}" y="\${(p.y + vy * offsetDist + 3).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P\${p.index}</text>
       </g>
-    `);
+    \`});
 
-    return `
-      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff;">
-        <g transform="translate(${viewWidth - 25}, 25)">
-          <line x1="0" y1="24" x2="0" y2="0" stroke="#000000" stroke-width="2" />
-          <polygon points="0,0 -5,10 5,10" fill="#000000" />
-          <text x="0" y="-5" text-anchor="middle" font-weight="bold" font-size="11" fill="#000000">U</text>
+    const vLocal = (val: string) => val && val.trim() !== '' ? val : '-';
+
+    return \`
+      <svg width="100%" height="100%" viewBox="0 0 \${viewWidth} \${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff; overflow:visible;">
+        <g transform="translate(\${viewWidth - 15}, 15)">
+          <line x1="0" y1="20" x2="0" y2="0" stroke="#000000" stroke-width="1.2" />
+          <polygon points="0,0 -4,8 4,8" fill="#000000" />
+          <text x="0" y="-3" text-anchor="middle" font-weight="bold" font-size="9" fill="#000000">U</text>
         </g>
 
-        <polygon points="${svgPolygonPoints}" fill="none" stroke="#000000" stroke-width="2" stroke-linejoin="round" />
-        ${edgeLabels.join('')}
-        ${vertexElements.join('')}
+        <!-- Nama Tetangga di Luar SVG -->
+        <text x="\${viewWidth / 2}" y="12" text-anchor="middle" font-size="8" fill="#000000">Utara: \${vLocal(formData.batasUtara)}</text>
+        <text x="\${viewWidth / 2}" y="\${viewHeight - 4}" text-anchor="middle" font-size="8" fill="#000000">Selatan: \${vLocal(formData.batasSelatan)}</text>
+        
+        <g transform="translate(10, \${viewHeight / 2}) rotate(-90)">
+           <text x="0" y="0" text-anchor="middle" font-size="8" fill="#000000">Barat: \${vLocal(formData.batasBarat)}</text>
+        </g>
+        <g transform="translate(\${viewWidth - 10}, \${viewHeight / 2}) rotate(90)">
+           <text x="0" y="0" text-anchor="middle" font-size="8" fill="#000000">Timur: \${vLocal(formData.batasTimur)}</text>
+        </g>
+
+        <polygon points="\${svgPolygonPoints}" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="round" />
+        \${edgeLabels.join('')}
+        \${vertexElements.join('')}
       </svg>
-    `;
+    \`;
   };
+
   
   const generateHTML = () => {
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     
+    const kopSuratHtml = generateKopSuratHTML({
+      kabupaten: activeKabupaten,
+      kecamatan: activeKecamatan,
+      desa: activeDesa,
+      alamat: activeAlamat,
+      kontak: activeKontak,
+      logoUrl: villageLogo,
+      fontFamily: letterFont
+    });
+
     const page1 = `
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
       <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; box-sizing: border-box; padding-bottom: 20px;">
+        
+        ${kopSuratHtml}
 
         <!-- JUDUL SURAT -->
-        <div style="text-align:center; margin-top:10px; margin-bottom:16px;">
+        <div style="text-align:center; margin-top:5px; margin-bottom:16px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH</h3>
           <p style="margin:3px 0 0 0; font-size:12px;">Nomor : ${formData.nomorSurat || '...'}</p>
         </div>
