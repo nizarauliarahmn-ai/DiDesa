@@ -177,23 +177,22 @@ export default function AdminSaaSTemplateSurat() {
       // Safe save alternative to avoid constraint errors
       const { data: existing } = await supabase
         .from('saas_settings')
-        .select('key')
+        .select('key, id')
         .eq('key', 'saas_global_letter_catalog')
-        .or('tenant_id.eq.saas_global,tenant_id.is.null')
+        .is('tenant_id', null)
         .maybeSingle();
 
       let opError = null;
       if (existing) {
         const { error } = await supabase
           .from('saas_settings')
-          .update({ value: jsonStr, tenant_id: 'saas_global' })
-          .eq('key', 'saas_global_letter_catalog')
-          .or('tenant_id.eq.saas_global,tenant_id.is.null');
+          .update({ value: jsonStr })
+          .eq('id', existing.id);
         opError = error;
       } else {
         const { error } = await supabase
           .from('saas_settings')
-          .insert({ tenant_id: 'saas_global', key: 'saas_global_letter_catalog', value: jsonStr });
+          .insert({ key: 'saas_global_letter_catalog', value: jsonStr, tenant_id: null });
         opError = error;
       }
 
