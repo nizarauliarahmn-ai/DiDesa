@@ -5,10 +5,11 @@ export interface KopSuratOptions {
   desa?: string;
   alamat?: string;
   kontak?: string;
-  fontFamily?: string;
 }
 
 export const generateKopSuratHTML = (options: KopSuratOptions = {}) => {
+  const logoUrl = options.logoUrl || localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
+
   const rawKab = options.kabupaten || localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
   const kabupaten = rawKab.replace(/^(pemerintah\s+kabupaten|kabupaten|kota)\s+/i, '').trim();
 
