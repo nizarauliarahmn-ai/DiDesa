@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Edit2, Trash2, CheckCircle2, X } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function AdminSaaSTemplateSurat() {
   const [templates, setTemplates] = useState<any[]>([]);
