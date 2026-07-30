@@ -81,10 +81,49 @@ export default function AdminSaaSTemplateSurat() {
     };
     loadTemplates();
 
-    const storedReqs = localStorage.getItem('saas_letter_requests');
-    if (storedReqs) {
-      setRequests(JSON.parse(storedReqs));
-    }
+    const fetchRequestsFromSupabase = async () => {
+      try {
+        const { data } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('key', 'saas_letter_requests')
+          .limit(1)
+          .maybeSingle();
+
+        if (data?.value) {
+          const parsed = JSON.parse(data.value);
+          setRequests(parsed);
+          localStorage.setItem('saas_letter_requests', data.value);
+          return;
+        }
+      } catch (e) {
+        console.error('Error fetching letter requests:', e);
+      }
+
+      const storedReqs = localStorage.getItem('saas_letter_requests');
+      if (storedReqs) {
+        setRequests(JSON.parse(storedReqs));
+      }
+    };
+
+    fetchRequestsFromSupabase();
+
+    const channel = supabase
+      .channel('public:saas_letter_requests_channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'saas_settings' },
+        (payload: any) => {
+          if (payload.new && payload.new.key === 'saas_letter_requests') {
+            fetchRequestsFromSupabase();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
     const generateKodeKlasifikasi = (jenisSurat: string) => {
@@ -343,7 +382,7 @@ export default function AdminSaaSTemplateSurat() {
                   </div>
                 </div>
                 <button 
-                  onClick={() => {
+                  onClick={async () => {
                      setFormData({
                        jenis: req.letterName,
                        klasifikasi: '',
@@ -351,10 +390,19 @@ export default function AdminSaaSTemplateSurat() {
                        deskripsi: '',
                        noUrutTerakhir: 0
                      });
-                     // Mark as resolved
+                     // Mark as resolved in Supabase
                      const newReqs = requests.filter((r: any) => r.id !== req.id);
                      setRequests(newReqs);
-                     localStorage.setItem("saas_letter_requests", JSON.stringify(newReqs));
+                     const jsonStr = JSON.stringify(newReqs);
+                     localStorage.setItem("saas_letter_requests", jsonStr);
+
+                     try {
+                       await supabase
+                         .from('saas_settings')
+                         .update({ value: jsonStr })
+                         .eq('key', 'saas_letter_requests');
+                     } catch (e) {}
+
                      setIsModalOpen(true);
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors shrink-0"

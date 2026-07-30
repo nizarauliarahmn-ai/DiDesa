@@ -276,14 +276,16 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
   }
 
   const reader = new FileReader();
-  reader.onload = (event) => {
+  reader.onload = async (event) => {
     const fileData = event.target?.result;
     
-    // Save request to localStorage for SaaS view
-    const existingReqs = JSON.parse(localStorage.getItem("saas_letter_requests") || "[]");
+    const villageName = localStorage.getItem("village_name") || "Desa Client";
+    const tenantId = await resolveCurrentTenant();
+    const masterTenantId = tenantId || '11111111-1111-1111-1111-111111111111';
+
     const newReq = {
       id: Date.now().toString(),
-      villageName: localStorage.getItem("village_name") || "Desa Sukamakmur",
+      villageName: villageName,
       letterName: saasLetterName.toUpperCase().trim(),
       fileName: saasLetterFile.name,
       fileData: fileData, // Base64 content for downloading
@@ -292,7 +294,55 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
     };
     
     try {
-      localStorage.setItem("saas_letter_requests", JSON.stringify([newReq, ...existingReqs]));
+      // 1. Fetch existing from Supabase
+      const { data: existingRow } = await supabase
+        .from('saas_settings')
+        .select('value')
+        .eq('key', 'saas_letter_requests')
+        .limit(1)
+        .maybeSingle();
+
+      let existingReqs = [];
+      if (existingRow?.value) {
+        try { existingReqs = JSON.parse(existingRow.value); } catch(e) {}
+      } else {
+        const stored = localStorage.getItem("saas_letter_requests");
+        if (stored) existingReqs = JSON.parse(stored);
+      }
+
+      const updatedReqs = [newReq, ...existingReqs];
+      const jsonStr = JSON.stringify(updatedReqs);
+
+      if (existingRow) {
+        await supabase
+          .from('saas_settings')
+          .update({ value: jsonStr })
+          .eq('key', 'saas_letter_requests');
+      } else {
+        await supabase
+          .from('saas_settings')
+          .insert({ tenant_id: masterTenantId, key: 'saas_letter_requests', value: jsonStr });
+      }
+
+      // Sync across all tenant rows if any
+      const { data: allRows } = await supabase
+        .from('saas_settings')
+        .select('tenant_id')
+        .eq('key', 'saas_letter_requests');
+
+      if (allRows && allRows.length > 1) {
+        for (const row of allRows) {
+          if (row.tenant_id !== masterTenantId) {
+            await supabase
+              .from('saas_settings')
+              .update({ value: jsonStr })
+              .eq('key', 'saas_letter_requests')
+              .eq('tenant_id', row.tenant_id);
+          }
+        }
+      }
+
+      localStorage.setItem("saas_letter_requests", jsonStr);
       
       // Trigger SaaS Notification
       addSaaSNotification(
@@ -308,7 +358,8 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
       );
       setShowModal(false);
     } catch(err) {
-      showToast("Gagal menyimpan, file contoh mungkin terlalu besar! Maksimal ukuran file disarankan di bawah 2MB.", "error");
+      console.error("Error submitting SaaS letter request:", err);
+      showToast("Gagal mengirimkan permintaan: " + String(err), "error");
     }
   };
   
