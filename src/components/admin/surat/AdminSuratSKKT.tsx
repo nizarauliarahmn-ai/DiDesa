@@ -3,6 +3,7 @@ import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compa
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLetterKode } from '../../../hooks/useLetterKode';
+import { getLetterClassifications, generateLetterNumber } from '../../../utils/letterClassifications';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
@@ -89,9 +90,9 @@ export default function AdminSuratSKKT({
     saksi3Nik: '',
 
     // RT & Pejabat
-    nomorRt: '02',
-    namaKetuaRt: 'TAIBAH',
-    namaPejabat: localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || 'PELDA (PURN) FAZAKKIR RAHMAD',
+    nomorRt: '',
+    namaKetuaRt: '',
+    namaPejabat: localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || '',
     jabatanPejabat: localStorage.getItem('village_super_admin_role') || 'Kepala Desa',
     includeCamat: false,
     namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
@@ -118,6 +119,14 @@ export default function AdminSuratSKKT({
   useEffect(() => {
     if (editData) {
       setFormData(prev => ({ ...prev, ...editData }));
+    } else {
+      const configs = getLetterClassifications();
+      let skkt = configs.find(c => c.klasifikasi === 'SKKT');
+      if (!skkt) {
+        skkt = { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
+      }
+      const generatedNo = generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251');
+      setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
     }
   }, [editData]);
 
@@ -388,8 +397,8 @@ export default function AdminSuratSKKT({
           <!-- KETUA RT (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:48px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '02')}</p>
-            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
+            <p style="margin-bottom:48px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
 
           <!-- KEPALA DESA (KANAN) -->
@@ -476,8 +485,8 @@ export default function AdminSuratSKKT({
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:50px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '02')}</p>
-            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
+            <p style="margin-bottom:50px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
         </div>
 
@@ -866,14 +875,18 @@ export default function AdminSuratSKKT({
             </div>
 
             {/* Section 4: RT & Kades */}
-            <div className="grid grid-cols-2 gap-3 text-xs pt-2">
+            <div className="grid grid-cols-3 gap-3 text-xs pt-2">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nomor RT</label>
                 <input type="text" placeholder="02" value={formData.nomorRt} onChange={e => setFormData({ ...formData, nomorRt: e.target.value })} className="w-full p-2 border rounded-lg" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nama Ketua RT</label>
-                <input type="text" placeholder="TAIBAH" value={formData.namaKetuaRt} onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="Nama Ketua RT" value={formData.namaKetuaRt} onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
+              </div>
+              <div>
+                <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pejabat / Kades</label>
+                <input type="text" placeholder="Nama Kades" value={formData.namaPejabat} onChange={e => setFormData({ ...formData, namaPejabat: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
               </div>
             </div>
           </div>
