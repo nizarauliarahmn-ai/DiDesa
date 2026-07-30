@@ -394,9 +394,9 @@ export default function AdminSuratSKKT({
     const monthRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][today.getMonth()];
     const globalPrintFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>';
 
-    return `
+    const page1 = `
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
-      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; position:relative; box-sizing: border-box; padding-bottom: 30px; page-break-after: always; break-after: page;">
+      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; position:relative; box-sizing: border-box; padding-bottom: 30px; height: 100%;">
 
         <!-- JUDUL SURAT -->
         <div style="text-align:center; margin-top:10px; margin-bottom:16px;">
@@ -504,9 +504,11 @@ export default function AdminSuratSKKT({
           ${globalPrintFooter}
         </div>
       </div>
+    `;
 
+    const page2 = `
       <!-- PAGE 2: GAMBAR SITUASI KASAR TANAH -->
-      <div style="page-break-before: always; break-before: page; font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; position:relative; box-sizing: border-box; padding-top:20px; padding-bottom: 30px;">
+      <div style="font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; position:relative; box-sizing: border-box; padding-top:20px; padding-bottom: 30px; height: 100%;">
 
         <div style="text-align:center; margin-bottom:15px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">GAMBAR SITUASI KASAR TANAH</h3>
@@ -625,6 +627,8 @@ export default function AdminSuratSKKT({
         </div>
       </div>
     `;
+
+    return [page1, page2];
   };
 
   const handleSave = async () => {
@@ -658,7 +662,7 @@ export default function AdminSuratSKKT({
         .map(el => el.outerHTML)
         .join('\n');
 
-      const contentHtml = generateHTML();
+      const [page1Html, page2Html] = generateHTML();
       
       const printHTML = `
         <html>
@@ -679,9 +683,14 @@ export default function AdminSuratSKKT({
                 margin: 0 auto; 
                 box-sizing: border-box; 
                 background: white; 
+                page-break-after: always;
+              }
+              .page:last-child {
+                page-break-after: auto;
               }
               .printable-area {
                 width: 210mm !important;
+                min-height: 297mm !important;
                 padding: 45px 55px !important;
                 box-sizing: border-box !important;
                 background: white !important;
@@ -689,6 +698,7 @@ export default function AdminSuratSKKT({
                 font-family: ${letterFont};
                 font-size: 12px;
                 line-height: 1.45;
+                position: relative;
               }
               .printable-area * {
                 visibility: visible !important;
@@ -703,7 +713,12 @@ export default function AdminSuratSKKT({
           <body>
             <div class="page">
               <div class="printable-area bg-white text-black">
-                ${contentHtml}
+                ${page1Html}
+              </div>
+            </div>
+            <div class="page">
+              <div class="printable-area bg-white text-black">
+                ${page2Html}
               </div>
             </div>
           </body>
