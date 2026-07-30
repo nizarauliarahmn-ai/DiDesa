@@ -1023,36 +1023,53 @@ export default function AdminSuratSKKT({
             onMouseUp={dragProps.onMouseUp}
             onMouseMove={dragProps.onMouseMove}
             style={{ ...dragProps.style }}
-            className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8 max-h-[85vh]"
+            className="flex-1 bg-slate-200/40 overflow-auto relative flex flex-col items-center gap-8 p-8 max-h-[85vh]"
           >
-            <div 
-              style={{
-                width: `${794 * previewZoom}px`,
-                overflow: 'hidden',
-                position: 'relative',
-                boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                borderRadius: '12px',
-                transition: 'width 0.2s ease-out'
-              }}
-              className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
-            >
+            {generateHTML().map((pageHtml, index) => (
               <div 
-                className="bg-white dark:bg-slate-900 shrink-0"
-                style={{ 
-                  width: '794px', 
-                  padding: '45px 55px',
-                  transform: `scale(${previewZoom})`,
-                  transformOrigin: 'top left',
-                  fontFamily: letterFont,
-                  fontSize: '12px',
-                  lineHeight: '1.45',
+                key={index}
+                style={{
+                  width: `${794 * previewZoom}px`,
+                  height: `${1123 * previewZoom}px`,
+                  overflow: 'hidden',
                   position: 'relative',
-                  color: 'black',
-                  boxSizing: 'border-box'
+                  boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                  borderRadius: '12px',
+                  transition: 'width 0.2s ease-out, height 0.2s ease-out'
                 }}
-                dangerouslySetInnerHTML={{ __html: generateHTML() }}
-              />
-            </div>
+                className="bg-white dark:bg-slate-900 shrink-0 relative"
+              >
+                <div 
+                  className="bg-white dark:bg-slate-900 shrink-0"
+                  style={{ 
+                    width: '794px', 
+                    height: '1123px',
+                    padding: '45px 55px',
+                    transform: `scale(${previewZoom})`,
+                    transformOrigin: 'top left',
+                    fontFamily: letterFont,
+                    fontSize: '12px',
+                    lineHeight: '1.45',
+                    position: 'relative',
+                    color: 'black',
+                    boxSizing: 'border-box'
+                  }}
+                >
+                  <div dangerouslySetInnerHTML={{ __html: pageHtml }} />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '45px',
+                    left: '55px',
+                    right: '55px',
+                    borderTop: '0.5px solid #cbd5e1',
+                    paddingTop: '4px',
+                    fontSize: '8px',
+                    color: '#64748b',
+                    textAlign: 'left'
+                  }} dangerouslySetInnerHTML={{ __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>' }} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
