@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft } from 'lucide-react';
-import { getLetterClassifications, LetterClassification } from '../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, generateLetterNumber } from '../utils/letterClassifications';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { addLetterHistory } from '../utils/letterHistory';
 import { fetchResidentsCached } from '../utils/apiCache';
@@ -101,12 +101,8 @@ export default function PublicKiosSurat() {
       }
     }
 
-    // Generate simulated letter code
-    const randomNum = Math.floor(Math.random() * 800) + 100;
-    const formatNum = String(randomNum).padStart(3, '0');
-    const shortDesa = desaName.toUpperCase().replace(/DESA|KELURAHAN/gi, '').trim().split(' ')[0] || 'DESA';
-    const currentYear = new Date().getFullYear();
-    const finalNumber = `140/${formatNum}/DS-${shortDesa}/${selectedLetter.klasifikasi}/${currentYear}`;
+    // Generate official uniform letter code
+    const finalNumber = generateLetterNumber(selectedLetter.klasifikasi, selectedLetter.kodeKlasifikasi || '140');
 
     let formattedKeperluan = formData['keperluan'] || '';
     if (selectedLetter.fields && selectedLetter.fields.length > 0) {

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHistory';
 import { showToast } from '../../utils/toast';
-import { getLetterClassifications, LetterClassification } from '../../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, generateLetterNumber } from '../../utils/letterClassifications';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function LayananMandiri() {
@@ -116,14 +116,9 @@ export default function LayananMandiri() {
       'Surat Keterangan Domisili': 'SKD',
       'Surat Pengantar Kehilangan': 'SKH'
     };
-    const code = letterCodeMap[letterType] || 'SKM';
-    const shortDesa = (localStorage.getItem('kop_desa') || 'Sukamakmur')
-      .toUpperCase()
-      .replace(/DESA|KELURAHAN/gi, '')
-      .trim()
-      .split(' ')[0] || 'DESA';
-    const currentYear = new Date().getFullYear();
-    const finalNumber = `140/${formatNum}/DS-${shortDesa}/${code}/${currentYear}`;
+    const targetClass = classifications.find(c => c.jenis === letterType || c.klasifikasi === code);
+    const kodeKlasifikasi = targetClass?.kodeKlasifikasi || '140';
+    const finalNumber = generateLetterNumber(code, kodeKlasifikasi);
 
     resolveCurrentTenant().then(tenantId => {
       if (!tenantId) {
