@@ -140,7 +140,7 @@ export function RupiahInput({ value, onChange, placeholder }: RupiahInputProps) 
       inputRef.current.setSelectionRange(pos, pos);
       selectionRef.current = null;
     }
-  }, [displayValue]);
+  });
 
   return (
     <div className="flex items-center w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus-within:ring-2 focus-within:ring-emerald-500">
@@ -151,7 +151,14 @@ export function RupiahInput({ value, onChange, placeholder }: RupiahInputProps) 
         value={displayValue}
         onChange={handleInput}
         placeholder={placeholder ? placeholder.replace(/^Rp\.\s*/i, '').replace(/,-$/i, '') : '5.000.000'}
-        className="w-full bg-transparent outline-none font-medium text-slate-800 dark:text-slate-100"
+        className="w-full text-slate-800 dark:text-slate-100 font-bold tracking-wide"
+        style={{
+          background: 'transparent',
+          border: 'none',
+          outline: 'none',
+          boxShadow: 'none',
+          padding: 0
+        }}
       />
       {displayValue ? (
         <span className="text-slate-700 dark:text-slate-300 font-bold select-none ml-0.5 shrink-0">,-</span>
