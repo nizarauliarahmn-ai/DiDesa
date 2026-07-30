@@ -130,12 +130,24 @@ export default function AdminSuratSKKT({
     }
   }, [editData]);
 
-  useEffect(() => {
-    fetchResidentsCached()
-      .then(res => res.json())
-      .then(data => { if (Array.isArray(data)) setResidents(data); })
-      .catch(e => console.error(e));
-  }, []);
+    useEffect(() => {
+      fetchResidentsCached()
+        .then(res => res.json())
+        .then(data => { if (Array.isArray(data)) setResidents(data); })
+        .catch(e => console.error(e));
+
+      const activePejabat = localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || '';
+      try {
+        const stored = localStorage.getItem('village_officers');
+        if (stored) {
+          const list = JSON.parse(stored);
+          const found = list.find((o: any) => o.name === activePejabat);
+          if (found) {
+            setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
+          }
+        }
+      } catch (e) {}
+    }, []);
 
   const filteredResidents = searchQuery.trim() === '' ? [] : residents.filter(r => 
     r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.nik.includes(searchQuery)
@@ -152,6 +164,17 @@ export default function AdminSuratSKKT({
   );
 
   const handleSelectResident = (r: Resident) => {
+    const rt_rw = (r as any).rt_rw || '001/001';
+    const [rt, rw] = rt_rw.split('/');
+    const cleanRt = rt ? rt.replace(/^0+/, '') : '';
+    
+    let foundRtName = '';
+    try {
+      const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+      const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + cleanRt) || o.role.toLowerCase().includes('rt.' + cleanRt) || o.role.toLowerCase().includes('rt. ' + cleanRt) || o.role.toLowerCase() === 'rt ' + cleanRt);
+      if (rtOfficer) foundRtName = rtOfficer.name;
+    } catch (e) {}
+
     setFormData(prev => ({
       ...prev,
       nama: r.name,
@@ -159,7 +182,9 @@ export default function AdminSuratSKKT({
       tempatLahir: r.birthPlace || '',
       tanggalLahir: r.birthDate || '',
       pekerjaan: r.job || 'Wiraswasta',
-      alamat: r.address || '',
+      alamat: `${r.address || ''}, RT.${rt} RW.${rw} Desa Wasah Hilir`,
+      nomorRt: cleanRt,
+      ...(foundRtName ? { namaKetuaRt: foundRtName.toUpperCase() } : {})
     }));
     setSearchQuery('');
   };
@@ -870,7 +895,16 @@ export default function AdminSuratSKKT({
             <div className="grid grid-cols-3 gap-3 text-xs pt-2">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nomor RT</label>
-                <input type="text" placeholder="02" value={formData.nomorRt} onChange={e => setFormData({ ...formData, nomorRt: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="02" value={formData.nomorRt} onChange={e => {
+                    const rtVal = e.target.value;
+                    let autoName = formData.namaKetuaRt;
+                    try {
+                      const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+                      const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtVal) || o.role.toLowerCase().includes('rt.' + rtVal) || o.role.toLowerCase().includes('rt. ' + rtVal));
+                      if (rtOfficer) autoName = rtOfficer.name;
+                    } catch (err) {}
+                    setFormData({ ...formData, nomorRt: rtVal, namaKetuaRt: autoName.toUpperCase() });
+                  }} className="w-full p-2 border rounded-lg" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nama Ketua RT</label>
@@ -878,7 +912,35 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pejabat / Kades</label>
-                <input type="text" placeholder="Nama Kades" value={formData.namaPejabat} onChange={e => setFormData({ ...formData, namaPejabat: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
+                <select 
+                    className="w-full p-2 border rounded-lg bg-white dark:bg-slate-900"
+                    value={formData.namaPejabat}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setFormData(prev => ({ ...prev, namaPejabat: name }));
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          const found = list.find((o: any) => o.name === name);
+                          if (found) setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
+                        }
+                      } catch (err) {}
+                    }}
+                  >
+                    {(() => {
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          return list.map((o: any, i: number) => (
+                            <option key={i} value={o.name}>{o.name} ({o.role})</option>
+                          ));
+                        }
+                      } catch (err) {}
+                      return <option value="FAZAKKIR RAHMAD">FAZAKKIR RAHMAD (Kepala Desa)</option>;
+                    })()}
+                  </select>
               </div>
             </div>
           </div>
