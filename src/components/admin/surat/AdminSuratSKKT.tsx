@@ -253,23 +253,14 @@ export default function AdminSuratSKKT({
 
     return \`
       <svg width="100%" height="100%" viewBox="0 0 \${viewWidth} \${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff; overflow:visible;">
+        <!-- Titik Acuan Utara -->
         <g transform="translate(\${viewWidth - 15}, 15)">
           <line x1="0" y1="20" x2="0" y2="0" stroke="#000000" stroke-width="1.2" />
           <polygon points="0,0 -4,8 4,8" fill="#000000" />
           <text x="0" y="-3" text-anchor="middle" font-weight="bold" font-size="9" fill="#000000">U</text>
         </g>
 
-        <!-- Nama Tetangga di Luar SVG -->
-        <text x="\${viewWidth / 2}" y="12" text-anchor="middle" font-size="8" fill="#000000">Utara: \${vLocal(formData.batasUtara)}</text>
-        <text x="\${viewWidth / 2}" y="\${viewHeight - 4}" text-anchor="middle" font-size="8" fill="#000000">Selatan: \${vLocal(formData.batasSelatan)}</text>
-        
-        <g transform="translate(10, \${viewHeight / 2}) rotate(-90)">
-           <text x="0" y="0" text-anchor="middle" font-size="8" fill="#000000">Barat: \${vLocal(formData.batasBarat)}</text>
-        </g>
-        <g transform="translate(\${viewWidth - 10}, \${viewHeight / 2}) rotate(90)">
-           <text x="0" y="0" text-anchor="middle" font-size="8" fill="#000000">Timur: \${vLocal(formData.batasTimur)}</text>
-        </g>
-
+        <!-- Garis dan Titik Poligon -->
         <polygon points="\${svgPolygonPoints}" fill="none" stroke="#000000" stroke-width="1.5" stroke-linejoin="round" />
         \${edgeLabels.join('')}
         \${vertexElements.join('')}
