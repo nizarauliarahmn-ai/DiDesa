@@ -2,7 +2,7 @@
 import { resolveCurrentTenant } from './tenantResolver';
 
 // ==========================================
-// 1. SAAS ACTIVITY LOGS (SUPABASE-FIRST via saas_settings)
+// 1. SAAS ACTIVITY LOGS (SUPABASE-FIRST via saas_settings + REALTIME BROADCAST)
 // ==========================================
 
 export interface SaaSLog {
@@ -44,11 +44,20 @@ export const fetchSaaSLogs = async (): Promise<SaaSLog[]> => {
 export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' | 'tenant_name'>) => {
   try {
     const tenantId = await resolveCurrentTenant();
-    let villageName = log.category === 'SaaS Admin' ? 'Platform SaaS' : 'Desa Client';
+    
+    // Resolve Village Name dynamically from DB or local storage
+    let villageName = log.category === 'SaaS Admin' ? 'Platform SaaS' : '';
+    if (!villageName) {
+      villageName = localStorage.getItem('village_name') || '';
+    }
 
-    if (tenantId) {
+    if (tenantId && (!villageName || villageName === 'Desa Client')) {
       const { data } = await supabase.from('tenants').select('nama_desa, village_name, name').eq('id', tenantId).single();
       if (data) villageName = data.nama_desa || data.village_name || data.name || villageName;
+    }
+
+    if (!villageName) {
+      villageName = tenantId ? 'Desa Client' : 'Platform SaaS';
     }
 
     const now = new Date();
@@ -108,6 +117,15 @@ export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' |
 
     localStorage.setItem('saas_global_activity_logs', jsonStr);
     window.dispatchEvent(new Event('saas_logs_updated'));
+
+    // Realtime Broadcast across all connected clients & tenants
+    if (_logsChannel) {
+      _logsChannel.send({
+        type: 'broadcast',
+        event: 'new_saas_log',
+        payload: { logs: updatedLogs }
+      }).catch((err: any) => console.warn('Broadcast send error:', err));
+    }
   } catch (e) {
     console.error('Error adding SaaS log:', e);
   }
@@ -117,7 +135,7 @@ let _logsChannel: any = null;
 export function subscribeSaaSLogsRealtime(): () => void {
   if (!_logsChannel) {
     _logsChannel = supabase
-      .channel('public:saas_settings:logs')
+      .channel('public:saas_logs_realtime_broadcast')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'saas_settings' },
@@ -130,6 +148,12 @@ export function subscribeSaaSLogsRealtime(): () => void {
           }
         }
       )
+      .on('broadcast', { event: 'new_saas_log' }, (payload: any) => {
+        if (payload?.payload?.logs) {
+          localStorage.setItem('saas_global_activity_logs', JSON.stringify(payload.payload.logs));
+        }
+        window.dispatchEvent(new Event('saas_logs_updated'));
+      })
       .subscribe();
   }
 
