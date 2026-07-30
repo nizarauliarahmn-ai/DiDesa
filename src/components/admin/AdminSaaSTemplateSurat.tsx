@@ -176,7 +176,7 @@ export default function AdminSaaSTemplateSurat() {
     try {
       const { error } = await supabase
         .from('saas_settings')
-        .upsert({ key: 'saas_global_letter_catalog', value: jsonStr }, { onConflict: 'key' });
+        .upsert({ tenant_id: 'saas_global', key: 'saas_global_letter_catalog', value: jsonStr }, { onConflict: 'tenant_id,key' });
       if (error) {
         console.error('[SaaSTemplateSurat] Gagal simpan ke Supabase:', error.message);
         showToast('Gagal menyimpan ke server: ' + error.message, 'error');

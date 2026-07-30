@@ -214,11 +214,14 @@ const handleSaveSettings = () => {
   localStorage.setItem("surat_autoreset", autoReset ? "true" : "false");
 
   try {
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) return;
+
     const settingsToSave = [
-      { key: 'surat_format', value: format },
-      { key: 'surat_autoreset', value: autoReset ? "true" : "false" }
+      { tenant_id: tenantId, key: 'surat_format', value: format },
+      { tenant_id: tenantId, key: 'surat_autoreset', value: autoReset ? "true" : "false" }
     ];
-    supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'key' }).then();
+    supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'tenant_id,key' }).then();
   } catch (e) {}
 
   // Dispatch custom event so that other components re-load settings
