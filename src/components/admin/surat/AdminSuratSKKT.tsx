@@ -199,9 +199,6 @@ export default function AdminSuratSKKT({
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
 
-    const polygonCenterX = mappedPts.reduce((acc, p) => acc + p.x, 0) / mappedPts.length;
-    const polygonCenterY = mappedPts.reduce((acc, p) => acc + p.y, 0) / mappedPts.length;
-
     const edgeLabels = [];
     for (let i = 0; i < mappedPts.length; i++) {
       const p1 = mappedPts[i];
@@ -219,29 +216,9 @@ export default function AdminSuratSKKT({
 
       const midX = (p1.x + p2.x) / 2;
       const midY = (p1.y + p2.y) / 2;
-
-      // Normal vector pointing outward from centroid
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      let nx = -dy;
-      let ny = dx;
-      const len = Math.sqrt(nx * nx + ny * ny) || 1;
-      nx /= len;
-      ny /= len;
-
-      const toMidX = midX - polygonCenterX;
-      const toMidY = midY - polygonCenterY;
-      if (nx * toMidX + ny * toMidY < 0) {
-        nx = -nx;
-        ny = -ny;
-      }
-
-      const offsetDist = 14;
-      const labelX = midX + nx * offsetDist;
-      const labelY = midY + ny * offsetDist;
-
       const midLat = (p1.lat + p2.lat) / 2;
       const midLng = (p1.lng + p2.lng) / 2;
+
       const dLatVal = midLat - centerLat;
       const dLngVal = midLng - centerLng;
       let neighborName = '';
@@ -252,29 +229,20 @@ export default function AdminSuratSKKT({
       }
 
       edgeLabels.push(`
-        <g transform="translate(${labelX.toFixed(1)}, ${labelY.toFixed(1)})">
-          <text x="0" y="0" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
-          ${neighborName ? `<text x="0" y="${ny >= 0 ? 9 : -8}" text-anchor="middle" font-size="7" font-weight="normal" fill="#333333">${neighborName}</text>` : ''}
+        <g transform="translate(${midX.toFixed(1)}, ${midY.toFixed(1)})">
+          <rect x="-24" y="-7.5" width="48" height="15" rx="2" fill="#ffffff" stroke="#000000" stroke-width="0.8" />
+          <text x="0" y="3" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
+          ${neighborName ? `<text x="0" y="${dLatVal > 0 ? -11 : 16}" text-anchor="middle" font-size="7" font-weight="bold" fill="#000000">${neighborName}</text>` : ''}
         </g>
       `);
     }
 
-    const vertexElements = mappedPts.map(p => {
-      const vx = p.x - polygonCenterX;
-      const vy = p.y - polygonCenterY;
-      const vlen = Math.sqrt(vx * vx + vy * vy) || 1;
-      const vnx = vx / vlen;
-      const vny = vy / vlen;
-      const textX = (vnx * 10).toFixed(1);
-      const textY = (vny * 10 + 3).toFixed(1);
-
-      return `
-        <g transform="translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})">
-          <circle cx="0" cy="0" r="3" fill="#000000" />
-          <text x="${textX}" y="${textY}" text-anchor="middle" font-size="7.5" font-weight="bold" fill="#000000">P${p.index}</text>
-        </g>
-      `;
-    });
+    const vertexElements = mappedPts.map(p => `
+      <g transform="translate(${p.x.toFixed(1)}, ${p.y.toFixed(1)})">
+        <circle cx="0" cy="0" r="3.5" fill="#000000" stroke="#ffffff" stroke-width="1" />
+        <text x="0" y="-5" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P${p.index}</text>
+      </g>
+    `);
 
     return `
       <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff;">
@@ -421,7 +389,6 @@ export default function AdminSuratSKKT({
         </div>
 
         <p style="text-align:justify; margin-bottom:10px; font-size:11px;">
-          <span style="font-style:italic; font-weight:bold; display:block; margin-bottom:4px;">* Catatan: Gambar situasi di atas merupakan sketsa gambaran kasar pemetaan bidang tanah.</span>
           Kami yang bertanda tangan di bawah ini adalah yang masing-masing memiliki tanah yang berbatasan dengan tanah yang di terangkan pada gambar di atas , dengan ini membenarkan batas-batas tanah tersebut :
         </p>
 
