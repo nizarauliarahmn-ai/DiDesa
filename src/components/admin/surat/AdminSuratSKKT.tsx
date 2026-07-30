@@ -494,7 +494,7 @@ export default function AdminSuratSKKT({
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">${activeDesa}, ${tglFormatted}</p>
             <p style="margin-bottom:48px; font-weight:bold;">Yang membuat pernyataan</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.nama)}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.nama)}</p>
           </div>
         </div>
 
@@ -503,14 +503,14 @@ export default function AdminSuratSKKT({
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
             <p style="margin-bottom:48px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '02')}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
           </div>
 
           <!-- KEPALA DESA (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
             <p style="margin-bottom:48px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
         </div>
 
@@ -638,14 +638,14 @@ export default function AdminSuratSKKT({
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
             <p style="margin-bottom:50px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
             <p style="margin-bottom:50px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '02')}</p>
-            <p style="font-weight:bold; text-decoration:underline; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
+            <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, 'TAIBAH')}</p>
           </div>
         </div>
 
