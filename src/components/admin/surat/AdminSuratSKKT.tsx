@@ -392,11 +392,10 @@ export default function AdminSuratSKKT({
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const monthRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][today.getMonth()];
-    const globalPrintFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>';
-
+    
     const page1 = `
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
-      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; position:relative; box-sizing: border-box; padding-bottom: 30px; height: 100%;">
+      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; box-sizing: border-box; padding-bottom: 20px;">
 
         <!-- JUDUL SURAT -->
         <div style="text-align:center; margin-top:10px; margin-bottom:16px;">
@@ -499,16 +498,12 @@ export default function AdminSuratSKKT({
           </div>
         </div>
 
-        <!-- SAAS GLOBAL FOOTER PAGE 1 -->
-        <div style="position:absolute; bottom:0; left:0; right:0; border-top:0.5px solid #cbd5e1; padding-top:4px; font-size:8px; color:#64748b; text-align:left;">
-          ${globalPrintFooter}
-        </div>
       </div>
     `;
 
     const page2 = `
       <!-- PAGE 2: GAMBAR SITUASI KASAR TANAH -->
-      <div style="font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; position:relative; box-sizing: border-box; padding-top:20px; padding-bottom: 30px; height: 100%;">
+      <div style="font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; box-sizing: border-box; padding-bottom: 20px;">
 
         <div style="text-align:center; margin-bottom:15px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">GAMBAR SITUASI KASAR TANAH</h3>
@@ -621,10 +616,6 @@ export default function AdminSuratSKKT({
           </div>
         </div>
 
-        <!-- SAAS GLOBAL FOOTER PAGE 2 -->
-        <div style="position:absolute; bottom:0; left:0; right:0; border-top:0.5px solid #cbd5e1; padding-top:4px; font-size:8px; color:#64748b; text-align:left;">
-          ${globalPrintFooter}
-        </div>
       </div>
     `;
 
@@ -663,14 +654,19 @@ export default function AdminSuratSKKT({
         .join('\n');
 
       const [page1Html, page2Html] = generateHTML();
+      const globalPrintFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong>';
       
       const printHTML = `
+        <!DOCTYPE html>
         <html>
           <head>
             <title>Cetak SKKT - ${formData.nama}</title>
             ${styles}
             <style>
-              @page { size: A4; margin: 0 !important; }
+              @page { 
+                size: A4; 
+                margin: 0 !important; 
+              }
               body { 
                 margin: 0; 
                 padding: 0; 
@@ -680,49 +676,41 @@ export default function AdminSuratSKKT({
               }
               .page { 
                 width: 210mm; 
-                margin: 0 auto; 
+                min-height: 297mm; 
+                margin: 0 auto;
+                padding: 45px 55px;
                 box-sizing: border-box; 
                 background: white; 
+                position: relative;
                 page-break-after: always;
+                break-after: page;
               }
               .page:last-child {
                 page-break-after: auto;
+                break-after: auto;
               }
-              .printable-area {
-                width: 210mm !important;
-                min-height: 297mm !important;
-                padding: 45px 55px !important;
-                box-sizing: border-box !important;
-                background: white !important;
-                color: black !important;
+              .footer {
+                position: absolute;
+                bottom: 45px;
+                left: 55px;
+                right: 55px;
+                border-top: 0.5px solid #cbd5e1;
+                padding-top: 4px;
                 font-family: ${letterFont};
-                font-size: 12px;
-                line-height: 1.45;
-                position: relative;
-              }
-              @media print {
-                html, body {
-                  width: 210mm;
-                  margin: 0;
-                  padding: 0;
-                }
-                .page {
-                  page-break-after: always !important;
-                  break-after: page !important;
-                }
+                font-size: 8px;
+                color: #64748b;
+                text-align: left;
               }
             </style>
           </head>
           <body>
             <div class="page">
-              <div class="printable-area bg-white text-black">
-                ${page1Html}
-              </div>
+              ${page1Html}
+              <div class="footer">${globalPrintFooter}</div>
             </div>
             <div class="page">
-              <div class="printable-area bg-white text-black">
-                ${page2Html}
-              </div>
+              ${page2Html}
+              <div class="footer">${globalPrintFooter}</div>
             </div>
           </body>
         </html>
@@ -754,8 +742,8 @@ export default function AdminSuratSKKT({
   };
 
   return (
-    <div className="space-y-6">
-      <iframe ref={iframeRef} className="fixed right-0 bottom-0 w-0 h-0 border-0" title="Print Frame SKKT" />
+    <div className="space-y-6 relative">
+      <iframe ref={iframeRef} className="absolute opacity-0 pointer-events-none -z-50 w-[210mm] h-[297mm]" title="Print Frame SKKT" />
 
       {/* Header Bar */}
       <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
