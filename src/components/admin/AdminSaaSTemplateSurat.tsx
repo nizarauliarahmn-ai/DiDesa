@@ -174,12 +174,17 @@ export default function AdminSaaSTemplateSurat() {
   const saveTemplates = async (newTemplates: any[]): Promise<boolean> => {
     const jsonStr = JSON.stringify(newTemplates);
     try {
-      // Safe save alternative to avoid constraint errors
+      let tenantId = await resolveCurrentTenant();
+      if (!tenantId) {
+        tenantId = '11111111-1111-1111-1111-111111111111'; // Master default tenant UUID
+      }
+
+      // 1. Update/Insert for current tenant
       const { data: existing } = await supabase
         .from('saas_settings')
-        .select('key, id')
+        .select('key')
         .eq('key', 'saas_global_letter_catalog')
-        .is('tenant_id', null)
+        .eq('tenant_id', tenantId)
         .maybeSingle();
 
       let opError = null;
@@ -187,13 +192,32 @@ export default function AdminSaaSTemplateSurat() {
         const { error } = await supabase
           .from('saas_settings')
           .update({ value: jsonStr })
-          .eq('id', existing.id);
+          .eq('key', 'saas_global_letter_catalog')
+          .eq('tenant_id', tenantId);
         opError = error;
       } else {
         const { error } = await supabase
           .from('saas_settings')
-          .insert({ key: 'saas_global_letter_catalog', value: jsonStr, tenant_id: null });
+          .insert({ key: 'saas_global_letter_catalog', value: jsonStr, tenant_id: tenantId });
         opError = error;
+      }
+
+      // 2. Broadcast/Sync update to ALL other tenant rows with saas_global_letter_catalog
+      const { data: allRows } = await supabase
+        .from('saas_settings')
+        .select('tenant_id')
+        .eq('key', 'saas_global_letter_catalog');
+
+      if (allRows && allRows.length > 0) {
+        for (const row of allRows) {
+          if (row.tenant_id !== tenantId) {
+            await supabase
+              .from('saas_settings')
+              .update({ value: jsonStr })
+              .eq('key', 'saas_global_letter_catalog')
+              .eq('tenant_id', row.tenant_id);
+          }
+        }
       }
 
       if (opError) {
