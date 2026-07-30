@@ -160,10 +160,10 @@ export default function AdminTenants() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const cleanDomain = (formData.domain || '').toLowerCase().trim().replace(/^https?:\/\//, '').split('.')[0];
+      const cleanDomain = (formData.domain || formData.nama_desa || '').toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').replace(/^https?:\/\//, '').split('.')[0];
       const payload = {
         ...formData,
-        domain: cleanDomain || formData.domain,
+        domain: cleanDomain,
         admin_email: formData.admin_email || `admin@${cleanDomain || 'desa.id'}`,
         admin_password: formData.admin_password || 'admin123',
         kades_email: formData.kades_email || `kades@${cleanDomain || 'desa.id'}`,
@@ -601,6 +601,20 @@ export default function AdminTenants() {
                 <p className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Arsitektur Database</p>
                 <p className="text-base font-extrabold text-gray-900 dark:text-white">RLS Isolated Multi-Tenant</p>
               </div>
+            </div>
+          </div>
+
+          {/* Vercel Subdomain Info */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/50 flex items-start gap-3 print:hidden mt-4 mb-4">
+            <Globe className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="space-y-1 text-sm">
+              <p className="font-bold text-blue-900 dark:text-blue-300">Konfigurasi Akses Subdomain (Vercel / Hosting)</p>
+              <p className="text-blue-700 dark:text-blue-400 leading-relaxed text-xs">
+                Secara default, portal web klien dapat diakses via URL fallback <code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded font-mono text-[11px] text-blue-800 dark:text-blue-200">/?tenant=namadesa</code>. 
+                Namun, jika Anda ingin menggunakan format subdomain seperti <code className="bg-blue-100 dark:bg-blue-800/50 px-1.5 py-0.5 rounded font-mono text-[11px] text-blue-800 dark:text-blue-200">namadesa.domainanda.com</code>, 
+                Anda <strong>WAJIB</strong> menambahkan <strong>Wildcard Domain</strong> (<code className="font-mono">*.domainanda.com</code>) pada tab <i>Settings &gt; Domains</i> di dashboard Vercel. 
+                Tanpa pengaturan tersebut di sisi server Vercel, peramban Anda akan mendapatkan halaman error <strong className="text-rose-600">404: DEPLOYMENT_NOT_FOUND</strong>.
+              </p>
             </div>
           </div>
 

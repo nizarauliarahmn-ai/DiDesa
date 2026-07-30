@@ -237,12 +237,12 @@ export default function App() {
         // Fetch tenant details for name fallback
         const { data: tenant } = await supabase
           .from('tenants')
-          .select('name, village_name')
+          .select('nama_desa')
           .eq('id', tid)
           .single();
 
         if (tenant) {
-          const tName = tenant.village_name || tenant.name;
+          const tName = tenant.nama_desa;
           if (tName) {
             localStorage.setItem('village_name', tName);
             const currentKop = localStorage.getItem('kop_desa');
@@ -310,7 +310,7 @@ export default function App() {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.tenantId && parsed.role !== 'saas_admin') {
           const currentTenantId = await resolveCurrentTenant();
-          if (currentTenantId && currentTenantId !== parsed.tenantId) {
+          if (currentTenantId !== parsed.tenantId) {
             console.warn('[Security] Tenant mismatch detected. Logging out to prevent data leakage.', parsed.tenantId, currentTenantId);
             handleLogout();
           }

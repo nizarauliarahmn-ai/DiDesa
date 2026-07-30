@@ -67,9 +67,9 @@ export default function PublicBukuTamu() {
         setTenantId(id);
         if (!tName) {
           try {
-            const { data } = await supabase.from('tenants').select('name, village_name').eq('id', id).single();
-            if (data && (data.village_name || data.name)) {
-              setDesaName(capitalizeWords(data.village_name || data.name));
+            const { data } = await supabase.from('tenants').select('nama_desa').eq('id', id).single();
+            if (data && data.nama_desa) {
+              setDesaName(capitalizeWords(data.nama_desa));
             }
           } catch (e) {}
         }

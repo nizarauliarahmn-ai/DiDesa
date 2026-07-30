@@ -1,4 +1,4 @@
-﻿import { supabase } from './supabase';
+import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 
 // ==========================================
@@ -51,9 +51,11 @@ export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' |
       villageName = localStorage.getItem('village_name') || '';
     }
 
-    if (tenantId && (!villageName || villageName === 'Desa Client')) {
-      const { data } = await supabase.from('tenants').select('nama_desa, village_name, name').eq('id', tenantId).single();
-      if (data) villageName = data.nama_desa || data.village_name || data.name || villageName;
+    if (tenantId && tenantId !== '11111111-1111-1111-1111-111111111111') {
+      const { data } = await supabase.from('tenants').select('nama_desa').eq('id', tenantId).single();
+      if (data && data.nama_desa) {
+        villageName = data.nama_desa || villageName;
+      }
     }
 
     if (!villageName) {
@@ -119,8 +121,9 @@ export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' |
     window.dispatchEvent(new Event('saas_logs_updated'));
 
     // Realtime Broadcast across all connected clients & tenants
-    if (_logsChannel) {
-      _logsChannel.send({
+    const channel = getLogsChannel();
+    if (channel) {
+      channel.send({
         type: 'broadcast',
         event: 'new_saas_log',
         payload: { logs: updatedLogs }
@@ -132,36 +135,40 @@ export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' |
 };
 
 let _logsChannel: any = null;
-export function subscribeSaaSLogsRealtime(): () => void {
+
+const getLogsChannel = () => {
   if (!_logsChannel) {
-    _logsChannel = supabase
-      .channel('public:saas_logs_realtime_broadcast')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'saas_settings' },
-        (payload: any) => {
-          if (payload.new && payload.new.key === 'saas_global_activity_logs') {
-            if (payload.new.value) {
-              localStorage.setItem('saas_global_activity_logs', payload.new.value);
-            }
-            window.dispatchEvent(new Event('saas_logs_updated'));
-          }
-        }
-      )
-      .on('broadcast', { event: 'new_saas_log' }, (payload: any) => {
-        if (payload?.payload?.logs) {
-          localStorage.setItem('saas_global_activity_logs', JSON.stringify(payload.payload.logs));
-        }
-        window.dispatchEvent(new Event('saas_logs_updated'));
-      })
-      .subscribe();
+    _logsChannel = supabase.channel('public:saas_logs_realtime_broadcast');
+    _logsChannel.subscribe();
   }
+  return _logsChannel;
+};
+
+export function subscribeSaaSLogsRealtime(): () => void {
+  const channel = getLogsChannel();
+  
+  channel
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'saas_settings' },
+      (payload: any) => {
+        if (payload.new && payload.new.key === 'saas_global_activity_logs') {
+          if (payload.new.value) {
+            localStorage.setItem('saas_global_activity_logs', payload.new.value);
+          }
+          window.dispatchEvent(new Event('saas_logs_updated'));
+        }
+      }
+    )
+    .on('broadcast', { event: 'new_saas_log' }, (payload: any) => {
+      if (payload?.payload?.logs) {
+        localStorage.setItem('saas_global_activity_logs', JSON.stringify(payload.payload.logs));
+      }
+      window.dispatchEvent(new Event('saas_logs_updated'));
+    });
 
   return () => {
-    if (_logsChannel) {
-      supabase.removeChannel(_logsChannel);
-      _logsChannel = null;
-    }
+    // We don't remove channel here because we still need it to send logs
   };
 }
 
@@ -175,17 +182,14 @@ export const addSaaSNotification = async (
   message: string,
   villageName?: string
 ) => {
-  const tenantId = await resolveCurrentTenant();
-  const masterTenantId = tenantId || '11111111-1111-1111-1111-111111111111';
-
   const { error } = await supabase.from('notifications').insert([{
     id: 'notif-saas-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
     title: title,
     message: message,
-    category: 'System',
+    category: 'SaaS Global', // Changed to SaaS Global to ensure SaaS Admin sees it
     time: 'Baru saja',
     is_read: false,
-    tenant_id: masterTenantId,
+    tenant_id: null, // SaaS notifications belong to SaaS Admin
   }]);
 
   if (error) {
