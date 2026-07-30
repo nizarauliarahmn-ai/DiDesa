@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function AdminAparatur() {
   const [authUser, setAuthUser] = useState<{ role: string; isImpersonated?: boolean } | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
 
   useEffect(() => {
+    resolveCurrentTenant().then(tid => setTenantId(tid));
     const saved = localStorage.getItem('didesa_auth_user');
     if (saved) setAuthUser(JSON.parse(saved));
   }, []);
@@ -46,7 +50,7 @@ export default function AdminAparatur() {
   const [rwForm, setRwForm] = useState({ no: '', name: '' });
 
   // Handle Save
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     if (!isSuperAdmin) {
       showToast('Akses ditolak: Hanya Super Admin yang dapat menyimpan pengaturan ini.', 'error');
       return;
@@ -60,8 +64,35 @@ export default function AdminAparatur() {
     localStorage.setItem('village_rt_list', JSON.stringify(rtList));
     localStorage.setItem('village_rw_list', JSON.stringify(rwList));
     
+    // Save to Supabase online if tenant is available
+    if (tenantId) {
+      const settingsToSave = [
+        { key: 'village_officers', value: JSON.stringify(officers) },
+        { key: 'kop_kades', value: namaKades },
+        { key: 'village_signature_left_role', value: sigLeftRole },
+        { key: 'village_signature_left_name', value: sigLeftName },
+        { key: 'village_signature_left_pangkat', value: sigLeftPangkat },
+        { key: 'village_signature_left_nip', value: sigLeftNip },
+        { key: 'village_rt_list', value: JSON.stringify(rtList) },
+        { key: 'village_rw_list', value: JSON.stringify(rwList) }
+      ];
+
+      try {
+        for (const s of settingsToSave) {
+          const { data: existing } = await supabase.from('saas_settings').select('key').eq('tenant_id', tenantId).eq('key', s.key).maybeSingle();
+          if (existing) {
+            await supabase.from('saas_settings').update({ value: s.value }).eq('tenant_id', tenantId).eq('key', s.key);
+          } else {
+            await supabase.from('saas_settings').insert({ tenant_id: tenantId, key: s.key, value: s.value });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to sync aparatur settings to Supabase', err);
+      }
+    }
+
     window.dispatchEvent(new Event('village_settings_updated'));
-    showToast('Berhasil menyimpan data aparatur desa', 'success');
+    showToast('Berhasil menyimpan data aparatur desa ke cloud & lokal', 'success');
   };
 
   // Officer Modal Actions
