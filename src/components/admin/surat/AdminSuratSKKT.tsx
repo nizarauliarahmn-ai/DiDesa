@@ -319,6 +319,12 @@ export default function AdminSuratSKKT({
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     
+    const isAn = (formData.jabatanPejabat || '').toLowerCase() !== 'kepala desa';
+    const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
+    const kadesRoleHTML = isAn 
+      ? `a.n. Kepala Desa ${cleanDesaName},<br/>${v(formData.jabatanPejabat)}`
+      : `Kepala Desa ${cleanDesaName}`;
+
     const kopSuratHtml = generateKopSuratHTML();
 
     const page1 = `
@@ -495,7 +501,7 @@ export default function AdminSuratSKKT({
           <!-- KEPALA DESA (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
-            <p style="margin-bottom:50px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
+            <p style="margin-bottom:50px; font-weight:bold;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
