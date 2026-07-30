@@ -1,3 +1,4 @@
+import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
