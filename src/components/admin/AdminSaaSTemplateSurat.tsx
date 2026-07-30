@@ -174,12 +174,32 @@ export default function AdminSaaSTemplateSurat() {
   const saveTemplates = async (newTemplates: any[]): Promise<boolean> => {
     const jsonStr = JSON.stringify(newTemplates);
     try {
-      const { error } = await supabase
+      // Safe save alternative to avoid constraint errors
+      const { data: existing } = await supabase
         .from('saas_settings')
-        .upsert({ tenant_id: 'saas_global', key: 'saas_global_letter_catalog', value: jsonStr }, { onConflict: 'tenant_id,key' });
-      if (error) {
-        console.error('[SaaSTemplateSurat] Gagal simpan ke Supabase:', error.message);
-        showToast('Gagal menyimpan ke server: ' + error.message, 'error');
+        .select('key')
+        .eq('key', 'saas_global_letter_catalog')
+        .or('tenant_id.eq.saas_global,tenant_id.is.null')
+        .maybeSingle();
+
+      let opError = null;
+      if (existing) {
+        const { error } = await supabase
+          .from('saas_settings')
+          .update({ value: jsonStr, tenant_id: 'saas_global' })
+          .eq('key', 'saas_global_letter_catalog')
+          .or('tenant_id.eq.saas_global,tenant_id.is.null');
+        opError = error;
+      } else {
+        const { error } = await supabase
+          .from('saas_settings')
+          .insert({ tenant_id: 'saas_global', key: 'saas_global_letter_catalog', value: jsonStr });
+        opError = error;
+      }
+
+      if (opError) {
+        console.error('[SaaSTemplateSurat] Gagal simpan ke Supabase:', opError.message);
+        showToast('Gagal menyimpan ke server: ' + opError.message, 'error');
         return false;
       }
       // Hanya update state & localStorage SETELAH Supabase berhasil

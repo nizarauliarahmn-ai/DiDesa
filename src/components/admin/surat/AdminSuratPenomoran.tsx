@@ -209,20 +209,37 @@ export default function AdminSuratPenomoran() {
     showToast(`Ditambahkan ${variableCode} ke format!`, "success");
   };
 
-const handleSaveSettings = () => {
+const handleSaveSettings = async () => {
   localStorage.setItem("surat_format", format);
   localStorage.setItem("surat_autoreset", autoReset ? "true" : "false");
 
   try {
     const tenantId = await resolveCurrentTenant();
-    if (!tenantId) return;
-
-    const settingsToSave = [
-      { tenant_id: tenantId, key: 'surat_format', value: format },
-      { tenant_id: tenantId, key: 'surat_autoreset', value: autoReset ? "true" : "false" }
-    ];
-    supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'tenant_id,key' }).then();
-  } catch (e) {}
+    if (tenantId) {
+      const settingsToSave = [
+        { tenant_id: tenantId, key: 'surat_format', value: format },
+        { tenant_id: tenantId, key: 'surat_autoreset', value: autoReset ? "true" : "false" }
+      ];
+      
+      // Safe save
+      for (const s of settingsToSave) {
+        const { data: existing } = await supabase
+          .from('saas_settings')
+          .select('key')
+          .eq('tenant_id', tenantId)
+          .eq('key', s.key)
+          .maybeSingle();
+          
+        if (existing) {
+          await supabase.from('saas_settings').update({ value: s.value }).eq('tenant_id', tenantId).eq('key', s.key);
+        } else {
+          await supabase.from('saas_settings').insert(s);
+        }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
 
   // Dispatch custom event so that other components re-load settings
   window.dispatchEvent(new Event("village_settings_updated"));
