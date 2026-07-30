@@ -178,11 +178,29 @@ export default function AdminPengaturan() {
         { tenant_id: tenantId, key: 'village_lng', value: villageLng.toString() },
         { tenant_id: tenantId, key: 'app_theme', value: appTheme }
       ];
-      // Await upsert to Supabase
-      const { error } = await supabase.from('saas_settings').upsert(settingsToSave, { onConflict: 'tenant_id,key' });
-      if (error) {
-        console.error('Supabase Upsert Error:', error);
-        alert('Gagal menyinkronkan ke server Supabase.');
+      // Safe save
+      for (const s of settingsToSave) {
+        const { data: existing } = await supabase
+          .from('saas_settings')
+          .select('key')
+          .eq('tenant_id', tenantId)
+          .eq('key', s.key)
+          .maybeSingle();
+
+        let opError = null;
+        if (existing) {
+          const { error } = await supabase.from('saas_settings').update({ value: s.value }).eq('tenant_id', tenantId).eq('key', s.key);
+          opError = error;
+        } else {
+          const { error } = await supabase.from('saas_settings').insert(s);
+          opError = error;
+        }
+
+        if (opError) {
+          console.error('Supabase Save Error for key ' + s.key + ':', opError);
+          alert('Gagal menyinkronkan ke server Supabase.');
+          break; // Stop on first error
+        }
       }
     } catch (err) {
       console.error('Failed to sync settings to Supabase', err);
