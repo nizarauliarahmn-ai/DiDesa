@@ -1,3 +1,5 @@
+import React, { useRef, useLayoutEffect } from 'react';
+
 export function terbilang(n: number): string {
   if (isNaN(n) || n < 0) return '';
   if (n === 0) return 'Nol';
@@ -33,56 +35,80 @@ export function formatRupiahWithTerbilang(val: string): string {
   return `Rp. ${formattedNum},- (${kata} Rupiah)`;
 }
 
-export function handleRupiahInputChange(
-  e: React.ChangeEvent<HTMLInputElement>,
-  currentValue: string,
-  onUpdate: (formattedValue: string) => void
-) {
-  const inputEl = e.target;
-  const rawInput = inputEl.value;
-  const oldVal = currentValue || '';
-  const oldCursorPos = inputEl.selectionStart || oldVal.length;
+export interface RupiahInputProps {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  className?: string;
+}
 
-  // Count how many digits were before the cursor in the old value
-  const digitsBeforeCursor = oldVal.slice(0, oldCursorPos).replace(/\D/g, '').length;
-  
-  // Count delta in total digits between raw input and old value
-  const oldTotalDigits = oldVal.replace(/\D/g, '').length;
-  const newTotalDigits = rawInput.replace(/\D/g, '').length;
-  const deltaDigits = newTotalDigits - oldTotalDigits;
+export function RupiahInput({ value, onChange, placeholder, className }: RupiahInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const selectionRef = useRef<number | null>(null);
 
-  const targetDigitCount = Math.max(0, digitsBeforeCursor + deltaDigits);
-  const formatted = formatRupiahInput(rawInput);
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputEl = e.target;
+    const rawVal = inputEl.value;
+    const oldVal = value || '';
+    const oldCursor = inputEl.selectionStart || oldVal.length;
 
-  onUpdate(formatted);
+    // Digits before old cursor position
+    const digitsBeforeCursor = oldVal.slice(0, oldCursor).replace(/\D/g, '').length;
+    const oldTotalDigits = oldVal.replace(/\D/g, '').length;
+    const newTotalDigits = rawVal.replace(/\D/g, '').length;
+    const delta = newTotalDigits - oldTotalDigits;
 
-  // Restore cursor position preserving exact digit placement like Word
-  requestAnimationFrame(() => {
-    if (!inputEl) return;
-    if (!formatted) {
-      inputEl.setSelectionRange(0, 0);
-      return;
+    const targetDigitCount = Math.max(0, digitsBeforeCursor + delta);
+
+    // Compute new formatted string
+    const cleanDigits = rawVal.replace(/\D/g, '');
+    let formatted = '';
+    if (cleanDigits) {
+      const num = Number(cleanDigits);
+      const formattedNum = new Intl.NumberFormat('id-ID').format(num);
+      formatted = `Rp. ${formattedNum},-`;
     }
 
-    if (targetDigitCount === 0) {
-      const prefixIdx = formatted.indexOf('Rp. ');
-      const pos = prefixIdx !== -1 ? prefixIdx + 4 : 0;
-      inputEl.setSelectionRange(pos, pos);
-      return;
-    }
-
-    let digitCounter = 0;
+    // Compute target cursor position in the NEW formatted string
     let newPos = formatted.length;
-    for (let i = 0; i < formatted.length; i++) {
-      if (/\d/.test(formatted[i])) {
-        digitCounter++;
-        if (digitCounter === targetDigitCount) {
-          newPos = i + 1;
-          break;
+    if (!formatted) {
+      newPos = 0;
+    } else if (targetDigitCount === 0) {
+      const prefixIdx = formatted.indexOf('Rp. ');
+      newPos = prefixIdx !== -1 ? prefixIdx + 4 : 0;
+    } else {
+      let digitCounter = 0;
+      for (let i = 0; i < formatted.length; i++) {
+        if (/\d/.test(formatted[i])) {
+          digitCounter++;
+          if (digitCounter === targetDigitCount) {
+            newPos = i + 1;
+            break;
+          }
         }
       }
     }
 
-    inputEl.setSelectionRange(newPos, newPos);
-  });
+    selectionRef.current = newPos;
+    onChange(formatted);
+  };
+
+  useLayoutEffect(() => {
+    if (inputRef.current && selectionRef.current !== null) {
+      const pos = selectionRef.current;
+      inputRef.current.setSelectionRange(pos, pos);
+      selectionRef.current = null;
+    }
+  }, [value]);
+
+  return (
+    <input
+      ref={inputRef}
+      type="text"
+      value={value}
+      onChange={handleInput}
+      placeholder={placeholder}
+      className={className}
+    />
+  );
 }
