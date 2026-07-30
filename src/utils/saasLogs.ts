@@ -51,9 +51,11 @@ export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' |
       villageName = localStorage.getItem('village_name') || '';
     }
 
-    if (tenantId && (!villageName || villageName === 'Desa Client')) {
-      const { data } = await supabase.from('tenants').select('nama_desa, village_name, name').eq('id', tenantId).single();
-      if (data) villageName = data.nama_desa || data.village_name || data.name || villageName;
+    if (tenantId && tenantId !== '11111111-1111-1111-1111-111111111111') {
+      const { data } = await supabase.from('tenants').select('nama_desa').eq('id', tenantId).single();
+      if (data && data.nama_desa) {
+        villageName = data.nama_desa || villageName;
+      }
     }
 
     if (!villageName) {

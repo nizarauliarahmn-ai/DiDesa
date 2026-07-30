@@ -237,12 +237,12 @@ export default function App() {
         // Fetch tenant details for name fallback
         const { data: tenant } = await supabase
           .from('tenants')
-          .select('name, village_name')
+          .select('nama_desa')
           .eq('id', tid)
           .single();
 
         if (tenant) {
-          const tName = tenant.village_name || tenant.name;
+          const tName = tenant.nama_desa;
           if (tName) {
             localStorage.setItem('village_name', tName);
             const currentKop = localStorage.getItem('kop_desa');
