@@ -155,7 +155,11 @@ export default function PublicKiosSurat() {
         is_read: false,
         timestamp: new Date().toISOString()
       }]);
-      if (notifErr) console.error('Gagal membuat notif surat:', notifErr);
+      if (notifErr) {
+        console.error('Gagal membuat notif surat:', notifErr);
+      } else {
+        window.dispatchEvent(new Event('didesa_notification_created'));
+      }
     } catch (error) {
       console.error("Gagal mengirim data ke server:", error);
     }
