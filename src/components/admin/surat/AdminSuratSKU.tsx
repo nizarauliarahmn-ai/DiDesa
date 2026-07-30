@@ -17,6 +17,7 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import { formatRupiahInput, formatRupiahWithTerbilang } from '../../../utils/numberToTerbilang';
 
 interface Resident {
   nik: string;
@@ -478,7 +479,7 @@ export default function AdminSuratSKU({
         <tr><td>Alamat Lokasi Usaha</td><td>:</td><td>${v(formData.usahaAlamat, formData.alamat)}</td></tr>
         <tr><td>Mulai Berdiri Sejak</td><td>:</td><td>${v(formData.usahaMulai, 'Januari 2021')}</td></tr>
         ${formData.usahaNib ? `<tr><td>NIB / Izin Usaha</td><td>:</td><td style="font-family:monospace;font-weight:bold;">${formData.usahaNib}</td></tr>` : ''}
-        ${formData.usahaOmzet ? `<tr><td>Estimasi Omset Bulanan</td><td>:</td><td>${formData.usahaOmzet}</td></tr>` : ''}
+        ${formData.usahaOmzet ? `<tr><td>Estimasi Omset Bulanan</td><td>:</td><td>${formatRupiahWithTerbilang(formData.usahaOmzet)}</td></tr>` : ''}
       </table>
 
       <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;margin-top:15px;">
@@ -973,12 +974,11 @@ export default function AdminSuratSKU({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Estimasi Omset Bulanan (Opsional)</label>
                   <input 
                     type="text"
-                    placeholder="Contoh: Rp 5.000.000"
+                    placeholder="Contoh: Rp. 5.000.000,-"
                     className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.usahaOmzet}
                     onChange={(e) => {
-                      const rawDigits = e.target.value.replace(/\D/g, '');
-                      const formatted = rawDigits ? `Rp ${new Intl.NumberFormat('id-ID').format(Number(rawDigits))}` : '';
+                      const formatted = formatRupiahInput(e.target.value);
                       setFormData({...formData, usahaOmzet: formatted});
                     }}
                   />
