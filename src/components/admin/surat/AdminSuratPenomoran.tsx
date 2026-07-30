@@ -24,6 +24,7 @@ import {
 } from "../../../utils/letterClassifications";
 import { showToast } from "../../../utils/toast";
 import ConfirmModal from "../../common/ConfirmModal";
+import { addSaaSNotification } from "../../../utils/saasLogs";
 
 export default function AdminSuratPenomoran() {
   const [format, setFormat] = useState(
@@ -272,6 +273,15 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
     
     try {
       localStorage.setItem("saas_letter_requests", JSON.stringify([newReq, ...existingReqs]));
+      
+      // Trigger SaaS Notification
+      addSaaSNotification(
+        'letter_request',
+        'Permintaan Tambah Surat',
+        `Desa ${newReq.villageName} mengajukan surat baru: ${newReq.letterName}.`,
+        newReq.villageName
+      );
+
       showToast(
         "Permintaan penambahan jenis surat beserta contoh file telah dikirim ke tim SaaS untuk ditinjau.",
         "success"

@@ -1,29 +1,41 @@
 
 import React, { useState, useEffect } from 'react';
 import { Database, Search, Filter, Trash2, Download, AlertCircle, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
-import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
+import { fetchSaaSLogs, SaaSLog, subscribeSaaSLogsRealtime } from '../../utils/saasLogs';
 
 export default function AdminSaaSLogs() {
   const [logs, setLogs] = useState<SaaSLog[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('Semua');
 
+  const [filterCategory, setFilterCategory] = useState<string>('Semua Kategori');
+
   useEffect(() => {
     const handleUpdate = () => fetchSaaSLogs().then(setLogs);
     handleUpdate();
     window.addEventListener('saas_logs_updated', handleUpdate);
-    return () => window.removeEventListener('saas_logs_updated', handleUpdate);
+    const unsubscribe = subscribeSaaSLogsRealtime();
+    
+    return () => {
+      window.removeEventListener('saas_logs_updated', handleUpdate);
+      unsubscribe();
+    };
   }, []);
 
   const filteredLogs = logs.filter(log => {
-    const matchesSearch = 
-      log.aksi.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.admin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.target.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const searchTarget = (
+      log.aksi + 
+      log.admin + 
+      log.target + 
+      (log.tenant_name || '') + 
+      (log.category || '')
+    ).toLowerCase();
+
+    const matchesSearch = searchTarget.includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === 'Semua' || log.status === filterStatus;
+    const matchesCategory = filterCategory === 'Semua Kategori' || log.category === filterCategory;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesCategory;
   });
 
   const getStatusIcon = (status: SaaSLog['status']) => {
@@ -57,12 +69,21 @@ export default function AdminSaaSLogs() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text"
-              placeholder="Cari aksi, admin, atau target..."
+              placeholder="Cari aksi, admin, desa, atau target..."
               className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 transition-all text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 transition-all text-sm"
+          >
+            {['Semua Kategori', 'SaaS Admin', 'Desa', 'System', 'Surat', 'Penduduk'].map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
           <div className="flex gap-2">
             {['Semua', 'Berhasil', 'Gagal', 'Peringatan'].map(status => (
               <button
@@ -85,21 +106,26 @@ export default function AdminSaaSLogs() {
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">
               <tr>
-                <th className="px-8 py-4">Waktu & Tanggal</th>
-                <th className="px-8 py-4">Administrator</th>
-                <th className="px-8 py-4">Aksi</th>
-                <th className="px-8 py-4">Target</th>
-                <th className="px-8 py-4">Status</th>
+                <th className="px-6 py-4">Waktu</th>
+                <th className="px-6 py-4">Desa / Tenant</th>
+                <th className="px-6 py-4">Administrator</th>
+                <th className="px-6 py-4">Kategori</th>
+                <th className="px-6 py-4">Aksi</th>
+                <th className="px-6 py-4">Target</th>
+                <th className="px-6 py-4">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredLogs.length > 0 ? filteredLogs.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
-                  <td className="px-8 py-5">
+                  <td className="px-6 py-5">
                     <div className="font-bold text-slate-900 dark:text-white">{log.waktu}</div>
                     <div className="text-[10px] text-slate-400 mt-0.5">{log.tanggal}</div>
                   </td>
-                  <td className="px-8 py-5">
+                  <td className="px-6 py-5">
+                    <span className="font-bold text-slate-900 dark:text-white">{log.tenant_name || '-'}</span>
+                  </td>
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400">
                         {log.admin.charAt(0)}
@@ -107,13 +133,16 @@ export default function AdminSaaSLogs() {
                       <span className="font-medium text-slate-700 dark:text-slate-300">{log.admin}</span>
                     </div>
                   </td>
-                  <td className="px-8 py-5">
+                  <td className="px-6 py-5">
+                    <span className="text-xs px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">{log.category || 'System'}</span>
+                  </td>
+                  <td className="px-6 py-5">
                     <span className="font-bold text-slate-900 dark:text-white">{log.aksi}</span>
                   </td>
-                  <td className="px-8 py-5 text-slate-500 dark:text-slate-400 italic">
+                  <td className="px-6 py-5 text-slate-500 dark:text-slate-400 italic">
                     {log.target}
                   </td>
-                  <td className="px-8 py-5">
+                  <td className="px-6 py-5">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(log.status)}
                       <span className={`text-[10px] font-black uppercase tracking-widest ${
@@ -127,7 +156,7 @@ export default function AdminSaaSLogs() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={5} className="px-8 py-20 text-center text-slate-400">
+                  <td colSpan={7} className="px-6 py-20 text-center text-slate-400">
                     <div className="flex flex-col items-center">
                       <Database size={48} className="mb-4 opacity-10" />
                       <p className="font-bold">Tidak ada data log yang ditemukan.</p>

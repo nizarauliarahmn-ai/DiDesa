@@ -143,13 +143,23 @@ export default function AdminHeader({
     setDbStatus({ engine: 'Supabase (Multi-Tenant)' });
 
     const loadNotifications = async () => {
+      const authUserStr = localStorage.getItem('didesa_auth_user');
+      const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
       const tenantId = await resolveCurrentTenant();
-      if (!tenantId) return;
       
-      const { data } = await supabase.from('notifications')
+      if (role !== 'saas_admin' && !tenantId) return;
+
+      let query = supabase.from('notifications')
         .select('*')
-        .eq('tenant_id', tenantId)
         .order('timestamp', { ascending: false });
+
+      if (role === 'saas_admin') {
+        query = query.is('tenant_id', null);
+      } else {
+        query = query.eq('tenant_id', tenantId);
+      }
+
+      const { data } = await query;
         
       if (data && Array.isArray(data)) {
         const formattedData = data.map(n => ({
@@ -162,21 +172,20 @@ export default function AdminHeader({
           isRead: n.is_read
         }));
             try {
-              const authUserStr = localStorage.getItem('didesa_auth_user');
-              const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
-              
               let roleData = [];
               if (role === 'saas_admin') {
-                roleData = data.filter(n => n.category === 'System');
+                // SaaS admin reads notifications where category = 'System' or 'SaaS Global'
+                roleData = data.filter(n => n.category === 'System' || n.category === 'SaaS Global');
                 
+                // We keep the old localStorage fallback just in case there are old requests
                 const saasReqsStr = localStorage.getItem('saas_letter_requests');
                 if (saasReqsStr) {
                   const saasReqs = JSON.parse(saasReqsStr);
                   saasReqs.forEach((r: any) => {
                     roleData.unshift({
                       id: `saas-req-${r.id}`,
-                      title: 'Pengajuan Tambah Surat',
-                      message: `Desa ${r.villageName} mengajukan surat baru: ${r.letterName}.`,
+                      title: 'Pengajuan Tambah Surat (Lokal)',
+                      message: `Desa ${r.villageName} mengajukan surat: ${r.letterName}.`,
                       category: 'System',
                       time: 'Baru saja',
                       timestamp: r.timestamp,
@@ -240,7 +249,12 @@ export default function AdminHeader({
       setUnreadCount(0);
 
       const tenantId = await resolveCurrentTenant();
-      if (tenantId) {
+      if (role === 'saas_admin') {
+        await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .is('tenant_id', null);
+      } else if (tenantId) {
         await supabase
           .from('notifications')
           .update({ is_read: true })
