@@ -31,9 +31,19 @@ const GLOBAL_BRANDING_KEYS = [
   'global_footer_copyright',
 ];
 
+// Kunci setting SaaS global yang tersimpan di tabel saas_settings
+const SAAS_SETTINGS_GLOBAL_KEYS = [
+  'saas_global_letter_catalog',
+  'saas_feature_flags',
+  'saas_kiosk_config',
+];
+
 let _isSyncing = false;
 let _lastSynced: number | null = null;
 let _realtimeChannel: any = null;
+let _saasSettingsChannel: any = null;
+let _isSaasSettingsSyncing = false;
+let _lastSaasSettingsSynced: number | null = null;
 
 /**
  * Syncs global_settings table (SaaS-wide) from Supabase into localStorage.
@@ -127,6 +137,103 @@ export function subscribeGlobalBrandingRealtime(): () => void {
     if (_realtimeChannel) {
       supabase.removeChannel(_realtimeChannel);
       _realtimeChannel = null;
+    }
+  };
+}
+
+/**
+ * Syncs saas_settings table (SaaS global settings: letter catalog, flags, etc.)
+ * into localStorage. Dispatches 'letter_classifications_updated' when changed.
+ *
+ * RULE: Ini adalah sumber kebenaran untuk semua pengaturan SaaS — bukan localStorage.
+ */
+export async function syncSaaSSettingsFromSupabase(force = false): Promise<void> {
+  if (_isSaasSettingsSyncing) return;
+  if (!force && _lastSaasSettingsSynced && Date.now() - _lastSaasSettingsSynced < 5000) return;
+
+  _isSaasSettingsSyncing = true;
+  try {
+    const { data, error } = await supabase
+      .from('saas_settings')
+      .select('key, value')
+      .in('key', SAAS_SETTINGS_GLOBAL_KEYS);
+
+    if (error) {
+      console.warn('[SaaSSettings] Supabase fetch error:', error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) return;
+
+    let changed = false;
+    data.forEach((row: { key: string; value: string }) => {
+      if (!row.value || row.value.trim() === '') return;
+      const current = localStorage.getItem(row.key);
+      if (current !== row.value) {
+        localStorage.setItem(row.key, row.value);
+        changed = true;
+      }
+    });
+
+    _lastSaasSettingsSynced = Date.now();
+
+    if (changed) {
+      window.dispatchEvent(new Event('letter_classifications_updated'));
+      window.dispatchEvent(new Event('village_settings_updated'));
+    }
+  } catch (err) {
+    console.warn('[SaaSSettings] Sync failed:', err);
+  } finally {
+    _isSaasSettingsSyncing = false;
+  }
+}
+
+/**
+ * Subscribes to Supabase Realtime channel for saas_settings table.
+ * Ensures ALL devices get SaaS Admin changes in real-time (<100ms).
+ *
+ * RULE: Wajib dipanggil saat app load. Ini adalah jaminan cross-device sync.
+ */
+export function subscribeSaaSSettingsRealtime(): () => void {
+  // Sync segera saat subscribe
+  syncSaaSSettingsFromSupabase(true);
+
+  // Set up Realtime listener
+  if (!_saasSettingsChannel) {
+    _saasSettingsChannel = supabase
+      .channel('public:saas_settings:global')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'saas_settings' },
+        (payload: any) => {
+          if (payload.new && payload.new.key && payload.new.value !== undefined) {
+            const { key, value } = payload.new;
+            if (SAAS_SETTINGS_GLOBAL_KEYS.includes(key) && value && value.trim() !== '') {
+              localStorage.setItem(key, value);
+              window.dispatchEvent(new Event('letter_classifications_updated'));
+              window.dispatchEvent(new Event('village_settings_updated'));
+            }
+          }
+          syncSaaSSettingsFromSupabase(true);
+        }
+      )
+      .subscribe();
+  }
+
+  const handleFocus = () => syncSaaSSettingsFromSupabase(true);
+  window.addEventListener('focus', handleFocus);
+
+  // Background polling fallback (setiap 30 detik)
+  const interval = setInterval(() => {
+    syncSaaSSettingsFromSupabase(false);
+  }, 30000);
+
+  return () => {
+    window.removeEventListener('focus', handleFocus);
+    clearInterval(interval);
+    if (_saasSettingsChannel) {
+      supabase.removeChannel(_saasSettingsChannel);
+      _saasSettingsChannel = null;
     }
   };
 }
