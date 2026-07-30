@@ -1,5 +1,6 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
+import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -505,23 +506,35 @@ export default function AdminSuratNikah({
     setSuccess(true);
   };
 
-  const kopHtml = () => {
+  const generateKopSuratHTML = (config: { logoUrl: string, kabupaten: string, kecamatan: string, desa: string, alamat: string, kontak: string, fontFamily: string }) => {
     return `
-      <div style="display:flex;align-items:flex-start;border-bottom:2.5px solid #000;padding-bottom:8px;margin-bottom:10px;font-family:${letterFont};">
+      <div style="display:flex;align-items:flex-start;border-bottom:2.5px solid #000;padding-bottom:8px;margin-bottom:10px;font-family:${config.fontFamily};">
         <div style="display:flex;width:100%;align-items:center;">
           <div style="width:100px;height:110px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
-            <img src="${localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png'}" style="width:100%;height:100%;object-fit:contain;" />
+            <img src="${config.logoUrl}" style="width:100%;height:100%;object-fit:contain;" />
           </div>
           <div style="text-align:center;flex:1;padding-right:100px;">
-            <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${v(formData.namaKabupaten).toUpperCase()}</div>
-            <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${v(formData.namaKecamatan).toUpperCase()}</div>
-            <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${v(formData.namaDesa).toUpperCase()}</div>
-            <div style="font-size:10.5px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${v(formData.alamatKantor)}</div>
-            <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${v(formData.kontakKantor)}</div>
+            <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${config.kabupaten.toUpperCase()}</div>
+            <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">${config.kecamatan.toUpperCase()}</div>
+            <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">${config.desa.toUpperCase()}</div>
+            <div style="font-size:10.5px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${config.alamat}</div>
+            <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${config.kontak}</div>
           </div>
         </div>
       </div>
     `;
+  };
+
+  const kopHtml = () => {
+    return generateKopSuratHTML({
+      logoUrl: localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png',
+      kabupaten: v(formData.namaKabupaten),
+      kecamatan: v(formData.namaKecamatan),
+      desa: v(formData.namaDesa),
+      alamat: v(formData.alamatKantor),
+      kontak: v(formData.kontakKantor),
+      fontFamily: letterFont
+    });
   };
 
   const lampiranHtml = (model: string) => {
