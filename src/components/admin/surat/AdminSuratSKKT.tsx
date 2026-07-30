@@ -396,25 +396,7 @@ export default function AdminSuratSKKT({
 
     return `
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
-      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; position:relative; min-height: 1000px; box-sizing: border-box; padding-bottom: 30px;">
-        
-        <!-- KOP SURAT -->
-        <div style="border-bottom: 3px solid #000; margin-bottom: 12px;">
-          <div style="display: flex; align-items: flex-start; padding-bottom: 6px; margin-bottom: 1px; font-family: ${letterFont};">
-            <div style="display: flex; width: 100%; align-items: center;">
-              <div style="width: 90px; height: 100px; flex: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-right: 15px;">
-                <img src="${villageLogo}" style="width: 100%; height: 100%; object-fit: contain;" />
-              </div>
-              <div style="text-align: center; flex: 1; padding-right: 90px;">
-                <div style="font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1; margin: 0 0 2px 0;">${activeKabupaten.toUpperCase()}</div>
-                <div style="font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1; margin: 0 0 2px 0;">${activeKecamatan.toUpperCase()}</div>
-                <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; letter-spacing: 2px; line-height: 1.1; margin: 2px 0 3px 0;">DESA ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i).toUpperCase()}</div>
-                <div style="font-size: 10.5px; margin-top: 4px; text-transform: capitalize; line-height: 1.15; margin: 2px 0 1px 0;">${activeAlamat}</div>
-                <div style="font-size: 10.5px; line-height: 1.15; margin: 1px 0 0 0;">${activeKontak}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div style="font-family:${letterFont}; font-size:12px; line-height:1.45; color:black; position:relative; box-sizing: border-box; padding-bottom: 30px; page-break-after: always; break-after: page;">
 
         <!-- JUDUL SURAT -->
         <div style="text-align:center; margin-top:10px; margin-bottom:16px;">
@@ -524,25 +506,7 @@ export default function AdminSuratSKKT({
       </div>
 
       <!-- PAGE 2: GAMBAR SITUASI KASAR TANAH -->
-      <div style="page-break-before: always; font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; position:relative; min-height: 1000px; box-sizing: border-box; padding-top:20px; padding-bottom: 30px;">
-        
-        <!-- KOP SURAT -->
-        <div style="border-bottom: 3px solid #000; margin-bottom: 12px;">
-          <div style="display: flex; align-items: flex-start; padding-bottom: 6px; margin-bottom: 1px; font-family: ${letterFont};">
-            <div style="display: flex; width: 100%; align-items: center;">
-              <div style="width: 90px; height: 100px; flex: none; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-right: 15px;">
-                <img src="${villageLogo}" style="width: 100%; height: 100%; object-fit: contain;" />
-              </div>
-              <div style="text-align: center; flex: 1; padding-right: 90px;">
-                <div style="font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1; margin: 0 0 2px 0;">${activeKabupaten.toUpperCase()}</div>
-                <div style="font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.1; margin: 0 0 2px 0;">${activeKecamatan.toUpperCase()}</div>
-                <div style="font-weight: 900; font-size: 26px; text-transform: uppercase; letter-spacing: 2px; line-height: 1.1; margin: 2px 0 3px 0;">DESA ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i).toUpperCase()}</div>
-                <div style="font-size: 10.5px; margin-top: 4px; text-transform: capitalize; line-height: 1.15; margin: 2px 0 1px 0;">${activeAlamat}</div>
-                <div style="font-size: 10.5px; line-height: 1.15; margin: 1px 0 0 0;">${activeKontak}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div style="page-break-before: always; break-before: page; font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; position:relative; box-sizing: border-box; padding-top:20px; padding-bottom: 30px;">
 
         <div style="text-align:center; margin-bottom:15px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">GAMBAR SITUASI KASAR TANAH</h3>
