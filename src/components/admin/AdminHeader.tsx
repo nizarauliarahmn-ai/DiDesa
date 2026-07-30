@@ -154,7 +154,7 @@ export default function AdminHeader({
         .order('timestamp', { ascending: false });
 
       if (role === 'saas_admin') {
-        query = query.is('tenant_id', null);
+        query = query.or('category.eq.System,category.eq.SaaS Global');
       } else {
         query = query.eq('tenant_id', tenantId);
       }
@@ -351,20 +351,34 @@ export default function AdminHeader({
     
     // Navigation logic
     const title = (item.title || '').toLowerCase();
-    const msg = item.message.toLowerCase();
-    
-    if (title.includes('persetujuan') || title.includes('approval') || msg.includes('menunggu persetujuan')) {
-      if (setActiveTab) setActiveTab('antrean');
-    } else if (title.includes('penduduk') || msg.includes('penduduk')) {
-      if (setActiveTab) setActiveTab('penduduk');
-    } else if (title.includes('surat') || msg.includes('surat')) {
-      if (setActiveTab) setActiveTab('surat');
-    } else if (title.includes('keuangan') || msg.includes('keuangan')) {
-      if (setActiveTab) setActiveTab('keuangan');
-    } else if (title.includes('bantuan') || msg.includes('bantuan')) {
-      if (setActiveTab) setActiveTab('bantuan');
-    } else if (title.includes('aspirasi') || msg.includes('aspirasi')) {
-      if (setActiveTab) setActiveTab('aspirasi');
+    const msg = (item.message || '').toLowerCase();
+    const authUserStr = localStorage.getItem('didesa_auth_user');
+    const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
+
+    if (role === 'saas_admin') {
+      if (title.includes('surat') || title.includes('pengajuan') || title.includes('template') || msg.includes('surat')) {
+        if (setActiveTab) setActiveTab('template_surat');
+      } else if (title.includes('klien') || title.includes('tenant') || title.includes('desa') || msg.includes('klien')) {
+        if (setActiveTab) setActiveTab('manajemen_klien');
+      } else if (title.includes('log') || title.includes('aktivitas') || msg.includes('aktivitas')) {
+        if (setActiveTab) setActiveTab('log_aktivitas');
+      } else {
+        if (setActiveTab) setActiveTab('dashboard');
+      }
+    } else {
+      if (title.includes('persetujuan') || title.includes('approval') || msg.includes('menunggu persetujuan')) {
+        if (setActiveTab) setActiveTab('antrean');
+      } else if (title.includes('penduduk') || msg.includes('penduduk')) {
+        if (setActiveTab) setActiveTab('penduduk');
+      } else if (title.includes('surat') || msg.includes('surat')) {
+        if (setActiveTab) setActiveTab('surat');
+      } else if (title.includes('keuangan') || msg.includes('keuangan')) {
+        if (setActiveTab) setActiveTab('keuangan');
+      } else if (title.includes('bantuan') || msg.includes('bantuan')) {
+        if (setActiveTab) setActiveTab('bantuan');
+      } else if (title.includes('aspirasi') || msg.includes('aspirasi')) {
+        if (setActiveTab) setActiveTab('aspirasi');
+      }
     }
     
     setShowNotifDropdown(false);
