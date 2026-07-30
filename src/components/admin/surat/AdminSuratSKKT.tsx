@@ -8,6 +8,7 @@ import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 
 interface Resident {
   nik: string;
@@ -20,241 +21,7 @@ interface Resident {
   desa: string;
 }
 
-// Sub-component for Interactive Leaflet Satellite Map Picker
-function LandMapPickerModal({
-  initialLat,
-  initialLng,
-  onSave,
-  onClose
-}: {
-  initialLat: string;
-  initialLng: string;
-  onSave: (lat: string, lng: string) => void;
-  onClose: () => void;
-}) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const tileLayerRef = useRef<L.TileLayer | null>(null);
-
-  const [latVal, setLatVal] = useState(initialLat || '-2.797806');
-  const [lngVal, setLngVal] = useState(initialLng || '115.227889');
-  const [mapType, setMapType] = useState<'satellite' | 'street'>('satellite');
-
-  const tileUrls = {
-    satellite: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
-    street: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-  };
-
-  const tileAttributions = {
-    satellite: '&copy; Google Maps Satellite Imagery',
-    street: '&copy; OpenStreetMap &copy; CARTO'
-  };
-
-  useEffect(() => {
-    if (!mapContainerRef.current) return;
-
-    const parseLat = parseFloat(latVal) || -2.797806;
-    const parseLng = parseFloat(lngVal) || 115.227889;
-
-    if (!mapInstanceRef.current) {
-      const map = L.map(mapContainerRef.current, {
-        center: [parseLat, parseLng],
-        zoom: 17,
-        zoomControl: true,
-      });
-
-      const tileLayer = L.tileLayer(tileUrls[mapType], {
-        maxZoom: 20,
-        attribution: tileAttributions[mapType]
-      }).addTo(map);
-
-      tileLayerRef.current = tileLayer;
-
-      const customIcon = L.divIcon({
-        className: 'custom-land-pin',
-        html: `
-          <div class="relative flex items-center justify-center">
-            <span class="absolute inline-flex h-10 w-10 rounded-full bg-red-500 opacity-60 animate-ping"></span>
-            <div class="w-9 h-9 rounded-full bg-red-600 border-2 border-white shadow-2xl flex items-center justify-center text-white font-bold text-xs">
-              📍
-            </div>
-          </div>
-        `,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
-      });
-
-      const marker = L.marker([parseLat, parseLng], {
-        draggable: true,
-        icon: customIcon
-      }).addTo(map);
-
-      marker.on('dragend', () => {
-        const position = marker.getLatLng();
-        setLatVal(position.lat.toFixed(6));
-        setLngVal(position.lng.toFixed(6));
-      });
-
-      map.on('click', (e: L.LeafletMouseEvent) => {
-        const { lat, lng } = e.latlng;
-        marker.setLatLng([lat, lng]);
-        setLatVal(lat.toFixed(6));
-        setLngVal(lng.toFixed(6));
-      });
-
-      markerRef.current = marker;
-      mapInstanceRef.current = map;
-    }
-
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-        markerRef.current = null;
-        tileLayerRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (mapInstanceRef.current && tileLayerRef.current) {
-      mapInstanceRef.current.removeLayer(tileLayerRef.current);
-      const newTileLayer = L.tileLayer(tileUrls[mapType], {
-        maxZoom: 20,
-        attribution: tileAttributions[mapType]
-      }).addTo(mapInstanceRef.current);
-      tileLayerRef.current = newTileLayer;
-    }
-  }, [mapType]);
-
-  const handleCoordInputChange = (newLat: string, newLng: string) => {
-    setLatVal(newLat);
-    setLngVal(newLng);
-    const pLat = parseFloat(newLat);
-    const pLng = parseFloat(newLng);
-    if (!isNaN(pLat) && !isNaN(pLng) && mapInstanceRef.current && markerRef.current) {
-      mapInstanceRef.current.setView([pLat, pLng], mapInstanceRef.current.getZoom());
-      markerRef.current.setLatLng([pLat, pLng]);
-    }
-  };
-
-  const handleGetCurrentLocation = () => {
-    if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const lat = pos.coords.latitude.toFixed(6);
-          const lng = pos.coords.longitude.toFixed(6);
-          handleCoordInputChange(lat, lng);
-          showToast('Koordinat lokasi GPS saat ini berhasil diambil!', 'success');
-        },
-        (err) => {
-          showToast('Gagal mengakses GPS perangkat: ' + err.message, 'error');
-        }
-      );
-    } else {
-      showToast('Browser Anda tidak mendukung lokasi GPS', 'error');
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="p-5 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-gray-50/50 dark:bg-slate-800/50">
-          <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white flex items-center gap-2">
-              <MapIcon className="w-5 h-5 text-emerald-600" /> Penanda Koordinat & Foto Satelit Obyek Tanah
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-              Klik lokasi tanah di peta atau geser pin merah untuk mengambil lokasi GPS tanah secara presisi.
-            </p>
-          </div>
-          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-600 font-bold rounded-lg text-lg">✕</button>
-        </div>
-
-        <div className="p-4 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
-            <button
-              onClick={() => setMapType('satellite')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                mapType === 'satellite'
-                  ? 'bg-emerald-700 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5" /> 🛰️ Satelit & Foto Udara
-            </button>
-            <button
-              onClick={() => setMapType('street')}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
-                mapType === 'street'
-                  ? 'bg-emerald-700 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" /> 🗺️ Peta Jalan
-            </button>
-          </div>
-
-          <button
-            onClick={handleGetCurrentLocation}
-            className="px-3.5 py-1.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition-all flex items-center gap-1.5"
-          >
-            <Navigation className="w-3.5 h-3.5" /> 🎯 Ambil GPS HP / Perangkat
-          </button>
-        </div>
-
-        <div className="relative w-full h-[400px] bg-slate-200">
-          <div ref={mapContainerRef} className="w-full h-full z-0" />
-          <div className="absolute top-3 right-3 bg-black/75 text-white backdrop-blur-md px-3 py-1.5 rounded-xl text-[11px] font-mono shadow-lg z-[10] border border-white/20">
-            📍 Lat: {latVal} | Lng: {lngVal}
-          </div>
-        </div>
-
-        <div className="p-5 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="grid grid-cols-2 gap-3 text-xs w-full sm:w-auto">
-            <div>
-              <span className="font-bold text-gray-500 block mb-1">Latitude</span>
-              <input
-                type="text"
-                value={latVal}
-                onChange={e => handleCoordInputChange(e.target.value, lngVal)}
-                className="w-full sm:w-36 p-2 border border-gray-200 dark:border-slate-700 rounded-xl font-mono text-xs bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-            <div>
-              <span className="font-bold text-gray-500 block mb-1">Longitude</span>
-              <input
-                type="text"
-                value={lngVal}
-                onChange={e => handleCoordInputChange(latVal, e.target.value)}
-                className="w-full sm:w-36 p-2 border border-gray-200 dark:border-slate-700 rounded-xl font-mono text-xs bg-white dark:bg-slate-900 outline-none focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <button
-              onClick={onClose}
-              className="px-4 py-2.5 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl hover:bg-gray-300 transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              onClick={() => {
-                onSave(latVal, lngVal);
-                onClose();
-              }}
-              className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
-            >
-              <MapPin className="w-4 h-4" /> Gunakan Koordinat Ini
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+// Removed inline LandMapPickerModal, replaced by external LandPolygonPickerModal
 
 export default function AdminSuratSKKT({ 
   onBack, 
@@ -332,8 +99,9 @@ export default function AdminSuratSKKT({
     alamatKantor: localStorage.getItem('kop_alamat') || '',
     kontakKantor: localStorage.getItem('kop_kontak') || '',
 
-    lat: '-2.797806',
-    lng: '115.227889',
+    lat: editData?.data?.lat || '',
+    lng: editData?.data?.lng || '',
+    polygonPoints: editData?.data?.polygonPoints || [],
     keperluan: 'Kelengkapan Berkas / Sertifikasi Tanah',
   });
 
@@ -387,11 +155,61 @@ export default function AdminSuratSKKT({
   };
 
   const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? val : fallback);
+  const toTitleCase = (str: string) => {
+    if (!str) return '';
+    return str.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+  };
+
+  const generatePolygonSVG = () => {
+    const pts = formData.polygonPoints;
+    if (!pts || pts.length < 3) {
+      return `<div style="width:100%; height:100%; border:1px dashed #666; background: #f0fdf4; display:flex; align-items:center; justify-content:center; color:#666; font-size:10px;">Belum ada poligon peta satelit</div>`;
+    }
+    const lats = pts.map((p: any) => p.lat);
+    const lngs = pts.map((p: any) => p.lng);
+    const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+    
+    const viewWidth = 100;
+    const viewHeight = 100;
+    const padding = 15;
+    const drawWidth = viewWidth - 2 * padding;
+    const drawHeight = viewHeight - 2 * padding;
+    
+    const dLat = maxLat - minLat || 0.00001;
+    const dLng = maxLng - minLng || 0.00001;
+    
+    const scaleX = drawWidth / dLng;
+    const scaleY = drawHeight / dLat;
+    const scale = Math.min(scaleX, scaleY);
+    
+    const scaledW = dLng * scale;
+    const scaledH = dLat * scale;
+    const offsetX = (viewWidth - scaledW) / 2;
+    const offsetY = (viewHeight - scaledH) / 2;
+    
+    const svgPoints = pts.map((p: any) => {
+      const x = offsetX + (p.lng - minLng) * scale;
+      const y = offsetY + (maxLat - p.lat) * scale; // Invert Y because SVG origin is top-left
+      return `${x},${y}`;
+    }).join(' ');
+
+    return `
+      <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet">
+        <polygon points="${svgPoints}" fill="#dcfce7" stroke="#16a34a" stroke-width="0.8" stroke-linejoin="round" />
+        <!-- Poin perbatasan -->
+        ${pts.map((p: any) => {
+          const x = offsetX + (p.lng - minLng) * scale;
+          const y = offsetY + (maxLat - p.lat) * scale;
+          return `<circle cx="${x}" cy="${y}" r="1.5" fill="#ef4444" />`;
+        }).join('')}
+      </svg>
+    `;
+  };
   
   const generateHTML = () => {
     const today = new Date();
     const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    const monthRoman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'][today.getMonth()];
     
     const page1 = `
       <!-- PAGE 1: SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH -->
@@ -400,7 +218,7 @@ export default function AdminSuratSKKT({
         <!-- JUDUL SURAT -->
         <div style="text-align:center; margin-top:10px; margin-bottom:16px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH</h3>
-          <p style="margin:3px 0 0 0; font-size:12px;">Nomor : ${v(formData.nomorSurat, '251/SKKT/' + monthRoman + '/' + today.getFullYear())}</p>
+          <p style="margin:3px 0 0 0; font-size:12px;">Nomor : ${formData.nomorSurat || '...'}</p>
         </div>
 
         <p style="margin-bottom:6px;">Yang bertanda tangan di bawah ini :</p>
@@ -442,22 +260,20 @@ export default function AdminSuratSKKT({
             <td style="width:20px; vertical-align:top;">1.</td>
             <td style="width:90px; vertical-align:top;">Nama<br/>NIK</td>
             <td style="width:12px; vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${v(formData.saksi1Nama)}</strong><br/>${v(formData.saksi1Nik)}</td>
+            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi1Nama))}</strong><br/>${v(formData.saksi1Nik)}</td>
           </tr>
           <tr>
             <td style="vertical-align:top;">2.</td>
             <td style="vertical-align:top;">Nama<br/>NIK</td>
             <td style="vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${v(formData.saksi2Nama)}</strong><br/>${v(formData.saksi2Nik)}</td>
+            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi2Nama))}</strong><br/>${v(formData.saksi2Nik)}</td>
           </tr>
-          ${formData.saksi3Nama ? `
           <tr>
             <td style="vertical-align:top;">3.</td>
             <td style="vertical-align:top;">Nama<br/>NIK</td>
             <td style="vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${v(formData.saksi3Nama)}</strong><br/>${v(formData.saksi3Nik)}</td>
+            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi3Nama))}</strong><br/>${v(formData.saksi3Nik)}</td>
           </tr>
-          ` : ''}
         </table>
 
         <p style="text-align:justify; margin-bottom:16px; line-height:1.4;">
@@ -469,9 +285,9 @@ export default function AdminSuratSKKT({
           <!-- SAKSI-SAKSI (KIRI) -->
           <div style="width:48%;">
             <p style="margin-bottom:6px; font-weight:bold;">Saksi – Saksi :</p>
-            <p style="margin-bottom:4px;">1. ${v(formData.saksi1Nama)} ( ....................... )</p>
-            <p style="margin-bottom:4px;">2. ${v(formData.saksi2Nama)} ( ....................... )</p>
-            ${formData.saksi3Nama ? `<p style="margin-bottom:4px;">3. ${v(formData.saksi3Nama)} ( ....................... )</p>` : ''}
+            <p style="margin-bottom:4px;">1. ${toTitleCase(v(formData.saksi1Nama))} ( ....................... )</p>
+            <p style="margin-bottom:4px;">2. ${toTitleCase(v(formData.saksi2Nama))} ( ....................... )</p>
+            <p style="margin-bottom:4px;">3. ${toTitleCase(v(formData.saksi3Nama))} ( ....................... )</p>
           </div>
 
           <!-- PEMBUAT PERNYATAAN (KANAN) -->
@@ -543,8 +359,10 @@ export default function AdminSuratSKKT({
               <span style="font-size:10px; color:#444;">${v(formData.ukuranBarat, '7 Meter')}</span>
             </div>
 
-            <!-- SKETSA SHAPE INSIDE -->
-            <div style="width:100%; height:100%; border:1px dashed #666; clip-path: polygon(0% 15%, 85% 0%, 100% 100%, 0% 100%); background: #f0fdf4;"></div>
+            <!-- SKETSA SHAPE INSIDE (FROM POLYGON MAP) -->
+            <div style="width:100%; height:100%; border:1px solid #d1d5db; background: #f8fafc;">
+              ${generatePolygonSVG()}
+            </div>
           </div>
 
           <!-- KOMPAS PANAH ARAH UTARA (U) -> SELATAN (S) DI SEBELAH KANAN -->
@@ -891,15 +709,24 @@ export default function AdminSuratSKKT({
             <div className="p-4 bg-emerald-50/50 dark:bg-slate-800/50 rounded-xl border border-emerald-100 dark:border-slate-700 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-xs text-emerald-900 dark:text-emerald-300">Georeferensi Koordinat Tanah</p>
-                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-mono">Lat: {formData.lat}, Lng: {formData.lng}</p>
+                  <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Koordinat Poligon & Satelit <span className="text-red-500">*</span></label>
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Klik tombol map untuk menggambar" 
+                      value={formData.polygonPoints?.length > 0 ? `${formData.polygonPoints.length} Titik Terukur` : ''} 
+                      disabled
+                      className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-slate-800 text-emerald-700 font-bold" 
+                    />
+                    <button 
+                      onClick={() => setShowMapModal(true)}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-2 whitespace-nowrap shadow-sm"
+                    >
+                      <MapPin className="w-4 h-4" /> Buka Peta
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-gray-500 mt-1">Gunakan peta satelit interaktif untuk menggambar batas tanah dan menghitung luas otomatis.</p>
                 </div>
-                <button 
-                  onClick={() => setShowMapModal(true)}
-                  className="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-xs flex items-center gap-1.5 shadow-sm"
-                >
-                  <MapIcon className="w-3.5 h-3.5" /> Tandai di Peta Satelit
-                </button>
               </div>
             </div>
           </div>
@@ -966,7 +793,7 @@ export default function AdminSuratSKKT({
 
             {/* Saksi 3 */}
             <div className="p-3 bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-700 space-y-2 text-xs">
-              <p className="font-bold text-gray-700 dark:text-slate-300">Saksi 3 (Opsional):</p>
+              <p className="font-bold text-gray-700 dark:text-slate-300">Saksi 3:</p>
               <div className="relative">
                 <input 
                   type="text" 
@@ -1076,12 +903,23 @@ export default function AdminSuratSKKT({
 
       {/* Interactive Satellite Map Picker Modal */}
       {showMapModal && (
-        <LandMapPickerModal
+        <LandPolygonPickerModal
           initialLat={formData.lat}
           initialLng={formData.lng}
-          onSave={(newLat, newLng) => {
-            setFormData(prev => ({ ...prev, lat: newLat, lng: newLng }));
-            showToast(`Koordinat diperbarui: ${newLat}, ${newLng}`, 'success');
+          onSave={(data: PolygonData) => {
+            setFormData(prev => ({ 
+              ...prev, 
+              lat: data.centerLat, 
+              lng: data.centerLng,
+              polygonPoints: data.points,
+              luasTanah: data.area.toFixed(2),
+              ukuranUtara: data.northDistance > 0 ? `${data.northDistance.toFixed(1)} Meter` : prev.ukuranUtara,
+              ukuranSelatan: data.southDistance > 0 ? `${data.southDistance.toFixed(1)} Meter` : prev.ukuranSelatan,
+              ukuranTimur: data.eastDistance > 0 ? `${data.eastDistance.toFixed(1)} Meter` : prev.ukuranTimur,
+              ukuranBarat: data.westDistance > 0 ? `${data.westDistance.toFixed(1)} Meter` : prev.ukuranBarat,
+            }));
+            showToast(`Area berhasil diukur: ${data.area.toFixed(2)} m²`, 'success');
+            setShowMapModal(false);
           }}
           onClose={() => setShowMapModal(false)}
         />
