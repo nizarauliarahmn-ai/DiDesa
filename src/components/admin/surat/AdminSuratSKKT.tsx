@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck } from 'lucide-react';
+import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLetterKode } from '../../../hooks/useLetterKode';
@@ -884,63 +884,97 @@ export default function AdminSuratSKKT({
                     ))}
                   </div>
                 )}
-              </div>
+</div>
               <div className="grid grid-cols-2 gap-2">
                 <input type="text" placeholder="Nama Saksi 3" value={formData.saksi3Nama} onChange={e => setFormData({ ...formData, saksi3Nama: e.target.value })} className="p-2 border rounded-lg" />
                 <input type="text" placeholder="NIK Saksi 3" value={formData.saksi3Nik} onChange={e => setFormData({ ...formData, saksi3Nik: e.target.value })} className="p-2 border rounded-lg font-mono" />
               </div>
             </div>
 
-            {/* Section 4: RT & Kades */}
-            <div className="grid grid-cols-3 gap-3 text-xs pt-2">
-              <div>
-                <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nomor RT</label>
-                <input type="text" placeholder="02" value={formData.nomorRt} onChange={e => {
-                    const rtVal = e.target.value;
-                    let autoName = formData.namaKetuaRt;
-                    try {
-                      const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-                      const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtVal) || o.role.toLowerCase().includes('rt.' + rtVal) || o.role.toLowerCase().includes('rt. ' + rtVal));
-                      if (rtOfficer) autoName = rtOfficer.name;
-                    } catch (err) {}
-                    setFormData({ ...formData, nomorRt: rtVal, namaKetuaRt: autoName.toUpperCase() });
-                  }} className="w-full p-2 border rounded-lg" />
+            {/* Pejabat Penandatangan */}
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                  <FileSignature className="w-4 h-4 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100">Pejabat & Pengesahan</h3>
               </div>
-              <div>
-                <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nama Ketua RT</label>
-                <input type="text" placeholder="Nama Ketua RT" value={formData.namaKetuaRt} onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
-              </div>
-              <div>
-                <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pejabat / Kades</label>
-                <select 
-                    className="w-full p-2 border rounded-lg bg-white dark:bg-slate-900"
-                    value={formData.namaPejabat}
-                    onChange={(e) => {
-                      const name = e.target.value;
-                      setFormData(prev => ({ ...prev, namaPejabat: name }));
-                      try {
-                        const stored = localStorage.getItem('village_officers');
-                        if (stored) {
-                          const list = JSON.parse(stored);
-                          const found = list.find((o: any) => o.name === name);
-                          if (found) setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
-                        }
-                      } catch (err) {}
-                    }}
-                  >
-                    {(() => {
-                      try {
-                        const stored = localStorage.getItem('village_officers');
-                        if (stored) {
-                          const list = JSON.parse(stored);
-                          return list.map((o: any, i: number) => (
-                            <option key={i} value={o.name}>{o.name} ({o.role})</option>
-                          ));
-                        }
-                      } catch (err) {}
-                      return <option value="FAZAKKIR RAHMAD">FAZAKKIR RAHMAD (Kepala Desa)</option>;
-                    })()}
-                  </select>
+              <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Pejabat / Kades */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
+                    <select 
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                      value={formData.namaPejabat}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        setFormData(prev => ({ ...prev, namaPejabat: name }));
+                        try {
+                          const stored = localStorage.getItem('village_officers');
+                          if (stored) {
+                            const list = JSON.parse(stored);
+                            const found = list.find((o: any) => o.name === name);
+                            if (found) setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
+                          }
+                        } catch (err) {}
+                      }}
+                    >
+                      {(() => {
+                        try {
+                          const stored = localStorage.getItem('village_officers');
+                          if (stored) {
+                            const list = JSON.parse(stored);
+                            return list.map((o: any, i: number) => (
+                              <option key={i} value={o.name}>{o.name} ({o.role})</option>
+                            ));
+                          }
+                        } catch (err) {}
+                        return <option value="FAZAKKIR RAHMAD">FAZAKKIR RAHMAD (Kepala Desa)</option>;
+                      })()}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-amber-900">Jabatan Pejabat</label>
+                    <input 
+                      type="text" 
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none font-medium"
+                      value={formData.jabatanPejabat}
+                      onChange={e => setFormData({ ...formData, jabatanPejabat: e.target.value })}
+                    />
+                  </div>
+
+                  {/* RT */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-amber-900">Nomor RT</label>
+                    <input 
+                      type="text" 
+                      placeholder="02" 
+                      value={formData.nomorRt} 
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none font-medium"
+                      onChange={e => {
+                        const rtVal = e.target.value;
+                        let autoName = formData.namaKetuaRt;
+                        try {
+                          const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+                          const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtVal) || o.role.toLowerCase().includes('rt.' + rtVal) || o.role.toLowerCase().includes('rt. ' + rtVal));
+                          if (rtOfficer) autoName = rtOfficer.name;
+                        } catch (err) {}
+                        setFormData({ ...formData, nomorRt: rtVal, namaKetuaRt: autoName.toUpperCase() });
+                      }} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-amber-900">Nama Ketua RT</label>
+                    <input 
+                      type="text" 
+                      placeholder="Nama Ketua RT" 
+                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none font-bold"
+                      value={formData.namaKetuaRt} 
+                      onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} 
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
