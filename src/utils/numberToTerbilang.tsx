@@ -52,85 +52,72 @@ export function RupiahInput({ value, onChange, placeholder }: RupiahInputProps) 
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputEl = e.target;
-    const rawVal = inputEl.value;
+    const newRawVal = inputEl.value; // The string AFTER the browser processed the keystroke
+    const newCursor = inputEl.selectionStart || 0;
     const oldVal = displayValue;
-    const oldCursor = inputEl.selectionStart || oldVal.length;
+    
+    // We get old cursor from our selectionRef if available, otherwise from the input
+    const oldCursor = selectionRef.current !== null ? selectionRef.current : oldVal.length;
 
-    // Digits before old cursor position
-    const digitsBeforeCursor = oldVal.slice(0, oldCursor).replace(/\D/g, '').length;
-    const oldTotalDigits = oldVal.replace(/\D/g, '').length;
-    const newTotalDigits = rawVal.replace(/\D/g, '').length;
-    let delta = newTotalDigits - oldTotalDigits;
+    // 1. Digits before the new cursor in the newly emitted string
+    let digitsBeforeCursor = newRawVal.slice(0, newCursor).replace(/\D/g, '').length;
 
-    // Check if user hit Backspace directly over a dot '.' (e.g. "123.|456" -> "123456")
-    const deletedChar = oldVal[oldCursor - 1];
-    if (delta === 0 && deletedChar === '.' && oldCursor > 0) {
-      // User backspaced over a dot -> delete the digit before the dot too so cursor stays seamless
-      const digitsBeforeDot = oldVal.slice(0, oldCursor - 1).replace(/\D/g, '');
-      const digitsAfterDot = oldVal.slice(oldCursor).replace(/\D/g, '');
-      const digitsMinusOne = digitsBeforeDot.slice(0, -1) + digitsAfterDot;
+    const oldDigitsBeforeCursor = oldVal.slice(0, oldCursor).replace(/\D/g, '').length;
+    const oldCleanLength = oldVal.replace(/\D/g, '').length;
+    const newCleanLength = newRawVal.replace(/\D/g, '').length;
+    
+    const cleanLengthUnchanged = oldCleanLength === newCleanLength;
+    const lengthDecreased = newRawVal.length < oldVal.length;
 
-      let newDisplay = '';
-      let fullFormatted = '';
+    let cleanDigitsStr = newRawVal.replace(/\D/g, '');
 
-      if (digitsMinusOne) {
-        const num = Number(digitsMinusOne);
-        newDisplay = new Intl.NumberFormat('id-ID').format(num);
-        fullFormatted = `Rp. ${newDisplay},-`;
+    // 2. Detect Backspace on a dot
+    // If length decreased but digit count stayed the same, and cursor moved left (newCursor < oldCursor)
+    if (lengthDecreased && cleanLengthUnchanged && newCursor < oldCursor && digitsBeforeCursor === oldDigitsBeforeCursor) {
+      if (digitsBeforeCursor > 0) {
+        const arr = cleanDigitsStr.split('');
+        arr.splice(digitsBeforeCursor - 1, 1);
+        cleanDigitsStr = arr.join('');
+        digitsBeforeCursor -= 1;
       }
-
-      const targetDigitCount = Math.max(0, digitsBeforeCursor - 1);
-      let newPos = newDisplay.length;
-      if (!newDisplay || targetDigitCount === 0) {
-        newPos = 0;
-      } else {
-        let digitCounter = 0;
-        for (let i = 0; i < newDisplay.length; i++) {
-          if (/\d/.test(newDisplay[i])) {
-            digitCounter++;
-            if (digitCounter === targetDigitCount) {
-              newPos = i + 1;
-              break;
-            }
-          }
-        }
-      }
-
-      selectionRef.current = newPos;
-      onChange(fullFormatted);
-      return;
     }
 
-    const targetDigitCount = Math.max(0, digitsBeforeCursor + delta);
+    // 3. Detect Delete on a dot
+    // If length decreased, digit count same, but cursor stayed in exactly the same position!
+    if (lengthDecreased && cleanLengthUnchanged && newCursor === oldCursor) {
+      if (digitsBeforeCursor < cleanDigitsStr.length) {
+        const arr = cleanDigitsStr.split('');
+        arr.splice(digitsBeforeCursor, 1);
+        cleanDigitsStr = arr.join('');
+      }
+    }
 
-    const newCleanDigits = rawVal.replace(/\D/g, '');
+    // 4. Format the final string
     let newDisplay = '';
     let fullFormatted = '';
 
-    if (newCleanDigits) {
-      const num = Number(newCleanDigits);
+    if (cleanDigitsStr) {
+      const num = Number(cleanDigitsStr);
       newDisplay = new Intl.NumberFormat('id-ID').format(num);
       fullFormatted = `Rp. ${newDisplay},-`;
     }
 
-    // Compute cursor pos within newDisplay
-    let newPos = newDisplay.length;
-    if (!newDisplay || targetDigitCount === 0) {
-      newPos = 0;
-    } else {
+    // 5. Calculate new cursor position in the formatted string
+    let nextCursorPos = 0;
+    if (newDisplay) {
       let digitCounter = 0;
       for (let i = 0; i < newDisplay.length; i++) {
         if (/\d/.test(newDisplay[i])) {
           digitCounter++;
-          if (digitCounter === targetDigitCount) {
-            newPos = i + 1;
+          if (digitCounter === digitsBeforeCursor) {
+            nextCursorPos = i + 1;
             break;
           }
         }
       }
     }
 
-    selectionRef.current = newPos;
+    selectionRef.current = nextCursorPos;
     onChange(fullFormatted);
   };
 
@@ -138,7 +125,7 @@ export function RupiahInput({ value, onChange, placeholder }: RupiahInputProps) 
     if (inputRef.current && selectionRef.current !== null) {
       const pos = selectionRef.current;
       inputRef.current.setSelectionRange(pos, pos);
-      selectionRef.current = null;
+      // Don't reset selectionRef to null yet! Let it persist until the next handleInput runs so we can track oldCursor properly.
     }
   });
 
