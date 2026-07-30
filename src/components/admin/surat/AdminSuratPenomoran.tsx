@@ -344,6 +344,17 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
 
       localStorage.setItem("saas_letter_requests", jsonStr);
       
+      const channel = supabase.channel('public:saas_letter_requests_channel');
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          channel.send({
+            type: 'broadcast',
+            event: 'new_letter_request',
+            payload: { requests: updatedReqs }
+          });
+        }
+      });
+      
       // Trigger SaaS Notification
       addSaaSNotification(
         'letter_request',

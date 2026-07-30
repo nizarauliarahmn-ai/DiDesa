@@ -160,10 +160,10 @@ export default function AdminTenants() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const cleanDomain = (formData.domain || '').toLowerCase().trim().replace(/^https?:\/\//, '').split('.')[0];
+      const cleanDomain = (formData.domain || formData.nama_desa || '').toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').replace(/^https?:\/\//, '').split('.')[0];
       const payload = {
         ...formData,
-        domain: cleanDomain || formData.domain,
+        domain: cleanDomain,
         admin_email: formData.admin_email || `admin@${cleanDomain || 'desa.id'}`,
         admin_password: formData.admin_password || 'admin123',
         kades_email: formData.kades_email || `kades@${cleanDomain || 'desa.id'}`,

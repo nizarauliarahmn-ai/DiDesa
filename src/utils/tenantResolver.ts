@@ -41,7 +41,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
 
     if (targetDomain) {
       const raw = targetDomain.toLowerCase().trim();
-      const slug = raw.replace(/^https?:\/\//, '').split('.')[0];
+      const slug = raw.replace(/\s+/g, '').replace(/^https?:\/\//, '').split('.')[0];
 
       const { data, error } = await supabase
         .from('tenants')

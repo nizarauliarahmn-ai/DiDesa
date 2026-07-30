@@ -310,7 +310,7 @@ export default function App() {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.tenantId && parsed.role !== 'saas_admin') {
           const currentTenantId = await resolveCurrentTenant();
-          if (currentTenantId && currentTenantId !== parsed.tenantId) {
+          if (currentTenantId !== parsed.tenantId) {
             console.warn('[Security] Tenant mismatch detected. Logging out to prevent data leakage.', parsed.tenantId, currentTenantId);
             handleLogout();
           }

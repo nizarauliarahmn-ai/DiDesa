@@ -119,6 +119,12 @@ export default function AdminSaaSTemplateSurat() {
           }
         }
       )
+      .on('broadcast', { event: 'new_letter_request' }, (payload: any) => {
+        if (payload?.payload?.requests) {
+          localStorage.setItem('saas_letter_requests', JSON.stringify(payload.payload.requests));
+          setRequests(payload.payload.requests);
+        }
+      })
       .subscribe();
 
     return () => {
