@@ -777,91 +777,98 @@ export default function AdminPendudukDetail({
           </>
         )}
 
-        {/* Hubungan Keluarga - TAMPILAN DISEMPURNAKAN TAPI TETAP SAMA */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Users className="w-5 h-5 text-emerald-700" />
+        {/* Hubungan Keluarga (Hanya ditampilkan jika ada anggota keluarga lain selain ybs) */}
+        {(() => {
+          const otherMembers = (familyMembers || []).filter((m: any) => m && m.nik !== data?.nik && m.name !== data?.name);
+          if (otherMembers.length === 0) return null;
+
+          return (
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-emerald-700" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-lg">Anggota Kartu Keluarga</h4>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Relasi dihitung terhadap Kepala Keluarga</p>
+                  </div>
+                </div>
+                <span className="text-sm font-bold text-gray-500 dark:text-slate-400 font-mono bg-gray-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-700">
+                  KK: {data?.noKk || data?.no_kk || "-"}
+                </span>
               </div>
-              <div>
-                <h4 className="font-bold text-gray-900 dark:text-white text-lg">Anggota Kartu Keluarga</h4>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Relasi dihitung terhadap Kepala Keluarga</p>
+              
+              <div className="space-y-3 relative pl-6 pb-2">
+                {/* Vertical line connector - adjusted */}
+                <div className="absolute left-[38px] top-8 bottom-8 w-0.5 bg-gray-200 dark:bg-slate-700 z-0"></div>
+                
+                {familyMembers.map((member: any, index: number) => {
+                  const isCurrent = member.nik === data?.nik;
+                  const isKepalaKeluarga = (member.familyRelation || '').toLowerCase().includes('kepala');
+                  const memberIsFemale = member.gender === 'Perempuan';
+                  
+                  return (
+                    <div 
+                      key={member.nik}
+                      id={`family-member-${member.nik}`}
+                      onClick={() => {
+                        if (!isCurrent && onSelectResident) {
+                          onSelectResident(member);
+                        }
+                      }}
+                      className={`flex items-center gap-4 relative z-10 p-4 rounded-xl border transition-all duration-200 ${
+                        isCurrent 
+                          ? 'bg-emerald-50/40 border-emerald-200 dark:border-emerald-800/50 shadow-sm dark:shadow-none cursor-default ring-1 ring-emerald-500/20' 
+                          : 'bg-white dark:bg-slate-900 hover:bg-emerald-50/20 border-gray-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800/50 hover:shadow-sm cursor-pointer group'
+                      } ${index > 0 ? 'ml-6' : ''}`}
+                    >
+                      {/* Horizontal connection line for child nodes */}
+                      {index > 0 && (
+                        <div className="absolute -left-[24px] top-1/2 w-[24px] h-0.5 bg-gray-200 dark:bg-slate-700"></div>
+                      )}
+                      
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 border-white shadow-sm dark:shadow-none shrink-0 ${
+                        memberIsFemale 
+                          ? 'bg-gradient-to-br from-pink-400 to-pink-500 text-white' 
+                          : 'bg-gradient-to-br from-blue-400 to-blue-500 text-white'
+                      }`}>
+                        <User className="w-6 h-6" fill="currentColor" />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-bold text-[15px] truncate ${isCurrent ? 'text-emerald-800 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors'}`}>
+                          {member.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium truncate flex items-center gap-1.5">
+                          <span className={`${isCurrent ? 'text-emerald-700 dark:text-emerald-500 font-bold' : ''}`}>{member.familyRelation || 'Anggota'}</span>
+                          <span className="opacity-50">•</span> 
+                          <span className="font-mono">{member.nik}</span>
+                        </p>
+                      </div>
+
+                      {isCurrent ? (
+                        <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-emerald-200 dark:border-emerald-800">
+                          Sedang Dilihat
+                        </span>
+                      ) : isKepalaKeluarga ? (
+                        <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-blue-100 dark:border-blue-800 group-hover:hidden">
+                          Kepala Keluarga
+                        </span>
+                      ) : null}
+
+                      {!isCurrent && (
+                        <span className={`${isKepalaKeluarga ? 'hidden group-hover:inline-block' : 'inline-block opacity-0 group-hover:opacity-100'} text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 transition-all duration-200 translate-x-2 group-hover:translate-x-0`}>
+                          Lihat Profil →
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
-            <span className="text-sm font-bold text-gray-500 dark:text-slate-400 font-mono bg-gray-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-700">
-              KK: {data?.noKk || data?.no_kk || "-"}
-            </span>
-          </div>
-          
-          <div className="space-y-3 relative pl-6 pb-2">
-            {/* Vertical line connector - adjusted */}
-            <div className="absolute left-[38px] top-8 bottom-8 w-0.5 bg-gray-200 dark:bg-slate-700 z-0"></div>
-            
-            {familyMembers.map((member: any, index: number) => {
-              const isCurrent = member.nik === data?.nik;
-              const isKepalaKeluarga = (member.familyRelation || '').toLowerCase().includes('kepala');
-              const memberIsFemale = member.gender === 'Perempuan';
-              
-              return (
-                <div 
-                  key={member.nik}
-                  id={`family-member-${member.nik}`}
-                  onClick={() => {
-                    if (!isCurrent && onSelectResident) {
-                      onSelectResident(member);
-                    }
-                  }}
-                  className={`flex items-center gap-4 relative z-10 p-4 rounded-xl border transition-all duration-200 ${
-                    isCurrent 
-                      ? 'bg-emerald-50/40 border-emerald-200 dark:border-emerald-800/50 shadow-sm dark:shadow-none cursor-default ring-1 ring-emerald-500/20' 
-                      : 'bg-white dark:bg-slate-900 hover:bg-emerald-50/20 border-gray-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800/50 hover:shadow-sm cursor-pointer group'
-                  } ${index > 0 ? 'ml-6' : ''}`}
-                >
-                  {/* Horizontal connection line for child nodes */}
-                  {index > 0 && (
-                    <div className="absolute -left-[24px] top-1/2 w-[24px] h-0.5 bg-gray-200 dark:bg-slate-700"></div>
-                  )}
-                  
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 border-white shadow-sm dark:shadow-none shrink-0 ${
-                    memberIsFemale 
-                      ? 'bg-gradient-to-br from-pink-400 to-pink-500 text-white' 
-                      : 'bg-gradient-to-br from-blue-400 to-blue-500 text-white'
-                  }`}>
-                    <User className="w-6 h-6" fill="currentColor" />
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-bold text-[15px] truncate ${isCurrent ? 'text-emerald-800 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors'}`}>
-                      {member.name}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium truncate flex items-center gap-1.5">
-                      <span className={`${isCurrent ? 'text-emerald-700 dark:text-emerald-500 font-bold' : ''}`}>{member.familyRelation || 'Anggota'}</span>
-                      <span className="opacity-50">•</span> 
-                      <span className="font-mono">{member.nik}</span>
-                    </p>
-                  </div>
-
-                  {isCurrent ? (
-                    <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-emerald-200 dark:border-emerald-800">
-                      Sedang Dilihat
-                    </span>
-                  ) : isKepalaKeluarga ? (
-                    <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-blue-100 dark:border-blue-800 group-hover:hidden">
-                      Kepala Keluarga
-                    </span>
-                  ) : null}
-
-                  {!isCurrent && (
-                    <span className={`${isKepalaKeluarga ? 'hidden group-hover:inline-block' : 'inline-block opacity-0 group-hover:opacity-100'} text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 transition-all duration-200 translate-x-2 group-hover:translate-x-0`}>
-                      Lihat Profil →
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Riwayat Administrasi */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">

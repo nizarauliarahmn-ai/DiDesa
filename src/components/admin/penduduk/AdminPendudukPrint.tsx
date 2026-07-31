@@ -52,6 +52,10 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
     <div className="bg-white dark:bg-slate-900 min-h-screen text-gray-900 dark:text-white font-sans">
       <style>
         {`
+          @page {
+            size: A4 portrait;
+            margin: 10mm 12mm 10mm 12mm;
+          }
           @media print {
             .no-print { display: none !important; }
             body { background-color: white !important; color: black !important; }
@@ -65,7 +69,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                 max-width: 100% !important;
                 box-shadow: none !important; 
                 margin: 0 !important; 
-                padding: 24px !important;
+                padding: 10px !important;
                 border: none !important;
                 background-color: white !important;
                 color: black !important;
@@ -79,7 +83,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
         <div className="flex items-center gap-4">
           <span className="text-xl font-bold text-emerald-700">DiDesa</span>
           <div className="h-6 w-[1px] bg-gray-200"></div>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Pratinjau Dokumen</h1>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Pratinjau Dokumen Cetak Profil (A4)</h1>
         </div>
         <div className="flex gap-2">
           <button 
@@ -101,7 +105,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
 
       {/* Document Canvas */}
       <main className="flex justify-center py-8 px-4 bg-gray-50 dark:bg-slate-800 min-h-screen">
-        <div className="print-container bg-white dark:bg-slate-900 w-full max-w-[800px] min-h-[1123px] shadow-lg dark:shadow-none p-[50px] border border-gray-200 dark:border-slate-700 flex flex-col gap-6">
+        <div className="print-container bg-white dark:bg-slate-900 w-full max-w-[800px] min-h-[1123px] shadow-lg dark:shadow-none p-[40px] sm:p-[50px] border border-gray-200 dark:border-slate-700 flex flex-col gap-6">
           
           {/* Document Header (Kop Surat Removed as requested) */}
           <div className="flex items-center justify-between border-b-2 border-emerald-700 pb-4 mb-2">
@@ -130,16 +134,17 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
           <div className="grid grid-cols-12 gap-8 mt-4">
             {/* Foto */}
             <div className="col-span-3">
-              <div className="w-full aspect-[3/4] border-2 border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden relative">
+              <div className="w-full aspect-[3/4] border-2 border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-sm">
                 {data?.photo ? (
                   <img src={data.photo} alt={data.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className={`w-full h-full flex items-center justify-center bg-gradient-to-b text-white ${data?.gender === 'Perempuan' ? 'from-pink-300 to-pink-400' : 'from-blue-300 to-blue-400'}`}>
-                    <User className="w-24 h-24" fill="currentColor" />
+                  <div className={`w-full h-full flex flex-col items-center justify-center text-white ${data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-500 to-pink-700' : 'bg-gradient-to-b from-blue-600 to-blue-800'}`}>
+                    <User className="w-20 h-20 opacity-90" fill="currentColor" />
+                    <span className="text-[9px] font-bold tracking-widest mt-2 uppercase">PASFOTO</span>
                   </div>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 bg-emerald-800/90 text-white text-center py-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider">AKTIF</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider">AKTIF</span>
                 </div>
               </div>
             </div>
@@ -197,42 +202,40 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
             </div>
           </div>
 
-          {/* Hubungan Keluarga */}
-          <div className="flex flex-col gap-2 mt-4">
-            <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
-              <span className="material-symbols-outlined text-xl">family_history</span> Hubungan Keluarga
-            </h5>
-            <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-2">
-              <table className="w-full text-left">
-                <thead className="bg-gray-100 dark:bg-slate-800">
-                  <tr>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Kawin</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
-                  {familyMembers.length > 0 ? (
-                    familyMembers.map((member: any, i: number) => (
-                      <tr key={i}>
-                        <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
-                        <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.familyRelation || '-'}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.maritalStatus || '-'}</td>
+          {/* Hubungan Keluarga (Hanya ditampilkan jika ada anggota keluarga lain selain ybs) */}
+          {(() => {
+            const otherMembers = (familyMembers || []).filter((m: any) => m && m.nik !== data?.nik && m.name !== data?.name);
+            if (otherMembers.length === 0) return null;
+            return (
+              <div className="flex flex-col gap-2 mt-4">
+                <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
+                  <span className="material-symbols-outlined text-xl">family_history</span> Hubungan Keluarga
+                </h5>
+                <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-2">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-100 dark:bg-slate-800">
+                      <tr>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Kawin</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-4 text-sm text-center text-gray-400 italic">
-                        Tidak ada data anggota keluarga lain
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
+                      {otherMembers.map((member: any, i: number) => (
+                        <tr key={i}>
+                          <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
+                          <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.familyRelation || '-'}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.maritalStatus || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Riwayat Layanan & Bantuan */}
           <div className="flex flex-col gap-2 mt-4">
