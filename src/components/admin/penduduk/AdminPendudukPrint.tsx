@@ -54,22 +54,23 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
         {`
           @page {
             size: A4 portrait;
-            margin: 10mm 12mm 10mm 12mm;
+            margin: 15mm 18mm 15mm 18mm;
           }
           @media print {
             .no-print { display: none !important; }
-            body { background-color: white !important; color: black !important; }
+            body { background-color: white !important; color: black !important; margin: 0 !important; padding: 0 !important; }
             body * { visibility: hidden !important; }
             .print-container, .print-container * { visibility: visible !important; }
             .print-container { 
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
+                right: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 box-shadow: none !important; 
                 margin: 0 !important; 
-                padding: 10px !important;
+                padding: 16px 24px !important;
                 border: none !important;
                 background-color: white !important;
                 color: black !important;
@@ -134,16 +135,18 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
           <div className="grid grid-cols-12 gap-8 mt-4">
             {/* Foto */}
             <div className="col-span-3">
-              <div className="w-full aspect-[3/4] border-2 border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-sm">
+              <div className="w-full aspect-[3/4] border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-sm bg-slate-100 shrink-0">
                 {data?.photo ? (
                   <img src={data.photo} alt={data.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className={`w-full h-full flex flex-col items-center justify-center text-white ${data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-500 to-pink-700' : 'bg-gradient-to-b from-blue-600 to-blue-800'}`}>
-                    <User className="w-20 h-20 opacity-90" fill="currentColor" />
-                    <span className="text-[9px] font-bold tracking-widest mt-2 uppercase">PASFOTO</span>
+                  <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white pb-6 ${
+                    data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-600 via-pink-500 to-rose-700' : 'bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-800'
+                  }`}>
+                    <User className="w-16 h-16 opacity-90" fill="currentColor" />
+                    <span className="text-[9px] font-extrabold tracking-widest mt-1.5 uppercase opacity-90">PASFOTO</span>
                   </div>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 bg-emerald-800/90 text-white text-center py-1">
+                <div className="absolute bottom-0 left-0 right-0 bg-emerald-800 text-white text-center py-1 border-t border-emerald-700 z-10">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider">AKTIF</span>
                 </div>
               </div>
