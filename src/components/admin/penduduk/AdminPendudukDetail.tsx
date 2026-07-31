@@ -689,24 +689,29 @@ export default function AdminPendudukDetail({
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                 {data?.activeAids && data.activeAids.length > 0 ? (
-                  data.activeAids.map((aid: string, idx: number) => (
-                    <tr key={idx} className="hover:bg-gray-50/50 dark:bg-slate-800/30 transition-colors">
-                      <td className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400">Aktif</td>
-                      <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">{aid}</td>
-                      <td className="px-4 py-4 text-sm text-gray-600 dark:text-slate-400">Terdaftar sebagai penerima aktif</td>
-                      <td className="px-4 py-4 text-right">
-                        <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800">AKTIF</span>
-                      </td>
-                    </tr>
-                  ))
+                  data.activeAids.map((aid: string, idx: number) => {
+                    const isStopped = aid.startsWith("STOPPED:");
+                    const displayAid = isStopped ? aid.split("|")[0].replace("STOPPED:", "").trim() : aid;
+                    const reason = isStopped && aid.includes("| Alasan:") ? aid.split("| Alasan:")[1].trim() : (isStopped ? "Dihentikan" : "Terdaftar sebagai penerima aktif");
+                    
+                    return (
+                      <tr key={idx} className="hover:bg-gray-50/50 dark:bg-slate-800/30 transition-colors">
+                        <td className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400">{isStopped ? "Selesai/Stop" : "Aktif"}</td>
+                        <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">{displayAid}</td>
+                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-slate-400">{reason}</td>
+                        <td className="px-4 py-4 text-right">
+                          {isStopped ? (
+                            <span className="px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 text-[10px] font-bold uppercase tracking-wider border border-rose-100 dark:bg-rose-900/30 dark:border-rose-800">BERHENTI</span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800">AKTIF</span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })
                 ) : (
                   <tr>
-                    <td className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400">-</td>
-                    <td className="px-4 py-4 text-sm font-bold text-gray-400">Tidak Ada Bantuan Aktif</td>
-                    <td className="px-4 py-4 text-sm text-gray-400">Penduduk ini tidak terdaftar di program bansos aktif</td>
-                    <td className="px-4 py-4 text-right">
-                      <span className="px-2.5 py-1 rounded-md bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-gray-100 dark:border-slate-800">NIHIL</span>
-                    </td>
+                    <td colSpan={4} className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400 text-center">-</td>
                   </tr>
                 )}
               </tbody>
@@ -738,9 +743,9 @@ export default function AdminPendudukDetail({
 
               <div>
                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Program Bantuan Aktif</p>
-                {data?.activeAids && data.activeAids.length > 0 ? (
+                {data?.activeAids && data.activeAids.filter((a: string) => !a.startsWith("STOPPED:")).length > 0 ? (
                   <div className="space-y-2">
-                    {data.activeAids.map((aid: string, idx: number) => (
+                    {data.activeAids.filter((a: string) => !a.startsWith("STOPPED:")).map((aid: string, idx: number) => (
                       <div key={idx} className="flex items-center justify-between p-3 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-xl">
                         <span className="text-sm font-bold text-emerald-800 dark:text-emerald-400">{aid}</span>
                         <button 

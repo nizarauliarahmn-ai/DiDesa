@@ -23,6 +23,7 @@ import ConfirmModal from '../common/ConfirmModal';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
+import AdminBantuanImport from './bantuan/AdminBantuanImport';
 
 export default function AdminBantuan({
   searchQuery: externalSearchQuery,
@@ -116,6 +117,7 @@ export default function AdminBantuan({
 
   // Dedicated view states for "Tambah Penerima Bantuan"
   const [showAddView, setShowAddView] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [formProgram, setFormProgram] = useState("");
   const [formAmount, setFormAmount] = useState("300000");
   const [formFunding, setFormFunding] = useState("");
@@ -299,10 +301,22 @@ export default function AdminBantuan({
     if (!targetResident) return;
 
     showConfirm(
-      "Hapus Penerima Bantuan",
-      `Apakah Anda yakin ingin menghapus bantuan "${programToRemove}" dari warga ${targetResident.name}?`,
+      "Hentikan Bantuan Sosial",
+      `Apakah Anda yakin ingin menghentikan bantuan "${programToRemove}" dari warga ${targetResident.name}?`,
       async () => {
-        const updatedAids = (targetResident.activeAids || []).filter((aid: string) => aid !== programToRemove);
+        const reason = window.prompt(`Masukkan alasan penghentian bantuan untuk ${targetResident.name} (wajib diisi):`, "Meninggal Dunia / Pindah / Mampu");
+        if (!reason || reason.trim() === "") {
+          showToast("Penghentian dibatalkan: Alasan wajib diisi.", "error");
+          return;
+        }
+
+        const currentAids = targetResident.activeAids || [];
+        const updatedAids = currentAids.map((aid: string) => {
+          if (aid === programToRemove) {
+            return `STOPPED: ${programToRemove} | Alasan: ${reason.trim()}`;
+          }
+          return aid;
+        });
 
         try {
           if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
@@ -316,12 +330,12 @@ export default function AdminBantuan({
           if (!error) {
             // Update local state directly
             setResidents(prev => prev.map(r => r.nik === nik ? { ...r, activeAids: updatedAids } : r));
-            showToast(`Berhasil mengeluarkan ${targetResident.name} dari program ${programToRemove}`, "success");
+            showToast(`Berhasil menghentikan ${targetResident.name} dari program ${programToRemove}`, "success");
           } else {
             throw error;
           }
         } catch (err: any) {
-          showToast(err.message || "Gagal mengeluarkan warga dari program bantuan", "error");
+          showToast(err.message || "Gagal menghentikan warga dari program bantuan", "error");
         }
       }
     );
@@ -473,6 +487,13 @@ export default function AdminBantuan({
             </div>
           </div>
           <div className="flex gap-3 w-full sm:w-auto">
+            <button
+              onClick={() => setShowImport(true)}
+              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-sm dark:shadow-none"
+            >
+              <Database className="w-5 h-5" />
+              Import Massal
+            </button>
             <button 
               onClick={() => {
                 setShowAddView(false);
@@ -1506,6 +1527,14 @@ export default function AdminBantuan({
       />
 
       {/* Resident Detail Modal on Row Click */}
+      {showImport && (
+        <AdminBantuanImport 
+          onClose={() => setShowImport(false)} 
+          onRefresh={fetchData} 
+          existingResidents={residents} 
+        />
+      )}
+
       {selectedResidentDetailModal && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden my-8 max-h-[90vh] overflow-y-auto">
