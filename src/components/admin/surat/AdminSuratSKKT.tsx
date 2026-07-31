@@ -450,7 +450,7 @@ export default function AdminSuratSKKT({
         </table>
 
         <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI DENGAN BINGKAI KOTAK) -->
-        <div style="width:100%; height:250px; margin-top:10px; margin-bottom:10px; position:relative; background:#ffffff; border:1px solid #000;">
+        <div style="width:100%; height:190px; margin-top:8px; margin-bottom:8px; position:relative; background:#ffffff; border:1px solid #000;">
           ${generatePolygonSVG()}
         </div>
 
@@ -500,14 +500,14 @@ export default function AdminSuratSKKT({
           <!-- KEPALA DESA (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
-            <p style="margin-bottom:45px; font-weight:bold;">${kadesRoleHTML}</p>
+            <p style="margin-bottom:22px; font-weight:bold;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:45px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:22px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
         </div>
