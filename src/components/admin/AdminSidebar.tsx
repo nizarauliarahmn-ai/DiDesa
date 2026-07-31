@@ -171,7 +171,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: globalColor }}>{globalName}</h1>
-            <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v4.0</span>
+            <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v4.1</span>
           </div>
           <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1">
             {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
