@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Printer, Edit2, BarChart2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, BarChart2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart } from 'lucide-react';
 import { Download, Mail, Phone, MoreVertical, Archive, HandHeart, History, AlertCircle, Eye, AlertTriangle } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
@@ -453,88 +453,158 @@ export default function AdminPendudukDetail({
       </div>
 
       <div className="space-y-6">
-        {/* Biodata */}
+        {/* Biodata Ringkasan Individu - Optimized for High-Speed Reading */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <User className="w-5 h-5 text-emerald-700" />
-            </div>
-            <h4 className="font-bold text-gray-900 dark:text-white text-lg">Biodata</h4>
-          </div>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center justify-between mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+                <User className="w-5 h-5" />
+              </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Tempat, Tgl Lahir</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">
-                  {data?.birthPlace || "Belum ada data"}, {data?.birthDate || "-"} {data?.age ? `(${data.age} Thn)` : ''}
+                <h4 className="font-bold text-gray-900 dark:text-white text-lg">Biodata Utama</h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400">Ringkasan identitas kependudukan</p>
+              </div>
+            </div>
+            {data?.nik && (
+              <span className="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-lg">
+                NIK: {data.nik}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {/* Tempat, Tgl Lahir & Usia */}
+            <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Tempat, Tgl Lahir</p>
+                <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
+                  {data?.birthPlace || "Belum diisi"}, {data?.birthDate || "-"}
+                </p>
+                {data?.age && (
+                  <span className="inline-block mt-1 text-[10px] font-black bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    {data.age} Tahun
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Jenis Kelamin */}
+            <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0 mt-0.5">
+                <User className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Jenis Kelamin</p>
+                <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">
+                  {data?.gender || "-"}
                 </p>
               </div>
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Jenis Kelamin</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.gender || "-"}</p>
+            </div>
+
+            {/* Pekerjaan */}
+            <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+                <Briefcase className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Pekerjaan</p>
+                <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
+                  {data?.job || "-"}
+                </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Agama</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.religion || "-"}</p>
+
+            {/* Pendidikan */}
+            <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0 mt-0.5">
+                <GraduationCap className="w-4 h-4" />
               </div>
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Pendidikan</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.education || "-"}</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Pekerjaan</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.job || "-"}</p>
-              </div>
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Golongan Darah</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.bloodType || "-"}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Pendidikan Terakhir</p>
+                <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
+                  {data?.education || "-"}
+                </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100 dark:border-slate-800">
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Nama Ayah Kandung</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.fatherName || "-"}</p>
+
+            {/* Agama & Golongan Darah */}
+            <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 flex items-center justify-center shrink-0 mt-0.5">
+                <Heart className="w-4 h-4" />
               </div>
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Nama Ibu Kandung</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.motherName || "-"}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Agama / Gol. Darah</p>
+                <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 flex items-center gap-2">
+                  <span>{data?.religion || "-"}</span>
+                  <span className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 px-1.5 py-0.5 rounded font-black border border-rose-200 dark:border-rose-800">
+                    Gol. {data?.bloodType || "-"}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Orang Tua Kandung */}
+            <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0 mt-0.5">
+                <Users className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1 text-xs">
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Orang Tua Kandung</p>
+                <p className="text-gray-700 dark:text-slate-300 mt-0.5 font-medium truncate">
+                  Ayah: <strong className="text-gray-900 dark:text-white">{data?.fatherName || "-"}</strong>
+                </p>
+                <p className="text-gray-700 dark:text-slate-300 font-medium truncate">
+                  Ibu: <strong className="text-gray-900 dark:text-white">{data?.motherName || "-"}</strong>
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Alamat & Domisili */}
+        {/* Alamat & Domisili - High Speed Card Layout */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-emerald-700" />
+          <div className="flex items-center gap-3 mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+              <MapPin className="w-5 h-5" />
             </div>
-            <h4 className="font-bold text-gray-900 dark:text-white text-lg">Alamat & Domisili</h4>
-          </div>
-          <div className="space-y-4">
             <div>
-              <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Alamat Lengkap</p>
-              <p className="font-medium text-gray-900 dark:text-white text-sm">
-                {data?.address || "-"}
-              </p>
+              <h4 className="font-bold text-gray-900 dark:text-white text-lg">Alamat & Domisili</h4>
+              <p className="text-xs text-gray-500 dark:text-slate-400">Lokasi tempat tinggal resmi terdaftar</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">RT / RW</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.rtRw || `${data?.rt || "-"} / ${data?.rw || "-"}`}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+            <div className="md:col-span-2 bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
+                <Home className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Desa</p>
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{data?.desa || "-"}</p>
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Alamat Jalan / Dusun</p>
+                <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 leading-snug">
+                  {data?.address || "Belum ada alamat jalan"}
+                </p>
               </div>
             </div>
-            <div className="mt-4 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl flex items-center gap-3 border border-gray-100 dark:border-slate-800">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <p className="text-[11px] font-bold text-gray-600 dark:text-slate-400">Sesuai KTP & Domisili Terdaftar</p>
+
+            <div className="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 flex flex-col justify-between gap-2">
+              <div>
+                <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Wilayah RT / RW & Desa</p>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  <span className="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
+                    RT {data?.rt || '01'} / RW {data?.rw || '01'}
+                  </span>
+                  <span className="font-bold text-xs bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-md border border-gray-200 dark:border-slate-700">
+                    {data?.desa || 'Desa Sukamaju'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 pt-1">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span>{data?.domicileStatus || 'Sesuai KTP & Domisili Terdaftar'}</span>
+              </div>
             </div>
           </div>
         </div>
