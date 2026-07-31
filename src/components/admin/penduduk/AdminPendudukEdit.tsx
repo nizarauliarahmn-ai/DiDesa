@@ -516,7 +516,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   <option value="03">03</option>
                   <option value="04">04</option>
                 </select>
-              </div>v>
+              </div>
 
               {/* RW input (auto-populated and disabled based on the rule) */}
               <div className="md:col-span-2 space-y-1">
