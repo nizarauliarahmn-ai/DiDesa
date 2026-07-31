@@ -16,7 +16,18 @@ import {
   Trash2,
   Database,
   CheckCircle2,
-  FileText
+  FileText,
+  ArrowUpDown,
+  CheckSquare,
+  Square,
+  Calendar,
+  ArrowRight,
+  Ban,
+  RefreshCw,
+  SlidersHorizontal,
+  Layers,
+  DollarSign,
+  Award
 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import ConfirmModal from '../common/ConfirmModal';
@@ -127,6 +138,19 @@ export default function AdminBantuan({
   const [filterYear, setFilterYear] = useState("Semua Tahun");
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [selectedResidentDetailModal, setSelectedResidentDetailModal] = useState<any | null>(null);
+
+  // New Table Optimization States
+  const [salurFilter, setSalurFilter] = useState<'all' | 'pending' | 'disbursed'>('all');
+  const [selectedNiks, setSelectedNiks] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [sortField, setSortField] = useState<'name' | 'nik' | 'rtRw' | 'status'>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Bulk Stop Modal State
+  const [showBulkStopModal, setShowBulkStopModal] = useState(false);
+  const [bulkStopDate, setBulkStopDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [bulkStopReason, setBulkStopReason] = useState('Meninggal Dunia / Pindah / Mampu');
 
   // Close recommendations dropdown on click outside
   useEffect(() => {
@@ -269,31 +293,223 @@ export default function AdminBantuan({
     };
   }, [residents, filterYear]);
 
-  // Filtered list of residents based on search and selected program
+  // Filtered list of residents based on search, selected program, salurFilter, and sort
   const filteredResidents = useMemo(() => {
     let list = residents;
 
     if (showOverlapOnly) {
-      // Show only residents with overlap
       list = stats.overlaps;
     } else {
-      // Filter by currently selected program and year
       const yearMatchStr = filterYear === "Semua Tahun" ? "" : `(${filterYear})`;
       list = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith(selectedProgram) && a.includes(yearMatchStr)));
     }
 
-    // Filter by search query
+    // Status Salur Filter
+    if (salurFilter === 'pending') {
+      list = list.filter(r => !disbursedNiks.includes(r.nik));
+    } else if (salurFilter === 'disbursed') {
+      list = list.filter(r => disbursedNiks.includes(r.nik));
+    }
+
+    // Search query filter
     if (debouncedSearchQuery.trim() !== "") {
       const q = debouncedSearchQuery.toLowerCase();
       list = list.filter(r => 
         r.name?.toLowerCase().includes(q) || 
         r.nik?.includes(q) || 
-        r.rtRw?.includes(q)
+        r.rtRw?.includes(q) ||
+        r.desa?.toLowerCase().includes(q)
       );
     }
 
+    // Sorting
+    list = [...list].sort((a, b) => {
+      let valA = a[sortField] || '';
+      let valB = b[sortField] || '';
+      if (sortField === 'status') {
+        valA = disbursedNiks.includes(a.nik) ? '1' : '0';
+        valB = disbursedNiks.includes(b.nik) ? '1' : '0';
+      }
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
     return list;
-  }, [residents, selectedProgram, showOverlapOnly, debouncedSearchQuery, stats.overlaps]);
+  }, [residents, selectedProgram, showOverlapOnly, debouncedSearchQuery, stats.overlaps, salurFilter, disbursedNiks, sortField, sortDirection, filterYear]);
+
+  // Reset pagination & selection when primary filters change
+  useEffect(() => {
+    setCurrentPage(1);
+    setSelectedNiks([]);
+  }, [selectedProgram, showOverlapOnly, salurFilter, debouncedSearchQuery, filterYear]);
+
+  // Paginated Residents Slice
+  const paginatedResidents = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredResidents.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredResidents, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredResidents.length / itemsPerPage) || 1;
+
+  // Calculate Nominal Amount Disbursed
+  const programAmountVal = useMemo(() => {
+    if (selectedProgram === "BLT Dana Desa") return 300000;
+    if (selectedProgram === "Program Keluarga Harapan (PKH)") return 600000;
+    if (selectedProgram === "Bantuan Pangan Non-Tunai") return 200000;
+    return 300000;
+  }, [selectedProgram]);
+
+  const disbursedCountInFiltered = useMemo(() => {
+    return filteredResidents.filter(r => disbursedNiks.includes(r.nik)).length;
+  }, [filteredResidents, disbursedNiks]);
+
+  const totalNominalDisbursed = disbursedCountInFiltered * programAmountVal;
+
+  // Sort Toggle Handler
+  const handleSort = (field: 'name' | 'nik' | 'rtRw' | 'status') => {
+    if (sortField === field) {
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Bulk Actions
+  const handleSelectAllOnPage = () => {
+    const pageNiks = paginatedResidents.map(r => r.nik);
+    const allSelected = pageNiks.every(nik => selectedNiks.includes(nik));
+    if (allSelected) {
+      setSelectedNiks(prev => prev.filter(nik => !pageNiks.includes(nik)));
+    } else {
+      setSelectedNiks(prev => Array.from(new Set([...prev, ...pageNiks])));
+    }
+  };
+
+  const handleBulkDisburse = (shouldDisburse: boolean) => {
+    if (selectedNiks.length === 0) return;
+    if (shouldDisburse) {
+      setDisbursedNiks(prev => Array.from(new Set([...prev, ...selectedNiks])));
+      showToast(`Berhasil menandai ${selectedNiks.length} warga sebagai "Sudah Salur"`, "success");
+    } else {
+      setDisbursedNiks(prev => prev.filter(n => !selectedNiks.includes(n)));
+      showToast(`Status ${selectedNiks.length} warga diubah menjadi "Belum Salur"`, "info");
+    }
+    setSelectedNiks([]);
+  };
+
+  // Bulk Rollforward to Next Year
+  const handleBulkRollforwardNextYear = async () => {
+    if (selectedNiks.length === 0) return;
+    
+    const nextYear = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
+    const newAidTag = `${selectedProgram} (${nextYear})`;
+
+    showConfirm(
+      `Teruskan Bantuan ke Tahun ${nextYear}`,
+      `Apakah Anda yakin ingin mendaftarkan ${selectedNiks.length} warga terpilih untuk mendapatkan program "${selectedProgram}" pada Tahun Anggaran ${nextYear}?`,
+      async () => {
+        setIsSaving(true);
+        try {
+          if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+
+          let updatedCount = 0;
+          const updatedResidents = [...residents];
+
+          for (const nik of selectedNiks) {
+            const target = updatedResidents.find(r => r.nik === nik);
+            if (target) {
+              const currentAids = target.activeAids || [];
+              if (!currentAids.includes(newAidTag)) {
+                const updatedAids = [...currentAids, newAidTag];
+                const { error } = await supabase
+                  .from('residents')
+                  .update({ active_aids: updatedAids })
+                  .eq('nik', nik)
+                  .eq('tenant_id', tenantId);
+
+                if (!error) {
+                  target.activeAids = updatedAids;
+                  updatedCount++;
+                }
+              }
+            }
+          }
+
+          setResidents(updatedResidents);
+          setSelectedNiks([]);
+          showToast(`Berhasil meneruskan ${updatedCount} warga ke program tahun ${nextYear}!`, "success");
+        } catch (err: any) {
+          showToast(err.message || "Gagal memperpanjang bantuan massal", "error");
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    );
+  };
+
+  // Bulk Termination with Detailed Date & Month logging
+  const handleConfirmBulkStopAid = async () => {
+    if (selectedNiks.length === 0) return;
+    if (!bulkStopReason || bulkStopReason.trim() === '') {
+      showToast("Alasan penghentian wajib diisi", "error");
+      return;
+    }
+
+    // Format date string for Indonesian readability e.g. "31 Juli 2026"
+    let formattedDateStr = bulkStopDate;
+    try {
+      const d = new Date(bulkStopDate);
+      if (!isNaN(d.getTime())) {
+        formattedDateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+    } catch(e) {}
+
+    const yearTag = filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear().toString();
+    const programTarget = `${selectedProgram} (${yearTag})`;
+
+    setIsSaving(true);
+    try {
+      if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+
+      let stoppedCount = 0;
+      const updatedResidents = [...residents];
+
+      for (const nik of selectedNiks) {
+        const target = updatedResidents.find(r => r.nik === nik);
+        if (target) {
+          const currentAids = target.activeAids || [];
+          const updatedAids = currentAids.map((aid: string) => {
+            if (aid.startsWith(selectedProgram)) {
+              return `STOPPED: ${aid} | Tgl: ${formattedDateStr} | Alasan: ${bulkStopReason.trim()}`;
+            }
+            return aid;
+          });
+
+          const { error } = await supabase
+            .from('residents')
+            .update({ active_aids: updatedAids })
+            .eq('nik', nik)
+            .eq('tenant_id', tenantId);
+
+          if (!error) {
+            target.activeAids = updatedAids;
+            stoppedCount++;
+          }
+        }
+      }
+
+      setResidents(updatedResidents);
+      setSelectedNiks([]);
+      setShowBulkStopModal(false);
+      showToast(`Berhasil menghentikan bantuan untuk ${stoppedCount} warga terpilih pada ${formattedDateStr}!`, "success");
+    } catch (err: any) {
+      showToast(err.message || "Gagal menghentikan bantuan massal", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Remove aid program from a resident
   const handleRemoveAid = (nik: string, programToRemove: string) => {
@@ -1086,82 +1302,214 @@ export default function AdminBantuan({
       )}
 
       {/* Table Section */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/20">
-          <div className="flex items-center gap-3">
-            <h4 className="font-bold text-lg text-gray-900 dark:text-white">
-              {showOverlapOnly ? "Tumpang Tindih (Penerima Ganda)" : `Penerima ${selectedProgram}`}
-            </h4>
-            <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-slate-800 rounded-full text-xs font-bold text-gray-600 dark:text-slate-400">
-              {filteredResidents.length} Jiwa
-            </span>
-            {!showOverlapOnly && (
-              <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-full text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                {disbursedNiks.length} / {filteredResidents.length} Sudah Salur
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden relative">
+        
+        {/* Table Top Controls & Quick Filter Bar */}
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800 space-y-4 bg-gray-50/20">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <h4 className="font-extrabold text-lg text-gray-900 dark:text-white">
+                {showOverlapOnly ? "Tumpang Tindih (Penerima Ganda)" : `Penerima ${selectedProgram}`}
+              </h4>
+              <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-slate-800 rounded-full text-xs font-bold text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700">
+                {filteredResidents.length} Jiwa Total
               </span>
-            )}
+              {!showOverlapOnly && (
+                <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
+                  {disbursedCountInFiltered} / {filteredResidents.length} Sudah Salur
+                </span>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+              <select
+                value={filterYear}
+                onChange={(e) => setFilterYear(e.target.value)}
+                className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm"
+              >
+                <option value="Semua Tahun">Semua Tahun</option>
+                <option value="2023">2023</option>
+                <option value="2024">2024</option>
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+              </select>
+
+              <button
+                onClick={() => setShowBaModal(true)}
+                className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-sm"
+              >
+                <Download className="w-3.5 h-3.5" />
+                BA Musdes
+              </button>
+
+              <div className="relative flex-1 sm:w-[220px]">
+                <input 
+                  type="text" 
+                  placeholder="Cari NIK / Nama / RT..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500 outline-none bg-white dark:bg-slate-900 text-gray-800 dark:text-slate-100 shadow-sm"
+                />
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <select
-              value={filterYear}
-              onChange={(e) => setFilterYear(e.target.value)}
-              className="px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-            >
-              <option value="Semua Tahun">Semua Tahun</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-            </select>
-            <button
-              onClick={() => setShowBaModal(true)}
-              className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95"
-            >
-              <Download className="w-3.5 h-3.5" />
-              Cetak BA Musdes
-            </button>
-            <div className="relative flex-1 sm:w-[240px]">
-              <input 
-                type="text" 
-                placeholder="Cari penerima bantuan..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
-              />
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+
+          {/* Quick Filter Tabs & Summary Calculation Banner */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-gray-100 dark:border-slate-800">
+            {/* Quick Tabs */}
+            <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-slate-800/80 p-1 rounded-xl border border-gray-200/50 dark:border-slate-700/50 self-start">
+              <button
+                onClick={() => setSalurFilter('all')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  salurFilter === 'all'
+                    ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
+                }`}
+              >
+                Semua ({filteredResidents.length})
+              </button>
+              <button
+                onClick={() => setSalurFilter('pending')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  salurFilter === 'pending'
+                    ? 'bg-amber-500 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
+                }`}
+              >
+                Belum Salur ({filteredResidents.length - disbursedCountInFiltered})
+              </button>
+              <button
+                onClick={() => setSalurFilter('disbursed')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  salurFilter === 'disbursed'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
+                }`}
+              >
+                Sudah Salur ({disbursedCountInFiltered})
+              </button>
+            </div>
+
+            {/* Total Nominal Summary */}
+            <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 px-4 py-2 rounded-xl text-emerald-900 dark:text-emerald-200">
+              <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-xs font-bold">Total Dana Salur:</span>
+              <span className="text-sm font-extrabold font-mono text-emerald-700 dark:text-emerald-300">
+                Rp {totalNominalDisbursed.toLocaleString('id-ID')}
+              </span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 italic">(@Rp {programAmountVal.toLocaleString('id-ID')})</span>
             </div>
           </div>
         </div>
+
+        {/* Floating Bulk Actions Bar (Shown when checkboxes are selected) */}
+        {selectedNiks.length > 0 && (
+          <div className="sticky top-20 z-30 bg-emerald-900 text-white px-6 py-3 border-y border-emerald-700 flex flex-wrap items-center justify-between gap-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-3">
+              <CheckSquare className="w-5 h-5 text-emerald-300" />
+              <span className="font-bold text-sm">
+                <strong className="font-extrabold text-emerald-300">{selectedNiks.length}</strong> Warga Dicentang
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => handleBulkDisburse(true)}
+                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Tandai Sudah Salur
+              </button>
+              
+              <button
+                onClick={() => handleBulkDisburse(false)}
+                className="px-3.5 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                Batalkan Salur
+              </button>
+
+              <button
+                onClick={handleBulkRollforwardNextYear}
+                className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                Teruskan ke Tahun Depan
+              </button>
+
+              <button
+                onClick={() => setShowBulkStopModal(true)}
+                className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <Ban className="w-3.5 h-3.5" />
+                Hentikan Bantuan (Massal)
+              </button>
+
+              <button
+                onClick={() => setSelectedNiks([])}
+                className="px-2.5 py-1.5 text-emerald-200 hover:text-white text-xs font-bold transition-colors ml-2"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        )}
         
+        {/* Table Main View */}
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
+            <thead className="bg-gray-50/80 dark:bg-slate-800/80 border-b border-gray-100 dark:border-slate-800 text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
               <tr>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">NIK / NAMA</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">DUSUN / RT / RW</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">DTKS & BANTUAN LAIN</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider">STATUS & SALUR</th>
-                <th className="px-6 py-4 font-bold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center">AKSI</th>
+                <th className="px-4 py-4 text-center w-12">
+                  <input
+                    type="checkbox"
+                    checked={paginatedResidents.length > 0 && paginatedResidents.every(r => selectedNiks.includes(r.nik))}
+                    onChange={handleSelectAllOnPage}
+                    className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                  />
+                </th>
+                <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('nik')}>
+                  <div className="flex items-center gap-1.5">
+                    NIK / WARGA
+                    <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
+                  </div>
+                </th>
+                <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('rtRw')}>
+                  <div className="flex items-center gap-1.5">
+                    DUSUN / RT / RW
+                    <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
+                  </div>
+                </th>
+                <th className="px-6 py-4">DTKS & BANTUAN LAIN</th>
+                <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
+                  <div className="flex items-center gap-1.5">
+                    STATUS & PENYALURAN
+                    <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
+                  </div>
+                </th>
+                <th className="px-6 py-4 text-center">AKSI</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-400">
-                    <span className="inline-block animate-spin mr-2">⏳</span> Mengambil data real dari server...
+                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-400">
+                    <span className="inline-block animate-spin mr-2">⏳</span> Mengambil data penerima dari server...
                   </td>
                 </tr>
               ) : filteredResidents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-400">
-                    Tidak ada penerima bantuan aktif untuk pencarian ini.
+                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-400">
+                    Tidak ada data penerima bantuan yang cocok dengan filter.
                   </td>
                 </tr>
               ) : (
-                filteredResidents.map((resident) => {
+                paginatedResidents.map((resident) => {
+                  const isSelected = selectedNiks.includes(resident.nik);
+                  const isDisbursed = disbursedNiks.includes(resident.nik);
                   const otherAids = (resident.activeAids || []).filter((aid: string) => 
-                    showOverlapOnly ? true : aid !== selectedProgram
+                    showOverlapOnly ? true : !aid.startsWith(selectedProgram)
                   );
                   const isOverlap = (resident.activeAids || []).length > 1;
 
@@ -1169,39 +1517,86 @@ export default function AdminBantuan({
                     <tr 
                       key={resident.nik} 
                       onClick={() => setSelectedResidentDetailModal(resident)}
-                      className="hover:bg-emerald-50/40 dark:hover:bg-slate-800/80 cursor-pointer transition-colors group"
+                      className={`hover:bg-emerald-50/30 dark:hover:bg-slate-800/80 cursor-pointer transition-colors group ${
+                        isSelected ? 'bg-emerald-50/60 dark:bg-emerald-950/30' : ''
+                      }`}
                     >
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors">{resident.nik}</p>
-                        <p className="text-sm font-semibold text-gray-600 dark:text-slate-400">{resident.name}</p>
-                        {resident.status?.toLowerCase().includes('meninggal') && (
-                          <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded-md">
-                            <AlertCircle className="w-3 h-3" />
-                            {resident.status}
-                          </span>
-                        )}
+                      {/* Checkbox Column */}
+                      <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedNiks(prev => [...prev, resident.nik]);
+                            } else {
+                              setSelectedNiks(prev => prev.filter(n => n !== resident.nik));
+                            }
+                          }}
+                          className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                        />
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-slate-400">
-                        {resident.desa || "Sukamaju"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
-                      </td>
+
+                      {/* Resident Info Column */}
                       <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 w-max px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-extrabold rounded border border-indigo-100">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                            resident.gender_color || 'bg-emerald-100 text-emerald-800'
+                          }`}>
+                            {(resident.name || 'W').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-extrabold text-sm text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
+                              {resident.name}
+                              {resident.gender_color && (
+                                <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${resident.gender_color}`}>
+                                  {resident.gender_color.includes('blue') ? 'L' : 'P'}
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs font-mono font-semibold text-gray-500 dark:text-slate-400">NIK: {resident.nik}</p>
+                            {resident.status?.toLowerCase().includes('meninggal') && (
+                              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded-md">
+                                <AlertCircle className="w-3 h-3" />
+                                {resident.status}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Address Column */}
+                      <td className="px-6 py-4 text-xs font-semibold text-gray-600 dark:text-slate-300">
+                        <span className="bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-slate-700">
+                          {resident.desa || "Sukamaju"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
+                        </span>
+                      </td>
+
+                      {/* DTKS & Other Aids Column */}
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-[10px] font-extrabold rounded border border-indigo-100 dark:border-indigo-800">
                             Terdaftar DTKS
                           </span>
                           {otherAids.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 mt-1">
+                            <div className="flex flex-wrap gap-1 mt-1 max-w-[200px]">
                               {otherAids.map((aid: string) => (
-                                <span key={aid} className="px-2 py-0.5 bg-red-50 text-red-700 text-[10px] font-bold rounded-md border border-red-100">
+                                <span key={aid} className={`px-2 py-0.5 text-[10px] font-bold rounded-md border ${
+                                  aid.startsWith('STOPPED') 
+                                    ? 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-slate-800 dark:text-slate-400' 
+                                    : 'bg-red-50 text-red-700 border-red-100 dark:bg-red-950 dark:text-red-300'
+                                }`}>
                                   {aid}
                                 </span>
                               ))}
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400 font-medium">Bantuan Tunggal</span>
+                            <span className="text-[11px] text-gray-400 font-medium italic">Bantuan Tunggal</span>
                           )}
                         </div>
                       </td>
+
+                      {/* Status & Disburse Toggle Column */}
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1.5 items-start">
                           {isOverlap ? (
@@ -1210,17 +1605,16 @@ export default function AdminBantuan({
                               Tumpang Tindih
                             </div>
                           ) : (
-                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-full font-bold text-[10px] border border-emerald-200">
+                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 rounded-full font-bold text-[10px] border border-emerald-200 dark:border-emerald-800">
                               <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
-                              Valid / Sesuai
+                              Valid / Penerima Resmi
                             </div>
                           )}
 
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              const isAlready = disbursedNiks.includes(resident.nik);
-                              if (isAlready) {
+                              if (isDisbursed) {
                                 setDisbursedNiks(prev => prev.filter(n => n !== resident.nik));
                                 showToast(`Status penyaluran ${resident.name} diubah menjadi Belum Salur`, "info");
                               } else {
@@ -1228,37 +1622,39 @@ export default function AdminBantuan({
                                 showToast(`Berhasil menandai ${resident.name} telah menerima salur ${selectedProgram}`, "success");
                               }
                             }}
-                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-1 ${
-                              disbursedNiks.includes(resident.nik)
-                                ? 'bg-emerald-600 text-white border-emerald-700'
-                                : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-700'
+                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                              isDisbursed
+                                ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
+                                : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
                             }`}
                           >
-                            {disbursedNiks.includes(resident.nik) ? (
+                            {isDisbursed ? (
                               <>
-                                <CheckCircle2 className="w-3 h-3 text-white" />
-                                Terisi Salur (Tahap I)
+                                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                                Sudah Salur (Tahap I)
                               </>
                             ) : (
                               <>
-                                <Banknote className="w-3 h-3" />
+                                <Banknote className="w-3.5 h-3.5 text-emerald-600" />
                                 Tandai Disalurkan
                               </>
                             )}
                           </button>
                         </div>
                       </td>
+
+                      {/* Single Action Column */}
                       <td className="px-6 py-4 text-center">
                         {showOverlapOnly ? (
-                          <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Hapus via Program Utama</p>
+                          <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Kelola via Tab Utama</p>
                         ) : (
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveAid(resident.nik, selectedProgram);
                             }}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex items-center gap-1.5 font-bold text-xs"
-                            title="Hapus Penerima"
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
+                            title="Keluarkan dari Program Bantuan"
                           >
                             <Trash2 className="w-4 h-4" />
                             Keluarkan
@@ -1272,7 +1668,132 @@ export default function AdminBantuan({
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Footer */}
+        <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-gray-600 dark:text-slate-400">
+          <div className="flex items-center gap-3">
+            <span>Tampilkan</span>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg font-bold text-gray-800 dark:text-slate-200 outline-none focus:ring-2 focus:ring-emerald-500"
+            >
+              <option value={10}>10 Baris</option>
+              <option value={25}>25 Baris</option>
+              <option value={50}>50 Baris</option>
+              <option value={100}>100 Baris</option>
+            </select>
+            <span>
+              Menampilkan {filteredResidents.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredResidents.length)} dari {filteredResidents.length} data
+            </span>
+          </div>
+
+          {/* Pagination Page Controls */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="px-3 py-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg font-bold">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
       </div>
+
+      {/* Modal Penghentian Massal Terdaftar Rinci Tanggal & Alasan */}
+      {showBulkStopModal && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-rose-50/50 dark:bg-rose-950/30 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
+                  <Ban className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-rose-900 dark:text-rose-200">Hentikan Bantuan Massal</h3>
+                  <p className="text-xs text-rose-700 dark:text-rose-400">{selectedNiks.length} Warga Terpilih</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowBulkStopModal(false)}
+                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
+                  Tanggal Penghentian Resmi (Rinci)
+                </label>
+                <input
+                  type="date"
+                  value={bulkStopDate}
+                  onChange={(e) => setBulkStopDate(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
+                  Alasan Penghentian Bantuan
+                </label>
+                <select
+                  value={bulkStopReason}
+                  onChange={(e) => setBulkStopReason(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-rose-500"
+                >
+                  <option value="Meninggal Dunia">Meninggal Dunia</option>
+                  <option value="Pindah Domisili Keluar Desa">Pindah Domisili Keluar Desa</option>
+                  <option value="Telah Mampu / Sejahtera secara Ekonomi">Telah Mampu / Sejahtera secara Ekonomi</option>
+                  <option value="Penerima Ganda Terlarang">Penerima Ganda Terlarang</option>
+                  <option value="Hasil Evaluasi Musdes">Hasil Evaluasi Musdes</option>
+                </select>
+              </div>
+
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/60 rounded-xl text-xs text-rose-800 dark:text-rose-300 space-y-1">
+                <p className="font-bold">Format Catatan Riwayat:</p>
+                <p className="font-mono text-[11px] bg-white dark:bg-slate-900 p-2 rounded border border-rose-200 dark:border-rose-900">
+                  STOPPED: {selectedProgram} | Tgl: {new Date(bulkStopDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} | Alasan: {bulkStopReason}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+              <button
+                onClick={() => setShowBulkStopModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleConfirmBulkStopAid}
+                disabled={isSaving}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2 active:scale-95 disabled:opacity-50"
+              >
+                <Ban className="w-4 h-4" />
+                {isSaving ? "Proses..." : "Konfirmasi Hentikan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Tambah Penerima */}
       {showModal && (
