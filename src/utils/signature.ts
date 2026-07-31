@@ -95,7 +95,8 @@ export function getPrintSignatureHTML(
         <img src="${verifyQrUrl}" style="width:64px;height:64px;display:block;" />
       </div>
       <div style="flex:1;font-size:10px;line-height:1.25;color:#000;">
-        <p style="margin:0;font-size:9px;color:#333;font-weight:normal;">Ditandatangani secara elektronik oleh:</p>
+        <p style="margin:0 0 3px 0;font-size:9.5px;color:#000;font-weight:bold;">${cleanDesaName}, ${tglFormatted}</p>
+        <p style="margin:0;font-size:8.5px;color:#333;font-weight:normal;">Ditandatangani secara elektronik oleh:</p>
         <p style="margin:2px 0 4px 0;font-weight:bold;text-transform:uppercase;font-size:10px;letter-spacing:-0.2px;">${cleanRole}</p>
         <p style="margin:0;font-weight:bold;text-transform:uppercase;font-size:10px;">${formattedNamaPejabat}</p>
         ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-size:8.5px;font-weight:normal;color:#444;">NIP. ${nipPejabat}</p>` : ''}
@@ -107,7 +108,11 @@ export function getPrintSignatureHTML(
     ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-family:monospace;font-size:11px;">NIP. ${nipPejabat}</p>` : ''}
   `;
 
-  const rightSideHtml = `
+  const rightSideHtml = showTTE ? `
+    <div style="text-align:${textAlign};width:330px;font-size:14px;display:inline-block;vertical-align:top;">
+      ${signatureContentHtml}
+    </div>
+  ` : `
     <div style="text-align:${textAlign};width:320px;font-size:14px;display:inline-block;vertical-align:top;">
       ${metaHtml}
       <div style="margin-top:5px;min-height:35px;line-height:1.4;">
@@ -121,34 +126,20 @@ export function getPrintSignatureHTML(
     return `
       <div style="padding:0 20px;font-size:14px;margin-top:25px;page-break-inside:avoid;">
         <!-- TOP ROW (Roles) -->
-        <div style="display:flex;justify-content:space-between;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
           <!-- Left Top -->
           <div style="width:320px;text-align:${textAlign};">
             <div style="min-height:35px;line-height:1.4;white-space:pre-line;">
               ${sigLeftRole}
             </div>
-          </div>
-          <!-- Right Top -->
-          <div style="width:320px;text-align:${textAlign};">
-            ${metaHtml}
-            <div style="margin-top:5px;min-height:35px;line-height:1.4;">
-              ${rightRoleHtml}
-            </div>
-          </div>
-        </div>
-
-        <!-- SPACE FOR SIGNATURE -->
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;">
-          <!-- Left Bottom -->
-          <div style="width:320px;text-align:${textAlign};">
             <div style="height:55px;"></div>
             <p style="font-weight:bold;margin:0;${nameDecoration}">${sigLeftName}</p>
             ${sigLeftPangkat ? `<p style="margin:2px 0 0 0;font-size:13px;">${sigLeftPangkat}</p>` : ''}
             ${sigLeftNip && sigLeftNip !== '-' && sigLeftNip !== '' ? `<p style="margin:2px 0 0 0;font-size:13px;">NIP : ${sigLeftNip}</p>` : ''}
           </div>
-          <!-- Right Bottom -->
-          <div style="width:320px;text-align:${textAlign};">
-            ${signatureContentHtml}
+          <!-- Right Top -->
+          <div style="width:330px;text-align:${textAlign};">
+            ${rightSideHtml}
           </div>
         </div>
       </div>

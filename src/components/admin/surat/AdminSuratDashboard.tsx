@@ -385,10 +385,8 @@ export default function AdminSuratDashboard({
         return (
           <div className="mt-8 flex justify-end text-black">
             <div className="text-right">
-              {sig.sigShowMeta === 'simple' && (
-                <p className="m-0 text-xs mb-2 font-sans">{sig.cleanDesaName}, {tglFormatted}</p>
-              )}
               <TTESignatureBox
+                dateStr={`${sig.cleanDesaName}, ${tglFormatted}`}
                 officerTitle={sig.rightRole.replace(/\n/g, ' ')}
                 officerName={namaPejabat}
                 nip={nipPejabat !== '-' ? nipPejabat : undefined}
