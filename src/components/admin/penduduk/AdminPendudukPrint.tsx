@@ -202,42 +202,59 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
             </div>
           </div>
 
-          {/* Hubungan Keluarga - Selalu Tampil (Tabel Anggota Keluarga) */}
-          <div className="flex flex-col gap-2 mt-4">
-            <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
-              <span className="material-symbols-outlined text-xl">family_history</span> Hubungan Keluarga
-            </h5>
-            <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-2">
-              <table className="w-full text-left">
-                <thead className="bg-gray-100 dark:bg-slate-800">
-                  <tr>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
-                    <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Kawin</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
-                  {familyMembers && familyMembers.length > 0 ? (
-                    familyMembers.map((member: any, i: number) => (
-                      <tr key={i}>
-                        <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
-                        <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.familyRelation || '-'}</td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.maritalStatus || '-'}</td>
+          {/* Hubungan Keluarga (Banner KK Mandiri jika tunggal, atau Tabel jika ada anggota lain) */}
+          {(() => {
+            const otherMembers = (familyMembers || []).filter((m: any) => m && m.nik !== data?.nik && m.name !== data?.name);
+            
+            if (otherMembers.length === 0) {
+              return (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between gap-4 mt-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-lg">group</span>
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-emerald-900 text-sm">Status Kartu Keluarga: KK Mandiri</h5>
+                      <p className="text-xs text-emerald-700">Yang bersangkutan terdaftar sebagai <strong>Kepala Keluarga / Anggota Tunggal</strong> dalam KK ini.</p>
+                    </div>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-emerald-800 bg-white px-3 py-1.5 rounded border border-emerald-300 shrink-0">
+                    KK: {data?.noKk || "-"}
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <div className="flex flex-col gap-2 mt-4">
+                <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
+                  <span className="material-symbols-outlined text-xl">family_history</span> Hubungan Keluarga
+                </h5>
+                <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-2">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-100 dark:bg-slate-800">
+                      <tr>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
+                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Kawin</th>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-4 text-sm text-center text-gray-500 dark:text-slate-400 italic font-medium">
-                        - Hanya yang bersangkutan terdaftar sebagai anggota tunggal dalam Kartu Keluarga ini -
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
+                      {familyMembers.map((member: any, i: number) => (
+                        <tr key={i}>
+                          <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
+                          <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.familyRelation || '-'}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.maritalStatus || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Clean Official Document Footer */}
           <div className="mt-auto pt-6 border-t border-gray-300 dark:border-slate-700 flex justify-between items-center text-[10px] text-gray-500 font-medium">
