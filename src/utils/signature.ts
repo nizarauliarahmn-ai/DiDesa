@@ -1,6 +1,34 @@
-/**
- * Utility for generating standardized print signature HTML blocks based on Super Admin custom configurations.
- */
+export function isKadesOfficial(namaPejabat: string): boolean {
+  const kadesName = (localStorage.getItem('kop_kades') || localStorage.getItem('village_kades') || 'Fazakkir Rahmad').toLowerCase().trim();
+  const currentName = (namaPejabat || '').toLowerCase().trim();
+  if (!currentName) return true;
+  return currentName.includes(kadesName) || kadesName.includes(currentName);
+}
+
+export function resolveOfficerRole(namaPejabat: string, inputJabatan: string): string {
+  const isKades = isKadesOfficial(namaPejabat);
+  if (isKades) return 'Kepala Desa';
+
+  const cleanInputRole = (inputJabatan || '').trim();
+  if (cleanInputRole && cleanInputRole.toLowerCase() !== 'kepala desa' && !cleanInputRole.toLowerCase().startsWith('a.n.')) {
+    return cleanInputRole;
+  }
+
+  try {
+    const stored = localStorage.getItem('village_officers');
+    if (stored) {
+      const officers = JSON.parse(stored);
+      const match = officers.find((o: any) => 
+        o.name && (namaPejabat.toLowerCase().includes(o.name.toLowerCase()) || o.name.toLowerCase().includes(namaPejabat.toLowerCase()))
+      );
+      if (match && match.role && match.role.toLowerCase() !== 'kepala desa') {
+        return match.role;
+      }
+    }
+  } catch (e) {}
+
+  return cleanInputRole && cleanInputRole.toLowerCase() !== 'kepala desa' ? cleanInputRole : 'Sekretaris Desa';
+}
 
 export function getPrintSignatureHTML(
   desaName: string, 
@@ -11,7 +39,7 @@ export function getPrintSignatureHTML(
   includeCamatOverride?: boolean
 ): string {
   const isDual = includeCamatOverride === true;
-  const isAn = (jabatanPejabat || '').toLowerCase() !== 'kepala desa';
+  const isKades = isKadesOfficial(namaPejabat);
 
   // Uppercase only the name part, preserving the degree
   const safeNamaPejabat = namaPejabat || '';
@@ -37,10 +65,11 @@ export function getPrintSignatureHTML(
 
   // Right Side role text
   let rightRoleHtml = '';
-  if (isAn) {
-    rightRoleHtml = `a.n. Kepala Desa,<br>${jabatanPejabat}`;
-  } else {
+  if (isKades) {
     rightRoleHtml = `Kepala Desa`;
+  } else {
+    const actualRole = resolveOfficerRole(namaPejabat, jabatanPejabat);
+    rightRoleHtml = `a.n. Kepala Desa,<br>${actualRole}`;
   }
 
   const textAlign = sigAlign === 'left' ? 'left' : 'center';
@@ -126,7 +155,7 @@ export function getReactSignaturePreview(
   includeCamatOverride?: boolean
 ) {
   const isDual = includeCamatOverride === true;
-  const isAn = (jabatanPejabat || '').toLowerCase() !== 'kepala desa';
+  const isKades = isKadesOfficial(namaPejabat);
 
   const sigLeftRoleRaw = localStorage.getItem('village_signature_left_role') || 'Camat Simpur';
   let sigLeftRole = sigLeftRoleRaw;
@@ -143,6 +172,14 @@ export function getReactSignaturePreview(
 
   const cleanDesaName = desaName.replace(/desa|kelurahan/gi, '').trim();
 
+  let rightRole = '';
+  if (isKades) {
+    rightRole = `Kepala Desa`;
+  } else {
+    const actualRole = resolveOfficerRole(namaPejabat, jabatanPejabat);
+    rightRole = `a.n. Kepala Desa,\n${actualRole}`;
+  }
+
   return {
     isDual,
     sigLeftRole,
@@ -153,6 +190,6 @@ export function getReactSignaturePreview(
     sigAlign,
     sigShowMeta,
     sigUnderline,
-    rightRole: isAn ? `a.n. Kepala Desa,\\n${jabatanPejabat}` : `Kepala Desa`
+    rightRole
   };
 }
