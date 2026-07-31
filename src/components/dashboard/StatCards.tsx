@@ -1,6 +1,7 @@
 import { fetchResidentsCached } from '../../utils/apiCache';
 import React, { useState, useEffect } from 'react';
 import { getCurrentMonthYear } from '../../utils/dateHelper';
+import { Users, User, UserCheck, CreditCard, TrendingUp } from 'lucide-react';
 
 export default function StatCards() {
   const [stats, setStats] = useState({
@@ -35,30 +36,83 @@ export default function StatCards() {
   const ratioKK = stats.kk > 0 ? (stats.total / stats.kk).toFixed(1) : '0';
 
   return (
-    <section>
-      <div className="flex items-center justify-between mb-4 px-1">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+    <section className="space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2 tracking-tight">
+          <Users className="w-5 h-5 text-emerald-600" />
           Statistik Kependudukan
         </h3>
-        <span className="text-xs font-medium text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-md">Update: {getCurrentMonthYear()}</span>
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-1.5">
+          <TrendingUp className="w-3.5 h-3.5 text-emerald-500" /> Update: {getCurrentMonthYear()}
+        </span>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Penduduk" value={stats.total.toLocaleString('id-ID')} subtext="Tercatat di sistem" subtextColor="text-emerald-600 font-bold" valueColor="text-emerald-700" />
-        <StatCard title="Laki-laki" value={stats.male.toLocaleString('id-ID')} subtext={`${malePercentage}% dari total`} />
-        <StatCard title="Perempuan" value={stats.female.toLocaleString('id-ID')} subtext={`${femalePercentage}% dari total`} />
-        <StatCard title="Kartu Keluarga" value={stats.kk.toLocaleString('id-ID')} subtext={`Rasio ${ratioKK} jiwa/KK`} valueColor="text-amber-600" />
+        <StatCard 
+          title="Total Penduduk" 
+          value={stats.total.toLocaleString('id-ID')} 
+          subtext="Jiwa tercatat di database" 
+          subtextColor="text-emerald-700 dark:text-emerald-400 font-bold" 
+          valueColor="text-emerald-800 dark:text-emerald-300"
+          icon={<Users className="w-6 h-6 text-white" />}
+          iconBg="bg-gradient-to-tr from-emerald-600 to-teal-500"
+        />
+        <StatCard 
+          title="Laki-laki" 
+          value={stats.male.toLocaleString('id-ID')} 
+          subtext={`${malePercentage}% dari populasi`} 
+          icon={<User className="w-6 h-6 text-white" />}
+          iconBg="bg-gradient-to-tr from-sky-600 to-blue-500"
+        />
+        <StatCard 
+          title="Perempuan" 
+          value={stats.female.toLocaleString('id-ID')} 
+          subtext={`${femalePercentage}% dari populasi`} 
+          icon={<UserCheck className="w-6 h-6 text-white" />}
+          iconBg="bg-gradient-to-tr from-rose-500 to-pink-500"
+        />
+        <StatCard 
+          title="Kartu Keluarga" 
+          value={stats.kk.toLocaleString('id-ID')} 
+          subtext={`Rasio ${ratioKK} jiwa/KK`} 
+          valueColor="text-amber-700 dark:text-amber-300" 
+          icon={<CreditCard className="w-6 h-6 text-white" />}
+          iconBg="bg-gradient-to-tr from-amber-500 to-orange-500"
+        />
       </div>
     </section>
   );
 }
 
-function StatCard({ title, value, subtext, subtextColor = "text-gray-500 dark:text-slate-400", valueColor = "text-gray-900 dark:text-white" }: { title: string, value: string, subtext: string, subtextColor?: string, valueColor?: string }) {
+function StatCard({ 
+  title, 
+  value, 
+  subtext, 
+  subtextColor = "text-slate-500 dark:text-slate-400", 
+  valueColor = "text-slate-900 dark:text-white",
+  icon,
+  iconBg = "bg-emerald-600"
+}: { 
+  title: string, 
+  value: string, 
+  subtext: string, 
+  subtextColor?: string, 
+  valueColor?: string,
+  icon?: React.ReactNode,
+  iconBg?: string
+}) {
   return (
-    <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none hover:shadow-md transition-shadow group">
-      <p className="text-sm font-semibold text-gray-500 dark:text-slate-400 mb-2">{title}</p>
-      <h3 className={`text-4xl font-bold mb-2 tracking-tight group-hover:scale-105 transform origin-left transition-transform ${valueColor}`}>{value}</h3>
-      <p className={`text-xs font-medium ${subtextColor}`}>{subtext}</p>
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/40 dark:shadow-none hover:shadow-2xl hover:border-emerald-200 dark:hover:border-slate-700 transition-all group relative overflow-hidden">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">{title}</p>
+        {icon && (
+          <div className={`p-3 rounded-2xl ${iconBg} shadow-md shadow-slate-200/50 dark:shadow-none group-hover:scale-110 transition-transform`}>
+            {icon}
+          </div>
+        )}
+      </div>
+      <h3 className={`text-4xl font-black mb-1.5 tracking-tight ${valueColor}`}>{value}</h3>
+      <p className={`text-xs font-semibold ${subtextColor}`}>{subtext}</p>
     </div>
   );
 }
