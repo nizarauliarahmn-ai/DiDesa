@@ -205,9 +205,9 @@ export default function AdminSuratSKKT({
     const minLat = Math.min(...lats), maxLat = Math.max(...lats);
     const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
     
-    const viewWidth = 260;
-    const viewHeight = 260;
-    const padding = 55; // Lebarkan padding agar nama tetangga di margin tidak terpotong
+    const viewWidth = 600;
+    const viewHeight = 280;
+    const padding = 35; // Padding sedang agar poligon terlihat besar dan jelas
     const drawWidth = viewWidth - 2 * padding;
     const drawHeight = viewHeight - 2 * padding;
     
@@ -272,14 +272,14 @@ export default function AdminSuratSKKT({
       const vSafe = (val: string) => val && val.trim() !== '' ? val : '-';
       const cleanName = vSafe(neighborName);
 
-      const offsetDist = 24; // Push further out to make room for 2 lines of text
+      const offsetDist = 20;
       const textX = midX + vx * offsetDist;
       const textY = midY + vy * offsetDist;
 
       edgeLabels.push(`
         <line x1="${midX}" y1="${midY}" x2="${textX}" y2="${textY}" stroke="#000000" stroke-width="0.5" stroke-dasharray="2 2" />
-        <text x="${textX}" y="${textY - 3}" text-anchor="middle" font-size="7" fill="#000000">${cleanName}</text>
-        <text x="${textX}" y="${textY + 6}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
+        <text x="${textX}" y="${textY - 3}" text-anchor="middle" font-size="8.5" fill="#000000">${cleanName}</text>
+        <text x="${textX}" y="${textY + 7}" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#000000">${distMeters.toFixed(1)} M</text>
       `);
     }
 
@@ -287,11 +287,11 @@ export default function AdminSuratSKKT({
       let vx = p.x - cx; let vy = p.y - cy;
       const vLen = Math.sqrt(vx * vx + vy * vy) || 1;
       vx /= vLen; vy /= vLen;
-      const offsetDist = 12;
+      const offsetDist = 14;
       return `
       <g>
-        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.5" fill="#000000" />
-        <text x="${(p.x + vx * offsetDist).toFixed(1)}" y="${(p.y + vy * offsetDist + 3).toFixed(1)}" text-anchor="middle" font-size="8" font-weight="bold" fill="#000000">P${p.index}</text>
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#000000" />
+        <text x="${(p.x + vx * offsetDist).toFixed(1)}" y="${(p.y + vy * offsetDist + 3).toFixed(1)}" text-anchor="middle" font-size="9" font-weight="bold" fill="#000000">P${p.index}</text>
       </g>
     `});
 
@@ -425,13 +425,15 @@ export default function AdminSuratSKKT({
         <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:flex-start;">
           <!-- KETUA RT (KIRI) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:30px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:2px;">Mengetahui / Membenarkan,</p>
+            <p style="margin-bottom:28px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
 
           <!-- KEPALA DESA (KANAN) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:30px;">${kadesRoleHTML}</p>
+            <p style="margin-bottom:2px;">Mengetahui,</p>
+            <p style="margin-bottom:28px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
         </div>
@@ -503,13 +505,15 @@ export default function AdminSuratSKKT({
         <div style="display:flex; justify-content:space-between; margin-top:8px; align-items:flex-start;">
           <!-- KEPALA DESA (KIRI) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:30px;">${kadesRoleHTML}</p>
+            <p style="margin-bottom:2px;">Mengetahui,</p>
+            <p style="margin-bottom:28px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:30px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:2px;">Mengetahui / Membenarkan,</p>
+            <p style="margin-bottom:28px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
         </div>
