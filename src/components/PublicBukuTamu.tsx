@@ -145,29 +145,43 @@ export default function PublicBukuTamu() {
     signatureRef.current?.clear();
   };
 
-  const lookupNik = async (nik: string) => {
+  const lookupResident = async (query: string) => {
+    if (!query || query.trim().length < 3) return;
     setIsLookingUp(true);
     setError('');
     try {
-      const { data } = await supabase
+      let req = supabase
         .from('residents')
-        .select('name, address, rt, rw')
-        .eq('nik', nik)
-        .eq('tenant_id', tenantId)
-        .single();
+        .select('nik, name, address, rt, rw')
+        .eq('tenant_id', tenantId);
 
-      if (data) {
+      // Jika query hanya berisi angka dan minimal 16 digit, cari by NIK
+      if (/^\d{16}$/.test(query.trim())) {
+        req = req.eq('nik', query.trim());
+      } else {
+        // Cari by nama (partial match)
+        req = req.ilike('name', `%${query.trim()}%`).limit(1);
+      }
+
+      const { data } = await req;
+      
+      const foundData = Array.isArray(data) ? data[0] : data;
+
+      if (foundData) {
         setForm({
-          nik,
-          nama: capitalizeWords(data.name || ''),
-          alamat: capitalizeWords(`${data.address || ''} RT ${data.rt || ''} RW ${data.rw || ''}`),
+          nik: foundData.nik || query,
+          nama: capitalizeWords(foundData.name || ''),
+          alamat: capitalizeWords(`${foundData.address || ''} RT ${foundData.rt || ''} RW ${foundData.rw || ''}`),
           instansi: 'Warga Desa',
           keperluan: KEPERLUAN_OPTIONS[0]
         });
+        setStep('form');
       } else {
-        setForm(prev => ({ ...prev, nik, nama: '', alamat: '', instansi: '' }));
+        setError('Data warga tidak ditemukan.');
       }
-      setStep('form');
+    } catch (err) {
+      console.error(err);
+      setError('Terjadi kesalahan pencarian.');
     } finally {
       setIsLookingUp(false);
     }
@@ -363,37 +377,44 @@ export default function PublicBukuTamu() {
             )}
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">NIK (Opsional)</label>
-                <div className="flex gap-2">
-                  <input
-                    type="tel"
-                    data-no-cap
-                    maxLength={16}
-                    value={form.nik}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '');
-                      setForm(p => ({ ...p, nik: val }));
-                      if (val.length === 16) {
-                        lookupNik(val);
-                      }
-                    }}
-                    placeholder="16 Digit NIK KTP..."
-                    className="flex-1 h-12 px-4 border-2 border-gray-200 rounded-xl text-sm font-mono text-gray-900 focus:border-emerald-500 outline-none transition-all"
-                  />
-                  <button
-                    onClick={(e) => {
-                       e.preventDefault();
-                       if (form.nik.length === 16) lookupNik(form.nik);
-                       else setError('NIK harus 16 digit.');
-                    }}
-                    className="h-12 px-4 bg-emerald-100 text-emerald-700 font-bold rounded-xl hover:bg-emerald-200 transition-all flex items-center justify-center gap-2"
-                  >
-                    <Search className="w-5 h-5" />
-                  </button>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Cari NIK / Nama Warga (Opsional)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      data-no-cap
+                      value={form.nik}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setForm(p => ({ ...p, nik: val }));
+                        // Auto-search jika NIK sudah 16 digit
+                        if (/^\d{16}$/.test(val.trim())) {
+                          lookupResident(val.trim());
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (form.nik.trim().length >= 3) lookupResident(form.nik);
+                          else setError('Ketikkan NIK atau minimal 3 huruf nama warga.');
+                        }
+                      }}
+                      placeholder="Masukkan 16 Digit NIK atau Nama..."
+                      className="flex-1 h-12 px-4 border-2 border-gray-200 rounded-xl text-sm text-gray-900 focus:border-emerald-500 outline-none transition-all"
+                    />
+                    <button
+                      onClick={(e) => {
+                         e.preventDefault();
+                         if (form.nik.trim().length >= 3) lookupResident(form.nik);
+                         else setError('Ketikkan NIK atau minimal 3 huruf nama warga.');
+                      }}
+                      className="h-12 px-4 bg-emerald-100 text-emerald-700 font-bold rounded-xl hover:bg-emerald-200 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Search className="w-5 h-5" />
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1">Ketikkan NIK atau Nama lalu klik ikon pencarian atau Enter untuk auto-lengkapi.</p>
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1">Isi NIK untuk otomatis melengkapi nama & alamat (khusus warga).</p>
-              </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Nama Lengkap *</label>
                 <input
