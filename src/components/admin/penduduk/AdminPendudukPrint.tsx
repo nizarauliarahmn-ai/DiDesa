@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { ArrowLeft, Printer, User } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface AdminPendudukPrintProps {
   onBack: () => void;
@@ -16,10 +17,10 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
   const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
   const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
   const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
-  const activeDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
+  const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
   const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-  const kadesName = localStorage.getItem('village_kades_name') || 'Ahmaduddin Noor';
-  const kadesNip = localStorage.getItem('village_kades_nip') || '19750520 200501 1 005';
+  const kadesName = localStorage.getItem('kades_name') || localStorage.getItem('village_kades_name') || 'Ahmaduddin Noor';
+  const kadesNip = localStorage.getItem('kades_nip') || localStorage.getItem('village_kades_nip') || '19750520 200501 1 005';
   const appName = localStorage.getItem('global_app_name') || 'DiDesa';
   
   const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -81,7 +82,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
               <div className="text-center flex-1 pr-20">
                 <h2 className="text-[17px] font-bold text-gray-900 leading-tight uppercase tracking-wide">{activeKabupaten}</h2>
                 <h3 className="text-[17px] font-bold text-gray-900 leading-tight uppercase tracking-wide">{activeKecamatan}</h3>
-                <h1 className="text-2xl font-black text-gray-900 leading-tight uppercase tracking-wider mt-1 mb-1">DESA {activeDesa}</h1>
+                <h1 className="text-2xl font-black text-gray-900 leading-tight uppercase tracking-wider mt-1 mb-1">DESA {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</h1>
                 <p className="text-xs font-medium text-gray-700">{activeAlamat}</p>
               </div>
             </div>
@@ -92,13 +93,13 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
 
           {/* Identitas Utama (NIK/KK Highlight) */}
           <div className="grid grid-cols-2 gap-6 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 p-4 rounded-lg mt-2">
-            <div className="flex mb-6 flex-col">
+            <div className="flex flex-col">
               <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nomor Induk Kependudukan (NIK)</span>
-              <span className="text-2xl font-extrabold text-emerald-700">{data?.nik || "3273010101780005"}</span>
+              <span className="text-2xl font-extrabold text-emerald-700">{data?.nik || "-"}</span>
             </div>
-            <div className="flex mb-6 flex-col">
+            <div className="flex flex-col">
               <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nomor Kartu Keluarga (KK)</span>
-              <span className="text-2xl font-extrabold text-emerald-700">{data?.noKk || "3273010101210001"}</span>
+              <span className="text-2xl font-extrabold text-emerald-700">{data?.noKk || "-"}</span>
             </div>
           </div>
 
@@ -124,43 +125,47 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
               <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap</p>
-                  <p className="text-base font-bold text-gray-900 dark:text-white">{data?.name || "Ahmad Bukhori, S.Kom"}</p>
+                  <p className="text-base font-bold text-gray-900 dark:text-white uppercase">{data?.name || "-"}</p>
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jenis Kelamin</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white">{data?.gender || "Laki-laki"}</p>
+                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">{data?.gender || "-"}</p>
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tempat, Tgl Lahir</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white">Bandung, 12 Januari 1978 ({data?.age || 40} Thn)</p>
+                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">
+                    {data?.birthPlace || "-"}{data?.birthDate ? `, ${data.birthDate}` : ''} {data?.age ? `(${data.age} Thn)` : ''}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Golongan Darah</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white">O</p>
+                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">{data?.bloodType || "-"}</p>
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pendidikan Terakhir</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white">Sarjana (S1)</p>
+                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">{data?.education || "-"}</p>
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pekerjaan</p>
-                  <p className="text-base font-bold text-gray-900 dark:text-white">Wiraswasta / Pemilik UMKM</p>
+                  <p className="text-base font-bold text-gray-900 dark:text-white uppercase">{data?.job || "-"}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Alamat & Verifikasi */}
-          <div className="flex mb-6 flex-col gap-2 mt-4">
+          <div className="flex flex-col gap-2 mt-4">
             <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
               <span className="material-symbols-outlined text-xl">location_on</span> Alamat & Tempat Tinggal
             </h5>
             <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 grid grid-cols-3 gap-4 bg-gray-50/50 dark:bg-slate-800/50 mt-2">
               <div className="col-span-2">
                 <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alamat Lengkap</p>
-                <p className="text-sm font-medium text-gray-900 dark:text-white">Jl. Melati No. 12, RT 004/RW 002, Desa Sukasari, Desa Digital</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">
+                  {data?.address || '-'} (RT {data?.rt || '-'}/RW {data?.rw || '-'}, Desa {data?.desa || activeDesa})
+                </p>
               </div>
-              <div className="flex mb-6 flex-col items-end justify-center">
+              <div className="flex flex-col items-end justify-center">
                 <div className="bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-emerald-200">
                   <span className="material-symbols-outlined text-lg">verified</span>
                   <span className="text-[11px] font-bold uppercase tracking-wider">KTP Terverifikasi</span>
@@ -170,7 +175,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
           </div>
 
           {/* Hubungan Keluarga */}
-          <div className="flex mb-6 flex-col gap-2 mt-4">
+          <div className="flex flex-col gap-2 mt-4">
             <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
               <span className="material-symbols-outlined text-xl">family_history</span> Hubungan Keluarga
             </h5>
@@ -185,7 +190,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
-                  {familyMembers.length > 1 ? (
+                  {familyMembers.length > 0 ? (
                     familyMembers.map((member: any, i: number) => (
                       <tr key={i}>
                         <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
@@ -207,7 +212,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
           </div>
 
           {/* Riwayat Layanan & Bantuan */}
-          <div className="flex mb-8 flex-col gap-2 mt-4">
+          <div className="flex flex-col gap-2 mt-4">
             <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
               <span className="material-symbols-outlined text-xl">history</span> Riwayat Layanan Administrasi & Sosial
             </h5>
@@ -256,39 +261,37 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
             </div>
           </div>
 
-          {/* Footer / Tanda Tangan */}
-          <div className="mt-auto pt-12 grid grid-cols-2 gap-12">
-            <div className="flex mb-6 flex-col items-center">
+          {/* Footer / Tanda Tangan Connected to Settings */}
+          <div className="mt-auto pt-10 grid grid-cols-2 gap-12">
+            <div className="flex flex-col items-center text-center">
               <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-20">Penduduk yang bersangkutan,</p>
               <div className="w-40 h-[1px] bg-gray-400 mb-2"></div>
-              <p className="text-sm font-bold uppercase text-gray-900 dark:text-white">{data?.name || "Nama Penduduk"}</p>
+              <p className="text-sm font-bold uppercase text-gray-900 dark:text-white">{data?.name || "-"}</p>
             </div>
-            <div className="flex mb-6 flex-col items-center text-center">
-              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-1">{activeDesa}, {today}</p>
-              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-6">Kepala Desa,</p>
-              <div className="w-48 h-20 flex items-center justify-center mb-4">
-                {/* Tanda tangan bisa ditempatkan di sini */}
+            
+            <div className="flex flex-col items-center text-center">
+              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-1">
+                Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}, {today}
+              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-2">Kepala Desa,</p>
+
+              {/* QR Code Verifikasi Digital Sistem DiDesa */}
+              <div className="my-2 p-2 bg-white border border-emerald-300 rounded-xl shadow-sm flex flex-col items-center gap-1">
+                <QRCodeSVG value={`VERIFIED-PROFIL-${data?.nik || 'NIK'}-${today}`} size={64} />
+                <span className="text-[8px] font-mono text-emerald-800 font-extrabold uppercase tracking-wider">VERIFIKASI SISTEM DIDESA</span>
               </div>
-              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white">{kadesName}</p>
-              <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mt-1">NIP. {kadesNip}</p>
+
+              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white mt-1">{kadesName}</p>
+              {kadesNip && kadesNip !== '-' && (
+                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">NIP. {kadesNip}</p>
+              )}
             </div>
           </div>
 
-          {/* Document ID & QR */}
-          <div className="mt-8 pt-4 border-t border-gray-200 dark:border-slate-700 flex justify-between items-end">
-            <div 
-              className="text-[10px] text-gray-500 dark:text-slate-400 font-medium leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia' }}
-            />
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-[10px] font-bold text-gray-900 dark:text-white uppercase tracking-wider">Verifikasi Digital:</p>
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">Scan QR untuk keaslian data</p>
-              </div>
-              <div className="w-12 h-12 bg-white dark:bg-slate-900 border border-gray-900 p-1 flex items-center justify-center">
-                <span className="material-symbols-outlined text-3xl">qr_code_2</span>
-              </div>
-            </div>
+          {/* Clean Minimalist Footer without Messy Barcode Attributes */}
+          <div className="mt-6 pt-3 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center text-[10px] text-gray-500 font-medium">
+            <span>Dokumen Cetak Profil Kependudukan Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</span>
+            <span>Di-generate secara otomatis melalui Sistem DiDesa</span>
           </div>
 
         </div>
