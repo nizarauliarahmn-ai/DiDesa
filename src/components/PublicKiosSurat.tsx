@@ -32,7 +32,7 @@ export default function PublicKiosSurat() {
     }
     setIsTenantValid(true);
 
-    const types = getLetterClassifications().filter(t => t.isVisible);
+    const types = getLetterClassifications().filter(t => t.isVisible && !t.isSaaSDisabled);
     setLetterTypes(types);
     
     const storedDesa = localStorage.getItem('kop_desa') || localStorage.getItem('village_name');

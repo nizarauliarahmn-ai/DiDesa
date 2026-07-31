@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, FileText, CheckCircle, Clock } from 'lucide-react';
-import { fetchLetterHistoryAsync, LetterHistory } from '../../../utils/letterHistory';
+import { fetchLetterHistoryAsync, LetterHistory, saveLetterHistory } from '../../../utils/letterHistory';
 
 interface AdminSuratInboxProps {
   onEditLetter?: (letter: LetterHistory) => void;
@@ -21,12 +21,25 @@ export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) 
 
   useEffect(() => {
     fetchLetterHistoryAsync().then(data => {
-      // Filter hanya yang berstatus pending/Menunggu
-      const pending = data.filter(s => s.status === 'pending' || (s.status as string) === 'Menunggu' || s.status === 'Proses');
+      // Filter hanya yang berstatus pending/Menunggu, hilangkan 'Proses'
+      const pending = data.filter(s => s.status === 'pending' || (s.status as string) === 'Menunggu');
       setSuratList(pending);
       setIsLoading(false);
     });
   }, []);
+
+  const handleReview = async (s: LetterHistory) => {
+    if (onEditLetter) {
+      if (s.status === 'pending' || (s.status as string) === 'Menunggu') {
+        const updated = { ...s, status: 'Proses' };
+        await saveLetterHistory(updated);
+        setSuratList(prev => prev.filter(item => item.id !== s.id));
+        onEditLetter(updated);
+      } else {
+        onEditLetter(s);
+      }
+    }
+  };
 
   const filteredSurat = suratList.filter(s => {
     const q = debouncedSearchQuery.toLowerCase();
@@ -114,7 +127,7 @@ export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) 
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button 
-                        onClick={() => onEditLetter?.(surat)}
+                        onClick={() => handleReview(surat)}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-bold rounded-lg hover:bg-emerald-700 transition-colors shadow-sm"
                       >
                         <CheckCircle className="w-4 h-4" />

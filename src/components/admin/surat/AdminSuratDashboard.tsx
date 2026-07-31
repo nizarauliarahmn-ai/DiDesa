@@ -1262,16 +1262,6 @@ export default function AdminSuratDashboard({
                     </td>
                     <td className="px-6 py-4 print:hidden text-center">
                       <div className="flex items-center justify-center gap-1">
-                        <button 
-                          onClick={async () => {
-                            const fullData = await getLetterFullData(surat);
-                            setSelectedSurat({ ...surat, data: fullData });
-                          }}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-800 rounded-lg transition-colors" 
-                          title="Lihat Detail Surat"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
                         
                         {!isCancelled && (
                           <>

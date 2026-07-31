@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, FileText, Megaphone, ArrowRight, Home } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { BookOpen, FileText, Megaphone, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { supabase } from '../utils/supabase';
@@ -19,7 +19,6 @@ export default function PublicKiosPortal() {
     }
 
     setIsTenantValid(true);
-    // Attempt to get desa name from URL if provided by Kiosk link, or localStorage
     const tName = urlParams.get('t_name');
     if (tName) {
       setDesaName(tName);
@@ -28,10 +27,9 @@ export default function PublicKiosPortal() {
       if (storedDesa) setDesaName(storedDesa);
     }
     
-    // Setup listener so that if admin pushes a guest while Kiosk is on home, it auto navigates
     resolveCurrentTenant().then((id) => {
       if (!id) return;
-      const channel = supabase.channel(`kiosk-notif-${id}`)
+      const channel = supabase.channel(kiosk-notif-${id})
         .on('broadcast', { event: 'incoming-guest' }, ({ payload }) => {
           localStorage.setItem('kiosk_incoming_guest', JSON.stringify(payload));
           const p = new URLSearchParams(window.location.search);
@@ -44,7 +42,6 @@ export default function PublicKiosPortal() {
         supabase.removeChannel(channel);
       }
     });
-
   }, []);
 
   const navigateTo = (tab: string) => {
@@ -54,84 +51,143 @@ export default function PublicKiosPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col font-sans select-none overflow-hidden relative">
+    <div className="min-h-screen bg-[#0f172a] flex flex-col font-sans select-none overflow-hidden relative text-slate-200">
       
       {isTenantValid === false && (
-        <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8">
-          <div className="bg-white rounded-3xl p-10 max-w-lg text-center shadow-2xl">
-            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-4xl">🔒</span>
+        <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8 backdrop-blur-md">
+          <div className="bg-slate-800 rounded-3xl p-10 max-w-lg text-center shadow-2xl border border-slate-700">
+            <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/30">
+              <span className="text-4xl">❌</span>
             </div>
-            <h2 className="text-3xl font-bold text-slate-800 mb-4">Akses Ditolak</h2>
-            <p className="text-slate-600 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda agar kode desa dapat terbaca dengan benar.</p>
+            <h2 className="text-3xl font-bold text-white mb-4">Akses Ditolak</h2>
+            <p className="text-slate-400 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda agar kode desa dapat terbaca dengan benar.</p>
           </div>
         </div>
       )}
 
-      {/* Background decorations */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-emerald-600/90 to-teal-800/90 rounded-b-[4rem] z-0 shadow-2xl"></div>
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/10 rounded-full blur-3xl z-0 pointer-events-none"></div>
-      <div className="absolute top-40 -left-20 w-72 h-72 bg-emerald-400/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
-      
+      {/* Dynamic Background Effects */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen" />
+      <div className="absolute top-[40%] left-[30%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+
       {/* Header */}
-      <header className="relative z-10 pt-16 pb-12 px-8 text-center text-white">
-        <h1 className="text-5xl font-black mb-4 tracking-tight">Selamat Datang</h1>
-        <p className="text-2xl font-medium text-emerald-50">di Kios Pelayanan Mandiri {desaName}</p>
-        <p className="mt-4 text-emerald-100 max-w-2xl mx-auto text-lg">Silakan sentuh salah satu menu di bawah ini untuk memulai layanan mandiri tanpa perlu antre di loket.</p>
+      <header className="relative z-10 pt-20 pb-12 px-8 text-center flex flex-col items-center">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md mb-8 shadow-xl"
+        >
+          <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-semibold tracking-wide text-slate-300">PORTAL RESMI PELAYANAN DESA</span>
+        </motion.div>
+        
+        <motion.h1 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+          className="text-5xl md:text-7xl font-black mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400"
+        >
+          Portal Warga
+        </motion.h1>
+        
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-xl md:text-3xl font-medium text-slate-300 mb-4"
+        >
+          Pemerintah Desa <span className="text-white font-bold">{desaName}</span>
+        </motion.p>
+        
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="text-slate-400 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed"
+        >
+          Pusat layanan digital mandiri. Silakan pilih menu di bawah ini untuk memulai layanan tanpa perlu antre di loket balai desa.
+        </motion.p>
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 flex-1 px-8 pb-12 flex items-center justify-center">
-        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8">
+      <main className="relative z-10 flex-1 px-6 pb-20 flex items-center justify-center">
+        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           
+          {/* Card 1 */}
           <motion.button 
-            whileHover={{ y: -10 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            whileHover={{ y: -10, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigateTo('buku_tamu')}
-            className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl shadow-emerald-900/5 border border-gray-100 dark:border-slate-700 text-left flex flex-col h-full group hover:shadow-2xl hover:border-emerald-200 transition-all"
+            className="group relative bg-slate-800/40 backdrop-blur-xl rounded-[2rem] p-8 border border-slate-700/50 text-left flex flex-col h-full hover:bg-slate-800/60 transition-all overflow-hidden"
           >
-            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <BookOpen className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-500 group-hover:rotate-3">
+              <BookOpen className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Buku Tamu</h2>
-            <p className="text-gray-500 dark:text-slate-400 text-lg flex-1">Catat kehadiran Anda sebagai tamu atau pengunjung balai desa secara digital.</p>
-            <div className="mt-6 flex items-center text-emerald-600 dark:text-emerald-400 font-bold text-lg">
-              Mulai <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            <h2 className="relative z-10 text-3xl font-bold text-white mb-4">Buku Tamu</h2>
+            <p className="relative z-10 text-slate-400 text-lg flex-1 leading-relaxed group-hover:text-slate-300 transition-colors">
+              Catat kehadiran Anda sebagai tamu atau pengunjung balai desa secara digital dengan mudah.
+            </p>
+            <div className="relative z-10 mt-8 flex items-center text-emerald-400 font-bold text-xl group-hover:text-emerald-300 transition-colors">
+              Buka Layanan <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-3 transition-transform duration-300" />
             </div>
           </motion.button>
 
+          {/* Card 2 */}
           <motion.button 
-            whileHover={{ y: -10 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            whileHover={{ y: -10, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigateTo('kios_surat')}
-            className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl shadow-blue-900/5 border border-gray-100 dark:border-slate-700 text-left flex flex-col h-full group hover:shadow-2xl hover:border-blue-200 transition-all relative overflow-hidden"
+            className="group relative bg-slate-800/40 backdrop-blur-xl rounded-[2rem] p-8 border border-slate-700/50 text-left flex flex-col h-full hover:bg-slate-800/60 transition-all overflow-hidden ring-1 ring-blue-500/20 hover:ring-blue-500/50"
           >
             {/* Ribbon */}
-            <div className="absolute top-6 -right-10 bg-blue-500 text-white text-xs font-bold py-1 px-10 rotate-45 shadow-md">POPULER</div>
-            
-            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <FileText className="w-10 h-10 text-blue-600 dark:text-blue-400" />
+            <div className="absolute top-8 -right-12 bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-sm font-black py-1.5 px-12 rotate-45 shadow-lg shadow-blue-500/30 z-20 tracking-wider">
+              FAVORIT
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Permohonan Surat</h2>
-            <p className="text-gray-500 dark:text-slate-400 text-lg flex-1">Ajukan berbagai jenis surat (SKTM, SKU, dll) hanya dengan NIK Anda.</p>
-            <div className="mt-6 flex items-center text-blue-600 dark:text-blue-400 font-bold text-lg">
-              Mulai <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-500 group-hover:-rotate-3">
+              <FileText className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="relative z-10 text-3xl font-bold text-white mb-4">Permohonan Surat</h2>
+            <p className="relative z-10 text-slate-400 text-lg flex-1 leading-relaxed group-hover:text-slate-300 transition-colors">
+              Ajukan berbagai jenis surat administrasi desa (SKTM, SKU, dll) secara mandiri hanya menggunakan NIK Anda.
+            </p>
+            <div className="relative z-10 mt-8 flex items-center text-blue-400 font-bold text-xl group-hover:text-blue-300 transition-colors">
+              Buka Layanan <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-3 transition-transform duration-300" />
             </div>
           </motion.button>
 
+          {/* Card 3 */}
           <motion.button 
-            whileHover={{ y: -10 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            whileHover={{ y: -10, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigateTo('kios_aspirasi')}
-            className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl shadow-amber-900/5 border border-gray-100 dark:border-slate-700 text-left flex flex-col h-full group hover:shadow-2xl hover:border-amber-200 transition-all"
+            className="group relative bg-slate-800/40 backdrop-blur-xl rounded-[2rem] p-8 border border-slate-700/50 text-left flex flex-col h-full hover:bg-slate-800/60 transition-all overflow-hidden"
           >
-            <div className="w-20 h-20 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-              <Megaphone className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform duration-500 group-hover:rotate-3">
+              <Megaphone className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Aduan Warga</h2>
-            <p className="text-gray-500 dark:text-slate-400 text-lg flex-1">Sampaikan aspirasi, saran, atau pengaduan layanan secara anonim maupun resmi.</p>
-            <div className="mt-6 flex items-center text-amber-600 dark:text-amber-400 font-bold text-lg">
-              Mulai <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            <h2 className="relative z-10 text-3xl font-bold text-white mb-4">Aduan Warga</h2>
+            <p className="relative z-10 text-slate-400 text-lg flex-1 leading-relaxed group-hover:text-slate-300 transition-colors">
+              Sampaikan aspirasi, saran, atau pengaduan layanan kepada pemerintah desa secara anonim maupun resmi.
+            </p>
+            <div className="relative z-10 mt-8 flex items-center text-amber-400 font-bold text-xl group-hover:text-amber-300 transition-colors">
+              Buka Layanan <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-3 transition-transform duration-300" />
             </div>
           </motion.button>
 
@@ -139,19 +195,25 @@ export default function PublicKiosPortal() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 flex flex-col items-center justify-center gap-4 text-gray-400 dark:text-slate-500 font-medium z-10 relative">
+      <motion.footer 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 1 }}
+        className="py-8 flex flex-col items-center justify-center gap-6 text-slate-500 font-medium z-10 relative mt-auto border-t border-slate-800/50"
+      >
         <button 
           onClick={() => {
             const p = new URLSearchParams(window.location.search);
             const t = p.get('tenant') || p.get('t_id');
-            window.location.search = t ? `?mode=public&tab=layanan_mandiri&tenant=${t}` : `?mode=public&tab=layanan_mandiri`;
+            window.location.search = t ? ?mode=public&tab=layanan_mandiri&tenant=+t : ?mode=public&tab=layanan_mandiri;
           }}
-          className="text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 font-bold hover:underline transition-colors flex items-center gap-2 bg-white/50 dark:bg-slate-800/50 px-4 py-2 rounded-full backdrop-blur-sm"
+          className="group text-emerald-400 hover:text-emerald-300 font-bold transition-all flex items-center gap-3 bg-slate-800/50 px-6 py-3 rounded-full backdrop-blur-md border border-slate-700/50 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-emerald-900/20"
         >
-          Kunjungi Portal Warga <ArrowRight className="w-4 h-4" />
+          <Zap className="w-5 h-5 group-hover:animate-pulse" />
+          Lihat Dashboard Publik <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
-        <p>&copy; {new Date().getFullYear()} DiDesa. Seluruh Hak Cipta Dilindungi.</p>
-      </footer>
+        <p className="tracking-wider text-sm">&copy; {new Date().getFullYear()} DiDesa. Sistem Pemerintahan Desa Modern.</p>
+      </motion.footer>
     </div>
   );
 }
