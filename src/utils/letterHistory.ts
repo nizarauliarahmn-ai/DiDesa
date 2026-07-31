@@ -125,15 +125,21 @@ export function deleteLetterHistory(id: string): LetterHistory[] {
 
 export async function updateLetterHistoryAsync(id: string, updatedFields: Partial<LetterHistory>): Promise<LetterHistory[]> {
   try {
-    const updatePayload: any = { ...updatedFields };
-    if (updatedFields.status) {
+    const updatePayload: any = {};
+    if (updatedFields.status !== undefined) {
       updatePayload.status = updatedFields.status === 'Proses' ? 'pending' : updatedFields.status;
     }
-    if (updatedFields.nomor) updatePayload.nomor = updatedFields.nomor;
-    if (updatedFields.keperluan) updatePayload.keterangan = updatedFields.keperluan;
-    if (updatedFields.jenis) updatePayload.jenis_surat = updatedFields.jenis;
+    if (updatedFields.nomor !== undefined) updatePayload.nomor = updatedFields.nomor;
+    if (updatedFields.nama !== undefined) updatePayload.nama = updatedFields.nama;
+    if (updatedFields.nik !== undefined) updatePayload.nik = updatedFields.nik;
+    if (updatedFields.keperluan !== undefined) updatePayload.keterangan = updatedFields.keperluan;
+    if (updatedFields.jenis !== undefined) updatePayload.jenis_surat = updatedFields.jenis;
+    if (updatedFields.data !== undefined) updatePayload.data = updatedFields.data;
     
-    await supabase.from('surat').update(updatePayload).eq('id', id);
+    const { error } = await supabase.from('surat').update(updatePayload).eq('id', id);
+    if (error) {
+      console.error("Error updating letter in Supabase:", error);
+    }
     return await fetchLetterHistoryAsync();
   } catch (e) {
     console.error("Error updating letter:", e);
