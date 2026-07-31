@@ -54,7 +54,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
         {`
           @page {
             size: A4 portrait;
-            margin: 20mm 24mm 20mm 24mm;
+            margin: 25mm 30mm 25mm 30mm;
           }
           @media print {
             .no-print { display: none !important; }
@@ -70,7 +70,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                 max-width: 100% !important;
                 box-shadow: none !important; 
                 margin: 0 !important; 
-                padding: 16px 28px !important;
+                padding: 32px 48px !important;
                 border: none !important;
                 background-color: white !important;
                 color: black !important;
@@ -106,7 +106,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
 
       {/* Document Canvas */}
       <main className="flex justify-center py-8 px-4 bg-gray-50 dark:bg-slate-800 min-h-screen">
-        <div className="print-container bg-white dark:bg-slate-900 w-full max-w-[800px] min-h-[1123px] shadow-lg dark:shadow-none p-[36px] sm:p-[44px] border border-gray-200 dark:border-slate-700 flex flex-col gap-3.5">
+        <div className="print-container bg-white dark:bg-slate-900 w-full max-w-[840px] min-h-[1123px] shadow-lg dark:shadow-none p-[52px] sm:p-[64px] border border-gray-200 dark:border-slate-700 flex flex-col gap-3.5">
           
           {/* Document Header (Kop Surat Removed as requested) */}
           <div className="flex items-center justify-between border-b-2 border-emerald-700 pb-3 mb-1">
@@ -146,8 +146,10 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                     <span className="text-[8px] font-extrabold tracking-widest mt-1 uppercase opacity-90">PASFOTO</span>
                   </div>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 bg-emerald-800 text-white text-center py-0.5 border-t border-emerald-700 z-10">
-                  <span className="text-[9px] font-extrabold uppercase tracking-wider">AKTIF</span>
+                <div className="absolute bottom-0 left-0 right-0 bg-emerald-800 text-white text-center py-1 border-t border-emerald-700 z-10">
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider">
+                    {data?.statusKependudukan || (data?.status && data.status.toLowerCase() !== 'aktif' ? data.status : 'WARGA TETAP')}
+                  </span>
                 </div>
               </div>
             </div>
@@ -205,7 +207,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
             </div>
           </div>
 
-          {/* Hubungan Keluarga (Banner KK Mandiri jika tunggal, atau Adaptif 2-Kolom jika >4 anggota) */}
+          {/* Hubungan Keluarga (Banner KK Mandiri jika tunggal, atau Adaptif 2-Kolom jika >= 4 anggota) */}
           {(() => {
             const otherMembers = (familyMembers || []).filter((m: any) => m && m.nik !== data?.nik && m.name !== data?.name);
             
@@ -228,28 +230,28 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
               );
             }
 
-            // Jika anggota > 4, tampilkan dalam 2-Kolom Kompak
-            if (familyMembers.length > 4) {
+            // Jika total anggota >= 4, tampilkan dalam 2-Kolom Kompak
+            if (familyMembers && familyMembers.length >= 4) {
               const mid = Math.ceil(familyMembers.length / 2);
               const leftCol = familyMembers.slice(0, mid);
               const rightCol = familyMembers.slice(mid);
 
               const renderMiniTable = (membersList: any[]) => (
-                <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg">
+                <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg shadow-sm">
                   <table className="w-full text-left">
-                    <thead className="bg-gray-100 dark:bg-slate-800">
+                    <thead className="bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
                       <tr>
-                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
-                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
-                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
+                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nama Anggota</th>
+                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIK</th>
+                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Hubungan</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900 text-xs">
+                    <tbody className="divide-y divide-gray-200 dark:divide-slate-800 bg-white dark:bg-slate-900 text-xs">
                       {membersList.map((member: any, i: number) => (
-                        <tr key={i} className="hover:bg-slate-50">
+                        <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                           <td className="px-2.5 py-1.5 font-bold text-gray-900 dark:text-white uppercase truncate max-w-[110px] text-[11px]">{member.name || '-'}</td>
                           <td className="px-2.5 py-1.5 font-mono text-[10px] text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
-                          <td className="px-2.5 py-1.5 font-semibold text-emerald-800 dark:text-emerald-400 uppercase text-[10px] truncate max-w-[90px]">{member.familyRelation || '-'}</td>
+                          <td className="px-2.5 py-1.5 font-semibold text-emerald-700 dark:text-emerald-400 uppercase text-[10px] truncate max-w-[95px]">{member.familyRelation || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -259,13 +261,15 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
 
               return (
                 <div className="flex flex-col gap-1.5 mt-1">
-                  <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-1">
+                  <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-1">
                     <h5 className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-base">family_history</span> Hubungan Keluarga ({familyMembers.length} Anggota)
                     </h5>
-                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200">Format 2-Kolom Kompak</span>
+                    <span className="text-[9px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                      Format 2-Kolom Kompak
+                    </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2.5 mt-0.5">
+                  <div className="grid grid-cols-2 gap-3 mt-1">
                     {renderMiniTable(leftCol)}
                     {renderMiniTable(rightCol)}
                   </div>
