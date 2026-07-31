@@ -49,6 +49,7 @@ export default function AdminSuratSKH({
   }, [presetResident]);
 
   const [loading, setLoading] = useState(false);
+  const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SKH', 'Surat Keterangan Kehilangan / Miskin');
   const templateKode = useLetterKode('SKH');
   const [success, setSuccess] = useState(false);
@@ -480,7 +481,8 @@ export default function AdminSuratSKH({
             return '-';
           }
         })(),
-        formData.includeCamat
+        formData.includeCamat,
+        useEsignature
       )}
       <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
         ${SAAS_CONFIG.globalFooterHTML}
@@ -910,17 +912,38 @@ export default function AdminSuratSKH({
                 
                 </div>
                 
-                <div className="mt-6 pt-6 border-t border-amber-100">
-                  <label className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50 transition-colors">
-                    <input 
-                      type="checkbox"
-                      checked={formData.includeCamat}
-                      onChange={(e) => setFormData({...formData, includeCamat: e.target.checked})}
-                      className="w-5 h-5 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
-                    />
-                    <div>
+                <div className="mt-6 pt-6 border-t border-amber-100 space-y-3">
+                  {/* Toggle TTE / QR Code */}
+                  <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                    <div className="space-y-0.5 pr-4">
+                      <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
+                    </div>
+                    <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input 
+                        type="checkbox" 
+                        checked={useEsignature} 
+                        onChange={(e) => setUseEsignature(e.target.checked)}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                    </div>
+                  </label>
+
+                  {/* Toggle Mengetahui Camat */}
+                  <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                    <div className="space-y-0.5 pr-4">
                       <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                    </div>
+                    <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input 
+                        type="checkbox" 
+                        checked={formData.includeCamat} 
+                        onChange={(e) => setFormData(prev => ({ ...prev, includeCamat: e.target.checked }))}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
                     </div>
                   </label>
                 </div>

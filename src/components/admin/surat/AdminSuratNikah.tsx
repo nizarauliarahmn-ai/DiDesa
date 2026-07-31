@@ -99,6 +99,7 @@ export default function AdminSuratNikah({
     statusIstri: 'Perawan',
     hubunganWali: 'Ayah Kandung',
   });
+  const [useEsignature, setUseEsignature] = useState(true);
 
   const STEPS = [
     { n: 1, label: 'Mempelai (Warga Desa)' },
@@ -1404,6 +1405,42 @@ export default function AdminSuratNikah({
               </div>
               <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jabatan (Ketik Manual jika perlu)</label>
                 <input type="text" name="jabatanPejabat" value={formData.jabatanPejabat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" />
+              </div>
+
+              <div className="md:col-span-2 mt-4 pt-4 border-t border-emerald-100 space-y-3">
+                {/* Toggle TTE / QR Code */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={useEsignature} 
+                      onChange={(e) => setUseEsignature(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
+
+                {/* Toggle Mengetahui Camat */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={formData.includeCamat} 
+                      onChange={(e) => setFormData(prev => ({ ...prev, includeCamat: e.target.checked }))}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
               </div>
             </div>
             
