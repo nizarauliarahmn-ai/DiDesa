@@ -36,6 +36,12 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminBantuanImport from './bantuan/AdminBantuanImport';
 
+// Helper to auto capitalize first letter of each word
+const toTitleCase = (str: string) => {
+  if (!str) return str;
+  return str.replace(/\b[a-z]/g, (char) => char.toUpperCase());
+};
+
 export default function AdminBantuan({
   searchQuery: externalSearchQuery,
   setSearchQuery: externalSetSearchQuery,
@@ -962,9 +968,9 @@ export default function AdminBantuan({
                         <input
                           type="text"
                           value={manualResidentData.name}
-                          onChange={(e) => setManualResidentData({ ...manualResidentData, name: e.target.value })}
+                          onChange={(e) => setManualResidentData({ ...manualResidentData, name: toTitleCase(e.target.value) })}
                           placeholder="Masukkan nama sesuai KTP..."
-                          className="w-full h-11 px-4 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500"
+                          className="w-full h-11 px-4 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 capitalize"
                           required
                         />
                       </div>
@@ -987,9 +993,9 @@ export default function AdminBantuan({
                         <input
                           type="text"
                           value={manualResidentData.address}
-                          onChange={(e) => setManualResidentData({ ...manualResidentData, address: e.target.value })}
+                          onChange={(e) => setManualResidentData({ ...manualResidentData, address: toTitleCase(e.target.value) })}
                           placeholder="Jl. Keramat RT 02..."
-                          className="w-full h-11 px-4 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500"
+                          className="w-full h-11 px-4 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 capitalize"
                         />
                       </div>
 
@@ -1164,8 +1170,8 @@ export default function AdminBantuan({
                         type="text"
                         placeholder="Ketik nama program bantuan sosial kustom di sini..."
                         value={formProgram}
-                        onChange={(e) => setFormProgram(e.target.value)}
-                        className="w-full h-11 px-4 border border-emerald-300 dark:border-emerald-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm font-bold text-emerald-950 dark:text-emerald-100 bg-emerald-50/40 dark:bg-emerald-950/40 shadow-inner"
+                        onChange={(e) => setFormProgram(toTitleCase(e.target.value))}
+                        className="w-full h-11 px-4 border border-emerald-300 dark:border-emerald-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm font-bold text-emerald-950 dark:text-emerald-100 bg-emerald-50/40 dark:bg-emerald-950/40 shadow-inner capitalize"
                         required
                       />
                       <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Tuliskan nama resmi program bantuan sosial yang sesuai.</p>
@@ -1405,12 +1411,12 @@ export default function AdminBantuan({
                             type="text"
                             placeholder="Tulis kriteria kustom baru (misal: Rumah Dinding Kayu)..."
                             value={newCriteriaText}
-                            onChange={(e) => setNewCriteriaText(e.target.value)}
+                            onChange={(e) => setNewCriteriaText(toTitleCase(e.target.value))}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
                                 e.preventDefault();
                                 if (newCriteriaText.trim()) {
-                                  const text = newCriteriaText.trim();
+                                  const text = toTitleCase(newCriteriaText.trim());
                                   setCustomCriteriaList(prev => [...prev, text]);
                                   setCriteriaChecked(prev => ({ ...prev, [`custom_${text}`]: true }));
                                   setNewCriteriaText('');
@@ -1418,7 +1424,7 @@ export default function AdminBantuan({
                                 }
                               }
                             }}
-                            className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-slate-600 rounded-lg outline-none font-semibold bg-white dark:bg-slate-900"
+                            className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-slate-600 rounded-lg outline-none font-semibold bg-white dark:bg-slate-900 capitalize"
                           />
                           <div className="flex justify-end gap-2">
                             <button
