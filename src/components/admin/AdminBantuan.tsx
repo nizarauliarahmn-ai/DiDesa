@@ -1307,18 +1307,10 @@ export default function AdminBantuan({
         {/* Table Top Controls & Quick Filter Bar */}
         <div className="p-6 border-b border-gray-100 dark:border-slate-800 space-y-4 bg-gray-50/20">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-3">
               <h4 className="font-extrabold text-lg text-gray-900 dark:text-white">
                 {showOverlapOnly ? "Tumpang Tindih (Penerima Ganda)" : `Penerima ${selectedProgram}`}
               </h4>
-              <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-slate-800 rounded-full text-xs font-bold text-gray-600 dark:text-slate-400 border border-gray-200 dark:border-slate-700">
-                {filteredResidents.length} Jiwa Total
-              </span>
-              {!showOverlapOnly && (
-                <span className="px-2.5 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/80 rounded-full text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
-                  {disbursedCountInFiltered} / {filteredResidents.length} Sudah Salur
-                </span>
-              )}
             </div>
             
             <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
@@ -1481,6 +1473,7 @@ export default function AdminBantuan({
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
+                <th className="px-6 py-4">TAHUN</th>
                 <th className="px-6 py-4">DTKS & BANTUAN LAIN</th>
                 <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center gap-1.5">
@@ -1494,13 +1487,13 @@ export default function AdminBantuan({
             <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-400">
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-400">
                     <span className="inline-block animate-spin mr-2">⏳</span> Mengambil data penerima dari server...
                   </td>
                 </tr>
               ) : filteredResidents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-sm text-gray-400">
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-400">
                     Tidak ada data penerima bantuan yang cocok dengan filter.
                   </td>
                 </tr>
@@ -1512,6 +1505,14 @@ export default function AdminBantuan({
                     showOverlapOnly ? true : !aid.startsWith(selectedProgram)
                   );
                   const isOverlap = (resident.activeAids || []).length > 1;
+
+                  // Extract aid year
+                  let aidYear = filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear().toString();
+                  const matchedAid = (resident.activeAids || []).find((a: string) => a.startsWith(selectedProgram));
+                  if (matchedAid) {
+                    const match = matchedAid.match(/\((\d{4})\)/);
+                    if (match) aidYear = match[1];
+                  }
 
                   return (
                     <tr 
@@ -1537,31 +1538,24 @@ export default function AdminBantuan({
                         />
                       </td>
 
-                      {/* Resident Info Column */}
+                      {/* Resident Info Column (Clean without Avatar Letter) */}
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                            resident.gender_color || 'bg-emerald-100 text-emerald-800'
-                          }`}>
-                            {(resident.name || 'W').charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="font-extrabold text-sm text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
-                              {resident.name}
-                              {resident.gender_color && (
-                                <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${resident.gender_color}`}>
-                                  {resident.gender_color.includes('blue') ? 'L' : 'P'}
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-xs font-mono font-semibold text-gray-500 dark:text-slate-400">NIK: {resident.nik}</p>
-                            {resident.status?.toLowerCase().includes('meninggal') && (
-                              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded-md">
-                                <AlertCircle className="w-3 h-3" />
-                                {resident.status}
+                        <div>
+                          <p className="font-extrabold text-sm text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
+                            {resident.name}
+                            {resident.gender_color && (
+                              <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${resident.gender_color}`}>
+                                {resident.gender_color.includes('blue') ? 'L' : 'P'}
                               </span>
                             )}
-                          </div>
+                          </p>
+                          <p className="text-xs font-mono font-semibold text-gray-500 dark:text-slate-400">NIK: {resident.nik}</p>
+                          {resident.status?.toLowerCase().includes('meninggal') && (
+                            <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded-md">
+                              <AlertCircle className="w-3 h-3" />
+                              {resident.status}
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -1569,6 +1563,13 @@ export default function AdminBantuan({
                       <td className="px-6 py-4 text-xs font-semibold text-gray-600 dark:text-slate-300">
                         <span className="bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-slate-700">
                           {resident.desa || "Sukamaju"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
+                        </span>
+                      </td>
+
+                      {/* Year Column */}
+                      <td className="px-6 py-4 text-xs font-bold font-mono">
+                        <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 rounded-lg">
+                          {aidYear}
                         </span>
                       </td>
 
