@@ -273,7 +273,9 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap Sesuai KTP</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  Nama Lengkap Sesuai KTP <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib Diisi)</span>
+                </label>
                 <input 
                   type="text"
                   value={name}
@@ -291,7 +293,9 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* NIK Field */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK (Nomor Induk Kependudukan)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  NIK (Nomor Induk Kependudukan) <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib 16 Digit)</span>
+                </label>
                 <input 
                   type="text"
                   maxLength={16}
@@ -309,9 +313,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 {errors.nik && <p className="text-xs text-red-500 font-semibold">{errors.nik}</p>}
               </div>
 
-              {/* Nomor KK Field (Newly Added) */}
+              {/* Nomor KK Field */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. KK (Kartu Keluarga)</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  No. KK (Kartu Keluarga) <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib 16 Digit)</span>
+                </label>
                 <input 
                   type="text"
                   maxLength={16}
@@ -330,7 +336,9 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Jenis Kelamin</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  Jenis Kelamin <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                </label>
                 <select 
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
@@ -342,7 +350,9 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tempat Lahir</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  Tempat Lahir <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                </label>
                 <input 
                   type="text"
                   value={birthPlace}
@@ -359,7 +369,9 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tanggal Lahir</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  Tanggal Lahir <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                </label>
                 <input 
                   type="date"
                   value={birthDate}
@@ -405,7 +417,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 </select>
               </div>
 
-              {/* Pekerjaan Dropdown selection (Updated from input) */}
+              {/* Pekerjaan Dropdown selection */}
               <div className="md:col-span-2 space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pekerjaan</label>
                 <select 
@@ -419,9 +431,11 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 </select>
               </div>
 
-              {/* Father and Mother Names */}
+              {/* Father and Mother Names (Marked Opsional) */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Ayah Kandung</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  Nama Ayah Kandung <span className="text-gray-400 font-normal text-[10px] lowercase tracking-normal ml-1.5">(Opsional)</span>
+                </label>
                 <input 
                   type="text"
                   value={fatherName}
@@ -432,7 +446,9 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Ibu Kandung</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  Nama Ibu Kandung <span className="text-gray-400 font-normal text-[10px] lowercase tracking-normal ml-1.5">(Opsional)</span>
+                </label>
                 <input 
                   type="text"
                   value={motherName}
@@ -453,10 +469,12 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">Alamat & Domisili</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
                 <div className="md:col-span-6 space-y-1">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Alamat Lengkap</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      Alamat Lengkap <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                    </label>
                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Smart Autofill RT/RW Aktif</span>
                   </div>
                   <textarea 
@@ -485,7 +503,9 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               {/* RT Dropdown select list */}
               <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">RT</label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                  RT <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                </label>
                 <select 
                   value={rt}
                   onChange={(e) => handleRtChange(e.target.value)}
@@ -496,7 +516,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   <option value="03">03</option>
                   <option value="04">04</option>
                 </select>
-              </div>
+              </div>v>
 
               {/* RW input (auto-populated and disabled based on the rule) */}
               <div className="md:col-span-2 space-y-1">

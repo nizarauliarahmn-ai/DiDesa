@@ -111,7 +111,7 @@ export default function AdminPenduduk({
       }
 
       if (allData.length > 0) {
-        const formatted = allData.map(r => ({
+        const formatted = allData.map((r, idx) => ({
            ...r,
            noKk: r.no_kk,
            rtRw: r.rt_rw,
@@ -124,7 +124,8 @@ export default function AdminPenduduk({
            motherName: r.mother_name,
            activeAids: typeof r.active_aids === 'string' ? JSON.parse(r.active_aids) : (r.active_aids || []),
            genderColor: r.gender_color,
-           statusColor: r.status_color
+           statusColor: r.status_color,
+           _orderKey: r.created_at ? new Date(r.created_at).getTime() : (r.id ? Number(r.id) : (allData.length - idx))
         }));
         setResidents(formatted.filter(r => String(r.is_deleted) !== '1' && r.is_deleted !== true));
       }
@@ -333,8 +334,8 @@ export default function AdminPenduduk({
     // Sorting
     if (sortOrder === 'Terbaru' || activeFilter === '✨ Terbaru') {
       result = [...result].sort((a, b) => {
-        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        const timeA = a._orderKey || (a.created_at ? new Date(a.created_at).getTime() : 0);
+        const timeB = b._orderKey || (b.created_at ? new Date(b.created_at).getTime() : 0);
         if (timeA !== timeB) return timeB - timeA;
         return (b.id || 0) - (a.id || 0);
       });
