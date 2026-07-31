@@ -901,33 +901,101 @@ export default function AdminBantuan({
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Program Bantuan</label>
                   <select 
-                    value={formProgram}
+                    value={[
+                      "BLT Dana Desa",
+                      "Program Keluarga Harapan (PKH)",
+                      "Bantuan Pangan Non-Tunai (BPNT)",
+                      "Bansos Tunai Kemensos",
+                      "Bantuan Cadangan Beras Pemerintah (CBP)",
+                      "BLT El Nino / Cuaca Ekstrem",
+                      "Bantuan Rumah Tidak Layak Huni (RTLH)",
+                      "Asistensi Sosial Disabilitas (ASPD)",
+                      "Asistensi Sosial Lansia Terlantar (ASLUT)",
+                      "Bantuan Pelaku Usaha Mikro (BPUM / BLT UMKM)",
+                      "Bantuan Subsidi Upah (BSU)",
+                      "Beasiswa Pendidikan Desa (KIP Desa)",
+                      "Jaminan Kesehatan PBI-JK (BPJS Gratis)",
+                      "Bantuan Semen / Material Bangunan Desa",
+                      "Bantuan Alat / Pupuk Pertanian Desa",
+                      "Bantuan Bibit & Pakan Peternakan/Perikanan"
+                    ].includes(formProgram) ? formProgram : (formProgram ? "Lainnya (Ketik Manual...)" : "")}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setFormProgram(val);
-                      // Set dynamic defaults for amount and funding
-                      if (val === "BLT Dana Desa") {
-                        setFormAmount("300000");
-                        setFormFunding("Dana Desa");
-                      } else if (val === "Bantuan Pangan Non-Tunai") {
-                        setFormAmount("200000");
-                        setFormFunding("APBN");
-                      } else if (val === "Program Keluarga Harapan (PKH)") {
-                        setFormAmount("600000");
-                        setFormFunding("APBN");
-                      } else if (val === "Bansos Tunai Kemensos") {
-                        setFormAmount("300000");
-                        setFormFunding("APBN");
+                      if (val === "Lainnya (Ketik Manual...)") {
+                        setFormProgram("");
+                      } else {
+                        setFormProgram(val);
+                        // Set dynamic defaults for amount and funding
+                        if (val === "BLT Dana Desa") {
+                          setFormAmount("300000");
+                          setFormFunding("Dana Desa");
+                        } else if (val.includes("BPNT") || val.includes("Bantuan Pangan")) {
+                          setFormAmount("200000");
+                          setFormFunding("APBN");
+                        } else if (val.includes("PKH") || val.includes("Keluarga Harapan")) {
+                          setFormAmount("600000");
+                          setFormFunding("APBN");
+                        } else if (val.includes("RTLH") || val.includes("Rumah")) {
+                          setFormAmount("20000000");
+                          setFormFunding("Dana Desa");
+                        } else if (val.includes("Kemensos") || val.includes("BSU") || val.includes("BPUM")) {
+                          setFormAmount("300000");
+                          setFormFunding("APBN");
+                        }
                       }
                     }}
                     className="w-full h-12 px-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                   >
-                    <option value="">Pilih Program</option>
+                    <option value="" disabled>-- Pilih Program Bantuan --</option>
                     <option value="BLT Dana Desa">BLT Dana Desa</option>
                     <option value="Program Keluarga Harapan (PKH)">PKH (Program Keluarga Harapan)</option>
-                    <option value="Bantuan Pangan Non-Tunai">BPNT (Bantuan Pangan Non-Tunai)</option>
-                    <option value="Bansos Tunai Kemensos">Bansos Tunai Kemensos</option>
+                    <option value="Bantuan Pangan Non-Tunai (BPNT)">BPNT (Bantuan Pangan Non-Tunai / Kartu Sembako)</option>
+                    <option value="Bansos Tunai Kemensos">Bansos Tunai Kemensos (BST)</option>
+                    <option value="Bantuan Cadangan Beras Pemerintah (CBP)">Bantuan Cadangan Beras Pemerintah (CBP)</option>
+                    <option value="BLT El Nino / Cuaca Ekstrem">BLT El Nino / Cuaca Ekstrem</option>
+                    <option value="Bantuan Rumah Tidak Layak Huni (RTLH)">Bantuan Rumah Tidak Layak Huni (RTLH / Bedah Rumah)</option>
+                    <option value="Asistensi Sosial Disabilitas (ASPD)">Asistensi Sosial Disabilitas (ASPD)</option>
+                    <option value="Asistensi Sosial Lansia Terlantar (ASLUT)">Asistensi Sosial Lansia Terlantar (ASLUT)</option>
+                    <option value="Bantuan Pelaku Usaha Mikro (BPUM / BLT UMKM)">Bantuan Pelaku Usaha Mikro (BPUM / BLT UMKM)</option>
+                    <option value="Bantuan Subsidi Upah (BSU)">Bantuan Subsidi Upah (BSU)</option>
+                    <option value="Beasiswa Pendidikan Desa (KIP Desa)">Beasiswa Pendidikan Desa (KIP Desa)</option>
+                    <option value="Jaminan Kesehatan PBI-JK (BPJS Gratis)">Jaminan Kesehatan PBI-JK (BPJS Gratis)</option>
+                    <option value="Bantuan Semen / Material Bangunan Desa">Bantuan Semen / Material Bangunan Desa</option>
+                    <option value="Bantuan Alat / Pupuk Pertanian Desa">Bantuan Alat / Pupuk Pertanian Desa</option>
+                    <option value="Bantuan Bibit & Pakan Peternakan/Perikanan">Bantuan Bibit & Pakan Peternakan / Perikanan</option>
+                    <option value="Lainnya (Ketik Manual...)">✨ Lainnya (Ketik Manual...)</option>
                   </select>
+
+                  {(![
+                    "BLT Dana Desa",
+                    "Program Keluarga Harapan (PKH)",
+                    "Bantuan Pangan Non-Tunai (BPNT)",
+                    "Bansos Tunai Kemensos",
+                    "Bantuan Cadangan Beras Pemerintah (CBP)",
+                    "BLT El Nino / Cuaca Ekstrem",
+                    "Bantuan Rumah Tidak Layak Huni (RTLH)",
+                    "Asistensi Sosial Disabilitas (ASPD)",
+                    "Asistensi Sosial Lansia Terlantar (ASLUT)",
+                    "Bantuan Pelaku Usaha Mikro (BPUM / BLT UMKM)",
+                    "Bantuan Subsidi Upah (BSU)",
+                    "Beasiswa Pendidikan Desa (KIP Desa)",
+                    "Jaminan Kesehatan PBI-JK (BPJS Gratis)",
+                    "Bantuan Semen / Material Bangunan Desa",
+                    "Bantuan Alat / Pupuk Pertanian Desa",
+                    "Bantuan Bibit & Pakan Peternakan/Perikanan"
+                  ].includes(formProgram) || formProgram === '') && (
+                    <div className="mt-2 animate-in fade-in slide-in-from-top-1">
+                      <input
+                        type="text"
+                        placeholder="Ketik nama program bantuan sosial kustom di sini..."
+                        value={formProgram}
+                        onChange={(e) => setFormProgram(e.target.value)}
+                        className="w-full h-11 px-4 border border-emerald-300 dark:border-emerald-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none text-sm font-bold text-emerald-950 dark:text-emerald-100 bg-emerald-50/40 dark:bg-emerald-950/40 shadow-inner"
+                        required
+                      />
+                      <p className="mt-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Tuliskan nama resmi program bantuan sosial yang sesuai.</p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
