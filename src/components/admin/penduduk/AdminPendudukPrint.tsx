@@ -54,14 +54,21 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
         {`
           @media print {
             .no-print { display: none !important; }
-            body { background-color: white !important; }
+            body { background-color: white !important; color: black !important; }
+            body * { visibility: hidden !important; }
+            .print-container, .print-container * { visibility: visible !important; }
             .print-container { 
-                box-shadow: none !important; 
-                margin: 0 !important; 
-                padding: 0 !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
                 width: 100% !important;
                 max-width: 100% !important;
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                padding: 24px !important;
                 border: none !important;
+                background-color: white !important;
+                color: black !important;
             }
           }
         `}
@@ -96,22 +103,15 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
       <main className="flex justify-center py-8 px-4 bg-gray-50 dark:bg-slate-800 min-h-screen">
         <div className="print-container bg-white dark:bg-slate-900 w-full max-w-[800px] min-h-[1123px] shadow-lg dark:shadow-none p-[50px] border border-gray-200 dark:border-slate-700 flex flex-col gap-6">
           
-          {/* Document Header */}
-          <div className="flex mb-6 flex-col items-center text-center gap-2 border-b-2 border-gray-900 pb-4">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="w-20 h-24 flex items-center justify-center overflow-hidden">
-                <img src={villageLogo} alt="Logo Desa" className="w-full h-full object-contain" />
-              </div>
-              <div className="text-center flex-1 pr-20">
-                <h2 className="text-[17px] font-bold text-gray-900 leading-tight uppercase tracking-wide">{activeKabupaten}</h2>
-                <h3 className="text-[17px] font-bold text-gray-900 leading-tight uppercase tracking-wide">{activeKecamatan}</h3>
-                <h1 className="text-2xl font-black text-gray-900 leading-tight uppercase tracking-wider mt-1 mb-1">DESA {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</h1>
-                <p className="text-xs font-medium text-gray-700">{activeAlamat}</p>
-              </div>
+          {/* Document Header (Kop Surat Removed as requested) */}
+          <div className="flex items-center justify-between border-b-2 border-emerald-700 pb-4 mb-2">
+            <div>
+              <h1 className="text-2xl font-black uppercase text-emerald-800 tracking-wider">PROFIL DATA PENDUDUK</h1>
+              <p className="text-xs font-semibold text-gray-600 dark:text-slate-400">Pemerintah Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</p>
             </div>
-            <div className="w-full mt-4">
-              <h4 className="text-xl font-extrabold uppercase tracking-widest text-gray-900 dark:text-white">PROFIL DATA PENDUDUK</h4>
-            </div>
+            <span className="font-mono text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-3 py-1 rounded-md border border-emerald-300 dark:border-emerald-800">
+              DIDESA DIGITAL ID
+            </span>
           </div>
 
           {/* Identitas Utama (NIK/KK Highlight) */}
