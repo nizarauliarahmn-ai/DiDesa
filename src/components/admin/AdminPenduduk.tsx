@@ -11,7 +11,7 @@ import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
-const FILTERS = ["Semua", "✨ Terbaru", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
+const FILTERS = ["Semua", "✨ Terbaru", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
 
 export default function AdminPenduduk({ 
   onNavigateToTab, 
@@ -312,7 +312,13 @@ export default function AdminPenduduk({
           const now = Date.now();
           const createdTime = item.created_at ? new Date(item.created_at).getTime() : 0;
           const isRecent = createdTime > 0 && (now - createdTime) < (30 * 24 * 60 * 60 * 1000);
-          matchesFilter = isRecent || !item.created_at; // show items if recent or recently loaded
+          matchesFilter = isRecent || !item.created_at;
+        } else if (activeFilter === 'Pindah') {
+          const s = (item.status || '').toLowerCase();
+          matchesFilter = s.includes('pindah') || s.includes('mutasi');
+        } else if (activeFilter === 'Meninggal') {
+          const s = (item.status || '').toLowerCase();
+          matchesFilter = s.includes('meninggal') || s === 'mati' || s === 'wafat';
         } else if (activeFilter.startsWith('RW')) {
           const rw = activeFilter.split(' ')[1];
           const itemRw = item.rw || (item.rtRw ? item.rtRw.split(/[\/\s-]+/)[1] : '');
@@ -514,28 +520,36 @@ export default function AdminPenduduk({
     setShowExportMenu(false);
   };
 
-  const totalCount = residents.length;
+  // Exclude Pindah and Meninggal from active population counts (so they don't count towards active headcounts)
+  const activeResidents = useMemo(() => {
+    return residents.filter(r => {
+      const s = (r.status || 'Aktif').toLowerCase();
+      return !s.includes('pindah') && !s.includes('meninggal') && s !== 'mati' && s !== 'archived';
+    });
+  }, [residents]);
+
+  const totalCount = activeResidents.length;
   const getKepalaKeluarga = (noKk: string) => {
     if (!noKk) return '-';
     const head = residents.find(r => r.noKk === noKk && r.familyRelation === 'Kepala Keluarga');
     return head ? head.name : '-';
   };
-  const maleCount = residents.filter(r => r.gender === 'Laki-laki').length;
-  const femaleCount = residents.filter(r => r.gender === 'Perempuan').length;
+  const maleCount = activeResidents.filter(r => r.gender === 'Laki-laki').length;
+  const femaleCount = activeResidents.filter(r => r.gender === 'Perempuan').length;
 
-  const childCount = residents.filter(r => {
+  const childCount = activeResidents.filter(r => {
     const age = parseInt(r.age);
     return !isNaN(age) && age >= 0 && age < 12;
   }).length;
-  const teenagerCount = residents.filter(r => {
+  const teenagerCount = activeResidents.filter(r => {
     const age = parseInt(r.age);
     return !isNaN(age) && age >= 12 && age <= 17;
   }).length;
-  const adultCount = residents.filter(r => {
+  const adultCount = activeResidents.filter(r => {
     const age = parseInt(r.age);
     return !isNaN(age) && age >= 18 && age <= 59;
   }).length;
-  const elderlyCount = residents.filter(r => {
+  const elderlyCount = activeResidents.filter(r => {
     const age = parseInt(r.age);
     return !isNaN(age) && age >= 60;
   }).length;

@@ -358,8 +358,15 @@ export default function AdminSuratSKP({
       job: formData.pekerjaan,
       address: formData.alamat,
       rt: formData.rt,
-      rw: formData.rw
+      rw: formData.rw,
+      status: 'Pindah'
     });
+
+    if (checkedFamilyNiks && checkedFamilyNiks.length > 0) {
+      for (const followerNik of checkedFamilyNiks) {
+        await updateResidentData(followerNik, { status: 'Pindah' });
+      }
+    }
 
     const pages = generateHTML();
     const pagesHTML = pages.map((page, index) => `
