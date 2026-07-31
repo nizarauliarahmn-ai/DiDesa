@@ -88,12 +88,18 @@ export function getPrintSignatureHTML(
   const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://sistemdidesa.id';
   const verifyQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(`${originUrl}/?tab=verifikasi`)}`;
 
+  const cleanRole = rightRoleHtml.replace(/<br\s*\/?>/gi, ' ');
   const signatureContentHtml = showTTE ? `
-    <div style="border:1px solid #cbd5e1;padding:8px 12px;border-radius:10px;background:#f8fafc;display:inline-block;text-align:center;margin-top:4px;margin-bottom:6px;">
-      <p style="margin:0 0 4px 0;font-size:9px;color:#475569;text-transform:uppercase;font-weight:bold;letter-spacing:0.5px;">Dokumen Resmi Terverifikasi TTE</p>
-      <img src="${verifyQrUrl}" style="width:70px;height:70px;margin:0 auto 4px auto;display:block;" />
-      <p style="margin:0;font-size:11px;font-weight:bold;color:#0f172a;">${formattedNamaPejabat}</p>
-      ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:1px 0 0 0;font-family:monospace;font-size:9px;color:#64748b;">NIP. ${nipPejabat}</p>` : ''}
+    <div style="border:1px solid #000;padding:6px 10px;background:#fff;display:inline-flex;align-items:center;gap:10px;text-align:left;font-family:Arial,sans-serif;max-width:330px;box-sizing:border-box;margin-top:4px;">
+      <div style="flex-shrink:0;">
+        <img src="${verifyQrUrl}" style="width:64px;height:64px;display:block;" />
+      </div>
+      <div style="flex:1;font-size:10px;line-height:1.25;color:#000;">
+        <p style="margin:0;font-size:9px;color:#333;font-weight:normal;">Ditandatangani secara elektronik oleh:</p>
+        <p style="margin:2px 0 4px 0;font-weight:bold;text-transform:uppercase;font-size:10px;letter-spacing:-0.2px;">${cleanRole}</p>
+        <p style="margin:0;font-weight:bold;text-transform:uppercase;font-size:10px;">${formattedNamaPejabat}</p>
+        ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-size:8.5px;font-weight:normal;color:#444;">NIP. ${nipPejabat}</p>` : ''}
+      </div>
     </div>
   ` : `
     <div style="height:55px;"></div>
