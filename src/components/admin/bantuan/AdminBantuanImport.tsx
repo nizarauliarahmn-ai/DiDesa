@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { X, Upload, CheckCircle, Database, FileText, Loader2, AlertCircle } from 'lucide-react';
 import { read, utils } from 'xlsx';
 import { supabase } from '../../../utils/supabase';
@@ -71,7 +71,7 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
       const tenantId = await resolveCurrentTenant();
       if (!tenantId) throw new Error("Gagal mengidentifikasi tenant.");
 
-      const aidToSave = ${program} ();
+      const aidToSave = `${program} (${year})`;
 
       for (const row of parsedData) {
         try {
