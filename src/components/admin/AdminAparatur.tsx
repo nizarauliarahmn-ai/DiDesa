@@ -1,61 +1,147 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2 } from 'lucide-react';
+import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, Cloud, RefreshCw } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
+interface Officer {
+  name: string;
+  role: string;
+  nip?: string;
+}
+
 export default function AdminAparatur() {
   const [authUser, setAuthUser] = useState<{ role: string; isImpersonated?: boolean } | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [cloudSynced, setCloudSynced] = useState(false);
+
+  // Data States
+  const [officers, setOfficers] = useState<Officer[]>([]);
+  const [bpdList, setBpdList] = useState<Officer[]>([]);
+  const [lpmList, setLpmList] = useState<Officer[]>([]);
+  const [namaKades, setNamaKades] = useState<string>('Fazakkir Rahmad');
+
+  // Camat / Left Signature
+  const [sigLeftRole, setSigLeftRole] = useState('Camat Simpur');
+  const [sigLeftName, setSigLeftName] = useState('........................');
+  const [sigLeftPangkat, setSigLeftPangkat] = useState('');
+  const [sigLeftNip, setSigLeftNip] = useState('');
+
+  // RT / RW
+  const [rtList, setRtList] = useState<{no: string; name: string}[]>([]);
+  const [rwList, setRwList] = useState<{no: string; name: string}[]>([]);
+  const [rtForm, setRtForm] = useState({ no: '', name: '' });
+  const [rwForm, setRwForm] = useState({ no: '', name: '' });
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalCategory, setModalCategory] = useState<'perangkat' | 'bpd' | 'lpm'>('perangkat');
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [officerForm, setOfficerForm] = useState<Officer>({ name: '', role: '', nip: '-' });
+
+  const isSuperAdmin = authUser?.role === 'kades' || authUser?.isImpersonated;
+
+  // Load Data from Local & Supabase Cloud
+  const fetchCloudSettings = async () => {
+    setIsSyncing(true);
+    const tid = await resolveCurrentTenant();
+    setTenantId(tid);
+
+    // Load Local Cache First
+    try {
+      const storedOff = localStorage.getItem('village_officers');
+      if (storedOff) setOfficers(JSON.parse(storedOff));
+      const storedBpd = localStorage.getItem('village_bpd');
+      if (storedBpd) setBpdList(JSON.parse(storedBpd));
+      const storedLpm = localStorage.getItem('village_lpm');
+      if (storedLpm) setLpmList(JSON.parse(storedLpm));
+      const storedRt = localStorage.getItem('village_rt_list');
+      if (storedRt) setRtList(JSON.parse(storedRt));
+      const storedRw = localStorage.getItem('village_rw_list');
+      if (storedRw) setRwList(JSON.parse(storedRw));
+      
+      const kades = localStorage.getItem('kop_kades');
+      if (kades) setNamaKades(kades);
+      const roleL = localStorage.getItem('village_signature_left_role');
+      if (roleL) setSigLeftRole(roleL);
+      const nameL = localStorage.getItem('village_signature_left_name');
+      if (nameL) setSigLeftName(nameL);
+      const pnkL = localStorage.getItem('village_signature_left_pangkat');
+      if (pnkL) setSigLeftPangkat(pnkL);
+      const nipL = localStorage.getItem('village_signature_left_nip');
+      if (nipL) setSigLeftNip(nipL);
+    } catch (e) {}
+
+    // Fetch ONLINE from Supabase Cloud
+    if (tid) {
+      try {
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('key, value')
+          .eq('tenant_id', tid);
+
+        if (!error && data && data.length > 0) {
+          data.forEach(item => {
+            if (item.key === 'village_officers' && item.value) {
+              try { setOfficers(JSON.parse(item.value)); localStorage.setItem('village_officers', item.value); } catch {}
+            }
+            if (item.key === 'village_bpd' && item.value) {
+              try { setBpdList(JSON.parse(item.value)); localStorage.setItem('village_bpd', item.value); } catch {}
+            }
+            if (item.key === 'village_lpm' && item.value) {
+              try { setLpmList(JSON.parse(item.value)); localStorage.setItem('village_lpm', item.value); } catch {}
+            }
+            if (item.key === 'kop_kades' && item.value) {
+              setNamaKades(item.value); localStorage.setItem('kop_kades', item.value);
+            }
+            if (item.key === 'village_signature_left_role' && item.value) {
+              setSigLeftRole(item.value); localStorage.setItem('village_signature_left_role', item.value);
+            }
+            if (item.key === 'village_signature_left_name' && item.value) {
+              setSigLeftName(item.value); localStorage.setItem('village_signature_left_name', item.value);
+            }
+            if (item.key === 'village_signature_left_pangkat' && item.value) {
+              setSigLeftPangkat(item.value); localStorage.setItem('village_signature_left_pangkat', item.value);
+            }
+            if (item.key === 'village_signature_left_nip' && item.value) {
+              setSigLeftNip(item.value); localStorage.setItem('village_signature_left_nip', item.value);
+            }
+            if (item.key === 'village_rt_list' && item.value) {
+              try { setRtList(JSON.parse(item.value)); localStorage.setItem('village_rt_list', item.value); } catch {}
+            }
+            if (item.key === 'village_rw_list' && item.value) {
+              try { setRwList(JSON.parse(item.value)); localStorage.setItem('village_rw_list', item.value); } catch {}
+            }
+          });
+          setCloudSynced(true);
+        }
+      } catch (err) {
+        console.error('Failed to load online settings from Supabase:', err);
+      }
+    }
+    setIsSyncing(false);
+  };
 
   useEffect(() => {
-    resolveCurrentTenant().then(tid => setTenantId(tid));
+    fetchCloudSettings();
     const saved = localStorage.getItem('didesa_auth_user');
     if (saved) setAuthUser(JSON.parse(saved));
   }, []);
 
-  const isSuperAdmin = authUser?.role === 'kades' || authUser?.isImpersonated;
-
-  // 1. Officers (Kades, Perangkat Desa, BPD, LPM, PKK, Karang Taruna)
-  const [officers, setOfficers] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem('village_officers');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {}
-    return [
-      { name: 'Belum Diatur', role: 'Kepala Desa', nip: '-' },
-    ];
-  });
-  const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || 'Fazakkir Rahmad');
-  
-  // Modals for Officer
-  const [isOfficerModalOpen, setIsOfficerModalOpen] = useState(false);
-  const [editingOfficerIndex, setEditingOfficerIndex] = useState<number | null>(null);
-  const [officerForm, setOfficerForm] = useState({ name: '', role: 'Kepala Desa', nip: '-' });
-
-  // 2. Camat / Left Signature
-  const [sigLeftRole, setSigLeftRole] = useState(() => localStorage.getItem('village_signature_left_role') || 'Camat Simpur');
-  const [sigLeftName, setSigLeftName] = useState(() => localStorage.getItem('village_signature_left_name') || '........................');
-  const [sigLeftPangkat, setSigLeftPangkat] = useState(() => localStorage.getItem('village_signature_left_pangkat') || '');
-  const [sigLeftNip, setSigLeftNip] = useState(() => localStorage.getItem('village_signature_left_nip') || '');
-
-  // 3. RT / RW
-  const [rtList, setRtList] = useState<{no: string; name: string}[]>(() => {
-    try { return JSON.parse(localStorage.getItem('village_rt_list') || '[]'); } catch { return []; }
-  });
-  const [rwList, setRwList] = useState<{no: string; name: string}[]>(() => {
-    try { return JSON.parse(localStorage.getItem('village_rw_list') || '[]'); } catch { return []; }
-  });
-  const [rtForm, setRtForm] = useState({ no: '', name: '' });
-  const [rwForm, setRwForm] = useState({ no: '', name: '' });
-
-  // Handle Save
+  // Save All to Supabase Cloud & Local Storage
   const handleSaveAll = async () => {
     if (!isSuperAdmin) {
       showToast('Akses ditolak: Hanya Super Admin yang dapat menyimpan pengaturan ini.', 'error');
       return;
     }
+
+    setIsSyncing(true);
+
+    // Save to Local Cache
     localStorage.setItem('village_officers', JSON.stringify(officers));
+    localStorage.setItem('village_bpd', JSON.stringify(bpdList));
+    localStorage.setItem('village_lpm', JSON.stringify(lpmList));
     localStorage.setItem('kop_kades', namaKades);
     localStorage.setItem('village_signature_left_role', sigLeftRole);
     localStorage.setItem('village_signature_left_name', sigLeftName);
@@ -63,11 +149,13 @@ export default function AdminAparatur() {
     localStorage.setItem('village_signature_left_nip', sigLeftNip);
     localStorage.setItem('village_rt_list', JSON.stringify(rtList));
     localStorage.setItem('village_rw_list', JSON.stringify(rwList));
-    
-    // Save to Supabase online if tenant is available
+
+    // Save ONLINE to Supabase Cloud
     if (tenantId) {
       const settingsToSave = [
         { key: 'village_officers', value: JSON.stringify(officers) },
+        { key: 'village_bpd', value: JSON.stringify(bpdList) },
+        { key: 'village_lpm', value: JSON.stringify(lpmList) },
         { key: 'kop_kades', value: namaKades },
         { key: 'village_signature_left_role', value: sigLeftRole },
         { key: 'village_signature_left_name', value: sigLeftName },
@@ -79,44 +167,103 @@ export default function AdminAparatur() {
 
       try {
         for (const s of settingsToSave) {
-          const { data: existing } = await supabase.from('saas_settings').select('key').eq('tenant_id', tenantId).eq('key', s.key).maybeSingle();
+          const { data: existing } = await supabase
+            .from('saas_settings')
+            .select('key')
+            .eq('tenant_id', tenantId)
+            .eq('key', s.key)
+            .maybeSingle();
+
           if (existing) {
-            await supabase.from('saas_settings').update({ value: s.value }).eq('tenant_id', tenantId).eq('key', s.key);
+            await supabase
+              .from('saas_settings')
+              .update({ value: s.value })
+              .eq('tenant_id', tenantId)
+              .eq('key', s.key);
           } else {
-            await supabase.from('saas_settings').insert({ tenant_id: tenantId, key: s.key, value: s.value });
+            await supabase
+              .from('saas_settings')
+              .insert({ tenant_id: tenantId, key: s.key, value: s.value });
           }
         }
+        setCloudSynced(true);
+        showToast('Berhasil menyimpan data aparatur & lembaga desa ke Cloud Supabase!', 'success');
       } catch (err) {
-        console.error('Failed to sync aparatur settings to Supabase', err);
+        console.error('Failed to sync settings to Supabase', err);
+        showToast('Tersimpan di lokal. Gagal sinkron ke Cloud Supabase.', 'error');
       }
+    } else {
+      showToast('Berhasil menyimpan ke penyimpanan lokal.', 'success');
     }
 
+    setIsSyncing(false);
     window.dispatchEvent(new Event('village_settings_updated'));
-    showToast('Berhasil menyimpan data aparatur desa ke cloud & lokal', 'success');
   };
 
-  // Officer Modal Actions
-  const handleAddOfficer = () => {
-    setOfficerForm({ name: '', role: 'Kepala Desa', nip: '-' });
-    setEditingOfficerIndex(null);
-    setIsOfficerModalOpen(true);
+  // Modal Open Handlers
+  const handleOpenAddModal = (cat: 'perangkat' | 'bpd' | 'lpm') => {
+    setModalCategory(cat);
+    setEditingIndex(null);
+    let defaultRole = 'Staf Desa';
+    if (cat === 'bpd') defaultRole = 'Anggota BPD';
+    if (cat === 'lpm') defaultRole = 'Anggota LPM';
+    setOfficerForm({ name: '', role: defaultRole, nip: '-' });
+    setIsModalOpen(true);
   };
-  const handleEditOfficer = (index: number) => {
-    setOfficerForm(officers[index]);
-    setEditingOfficerIndex(index);
-    setIsOfficerModalOpen(true);
+
+  const handleOpenEditModal = (cat: 'perangkat' | 'bpd' | 'lpm', idx: number) => {
+    setModalCategory(cat);
+    setEditingIndex(idx);
+    if (cat === 'perangkat') setOfficerForm(officers[idx]);
+    else if (cat === 'bpd') setOfficerForm(bpdList[idx]);
+    else setOfficerForm(lpmList[idx]);
+    setIsModalOpen(true);
   };
-  const handleSaveOfficer = () => {
-    let updated = [...officers];
-    if (editingOfficerIndex !== null) updated[editingOfficerIndex] = officerForm;
-    else updated.push(officerForm);
-    setOfficers(updated);
-    setIsOfficerModalOpen(false);
+
+  const handleSaveModal = () => {
+    if (!officerForm.name.trim()) {
+      showToast('Nama lengkap wajib diisi!', 'error');
+      return;
+    }
+
+    if (modalCategory === 'perangkat') {
+      let updated = [...officers];
+      if (editingIndex !== null) updated[editingIndex] = officerForm;
+      else updated.push(officerForm);
+      setOfficers(updated);
+    } else if (modalCategory === 'bpd') {
+      let updated = [...bpdList];
+      if (editingIndex !== null) updated[editingIndex] = officerForm;
+      else updated.push(officerForm);
+      setBpdList(updated);
+    } else if (modalCategory === 'lpm') {
+      let updated = [...lpmList];
+      if (editingIndex !== null) updated[editingIndex] = officerForm;
+      else updated.push(officerForm);
+      setLpmList(updated);
+    }
+
+    setIsModalOpen(false);
   };
-  const handleDeleteOfficer = (index: number) => {
-    let updated = [...officers];
-    updated.splice(index, 1);
-    setOfficers(updated);
+
+  const handleDeleteItem = (cat: 'perangkat' | 'bpd' | 'lpm', idx: number) => {
+    if (cat === 'perangkat') setOfficers(prev => prev.filter((_, i) => i !== idx));
+    else if (cat === 'bpd') setBpdList(prev => prev.filter((_, i) => i !== idx));
+    else setLpmList(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const getRoleOptions = () => {
+    if (modalCategory === 'bpd') {
+      return ['Ketua BPD', 'Wakil Ketua BPD', 'Sekretaris BPD', 'Anggota BPD'];
+    }
+    if (modalCategory === 'lpm') {
+      return ['Ketua LPM', 'Wakil Ketua LPM', 'Sekretaris LPM', 'Bendahara LPM', 'Anggota LPM'];
+    }
+    return [
+      'Kepala Desa', 'Sekretaris Desa', 'Kaur Keuangan', 'Kaur Umum', 
+      'Kaur Perencanaan', 'Kasi Pemerintahan', 'Kasi Kesejahteraan', 
+      'Kasi Pelayanan', 'Staf Desa', 'Kepala Dusun'
+    ];
   };
 
   if (authUser && !isSuperAdmin) {
@@ -131,39 +278,57 @@ export default function AdminAparatur() {
 
   return (
     <div className="pt-6 pb-24 px-4 md:px-8 max-w-7xl mx-auto animate-in fade-in duration-300">
+      {/* HEADER BAR */}
       <div className="flex items-center justify-between mb-8 flex-col md:flex-row gap-4 md:gap-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Building2 className="text-emerald-600" />
-            Aparatur Desa & SDM
-          </h1>
-          <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Kelola data Kepala Desa, Perangkat, BPD, RT/RW, dan Pejabat lainnya.</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <Building2 className="text-emerald-600" />
+              Aparatur Desa & Lembaga SDM
+            </h1>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${cloudSynced ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+              <Cloud className="w-3.5 h-3.5" />
+              {isSyncing ? 'Mengumpulkan data...' : cloudSynced ? 'Tersinkron Cloud Supabase' : 'Lokal (Menunggu Sync)'}
+            </span>
+          </div>
+          <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Kelola data Kepala Desa, Perangkat Desa, BPD, LPM, RT/RW, dan Pejabat Pengesah secara online real-time.</p>
         </div>
-        <button 
-          onClick={handleSaveAll}
-          className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg dark:shadow-none shadow-emerald-200"
-        >
-          <Save size={18} /> Simpan Perubahan
-        </button>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <button 
+            onClick={fetchCloudSettings}
+            disabled={isSyncing}
+            className="p-2.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 rounded-xl hover:bg-gray-200 transition-colors"
+            title="Muat Ulang dari Cloud Supabase"
+          >
+            <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
+          </button>
+          <button 
+            onClick={handleSaveAll}
+            disabled={isSyncing}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg dark:shadow-none shadow-emerald-200 disabled:opacity-50"
+          >
+            <Save size={18} /> {isSyncing ? 'Menyimpan...' : 'Simpan Perubahan Online'}
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         
         {/* === SECTION 1: PERANGKAT DESA === */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
           <div className="flex items-start justify-between mb-6 flex-col sm:flex-row gap-4 sm:gap-0">
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <UserCheck className="w-5 h-5 text-emerald-600" />
-                Daftar Pejabat & Perangkat Desa
+                Pemerintah & Perangkat Desa
               </h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Kelola staf desa, BPD, LPM, PKK, Karang Taruna, dsb.</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Staf operasional desa: Kepala Desa, Sekretaris Desa, Kaur, Kasi, dan Staf Desa.</p>
             </div>
             <button
-              onClick={handleAddOfficer}
+              onClick={() => handleOpenAddModal('perangkat')}
               className="text-sm bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl px-4 py-2 font-bold flex items-center gap-2 transition-all w-full sm:w-auto justify-center"
             >
-              + Tambah Pejabat
+              + Tambah Perangkat Desa
             </button>
           </div>
 
@@ -172,7 +337,7 @@ export default function AdminAparatur() {
               <div key={index} className="p-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-emerald-200 transition-all group relative">
                 <div className="pr-12">
                   <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{officer.name}</p>
-                  <p className="text-xs text-emerald-700 font-extrabold uppercase tracking-wider mt-0.5">{officer.role}</p>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider mt-0.5">{officer.role}</p>
                   {officer.nip && officer.nip !== '-' && (
                     <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-1">NIP. {officer.nip}</p>
                   )}
@@ -190,32 +355,129 @@ export default function AdminAparatur() {
                   )}
                 </div>
                 <div className="absolute top-4 right-4 flex flex-col gap-1 sm:flex-row opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleEditOfficer(index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-emerald-600 rounded-lg shadow-sm dark:shadow-none">
+                  <button onClick={() => handleOpenEditModal('perangkat', index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-emerald-600 rounded-lg shadow-sm">
                     <Edit3 className="w-4 h-4" />
                   </button>
-                  <button onClick={() => handleDeleteOfficer(index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-rose-600 rounded-lg shadow-sm dark:shadow-none">
+                  <button onClick={() => handleDeleteItem('perangkat', index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-rose-600 rounded-lg shadow-sm">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             ))}
+            {officers.length === 0 && (
+              <div className="col-span-full p-6 text-center text-gray-400 text-sm border border-dashed rounded-xl">
+                Belum ada data perangkat desa. Klik tombol di atas untuk menambah.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* === SECTION 2: BADAN PERMUSYAWARATAN DESA (BPD) === */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-indigo-100 dark:border-slate-700 shadow-sm">
+          <div className="flex items-start justify-between mb-6 flex-col sm:flex-row gap-4 sm:gap-0">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                Badan Permusyawaratan Desa (BPD)
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Lembaga legislatif dan pengawasan desa: Ketua, Wakil Ketua, Sekretaris, dan Anggota BPD.</p>
+            </div>
+            <button
+              onClick={() => handleOpenAddModal('bpd')}
+              className="text-sm bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 rounded-xl px-4 py-2 font-bold flex items-center gap-2 transition-all w-full sm:w-auto justify-center"
+            >
+              + Tambah Anggota BPD
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {bpdList.map((bpd, index) => (
+              <div key={index} className="p-4 bg-indigo-50/50 dark:bg-slate-800/60 rounded-xl border border-indigo-100 dark:border-slate-800 hover:border-indigo-300 transition-all group relative">
+                <div className="pr-12">
+                  <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{bpd.name}</p>
+                  <p className="text-xs text-indigo-700 dark:text-indigo-400 font-extrabold uppercase tracking-wider mt-0.5">{bpd.role}</p>
+                  {bpd.nip && bpd.nip !== '-' && (
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-1">NIP/NID. {bpd.nip}</p>
+                  )}
+                </div>
+                <div className="absolute top-4 right-4 flex flex-col gap-1 sm:flex-row opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => handleOpenEditModal('bpd', index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-indigo-600 rounded-lg shadow-sm">
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDeleteItem('bpd', index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-rose-600 rounded-lg shadow-sm">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {bpdList.length === 0 && (
+              <div className="col-span-full p-6 text-center text-gray-400 text-sm border border-dashed rounded-xl">
+                Belum ada pengurus BPD terdaftar. Klik "+ Tambah Anggota BPD" untuk memasukkan data.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* === SECTION 3: LEMBAGA PEMBERDAYAAN MASYARAKAT (LPM) === */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-amber-100 dark:border-slate-700 shadow-sm">
+          <div className="flex items-start justify-between mb-6 flex-col sm:flex-row gap-4 sm:gap-0">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-600" />
+                Lembaga Pemberdayaan Masyarakat (LPM / LPMD)
+              </h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Mitra pembangunan desa: Ketua, Sekretaris, Bendahara, dan Pengurus LPM.</p>
+            </div>
+            <button
+              onClick={() => handleOpenAddModal('lpm')}
+              className="text-sm bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl px-4 py-2 font-bold flex items-center gap-2 transition-all w-full sm:w-auto justify-center"
+            >
+              + Tambah Pengurus LPM
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {lpmList.map((lpm, index) => (
+              <div key={index} className="p-4 bg-amber-50/40 dark:bg-slate-800/60 rounded-xl border border-amber-100 dark:border-slate-800 hover:border-amber-300 transition-all group relative">
+                <div className="pr-12">
+                  <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{lpm.name}</p>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 font-extrabold uppercase tracking-wider mt-0.5">{lpm.role}</p>
+                  {lpm.nip && lpm.nip !== '-' && (
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-1">NIP/ID. {lpm.nip}</p>
+                  )}
+                </div>
+                <div className="absolute top-4 right-4 flex flex-col gap-1 sm:flex-row opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => handleOpenEditModal('lpm', index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-amber-600 rounded-lg shadow-sm">
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDeleteItem('lpm', index)} className="p-1.5 hover:bg-white text-gray-500 dark:text-slate-400 hover:text-rose-600 rounded-lg shadow-sm">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {lpmList.length === 0 && (
+              <div className="col-span-full p-6 text-center text-gray-400 text-sm border border-dashed rounded-xl">
+                Belum ada pengurus LPM terdaftar. Klik "+ Tambah Pengurus LPM" untuk memasukkan data.
+              </div>
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* === SECTION 2: RT & RW === */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm dark:shadow-none flex flex-col">
+          {/* === SECTION 4: RT & RW === */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col">
             <div className="mb-4">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Daftar Ketua RT & RW</h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Data ini akan muncul di formulir SPT dan layanan lainnya.</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Data ini digunakan untuk verifikasi otomatis di SKKT, SPT, dan formulir pelayanan.</p>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
               {/* RT List */}
               <div className="space-y-3">
                 <p className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider border-b pb-2">Ketua RT</p>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                   {rtList.map((rt, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm">
                       <div className="flex items-center gap-2 overflow-hidden">
@@ -237,7 +499,7 @@ export default function AdminAparatur() {
               {/* RW List */}
               <div className="space-y-3">
                 <p className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider border-b pb-2">Ketua RW</p>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                   {rwList.map((rw, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm">
                       <div className="flex items-center gap-2 overflow-hidden">
@@ -258,11 +520,11 @@ export default function AdminAparatur() {
             </div>
           </div>
 
-          {/* === SECTION 3: CAMAT / PENGESAH KIRI === */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm dark:shadow-none h-fit">
+          {/* === SECTION 5: CAMAT / PENGESAH SEBELAH KIRI === */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm h-fit">
             <div className="mb-4">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">Camat / Pengesah Sebelah Kiri</h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Otomatisasi pengisian tanda tangan sebelah kiri pada surat tertentu (misal: SPT).</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Pengaturan penandatangan pejabat pengesah tingkat kecamatan untuk surat formal.</p>
             </div>
             <div className="space-y-4">
               <div className="space-y-1.5">
@@ -285,36 +547,73 @@ export default function AdminAparatur() {
               </div>
             </div>
           </div>
-          
+
         </div>
       </div>
 
-      {/* OFFICER MODAL */}
-      {isOfficerModalOpen && (
+      {/* UNIFIED OFFICER MODAL */}
+      {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{editingOfficerIndex !== null ? 'Edit Pejabat' : 'Tambah Pejabat'}</h3>
-              <button onClick={() => setIsOfficerModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                {modalCategory === 'bpd' && <ShieldCheck className="w-5 h-5 text-indigo-600" />}
+                {modalCategory === 'lpm' && <Award className="w-5 h-5 text-amber-600" />}
+                {modalCategory === 'perangkat' && <UserCheck className="w-5 h-5 text-emerald-600" />}
+                {editingIndex !== null ? 'Edit Data' : 'Tambah Data'} {modalCategory === 'perangkat' ? 'Perangkat Desa' : modalCategory === 'bpd' ? 'BPD' : 'LPM'}
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
             </div>
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nama Lengkap</label>
-                <input type="text" className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" value={officerForm.name} onChange={e => setOfficerForm({...officerForm, name: e.target.value})} placeholder="Nama pejabat" />
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                  value={officerForm.name} 
+                  onChange={e => setOfficerForm({...officerForm, name: e.target.value})} 
+                  placeholder="Nama pejabat / pengurus" 
+                />
               </div>
+
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Jabatan</label>
-                <input type="text" className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" value={officerForm.role} onChange={e => setOfficerForm({...officerForm, role: e.target.value})} placeholder="Contoh: Kaur Keuangan, Ketua BPD, dll" />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Jabatan / Peran</label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500 mb-2" 
+                  value={officerForm.role} 
+                  onChange={e => setOfficerForm({...officerForm, role: e.target.value})} 
+                  placeholder="Ketik jabatan atau pilih opsi di bawah" 
+                />
+                <div className="flex flex-wrap gap-1.5">
+                  {getRoleOptions().map((r, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setOfficerForm(prev => ({ ...prev, role: r }))}
+                      className={`text-[11px] px-2.5 py-1 rounded-lg border font-medium transition-colors ${officerForm.role === r ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200'}`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
               </div>
+
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIP (Opsional)</label>
-                <input type="text" className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" value={officerForm.nip} onChange={e => setOfficerForm({...officerForm, nip: e.target.value})} placeholder="Kosongkan atau isi '-' jika tidak ada" />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIP / ID Anggota (Opsional)</label>
+                <input 
+                  type="text" 
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                  value={officerForm.nip} 
+                  onChange={e => setOfficerForm({...officerForm, nip: e.target.value})} 
+                  placeholder="Kosongkan atau isi '-' jika tidak ada" 
+                />
               </div>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
-              <button onClick={() => setIsOfficerModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-200 rounded-xl transition-colors">Batal</button>
-              <button onClick={handleSaveOfficer} className="px-5 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-lg dark:shadow-none shadow-emerald-200 flex items-center gap-2">
-                <Check size={16} /> Simpan
+              <button onClick={() => setIsModalOpen(false)} className="px-5 py-2.5 text-sm font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-200 rounded-xl transition-colors">Batal</button>
+              <button onClick={handleSaveModal} className="px-5 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-lg shadow-emerald-200 flex items-center gap-2">
+                <Check size={16} /> Simpan Data
               </button>
             </div>
           </div>
