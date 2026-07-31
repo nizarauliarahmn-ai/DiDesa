@@ -36,10 +36,12 @@ export function getPrintSignatureHTML(
   namaPejabat: string, 
   jabatanPejabat: string, 
   nipPejabat?: string,
-  includeCamatOverride?: boolean
+  includeCamatOverride?: boolean,
+  useEsignature?: boolean
 ): string {
   const isDual = includeCamatOverride === true;
   const isKades = isKadesOfficial(namaPejabat);
+  const showTTE = useEsignature !== false;
 
   // Uppercase only the name part, preserving the degree
   const safeNamaPejabat = namaPejabat || '';
@@ -83,14 +85,29 @@ export function getPrintSignatureHTML(
        <p style="margin:0 0 5px 0;border-bottom:1px solid #000;padding-bottom:5px;display:inline-block;">Pada Tanggal : ${tglFormatted}</p>`;
   }
 
+  const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://sistemdidesa.id';
+  const verifyQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(`${originUrl}/?tab=verifikasi`)}`;
+
+  const signatureContentHtml = showTTE ? `
+    <div style="border:1px solid #cbd5e1;padding:8px 12px;border-radius:10px;background:#f8fafc;display:inline-block;text-align:center;margin-top:4px;margin-bottom:6px;">
+      <p style="margin:0 0 4px 0;font-size:9px;color:#475569;text-transform:uppercase;font-weight:bold;letter-spacing:0.5px;">Dokumen Resmi Terverifikasi TTE</p>
+      <img src="${verifyQrUrl}" style="width:70px;height:70px;margin:0 auto 4px auto;display:block;" />
+      <p style="margin:0;font-size:11px;font-weight:bold;color:#0f172a;">${formattedNamaPejabat}</p>
+      ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:1px 0 0 0;font-family:monospace;font-size:9px;color:#64748b;">NIP. ${nipPejabat}</p>` : ''}
+    </div>
+  ` : `
+    <div style="height:55px;"></div>
+    <p style="font-weight:bold;margin:0;${nameDecoration}">${formattedNamaPejabat}</p>
+    ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-family:monospace;font-size:11px;">NIP. ${nipPejabat}</p>` : ''}
+  `;
+
   const rightSideHtml = `
     <div style="text-align:${textAlign};width:320px;font-size:14px;display:inline-block;vertical-align:top;">
       ${metaHtml}
-      <div style="margin-bottom:55px;margin-top:5px;min-height:35px;line-height:1.4;">
+      <div style="margin-top:5px;min-height:35px;line-height:1.4;">
         ${rightRoleHtml}
       </div>
-      <p style="font-weight:bold;margin:0;${nameDecoration}">${formattedNamaPejabat}</p>
-      ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-family:monospace;font-size:11px;">NIP. ${nipPejabat}</p>` : ''}
+      ${signatureContentHtml}
     </div>
   `;
 
@@ -115,20 +132,17 @@ export function getPrintSignatureHTML(
         </div>
 
         <!-- SPACE FOR SIGNATURE -->
-        <div style="height:60px;"></div>
-
-        <!-- BOTTOM ROW (Names) -->
-        <div style="display:flex;justify-content:space-between;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;">
           <!-- Left Bottom -->
           <div style="width:320px;text-align:${textAlign};">
+            <div style="height:55px;"></div>
             <p style="font-weight:bold;margin:0;${nameDecoration}">${sigLeftName}</p>
             ${sigLeftPangkat ? `<p style="margin:2px 0 0 0;font-size:13px;">${sigLeftPangkat}</p>` : ''}
             ${sigLeftNip && sigLeftNip !== '-' && sigLeftNip !== '' ? `<p style="margin:2px 0 0 0;font-size:13px;">NIP : ${sigLeftNip}</p>` : ''}
           </div>
           <!-- Right Bottom -->
           <div style="width:320px;text-align:${textAlign};">
-            <p style="font-weight:bold;margin:0;${nameDecoration}">${formattedNamaPejabat}</p>
-            ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-family:monospace;font-size:11px;">NIP. ${nipPejabat}</p>` : ''}
+            ${signatureContentHtml}
           </div>
         </div>
       </div>
@@ -152,10 +166,12 @@ export function getReactSignaturePreview(
   namaPejabat: string,
   jabatanPejabat: string,
   nipPejabat?: string,
-  includeCamatOverride?: boolean
+  includeCamatOverride?: boolean,
+  useEsignature?: boolean
 ) {
   const isDual = includeCamatOverride === true;
   const isKades = isKadesOfficial(namaPejabat);
+  const showTTE = useEsignature !== false;
 
   const sigLeftRoleRaw = localStorage.getItem('village_signature_left_role') || 'Camat Simpur';
   let sigLeftRole = sigLeftRoleRaw;
@@ -190,6 +206,7 @@ export function getReactSignaturePreview(
     sigAlign,
     sigShowMeta,
     sigUnderline,
-    rightRole
+    rightRole,
+    showTTE
   };
 }
