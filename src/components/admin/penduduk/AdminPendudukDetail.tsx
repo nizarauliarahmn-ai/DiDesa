@@ -539,21 +539,21 @@ export default function AdminPendudukDetail({
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Alamat</span>
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Alamat Jalan</span>
                   <span className="col-span-1">:</span>
                   <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.address || '-'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-0.5 pl-3 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-bold text-[10px] text-sky-900 dark:text-slate-400">RT / RW</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">RT/RW & Desa</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase font-mono text-xs">{data?.rt || '001'} / {data?.rw || '001'}</span>
-                </div>
-
-                <div className="grid grid-cols-12 gap-2 py-0.5 pl-3 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-bold text-[10px] text-sky-900 dark:text-slate-400">Kel / Desa</span>
-                  <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.desa || 'SUKAMUJU'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs flex items-center gap-1.5 flex-wrap">
+                    <span className="font-mono bg-sky-900/10 dark:bg-cyan-950 px-1.5 py-0.5 rounded text-[11px] font-black text-sky-950 dark:text-cyan-300">
+                      RT {data?.rt || '001'} / RW {data?.rw || '001'}
+                    </span>
+                    <span className="text-sky-400">•</span>
+                    <span>DESA {data?.desa || 'WASAH HILIR'}</span>
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
