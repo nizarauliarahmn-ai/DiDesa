@@ -492,126 +492,125 @@ export default function AdminPendudukDetail({
         </div>
 
         {viewMode === 'ektp' ? (
-          /* Authentic Digital e-KTP Card View */
-          <div className="relative overflow-hidden bg-gradient-to-br from-sky-100 via-sky-200 to-indigo-100 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-sky-300 dark:border-cyan-500/40 shadow-2xl space-y-6 text-gray-900 dark:text-white">
-            {/* Header Watermark e-KTP */}
-            <div className="text-center space-y-1 pb-3 border-b-2 border-sky-300/80 dark:border-cyan-500/40 relative z-10">
-              <h3 className="text-sm sm:text-base font-black tracking-widest uppercase text-sky-950 dark:text-cyan-200">
-                PROVINSI KALIMANTAN SELATAN
-              </h3>
-              <h4 className="text-xs sm:text-sm font-extrabold tracking-wider uppercase text-sky-900 dark:text-cyan-300">
-                KABUPATEN HULU SUNGAI SELATAN
-              </h4>
-              <p className="text-[11px] font-black tracking-[0.25em] text-cyan-800 dark:text-cyan-400 uppercase pt-0.5">
-                KARTU TANDA PENDUDUK REPUBLIK INDONESIA
-              </p>
+          /* Ultra-Modern Compact Digital e-KTP Card View */
+          <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-sky-100 to-indigo-100 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 rounded-3xl p-5 sm:p-6 border-2 border-sky-300 dark:border-cyan-500/40 shadow-xl space-y-4 text-gray-900 dark:text-white">
+            {/* Sleek Minimalist Top Header (Kop Removed as requested) */}
+            <div className="flex items-center justify-between pb-3 border-b border-sky-900/15 dark:border-cyan-500/20">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-xs font-black tracking-widest uppercase text-sky-950 dark:text-cyan-200">
+                  IDENTITAS DIGITAL KEPENDUDUKAN
+                </span>
+              </div>
+              <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md bg-sky-900/10 text-sky-900 dark:bg-cyan-950 dark:text-cyan-300 border border-sky-900/20 dark:border-cyan-800">
+                e-KTP INDONESIA
+              </span>
             </div>
 
-            {/* NIK Bar Header */}
-            <div className="flex items-center justify-between bg-sky-900/90 dark:bg-cyan-950/90 text-white px-6 py-3 rounded-2xl border border-sky-700 dark:border-cyan-700/60 shadow-inner">
-              <span className="text-xs font-bold text-sky-200 dark:text-cyan-300 uppercase tracking-widest">NIK</span>
-              <span className="font-mono text-lg sm:text-xl font-black tracking-widest text-emerald-300 dark:text-emerald-400">{data?.nik || '6306060107770103'}</span>
+            {/* Compact NIK Header Bar */}
+            <div className="flex items-center justify-between bg-sky-900/90 dark:bg-cyan-950/90 text-white px-4 sm:px-5 py-2 rounded-xl border border-sky-700 dark:border-cyan-700/60 shadow-inner">
+              <span className="text-[11px] font-bold text-sky-200 dark:text-cyan-300 uppercase tracking-widest">NIK</span>
+              <span className="font-mono text-base sm:text-lg font-black tracking-widest text-emerald-300 dark:text-emerald-400">{data?.nik || '6306060107770103'}</span>
             </div>
 
-            {/* e-KTP Content Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
-              {/* Field Values List */}
-              <div className="md:col-span-8 space-y-2.5 text-xs font-semibold">
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Nama</span>
+            {/* High-Density Compact e-KTP Field Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 relative z-10">
+              {/* Ultra-Dense Field Values List */}
+              <div className="md:col-span-8 space-y-1 text-xs font-semibold">
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Nama</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-black text-sm text-gray-900 dark:text-white uppercase tracking-wide">{data?.name || '-'}</span>
+                  <span className="col-span-7 font-black text-xs sm:text-sm text-gray-900 dark:text-white uppercase tracking-wide">{data?.name || '-'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Tempat/Tgl Lahir</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Tempat/Tgl Lahir</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase">{data?.birthPlace || '-'}, {data?.birthDate || '-'} {data?.age ? `(${data.age} THN)` : ''}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.birthPlace || '-'}, {data?.birthDate || '-'} {data?.age ? `(${data.age} THN)` : ''}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Jenis Kelamin</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Jenis Kelamin</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase flex items-center justify-between">
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs flex items-center justify-between">
                     <span>{data?.gender || '-'}</span>
-                    <span className="font-bold text-sky-950 dark:text-slate-400 text-[11px]">GOL. DARAH : <strong className="text-rose-600 dark:text-rose-400 font-extrabold">{data?.bloodType || 'O'}</strong></span>
+                    <span className="font-bold text-sky-950 dark:text-slate-400 text-[10px]">GOL. DARAH: <strong className="text-rose-600 dark:text-rose-400 font-extrabold">{data?.bloodType || 'O'}</strong></span>
                   </span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Alamat</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Alamat</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase">{data?.address || '-'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.address || '-'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 pl-4 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-bold text-sky-900 dark:text-slate-400">RT / RW</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 pl-3 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-bold text-[10px] text-sky-900 dark:text-slate-400">RT / RW</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase font-mono">{data?.rt || '001'} / {data?.rw || '001'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase font-mono text-xs">{data?.rt || '001'} / {data?.rw || '001'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 pl-4 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-bold text-sky-900 dark:text-slate-400">Kel / Desa</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 pl-3 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-bold text-[10px] text-sky-900 dark:text-slate-400">Kel / Desa</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase">{data?.desa || 'SUKAMUJU'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.desa || 'SUKAMUJU'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Agama</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Agama</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase">{data?.religion || 'ISLAM'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.religion || 'ISLAM'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Status Perkawinan</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Status Perkawinan</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase">{data?.maritalStatus || 'BELUM KAWIN'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.maritalStatus || 'BELUM KAWIN'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Pekerjaan</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Pekerjaan</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase">{data?.job || 'WIRASWASTA'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.job || 'WIRASWASTA'}</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1 border-b border-sky-900/10 dark:border-slate-800">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Kewarganegaraan</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Kewarganegaraan</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase">WNI</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">WNI</span>
                 </div>
 
-                <div className="grid grid-cols-12 gap-2 py-1">
-                  <span className="col-span-4 uppercase font-extrabold text-sky-950 dark:text-slate-400">Berlaku Hingga</span>
+                <div className="grid grid-cols-12 gap-2 py-0.5">
+                  <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Berlaku Hingga</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">SEUMUR HIDUP</span>
+                  <span className="col-span-7 font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider text-xs">SEUMUR HIDUP</span>
                 </div>
               </div>
 
-              {/* Photo & QR Column */}
-              <div className="md:col-span-4 flex flex-col items-center justify-between space-y-4 pt-2">
+              {/* Photo & QR Column - Compact */}
+              <div className="md:col-span-4 flex flex-col items-center justify-between space-y-3">
                 {/* Pasfoto */}
-                <div className="w-36 h-48 rounded-2xl overflow-hidden border-4 border-white dark:border-slate-800 shadow-xl relative group bg-gradient-to-b from-blue-600 to-blue-800 shrink-0">
+                <div className="w-32 h-40 rounded-xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-md relative group bg-gradient-to-b from-blue-600 to-blue-800 shrink-0">
                   {data?.photo ? (
                     <img src={data.photo} alt={data.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className={`w-full h-full flex flex-col items-center justify-center text-white ${data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-500 to-pink-700' : 'bg-gradient-to-b from-blue-600 to-blue-800'}`}>
-                      <User className="w-20 h-20 opacity-90" fill="currentColor" />
-                      <span className="text-[10px] font-bold tracking-widest mt-2 uppercase">PASFOTO e-KTP</span>
+                      <User className="w-16 h-16 opacity-90" fill="currentColor" />
+                      <span className="text-[9px] font-bold tracking-wider mt-1 uppercase">PASFOTO</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-blue-900/10 pointer-events-none border border-white/20 rounded-2xl"></div>
+                  <div className="absolute inset-0 bg-blue-900/10 pointer-events-none border border-white/20 rounded-xl"></div>
                 </div>
 
                 {/* QR Code Verifikasi */}
-                <div className="bg-white/90 dark:bg-slate-900/90 p-3 rounded-2xl border border-sky-300 dark:border-cyan-800 shadow-md text-center space-y-1.5 w-full max-w-[160px]">
-                  <p className="text-[9px] font-extrabold text-sky-950 dark:text-cyan-300 uppercase tracking-wider flex items-center justify-center gap-1">
+                <div className="bg-white/90 dark:bg-slate-900/90 p-2.5 rounded-xl border border-sky-300 dark:border-cyan-800 shadow-sm text-center space-y-1 w-full max-w-[140px]">
+                  <p className="text-[8px] font-extrabold text-sky-950 dark:text-cyan-300 uppercase tracking-wider flex items-center justify-center gap-1">
                     <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                    VERIFIKASI
+                    VERIFIKASI DIGITAL
                   </p>
-                  <div className="flex justify-center p-1 bg-white rounded-xl">
-                    <QRCodeSVG value={data?.nik || '6306060107770103'} size={85} />
+                  <div className="flex justify-center p-1 bg-white rounded-lg">
+                    <QRCodeSVG value={data?.nik || '6306060107770103'} size={70} />
                   </div>
-                  <p className="text-[8px] text-gray-500 font-mono">ID: {data?.nik ? data.nik.slice(0, 8) : 'DIGITAL-KTP'}</p>
                 </div>
               </div>
             </div>
