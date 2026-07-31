@@ -11,7 +11,7 @@ import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
-const FILTERS = ["Semua", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
+const FILTERS = ["Semua", "✨ Terbaru", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
 
 export default function AdminPenduduk({ 
   onNavigateToTab, 
@@ -306,7 +306,13 @@ export default function AdminPenduduk({
       // Category filter
       let matchesFilter = true;
       if (activeFilter !== 'Semua') {
-        if (activeFilter.startsWith('RW')) {
+        if (activeFilter === '✨ Terbaru') {
+          // Newest residents (created in last 30 days or highest ID/created_at)
+          const now = Date.now();
+          const createdTime = item.created_at ? new Date(item.created_at).getTime() : 0;
+          const isRecent = createdTime > 0 && (now - createdTime) < (30 * 24 * 60 * 60 * 1000);
+          matchesFilter = isRecent || !item.created_at; // show items if recent or recently loaded
+        } else if (activeFilter.startsWith('RW')) {
           const rw = activeFilter.split(' ')[1];
           const itemRw = item.rw || (item.rtRw ? item.rtRw.split(/[\/\s-]+/)[1] : '');
           matchesFilter = (itemRw || '').trim().padStart(2, '0') === rw.trim().padStart(2, '0');
@@ -325,7 +331,14 @@ export default function AdminPenduduk({
     });
 
     // Sorting
-    if (sortOrder === 'No. KK') {
+    if (sortOrder === 'Terbaru' || activeFilter === '✨ Terbaru') {
+      result = [...result].sort((a, b) => {
+        const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        if (timeA !== timeB) return timeB - timeA;
+        return (b.id || 0) - (a.id || 0);
+      });
+    } else if (sortOrder === 'No. KK') {
       result = [...result].sort((a, b) => {
         const kkA = a.noKk || '';
         const kkB = b.noKk || '';
@@ -697,12 +710,12 @@ export default function AdminPenduduk({
               <select 
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 outline-none cursor-pointer min-w-[160px]"
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 outline-none cursor-pointer min-w-[180px]"
               >
                 <option value="No. KK">Urutkan: No. KK</option>
-                <option value="Terbaru">Terbaru</option>
-                <option value="A-Z Nama">A-Z Nama</option>
-                <option value="Z-A Nama">Z-A Nama</option>
+                <option value="Terbaru">Urutkan: ✨ Terbaru Ditambahkan</option>
+                <option value="A-Z Nama">Urutkan: A-Z Nama</option>
+                <option value="Z-A Nama">Urutkan: Z-A Nama</option>
               </select>
               <button 
                 onClick={() => setShowQuickFilters(!showQuickFilters)}
@@ -1030,6 +1043,12 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
         <div className="flex flex-col">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-bold text-gray-900 dark:text-white">{name}</span>
+            {item.created_at && (Date.now() - new Date(item.created_at).getTime() < 14 * 24 * 60 * 60 * 1000) && (
+              <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/80 shrink-0 flex items-center gap-1 shadow-sm">
+                <Sparkles className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+                BARU
+              </span>
+            )}
             {maritalStatus && (
               <span className="bg-blue-100 text-blue-800 text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
                 {maritalStatus}
