@@ -13,6 +13,7 @@ import { getLetterClassifications, LetterClassification, incrementSequenceNumber
 import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
+import { formatRupiahWithTerbilang, RupiahInput } from '../../../utils/numberToTerbilang';
 
 const BUSINESS_CATEGORIES = [
   "Perdagangan Sembako / Kelontong",
@@ -1226,11 +1227,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Omset Bulanan / Perkiraan (Opsional)</label>
-                      <input 
-                        type="text" 
+                      <RupiahInput 
                         value={usahaOmzet}
-                        onChange={(e) => setUsahaOmzet(e.target.value)}
-                        placeholder="Contoh: Rp 5.000.000,-"
+                        onChange={(val) => setUsahaOmzet(val)}
+                        placeholder="Contoh: Rp. 5.000.000,-"
                         className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
                       />
                     </div>
@@ -1531,7 +1531,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                               <div style={{ display: 'grid', gridTemplateColumns: '200px 10px 1fr' }}><span>5. No. Izin Usaha / NIB</span><span>:</span><span className="font-mono">{usahaNib}</span></div>
                             )}
                             {usahaOmzet && usahaOmzet !== '-' && (
-                              <div style={{ display: 'grid', gridTemplateColumns: '200px 10px 1fr' }}><span>{usahaNib && usahaNib !== '-' ? '6' : '5'}. Estimasi Omset Bulanan</span><span>:</span><span>{usahaOmzet}</span></div>
+                              <div style={{ display: 'grid', gridTemplateColumns: '200px 10px 1fr' }}><span>{usahaNib && usahaNib !== '-' ? '6' : '5'}. Estimasi Omset Bulanan</span><span>:</span><span>{formatRupiahWithTerbilang(usahaOmzet)}</span></div>
                             )}
                           </div>
                         );
