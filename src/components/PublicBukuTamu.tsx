@@ -155,16 +155,22 @@ export default function PublicBukuTamu() {
         .select('nik, name, address, rt, rw')
         .eq('tenant_id', tenantId);
 
-      // Jika query hanya berisi angka dan minimal 16 digit, cari by NIK
       if (/^\d{16}$/.test(query.trim())) {
         req = req.eq('nik', query.trim());
       } else {
-        // Cari by nama (partial match)
         req = req.ilike('name', `%${query.trim()}%`).limit(1);
       }
 
-      const { data } = await req;
+      const { data, error } = await req;
       
+      if (error) {
+        console.error("Supabase error detail:", error);
+        setError(`DB Error: ${error.message || 'Unknown error'}`);
+        return;
+      }
+      
+      console.log("Supabase data returned:", data, "TenantID:", tenantId);
+
       const foundData = Array.isArray(data) ? data[0] : data;
 
       if (foundData) {
@@ -177,11 +183,11 @@ export default function PublicBukuTamu() {
         });
         setStep('form');
       } else {
-        setError('Data warga tidak ditemukan.');
+        setError(`Data warga tidak ditemukan. (Tenant: ${tenantId ? 'OK' : 'MISSING'})`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError('Terjadi kesalahan pencarian.');
+      setError(`Terjadi kesalahan sistem: ${err.message || 'Unknown'}`);
     } finally {
       setIsLookingUp(false);
     }
