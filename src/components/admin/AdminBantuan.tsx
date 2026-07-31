@@ -812,7 +812,7 @@ export default function AdminBantuan({
             </button>
             <button 
               onClick={handleSaveAddForm}
-              disabled={isSaving || !selectedResidentNik || !formProgram}
+              disabled={isSaving || (!selectedResidentNik && !isManualResident) || !formProgram}
               className="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
@@ -1182,15 +1182,38 @@ export default function AdminBantuan({
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Tahun Anggaran</label>
                   <select 
-                    value={formYear}
-                    onChange={(e) => setFormYear(e.target.value)}
+                    value={
+                      Array.from({ length: 16 }, (_, i) => (2020 + i).toString()).includes(formYear)
+                        ? formYear
+                        : "Lainnya"
+                    }
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "Lainnya") {
+                        setFormYear("");
+                      } else {
+                        setFormYear(val);
+                      }
+                    }}
                     className="w-full h-12 px-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                   >
-                    <option value="2023">2023</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
+                    {Array.from({ length: 16 }, (_, i) => {
+                      const y = (2020 + i).toString();
+                      return <option key={y} value={y}>{y}</option>;
+                    })}
+                    <option value="Lainnya">✨ Ketik Tahun Manual...</option>
                   </select>
+
+                  {(!Array.from({ length: 16 }, (_, i) => (2020 + i).toString()).includes(formYear)) && (
+                    <input
+                      type="text"
+                      maxLength={4}
+                      placeholder="Ketik tahun (contoh: 2030)..."
+                      value={formYear}
+                      onChange={(e) => setFormYear(e.target.value.replace(/\D/g, ''))}
+                      className="w-full h-11 px-4 mt-1 border border-emerald-300 rounded-xl text-sm font-mono font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 bg-emerald-50/40 text-emerald-950 dark:text-emerald-100"
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-1.5">
@@ -1202,17 +1225,25 @@ export default function AdminBantuan({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Besaran Bantuan</label>
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Besaran Bantuan (Hanya Angka)</label>
                   <div className="relative group">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400 font-bold text-sm">Rp</span>
                     <input 
                       type="text"
-                      value={formAmount}
-                      onChange={(e) => setFormAmount(e.target.value)}
+                      inputMode="numeric"
+                      value={(() => {
+                        const digits = formAmount.replace(/\D/g, '');
+                        return digits ? parseInt(digits, 10).toLocaleString('id-ID') : '';
+                      })()}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, '');
+                        setFormAmount(raw);
+                      }}
                       placeholder="300.000"
-                      className="w-full h-12 pl-10 pr-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-semibold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
+                      className="w-full h-12 pl-10 pr-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 outline-none text-sm font-mono font-bold text-gray-800 dark:text-slate-100 bg-white dark:bg-slate-900"
                     />
                   </div>
+                  <p className="text-[10px] text-gray-400 font-medium ml-1">Terformat otomatis Rupiah. Kunci hanya bisa diisi angka.</p>
                 </div>
 
                 <div className="space-y-1.5">
