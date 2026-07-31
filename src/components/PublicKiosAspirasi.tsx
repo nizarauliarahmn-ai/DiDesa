@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Megaphone, CheckCircle2, Home, User, ArrowLeft } from 'lucide-react';
 import { showToast } from '../utils/toast';
@@ -324,7 +324,11 @@ export default function PublicKiosAspirasi() {
                       <button
                         key={cat}
                         onClick={() => setKategori(cat)}
-                        className={p-4 rounded-xl border-2 text-left text-lg font-medium transition-all }
+                        className={`p-4 rounded-xl border-2 text-left text-lg font-medium transition-all ${
+                          kategori === cat 
+                            ? 'border-amber-500 bg-amber-50 text-amber-700' 
+                            : 'border-slate-200 text-slate-600 hover:border-amber-200'
+                        }`}
                       >
                         {cat}
                       </button>
