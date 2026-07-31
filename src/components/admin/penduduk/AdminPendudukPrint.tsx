@@ -54,7 +54,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
         {`
           @page {
             size: A4 portrait;
-            margin: 15mm 18mm 15mm 18mm;
+            margin: 19mm 22mm 19mm 22mm;
           }
           @media print {
             .no-print { display: none !important; }
@@ -70,7 +70,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                 max-width: 100% !important;
                 box-shadow: none !important; 
                 margin: 0 !important; 
-                padding: 16px 24px !important;
+                padding: 20px 28px !important;
                 border: none !important;
                 background-color: white !important;
                 color: black !important;
