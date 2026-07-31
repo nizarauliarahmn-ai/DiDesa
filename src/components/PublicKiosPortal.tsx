@@ -205,7 +205,7 @@ export default function PublicKiosPortal() {
           onClick={() => {
             const p = new URLSearchParams(window.location.search);
             const t = p.get('tenant') || p.get('t_id');
-            window.location.search = t ? ?mode=public&tab=layanan_mandiri&tenant=+t : ?mode=public&tab=layanan_mandiri;
+            window.location.search = t ? `?mode=public&tab=layanan_mandiri&tenant=${t}` : `?mode=public&tab=layanan_mandiri`;
           }}
           className="group text-emerald-400 hover:text-emerald-300 font-bold transition-all flex items-center gap-3 bg-slate-800/50 px-6 py-3 rounded-full backdrop-blur-md border border-slate-700/50 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-emerald-900/20"
         >
