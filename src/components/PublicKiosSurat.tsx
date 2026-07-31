@@ -40,8 +40,9 @@ export default function PublicKiosSurat() {
   }, []);
 
   const handleVerifyNik = async () => {
-    if (nik.length < 16) {
-      showToast('NIK harus 16 digit', 'error');
+    const query = nik.trim();
+    if (query.length < 3) {
+      showToast('Ketikkan NIK atau minimal 3 huruf nama', 'error');
       return;
     }
     
@@ -49,7 +50,14 @@ export default function PublicKiosSurat() {
       const res = await fetchResidentsCached();
       if (!res.ok) throw new Error('Network response was not ok');
       const residents = await res.json();
-      const match = residents.find((r: any) => r.nik === nik);
+      
+      let match;
+      if (/^\d{16}$/.test(query)) {
+        match = residents.find((r: any) => r.nik === query);
+      } else {
+        match = residents.find((r: any) => r.name?.toLowerCase().includes(query.toLowerCase()));
+      }
+
       if (match) {
         setVerifiedResident(match);
         setStep(2);
@@ -57,7 +65,7 @@ export default function PublicKiosSurat() {
         setIsManualEntry(true);
       }
     } catch (err) {
-      showToast('Terjadi kesalahan saat memverifikasi NIK', 'error');
+      showToast('Terjadi kesalahan saat memverifikasi identitas', 'error');
     }
   };
 
@@ -287,23 +295,25 @@ export default function PublicKiosSurat() {
                 <User className="w-12 h-12 text-blue-600" />
               </div>
               <h2 className="text-4xl font-black text-slate-800 mb-4">Verifikasi Identitas</h2>
-              <p className="text-xl text-slate-500 mb-8">Silakan masukkan 16 digit NIK Anda untuk melanjutkan permohonan surat.</p>
+              <p className="text-xl text-slate-500 mb-8">Silakan masukkan NIK atau Nama Lengkap Anda untuk melanjutkan permohonan surat.</p>
               
               {!isManualEntry ? (
                 <div className="flex flex-col items-center w-full">
                   <input 
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                    type="text"
+                    data-no-cap
                     value={nik}
-                    onChange={(e) => setNik(e.target.value.replace(/\D/g, '').slice(0, 16))}
-                    className="w-full text-center text-4xl font-mono tracking-[0.2em] p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 outline-none"
-                    placeholder="0000000000000000"
+                    onChange={(e) => setNik(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleVerifyNik();
+                    }}
+                    className="w-full text-center text-3xl md:text-4xl font-mono p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus:border-blue-500 focus:ring-4 focus:ring-blue-200 outline-none"
+                    placeholder="Masukkan NIK atau Nama..."
                   />
 
                   <button 
                     onClick={handleVerifyNik}
-                    disabled={nik.length < 16}
+                    disabled={nik.trim().length < 3}
                     className="w-full py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-blue-600/30"
                   >
                     Lanjutkan
