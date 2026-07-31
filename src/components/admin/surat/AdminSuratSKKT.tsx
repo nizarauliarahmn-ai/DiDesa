@@ -425,7 +425,7 @@ export default function AdminSuratSKKT({
         <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:flex-start;">
           <!-- KETUA RT (KIRI) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:2px;">Mengetahui / Membenarkan,</p>
+            <p style="margin-bottom:2px;">Mengetahui,</p>
             <p style="margin-bottom:28px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
@@ -512,7 +512,7 @@ export default function AdminSuratSKKT({
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:2px;">Mengetahui / Membenarkan,</p>
+            <p style="margin-bottom:2px;">Mengetahui,</p>
             <p style="margin-bottom:28px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
