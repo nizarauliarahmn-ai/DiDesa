@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, FileText, Megaphone, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
@@ -29,7 +29,7 @@ export default function PublicKiosPortal() {
     
     resolveCurrentTenant().then((id) => {
       if (!id) return;
-      const channel = supabase.channel(kiosk-notif-${id})
+      const channel = supabase.channel(`kiosk-notif-${id}`)
         .on('broadcast', { event: 'incoming-guest' }, ({ payload }) => {
           localStorage.setItem('kiosk_incoming_guest', JSON.stringify(payload));
           const p = new URLSearchParams(window.location.search);
