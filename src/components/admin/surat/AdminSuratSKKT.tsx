@@ -373,25 +373,31 @@ export default function AdminSuratSKKT({
           Bidang tanah tersebut saya peroleh dari ${v(formData.asalPerolehan, 'warisan peninggalan orang tua yang sampai saat ini saya kuasai secara terus menerus')} , tidak di jadikan / menjadi jaminan suatu hutang dan tidak dalam sengketa , dengan saksi – saksi sebagai berikut :
         </p>
 
-        <table style="width:100%; border-collapse:collapse; margin-bottom:12px; margin-left:15px; font-size:12px;">
-          <tr>
-            <td style="width:20px; vertical-align:top;">1.</td>
-            <td style="width:90px; vertical-align:top;">Nama<br/>NIK</td>
-            <td style="width:12px; vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi1Nama))}</strong><br/>${v(formData.saksi1Nik)}</td>
-          </tr>
-          <tr>
-            <td style="vertical-align:top;">2.</td>
-            <td style="vertical-align:top;">Nama<br/>NIK</td>
-            <td style="vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi2Nama))}</strong><br/>${v(formData.saksi2Nik)}</td>
-          </tr>
-          <tr>
-            <td style="vertical-align:top;">3.</td>
-            <td style="vertical-align:top;">Nama<br/>NIK</td>
-            <td style="vertical-align:top;">:<br/>:</td>
-            <td style="vertical-align:top;"><strong>${toTitleCase(v(formData.saksi3Nama))}</strong><br/>${v(formData.saksi3Nik)}</td>
-          </tr>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:11px;" border="1" cellPadding="4">
+          <thead>
+            <tr style="background:#f8fafc;">
+              <th style="width:35px; text-align:center;">NO</th>
+              <th style="text-align:center;">NAMA SAKSI</th>
+              <th style="width:200px; text-align:center;">NIK / IDENTITAS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align:center;">1.</td>
+              <td style="font-weight:bold;">${toTitleCase(v(formData.saksi1Nama))}</td>
+              <td style="text-align:center; font-family:monospace;">${v(formData.saksi1Nik)}</td>
+            </tr>
+            <tr>
+              <td style="text-align:center;">2.</td>
+              <td style="font-weight:bold;">${toTitleCase(v(formData.saksi2Nama))}</td>
+              <td style="text-align:center; font-family:monospace;">${v(formData.saksi2Nik)}</td>
+            </tr>
+            <tr>
+              <td style="text-align:center;">3.</td>
+              <td style="font-weight:bold;">${toTitleCase(v(formData.saksi3Nama))}</td>
+              <td style="text-align:center; font-family:monospace;">${v(formData.saksi3Nik)}</td>
+            </tr>
+          </tbody>
         </table>
 
         <p style="text-align:justify; margin-bottom:16px; line-height:1.4;">
