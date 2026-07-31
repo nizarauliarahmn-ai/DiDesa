@@ -132,59 +132,91 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
           </div>
 
           {/* Biodata Section */}
-          <div className="grid grid-cols-12 gap-6 mt-2">
-            {/* Foto */}
-            <div className="col-span-3">
-              <div className="w-full aspect-[3/4] border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-sm bg-slate-100 shrink-0">
-                {data?.photo ? (
-                  <img src={data.photo} alt={data.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white pb-5 ${
-                    data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-600 via-pink-500 to-rose-700' : 'bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-800'
-                  }`}>
-                    <User className="w-14 h-14 opacity-90" fill="currentColor" />
-                    <span className="text-[8px] font-extrabold tracking-widest mt-1 uppercase opacity-90">PASFOTO</span>
+          {(() => {
+            const getStatusTheme = (rawStatus?: string, statusKependudukan?: string) => {
+              const status = (statusKependudukan || rawStatus || 'TETAP').toLowerCase();
+              if (status.includes('meninggal') || status.includes('mati')) {
+                return {
+                  label: 'MENINGGAL DUNIA',
+                  bgClass: 'bg-rose-700 border-rose-800 text-white',
+                };
+              }
+              if (status.includes('pindah')) {
+                return {
+                  label: 'PINDAH KELUAR',
+                  bgClass: 'bg-amber-600 border-amber-700 text-white',
+                };
+              }
+              if (status.includes('kontrak') || status.includes('domisili') || status.includes('sementara')) {
+                return {
+                  label: (statusKependudukan || rawStatus || 'WARGA DOMISILI').toUpperCase(),
+                  bgClass: 'bg-blue-700 border-blue-800 text-white',
+                };
+              }
+              return {
+                label: (statusKependudukan || (rawStatus && rawStatus.toLowerCase() !== 'aktif' ? rawStatus : 'WARGA TETAP')).toUpperCase(),
+                bgClass: 'bg-emerald-800 border-emerald-700 text-white',
+              };
+            };
+
+            const statusTheme = getStatusTheme(data?.status, data?.statusKependudukan);
+
+            return (
+              <div className="grid grid-cols-12 gap-6 mt-2">
+                {/* Foto */}
+                <div className="col-span-3">
+                  <div className="w-full aspect-[3/4] border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-sm bg-slate-100 shrink-0">
+                    {data?.photo ? (
+                      <img src={data.photo} alt={data.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white pb-5 ${
+                        data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-600 via-pink-500 to-rose-700' : 'bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-800'
+                      }`}>
+                        <User className="w-14 h-14 opacity-90" fill="currentColor" />
+                        <span className="text-[8px] font-extrabold tracking-widest mt-1 uppercase opacity-90">PASFOTO</span>
+                      </div>
+                    )}
+                    <div className={`absolute bottom-0 left-0 right-0 ${statusTheme.bgClass} text-center py-1 border-t z-10 shadow-sm`}>
+                      <span className="text-[9px] font-extrabold uppercase tracking-wider">
+                        {statusTheme.label}
+                      </span>
+                    </div>
                   </div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 bg-emerald-800 text-white text-center py-1 border-t border-emerald-700 z-10">
-                  <span className="text-[9px] font-extrabold uppercase tracking-wider">
-                    {data?.statusKependudukan || (data?.status && data.status.toLowerCase() !== 'aktif' ? data.status : 'WARGA TETAP')}
-                  </span>
+                </div>
+                {/* Detail Info */}
+                <div className="col-span-9 flex flex-col gap-1.5">
+                  <div className="grid grid-cols-2 gap-x-5 gap-y-2.5">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Nama Lengkap</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white uppercase">{data?.name || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Jenis Kelamin</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.gender || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Tempat, Tgl Lahir</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">
+                        {data?.birthPlace || "-"}{data?.birthDate ? `, ${data.birthDate}` : ''} {data?.age ? `(${data.age} Thn)` : ''}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Golongan Darah</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.bloodType || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Pendidikan Terakhir</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.education || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Pekerjaan</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white uppercase">{data?.job || "-"}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            {/* Detail Info */}
-            <div className="col-span-9 flex flex-col gap-1.5">
-              <div className="grid grid-cols-2 gap-x-5 gap-y-2.5">
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Nama Lengkap</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white uppercase">{data?.name || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Jenis Kelamin</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.gender || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Tempat, Tgl Lahir</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">
-                    {data?.birthPlace || "-"}{data?.birthDate ? `, ${data.birthDate}` : ''} {data?.age ? `(${data.age} Thn)` : ''}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Golongan Darah</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.bloodType || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Pendidikan Terakhir</p>
-                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.education || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Pekerjaan</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white uppercase">{data?.job || "-"}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+            );
+          })()}
 
           {/* Alamat & Verifikasi */}
           <div className="flex flex-col gap-1.5 mt-2">
@@ -230,7 +262,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
               );
             }
 
-            // Jika total anggota >= 4, tampilkan dalam 2-Kolom Kompak
+            // Jika total anggota >= 4, tampilkan dalam 2-Kolom Kompak Tanpa Truncate
             if (familyMembers && familyMembers.length >= 4) {
               const mid = Math.ceil(familyMembers.length / 2);
               const leftCol = familyMembers.slice(0, mid);
@@ -241,17 +273,17 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
                       <tr>
-                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nama Anggota</th>
-                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIK</th>
-                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Hubungan</th>
+                        <th className="px-2 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nama Anggota</th>
+                        <th className="px-1.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIK</th>
+                        <th className="px-1.5 py-1 text-[10px] font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Hubungan</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-slate-800 bg-white dark:bg-slate-900 text-xs">
                       {membersList.map((member: any, i: number) => (
                         <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                          <td className="px-2.5 py-1.5 font-bold text-gray-900 dark:text-white uppercase truncate max-w-[110px] text-[11px]">{member.name || '-'}</td>
-                          <td className="px-2.5 py-1.5 font-mono text-[10px] text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
-                          <td className="px-2.5 py-1.5 font-semibold text-emerald-700 dark:text-emerald-400 uppercase text-[10px] truncate max-w-[95px]">{member.familyRelation || '-'}</td>
+                          <td className="px-2 py-1.5 font-bold text-gray-900 dark:text-white uppercase text-[10.5px] leading-tight">{member.name || '-'}</td>
+                          <td className="px-1.5 py-1.5 font-mono text-[9.5px] text-gray-600 dark:text-slate-400 whitespace-nowrap">{member.nik || '-'}</td>
+                          <td className="px-1.5 py-1.5 font-semibold text-emerald-700 dark:text-emerald-400 uppercase text-[10px] leading-tight">{member.familyRelation || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
