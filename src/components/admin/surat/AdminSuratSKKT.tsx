@@ -408,7 +408,7 @@ export default function AdminSuratSKKT({
         <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:flex-start;">
           <!-- SAKSI-SAKSI (KIRI) -->
           <div style="width:48%;">
-            <p style="margin-bottom:6px; font-weight:bold;">Saksi – Saksi :</p>
+            <p style="margin-bottom:6px;">Saksi – Saksi :</p>
             <p style="margin-bottom:4px;">1. ${toTitleCase(v(formData.saksi1Nama))} ( ....................... )</p>
             <p style="margin-bottom:4px;">2. ${toTitleCase(v(formData.saksi2Nama))} ( ....................... )</p>
             <p style="margin-bottom:4px;">3. ${toTitleCase(v(formData.saksi3Nama))} ( ....................... )</p>
@@ -417,23 +417,21 @@ export default function AdminSuratSKKT({
           <!-- PEMBUAT PERNYATAAN (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">${activeDesa}, ${tglFormatted}</p>
-            <p style="margin-bottom:48px; font-weight:bold;">Yang membuat pernyataan</p>
+            <p style="margin-bottom:30px;">Yang membuat pernyataan</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.nama)}</p>
           </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; margin-top:15px; align-items:flex-start;">
+        <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:flex-start;">
           <!-- KETUA RT (KIRI) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:48px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:30px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
 
           <!-- KEPALA DESA (KANAN) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:2px;">Mengetahui</p>
-            <p style="margin-bottom:48px; font-weight:bold;">${v(formData.jabatanPejabat)} ${activeDesa}</p>
+            <p style="margin-bottom:30px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
         </div>
@@ -445,26 +443,26 @@ export default function AdminSuratSKKT({
       <!-- PAGE 2: GAMBAR SITUASI KASAR TANAH -->
       <div style="font-family:${letterFont}; font-size:12px; line-height:1.4; color:black; box-sizing: border-box; padding-bottom: 20px;">
 
-        <div style="text-align:center; margin-bottom:15px;">
+        <div style="text-align:center; margin-bottom:12px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">GAMBAR SITUASI KASAR TANAH</h3>
         </div>
 
-        <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-weight:bold; font-size:12px;">
-          <tr><td style="width:100px;">MILIK</td><td style="width:12px;">:</td><td style="text-transform:uppercase;">${v(formData.nama)}</td></tr>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:12px;">
+          <tr><td style="width:100px;">MILIK</td><td style="width:12px;">:</td><td style="text-transform:uppercase; font-weight:bold;">${v(formData.nama)}</td></tr>
           <tr><td>LOKASI</td><td>:</td><td>${v(formData.lokasiTanah)} RT. ${v(formData.nomorRt, '2')} RW. 1 Desa ${activeDesa} Kec. ${activeKecamatan}</td></tr>
           <tr><td>LUAS</td><td>:</td><td>± ${v(formData.luasTanah)} Meter</td></tr>
         </table>
 
         <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI DENGAN BINGKAI KOTAK) -->
-        <div style="width:100%; height:190px; margin-top:8px; margin-bottom:8px; position:relative; background:#ffffff; border:1px solid #000;">
+        <div style="width:100%; height:300px; margin-top:6px; margin-bottom:8px; position:relative; background:#ffffff; border:1px solid #000;">
           ${generatePolygonSVG()}
         </div>
 
-        <p style="text-align:justify; margin-bottom:10px; font-size:11px;">
+        <p style="text-align:justify; margin-bottom:8px; font-size:11px;">
           Kami yang bertanda tangan di bawah ini adalah yang masing-masing memiliki tanah yang berbatasan dengan tanah yang di terangkan pada gambar di atas , dengan ini membenarkan batas-batas tanah tersebut :
         </p>
 
-        <table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-size:11px;" border="1" cellPadding="3">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:11px;" border="1" cellPadding="3">
           <thead>
             <tr style="background:#f8fafc;">
               <th style="width:35px; text-align:center;">NO</th>
@@ -477,43 +475,41 @@ export default function AdminSuratSKKT({
             <tr>
               <td style="text-align:center;">1.</td>
               <td>${v(formData.batasUtara)}</td>
-              <td style="text-align:center; font-weight:bold;">UTARA</td>
-              <td style="height:24px;"></td>
+              <td style="text-align:center;">UTARA</td>
+              <td style="height:22px;"></td>
             </tr>
             <tr>
               <td style="text-align:center;">2.</td>
               <td>${v(formData.batasSelatan)}</td>
-              <td style="text-align:center; font-weight:bold;">SELATAN</td>
-              <td style="height:24px;"></td>
+              <td style="text-align:center;">SELATAN</td>
+              <td style="height:22px;"></td>
             </tr>
             <tr>
               <td style="text-align:center;">3.</td>
               <td>${v(formData.batasTimur)}</td>
-              <td style="text-align:center; font-weight:bold;">TIMUR</td>
-              <td style="height:24px;"></td>
+              <td style="text-align:center;">TIMUR</td>
+              <td style="height:22px;"></td>
             </tr>
             <tr>
               <td style="text-align:center;">4.</td>
               <td>${v(formData.batasBarat)}</td>
-              <td style="text-align:center; font-weight:bold;">BARAT</td>
-              <td style="height:24px;"></td>
+              <td style="text-align:center;">BARAT</td>
+              <td style="height:22px;"></td>
             </tr>
           </tbody>
         </table>
 
         <!-- TANDA TANGAN PAGE 2 -->
-        <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:flex-start;">
+        <div style="display:flex; justify-content:space-between; margin-top:8px; align-items:flex-start;">
           <!-- KEPALA DESA (KIRI) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:2px;">Mengetahui</p>
-            <p style="margin-bottom:22px; font-weight:bold;">${kadesRoleHTML}</p>
+            <p style="margin-bottom:30px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
-            <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:22px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:30px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
         </div>
