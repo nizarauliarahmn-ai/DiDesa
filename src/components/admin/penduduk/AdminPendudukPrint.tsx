@@ -19,10 +19,33 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
   const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
   const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
   const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-  const kadesName = localStorage.getItem('kades_name') || localStorage.getItem('village_kades_name') || 'Ahmaduddin Noor';
-  const kadesNip = localStorage.getItem('kades_nip') || localStorage.getItem('village_kades_nip') || '19750520 200501 1 005';
-  const appName = localStorage.getItem('global_app_name') || 'DiDesa';
   
+  // Ambil Pejabat Penandatangan Resmi dari Pengaturan (village_officers / kades settings)
+  let kadesName = localStorage.getItem('kades_name') || localStorage.getItem('village_kades_name') || '';
+  let kadesNip = localStorage.getItem('kades_nip') || localStorage.getItem('village_kades_nip') || '';
+  let kadesTitle = localStorage.getItem('kades_title') || 'Kepala Desa';
+
+  try {
+    const storedOfficers = localStorage.getItem('village_officers');
+    if (storedOfficers) {
+      const list = JSON.parse(storedOfficers);
+      const kadesObj = list.find((o: any) => (o.role || '').toLowerCase().includes('kepala desa') || (o.role || '').toLowerCase().includes('kades'));
+      if (kadesObj) {
+        if (kadesObj.name) kadesName = kadesObj.name;
+        if (kadesObj.nip) kadesNip = kadesObj.nip;
+        if (kadesObj.role) kadesTitle = kadesObj.role;
+      } else if (list.length > 0) {
+        if (list[0].name) kadesName = list[0].name;
+        if (list[0].nip) kadesNip = list[0].nip;
+        if (list[0].role) kadesTitle = list[0].role;
+      }
+    }
+  } catch (e) {}
+
+  if (!kadesName) kadesName = 'Ahmaduddin Noor';
+  if (!kadesNip) kadesNip = '19750520 200501 1 005';
+
+  const appName = localStorage.getItem('global_app_name') || 'DiDesa';
   const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
@@ -261,37 +284,30 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
             </div>
           </div>
 
-          {/* Footer / Tanda Tangan Connected to Settings */}
-          <div className="mt-auto pt-10 grid grid-cols-2 gap-12">
+          {/* Pejabat Penandatangan - Format Standar Surat Resmi Desa */}
+          <div className="mt-auto pt-12 grid grid-cols-2 gap-12">
             <div className="flex flex-col items-center text-center">
-              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-20">Penduduk yang bersangkutan,</p>
-              <div className="w-40 h-[1px] bg-gray-400 mb-2"></div>
-              <p className="text-sm font-bold uppercase text-gray-900 dark:text-white">{data?.name || "-"}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-24">Penduduk yang bersangkutan,</p>
+              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white">{data?.name || "-"}</p>
             </div>
             
             <div className="flex flex-col items-center text-center">
-              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-1">
+              <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}, {today}
               </p>
-              <p className="text-sm font-medium text-gray-600 dark:text-slate-400 mb-2">Kepala Desa,</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-24">{kadesTitle},</p>
 
-              {/* QR Code Verifikasi Digital Sistem DiDesa */}
-              <div className="my-2 p-2 bg-white border border-emerald-300 rounded-xl shadow-sm flex flex-col items-center gap-1">
-                <QRCodeSVG value={`VERIFIED-PROFIL-${data?.nik || 'NIK'}-${today}`} size={64} />
-                <span className="text-[8px] font-mono text-emerald-800 font-extrabold uppercase tracking-wider">VERIFIKASI SISTEM DIDESA</span>
-              </div>
-
-              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white mt-1">{kadesName}</p>
-              {kadesNip && kadesNip !== '-' && (
-                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mt-0.5">NIP. {kadesNip}</p>
+              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white">{kadesName}</p>
+              {kadesNip && kadesNip !== '-' && kadesNip.trim() !== '' && (
+                <p className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mt-1">NIP. {kadesNip}</p>
               )}
             </div>
           </div>
 
-          {/* Clean Minimalist Footer without Messy Barcode Attributes */}
-          <div className="mt-6 pt-3 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center text-[10px] text-gray-500 font-medium">
-            <span>Dokumen Cetak Profil Kependudukan Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</span>
-            <span>Di-generate secara otomatis melalui Sistem DiDesa</span>
+          {/* Clean Official Document Footer */}
+          <div className="mt-6 pt-3 border-t border-gray-300 dark:border-slate-700 flex justify-between items-center text-[10px] text-gray-500 font-medium">
+            <span>Dokumen Profil Kependudukan Resmi • Pemerintah Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</span>
+            <span>Terverifikasi Digital Sistem DiDesa</span>
           </div>
 
         </div>
