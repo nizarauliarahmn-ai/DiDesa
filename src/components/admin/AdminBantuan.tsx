@@ -152,6 +152,22 @@ export default function AdminBantuan({
   const [bulkStopDate, setBulkStopDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [bulkStopReason, setBulkStopReason] = useState('Meninggal Dunia / Pindah / Mampu');
 
+  // Manual Resident Entry States
+  const [isManualResident, setIsManualResident] = useState(false);
+  const [manualResidentData, setManualResidentData] = useState({
+    name: '',
+    nik: '',
+    address: '',
+    rt: '001',
+    rw: '001',
+    desa: 'Sukamaju'
+  });
+
+  // Custom Criteria States
+  const [customCriteriaList, setCustomCriteriaList] = useState<string[]>([]);
+  const [newCriteriaText, setNewCriteriaText] = useState('');
+  const [showAddCriteriaForm, setShowAddCriteriaForm] = useState(false);
+
   // Close recommendations dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -610,14 +626,80 @@ export default function AdminBantuan({
     }
   };
 
-  // Save aid program to selected resident from dedicated view
+  // Save aid program to selected resident or create new resident from dedicated view
   const handleSaveAddForm = async () => {
-    if (!selectedResidentNik) {
-      showToast("Silakan pilih penduduk terlebih dahulu", "error");
-      return;
-    }
     if (!formProgram) {
       showToast("Silakan pilih program bantuan terlebih dahulu", "error");
+      return;
+    }
+
+    const aidTag = `${formProgram} (${formYear})`;
+
+    // FLOW A: Manual New Resident Creation (Auto-saved to Master Penduduk DB)
+    if (isManualResident) {
+      if (!manualResidentData.name.trim() || !manualResidentData.nik.trim()) {
+        showToast("Nama Warga dan NIK (16 Digit) wajib diisi", "error");
+        return;
+      }
+
+      setIsSaving(true);
+      try {
+        if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+
+        const newResidentRecord = {
+          tenant_id: tenantId,
+          name: manualResidentData.name.trim(),
+          nik: manualResidentData.nik.trim(),
+          address: manualResidentData.address.trim() || 'Jl. Utama Desa',
+          rt: manualResidentData.rt.trim() || '001',
+          rw: manualResidentData.rw.trim() || '001',
+          desa: manualResidentData.desa.trim() || 'Sukamaju',
+          active_aids: [aidTag],
+          is_deleted: 0
+        };
+
+        const { data, error } = await supabase
+          .from('residents')
+          .insert([newResidentRecord])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Format for local state
+        const formattedNewResident = {
+          ...data,
+          noKk: data?.no_kk || '-',
+          rtRw: `${data?.rt || '001'}/${data?.rw || '001'}`,
+          birthPlace: data?.birth_place || '-',
+          birthDate: data?.birth_date || '-',
+          activeAids: [aidTag]
+        };
+
+        setResidents(prev => [formattedNewResident, ...prev]);
+        showToast(`Warga baru ${manualResidentData.name} berhasil disimpan ke data penduduk web & didaftarkan ke ${formProgram}!`, "success");
+
+        // Reset
+        setIsManualResident(false);
+        setManualResidentData({ name: '', nik: '', address: '', rt: '001', rw: '001', desa: 'Sukamaju' });
+        setSelectedResidentNik("");
+        setSearchResidentQuery("");
+        setFormProgram("");
+        setFormAmount("300000");
+        setFormFunding("");
+        setCriteriaChecked({});
+        setShowAddView(false);
+      } catch (err: any) {
+        showToast(err.message || "Gagal menyimpan penduduk baru ke database", "error");
+      } finally {
+        setIsSaving(false);
+      }
+      return;
+    }
+
+    // FLOW B: Existing Resident Selection
+    if (!selectedResidentNik) {
+      showToast("Silakan pilih penduduk terlebih dahulu", "error");
       return;
     }
 
@@ -625,7 +707,7 @@ export default function AdminBantuan({
     if (!targetResident) return;
 
     const currentAids = targetResident.activeAids || [];
-    const updatedAids = currentAids.includes(formProgram) ? currentAids : [...currentAids, formProgram];
+    const updatedAids = currentAids.includes(aidTag) ? currentAids : [...currentAids, aidTag];
     setIsSaving(true);
 
     try {
@@ -781,7 +863,7 @@ export default function AdminBantuan({
                   <p className="text-[11px] text-gray-400 italic ml-1">Ketik nama/NIK, atau klik tombol Rekomendasi AI di atas.</p>
 
                   {/* Suggestion Dropdown */}
-                  {(searchResidentQuery.trim() !== "" || showRecommendations) && !selectedResidentNik && (
+                  {(searchResidentQuery.trim() !== "" || showRecommendations) && !selectedResidentNik && !isManualResident && (
                     <div className="absolute left-0 right-0 z-50 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
                       {searchResidentQuery.trim() === "" && searchResultsForAddView.length > 0 && (
                         <div className="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-3 py-1.5 uppercase tracking-wider flex items-center gap-1.5">
@@ -789,89 +871,182 @@ export default function AdminBantuan({
                         </div>
                       )}
                       {searchResultsForAddView.length === 0 ? (
-                        <p className="p-4 text-xs text-gray-400 text-center font-medium">Warga tidak ditemukan</p>
-                      ) : (
-                        searchResultsForAddView.map(r => (
-                          <button 
-                            key={r.nik}
+                        <div className="p-4 text-center space-y-3">
+                          <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Data warga tidak ditemukan dalam database penduduk.</p>
+                          <button
                             type="button"
                             onClick={() => {
-                              setSelectedResidentNik(r.nik);
-                              setSearchResidentQuery(r.name);
+                              setIsManualResident(true);
+                              setManualResidentData(prev => ({ ...prev, name: searchResidentQuery }));
                               setShowRecommendations(false);
                             }}
-                            className="w-full p-3.5 text-left hover:bg-emerald-50/40 cursor-pointer transition-colors flex justify-between items-center"
+                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 mx-auto active:scale-95"
                           >
-                            <div className="text-left">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100">{r.name}</p>
-                                {r.vulnerabilityScore !== undefined && searchResidentQuery.trim() === "" && (
-                                  <span className="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
-                                    Skor: {r.vulnerabilityScore}
+                            <UserPlus className="w-4 h-4" />
+                            + Tambah Warga Baru Secara Manual
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {searchResultsForAddView.map(r => (
+                            <button 
+                              key={r.nik}
+                              type="button"
+                              onClick={() => {
+                                setSelectedResidentNik(r.nik);
+                                setSearchResidentQuery(r.name);
+                                setShowRecommendations(false);
+                              }}
+                              className="w-full p-3.5 text-left hover:bg-emerald-50/40 cursor-pointer transition-colors flex justify-between items-center"
+                            >
+                              <div className="text-left">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100">{r.name}</p>
+                                  {r.vulnerabilityScore !== undefined && searchResidentQuery.trim() === "" && (
+                                    <span className="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                                      Skor: {r.vulnerabilityScore}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[11px] font-bold text-gray-500 dark:text-slate-400 font-mono">NIK: {r.nik}</p>
+                                {r.status?.toLowerCase().includes('meninggal') && (
+                                  <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold rounded">
+                                    <AlertCircle className="w-3 h-3" />
+                                    {r.status}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] font-bold text-gray-500 dark:text-slate-400 font-mono">NIK: {r.nik}</p>
-                              {r.status?.toLowerCase().includes('meninggal') && (
-                                <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold rounded">
-                                  <AlertCircle className="w-3 h-3" />
-                                  {r.status}
-                                </span>
-                              )}
-                              {r.activeAids && r.activeAids.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mt-1.5">
-                                  {r.activeAids.map((aid: string, index: number) => (
-                                    <span key={index} className="text-[9px] font-extrabold bg-blue-50 text-blue-700 border border-blue-100 rounded px-1.5 py-0.5">
-                                      {aid}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">Pilih</span>
-                          </button>
-                        ))
+                              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">Pilih</span>
+                            </button>
+                          ))}
+
+                          <div className="p-3 bg-gray-50 dark:bg-slate-800/60 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsManualResident(true);
+                                setManualResidentData(prev => ({ ...prev, name: searchResidentQuery }));
+                                setShowRecommendations(false);
+                              }}
+                              className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+                            >
+                              + Warga tidak ada? Tambah Manual Baru ke Master Penduduk Web
+                            </button>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
                 </div>
 
-                {/* Resident Info Preview Card */}
-                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-gray-200/60 flex gap-4 items-start shadow-inner">
-                  <div className="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 shrink-0">
-                    <Users className="w-8 h-8" />
-                  </div>
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Nama Lengkap</p>
-                      <p className="font-bold text-gray-800 dark:text-slate-100 text-sm">{selectedResidentDetail ? selectedResidentDetail.name : "-"}</p>
+                {/* Manual Resident Form (Triggered when user toggles manual mode) */}
+                {isManualResident ? (
+                  <div className="p-5 rounded-2xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/60 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center justify-between border-b border-emerald-200/60 dark:border-emerald-800/60 pb-3">
+                      <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-200 font-extrabold text-sm">
+                        <UserPlus className="w-4 h-4 text-emerald-600" />
+                        Form Tambah Warga Baru (Otomatis Masuk Master Penduduk)
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsManualResident(false)}
+                        className="text-xs text-rose-600 font-bold hover:underline"
+                      >
+                        Batal Manual
+                      </button>
                     </div>
-                    <div>
-                      <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">NIK</p>
-                      <p className="font-bold text-gray-800 dark:text-slate-100 text-sm font-mono">{selectedResidentDetail ? selectedResidentDetail.nik : "-"}</p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Alamat</p>
-                      <p className="text-xs text-gray-600 dark:text-slate-400 font-semibold leading-relaxed">
-                        {selectedResidentDetail 
-                          ? `RT ${selectedResidentDetail.rt || "-"} / RW ${selectedResidentDetail.rw || "-"}, Desa ${selectedResidentDetail.desa || "Sukamaju"}, ${selectedResidentDetail.address || ""}`
-                          : "Pilih warga terlebih dahulu..."}
-                      </p>
-                    </div>
-                    {selectedResidentDetail && selectedResidentDetail.activeAids && selectedResidentDetail.activeAids.length > 0 && (
-                      <div className="sm:col-span-2 mt-1">
-                        <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Bantuan Aktif Saat Ini</p>
-                        <div className="flex flex-wrap gap-1.5 mt-1.5">
-                          {selectedResidentDetail.activeAids.map((aid: string, index: number) => (
-                            <span key={index} className="text-[11px] font-extrabold bg-blue-50 text-blue-700 border border-blue-100 rounded-lg px-2.5 py-1">
-                              {aid}
-                            </span>
-                          ))}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Nama Lengkap Warga *</label>
+                        <input
+                          type="text"
+                          value={manualResidentData.name}
+                          onChange={(e) => setManualResidentData({ ...manualResidentData, name: e.target.value })}
+                          placeholder="Masukkan nama sesuai KTP..."
+                          className="w-full h-11 px-4 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">NIK (16 Digit) *</label>
+                        <input
+                          type="text"
+                          maxLength={16}
+                          value={manualResidentData.nik}
+                          onChange={(e) => setManualResidentData({ ...manualResidentData, nik: e.target.value.replace(/\D/g, '') })}
+                          placeholder="6306..."
+                          className="w-full h-11 px-4 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-mono font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Dusun / Alamat Jalan</label>
+                        <input
+                          type="text"
+                          value={manualResidentData.address}
+                          onChange={(e) => setManualResidentData({ ...manualResidentData, address: e.target.value })}
+                          placeholder="Jl. Keramat RT 02..."
+                          className="w-full h-11 px-4 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">RT</label>
+                          <input
+                            type="text"
+                            value={manualResidentData.rt}
+                            onChange={(e) => setManualResidentData({ ...manualResidentData, rt: e.target.value })}
+                            placeholder="001"
+                            className="w-full h-11 px-3 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">RW</label>
+                          <input
+                            type="text"
+                            value={manualResidentData.rw}
+                            onChange={(e) => setManualResidentData({ ...manualResidentData, rw: e.target.value })}
+                            placeholder="001"
+                            className="w-full h-11 px-3 border border-emerald-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500"
+                          />
                         </div>
                       </div>
-                    )}
+                    </div>
+
+                    <p className="text-[11px] text-emerald-700 dark:text-emerald-300 font-medium italic">
+                      * Data warga ini akan otomatis tersimpan permanen ke master database penduduk desa & langsung dapat diakses di menu Penduduk.
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  /* Resident Info Preview Card for existing residents */
+                  <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-gray-200/60 flex gap-4 items-start shadow-inner">
+                    <div className="w-14 h-14 rounded-xl bg-gray-200 flex items-center justify-center text-gray-400 shrink-0">
+                      <Users className="w-8 h-8" />
+                    </div>
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Nama Lengkap</p>
+                        <p className="font-bold text-gray-800 dark:text-slate-100 text-sm">{selectedResidentDetail ? selectedResidentDetail.name : "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">NIK</p>
+                        <p className="font-bold text-gray-800 dark:text-slate-100 text-sm font-mono">{selectedResidentDetail ? selectedResidentDetail.nik : "-"}</p>
+                      </div>
+                      <div className="sm:col-span-2">
+                        <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Alamat</p>
+                        <p className="text-xs text-gray-600 dark:text-slate-400 font-semibold leading-relaxed">
+                          {selectedResidentDetail 
+                            ? `RT ${selectedResidentDetail.rt || "-"} / RW ${selectedResidentDetail.rw || "-"}, Desa ${selectedResidentDetail.desa || "Sukamaju"}, ${selectedResidentDetail.address || ""}`
+                            : "Pilih warga terlebih dahulu..."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Overlap Info inside Card */}
                 {selectedResidentDetail && selectedResidentDetail.activeAids && selectedResidentDetail.activeAids.length > 0 && (
@@ -1194,6 +1369,92 @@ export default function AdminBantuan({
                         </label>
                       </>
                     )}
+
+                    {/* Custom Added Criteria List */}
+                    {customCriteriaList.length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+                        <p className="text-[10px] font-extrabold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Kriteria Kustom Tambahan:</p>
+                        {customCriteriaList.map((crit, idx) => (
+                          <div key={idx} className="flex items-center justify-between gap-2 p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-800/40">
+                            <label className="flex items-start gap-3 cursor-pointer flex-1">
+                              <input
+                                type="checkbox"
+                                checked={!!criteriaChecked[`custom_${crit}`]}
+                                onChange={(e) => setCriteriaChecked({ ...criteriaChecked, [`custom_${crit}`]: e.target.checked })}
+                                className="w-5 h-5 rounded border-gray-300 dark:border-slate-600 text-emerald-700 focus:ring-emerald-500 mt-0.5"
+                              />
+                              <span className="font-bold text-xs text-gray-800 dark:text-slate-100">{crit}</span>
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => setCustomCriteriaList(prev => prev.filter(c => c !== crit))}
+                              className="text-red-500 hover:text-red-700 p-1 text-xs"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Add Custom Criteria Input Trigger */}
+                    <div className="pt-3">
+                      {showAddCriteriaForm ? (
+                        <div className="space-y-2 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 animate-in fade-in duration-200">
+                          <input
+                            type="text"
+                            placeholder="Tulis kriteria kustom baru (misal: Rumah Dinding Kayu)..."
+                            value={newCriteriaText}
+                            onChange={(e) => setNewCriteriaText(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newCriteriaText.trim()) {
+                                  const text = newCriteriaText.trim();
+                                  setCustomCriteriaList(prev => [...prev, text]);
+                                  setCriteriaChecked(prev => ({ ...prev, [`custom_${text}`]: true }));
+                                  setNewCriteriaText('');
+                                  setShowAddCriteriaForm(false);
+                                }
+                              }
+                            }}
+                            className="w-full px-3 py-2 text-xs border border-gray-300 dark:border-slate-600 rounded-lg outline-none font-semibold bg-white dark:bg-slate-900"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setShowAddCriteriaForm(false)}
+                              className="px-2.5 py-1 text-[11px] font-bold text-gray-500 hover:text-gray-700"
+                            >
+                              Batal
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (newCriteriaText.trim()) {
+                                  const text = newCriteriaText.trim();
+                                  setCustomCriteriaList(prev => [...prev, text]);
+                                  setCriteriaChecked(prev => ({ ...prev, [`custom_${text}`]: true }));
+                                  setNewCriteriaText('');
+                                  setShowAddCriteriaForm(false);
+                                }
+                              }}
+                              className="px-3 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded-lg hover:bg-emerald-700"
+                            >
+                              + Tambah Kriteria
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCriteriaForm(true)}
+                          className="w-full py-2.5 border border-dashed border-emerald-300 dark:border-emerald-700/80 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all flex items-center justify-center gap-1.5"
+                        >
+                          + Tambah Kriteria Manual Baru
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
