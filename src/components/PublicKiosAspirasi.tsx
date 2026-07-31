@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Megaphone, CheckCircle2, Home } from 'lucide-react';
+import { Megaphone, CheckCircle2, Home, User, ArrowLeft } from 'lucide-react';
 import { showToast } from '../utils/toast';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
+import { fetchResidentsCached } from '../utils/apiCache';
 
 export default function PublicKiosAspirasi() {
   const [step, setStep] = useState(1);
-  const [namaPengirim, setNamaPengirim] = useState('');
-  
+  const [nik, setNik] = useState('');
+  const [isManualEntry, setIsManualEntry] = useState(false);
+  const [manualName, setManualName] = useState('');
+  const [verifiedResident, setVerifiedResident] = useState<any>(null);
+
   const [kategori, setKategori] = useState('');
   const [pesan, setPesan] = useState('');
   const [desaName, setDesaName] = useState('');
@@ -37,13 +41,43 @@ export default function PublicKiosAspirasi() {
     if (storedDesa) setDesaName(storedDesa);
   }, []);
 
+  const handleVerifyNik = async () => {
+    const query = nik.trim();
+    if (query.length < 3) {
+      showToast('Ketikkan NIK atau minimal 3 huruf nama', 'error');
+      return;
+    }
+    
+    try {
+      const res = await fetchResidentsCached();
+      if (!res.ok) throw new Error('Network response was not ok');
+      const residents = await res.json();
+      
+      let match;
+      if (/^\d{16}/.test(query)) {
+        match = residents.find((r: any) => r.nik === query);
+      } else {
+        match = residents.find((r: any) => r.name?.toLowerCase().includes(query.toLowerCase()));
+      }
+
+      if (match) {
+        setVerifiedResident(match);
+        setStep(1.5);
+      } else {
+        setIsManualEntry(true);
+      }
+    } catch (err) {
+      showToast('Terjadi kesalahan saat memverifikasi identitas', 'error');
+    }
+  };
+
   const handleSubmit = async () => {
     if (!kategori || !pesan.trim()) {
       showToast('Harap lengkapi kategori dan isi aduan', 'error');
       return;
     }
 
-    const pengirim = namaPengirim.trim() || 'Warga Anonim';
+    const pengirim = verifiedResident?.name || manualName || 'Warga Anonim';
     const tenantId = await resolveCurrentTenant();
     
     if (!tenantId) {
@@ -78,7 +112,7 @@ export default function PublicKiosAspirasi() {
       console.error("Gagal mengirim data ke server:", error);
     }
 
-    setStep(2);
+    setStep(3);
     
     // Auto reset after 10s
     setTimeout(() => {
@@ -95,7 +129,7 @@ export default function PublicKiosAspirasi() {
         <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8">
           <div className="bg-white rounded-3xl p-10 max-w-lg text-center shadow-2xl">
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-4xl">🔒</span>
+              <span className="text-4xl">dY"'</span>
             </div>
             <h2 className="text-3xl font-bold text-slate-800 mb-4">Akses Ditolak</h2>
             <p className="text-slate-600 text-lg mb-8">Kios Belum Dikonfigurasi. Silakan buka tautan Kios melalui Dashboard Admin Desa Anda.</p>
@@ -128,32 +162,169 @@ export default function PublicKiosAspirasi() {
       {/* Main Content area */}
       <main className="flex-1 relative flex items-center justify-center p-8">
         <AnimatePresence mode="wait">
-          
-          {/* STEP 1: Form Aduan */}
+
+          {/* STEP 1: NIK/Name Verification */}
           {step === 1 && (
             <motion.div 
               key="step1"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -50 }}
+              className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-2xl text-center"
+            >
+              <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <User className="w-12 h-12 text-amber-600" />
+              </div>
+              <h2 className="text-4xl font-black text-slate-800 mb-4">Verifikasi Identitas</h2>
+              <p className="text-xl text-slate-500 mb-8">Silakan masukkan NIK atau Nama Lengkap Anda untuk mengirimkan aduan.</p>
+              
+              {!isManualEntry ? (
+                <div className="flex flex-col items-center w-full">
+                  <input 
+                    type="text"
+                    data-no-cap
+                    value={nik}
+                    onChange={(e) => setNik(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleVerifyNik();
+                    }}
+                    className="w-full text-center text-3xl md:text-4xl font-mono p-6 bg-slate-50 border-2 border-slate-200 rounded-2xl mb-8 focus:border-amber-500 focus:ring-4 focus:ring-amber-200 outline-none"
+                    placeholder="Masukkan NIK atau Nama..."
+                  />
+
+                  <button 
+                    onClick={handleVerifyNik}
+                    disabled={nik.trim().length < 3}
+                    className="w-full py-5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-2xl font-bold rounded-2xl transition-colors shadow-lg shadow-amber-500/30"
+                  >
+                    Lanjutkan
+                  </button>
+
+                  <button 
+                    onClick={() => setIsManualEntry(true)}
+                    className="mt-6 text-amber-600 font-bold text-lg hover:underline transition-colors"
+                  >
+                    Bukan Penduduk Desa? Isi Data Manual / Anonim
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6 text-left w-full">
+                  <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 mb-6">
+                    <p className="font-medium">
+                      {nik.length >= 3 ? "Data tidak ditemukan di database warga. " : ""}
+                      Silakan masukkan identitas Anda untuk melanjutkan.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-xl font-bold text-gray-700 mb-2">Nama Pengirim <span className="text-slate-400 font-normal">(Opsional)</span></label>
+                    <input 
+                      type="text"
+                      value={manualName}
+                      onChange={(e) => setManualName(e.target.value)}
+                      className="w-full p-4 text-xl rounded-2xl border-2 border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-200 outline-none transition-all uppercase"
+                      placeholder="Kosongkan jika Anonim"
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <button 
+                      onClick={() => {
+                        setIsManualEntry(false);
+                        setNik('');
+                        setManualName('');
+                      }}
+                      className="w-1/3 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-colors"
+                    >
+                      Kembali
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setVerifiedResident({ 
+                          name: manualName.trim() ? manualName.trim().toUpperCase() : 'Anonim', 
+                          nik: /^\d{16}/.test(nik) ? nik : '0000000000000000' 
+                        });
+                        setStep(2);
+                      }}
+                      className="w-2/3 py-4 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-colors"
+                    >
+                      Lanjutkan
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* STEP 1.5: Confirm Identity */}
+          {step === 1.5 && verifiedResident && (
+            <motion.div 
+              key="step1.5"
+              initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
+              className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-2xl text-center"
+            >
+              <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <User className="w-12 h-12 text-amber-600" />
+              </div>
+              <h2 className="text-4xl font-black text-slate-800 mb-2">Konfirmasi Identitas</h2>
+              <p className="text-xl text-slate-500 mb-8">Apakah ini data diri Anda?</p>
+              
+              <div className="bg-slate-50 rounded-2xl p-6 text-left mb-8 border border-slate-200">
+                <div className="mb-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap</p>
+                  <p className="text-2xl font-black text-slate-800">{verifiedResident.name || '-'}</p>
+                </div>
+                <div className="mb-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">NIK</p>
+                  <p className="text-xl font-medium text-slate-700 font-mono tracking-widest">{verifiedResident.nik || '-'}</p>
+                </div>
+                {verifiedResident.address && (
+                  <div>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Alamat</p>
+                    <p className="text-lg font-medium text-slate-700">{verifiedResident.address} RT {verifiedResident.rt || '00'} RW {verifiedResident.rw || '00'}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setStep(1)}
+                  className="w-1/3 py-5 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xl font-bold rounded-2xl transition-colors"
+                >
+                  Bukan
+                </button>
+                <button 
+                  onClick={() => setStep(2)}
+                  className="w-2/3 py-5 bg-amber-500 hover:bg-amber-600 text-white text-xl font-bold rounded-2xl transition-colors shadow-lg shadow-amber-500/30"
+                >
+                  Ya, Benar
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* STEP 2: Form Aduan */}
+          {step === 2 && (
+            <motion.div 
+              key="step2"
+              initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
               className="w-full max-w-4xl bg-white p-10 rounded-3xl shadow-xl"
             >
-              <div className="mb-8 pb-6 border-b border-gray-100">
-                <h2 className="text-3xl font-black text-slate-800">Tuliskan Aspirasi Anda</h2>
-                <p className="text-slate-500 text-lg">Pesan Anda akan langsung diterima oleh Kepala Desa tanpa perlu menggunakan NIK.</p>
+              <div className="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+                <button onClick={() => setStep(1)} className="p-3 bg-slate-50 rounded-full hover:bg-slate-100">
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <div>
+                  <h2 className="text-3xl font-black text-slate-800">Tuliskan Aspirasi Anda</h2>
+                  <p className="text-slate-500 text-lg">Mengirim sebagai: <strong className="text-slate-700">{verifiedResident?.name || manualName || 'Anonim'}</strong></p>
+                </div>
               </div>
               
-              <div className="space-y-8">
+              <div className="space-y-8 max-h-[55vh] overflow-y-auto pr-2 custom-scrollbar">
                 <div>
                   <label className="block text-xl font-bold text-gray-700 mb-3">Kategori Laporan</label>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {categories.map(cat => (
                       <button
                         key={cat}
                         onClick={() => setKategori(cat)}
-                        className={`p-4 rounded-xl border-2 text-left text-lg font-medium transition-all ${
-                          kategori === cat 
-                            ? 'border-amber-500 bg-amber-50 text-amber-700' 
-                            : 'border-slate-200 text-slate-600 hover:border-amber-200'
-                        }`}
+                        className={p-4 rounded-xl border-2 text-left text-lg font-medium transition-all }
                       >
                         {cat}
                       </button>
@@ -171,17 +342,6 @@ export default function PublicKiosAspirasi() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xl font-bold text-gray-700 mb-3">Nama Anda <span className="text-slate-400 font-normal">(Opsional)</span></label>
-                  <input
-                    type="text"
-                    value={namaPengirim}
-                    onChange={(e) => setNamaPengirim(e.target.value)}
-                    className="w-full p-6 text-xl rounded-2xl border-2 border-slate-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-200 outline-none transition-all"
-                    placeholder="Kosongkan jika ingin mengirim secara anonim (rahasia)"
-                  />
-                </div>
-
                 <button 
                   onClick={handleSubmit}
                   disabled={!kategori || !pesan.trim()}
@@ -193,10 +353,10 @@ export default function PublicKiosAspirasi() {
             </motion.div>
           )}
 
-          {/* STEP 2: Success */}
-          {step === 2 && (
+          {/* STEP 3: Success */}
+          {step === 3 && (
             <motion.div 
-              key="step2"
+              key="step3"
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
               className="bg-white p-12 rounded-3xl shadow-xl w-full max-w-2xl text-center"
             >

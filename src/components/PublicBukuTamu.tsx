@@ -39,6 +39,7 @@ export default function PublicBukuTamu() {
     nik: '', nama: '', alamat: '', instansi: '',
     keperluan: KEPERLUAN_OPTIONS[0]
   });
+  const [pendingResidentToConfirm, setPendingResidentToConfirm] = useState<any>(null);
   const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(false);
   const [isKioskMode, setIsKioskMode] = useState(false);
   const [showQrCode, setShowQrCode] = useState(false);
@@ -174,14 +175,11 @@ export default function PublicBukuTamu() {
       const foundData = Array.isArray(data) ? data[0] : data;
 
       if (foundData) {
-        setForm({
+        setPendingResidentToConfirm({
           nik: foundData.nik || query,
           nama: capitalizeWords(foundData.name || ''),
           alamat: capitalizeWords(`${foundData.address || ''} RT ${foundData.rt || ''} RW ${foundData.rw || ''}`),
-          instansi: 'Warga Desa',
-          keperluan: KEPERLUAN_OPTIONS[0]
         });
-        setStep('form');
       } else {
         setError(`Data warga tidak ditemukan. (Tenant: ${tenantId ? 'OK' : 'MISSING'})`);
       }
@@ -199,12 +197,14 @@ export default function PublicBukuTamu() {
     if (!result) return;
     const nikMatch = result.match(/\b(\d{16})\b/);
     if (nikMatch) {
-      lookupNik(nikMatch[1]);
+      lookupResident(nikMatch[1]);
     } else {
       try {
         const p = JSON.parse(result);
-        if (p.nik) { lookupNik(p.nik); return; }
-      } catch {}
+        if (p.nik) lookupResident(p.nik);
+      } catch (e) {
+        console.log("Not JSON format");
+      }
       setError('QR tidak dikenali. Coba scan ulang atau masukkan NIK manual.');
     }
   };
@@ -212,7 +212,7 @@ export default function PublicBukuTamu() {
   const handleManualNik = () => {
     const clean = manualNik.replace(/\D/g, '');
     if (clean.length !== 16) { setError('NIK harus 16 digit.'); return; }
-    lookupNik(clean);
+    lookupResident(clean);
   };
 
   const handleSubmit = async () => {
@@ -370,7 +370,8 @@ export default function PublicBukuTamu() {
             </div>
             
             {error && (
-              <div className="bg-red-50 text-red-600 text-sm font-medium p-3 mb-4 rounded-xl border border-red-100">
+              <div className="bg-rose-50 text-rose-600 p-4 rounded-2xl mb-6 text-sm font-medium border border-rose-100 flex items-center gap-3">
+                <AlertCircle size={20} className="shrink-0" />
                 {error}
               </div>
             )}
@@ -382,7 +383,57 @@ export default function PublicBukuTamu() {
               </div>
             )}
 
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+            {pendingResidentToConfirm && (
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 mb-8 shadow-sm animate-in fade-in slide-in-from-top-4">
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Konfirmasi Identitas</h3>
+                <p className="text-slate-600 mb-6">Apakah ini data diri Anda?</p>
+                
+                <div className="bg-white rounded-xl p-5 mb-6 border border-blue-100">
+                  <div className="mb-4">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap</p>
+                    <p className="text-xl font-black text-slate-800">{pendingResidentToConfirm.nama}</p>
+                  </div>
+                  <div className="mb-4">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">NIK</p>
+                    <p className="text-lg font-medium text-slate-700 font-mono tracking-widest">{pendingResidentToConfirm.nik}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Alamat</p>
+                    <p className="text-md font-medium text-slate-700">{pendingResidentToConfirm.alamat}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => {
+                      setPendingResidentToConfirm(null);
+                      setForm(p => ({ ...p, nik: '' }));
+                    }}
+                    className="w-1/3 py-4 bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold rounded-xl transition-colors"
+                  >
+                    Bukan
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setForm(p => ({
+                        ...p,
+                        nik: pendingResidentToConfirm.nik,
+                        nama: pendingResidentToConfirm.nama,
+                        alamat: pendingResidentToConfirm.alamat,
+                        instansi: 'Warga Desa',
+                        keperluan: KEPERLUAN_OPTIONS[0]
+                      }));
+                      setPendingResidentToConfirm(null);
+                    }}
+                    className="w-2/3 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl transition-colors shadow-lg shadow-blue-600/30"
+                  >
+                    Ya, Isi Otomatis
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className={`space-y-4 max-h-[60vh] overflow-y-auto pr-1 ${pendingResidentToConfirm ? 'opacity-50 pointer-events-none blur-sm transition-all' : 'transition-all'}`}>
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Cari NIK / Nama Warga (Opsional)</label>
                   <div className="flex gap-2">
