@@ -56,19 +56,17 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       }
     }
 
-    // 3. Fallback: Gunakan sesi otentikasi login HANYA jika tidak ada parameter ?tenant=
-    if (!tenantParam) {
-      const localAuth = localStorage.getItem('didesa_auth_user');
-      if (localAuth) {
-        try {
-          const user = JSON.parse(localAuth);
-          if (user && user.tenantId) {
-            cachedTenantId = user.tenantId;
-            isResolving = false;
-            return user.tenantId;
-          }
-        } catch(e) {}
-      }
+    // 3. Fallback: Gunakan sesi otentikasi login jika pencarian domain gagal atau tidak ada parameter
+    const localAuth = localStorage.getItem('didesa_auth_user');
+    if (localAuth) {
+      try {
+        const user = JSON.parse(localAuth);
+        if (user && user.tenantId) {
+          cachedTenantId = user.tenantId;
+          isResolving = false;
+          return user.tenantId;
+        }
+      } catch(e) {}
     }
 
     console.warn("Tenant Resolver: No subdomain or auth found. Returning null.");

@@ -14,7 +14,15 @@ export default function AdminPanduan() {
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
 
   const tenantName = localStorage.getItem('kop_desa') || 'Desa Anda';
-  const tenantSlug = tenantName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  
+  let userTenantId = '';
+  const localAuth = localStorage.getItem('didesa_auth_user');
+  if (localAuth) {
+    try {
+      const user = JSON.parse(localAuth);
+      userTenantId = user.tenantId || '';
+    } catch (e) {}
+  }
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -55,7 +63,7 @@ export default function AdminPanduan() {
               <Printer size={16} /> Unduh / Cetak Panduan
             </button>
             <a
-              href={`/?tenant=${tenantSlug}&tab=kios`}
+              href={`/?t_id=${userTenantId}&tab=kios`}
               target="_blank"
               rel="noreferrer"
               className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg transition-all"
@@ -165,10 +173,10 @@ export default function AdminPanduan() {
                   <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider mb-1">Tautan Portal Kios Utama</p>
                   <div className="flex items-center gap-2">
                     <code className="text-xs font-mono text-emerald-900 dark:text-emerald-200 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg flex-1 truncate border border-emerald-200 dark:border-emerald-800">
-                      {window.location.origin}/?tenant={tenantSlug}&tab=kios
+                      {window.location.origin}/?t_id={userTenantId}&tab=kios
                     </code>
                     <button
-                      onClick={() => copyToClipboard(`${window.location.origin}/?tenant=${tenantSlug}&tab=kios`, 'Tautan Portal Kios')}
+                      onClick={() => copyToClipboard(`${window.location.origin}/?t_id=${userTenantId}&tab=kios`, 'Tautan Portal Kios')}
                       className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shrink-0"
                     >
                       {copiedIndex === 'Tautan Portal Kios' ? <Check size={14} /> : <Copy size={14} />} Salin
@@ -180,10 +188,10 @@ export default function AdminPanduan() {
                   <p className="text-xs font-bold text-blue-800 dark:text-blue-400 uppercase tracking-wider mb-1">Tautan Mode Langsung Buku Tamu</p>
                   <div className="flex items-center gap-2">
                     <code className="text-xs font-mono text-blue-900 dark:text-blue-200 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg flex-1 truncate border border-blue-200 dark:border-blue-800">
-                      {window.location.origin}/?tenant={tenantSlug}&tab=buku_tamu
+                      {window.location.origin}/?t_id={userTenantId}&tab=buku_tamu
                     </code>
                     <button
-                      onClick={() => copyToClipboard(`${window.location.origin}/?tenant=${tenantSlug}&tab=buku_tamu`, 'Tautan Buku Tamu')}
+                      onClick={() => copyToClipboard(`${window.location.origin}/?t_id=${userTenantId}&tab=buku_tamu`, 'Tautan Buku Tamu')}
                       className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shrink-0"
                     >
                       {copiedIndex === 'Tautan Buku Tamu' ? <Check size={14} /> : <Copy size={14} />} Salin
@@ -403,7 +411,7 @@ export default function AdminPanduan() {
               {[
                 {
                   q: "Mengapa data yang dikirim dari laptop admin tidak muncul otomatis di layar tablet Kios?",
-                  a: "Pastikan dua hal: (1) Layar tablet dalam keadaan terbuka di alamat Kios (?tenant=namadesa&tab=kios), dan (2) Titik sinyal indikator di pojok kanan atas tablet berwarna HIJAU (SUBSCRIBED). Jika warna titik masih kuning, silakan muat ulang (refresh) browser tablet tersebut."
+                  a: "Pastikan dua hal: (1) Layar tablet dalam keadaan terbuka di alamat Kios (?t_id=...&tab=kios), dan (2) Titik sinyal indikator di pojok kanan atas tablet berwarna HIJAU (SUBSCRIBED). Jika warna titik masih kuning, silakan muat ulang (refresh) browser tablet tersebut."
                 },
                 {
                   q: "Bagaimana jika tablet milik desa tidak memiliki kamera untuk scan QR Code?",
