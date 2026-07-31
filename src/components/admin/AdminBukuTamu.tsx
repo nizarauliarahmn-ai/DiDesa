@@ -56,7 +56,11 @@ export default function AdminBukuTamu() {
     documentTitle: 'Cetak_QR_Kiosk_Buku_Tamu',
   });
   const [filterStatus, setFilterStatus] = useState('Semua');
-  const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
+  const [filterDate, setFilterDate] = useState(''); // Empty string shows ALL dates by default
+
+  const [showPrintReportModal, setShowPrintReportModal] = useState(false);
+  const [printStartDate, setPrintStartDate] = useState('');
+  const [printEndDate, setPrintEndDate] = useState('');
 
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
@@ -117,13 +121,19 @@ export default function AdminBukuTamu() {
     if (!tenantId) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('guest_book')
         .select('*')
         .eq('tenant_id', tenantId)
-        .gte('tanggal_masuk', filterDate + 'T00:00:00')
-        .lte('tanggal_masuk', filterDate + 'T23:59:59')
         .order('tanggal_masuk', { ascending: false });
+
+      if (filterDate) {
+        query = query
+          .gte('tanggal_masuk', filterDate + 'T00:00:00')
+          .lte('tanggal_masuk', filterDate + 'T23:59:59');
+      }
+
+      const { data, error } = await query;
       if (!error && data) setEntries(data);
     } finally {
       setLoading(false);
@@ -196,16 +206,26 @@ export default function AdminBukuTamu() {
     });
   }, [entries, searchQuery, filterStatus]);
 
-  const todayCount = entries.filter(e => e.status === 'hadir').length;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayCount = entries.filter(e => e.tanggal_masuk && e.tanggal_masuk.startsWith(todayStr)).length;
 
-  const handlePrint = () => {
+  const handlePrintReport = () => {
+    setShowPrintReportModal(false);
+
+    const printData = entries.filter(e => {
+      if (!e.tanggal_masuk) return true;
+      const entryDate = e.tanggal_masuk.split('T')[0];
+      if (printStartDate && entryDate < printStartDate) return false;
+      if (printEndDate && entryDate > printEndDate) return false;
+      return true;
+    });
+
     const logoUrl = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const kabupatenName = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
     const kecamatanName = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
     const desaName = localStorage.getItem('kop_desa') || 'Desa';
     const alamatKantor = localStorage.getItem('kop_alamat') || 'Alamat Kantor Pelayanan Desa';
     const kontakKantor = localStorage.getItem('kop_kontak') || '-';
-    const customFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat & dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     
     const printContent = `
       <!DOCTYPE html>
@@ -237,14 +257,13 @@ export default function AdminBukuTamu() {
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
             th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .meta { font-size: 10px; color: #666; margin-top: 3px; display: block; }
-            .footer-notes { margin-top: 40px; padding-top: 10px; border-top: 1px solid #ccc; font-size: 10px; color: #666; text-align: left; font-family: sans-serif; }
           </style>
         </head>
         <body>
           <div class="content-wrapper">
             <div class="header">
-            <h1 class="title">LAPORAN BUKU TAMU</h1>
-            <p class="subtitle">${desaName.toUpperCase()} - Dicetak pada ${new Date().toLocaleString('id-ID')}</p>
+            <h1 class="title">LAPORAN BUKU TAMU DIGITAL</h1>
+            <p class="subtitle">${desaName.toUpperCase()} - ${printStartDate || printEndDate ? `Periode ${printStartDate || 'Awal'} s/d ${printEndDate || 'Sekarang'}` : 'Semua Riwayat'}</p>
           </div>
           <table>
             <thead>
@@ -258,7 +277,7 @@ export default function AdminBukuTamu() {
               </tr>
             </thead>
             <tbody>
-              ${filtered.map((e, i) => `
+              ${printData.map((e, i) => `
                 <tr>
                   <td>${i + 1}</td>
                   <td><strong>${e.nama}</strong><span class="meta">NIK: ${e.nik || '-'}</span></td>
@@ -342,7 +361,7 @@ export default function AdminBukuTamu() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <button
-            onClick={handlePrint}
+            onClick={() => setShowPrintReportModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
           >
             <Printer className="w-4 h-4" />
@@ -368,10 +387,10 @@ export default function AdminBukuTamu() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total Hari Ini', value: entries.length, color: 'emerald', icon: <BookOpen className="w-5 h-5" /> },
+          { label: 'Total Hari Ini', value: todayCount, color: 'emerald', icon: <BookOpen className="w-5 h-5" /> },
           { label: 'Sedang Hadir', value: entries.filter(e => e.status === 'hadir').length, color: 'blue', icon: <LogIn className="w-5 h-5" /> },
           { label: 'Selesai', value: entries.filter(e => e.status === 'selesai').length, color: 'gray', icon: <CheckCircle2 className="w-5 h-5" /> },
-          { label: 'Urusan Surat', value: entries.filter(e => e.keperluan.includes('Surat')).length, color: 'amber', icon: <Building2 className="w-5 h-5" /> },
+          { label: 'Urusan Surat', value: entries.filter(e => e.keperluan && e.keperluan.toLowerCase().includes('surat')).length, color: 'amber', icon: <Building2 className="w-5 h-5" /> },
         ].map(({ label, value, color, icon }) => (
           <div key={label} className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none">
             <div className={`w-8 h-8 rounded-lg bg-${color}-50 dark:bg-${color}-900/20 flex items-center justify-center text-${color}-600 dark:text-${color}-400 mb-2`}>
@@ -384,8 +403,8 @@ export default function AdminBukuTamu() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none mb-4 p-4 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none mb-4 p-4 flex flex-col sm:flex-row items-center gap-3">
+        <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
@@ -396,13 +415,28 @@ export default function AdminBukuTamu() {
             className="w-full pl-10 pr-4 h-10 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
           />
         </div>
-        <input
-          type="date"
-          value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
-          className="h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
-        />
-
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <input
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 text-gray-900 dark:text-white flex-1 sm:flex-none"
+            title="Filter Tanggal Spesifik"
+          />
+          {filterDate ? (
+            <button 
+              onClick={() => setFilterDate('')}
+              className="h-10 px-3 border border-emerald-200 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-100 transition-colors shrink-0"
+              title="Tampilkan Semua Tanggal"
+            >
+              Semua Tanggal
+            </button>
+          ) : (
+            <span className="text-xs font-bold text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 shrink-0">
+              Semua Riwayat Tanggal
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -653,6 +687,66 @@ export default function AdminBukuTamu() {
           </div>
         </div>
       </div>
+
+      {/* Modal Filter Tanggal Cetak Laporan */}
+      {showPrintReportModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+              <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                <Printer className="w-5 h-5 text-emerald-700" />
+                Cetak Laporan Buku Tamu
+              </h3>
+              <button onClick={() => setShowPrintReportModal(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300 p-3 rounded-xl text-xs font-medium border border-emerald-100 dark:border-emerald-800/40">
+                Tentukan rentang tanggal data kunjungan tamu yang ingin dicetak ke dalam laporan fisik/PDF.
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Dari Tanggal</label>
+                <input
+                  type="date"
+                  value={printStartDate}
+                  onChange={(e) => setPrintStartDate(e.target.value)}
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Sampai Tanggal</label>
+                <input
+                  type="date"
+                  value={printEndDate}
+                  onChange={(e) => setPrintEndDate(e.target.value)}
+                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                />
+              </div>
+
+              <p className="text-[11px] text-gray-500 dark:text-slate-400 italic">
+                * Kosongkan kolom tanggal di atas untuk mencetak <strong>keseluruhan riwayat data tamu</strong>.
+              </p>
+            </div>
+            
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 bg-gray-50/50 dark:bg-slate-900/50">
+              <button onClick={() => setShowPrintReportModal(false)} className="px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
+                Batal
+              </button>
+              <button 
+                onClick={handlePrintReport} 
+                className="px-6 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                <Printer className="w-4 h-4" />
+                Cetak Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Style print bawaan yang mengganggu dihapus karena kita sudah pakai iframe murni */}
       <ConfirmModal
