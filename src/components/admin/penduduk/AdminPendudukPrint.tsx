@@ -284,28 +284,8 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
             </div>
           </div>
 
-          {/* Pejabat Penandatangan - Format Standar Surat Resmi Desa */}
-          <div className="mt-auto pt-12 grid grid-cols-2 gap-12">
-            <div className="flex flex-col items-center text-center">
-              <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-24">Penduduk yang bersangkutan,</p>
-              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white">{data?.name || "-"}</p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center">
-              <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}, {today}
-              </p>
-              <p className="text-sm font-medium text-gray-700 dark:text-slate-300 mb-24">{kadesTitle},</p>
-
-              <p className="text-sm font-bold uppercase underline text-gray-900 dark:text-white">{kadesName}</p>
-              {kadesNip && kadesNip !== '-' && kadesNip.trim() !== '' && (
-                <p className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mt-1">NIP. {kadesNip}</p>
-              )}
-            </div>
-          </div>
-
           {/* Clean Official Document Footer */}
-          <div className="mt-6 pt-3 border-t border-gray-300 dark:border-slate-700 flex justify-between items-center text-[10px] text-gray-500 font-medium">
+          <div className="mt-auto pt-6 border-t border-gray-300 dark:border-slate-700 flex justify-between items-center text-[10px] text-gray-500 font-medium">
             <span>Dokumen Profil Kependudukan Resmi • Pemerintah Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</span>
             <span>Terverifikasi Digital Sistem DiDesa</span>
           </div>
