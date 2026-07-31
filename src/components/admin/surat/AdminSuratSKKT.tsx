@@ -450,7 +450,7 @@ export default function AdminSuratSKKT({
         </table>
 
         <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI DENGAN BINGKAI KOTAK) -->
-        <div style="width:100%; height:320px; margin-top:10px; margin-bottom:15px; position:relative; background:#ffffff; border:1px solid #000;">
+        <div style="width:100%; height:250px; margin-top:10px; margin-bottom:10px; position:relative; background:#ffffff; border:1px solid #000;">
           ${generatePolygonSVG()}
         </div>
 
@@ -458,8 +458,7 @@ export default function AdminSuratSKKT({
           Kami yang bertanda tangan di bawah ini adalah yang masing-masing memiliki tanah yang berbatasan dengan tanah yang di terangkan pada gambar di atas , dengan ini membenarkan batas-batas tanah tersebut :
         </p>
 
-        <!-- TABEL PEMILIK BATAS TANAH -->
-        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; font-size:11px;" border="1" cellPadding="5">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:10px; font-size:11px;" border="1" cellPadding="3">
           <thead>
             <tr style="background:#f8fafc;">
               <th style="width:35px; text-align:center;">NO</th>
@@ -473,25 +472,25 @@ export default function AdminSuratSKKT({
               <td style="text-align:center;">1.</td>
               <td>${v(formData.batasUtara)}</td>
               <td style="text-align:center; font-weight:bold;">UTARA</td>
-              <td style="height:28px;"></td>
+              <td style="height:24px;"></td>
             </tr>
             <tr>
               <td style="text-align:center;">2.</td>
               <td>${v(formData.batasSelatan)}</td>
               <td style="text-align:center; font-weight:bold;">SELATAN</td>
-              <td style="height:28px;"></td>
+              <td style="height:24px;"></td>
             </tr>
             <tr>
               <td style="text-align:center;">3.</td>
               <td>${v(formData.batasTimur)}</td>
               <td style="text-align:center; font-weight:bold;">TIMUR</td>
-              <td style="height:28px;"></td>
+              <td style="height:24px;"></td>
             </tr>
             <tr>
               <td style="text-align:center;">4.</td>
               <td>${v(formData.batasBarat)}</td>
               <td style="text-align:center; font-weight:bold;">BARAT</td>
-              <td style="height:28px;"></td>
+              <td style="height:24px;"></td>
             </tr>
           </tbody>
         </table>
