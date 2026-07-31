@@ -356,11 +356,41 @@ export default function AdminPendudukDetail({
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-2">
                 {data?.name || "Nama Penduduk"}
-                <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">
-                  {data?.status || 'Aktif'}
-                </span>
+                {(() => {
+                  const s = (data?.status || 'Aktif').trim().toLowerCase();
+                  if (s.includes('meninggal') || s === 'mati' || s === 'wafat') {
+                    return (
+                      <span className="bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                        Meninggal
+                      </span>
+                    );
+                  }
+                  if (s.includes('pindah') || s.includes('mutasi') || s === 'pindah domisili') {
+                    return (
+                      <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        Pindah
+                      </span>
+                    );
+                  }
+                  if (s === 'pending_approval' || s === 'pending') {
+                    return (
+                      <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                        Pending
+                      </span>
+                    );
+                  }
+                  return (
+                    <span className="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      {s === 'aktif' || s === 'hidup' || s.includes('hidup') ? 'Hidup' : (data?.status || 'Hidup')}
+                    </span>
+                  );
+                })()}
                 {data?.maritalStatus && (
-                  <span className="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold">
+                  <span className="bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black shadow-sm">
                     {data.maritalStatus}
                   </span>
                 )}

@@ -1066,7 +1066,19 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
         <div className="flex flex-col gap-1.5 items-start">
-          <span className="text-[11px] font-bold text-gray-600 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-md border border-gray-200 dark:border-slate-700 leading-none">{status === 'pending_approval' ? 'Pending' : (status || '-')}</span>
+          {(() => {
+            const s = (status || 'Aktif').trim().toLowerCase();
+            if (s.includes('meninggal') || s === 'mati' || s === 'wafat') {
+              return <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800 leading-none">Meninggal</span>;
+            }
+            if (s.includes('pindah') || s.includes('mutasi')) {
+              return <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800 leading-none">Pindah</span>;
+            }
+            if (s === 'pending_approval' || s === 'pending') {
+              return <span className="text-[11px] font-bold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800 leading-none">Pending</span>;
+            }
+            return <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 leading-none">{s === 'aktif' ? 'Hidup' : (status || 'Hidup')}</span>;
+          })()}
           <span className={`text-[10px] px-2 py-1 rounded-md font-bold border whitespace-nowrap leading-none ${getBadgeColors(genderColor)}`}>
             {gender}
           </span>
