@@ -777,13 +777,8 @@ export default function AdminPendudukDetail({
           </>
         )}
 
-        {/* Hubungan Keluarga (Hanya ditampilkan jika ada anggota keluarga lain selain ybs) */}
-        {(() => {
-          const otherMembers = (familyMembers || []).filter((m: any) => m && m.nik !== data?.nik && m.name !== data?.name);
-          if (otherMembers.length === 0) return null;
-
-          return (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+        {/* Hubungan Keluarga / Anggota Kartu Keluarga */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
@@ -867,8 +862,6 @@ export default function AdminPendudukDetail({
                 })}
               </div>
             </div>
-          );
-        })()}
 
         {/* Riwayat Administrasi */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
