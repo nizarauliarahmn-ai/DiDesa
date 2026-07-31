@@ -54,7 +54,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
         {`
           @page {
             size: A4 portrait;
-            margin: 19mm 22mm 19mm 22mm;
+            margin: 20mm 24mm 20mm 24mm;
           }
           @media print {
             .no-print { display: none !important; }
@@ -70,7 +70,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                 max-width: 100% !important;
                 box-shadow: none !important; 
                 margin: 0 !important; 
-                padding: 20px 28px !important;
+                padding: 16px 28px !important;
                 border: none !important;
                 background-color: white !important;
                 color: black !important;
@@ -106,150 +106,196 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
 
       {/* Document Canvas */}
       <main className="flex justify-center py-8 px-4 bg-gray-50 dark:bg-slate-800 min-h-screen">
-        <div className="print-container bg-white dark:bg-slate-900 w-full max-w-[800px] min-h-[1123px] shadow-lg dark:shadow-none p-[40px] sm:p-[50px] border border-gray-200 dark:border-slate-700 flex flex-col gap-6">
+        <div className="print-container bg-white dark:bg-slate-900 w-full max-w-[800px] min-h-[1123px] shadow-lg dark:shadow-none p-[36px] sm:p-[44px] border border-gray-200 dark:border-slate-700 flex flex-col gap-3.5">
           
           {/* Document Header (Kop Surat Removed as requested) */}
-          <div className="flex items-center justify-between border-b-2 border-emerald-700 pb-4 mb-2">
+          <div className="flex items-center justify-between border-b-2 border-emerald-700 pb-3 mb-1">
             <div>
-              <h1 className="text-2xl font-black uppercase text-emerald-800 tracking-wider">PROFIL DATA PENDUDUK</h1>
-              <p className="text-xs font-semibold text-gray-600 dark:text-slate-400">Pemerintah Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</p>
+              <h1 className="text-xl font-black uppercase text-emerald-800 tracking-wider">PROFIL DATA PENDUDUK</h1>
+              <p className="text-[11px] font-semibold text-gray-600 dark:text-slate-400">Pemerintah Desa {activeDesa.replace(/desa|kelurahan/gi, '').trim()}</p>
             </div>
-            <span className="font-mono text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-3 py-1 rounded-md border border-emerald-300 dark:border-emerald-800">
+            <span className="font-mono text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2.5 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800">
               DIDESA DIGITAL ID
             </span>
           </div>
 
           {/* Identitas Utama (NIK/KK Highlight) */}
-          <div className="grid grid-cols-2 gap-6 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 p-4 rounded-lg mt-2">
+          <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 p-2.5 px-4 rounded-lg mt-1">
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nomor Induk Kependudukan (NIK)</span>
-              <span className="text-2xl font-extrabold text-emerald-700">{data?.nik || "-"}</span>
+              <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Nomor Induk Kependudukan (NIK)</span>
+              <span className="text-xl font-extrabold text-emerald-700">{data?.nik || "-"}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nomor Kartu Keluarga (KK)</span>
-              <span className="text-2xl font-extrabold text-emerald-700">{data?.noKk || "-"}</span>
+              <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Nomor Kartu Keluarga (KK)</span>
+              <span className="text-xl font-extrabold text-emerald-700">{data?.noKk || "-"}</span>
             </div>
           </div>
 
           {/* Biodata Section */}
-          <div className="grid grid-cols-12 gap-8 mt-4">
+          <div className="grid grid-cols-12 gap-6 mt-2">
             {/* Foto */}
             <div className="col-span-3">
               <div className="w-full aspect-[3/4] border-2 border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden relative shadow-sm bg-slate-100 shrink-0">
                 {data?.photo ? (
                   <img src={data.photo} alt={data.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white pb-6 ${
+                  <div className={`absolute inset-0 w-full h-full flex flex-col items-center justify-center text-white pb-5 ${
                     data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-600 via-pink-500 to-rose-700' : 'bg-gradient-to-b from-blue-600 via-blue-700 to-indigo-800'
                   }`}>
-                    <User className="w-16 h-16 opacity-90" fill="currentColor" />
-                    <span className="text-[9px] font-extrabold tracking-widest mt-1.5 uppercase opacity-90">PASFOTO</span>
+                    <User className="w-14 h-14 opacity-90" fill="currentColor" />
+                    <span className="text-[8px] font-extrabold tracking-widest mt-1 uppercase opacity-90">PASFOTO</span>
                   </div>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 bg-emerald-800 text-white text-center py-1 border-t border-emerald-700 z-10">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider">AKTIF</span>
+                <div className="absolute bottom-0 left-0 right-0 bg-emerald-800 text-white text-center py-0.5 border-t border-emerald-700 z-10">
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider">AKTIF</span>
                 </div>
               </div>
             </div>
             {/* Detail Info */}
-            <div className="col-span-9 flex flex-col gap-2">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <div className="col-span-9 flex flex-col gap-1.5">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-2.5">
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap</p>
-                  <p className="text-base font-bold text-gray-900 dark:text-white uppercase">{data?.name || "-"}</p>
+                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Nama Lengkap</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white uppercase">{data?.name || "-"}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Jenis Kelamin</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">{data?.gender || "-"}</p>
+                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Jenis Kelamin</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.gender || "-"}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tempat, Tgl Lahir</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">
+                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Tempat, Tgl Lahir</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">
                     {data?.birthPlace || "-"}{data?.birthDate ? `, ${data.birthDate}` : ''} {data?.age ? `(${data.age} Thn)` : ''}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Golongan Darah</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">{data?.bloodType || "-"}</p>
+                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Golongan Darah</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.bloodType || "-"}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pendidikan Terakhir</p>
-                  <p className="text-base font-medium text-gray-900 dark:text-white uppercase">{data?.education || "-"}</p>
+                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Pendidikan Terakhir</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">{data?.education || "-"}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pekerjaan</p>
-                  <p className="text-base font-bold text-gray-900 dark:text-white uppercase">{data?.job || "-"}</p>
+                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Pekerjaan</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white uppercase">{data?.job || "-"}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Alamat & Verifikasi */}
-          <div className="flex flex-col gap-2 mt-4">
-            <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
-              <span className="material-symbols-outlined text-xl">location_on</span> Alamat & Tempat Tinggal
+          <div className="flex flex-col gap-1.5 mt-2">
+            <h5 className="text-sm font-bold text-emerald-700 flex items-center gap-1.5 border-b border-gray-100 dark:border-slate-800 pb-1">
+              <span className="material-symbols-outlined text-lg">location_on</span> Alamat & Tempat Tinggal
             </h5>
-            <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 grid grid-cols-3 gap-4 bg-gray-50/50 dark:bg-slate-800/50 mt-2">
+            <div className="border border-gray-200 dark:border-slate-700 rounded-lg p-2.5 px-3.5 grid grid-cols-3 gap-3 bg-gray-50/50 dark:bg-slate-800/50 mt-1">
               <div className="col-span-2">
-                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alamat Lengkap</p>
-                <p className="text-sm font-medium text-gray-900 dark:text-white uppercase">
+                <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">Alamat Lengkap</p>
+                <p className="text-xs font-medium text-gray-900 dark:text-white uppercase">
                   {data?.address || '-'} (RT {data?.rt || '-'}/RW {data?.rw || '-'}, Desa {data?.desa || activeDesa})
                 </p>
               </div>
               <div className="flex flex-col items-end justify-center">
-                <div className="bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-emerald-200">
-                  <span className="material-symbols-outlined text-lg">verified</span>
-                  <span className="text-[11px] font-bold uppercase tracking-wider">KTP Terverifikasi</span>
+                <div className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-200">
+                  <span className="material-symbols-outlined text-base">verified</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">KTP Terverifikasi</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Hubungan Keluarga (Banner KK Mandiri jika tunggal, atau Tabel jika ada anggota lain) */}
+          {/* Hubungan Keluarga (Banner KK Mandiri jika tunggal, atau Adaptif 2-Kolom jika >4 anggota) */}
           {(() => {
             const otherMembers = (familyMembers || []).filter((m: any) => m && m.nik !== data?.nik && m.name !== data?.name);
             
             if (otherMembers.length === 0) {
               return (
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-center justify-between gap-4 mt-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-lg">group</span>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center justify-between gap-4 mt-1">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-base">group</span>
                     </div>
                     <div>
-                      <h5 className="font-bold text-emerald-900 text-sm">Status Kartu Keluarga: KK Mandiri</h5>
-                      <p className="text-xs text-emerald-700">Yang bersangkutan terdaftar sebagai <strong>Kepala Keluarga / Anggota Tunggal</strong> dalam KK ini.</p>
+                      <h5 className="font-bold text-emerald-900 text-xs">Status Kartu Keluarga: KK Mandiri</h5>
+                      <p className="text-[11px] text-emerald-700">Yang bersangkutan terdaftar sebagai <strong>Kepala Keluarga / Anggota Tunggal</strong> dalam KK ini.</p>
                     </div>
                   </div>
-                  <span className="font-mono text-xs font-bold text-emerald-800 bg-white px-3 py-1.5 rounded border border-emerald-300 shrink-0">
+                  <span className="font-mono text-[11px] font-bold text-emerald-800 bg-white px-2.5 py-1 rounded border border-emerald-300 shrink-0">
                     KK: {data?.noKk || "-"}
                   </span>
                 </div>
               );
             }
 
-            return (
-              <div className="flex flex-col gap-2 mt-4">
-                <h5 className="text-lg font-bold text-emerald-700 flex items-center gap-2 border-b border-gray-100 dark:border-slate-800 pb-2">
-                  <span className="material-symbols-outlined text-xl">family_history</span> Hubungan Keluarga
-                </h5>
-                <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-2">
+            // Jika anggota > 4, tampilkan dalam 2-Kolom Kompak
+            if (familyMembers.length > 4) {
+              const mid = Math.ceil(familyMembers.length / 2);
+              const leftCol = familyMembers.slice(0, mid);
+              const rightCol = familyMembers.slice(mid);
+
+              const renderMiniTable = (membersList: any[]) => (
+                <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 dark:bg-slate-800">
                       <tr>
-                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
-                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
-                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
-                        <th className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Kawin</th>
+                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
+                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
+                        <th className="px-2.5 py-1 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900 text-xs">
+                      {membersList.map((member: any, i: number) => (
+                        <tr key={i} className="hover:bg-slate-50">
+                          <td className="px-2.5 py-1.5 font-bold text-gray-900 dark:text-white uppercase truncate max-w-[110px] text-[11px]">{member.name || '-'}</td>
+                          <td className="px-2.5 py-1.5 font-mono text-[10px] text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
+                          <td className="px-2.5 py-1.5 font-semibold text-emerald-800 dark:text-emerald-400 uppercase text-[10px] truncate max-w-[90px]">{member.familyRelation || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              );
+
+              return (
+                <div className="flex flex-col gap-1.5 mt-1">
+                  <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-1">
+                    <h5 className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-base">family_history</span> Hubungan Keluarga ({familyMembers.length} Anggota)
+                    </h5>
+                    <span className="text-[9px] font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-200">Format 2-Kolom Kompak</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 mt-0.5">
+                    {renderMiniTable(leftCol)}
+                    {renderMiniTable(rightCol)}
+                  </div>
+                </div>
+              );
+            }
+
+            // Standard Single Table (<= 4 Anggota)
+            return (
+              <div className="flex flex-col gap-1.5 mt-2">
+                <h5 className="text-sm font-bold text-emerald-700 flex items-center gap-1.5 border-b border-gray-100 dark:border-slate-800 pb-1">
+                  <span className="material-symbols-outlined text-base">family_history</span> Hubungan Keluarga
+                </h5>
+                <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-1">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-100 dark:bg-slate-800">
+                      <tr>
+                        <th className="px-3 py-1.5 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Anggota</th>
+                        <th className="px-3 py-1.5 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK</th>
+                        <th className="px-3 py-1.5 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan</th>
+                        <th className="px-3 py-1.5 text-[10px] font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Kawin</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white dark:bg-slate-900">
                       {familyMembers.map((member: any, i: number) => (
                         <tr key={i}>
-                          <td className="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
-                          <td className="px-4 py-3 text-sm font-mono text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
-                          <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.familyRelation || '-'}</td>
-                          <td className="px-4 py-3 text-sm font-medium text-gray-700 dark:text-slate-300 uppercase">{member.maritalStatus || '-'}</td>
+                          <td className="px-3 py-1.5 text-xs font-bold text-gray-900 dark:text-white uppercase">{member.name || '-'}</td>
+                          <td className="px-3 py-1.5 text-xs font-mono text-gray-600 dark:text-slate-400">{member.nik || '-'}</td>
+                          <td className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-slate-300 uppercase">{member.familyRelation || '-'}</td>
+                          <td className="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-slate-300 uppercase">{member.maritalStatus || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
