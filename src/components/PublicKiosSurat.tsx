@@ -60,7 +60,7 @@ export default function PublicKiosSurat() {
 
       if (match) {
         setVerifiedResident(match);
-        setStep(2);
+        setStep(1.5);
       } else {
         setIsManualEntry(true);
       }
@@ -330,7 +330,7 @@ export default function PublicKiosSurat() {
                 <div className="space-y-6 text-left w-full">
                   <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-amber-800 mb-6">
                     <p className="font-medium">
-                      {nik.length === 16 ? "Data NIK tidak ditemukan di database warga. " : ""}
+                      {nik.length >= 3 ? "Data tidak ditemukan di database warga. " : ""}
                       Silakan masukkan identitas Anda untuk melanjutkan permohonan.
                     </p>
                   </div>
@@ -346,21 +346,82 @@ export default function PublicKiosSurat() {
                   </div>
                   <div className="flex gap-4">
                     <button 
-                      onClick={() => setIsManualEntry(false)}
-                      className="w-1/3 py-5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xl font-bold rounded-2xl transition-colors"
+                      onClick={() => {
+                        setIsManualEntry(false);
+                        setNik('');
+                        setManualName('');
+                      }}
+                      className="w-1/3 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-2xl transition-colors"
                     >
-                      Batal
+                      Kembali
                     </button>
                     <button 
-                      onClick={handleManualEntryContinue}
-                      disabled={!manualName.trim()}
-                      className="w-2/3 py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xl font-bold rounded-2xl transition-colors shadow-lg shadow-blue-600/30"
+                      onClick={() => {
+                        if (manualName.trim().length < 3) {
+                          showToast('Masukkan nama lengkap minimal 3 karakter', 'error');
+                          return;
+                        }
+                        setVerifiedResident({ 
+                          name: manualName.trim().toUpperCase(), 
+                          nik: /^\d{16}$/.test(nik) ? nik : '0000000000000000' 
+                        });
+                        setStep(2);
+                      }}
+                      disabled={manualName.trim().length < 3}
+                      className="w-2/3 py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-colors"
                     >
-                      Lanjutkan Formulir
+                      Lanjutkan
                     </button>
                   </div>
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {/* STEP 1.5: Confirm Identity */}
+          {step === 1.5 && verifiedResident && (
+            <motion.div 
+              key="step1.5"
+              initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}
+              className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-2xl text-center"
+            >
+              <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <User className="w-12 h-12 text-blue-600" />
+              </div>
+              <h2 className="text-4xl font-black text-slate-800 mb-2">Konfirmasi Identitas</h2>
+              <p className="text-xl text-slate-500 mb-8">Apakah ini data diri Anda?</p>
+              
+              <div className="bg-slate-50 rounded-2xl p-6 text-left mb-8 border border-slate-200">
+                <div className="mb-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap</p>
+                  <p className="text-2xl font-black text-slate-800">{verifiedResident.name || '-'}</p>
+                </div>
+                <div className="mb-4">
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">NIK</p>
+                  <p className="text-xl font-medium text-slate-700 font-mono tracking-widest">{verifiedResident.nik || '-'}</p>
+                </div>
+                {verifiedResident.address && (
+                  <div>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Alamat</p>
+                    <p className="text-lg font-medium text-slate-700">{verifiedResident.address} RT {verifiedResident.rt || '00'} RW {verifiedResident.rw || '00'}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => setStep(1)}
+                  className="w-1/3 py-5 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xl font-bold rounded-2xl transition-colors"
+                >
+                  Bukan
+                </button>
+                <button 
+                  onClick={() => setStep(2)}
+                  className="w-2/3 py-5 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-2xl transition-colors shadow-lg shadow-blue-600/30"
+                >
+                  Ya, Benar
+                </button>
+              </div>
             </motion.div>
           )}
 
