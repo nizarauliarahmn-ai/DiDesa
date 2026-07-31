@@ -510,7 +510,7 @@ export default function AdminPendudukDetail({
             {/* Compact NIK Header Bar */}
             <div className="flex items-center justify-between bg-sky-900/90 dark:bg-cyan-950/90 text-white px-4 sm:px-5 py-2 rounded-xl border border-sky-700 dark:border-cyan-700/60 shadow-inner">
               <span className="text-[11px] font-bold text-sky-200 dark:text-cyan-300 uppercase tracking-widest">NIK</span>
-              <span className="font-mono text-base sm:text-lg font-black tracking-widest text-emerald-300 dark:text-emerald-400">{data?.nik || '6306060107770103'}</span>
+              <span className="font-mono text-base sm:text-lg font-black tracking-widest text-emerald-300 dark:text-emerald-400">{data?.nik || '-'}</span>
             </div>
 
             {/* High-Density Compact e-KTP Field Grid */}
@@ -526,7 +526,9 @@ export default function AdminPendudukDetail({
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
                   <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Tempat/Tgl Lahir</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.birthPlace || '-'}, {data?.birthDate || '-'} {data?.age ? `(${data.age} THN)` : ''}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">
+                    {data?.birthPlace || '-'}{data?.birthDate ? `, ${data.birthDate}` : ''} {data?.age ? `(${data.age} THN)` : ''}
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
@@ -534,7 +536,7 @@ export default function AdminPendudukDetail({
                   <span className="col-span-1">:</span>
                   <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs flex items-center justify-between">
                     <span>{data?.gender || '-'}</span>
-                    <span className="font-bold text-sky-950 dark:text-slate-400 text-[10px]">GOL. DARAH: <strong className="text-rose-600 dark:text-rose-400 font-extrabold">{data?.bloodType || 'O'}</strong></span>
+                    <span className="font-bold text-sky-950 dark:text-slate-400 text-[10px]">GOL. DARAH: <strong className="text-rose-600 dark:text-rose-400 font-extrabold">{data?.bloodType || '-'}</strong></span>
                   </span>
                 </div>
 
@@ -549,35 +551,35 @@ export default function AdminPendudukDetail({
                   <span className="col-span-1">:</span>
                   <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs flex items-center gap-1.5 flex-wrap">
                     <span className="font-mono bg-sky-900/10 dark:bg-cyan-950 px-1.5 py-0.5 rounded text-[11px] font-black text-sky-950 dark:text-cyan-300">
-                      RT {data?.rt || '001'} / RW {data?.rw || '001'}
+                      RT {data?.rt || '-'} / RW {data?.rw || '-'}
                     </span>
                     <span className="text-sky-400">•</span>
-                    <span>DESA {data?.desa || 'WASAH HILIR'}</span>
+                    <span>DESA {data?.desa || '-'}</span>
                   </span>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
                   <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Agama</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.religion || 'ISLAM'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.religion || '-'}</span>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
                   <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Status Perkawinan</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.maritalStatus || 'BELUM KAWIN'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.maritalStatus || '-'}</span>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
                   <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Pekerjaan</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.job || 'WIRASWASTA'}</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.job || '-'}</span>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
                   <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Kewarganegaraan</span>
                   <span className="col-span-1">:</span>
-                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">WNI</span>
+                  <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.citizenship || 'WNI'}</span>
                 </div>
 
                 <div className="grid grid-cols-12 gap-2 py-0.5">
