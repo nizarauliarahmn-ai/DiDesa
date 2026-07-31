@@ -300,10 +300,10 @@ export default function AdminSuratSKKT({
     return `
       <svg width="100%" height="100%" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet" style="background:#ffffff; overflow:visible;">
         <!-- Titik Acuan Utara -->
-        <g transform="translate(\${viewWidth - 15}, 15)">
-          <line x1="0" y1="20" x2="0" y2="0" stroke="#000000" stroke-width="1.2" />
-          <polygon points="0,0 -4,8 4,8" fill="#000000" />
-          <text x="0" y="-3" text-anchor="middle" font-weight="bold" font-size="9" fill="#000000">U</text>
+        <g transform="translate(25, 30)">
+          <line x1="0" y1="20" x2="0" y2="0" stroke="#000000" stroke-width="1.5" />
+          <polygon points="0,0 -5,10 5,10" fill="#000000" />
+          <text x="0" y="-4" text-anchor="middle" font-weight="bold" font-size="11" fill="#000000">U</text>
         </g>
 
         <!-- Garis dan Titik Poligon -->
@@ -449,8 +449,8 @@ export default function AdminSuratSKKT({
           <tr><td>LUAS</td><td>:</td><td>± ${v(formData.luasTanah)} Meter</td></tr>
         </table>
 
-        <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI TANPA BINGKAI KOTAK) -->
-        <div style="width:100%; height:380px; margin-top:10px; margin-bottom:20px; position:relative; background:#ffffff;">
+        <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI DENGAN BINGKAI KOTAK) -->
+        <div style="width:100%; height:320px; margin-top:10px; margin-bottom:15px; position:relative; background:#ffffff; border:1px solid #000;">
           ${generatePolygonSVG()}
         </div>
 
@@ -459,7 +459,7 @@ export default function AdminSuratSKKT({
         </p>
 
         <!-- TABEL PEMILIK BATAS TANAH -->
-        <table style="width:100%; border-collapse:collapse; margin-bottom:25px; font-size:11px;" border="1" cellPadding="5">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px; font-size:11px;" border="1" cellPadding="5">
           <thead>
             <tr style="background:#f8fafc;">
               <th style="width:35px; text-align:center;">NO</th>
@@ -497,18 +497,18 @@ export default function AdminSuratSKKT({
         </table>
 
         <!-- TANDA TANGAN PAGE 2 -->
-        <div style="display:flex; justify-content:space-between; margin-top:15px; align-items:flex-start;">
+        <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:flex-start;">
           <!-- KEPALA DESA (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui</p>
-            <p style="margin-bottom:50px; font-weight:bold;">${kadesRoleHTML}</p>
+            <p style="margin-bottom:45px; font-weight:bold;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui / Membenarkan</p>
-            <p style="margin-bottom:50px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:45px; font-weight:bold;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
         </div>
