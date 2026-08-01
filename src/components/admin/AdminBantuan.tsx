@@ -500,12 +500,25 @@ const MONTHS_LIST = [
 
   const handleBulkDisburse = (shouldDisburse: boolean) => {
     if (selectedNiks.length === 0) return;
+    const currentMonthId = MONTHS_LIST[new Date().getMonth()].id;
+    setDisbursedMonths(prev => {
+      const copy = { ...prev };
+      selectedNiks.forEach(nik => {
+        const current = copy[nik] || [];
+        if (shouldDisburse) {
+          if (!current.includes(currentMonthId)) {
+            copy[nik] = [...current, currentMonthId];
+          }
+        } else {
+          copy[nik] = current.filter(m => m !== currentMonthId);
+        }
+      });
+      return copy;
+    });
     if (shouldDisburse) {
-      setDisbursedNiks(prev => Array.from(new Set([...prev, ...selectedNiks])));
-      showToast(`Berhasil menandai ${selectedNiks.length} warga sebagai "Sudah Salur"`, "success");
+      showToast(`Berhasil menandai ${selectedNiks.length} warga disalurkan untuk bulan ${MONTHS_LIST[new Date().getMonth()].fullName}`, "success");
     } else {
-      setDisbursedNiks(prev => prev.filter(n => !selectedNiks.includes(n)));
-      showToast(`Status ${selectedNiks.length} warga diubah menjadi "Belum Salur"`, "info");
+      showToast(`Status penyaluran bulan ${MONTHS_LIST[new Date().getMonth()].fullName} dibatalkan untuk ${selectedNiks.length} warga`, "info");
     }
     setSelectedNiks([]);
   };
@@ -2008,7 +2021,6 @@ const MONTHS_LIST = [
               ) : (
                 paginatedResidents.map((resident) => {
                   const isSelected = selectedNiks.includes(resident.nik);
-                  const isDisbursed = disbursedNiks.includes(resident.nik);
                   const activeAidList = getActiveAidPrograms(resident, filterYear);
                   const otherAids = activeAidList.filter((aid: string) => 
                     showOverlapOnly ? true : !aid.startsWith(selectedProgram)
