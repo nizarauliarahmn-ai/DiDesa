@@ -157,7 +157,8 @@ export default function AdminBantuan({
   // Bulk Stop Modal State
   const [showBulkStopModal, setShowBulkStopModal] = useState(false);
   const [bulkStopDate, setBulkStopDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [bulkStopReason, setBulkStopReason] = useState('Meninggal Dunia / Pindah / Mampu');
+  const [bulkStopReason, setBulkStopReason] = useState('Meninggal Dunia');
+  const [bulkStopNote, setBulkStopNote] = useState('');
 
   // Manual Resident Entry States
   const [isManualResident, setIsManualResident] = useState(false);
@@ -607,7 +608,7 @@ export default function AdminBantuan({
           const currentAids = target.activeAids || [];
           const updatedAids = currentAids.map((aid: string) => {
             if (aid.startsWith(selectedProgram)) {
-              return `STOPPED: ${aid} | Tgl: ${formattedDateStr} | Alasan: ${bulkStopReason.trim()}`;
+              return `STOPPED: ${aid} | Tgl: ${formattedDateStr} | Alasan: ${bulkStopReason.trim()}${bulkStopNote.trim() ? ' | Catatan: ' + bulkStopNote.trim() : ''}`;
             }
             return aid;
           });
@@ -2218,17 +2219,17 @@ export default function AdminBantuan({
 
       </div>
 
-      {/* Modal Penghentian Massal Terdaftar Rinci Tanggal & Alasan */}
+      {/* Modal Hentikan Bantuan Massal / Rinci */}
       {showBulkStopModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200 my-8">
             <div className="p-6 border-b border-gray-100 dark:border-slate-800 bg-rose-50/50 dark:bg-rose-950/30 flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
                   <Ban className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-rose-900 dark:text-rose-200">Hentikan Bantuan Massal</h3>
+                  <h3 className="font-extrabold text-base text-rose-900 dark:text-rose-200">Hentikan Bantuan Resmi</h3>
                   <p className="text-xs text-rose-700 dark:text-rose-400">{selectedNiks.length} Warga Terpilih</p>
                 </div>
               </div>
@@ -2240,7 +2241,7 @@ export default function AdminBantuan({
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 font-sans">
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
                   Tanggal Penghentian Resmi (Rinci)
@@ -2249,18 +2250,18 @@ export default function AdminBantuan({
                   type="date"
                   value={bulkStopDate}
                   onChange={(e) => setBulkStopDate(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
-                  Alasan Penghentian Bantuan
+                  Alasan Utama Penghentian
                 </label>
                 <select
                   value={bulkStopReason}
                   onChange={(e) => setBulkStopReason(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-rose-500"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500"
                 >
                   <option value="Meninggal Dunia">Meninggal Dunia</option>
                   <option value="Pindah Domisili Keluar Desa">Pindah Domisili Keluar Desa</option>
@@ -2270,10 +2271,23 @@ export default function AdminBantuan({
                 </select>
               </div>
 
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">
+                  Catatan / Keterangan Rinci Tambahan Admin (Opsional)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Tuliskan keterangan rinci admin (misal: Hasil Musdes 15 Juli, ybs telah diangkat PNS / pindah ke Kota Bandung)..."
+                  value={bulkStopNote}
+                  onChange={(e) => setBulkStopNote(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+
               <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/60 rounded-xl text-xs text-rose-800 dark:text-rose-300 space-y-1">
                 <p className="font-bold">Format Catatan Riwayat:</p>
-                <p className="font-mono text-[11px] bg-white dark:bg-slate-900 p-2 rounded border border-rose-200 dark:border-rose-900">
-                  STOPPED: {selectedProgram} | Tgl: {new Date(bulkStopDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} | Alasan: {bulkStopReason}
+                <p className="font-mono text-[11px] bg-white dark:bg-slate-900 p-2 rounded border border-rose-200 dark:border-rose-900 leading-snug">
+                  STOPPED: {selectedProgram} | Tgl: {new Date(bulkStopDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} | Alasan: {bulkStopReason}{bulkStopNote.trim() ? ` | Catatan: ${bulkStopNote.trim()}` : ''}
                 </p>
               </div>
             </div>
@@ -2684,6 +2698,7 @@ export default function AdminBantuan({
                       type="button"
                       onClick={() => {
                         setSelectedNiks([selectedResidentDetailModal.nik]);
+                        setSelectedResidentDetailModal(null);
                         setShowBulkStopModal(true);
                       }}
                       className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
