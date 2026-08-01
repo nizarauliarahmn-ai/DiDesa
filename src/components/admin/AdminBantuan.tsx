@@ -288,8 +288,7 @@ export default function AdminBantuan({
              motherName: r.mother_name,
              activeAids: typeof r.active_aids === 'string' ? JSON.parse(r.active_aids) : (r.active_aids || []),
              genderColor: r.gender_color,
-             statusColor: r.status_color,
-             isDtsen: r.is_dtsen === 1 || r.is_dtsen === true || r.is_dtsen === '1' || r.is_dtsen === 'true'
+             statusColor: r.status_color
            }));
            setResidents(formatted.filter(r => r.is_deleted !== 1));
         }
@@ -436,56 +435,6 @@ export default function AdminBantuan({
       showToast(`Status ${selectedNiks.length} warga diubah menjadi "Belum Salur"`, "info");
     }
     setSelectedNiks([]);
-  };
-
-  // Toggle DTSEN Badge (with schema fallback)
-  const handleToggleDtsen = async (resident: any, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    const currentStatus = !!resident.isDtsen;
-    const newStatus = !currentStatus;
-
-    // Optimistic update in UI & Detail Modal
-    setResidents(prev => prev.map(r => r.nik === resident.nik ? { ...r, isDtsen: newStatus, is_dtsen: newStatus ? 1 : 0 } : r));
-    if (selectedResidentDetailModal && selectedResidentDetailModal.nik === resident.nik) {
-      setSelectedResidentDetailModal(prev => prev ? { ...prev, isDtsen: newStatus, is_dtsen: newStatus ? 1 : 0 } : null);
-    }
-
-    try {
-      if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
-
-      // Try updating physical column first
-      const { error } = await supabase
-        .from('residents')
-        .update({ is_dtsen: newStatus ? 1 : 0 })
-        .eq('nik', resident.nik)
-        .eq('tenant_id', tenantId);
-
-      if (error) {
-        // Fallback: If column is_dtsen doesn't exist in Supabase schema, store tag in active_aids array!
-        const currentAids = resident.activeAids || [];
-        let updatedAids = [...currentAids];
-        if (newStatus) {
-          if (!updatedAids.includes('DTSEN_VERIFIED')) updatedAids.push('DTSEN_VERIFIED');
-        } else {
-          updatedAids = updatedAids.filter(a => a !== 'DTSEN_VERIFIED');
-        }
-
-        const { error: aidErr } = await supabase
-          .from('residents')
-          .update({ active_aids: updatedAids })
-          .eq('nik', resident.nik)
-          .eq('tenant_id', tenantId);
-
-        if (!aidErr) {
-          setResidents(prev => prev.map(r => r.nik === resident.nik ? { ...r, activeAids: updatedAids, isDtsen: newStatus } : r));
-        }
-      }
-
-      showToast(`Status DTSEN ${resident.name} diubah menjadi: ${newStatus ? 'TERDAFTAR (Aktif)' : 'NON-AKTIF'}`, newStatus ? "success" : "info");
-    } catch (err: any) {
-      // Keep optimistic UI state so Admin workflow is never interrupted
-      showToast(`Status DTSEN ${resident.name} diperbarui!`, "success");
-    }
   };
 
   // Single Rollforward to Next Year
@@ -1944,7 +1893,7 @@ export default function AdminBantuan({
                   </div>
                 </th>
                 <th className="px-4 py-3.5 text-center">TAHUN</th>
-                <th className="px-5 py-3.5">DTSEN & BANTUAN LAIN</th>
+                <th className="px-5 py-3.5">BANTUAN LAINNYA</th>
                 <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center gap-1.5">
                     STATUS & PENYALURAN
@@ -2043,25 +1992,11 @@ export default function AdminBantuan({
                         </span>
                       </td>
 
-                      {/* DTSEN & Other Aids Column */}
+                      {/* Other Aids Column */}
                       <td className="px-5 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-col gap-1.5 items-start">
-                          {/* Toggle Switch / Badge DTSEN Manual Check Admin */}
-                          <button
-                            onClick={(e) => handleToggleDtsen(resident, e)}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold border transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap ${
-                              resident.isDtsen
-                                ? 'bg-indigo-600 text-white border-indigo-700 hover:bg-indigo-700'
-                                : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300'
-                            }`}
-                            title="Klik untuk Mengaktifkan/Nonaktifkan Lencana DTSEN"
-                          >
-                            <span className={`w-2 h-2 rounded-full ${resident.isDtsen ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`}></span>
-                            {resident.isDtsen ? 'Terdaftar DTSEN ✓' : '+ Verifikasi DTSEN'}
-                          </button>
-
                           {otherAids.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 mt-0.5 max-w-[200px]">
+                            <div className="flex flex-wrap gap-1 max-w-[200px]">
                               {otherAids.map((aid: string) => (
                                 <span key={aid} className={`px-2 py-0.5 text-[10px] font-bold rounded-md border ${
                                   aid.startsWith('STOPPED') 
@@ -2640,42 +2575,24 @@ export default function AdminBantuan({
                   </select>
                 </div>
 
-                {/* Status Penyaluran & DTSEN Toggle */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Status Penyaluran Bantuan</label>
-                    <select
-                      value={disbursedNiks.includes(selectedResidentDetailModal.nik) ? 'Sudah Salur (Tahap I)' : 'Belum Salur'}
-                      onChange={(e) => {
-                        if (e.target.value === 'Sudah Salur (Tahap I)') {
-                          setDisbursedNiks(prev => Array.from(new Set([...prev, selectedResidentDetailModal.nik])));
-                        } else {
-                          setDisbursedNiks(prev => prev.filter(n => n !== selectedResidentDetailModal.nik));
-                        }
-                      }}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-                    >
-                      <option value="Belum Salur">Belum Salur</option>
-                      <option value="Sudah Salur (Tahap I)">Sudah Salur (Tahap I)</option>
-                      <option value="Sudah Salur (Tahap II)">Sudah Salur (Tahap II)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Status Verifikasi DTSEN</label>
-                    <button
-                      type="button"
-                      onClick={(e) => handleToggleDtsen(selectedResidentDetailModal, e)}
-                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold border transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs ${
-                        selectedResidentDetailModal.isDtsen
-                          ? 'bg-indigo-600 text-white border-indigo-700 hover:bg-indigo-700'
-                          : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:bg-indigo-50 hover:text-indigo-700'
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${selectedResidentDetailModal.isDtsen ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`} />
-                      {selectedResidentDetailModal.isDtsen ? 'Terdaftar DTSEN ✓' : '+ Verifikasi DTSEN Manual'}
-                    </button>
-                  </div>
+                {/* Status Penyaluran */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Status Penyaluran Bantuan</label>
+                  <select
+                    value={disbursedNiks.includes(selectedResidentDetailModal.nik) ? 'Sudah Salur (Tahap I)' : 'Belum Salur'}
+                    onChange={(e) => {
+                      if (e.target.value === 'Sudah Salur (Tahap I)') {
+                        setDisbursedNiks(prev => Array.from(new Set([...prev, selectedResidentDetailModal.nik])));
+                      } else {
+                        setDisbursedNiks(prev => prev.filter(n => n !== selectedResidentDetailModal.nik));
+                      }
+                    }}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="Belum Salur">Belum Salur</option>
+                    <option value="Sudah Salur (Tahap I)">Sudah Salur (Tahap I)</option>
+                    <option value="Sudah Salur (Tahap II)">Sudah Salur (Tahap II)</option>
+                  </select>
                 </div>
 
                 {/* Quick Action Buttons */}

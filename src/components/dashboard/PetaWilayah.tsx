@@ -38,7 +38,6 @@ interface CustomMapPin {
   aidProgram?: string;
   officer?: string;
   desc?: string;
-  isDtsen?: boolean;
 }
 
 const svgIcons = {
@@ -93,7 +92,7 @@ export default function PetaWilayah() {
     nik: '',
     address: 'RT 04 / RW 02, Wasah Hilir',
     aidProgram: 'BLT Dana Desa (2026)',
-    desc: 'Penerima Bantuan Sosial Terdaftar DTSEN'
+    desc: 'Penerima Bantuan Sosial Resmi Desa'
   });
 
   // Custom Pin Markers Storage
@@ -147,8 +146,7 @@ export default function PetaWilayah() {
           address: 'Wasah Hilir / RT 04 / RW 02',
           nik: '6306034509650001',
           aidProgram: 'BLT Dana Desa (2026)',
-          isDtsen: true,
-          desc: 'Warga Penerima Bansos Resmi TA 2026 - Terdaftar DTSEN'
+          desc: 'Warga Penerima Bansos Resmi TA 2026'
         },
         {
           id: 'pin-lansia-1',
@@ -158,8 +156,7 @@ export default function PetaWilayah() {
           lng: villageLng - 0.0021,
           address: 'Wasah Hilir / RT 02 / RW 01',
           nik: '6306035208500003',
-          aidProgram: 'Program SembaKo Lansia',
-          isDtsen: true,
+          aidProgram: 'Program Sembako Lansia',
           desc: 'Lansia Tunggal (Hidup Sendiri) - Prioritas Bantuan Utama'
         }
       ];
@@ -211,8 +208,7 @@ export default function PetaWilayah() {
       address: pinForm.address,
       nik: pinForm.nik || undefined,
       aidProgram: pinForm.aidProgram,
-      desc: pinForm.desc,
-      isDtsen: true
+      desc: pinForm.desc
     };
 
     const updated = [newPin, ...pinsList];
@@ -390,7 +386,7 @@ export default function PetaWilayah() {
               {/* Map Floating Legend */}
               <div className="absolute bottom-4 left-4 bg-gray-900/90 backdrop-blur-md text-white px-3.5 py-2.5 rounded-xl border border-gray-700 shadow-xl text-[10px] space-y-1.5 font-bold z-10 pointer-events-none">
                 <p className="text-gray-400 uppercase tracking-widest text-[8px] mb-1">LEGENDA TITIK PETA</p>
-                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" /> <span>Penerima Bansos (DTSEN)</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" /> <span>Penerima Bansos</span></div>
                 <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white" /> <span>Lansia Tunggal (&ge; 60 Th)</span></div>
                 <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-2 ring-white" /> <span>Balai Desa / Fasilitas Umum</span></div>
               </div>
@@ -411,11 +407,6 @@ export default function PetaWilayah() {
                   }`}>
                     {selectedPoi.category.toUpperCase()}
                   </span>
-                  {selectedPoi.isDtsen && (
-                    <span className="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-md whitespace-nowrap">
-                      DTSEN Verified ✓
-                    </span>
-                  )}
                 </div>
                 <span className="text-xs text-gray-500 font-mono font-bold flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-emerald-600" /> {decimalToDMS(selectedPoi.lat, selectedPoi.lng)}
@@ -524,7 +515,7 @@ export default function PetaWilayah() {
                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5">Kategori Penanda</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'bansos', label: '🔴 Bansos / DTSEN' },
+                    { id: 'bansos', label: '🔴 Penerima Bansos' },
                     { id: 'lansia', label: '🟡 Lansia Tunggal' },
                     { id: 'kantor', label: '🔵 Fasilitas Umum' }
                   ].map(cat => (
