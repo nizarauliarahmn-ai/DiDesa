@@ -185,17 +185,30 @@ export default function AdminBantuan({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Helper for scoring
+  // Helper for scoring & Lansia Tunggal Detection
+  const isLansiaTunggal = (r: any) => {
+    const birthYear = r.birthDate ? new Date(r.birthDate).getFullYear() : (r.age ? new Date().getFullYear() - Number(r.age) : 0);
+    const age = birthYear > 0 ? new Date().getFullYear() - birthYear : (Number(r.age) || 0);
+    if (age < 60) return false;
+
+    if (!r.noKk) return true;
+    const sameKkMembers = residents.filter(item => item.noKk === r.noKk && item.is_deleted !== 1);
+    return sameKkMembers.length <= 1;
+  };
+
   const calculateVulnerabilityScore = (r: any) => {
     let score = 0;
     
     // Age calculation
-    if (r.birthDate) {
-      const birthYear = new Date(r.birthDate).getFullYear();
-      const currentYear = new Date().getFullYear();
-      const age = currentYear - birthYear;
-      if (age >= 60) score += 30;
-      else if (age >= 50) score += 15;
+    const birthYear = r.birthDate ? new Date(r.birthDate).getFullYear() : (r.age ? new Date().getFullYear() - Number(r.age) : 0);
+    const age = birthYear > 0 ? new Date().getFullYear() - birthYear : (Number(r.age) || 0);
+    
+    if (age >= 60) score += 40;
+    else if (age >= 50) score += 20;
+
+    // Single Elderly (Lansia Tunggal) HUGE Priority Boost (+60)
+    if (isLansiaTunggal(r)) {
+      score += 60;
     }
     
     // Job scoring
@@ -228,17 +241,18 @@ export default function AdminBantuan({
       // Filter out people who already have THIS program for THIS year
       list = list.filter(r => !(r.activeAids || []).includes(`${formProgram} (${formYear})`));
       
-      // Calculate scores
+      // Calculate scores & flag Lansia Tunggal
       const scoredList = list.map(r => ({
         ...r,
+        isSingleElderly: isLansiaTunggal(r),
         vulnerabilityScore: calculateVulnerabilityScore(r)
       }));
       
       // Sort by highest score
       scoredList.sort((a, b) => b.vulnerabilityScore - a.vulnerabilityScore);
       
-      // Return top 5
-      return scoredList.slice(0, 5);
+      // Return top 6
+      return scoredList.slice(0, 6);
     }
     
     return [];
@@ -419,6 +433,43 @@ export default function AdminBantuan({
       showToast(`Status ${selectedNiks.length} warga diubah menjadi "Belum Salur"`, "info");
     }
     setSelectedNiks([]);
+  };
+
+  // Single Rollforward to Next Year
+  const handleSingleRollforward = async (resident: any, nextYear: string) => {
+    const newAidTag = `${selectedProgram} (${nextYear})`;
+    showConfirm(
+      `Teruskan Bantuan ke Tahun ${nextYear}`,
+      `Apakah Anda yakin ingin mendaftarkan ${resident.name} untuk mendapatkan program "${selectedProgram}" pada Tahun ${nextYear}?`,
+      async () => {
+        setIsSaving(true);
+        try {
+          if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+          const currentAids = resident.activeAids || [];
+          if (currentAids.includes(newAidTag)) {
+            showToast(`${resident.name} sudah terdaftar pada tahun ${nextYear}`, "info");
+            return;
+          }
+          const updatedAids = [...currentAids, newAidTag];
+          const { error } = await supabase
+            .from('residents')
+            .update({ active_aids: updatedAids })
+            .eq('nik', resident.nik)
+            .eq('tenant_id', tenantId);
+
+          if (!error) {
+            setResidents(prev => prev.map(r => r.nik === resident.nik ? { ...r, activeAids: updatedAids } : r));
+            showToast(`Berhasil meneruskan ${resident.name} ke program tahun ${nextYear}!`, "success");
+          } else {
+            throw error;
+          }
+        } catch (err: any) {
+          showToast(err.message || "Gagal memperpanjang bantuan", "error");
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    );
   };
 
   // Bulk Rollforward to Next Year
@@ -1840,7 +1891,7 @@ export default function AdminBantuan({
                   </div>
                 </th>
                 <th className="px-6 py-4">TAHUN</th>
-                <th className="px-6 py-4">DTKS & BANTUAN LAIN</th>
+                <th className="px-6 py-4">DTSEN & BANTUAN LAIN</th>
                 <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center gap-1.5">
                     STATUS & PENYALURAN
@@ -1939,11 +1990,11 @@ export default function AdminBantuan({
                         </span>
                       </td>
 
-                      {/* DTKS & Other Aids Column */}
+                      {/* DTSEN & Other Aids Column */}
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1 items-start">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-[10px] font-extrabold rounded border border-indigo-100 dark:border-indigo-800">
-                            Terdaftar DTKS
+                            Terdaftar DTSEN
                           </span>
                           {otherAids.length > 0 ? (
                             <div className="flex flex-wrap gap-1 mt-1 max-w-[200px]">
@@ -2015,17 +2066,44 @@ export default function AdminBantuan({
                         {showOverlapOnly ? (
                           <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Kelola via Tab Utama</p>
                         ) : (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveAid(resident.nik, selectedProgram);
-                            }}
-                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
-                            title="Keluarkan dari Program Bantuan"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            Keluarkan
-                          </button>
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
+                                handleSingleRollforward(resident, nextYr);
+                              }}
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
+                              title="Teruskan Bantuan ke Tahun Depan"
+                            >
+                              <Calendar className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline">Ke {filterYear !== "Semua Tahun" ? parseInt(filterYear) + 1 : new Date().getFullYear() + 1}</span>
+                            </button>
+
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedNiks([resident.nik]);
+                                setShowBulkStopModal(true);
+                              }}
+                              className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
+                              title="Hentikan Bantuan (Dengan Tanggal & Alasan Rinci)"
+                            >
+                              <Ban className="w-3.5 h-3.5" />
+                              <span className="hidden xl:inline">Hentikan</span>
+                            </button>
+
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveAid(resident.nik, selectedProgram);
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
+                              title="Hapus / Keluarkan Langsung"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>

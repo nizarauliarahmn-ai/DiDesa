@@ -324,7 +324,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             <FeatureCard 
               icon={<PieChart size={28} className="text-emerald-500" />}
               title="Buku Keuangan & Bansos"
-              desc="Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran (DTKS)."
+              desc="Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran (DTSEN)."
               bg="bg-emerald-50 dark:bg-emerald-900/10"
             />
             <FeatureCard 
@@ -380,7 +380,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
           <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-10 text-sm">DiDesa mendukung format standar Kementrian Dalam Negeri, KemenDes PDTT, serta sistem keamanan data nasional.</p>
           <div className="flex flex-wrap justify-center items-center gap-8 opacity-70 grayscale hover:grayscale-0 transition-all">
             <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">KEMENDAGRI COMPATIBLE</span>
-            <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">DTKS TERINTEGRASI</span>
+            <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">DTSEN TERINTEGRASI</span>
             <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">TTE QR-VERIFIED</span>
             <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">OPEN-API READY</span>
           </div>
