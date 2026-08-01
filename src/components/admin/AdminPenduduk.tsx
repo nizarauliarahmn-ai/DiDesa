@@ -11,7 +11,7 @@ import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
-const FILTERS = ["Semua", "✨ Terbaru", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
+const FILTERS = ["Semua", "✨ Terbaru", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
 
 export default function AdminPenduduk({ 
   onNavigateToTab, 
@@ -47,6 +47,7 @@ export default function AdminPenduduk({
   const debouncedSearchQuery = externalDebouncedSearchQuery !== undefined ? externalDebouncedSearchQuery : localDebouncedSearchQuery;
 
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const [aidFilter, setAidFilter] = useState('Semua Bantuan');
   const [sortOrder, setSortOrder] = useState('No. KK');
   const [showQuickFilters, setShowQuickFilters] = useState(true);
   const [selectedPenduduk, setSelectedPenduduk] = useState<any>(null);
@@ -74,7 +75,7 @@ export default function AdminPenduduk({
   // Reset current page when debounced search query, filter or sorting changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearchQuery, activeFilter, sortOrder]);
+  }, [debouncedSearchQuery, activeFilter, sortOrder, aidFilter]);
 
   const fetchResidents = async () => {
     if (residents.length === 0) setLoading(true);
@@ -316,6 +317,18 @@ export default function AdminPenduduk({
         if (activeFilter === '✨ Terbaru') {
           // When filtering by Terbaru, include all residents so we can sort newest first
           matchesFilter = true;
+        } else if (activeFilter === '🎁 Penerima Bansos') {
+          const aids: string[] = Array.isArray(item.activeAids) 
+            ? item.activeAids 
+            : (typeof item.active_aids === 'string' ? JSON.parse(item.active_aids || '[]') : (item.active_aids || []));
+          const activePrograms = aids.filter((a: string) => !a.startsWith('STOPPED'));
+          matchesFilter = activePrograms.length > 0;
+        } else if (activeFilter === '🚫 Non-Penerima') {
+          const aids: string[] = Array.isArray(item.activeAids) 
+            ? item.activeAids 
+            : (typeof item.active_aids === 'string' ? JSON.parse(item.active_aids || '[]') : (item.active_aids || []));
+          const activePrograms = aids.filter((a: string) => !a.startsWith('STOPPED'));
+          matchesFilter = activePrograms.length === 0;
         } else if (activeFilter === 'Pindah') {
           const s = (item.status || '').toLowerCase();
           matchesFilter = s.includes('pindah') || s.includes('mutasi');
@@ -337,7 +350,24 @@ export default function AdminPenduduk({
         }
       }
 
-      return matchesSearch && matchesFilter;
+      // Aid Program dropdown filter
+      let matchesAid = true;
+      if (aidFilter !== 'Semua Bantuan') {
+        const aids: string[] = Array.isArray(item.activeAids) 
+          ? item.activeAids 
+          : (typeof item.active_aids === 'string' ? JSON.parse(item.active_aids || '[]') : (item.active_aids || []));
+        const activePrograms = aids.filter((a: string) => !a.startsWith('STOPPED'));
+
+        if (aidFilter === 'Penerima Bansos') {
+          matchesAid = activePrograms.length > 0;
+        } else if (aidFilter === 'Non-Penerima Bansos') {
+          matchesAid = activePrograms.length === 0;
+        } else {
+          matchesAid = activePrograms.some((a: string) => a.toLowerCase().includes(aidFilter.toLowerCase()));
+        }
+      }
+
+      return matchesSearch && matchesFilter && matchesAid;
     });
 
     // Sorting
@@ -387,7 +417,7 @@ export default function AdminPenduduk({
     }
 
     return result;
-  }, [residents, debouncedSearchQuery, activeFilter, sortOrder]);
+  }, [residents, debouncedSearchQuery, activeFilter, sortOrder, aidFilter]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -734,11 +764,28 @@ export default function AdminPenduduk({
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-gray-800 dark:text-slate-100 placeholder:text-gray-400 outline-none transition-shadow"
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <select 
+                value={aidFilter}
+                onChange={(e) => setAidFilter(e.target.value)}
+                className="px-3.5 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800/80 focus:ring-2 focus:ring-emerald-500 text-xs font-extrabold text-emerald-900 dark:text-emerald-200 bg-emerald-50/70 dark:bg-emerald-950/40 outline-none cursor-pointer min-w-[200px] shadow-2xs"
+              >
+                <option value="Semua Bantuan">🎁 Filter Bantuan: Semua Status</option>
+                <option value="Penerima Bansos">🎁 Semua Penerima Bansos</option>
+                <option value="Non-Penerima Bansos">🚫 Non-Penerima Bansos</option>
+                <option value="BLT Dana Desa">BLT Dana Desa</option>
+                <option value="Program Keluarga Harapan">PKH (Keluarga Harapan)</option>
+                <option value="Bantuan Pangan Non-Tunai">BPNT (Bantuan Pangan)</option>
+                <option value="Bansos Tunai Kemensos">Bansos Tunai Kemensos</option>
+                <option value="Bantuan Cadangan Beras">Cadangan Beras (CBP)</option>
+                <option value="RTLH">RTLH (Bedah Rumah)</option>
+                <option value="Jaminan Kesehatan PBI-JK">BPJS Gratis (PBI-JK)</option>
+              </select>
+
               <select 
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value)}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 outline-none cursor-pointer min-w-[180px]"
+                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-xs font-semibold text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 outline-none cursor-pointer min-w-[170px]"
               >
                 <option value="No. KK">Urutkan: No. KK</option>
                 <option value="Terbaru">Urutkan: ✨ Terbaru Ditambahkan</option>
