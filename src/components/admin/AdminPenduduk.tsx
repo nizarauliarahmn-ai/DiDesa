@@ -92,7 +92,7 @@ export default function AdminPenduduk({
           .from('residents')
           .select('*')
           .eq('tenant_id', resolvedTenant)
-          .order('name', { ascending: true })
+          .order('created_at', { ascending: false, nullsFirst: false })
           .range(page * pageSize, (page + 1) * pageSize - 1);
           
         if (error) {
@@ -111,7 +111,7 @@ export default function AdminPenduduk({
       }
 
       if (allData.length > 0) {
-        const formatted = allData.map((r, idx) => ({
+        const formatted = allData.map((r) => ({
            ...r,
            noKk: r.no_kk,
            rtRw: r.rt_rw,
@@ -125,7 +125,7 @@ export default function AdminPenduduk({
            activeAids: typeof r.active_aids === 'string' ? JSON.parse(r.active_aids) : (r.active_aids || []),
            genderColor: r.gender_color,
            statusColor: r.status_color,
-           _orderKey: r.created_at ? new Date(r.created_at).getTime() : (r.id ? Number(r.id) : (allData.length - idx))
+           _orderKey: r.created_at ? new Date(r.created_at).getTime() : (r.id && !isNaN(Number(r.id)) ? Number(r.id) : 0)
         }));
         setResidents(formatted.filter(r => String(r.is_deleted) !== '1' && r.is_deleted !== true));
       }
@@ -143,60 +143,66 @@ export default function AdminPenduduk({
       return;
     }
     const isEdit = !!editingPenduduk && !!editingPenduduk.nik;
+    const nowIso = new Date().toISOString();
+    const nowTimestamp = Date.now();
     
     const dbPayload = {
       tenant_id: tenantId,
       nik: savedResident.nik,
       initials: savedResident.initials || '',
       name: savedResident.name,
+      no_kk: savedResident.noKk,
       gender: savedResident.gender,
-      gender_color: savedResident.genderColor,
+      birth_place: savedResident.birthPlace,
+      birth_date: savedResident.birthDate,
+      age: savedResident.age,
+      blood_type: savedResident.bloodType,
+      religion: savedResident.religion,
+      marital_status: savedResident.maritalStatus,
+      education: savedResident.education,
+      job: savedResident.job,
+      address: savedResident.address,
       rt_rw: savedResident.rtRw,
       rt: savedResident.rt,
       rw: savedResident.rw,
-      status: savedResident.status,
-      status_color: savedResident.statusColor,
-      age: parseInt(savedResident.age || 0),
-      birth_place: savedResident.birthPlace,
-      birth_date: savedResident.birthDate,
-      blood_type: savedResident.bloodType,
-      religion: savedResident.religion,
-      job: savedResident.job,
-      address: savedResident.address,
       desa: savedResident.desa,
+      status: savedResident.status || 'Aktif',
       domicile_status: savedResident.domicileStatus,
       family_relation: savedResident.familyRelation,
-      education: savedResident.education,
-      photo: savedResident.photo,
-      no_kk: savedResident.noKk,
       father_name: savedResident.fatherName,
       mother_name: savedResident.motherName,
-      active_aids: savedResident.activeAids || []
+      active_aids: typeof savedResident.activeAids === 'string' ? savedResident.activeAids : JSON.stringify(savedResident.activeAids || []),
+      gender_color: savedResident.genderColor || 'blue',
+      status_color: savedResident.statusColor || 'emerald',
+      photo: savedResident.photo || '',
+      created_at: isEdit ? (editingPenduduk.created_at || nowIso) : nowIso
     };
 
     if (isEdit) {
-      const { error } = await supabase.from('residents').update(dbPayload).eq('nik', dbPayload.nik).eq('tenant_id', tenantId);
-      if (!error) {
-        showToast(`Data warga ${savedResident.name} berhasil diperbarui!`, "success");
-        
-        // Optimistic UI Update
-        const updatedRes = { 
-          ...dbPayload, 
-          noKk: dbPayload.no_kk, 
-          rtRw: dbPayload.rt_rw, 
-          birthPlace: dbPayload.birth_place, 
-          birthDate: dbPayload.birth_date, 
-          bloodType: dbPayload.blood_type, 
-          domicileStatus: dbPayload.domicile_status, 
-          familyRelation: dbPayload.family_relation, 
-          fatherName: dbPayload.father_name, 
-          motherName: dbPayload.mother_name, 
-          activeAids: dbPayload.active_aids, 
-          genderColor: dbPayload.gender_color, 
-          statusColor: dbPayload.status_color 
-        };
-        setResidents(prev => prev.map(r => r.nik === dbPayload.nik ? { ...r, ...updatedRes } : r));
+      const { error } = await supabase
+        .from('residents')
+        .update(dbPayload)
+        .eq('nik', savedResident.nik)
+        .eq('tenant_id', tenantId);
 
+      if (!error) {
+        showToast(`Data penduduk ${savedResident.name} berhasil diperbarui!`, "success");
+        setResidents(prev => prev.map(r => r.nik === savedResident.nik ? {
+          ...r,
+          ...dbPayload,
+          noKk: dbPayload.no_kk,
+          rtRw: dbPayload.rt_rw,
+          birthPlace: dbPayload.birth_place,
+          birthDate: dbPayload.birth_date,
+          bloodType: dbPayload.blood_type,
+          domicileStatus: dbPayload.domicile_status,
+          familyRelation: dbPayload.family_relation,
+          fatherName: dbPayload.father_name,
+          motherName: dbPayload.mother_name,
+          activeAids: savedResident.activeAids,
+          _orderKey: nowTimestamp
+        } : r));
+        
         // Log notification & SaaS Activity Log
         const adminUserStr = localStorage.getItem('didesa_auth_user');
         const adminName = adminUserStr ? JSON.parse(adminUserStr).name : 'Admin Desa';
@@ -243,7 +249,7 @@ export default function AdminPenduduk({
       if (!error) {
         showToast(`Warga baru ${savedResident.name} berhasil didaftarkan!`, "success");
         
-        // Optimistic UI Update
+        // Optimistic UI Update: Put newest resident at the very top of residents list!
         const newRes = { 
           ...dbPayload, 
           noKk: dbPayload.no_kk, 
@@ -255,15 +261,15 @@ export default function AdminPenduduk({
           familyRelation: dbPayload.family_relation, 
           fatherName: dbPayload.father_name, 
           motherName: dbPayload.mother_name, 
-          activeAids: dbPayload.active_aids, 
+          activeAids: savedResident.activeAids || [], 
           genderColor: dbPayload.gender_color, 
           statusColor: dbPayload.status_color,
-          is_deleted: 0
+          is_deleted: 0,
+          _orderKey: nowTimestamp
         };
-        setResidents(prev => {
-          const newList = [...prev, newRes];
-          return newList.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-        });
+        setResidents(prev => [newRes, ...prev.filter(r => r.nik !== newRes.nik)]);
+        setActiveFilter('✨ Terbaru');
+        setSortOrder('Terbaru');
 
         // Log notification & SaaS Activity Log
         const adminUserStr = localStorage.getItem('didesa_auth_user');
@@ -308,11 +314,8 @@ export default function AdminPenduduk({
       let matchesFilter = true;
       if (activeFilter !== 'Semua') {
         if (activeFilter === '✨ Terbaru') {
-          // Newest residents (created in last 30 days or highest ID/created_at)
-          const now = Date.now();
-          const createdTime = item.created_at ? new Date(item.created_at).getTime() : 0;
-          const isRecent = createdTime > 0 && (now - createdTime) < (30 * 24 * 60 * 60 * 1000);
-          matchesFilter = isRecent || !item.created_at;
+          // When filtering by Terbaru, include all residents so we can sort newest first
+          matchesFilter = true;
         } else if (activeFilter === 'Pindah') {
           const s = (item.status || '').toLowerCase();
           matchesFilter = s.includes('pindah') || s.includes('mutasi');
@@ -343,7 +346,12 @@ export default function AdminPenduduk({
         const timeA = a._orderKey || (a.created_at ? new Date(a.created_at).getTime() : 0);
         const timeB = b._orderKey || (b.created_at ? new Date(b.created_at).getTime() : 0);
         if (timeA !== timeB) return timeB - timeA;
-        return (b.id || 0) - (a.id || 0);
+
+        const idA = typeof a.id === 'number' ? a.id : (Number(a.id) || 0);
+        const idB = typeof b.id === 'number' ? b.id : (Number(b.id) || 0);
+        if (idA !== idB) return idB - idA;
+
+        return String(b.nik || '').localeCompare(String(a.nik || ''));
       });
     } else if (sortOrder === 'No. KK') {
       result = [...result].sort((a, b) => {
@@ -373,9 +381,9 @@ export default function AdminPenduduk({
         return (a.name || '').localeCompare(b.name || '');
       });
     } else if (sortOrder === 'A-Z Nama') {
-      result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+      result = [...result].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     } else if (sortOrder === 'Z-A Nama') {
-      result = [...result].sort((a, b) => b.name.localeCompare(a.name));
+      result = [...result].sort((a, b) => (b.name || '').localeCompare(a.name || ''));
     }
 
     return result;
@@ -698,7 +706,12 @@ export default function AdminPenduduk({
               {FILTERS.map((filter) => (
                 <button 
                   key={filter}
-                  onClick={() => setActiveFilter(filter)}
+                  onClick={() => {
+                    setActiveFilter(filter);
+                    if (filter === '✨ Terbaru') {
+                      setSortOrder('Terbaru');
+                    }
+                  }}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors shadow-sm dark:shadow-none ${
                     activeFilter === filter 
                       ? 'bg-emerald-700 text-white' 
