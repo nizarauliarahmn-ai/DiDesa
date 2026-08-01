@@ -1894,10 +1894,10 @@ export default function AdminBantuan({
         
         {/* Table Main View */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-gray-50/80 dark:bg-slate-800/80 border-b border-gray-100 dark:border-slate-800 text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50/90 dark:bg-slate-800/90 border-b border-gray-100 dark:border-slate-800 text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">
               <tr>
-                <th className="px-4 py-4 text-center w-12">
+                <th className="px-4 py-3.5 text-center w-12">
                   <input
                     type="checkbox"
                     checked={paginatedResidents.length > 0 && paginatedResidents.every(r => selectedNiks.includes(r.nik))}
@@ -1905,27 +1905,27 @@ export default function AdminBantuan({
                     className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
                   />
                 </th>
-                <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('nik')}>
+                <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('nik')}>
                   <div className="flex items-center gap-1.5">
                     NIK / WARGA
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
-                <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('rtRw')}>
+                <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('rtRw')}>
                   <div className="flex items-center gap-1.5">
                     DUSUN / RT / RW
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
-                <th className="px-6 py-4">TAHUN</th>
-                <th className="px-6 py-4">DTSEN & BANTUAN LAIN</th>
-                <th className="px-6 py-4 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
+                <th className="px-4 py-3.5 text-center">TAHUN</th>
+                <th className="px-5 py-3.5">DTSEN & BANTUAN LAIN</th>
+                <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center gap-1.5">
                     STATUS & PENYALURAN
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
-                <th className="px-6 py-4 text-center">AKSI</th>
+                <th className="px-5 py-3.5 text-center">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
@@ -1982,8 +1982,8 @@ export default function AdminBantuan({
                         />
                       </td>
 
-                      {/* Resident Info Column (Clean without Avatar Letter) */}
-                      <td className="px-6 py-4">
+                      {/* Resident Info Column */}
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div>
                           <p className="font-extrabold text-sm text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
                             {resident.name}
@@ -1993,7 +1993,7 @@ export default function AdminBantuan({
                               </span>
                             )}
                           </p>
-                          <p className="text-xs font-mono font-semibold text-gray-500 dark:text-slate-400">NIK: {resident.nik}</p>
+                          <p className="text-xs font-mono font-semibold text-gray-500 dark:text-slate-400 mt-0.5">NIK: {resident.nik}</p>
                           {resident.status?.toLowerCase().includes('meninggal') && (
                             <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 text-[10px] font-bold rounded-md">
                               <AlertCircle className="w-3 h-3" />
@@ -2004,26 +2004,26 @@ export default function AdminBantuan({
                       </td>
 
                       {/* Address Column */}
-                      <td className="px-6 py-4 text-xs font-semibold text-gray-600 dark:text-slate-300">
-                        <span className="bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-slate-700">
-                          {resident.desa || "Sukamaju"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
+                      <td className="px-5 py-4 text-xs font-semibold text-gray-600 dark:text-slate-300 whitespace-nowrap">
+                        <span className="bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-slate-700 whitespace-nowrap inline-block font-mono text-[11px]">
+                          {resident.desa || "Wasah Hilir"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
                         </span>
                       </td>
 
                       {/* Year Column */}
-                      <td className="px-6 py-4 text-xs font-bold font-mono">
+                      <td className="px-4 py-4 text-xs font-bold font-mono text-center whitespace-nowrap">
                         <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 rounded-lg">
                           {aidYear}
                         </span>
                       </td>
 
                       {/* DTSEN & Other Aids Column */}
-                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-5 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-col gap-1.5 items-start">
                           {/* Toggle Switch / Badge DTSEN Manual Check Admin */}
                           <button
                             onClick={(e) => handleToggleDtsen(resident, e)}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold border transition-all shadow-sm active:scale-95 cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold border transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap ${
                               resident.isDtsen
                                 ? 'bg-indigo-600 text-white border-indigo-700 hover:bg-indigo-700'
                                 : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300'
@@ -2053,15 +2053,15 @@ export default function AdminBantuan({
                       </td>
 
                       {/* Status & Disburse Toggle Column */}
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1.5 items-start">
                           {isOverlap ? (
-                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] border border-red-200">
+                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] border border-red-200 whitespace-nowrap">
                               <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
                               Tumpang Tindih
                             </div>
                           ) : (
-                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 rounded-full font-bold text-[10px] border border-emerald-200 dark:border-emerald-800">
+                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 rounded-full font-bold text-[10px] border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
                               <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
                               Valid / Penerima Resmi
                             </div>
@@ -2078,7 +2078,7 @@ export default function AdminBantuan({
                                 showToast(`Berhasil menandai ${resident.name} telah menerima salur ${selectedProgram}`, "success");
                               }
                             }}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all flex items-center gap-1.5 shadow-sm active:scale-95 ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all flex items-center gap-1.5 shadow-sm active:scale-95 whitespace-nowrap ${
                               isDisbursed
                                 ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
                                 : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
@@ -2100,22 +2100,22 @@ export default function AdminBantuan({
                       </td>
 
                       {/* Single Action Column */}
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-5 py-4 text-center whitespace-nowrap">
                         {showOverlapOnly ? (
-                          <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider">Kelola via Tab Utama</p>
+                          <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider whitespace-nowrap">Kelola via Tab Utama</p>
                         ) : (
-                          <div className="flex items-center justify-center gap-1.5">
+                          <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
                                 handleSingleRollforward(resident, nextYr);
                               }}
-                              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
+                              className="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200/80 dark:border-blue-800/80 transition-all inline-flex items-center gap-1 font-bold text-xs active:scale-95 whitespace-nowrap shadow-2xs"
                               title="Teruskan Bantuan ke Tahun Depan"
                             >
-                              <Calendar className="w-3.5 h-3.5" />
-                              <span className="hidden xl:inline">Ke {filterYear !== "Semua Tahun" ? parseInt(filterYear) + 1 : new Date().getFullYear() + 1}</span>
+                              <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                              <span>Ke {filterYear !== "Semua Tahun" ? parseInt(filterYear) + 1 : new Date().getFullYear() + 1}</span>
                             </button>
 
                             <button 
@@ -2124,11 +2124,11 @@ export default function AdminBantuan({
                                 setSelectedNiks([resident.nik]);
                                 setShowBulkStopModal(true);
                               }}
-                              className="p-1.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
+                              className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded-lg border border-rose-200/80 dark:border-rose-800/80 transition-all inline-flex items-center gap-1 font-bold text-xs active:scale-95 whitespace-nowrap shadow-2xs"
                               title="Hentikan Bantuan (Dengan Tanggal & Alasan Rinci)"
                             >
-                              <Ban className="w-3.5 h-3.5" />
-                              <span className="hidden xl:inline">Hentikan</span>
+                              <Ban className="w-3.5 h-3.5 text-rose-600" />
+                              <span>Hentikan</span>
                             </button>
 
                             <button 
@@ -2136,7 +2136,7 @@ export default function AdminBantuan({
                                 e.stopPropagation();
                                 handleRemoveAid(resident.nik, selectedProgram);
                               }}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors inline-flex items-center gap-1 font-bold text-xs active:scale-95"
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg border border-gray-200/60 dark:border-slate-700/60 transition-colors inline-flex items-center justify-center active:scale-95"
                               title="Hapus / Keluarkan Langsung"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
