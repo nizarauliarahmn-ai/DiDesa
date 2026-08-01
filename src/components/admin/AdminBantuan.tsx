@@ -286,7 +286,8 @@ export default function AdminBantuan({
              motherName: r.mother_name,
              activeAids: typeof r.active_aids === 'string' ? JSON.parse(r.active_aids) : (r.active_aids || []),
              genderColor: r.gender_color,
-             statusColor: r.status_color
+             statusColor: r.status_color,
+             isDtsen: r.is_dtsen === 1 || r.is_dtsen === true || r.is_dtsen === '1' || r.is_dtsen === 'true'
            }));
            setResidents(formatted.filter(r => r.is_deleted !== 1));
         }
@@ -433,6 +434,32 @@ export default function AdminBantuan({
       showToast(`Status ${selectedNiks.length} warga diubah menjadi "Belum Salur"`, "info");
     }
     setSelectedNiks([]);
+  };
+
+  // Toggle DTSEN Status for a resident
+  const handleToggleDtsen = async (resident: any, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const currentStatus = !!resident.isDtsen;
+    const newStatus = !currentStatus;
+
+    // Optimistic UI update
+    setResidents(prev => prev.map(r => r.nik === resident.nik ? { ...r, isDtsen: newStatus, is_dtsen: newStatus ? 1 : 0 } : r));
+
+    try {
+      if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+      const { error } = await supabase
+        .from('residents')
+        .update({ is_dtsen: newStatus ? 1 : 0 })
+        .eq('nik', resident.nik)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+      showToast(`Status DTSEN ${resident.name} diubah menjadi: ${newStatus ? 'TERDAFTAR (Aktif)' : 'NON-AKTIF'}`, newStatus ? "success" : "info");
+    } catch (err: any) {
+      // Revert if error
+      setResidents(prev => prev.map(r => r.nik === resident.nik ? { ...r, isDtsen: currentStatus, is_dtsen: currentStatus ? 1 : 0 } : r));
+      showToast(err.message || "Gagal mengubah status DTSEN", "error");
+    }
   };
 
   // Single Rollforward to Next Year
@@ -1991,13 +2018,24 @@ export default function AdminBantuan({
                       </td>
 
                       {/* DTSEN & Other Aids Column */}
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1 items-start">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 text-[10px] font-extrabold rounded border border-indigo-100 dark:border-indigo-800">
-                            Terdaftar DTSEN
-                          </span>
+                      <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col gap-1.5 items-start">
+                          {/* Toggle Switch / Badge DTSEN Manual Check Admin */}
+                          <button
+                            onClick={(e) => handleToggleDtsen(resident, e)}
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold border transition-all shadow-sm active:scale-95 cursor-pointer ${
+                              resident.isDtsen
+                                ? 'bg-indigo-600 text-white border-indigo-700 hover:bg-indigo-700'
+                                : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300'
+                            }`}
+                            title="Klik untuk Mengaktifkan/Nonaktifkan Lencana DTSEN"
+                          >
+                            <span className={`w-2 h-2 rounded-full ${resident.isDtsen ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`}></span>
+                            {resident.isDtsen ? 'Terdaftar DTSEN ✓' : '+ Verifikasi DTSEN'}
+                          </button>
+
                           {otherAids.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 mt-1 max-w-[200px]">
+                            <div className="flex flex-wrap gap-1 mt-0.5 max-w-[200px]">
                               {otherAids.map((aid: string) => (
                                 <span key={aid} className={`px-2 py-0.5 text-[10px] font-bold rounded-md border ${
                                   aid.startsWith('STOPPED') 
@@ -2009,7 +2047,7 @@ export default function AdminBantuan({
                               ))}
                             </div>
                           ) : (
-                            <span className="text-[11px] text-gray-400 font-medium italic">Bantuan Tunggal</span>
+                            <span className="text-[10px] text-gray-400 font-medium italic">Bantuan Tunggal</span>
                           )}
                         </div>
                       </td>
