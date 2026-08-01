@@ -92,7 +92,7 @@ export default function AdminPenduduk({
           .from('residents')
           .select('*')
           .eq('tenant_id', resolvedTenant)
-          .order('created_at', { ascending: false, nullsFirst: false })
+          .order('name', { ascending: true })
           .range(page * pageSize, (page + 1) * pageSize - 1);
           
         if (error) {
@@ -802,13 +802,26 @@ export default function AdminPenduduk({
                 if (item) setSelectedPenduduk(item);
               }
             }}>
-              <AnimatePresence>
-              {paginatedData.length > 0 ? (
-                paginatedData.map((item, index) => (
-                  <TableRow 
-                    key={index}
-                    item={item}
-                    nik={item.nik} 
+              {loading && residents.length === 0 ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className="animate-pulse">
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-24 mb-2"></div><div className="h-3 bg-gray-100 dark:bg-slate-800 rounded w-16"></div></td>
+                    <td className="px-6 py-4"><div className="flex gap-2 mb-2"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-32"></div><div className="h-4 bg-gray-100 dark:bg-slate-800 rounded w-12"></div></div><div className="h-3 bg-gray-100 dark:bg-slate-800 rounded w-20"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-16 mb-2"></div><div className="h-4 bg-gray-100 dark:bg-slate-800 rounded w-10"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-10"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-12"></div></td>
+                    <td className="px-6 py-4 hidden lg:table-cell"><div className="h-5 bg-gray-200 dark:bg-slate-700 rounded-full w-24"></div></td>
+                    <td className="px-6 py-4"><div className="flex gap-2 justify-center"><div className="h-8 w-8 bg-gray-200 dark:bg-slate-700 rounded-lg"></div><div className="h-8 w-8 bg-gray-200 dark:bg-slate-700 rounded-lg"></div><div className="h-8 w-8 bg-gray-200 dark:bg-slate-700 rounded-lg"></div></div></td>
+                  </tr>
+                ))
+              ) : (
+                <AnimatePresence mode="popLayout">
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((item) => (
+                    <TableRow 
+                      key={item.nik}
+                      item={item}
+                      nik={item.nik} 
                     noKk={item.noKk}
                     kepalaKeluarga={getKepalaKeluarga(item.noKk)}
                     initials={item.initials} 
@@ -833,7 +846,8 @@ export default function AdminPenduduk({
                   </td>
                 </tr>
               )}
-            </AnimatePresence>
+                </AnimatePresence>
+              )}
             </tbody>
           </table>
         </div>
