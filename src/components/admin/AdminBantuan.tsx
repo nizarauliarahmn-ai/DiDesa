@@ -305,23 +305,37 @@ export default function AdminBantuan({
     fetchData();
   }, []);
 
+  // Helper function to extract genuine active aid programs (excluding STOPPED entries & deceased residents)
+  const getActiveAidPrograms = (resident: any, targetYear: string = filterYear) => {
+    const statusStr = (resident.status || '').toLowerCase();
+    if (statusStr.includes('meninggal') || statusStr === 'mati' || statusStr === 'wafat' || statusStr === 'archived') {
+      return [];
+    }
+
+    const rawAids = Array.isArray(resident.activeAids)
+      ? resident.activeAids
+      : (typeof resident.active_aids === 'string' ? JSON.parse(resident.active_aids || '[]') : (resident.active_aids || []));
+
+    const validActive = rawAids.filter((a: string) => 
+      typeof a === 'string' && 
+      !a.startsWith('STOPPED') && 
+      a !== 'DTSEN_VERIFIED'
+    );
+
+    if (targetYear === "Semua Tahun") {
+      return validActive;
+    }
+    return validActive.filter((a: string) => a.includes(`(${targetYear})`));
+  };
+
   // Compute stats dynamically
   const stats = useMemo(() => {
-    // Determine the string to match for year filtering
-    const yearMatchStr = filterYear === "Semua Tahun" ? "" : `(${filterYear})`;
-
-    const bltCount = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith("BLT Dana Desa") && a.includes(yearMatchStr))).length;
-    const pkhCount = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith("Program Keluarga Harapan (PKH)") && a.includes(yearMatchStr))).length;
-    const bpntCount = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith("Bantuan Pangan Non-Tunai") && a.includes(yearMatchStr))).length;
+    const bltCount = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith("BLT Dana Desa"))).length;
+    const pkhCount = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith("Program Keluarga Harapan (PKH)"))).length;
+    const bpntCount = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith("Bantuan Pangan Non-Tunai"))).length;
     
-    // Residents with multiple aids (Overlap / Tumpang Tindih) for the selected year
-    const overlapResidents = residents.filter(r => {
-      if (!r.activeAids) return false;
-      const aidsInYear = filterYear === "Semua Tahun" 
-        ? r.activeAids 
-        : r.activeAids.filter((a: string) => a.includes(`(${filterYear})`));
-      return aidsInYear.length > 1;
-    });
+    // Residents with multiple genuine active aids (Overlap / Tumpang Tindih > 1)
+    const overlapResidents = residents.filter(r => getActiveAidPrograms(r, filterYear).length > 1);
     
     return {
       blt: bltCount,
@@ -338,8 +352,7 @@ export default function AdminBantuan({
     if (showOverlapOnly) {
       list = stats.overlaps;
     } else {
-      const yearMatchStr = filterYear === "Semua Tahun" ? "" : `(${filterYear})`;
-      list = residents.filter(r => r.activeAids?.some((a: string) => a.startsWith(selectedProgram) && a.includes(yearMatchStr)));
+      list = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith(selectedProgram)));
     }
 
     // Status Salur Filter
@@ -562,9 +575,15 @@ export default function AdminBantuan({
             return aid;
           });
 
+          const updatePayload: any = { active_aids: updatedAids };
+          if (bulkStopReason.toLowerCase().includes('meninggal')) {
+            updatePayload.status = 'Meninggal';
+            target.status = 'Meninggal';
+          }
+
           const { error } = await supabase
             .from('residents')
-            .update({ active_aids: updatedAids })
+            .update(updatePayload)
             .eq('nik', nik)
             .eq('tenant_id', tenantId);
 
@@ -1920,10 +1939,11 @@ export default function AdminBantuan({
                 paginatedResidents.map((resident) => {
                   const isSelected = selectedNiks.includes(resident.nik);
                   const isDisbursed = disbursedNiks.includes(resident.nik);
-                  const otherAids = (resident.activeAids || []).filter((aid: string) => 
+                  const activeAidList = getActiveAidPrograms(resident, filterYear);
+                  const otherAids = activeAidList.filter((aid: string) => 
                     showOverlapOnly ? true : !aid.startsWith(selectedProgram)
                   );
-                  const isOverlap = (resident.activeAids || []).length > 1;
+                  const isOverlap = activeAidList.length > 1;
 
                   // Extract aid year
                   let aidYear = filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear().toString();
