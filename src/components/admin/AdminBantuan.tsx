@@ -2055,15 +2055,10 @@ export default function AdminBantuan({
                       {/* Status & Disburse Toggle Column */}
                       <td className="px-5 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1.5 items-start">
-                          {isOverlap ? (
+                          {isOverlap && (
                             <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] border border-red-200 whitespace-nowrap">
                               <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
                               Tumpang Tindih
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 rounded-full font-bold text-[10px] border border-emerald-200 dark:border-emerald-800 whitespace-nowrap">
-                              <span className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>
-                              Valid / Penerima Resmi
                             </div>
                           )}
 
@@ -2539,13 +2534,161 @@ export default function AdminBantuan({
         />
       )}
 
+      {/* Detail & Edit Penerima Bantuan Modal */}
       {selectedResidentDetailModal && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden my-8 max-h-[90vh] overflow-y-auto">
-            <AdminPendudukDetail 
-              data={selectedResidentDetailModal}
-              onBack={() => setSelectedResidentDetailModal(null)}
-            />
+          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-8 border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 bg-gradient-to-r from-emerald-700 to-teal-800 text-white flex justify-between items-start">
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest bg-white/20 px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                  Detail & Edit Penerima Bantuan
+                </span>
+                <h3 className="text-xl font-extrabold mt-1.5 flex items-center gap-2">
+                  {selectedResidentDetailModal.name}
+                  {selectedResidentDetailModal.gender_color && (
+                    <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono">
+                      {selectedResidentDetailModal.gender_color.includes('blue') ? 'Laki-Laki' : 'Perempuan'}
+                    </span>
+                  )}
+                </h3>
+                <p className="text-xs text-emerald-100 font-mono mt-0.5">NIK: {selectedResidentDetailModal.nik}</p>
+              </div>
+              <button
+                onClick={() => setSelectedResidentDetailModal(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content / Form */}
+            <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto font-sans">
+              {/* Profile & Address Overview Box */}
+              <div className="bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/60 space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-gray-600 dark:text-slate-400">Wilayah / Alamat:</span>
+                  <span className="font-extrabold text-gray-900 dark:text-white font-mono">
+                    {selectedResidentDetailModal.desa || "Wasah Hilir"} / RT {selectedResidentDetailModal.rt || "-"} / RW {selectedResidentDetailModal.rw || "-"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-gray-600 dark:text-slate-400">Status Kerentanan:</span>
+                  {selectedResidentDetailModal.isLansiaTunggal ? (
+                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-extrabold rounded-md border border-amber-200">
+                      👴 Lansia Tunggal (&ge; 60 Th & KK Tunggal)
+                    </span>
+                  ) : (
+                    <span className="text-gray-500 font-medium">Warga Biasa / Anggota Keluarga</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Form Inputs for Edit Aid Data */}
+              <div className="space-y-4">
+                {/* Program Bantuan Selection */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Program Bantuan Sosial</label>
+                  <select
+                    value={selectedProgram}
+                    onChange={(e) => setSelectedProgram(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="BLT Dana Desa (2026)">BLT Dana Desa (2026)</option>
+                    <option value="PKH (Program Keluarga Harapan)">PKH (Program Keluarga Harapan)</option>
+                    <option value="BPNT (Sembako)">BPNT (Sembako)</option>
+                    <option value="Bansos Beras Cadangan Pangan">Bansos Beras Cadangan Pangan</option>
+                  </select>
+                </div>
+
+                {/* Status Penyaluran & DTSEN Toggle */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Status Penyaluran Bantuan</label>
+                    <select
+                      value={disbursedNiks.includes(selectedResidentDetailModal.nik) ? 'Sudah Salur (Tahap I)' : 'Belum Salur'}
+                      onChange={(e) => {
+                        if (e.target.value === 'Sudah Salur (Tahap I)') {
+                          setDisbursedNiks(prev => Array.from(new Set([...prev, selectedResidentDetailModal.nik])));
+                        } else {
+                          setDisbursedNiks(prev => prev.filter(n => n !== selectedResidentDetailModal.nik));
+                        }
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
+                    >
+                      <option value="Belum Salur">Belum Salur</option>
+                      <option value="Sudah Salur (Tahap I)">Sudah Salur (Tahap I)</option>
+                      <option value="Sudah Salur (Tahap II)">Sudah Salur (Tahap II)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Status Verifikasi DTSEN</label>
+                    <button
+                      type="button"
+                      onClick={(e) => handleToggleDtsen(selectedResidentDetailModal, e)}
+                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold border transition-all flex items-center justify-center gap-2 cursor-pointer shadow-2xs ${
+                        selectedResidentDetailModal.isDtsen
+                          ? 'bg-indigo-600 text-white border-indigo-700 hover:bg-indigo-700'
+                          : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 border-gray-200 dark:border-slate-700 hover:bg-indigo-50 hover:text-indigo-700'
+                      }`}
+                    >
+                      <span className={`w-2 h-2 rounded-full ${selectedResidentDetailModal.isDtsen ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`} />
+                      {selectedResidentDetailModal.isDtsen ? 'Terdaftar DTSEN ✓' : '+ Verifikasi DTSEN Manual'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Action Buttons */}
+                <div className="pt-3 border-t border-gray-100 dark:border-slate-800 space-y-2">
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">Tindakan Lanjutan Penerima</label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
+                        handleSingleRollforward(selectedResidentDetailModal, nextYr);
+                      }}
+                      className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
+                    >
+                      <Calendar className="w-3.5 h-3.5 text-blue-600" />
+                      Teruskan ke Tahun Depan (Ke 2027)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedNiks([selectedResidentDetailModal.nik]);
+                        setShowBulkStopModal(true);
+                      }}
+                      className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
+                    >
+                      <Ban className="w-3.5 h-3.5 text-rose-600" />
+                      Hentikan Bantuan (Dengan Tanggal Rinci)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+              <button
+                onClick={() => setSelectedResidentDetailModal(null)}
+                className="px-5 py-2 text-xs font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-100 rounded-xl"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  showToast(`Data bantuan ${selectedResidentDetailModal.name} berhasil diperbarui!`, "success");
+                  setSelectedResidentDetailModal(null);
+                }}
+                className="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <Check className="w-4 h-4" /> Simpan Perubahan Bantuan
+              </button>
+            </div>
           </div>
         </div>
       )}
