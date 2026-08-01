@@ -1,126 +1,235 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Map, Pin, Navigation, RefreshCw, ZoomIn, Info, Activity, Landmark, Heart, Users } from 'lucide-react';
+import { 
+  Map, 
+  Pin, 
+  Navigation, 
+  RefreshCw, 
+  ZoomIn, 
+  Info, 
+  Activity, 
+  Landmark, 
+  Heart, 
+  Users, 
+  Plus, 
+  Trash2, 
+  Search, 
+  CheckCircle2, 
+  MapPin, 
+  Layers, 
+  X, 
+  Save, 
+  Gift, 
+  AlertCircle
+} from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { showToast } from '../../utils/toast';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
-interface PointOfInterest {
+interface CustomMapPin {
   id: string;
   name: string;
-  category: 'kantor' | 'infrastruktur' | 'kesehatan' | 'ibadah' | 'pertanian';
-  coordinates: string;
+  category: 'bansos' | 'lansia' | 'kantor' | 'infrastruktur' | 'kesehatan' | 'ibadah' | 'pertanian';
   lat: number;
   lng: number;
   address: string;
-  officer: string;
-  desc: string;
-  image: string;
+  nik?: string;
+  aidProgram?: string;
+  officer?: string;
+  desc?: string;
+  isDtsen?: boolean;
 }
 
 const svgIcons = {
-  kantor: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>`,
-  infrastruktur: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-navigation"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`,
-  kesehatan: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
-  ibadah: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
-  pertanian: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
+  bansos: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>`,
+  lansia: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
+  kantor: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>`,
+  infrastruktur: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>`,
+  kesehatan: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`,
+  ibadah: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+  pertanian: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 1 0 7.75"/></svg>`
 };
 
 function decimalToDMS(lat: number, lng: number): string {
   const latDirection = lat >= 0 ? 'N' : 'S';
   const lngDirection = lng >= 0 ? 'E' : 'W';
-  
   const absLat = Math.abs(lat);
   const absLng = Math.abs(lng);
-  
   const latDegrees = Math.floor(absLat);
   const latMinutes = Math.floor((absLat - latDegrees) * 60);
   const latSeconds = ((absLat - latDegrees - (latMinutes / 60)) * 3600).toFixed(1);
-  
   const lngDegrees = Math.floor(absLng);
   const lngMinutes = Math.floor((absLng - lngDegrees) * 60);
   const lngSeconds = ((absLng - lngDegrees - (lngMinutes / 60)) * 3600).toFixed(1);
-  
   return `${latDegrees}°${latMinutes}'${latSeconds}"${latDirection} ${lngDegrees}°${lngMinutes}'${lngSeconds}"${lngDirection}`;
 }
 
 export default function PetaWilayah() {
-  const [selectedPoi, setSelectedPoi] = useState<PointOfInterest | null>(null);
+  const [selectedPoi, setSelectedPoi] = useState<CustomMapPin | null>(null);
+  const [filterCategory, setFilterCategory] = useState<string>('semua');
+  const [isAddingPinMode, setIsAddingPinMode] = useState<boolean>(false);
+  const [pendingClickCoords, setPendingClickCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [residentsList, setResidentsList] = useState<any[]>([]);
 
+  // Configured Village Coordinates
   const [villageName, setVillageName] = useState(() => localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur');
   const [kadesName, setKadesName] = useState(() => localStorage.getItem('kop_kades') || 'Kepala Desa');
   const [villageAlamat, setVillageAlamat] = useState(() => localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
   const [villageLat, setVillageLat] = useState(() => parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
   const [villageLng, setVillageLng] = useState(() => parseFloat(localStorage.getItem('village_lng') || '115.227889'));
-  const [borderUtara, setBorderUtara] = useState(() => localStorage.getItem('village_border_utara') || 'Berbatasan langsung dengan Desa Wasah Hulu, Kecamatan Simpur.');
-  const [borderSelatan, setBorderSelatan] = useState(() => localStorage.getItem('village_border_selatan') || 'Berbatasan langsung dengan Desa Garunggangan, Kecamatan Kandangan.');
-  const [borderTimur, setBorderTimur] = useState(() => localStorage.getItem('village_border_timur') || 'Berbatasan dengan Area Persawahan Produktif Desa Amparaya.');
-  const [borderBarat, setBorderBarat] = useState(() => localStorage.getItem('village_border_barat') || 'Berbatasan dengan Sungai Mati / Batas Alam Kali Simpur.');
-  const [luasPemukiman, setLuasPemukiman] = useState(() => localStorage.getItem('village_luas_pemukiman') || '1.2 km² (28.5%)');
-  const [luasSawah, setLuasSawah] = useState(() => localStorage.getItem('village_luas_sawah') || '2.5 km² (59.5%)');
-  const [luasPerkebunan, setLuasPerkebunan] = useState(() => localStorage.getItem('village_luas_perkebunan') || '0.5 km² (12.0%)');
-  const [suhuRata, setSuhuRata] = useState(() => localStorage.getItem('village_suhu_rata') || '26°C - 32°C');
-  const [curahHujan, setCurahHujan] = useState(() => localStorage.getItem('village_curah_hujan') || '2.200 mm/tahun');
 
-  // Fetch from Supabase on mount for full cross-device sync
-  useEffect(() => {
-    const fetchFromSupabase = async () => {
-      try {
-        const { resolveCurrentTenant } = await import('../../utils/tenantResolver');
-        const { supabase } = await import('../../utils/supabase');
-        const tid = await resolveCurrentTenant();
-        if (!tid) return;
-        const { data } = await supabase.from('saas_settings').select('key, value').eq('tenant_id', tid);
-        if (data && data.length > 0) {
-          const map: Record<string, string> = {};
-          data.forEach((r: any) => { map[r.key] = r.value; });
-          const applyIfSet = (key: string, setter: (v: string) => void) => {
-            if (map[key] && map[key].trim() !== '') {
-              setter(map[key]);
-              localStorage.setItem(key, map[key]);
-            }
-          };
-          applyIfSet('kop_desa', setVillageName);
-          applyIfSet('village_name', setVillageName);
-          applyIfSet('kop_kades', setKadesName);
-          applyIfSet('kop_alamat', setVillageAlamat);
-          applyIfSet('village_border_utara', setBorderUtara);
-          applyIfSet('village_border_selatan', setBorderSelatan);
-          applyIfSet('village_border_timur', setBorderTimur);
-          applyIfSet('village_border_barat', setBorderBarat);
-          applyIfSet('village_luas_pemukiman', setLuasPemukiman);
-          applyIfSet('village_luas_sawah', setLuasSawah);
-          applyIfSet('village_luas_perkebunan', setLuasPerkebunan);
-          applyIfSet('village_suhu_rata', setSuhuRata);
-          applyIfSet('village_curah_hujan', setCurahHujan);
-          if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
-          if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
+  // Pin Form State
+  const [pinForm, setPinForm] = useState<{
+    name: string;
+    category: 'bansos' | 'lansia' | 'kantor' | 'infrastruktur' | 'kesehatan' | 'ibadah' | 'pertanian';
+    nik: string;
+    address: string;
+    aidProgram: string;
+    desc: string;
+  }>({
+    name: '',
+    category: 'bansos',
+    nik: '',
+    address: 'RT 04 / RW 02, Wasah Hilir',
+    aidProgram: 'BLT Dana Desa (2026)',
+    desc: 'Penerima Bantuan Sosial Terdaftar DTSEN'
+  });
+
+  // Custom Pin Markers Storage
+  const [pinsList, setPinsList] = useState<CustomMapPin[]>([]);
+
+  // Load Pins & Residents Data from Supabase
+  const loadMapData = async () => {
+    try {
+      const tid = await resolveCurrentTenant();
+
+      // Fetch Residents for Dropdown
+      const { data: resData } = await supabase
+        .from('residents')
+        .select('*')
+        .order('name');
+      if (resData) setResidentsList(resData);
+
+      // Fetch Custom Pins from Cloud
+      if (tid) {
+        const { data: pinsData } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('tenant_id', tid)
+          .eq('key', 'map_custom_pins')
+          .single();
+
+        if (pinsData && pinsData.value) {
+          setPinsList(JSON.parse(pinsData.value));
+          return;
         }
-      } catch (err) {
-        console.warn('Gagal mengambil data peta dari Supabase:', err);
       }
-    };
-    fetchFromSupabase();
 
-    const handleSettingsUpdate = () => {
-      setVillageName(localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur');
-      setKadesName(localStorage.getItem('kop_kades') || 'Kepala Desa');
-      setVillageAlamat(localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
-      setVillageLat(parseFloat(localStorage.getItem('village_lat') || '-2.797806'));
-      setVillageLng(parseFloat(localStorage.getItem('village_lng') || '115.227889'));
-      setBorderUtara(localStorage.getItem('village_border_utara') || 'Berbatasan langsung dengan Desa Wasah Hulu, Kecamatan Simpur.');
-      setBorderSelatan(localStorage.getItem('village_border_selatan') || 'Berbatasan langsung dengan Desa Garunggangan, Kecamatan Kandangan.');
-      setBorderTimur(localStorage.getItem('village_border_timur') || 'Berbatasan dengan Area Persawahan Produktif Desa Amparaya.');
-      setBorderBarat(localStorage.getItem('village_border_barat') || 'Berbatasan dengan Sungai Mati / Batas Alam Kali Simpur.');
-      setLuasPemukiman(localStorage.getItem('village_luas_pemukiman') || '1.2 km² (28.5%)');
-      setLuasSawah(localStorage.getItem('village_luas_sawah') || '2.5 km² (59.5%)');
-      setLuasPerkebunan(localStorage.getItem('village_luas_perkebunan') || '0.5 km² (12.0%)');
-      setSuhuRata(localStorage.getItem('village_suhu_rata') || '26°C - 32°C');
-      setCurahHujan(localStorage.getItem('village_curah_hujan') || '2.200 mm/tahun');
-    };
-    window.addEventListener('village_settings_updated', handleSettingsUpdate);
-    return () => window.removeEventListener('village_settings_updated', handleSettingsUpdate);
-  }, []);
+      // Default Initial Pins if empty
+      const defaultPins: CustomMapPin[] = [
+        {
+          id: 'poi-balai',
+          name: `Kantor Balai ${villageName}`,
+          category: 'kantor',
+          lat: villageLat,
+          lng: villageLng,
+          address: villageAlamat,
+          officer: `${kadesName} (Kepala Desa)`,
+          desc: `Pusat pelayanan administrasi kependudukan dan tata pamong ${villageName}.`
+        },
+        {
+          id: 'pin-bansos-1',
+          name: 'Hj. Syarifah (Penerima BLT)',
+          category: 'bansos',
+          lat: villageLat + 0.0012,
+          lng: villageLng + 0.0018,
+          address: 'Wasah Hilir / RT 04 / RW 02',
+          nik: '6306034509650001',
+          aidProgram: 'BLT Dana Desa (2026)',
+          isDtsen: true,
+          desc: 'Warga Penerima Bansos Resmi TA 2026 - Terdaftar DTSEN'
+        },
+        {
+          id: 'pin-lansia-1',
+          name: 'Kamsiah (Lansia Tunggal 74 Th)',
+          category: 'lansia',
+          lat: villageLat - 0.0015,
+          lng: villageLng - 0.0021,
+          address: 'Wasah Hilir / RT 02 / RW 01',
+          nik: '6306035208500003',
+          aidProgram: 'Program SembaKo Lansia',
+          isDtsen: true,
+          desc: 'Lansia Tunggal (Hidup Sendiri) - Prioritas Bantuan Utama'
+        }
+      ];
+      setPinsList(defaultPins);
+    } catch (err) {
+      // Fallback
+    }
+  };
 
+  useEffect(() => {
+    loadMapData();
+  }, [villageLat, villageLng]);
+
+  // Save Pins to Supabase Cloud
+  const savePinsToSupabase = async (updatedPins: CustomMapPin[]) => {
+    setPinsList(updatedPins);
+    try {
+      const tid = await resolveCurrentTenant();
+      if (tid) {
+        await supabase
+          .from('saas_settings')
+          .upsert({
+            tenant_id: tid,
+            key: 'map_custom_pins',
+            value: JSON.stringify(updatedPins),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'tenant_id,key' });
+      }
+      showToast('Titik peta berhasil diperbarui & disimpan!', 'success');
+    } catch (e) {
+      showToast('Gagal menyimpan titik peta ke cloud', 'error');
+    }
+  };
+
+  // Add New Pin Action
+  const handleCreatePin = () => {
+    if (!pendingClickCoords) return;
+    if (!pinForm.name.trim()) {
+      showToast('Mohon isi nama penanda / nama penerima bantuan.', 'error');
+      return;
+    }
+
+    const newPin: CustomMapPin = {
+      id: `pin-${Date.now()}`,
+      name: pinForm.name,
+      category: pinForm.category,
+      lat: pendingClickCoords.lat,
+      lng: pendingClickCoords.lng,
+      address: pinForm.address,
+      nik: pinForm.nik || undefined,
+      aidProgram: pinForm.aidProgram,
+      desc: pinForm.desc,
+      isDtsen: true
+    };
+
+    const updated = [newPin, ...pinsList];
+    savePinsToSupabase(updated);
+    setSelectedPoi(newPin);
+    setPendingClickCoords(null);
+    setIsAddingPinMode(false);
+  };
+
+  // Delete Pin Action
+  const handleDeletePin = (id: string) => {
+    const updated = pinsList.filter(p => p.id !== id);
+    savePinsToSupabase(updated);
+    setSelectedPoi(null);
+  };
+
+  // Leaflet Map Initialization
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
@@ -130,20 +239,29 @@ export default function PetaWilayah() {
     if (!mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current, {
         center: [villageLat, villageLng],
-        zoom: 14,
+        zoom: 15,
         zoomControl: false,
         dragging: true,
-        scrollWheelZoom: false,
+        scrollWheelZoom: true,
       });
 
+      // Google Satellite Hybrid Tile Layer (Exact Google Maps Look)
       L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
         maxZoom: 20,
-        attribution: '&copy; Google Maps'
+        attribution: '&copy; Google Maps Satellite'
       }).addTo(map);
+
+      // Add Zoom Control
+      L.control.zoom({ position: 'topright' }).addTo(map);
 
       const markersLayer = L.layerGroup().addTo(map);
       markersLayerRef.current = markersLayer;
       mapInstanceRef.current = map;
+
+      // Handle Map Click to Pin Location
+      map.on('click', (e: L.LeafletMouseEvent) => {
+        setPendingClickCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
+      });
     } else {
       mapInstanceRef.current.setView([villageLat, villageLng]);
     }
@@ -157,97 +275,43 @@ export default function PetaWilayah() {
     };
   }, [villageLat, villageLng]);
 
-
-  // Create local relative POIs based on the configured center point
-  const pois: PointOfInterest[] = [
-    {
-      id: 'poi-1',
-      name: `Kantor Balai ${villageName}`,
-      category: 'kantor',
-      lat: villageLat,
-      lng: villageLng,
-      coordinates: decimalToDMS(villageLat, villageLng),
-      address: villageAlamat,
-      officer: `${kadesName} (Kepala Desa)`,
-      desc: `Pusat pelayanan administrasi kependudukan, musyawarah warga, dan seluruh urusan tata pamong ${villageName}.`,
-      image: 'https://images.unsplash.com/photo-1577086664693-894d8405334a?auto=format&fit=crop&q=80&w=600',
-    },
-    {
-      id: 'poi-2',
-      name: 'Jembatan Usaha Tani RW 03',
-      category: 'infrastruktur',
-      lat: villageLat - 0.003694,
-      lng: villageLng - 0.004889,
-      coordinates: decimalToDMS(villageLat - 0.003694, villageLng - 0.004889),
-      address: 'Kawasan Pertanian Handil Galam, RT 06',
-      officer: 'Gapoktan Sukamakmur',
-      desc: 'Infrastruktur penghubung jalan usaha tani yang memudahkan sirkulasi panen padi dan pupuk menuju sawah warga.',
-      image: 'https://images.unsplash.com/photo-1541888081156-fce1fa5427d6?auto=format&fit=crop&q=80&w=600',
-    },
-    {
-      id: 'poi-3',
-      name: 'Pos Kesehatan Desa (Poskesdes)',
-      category: 'kesehatan',
-      lat: villageLat + 0.001000,
-      lng: villageLng - 0.000444,
-      coordinates: decimalToDMS(villageLat + 0.001000, villageLng - 0.000444),
-      address: 'Jalan Kenanga RT 03 RW 01',
-      officer: 'Siti Aminah, Amd.Keb (Bidan Desa)',
-      desc: 'Pelayanan kesehatan tingkat pertama, posyandu balita & lansia, imunisasi, KB, serta konsultasi gizi sehat.',
-      image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&q=80&w=600',
-    },
-    {
-      id: 'poi-4',
-      name: 'Masjid Jami Al-Ittihad',
-      category: 'ibadah',
-      lat: villageLat - 0.000806,
-      lng: villageLng + 0.001722,
-      coordinates: decimalToDMS(villageLat - 0.000806, villageLng + 0.001722),
-      address: 'Jalan Keramat RT 01 RW 01',
-      officer: 'H. Abdul Kadir (Ketua Pengurus)',
-      desc: 'Masjid jami utama desa untuk ibadah sholat berjamaah, pengajian berkala, serta pusat bimbingan keagamaan warga.',
-      image: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&q=80&w=600',
-    },
-    {
-      id: 'poi-5',
-      name: 'Kawasan Lumbung Pertanian Organik',
-      category: 'pertanian',
-      lat: villageLat - 0.005389,
-      lng: villageLng + 0.004917,
-      coordinates: decimalToDMS(villageLat - 0.005389, villageLng + 0.004917),
-      address: 'Wilayah Sawah Garapan Selatan',
-      officer: 'Mulyadi (Koordinator Kelompok Tani)',
-      desc: 'Sentra persawahan organik percontohan dengan sistem irigasi berkelanjutan yang didukung penuh oleh program bantuan desa.',
-      image: 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&q=80&w=600',
-    }
-  ];
-
-  const handleMarkerClick = (poi: PointOfInterest) => {
-    setSelectedPoi(poi);
-    showToast(`Membuka info: ${poi.name}`, 'info');
-  };
-
+  // Render Leaflet Markers
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current) return;
-    
-    // Clear existing markers
     markersLayerRef.current.clearLayers();
 
-    pois.forEach(poi => {
+    const filtered = pinsList.filter(p => {
+      if (filterCategory === 'semua') return true;
+      return p.category === filterCategory;
+    });
+
+    filtered.forEach(poi => {
       const isSelected = selectedPoi?.id === poi.id;
       
+      // Color Badge based on category
+      let badgeBg = 'bg-emerald-600 border-white text-white';
+      let pingBg = 'bg-emerald-400';
+      if (poi.category === 'bansos') {
+        badgeBg = 'bg-rose-600 border-white text-white';
+        pingBg = 'bg-rose-400';
+      } else if (poi.category === 'lansia') {
+        badgeBg = 'bg-amber-500 border-white text-white';
+        pingBg = 'bg-amber-400';
+      } else if (poi.category === 'kantor') {
+        badgeBg = 'bg-indigo-600 border-white text-white';
+        pingBg = 'bg-indigo-400';
+      }
+
       const pinHtml = `
         <div class="relative group/pin cursor-pointer w-full h-full flex items-center justify-center">
-          ${!isSelected ? '<span class="absolute inline-flex h-8 w-8 rounded-full bg-emerald-400 opacity-75 animate-ping"></span>' : ''}
-          <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 transition-all duration-200 ${
-            isSelected 
-              ? 'bg-amber-500 border-white text-white scale-125 z-20' 
-              : 'bg-white border-emerald-700 text-emerald-800'
+          ${!isSelected ? `<span class="absolute inline-flex h-8 w-8 rounded-full ${pingBg} opacity-75 animate-ping"></span>` : ''}
+          <div class="w-8 h-8 rounded-full flex items-center justify-center shadow-xl border-2 transition-all duration-200 ${
+            isSelected ? 'bg-amber-400 border-white text-gray-900 scale-125 z-30 ring-4 ring-amber-300/50' : badgeBg
           }">
-            ${svgIcons[poi.category]}
+            ${svgIcons[poi.category] || svgIcons.kantor}
           </div>
-          <span class="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-900/95 text-[10px] font-bold text-white px-2 py-1 rounded-lg shadow-md whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200 pointer-events-none z-30">
-            ${poi.name.split(' ').slice(-2).join(' ')}
+          <span class="absolute top-9 left-1/2 -translate-x-1/2 bg-gray-950/90 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shadow-md whitespace-nowrap opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200 pointer-events-none z-40 border border-gray-700">
+            ${poi.name}
           </span>
         </div>
       `;
@@ -260,138 +324,304 @@ export default function PetaWilayah() {
       });
 
       const marker = L.marker([poi.lat, poi.lng], { icon });
-      marker.on('click', () => handleMarkerClick(poi));
+      marker.on('click', () => {
+        setSelectedPoi(poi);
+        showToast(`Titik lokasi: ${poi.name}`, 'info');
+      });
       marker.addTo(markersLayerRef.current!);
     });
-  }, [pois, selectedPoi]);
+  }, [pinsList, selectedPoi, filterCategory]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Geospasial & Peta Wilayah</h2>
-        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gali potensi geospasial desa, tata ruang lahan, dan lokasi fasilitas publik secara interaktif.</p>
+    <div className="space-y-6 font-sans">
+      {/* Header Info & Layer Filters */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 dark:border-slate-800 pb-4">
+        <div>
+          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight flex items-center gap-2.5">
+            <Map className="w-7 h-7 text-emerald-600" />
+            Peta Wilayah & Sebaran Bansos (Google Maps Satellite)
+          </h2>
+          <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-slate-400 mt-1">
+            Klik langsung di sembarang lokasi peta untuk menambahkan titik lokasi penerima bantuan sosial atau fasilitas desa.
+          </p>
+        </div>
+
+        {/* Filter Layer Buttons */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full whitespace-nowrap">
+          {[
+            { id: 'semua', label: 'Semua Titik', color: 'bg-gray-100 text-gray-700' },
+            { id: 'bansos', label: '🔴 Penerima Bansos', color: 'bg-rose-50 text-rose-700 border-rose-200' },
+            { id: 'lansia', label: '🟡 Lansia Tunggal', color: 'bg-amber-50 text-amber-800 border-amber-200' },
+            { id: 'kantor', label: '🔵 Fasilitas Publik', color: 'bg-indigo-50 text-indigo-700 border-indigo-200' }
+          ].map(f => (
+            <button
+              key={f.id}
+              onClick={() => setFilterCategory(f.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border whitespace-nowrap cursor-pointer active:scale-95 ${
+                filterCategory === f.id
+                  ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                  : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-700 hover:bg-gray-50'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Main Map & Interactive Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left Interactive Map Block */}
+        {/* Left Google Satellite Map */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none p-4 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm p-3 space-y-3">
             <div className="flex items-center justify-between px-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-4 h-4 text-emerald-700 animate-pulse" /> PETA INTERAKTIF DIGITAL
+              <span className="text-xs font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-emerald-600 animate-pulse" /> SATELIT GOOGLE MAPS HYBRID
               </span>
-              <span className="text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
-                Sistem Koordinat WGS84
+              <span className="text-[10px] bg-emerald-50 text-emerald-800 font-bold px-2.5 py-1 rounded-full border border-emerald-200 whitespace-nowrap">
+                Klik Peta untuk Tambah Titik
               </span>
             </div>
 
-            {/* Virtual Map Stage */}
-            <div className="h-96 w-full rounded-2xl relative overflow-hidden bg-emerald-50 border border-emerald-100/50 shadow-inner group">
-              {/* Leaflet Live Tile Map Container */}
-              <div ref={mapContainerRef} className="absolute inset-0 z-0 opacity-90" />
+            {/* Map Container */}
+            <div className="h-[480px] w-full rounded-2xl relative overflow-hidden bg-slate-900 border border-slate-700 shadow-inner group">
+              <div ref={mapContainerRef} className="absolute inset-0 z-0" />
 
-              <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 shadow-md dark:shadow-none text-[10px] space-y-1 z-10 font-bold pointer-events-none">
-                <p className="text-gray-400 uppercase tracking-widest text-[8px] mb-1.5">LEGENDA PETA</p>
-                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-white dark:bg-slate-900 border-2 border-emerald-700" /> <span>Fasilitas Publik / Administrasi</span></div>
-                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-amber-500" /> <span>Titik Terpilih</span></div>
+              {/* Map Floating Legend */}
+              <div className="absolute bottom-4 left-4 bg-gray-900/90 backdrop-blur-md text-white px-3.5 py-2.5 rounded-xl border border-gray-700 shadow-xl text-[10px] space-y-1.5 font-bold z-10 pointer-events-none">
+                <p className="text-gray-400 uppercase tracking-widest text-[8px] mb-1">LEGENDA TITIK PETA</p>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" /> <span>Penerima Bansos (DTSEN)</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white" /> <span>Lansia Tunggal (&ge; 60 Th)</span></div>
+                <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-2 ring-white" /> <span>Balai Desa / Fasilitas Umum</span></div>
               </div>
             </div>
           </div>
 
-          {/* POI Info Card */}
+          {/* Selected Marker Detail Card */}
           {selectedPoi ? (
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden flex flex-col md:flex-row animate-in slide-in-from-bottom-6 duration-200">
-              <div className="w-full md:w-56 h-48 md:h-auto bg-cover bg-center shrink-0">
-                <img src={selectedPoi.image} alt={selectedPoi.name} className="w-full h-full object-cover" />
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-md p-6 space-y-3 animate-in slide-in-from-bottom-4 duration-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-lg uppercase tracking-wider ${
+                    selectedPoi.category === 'bansos' 
+                      ? 'bg-rose-100 text-rose-800 border border-rose-200' 
+                      : selectedPoi.category === 'lansia'
+                      ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                      : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                  }`}>
+                    {selectedPoi.category.toUpperCase()}
+                  </span>
+                  {selectedPoi.isDtsen && (
+                    <span className="text-[10px] font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-md whitespace-nowrap">
+                      DTSEN Verified ✓
+                    </span>
+                  )}
+                </div>
+                <span className="text-xs text-gray-500 font-mono font-bold flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5 text-emerald-600" /> {decimalToDMS(selectedPoi.lat, selectedPoi.lng)}
+                </span>
               </div>
-              <div className="p-6 flex-1 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-100 px-2.5 py-1 rounded-lg uppercase tracking-wider">
-                    {selectedPoi.category}
-                  </span>
-                  <span className="text-xs text-gray-400 font-bold flex items-center gap-1">
-                    <Pin className="w-3.5 h-3.5" /> {selectedPoi.coordinates}
-                  </span>
-                </div>
-                <h4 className="text-base font-bold text-gray-900 dark:text-white">{selectedPoi.name}</h4>
-                <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed font-semibold">Alamat: {selectedPoi.address}</p>
-                <p className="text-xs text-gray-700 dark:text-slate-300 leading-relaxed text-justify">{selectedPoi.desc}</p>
-                <div className="border-t border-gray-50 pt-3 flex items-center justify-between">
-                  <span className="text-[10px] text-gray-400 font-bold">Pengelola / PJ: <span className="text-gray-700 dark:text-slate-300">{selectedPoi.officer}</span></span>
-                  <button 
-                    onClick={() => {
-                      navigator.clipboard.writeText(selectedPoi.coordinates);
-                      showToast('Koordinat GPS disalin ke papan klip!', 'success');
-                    }}
-                    className="text-xs text-emerald-800 hover:underline font-bold"
-                  >
-                    Salin Koordinat GPS
-                  </button>
-                </div>
+
+              <div>
+                <h4 className="text-lg font-black text-gray-900 dark:text-white">{selectedPoi.name}</h4>
+                {selectedPoi.nik && <p className="text-xs font-mono font-bold text-gray-500">NIK: {selectedPoi.nik}</p>}
+                <p className="text-xs text-gray-600 dark:text-slate-300 font-semibold mt-1">Alamat: {selectedPoi.address}</p>
+                {selectedPoi.aidProgram && (
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                    <Gift className="w-3.5 h-3.5" /> Program: {selectedPoi.aidProgram}
+                  </p>
+                )}
+                {selectedPoi.desc && <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{selectedPoi.desc}</p>}
+              </div>
+
+              <div className="pt-3 border-t border-gray-100 dark:border-slate-800 flex justify-between items-center">
+                <button
+                  onClick={() => handleDeletePin(selectedPoi.id)}
+                  className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Hapus Pin Titik Ini
+                </button>
+                <button
+                  onClick={() => setSelectedPoi(null)}
+                  className="text-xs font-bold text-gray-400 hover:text-gray-600"
+                >
+                  Tutup Info
+                </button>
               </div>
             </div>
           ) : (
-            <div className="bg-gray-50/50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-gray-200 dark:border-slate-700 p-8 text-center text-gray-400 text-xs font-semibold">
-              Silakan klik salah satu pin penanda di peta untuk melihat rincian informasi wilayah.
+            <div className="bg-gray-50 dark:bg-slate-800/40 rounded-3xl border border-dashed border-gray-200 dark:border-slate-700 p-6 text-center text-gray-500 text-xs font-semibold">
+              Klik salah satu pin penanda di peta untuk melihat detail penerima bantuan atau fasilitas desa.
             </div>
           )}
         </div>
 
-        {/* Right Sidebar stats */}
+        {/* Right Sidebar: List of Pins & Manual Coordinates Entry */}
         <div className="space-y-6">
-          {/* Geografis Stats */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-5">
-            <h4 className="text-sm font-bold text-gray-900 dark:text-white border-b border-gray-50 pb-3">Profil Geografis Desa</h4>
-            <div className="space-y-3 text-xs">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Pemukiman</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">{luasPemukiman}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Sawah Irigasi</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">{luasSawah}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Luas Perkebunan</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">{luasPerkebunan}</span>
-              </div>
-              <div className="h-px bg-gray-50 dark:bg-slate-800" />
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Suhu Rata-rata</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">{suhuRata}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Curah Hujan Tahunan</span>
-                <span className="font-bold text-gray-800 dark:text-slate-100">{curahHujan}</span>
-              </div>
-            </div>
-          </div>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-4">
+            <h4 className="text-base font-extrabold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+              <span>Daftar Titik Penanda ({pinsList.length})</span>
+              <span className="text-[10px] font-mono bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-full">Active GIS</span>
+            </h4>
 
-          {/* Batas Batas Wilayah */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-4">
-            <h4 className="text-sm font-bold text-gray-900 dark:text-white border-b border-gray-50 pb-3">Batas Wilayah Administratif</h4>
-            <div className="space-y-3 text-xs font-semibold text-gray-700 dark:text-slate-300">
-              <div className="flex items-start gap-2.5">
-                <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">UTARA</span>
-                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderUtara}</p>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">SELATAN</span>
-                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderSelatan}</p>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">TIMUR</span>
-                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderTimur}</p>
-              </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-16 text-gray-400 uppercase tracking-widest text-[9px] font-extrabold mt-0.5">BARAT</span>
-                <p className="flex-1 text-gray-800 dark:text-slate-100 leading-snug">{borderBarat}</p>
-              </div>
+            <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
+              {pinsList.map((pin) => (
+                <div
+                  key={pin.id}
+                  onClick={() => {
+                    setSelectedPoi(pin);
+                    if (mapInstanceRef.current) {
+                      mapInstanceRef.current.setView([pin.lat, pin.lng], 17);
+                    }
+                  }}
+                  className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-2 ${
+                    selectedPoi?.id === pin.id
+                      ? 'bg-emerald-50/70 border-emerald-300 dark:bg-emerald-950/40 dark:border-emerald-700'
+                      : 'bg-gray-50/60 dark:bg-slate-800/60 border-gray-100 dark:border-slate-800 hover:bg-gray-100'
+                  }`}
+                >
+                  <div className="truncate">
+                    <p className="text-xs font-extrabold text-gray-900 dark:text-white truncate">{pin.name}</p>
+                    <p className="text-[10px] text-gray-500 truncate">{pin.address}</p>
+                  </div>
+                  <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md whitespace-nowrap shrink-0 ${
+                    pin.category === 'bansos' ? 'bg-rose-100 text-rose-800' : pin.category === 'lansia' ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'
+                  }`}>
+                    {pin.category}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* MODAL TAMBAH TITIK MANUAL HASIL KLIK PETA */}
+      {pendingClickCoords && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-gray-100 dark:border-slate-800 bg-emerald-50/50 dark:bg-emerald-950/30 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-gray-900 dark:text-white">Tambah Titik Lokasi Peta</h3>
+                  <p className="text-xs text-gray-500 font-mono">GPS: {pendingClickCoords.lat.toFixed(6)}, {pendingClickCoords.lng.toFixed(6)}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setPendingClickCoords(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Category Selection */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5">Kategori Penanda</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'bansos', label: '🔴 Bansos / DTSEN' },
+                    { id: 'lansia', label: '🟡 Lansia Tunggal' },
+                    { id: 'kantor', label: '🔵 Fasilitas Umum' }
+                  ].map(cat => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setPinForm({ ...pinForm, category: cat.id as any })}
+                      className={`p-2 rounded-xl text-xs font-bold border transition-all text-center whitespace-nowrap cursor-pointer ${
+                        pinForm.category === cat.id
+                          ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
+                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Resident Selector or Name */}
+              {residentsList.length > 0 ? (
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Pilih Warga Penerima / Penanda</label>
+                  <select
+                    onChange={(e) => {
+                      const selectedRes = residentsList.find(r => r.nik === e.target.value);
+                      if (selectedRes) {
+                        setPinForm({
+                          ...pinForm,
+                          name: selectedRes.name,
+                          nik: selectedRes.nik,
+                          address: `${selectedRes.desa || "Wasah Hilir"} / RT ${selectedRes.rt || "-"} / RW ${selectedRes.rw || "-"}`
+                        });
+                      }
+                    }}
+                    className="w-full px-3 py-2 text-xs font-bold rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none"
+                  >
+                    <option value="">-- Pilih Warga dari Database --</option>
+                    {residentsList.map(r => (
+                      <option key={r.nik} value={r.nik}>
+                        {r.name} (NIK: {r.nik}) - RT {r.rt}/RW {r.rw}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : null}
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Nama Penanda / Nama Warga</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: Hj. Syarifah (Penerima BLT)"
+                  value={pinForm.name}
+                  onChange={(e) => setPinForm({ ...pinForm, name: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs font-bold rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Alamat Lengkap (RT/RW)</label>
+                <input
+                  type="text"
+                  value={pinForm.address}
+                  onChange={(e) => setPinForm({ ...pinForm, address: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Program Bantuan / Keterangan</label>
+                <input
+                  type="text"
+                  placeholder="Contoh: BLT Dana Desa (2026)"
+                  value={pinForm.aidProgram}
+                  onChange={(e) => setPinForm({ ...pinForm, aidProgram: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+              <button
+                onClick={() => setPendingClickCoords(null)}
+                className="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-xl"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleCreatePin}
+                className="px-5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer whitespace-nowrap"
+              >
+                <Save className="w-4 h-4" /> Simpan Titik Peta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
