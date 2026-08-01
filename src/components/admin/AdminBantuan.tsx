@@ -103,31 +103,80 @@ export default function AdminBantuan({
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [showBaModal, setShowBaModal] = useState(false);
-  const [disbursedNiks, setDisbursedNiks] = useState<string[]>(() => {
+const MONTHS_LIST = [
+  { id: 'Jan', label: 'Jan', fullName: 'Januari' },
+  { id: 'Feb', label: 'Feb', fullName: 'Februari' },
+  { id: 'Mar', label: 'Mar', fullName: 'Maret' },
+  { id: 'Apr', label: 'Apr', fullName: 'April' },
+  { id: 'Mei', label: 'Mei', fullName: 'Mei' },
+  { id: 'Jun', label: 'Jun', fullName: 'Juni' },
+  { id: 'Jul', label: 'Jul', fullName: 'Juli' },
+  { id: 'Ags', label: 'Ags', fullName: 'Agustus' },
+  { id: 'Sep', label: 'Sep', fullName: 'September' },
+  { id: 'Okt', label: 'Okt', fullName: 'Oktober' },
+  { id: 'Nov', label: 'Nov', fullName: 'November' },
+  { id: 'Des', label: 'Des', fullName: 'Desember' }
+];
+
+  // Monthly Disbursement State (Nik -> Array of Month IDs e.g. ['Jan', 'Feb', 'Mar'])
+  const [disbursedMonths, setDisbursedMonths] = useState<Record<string, string[]>>(() => {
     try {
-      const stored = localStorage.getItem(`disbursed_niks_${selectedProgram}`);
-      return stored ? JSON.parse(stored) : [];
-    } catch (e) { return []; }
+      const stored = localStorage.getItem(`disbursed_months_${selectedProgram}`);
+      return stored ? JSON.parse(stored) : {};
+    } catch (e) { return {}; }
   });
 
-  // Sync disbursement state to localStorage when program changes
+  // Sync when selectedProgram changes
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(`disbursed_niks_${selectedProgram}`);
-      setDisbursedNiks(stored ? JSON.parse(stored) : []);
+      const stored = localStorage.getItem(`disbursed_months_${selectedProgram}`);
+      setDisbursedMonths(stored ? JSON.parse(stored) : {});
     } catch (e) {
-      setDisbursedNiks([]);
+      setDisbursedMonths({});
     }
   }, [selectedProgram]);
 
-  // Sync disbursement state to localStorage when list changes
+  // Persist to localStorage & Supabase Cloud
   useEffect(() => {
+    if (!selectedProgram) return;
     try {
-      if (selectedProgram) {
-        localStorage.setItem(`disbursed_niks_${selectedProgram}`, JSON.stringify(disbursedNiks));
+      localStorage.setItem(`disbursed_months_${selectedProgram}`, JSON.stringify(disbursedMonths));
+      if (tenantId) {
+        supabase.from('saas_settings').upsert({
+          tenant_id: tenantId,
+          key: `disbursed_months_${selectedProgram}`,
+          value: JSON.stringify(disbursedMonths),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'tenant_id,key' }).then();
       }
     } catch (e) {}
-  }, [disbursedNiks, selectedProgram]);
+  }, [disbursedMonths, selectedProgram, tenantId]);
+
+  const handleToggleMonth = (nik: string, monthId: string) => {
+    setDisbursedMonths(prev => {
+      const current = prev[nik] || [];
+      const updated = current.includes(monthId) ? current.filter(m => m !== monthId) : [...current, monthId];
+      return { ...prev, [nik]: updated };
+    });
+  };
+
+  const handleSetMonthsUntil = (nik: string, maxIdx: number) => {
+    const monthsToSet = MONTHS_LIST.slice(0, maxIdx + 1).map(m => m.id);
+    setDisbursedMonths(prev => ({ ...prev, [nik]: monthsToSet }));
+  };
+
+  const handleSetAll12Months = (nik: string) => {
+    const allMonths = MONTHS_LIST.map(m => m.id);
+    setDisbursedMonths(prev => ({ ...prev, [nik]: allMonths }));
+  };
+
+  const handleResetMonths = (nik: string) => {
+    setDisbursedMonths(prev => {
+      const copy = { ...prev };
+      delete copy[nik];
+      return copy;
+    });
+  };
   const [searchResidentQuery, setSearchResidentQuery] = useState("");
   const [selectedResidentNik, setSelectedResidentNik] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -147,7 +196,7 @@ export default function AdminBantuan({
   const [selectedResidentDetailModal, setSelectedResidentDetailModal] = useState<any | null>(null);
 
   // New Table Optimization States
-  const [salurFilter, setSalurFilter] = useState<'all' | 'pending' | 'disbursed'>('all');
+  const [salurFilter, setSalurFilter] = useState<'all' | 'pending_month' | 'disbursed_month' | 'lunas'>('all');
   const [selectedNiks, setSelectedNiks] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -356,10 +405,13 @@ export default function AdminBantuan({
     }
 
     // Status Salur Filter
-    if (salurFilter === 'pending') {
-      list = list.filter(r => !disbursedNiks.includes(r.nik));
-    } else if (salurFilter === 'disbursed') {
-      list = list.filter(r => disbursedNiks.includes(r.nik));
+    const currentMonthId = MONTHS_LIST[new Date().getMonth()].id; // e.g. 'Ags'
+    if (salurFilter === 'pending_month') {
+      list = list.filter(r => !(disbursedMonths[r.nik] || []).includes(currentMonthId));
+    } else if (salurFilter === 'disbursed_month') {
+      list = list.filter(r => (disbursedMonths[r.nik] || []).includes(currentMonthId));
+    } else if (salurFilter === 'lunas') {
+      list = list.filter(r => (disbursedMonths[r.nik] || []).length === 12);
     }
 
     // Search query filter
@@ -378,8 +430,10 @@ export default function AdminBantuan({
       let valA = a[sortField] || '';
       let valB = b[sortField] || '';
       if (sortField === 'status') {
-        valA = disbursedNiks.includes(a.nik) ? '1' : '0';
-        valB = disbursedNiks.includes(b.nik) ? '1' : '0';
+        const countA = (disbursedMonths[a.nik] || []).length;
+        const countB = (disbursedMonths[b.nik] || []).length;
+        valA = String(countA);
+        valB = String(countB);
       }
       if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
       if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
@@ -387,7 +441,7 @@ export default function AdminBantuan({
     });
 
     return list;
-  }, [residents, selectedProgram, showOverlapOnly, debouncedSearchQuery, stats.overlaps, salurFilter, disbursedNiks, sortField, sortDirection, filterYear]);
+  }, [residents, selectedProgram, showOverlapOnly, debouncedSearchQuery, stats.overlaps, salurFilter, disbursedMonths, sortField, sortDirection, filterYear]);
 
   // Reset pagination & selection when primary filters change
   useEffect(() => {
@@ -411,11 +465,17 @@ export default function AdminBantuan({
     return 300000;
   }, [selectedProgram]);
 
-  const disbursedCountInFiltered = useMemo(() => {
-    return filteredResidents.filter(r => disbursedNiks.includes(r.nik)).length;
-  }, [filteredResidents, disbursedNiks]);
+  const disbursedThisMonthCount = useMemo(() => {
+    const currentMonthId = MONTHS_LIST[new Date().getMonth()].id;
+    return filteredResidents.filter(r => (disbursedMonths[r.nik] || []).includes(currentMonthId)).length;
+  }, [filteredResidents, disbursedMonths]);
 
-  const totalNominalDisbursed = disbursedCountInFiltered * programAmountVal;
+  const totalNominalDisbursed = useMemo(() => {
+    return filteredResidents.reduce((acc, r) => {
+      const count = (disbursedMonths[r.nik] || []).length;
+      return acc + (count * programAmountVal);
+    }, 0);
+  }, [filteredResidents, disbursedMonths, programAmountVal]);
 
   // Sort Toggle Handler
   const handleSort = (field: 'name' | 'nik' | 'rtRw' | 'status') => {
@@ -1788,7 +1848,7 @@ export default function AdminBantuan({
           {/* Quick Filter Tabs & Summary Calculation Banner */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-gray-100 dark:border-slate-800">
             {/* Quick Tabs */}
-            <div className="flex items-center gap-1 bg-gray-100/80 dark:bg-slate-800/80 p-1 rounded-xl border border-gray-200/50 dark:border-slate-700/50 self-start">
+            <div className="flex flex-wrap items-center gap-1 bg-gray-100/80 dark:bg-slate-800/80 p-1 rounded-xl border border-gray-200/50 dark:border-slate-700/50 self-start">
               <button
                 onClick={() => setSalurFilter('all')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -1800,24 +1860,34 @@ export default function AdminBantuan({
                 Semua ({filteredResidents.length})
               </button>
               <button
-                onClick={() => setSalurFilter('pending')}
+                onClick={() => setSalurFilter('pending_month')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  salurFilter === 'pending'
+                  salurFilter === 'pending_month'
                     ? 'bg-amber-500 text-white shadow-sm'
                     : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
                 }`}
               >
-                Belum Salur ({filteredResidents.length - disbursedCountInFiltered})
+                Belum Salur ({MONTHS_LIST[new Date().getMonth()].label})
               </button>
               <button
-                onClick={() => setSalurFilter('disbursed')}
+                onClick={() => setSalurFilter('disbursed_month')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  salurFilter === 'disbursed'
+                  salurFilter === 'disbursed_month'
                     ? 'bg-emerald-600 text-white shadow-sm'
                     : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
                 }`}
               >
-                Sudah Salur ({disbursedCountInFiltered})
+                Sudah Salur ({MONTHS_LIST[new Date().getMonth()].label}: {disbursedThisMonthCount})
+              </button>
+              <button
+                onClick={() => setSalurFilter('lunas')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  salurFilter === 'lunas'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
+                }`}
+              >
+                Lunas 12 Bln
               </button>
             </div>
 
@@ -2034,7 +2104,7 @@ export default function AdminBantuan({
                       </td>
 
                       {/* Status & Disburse Toggle Column */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-5 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-col gap-1.5 items-start">
                           {isOverlap && (
                             <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] border border-red-200 whitespace-nowrap">
@@ -2043,35 +2113,48 @@ export default function AdminBantuan({
                             </div>
                           )}
 
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (isDisbursed) {
-                                setDisbursedNiks(prev => prev.filter(n => n !== resident.nik));
-                                showToast(`Status penyaluran ${resident.name} diubah menjadi Belum Salur`, "info");
-                              } else {
-                                setDisbursedNiks(prev => [...prev, resident.nik]);
-                                showToast(`Berhasil menandai ${resident.name} telah menerima salur ${selectedProgram}`, "success");
-                              }
-                            }}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border transition-all flex items-center gap-1.5 shadow-sm active:scale-95 whitespace-nowrap ${
-                              isDisbursed
-                                ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
-                                : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300'
-                            }`}
-                          >
-                            {isDisbursed ? (
-                              <>
-                                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                                Sudah Salur (Tahap I)
-                              </>
-                            ) : (
-                              <>
-                                <Banknote className="w-3.5 h-3.5 text-emerald-600" />
-                                Tandai Disalurkan
-                              </>
-                            )}
-                          </button>
+                          {/* 12-Month Salur Status Summary & Month Chips */}
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`px-2 py-0.5 rounded-md font-extrabold text-[10px] border shadow-2xs ${
+                                (disbursedMonths[resident.nik] || []).length === 12
+                                  ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-200'
+                                  : (disbursedMonths[resident.nik] || []).length > 0
+                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200'
+                                  : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-200'
+                              }`}>
+                                {(disbursedMonths[resident.nik] || []).length} / 12 Bln
+                              </span>
+                              <span className="text-[10px] font-bold text-gray-500 font-mono">
+                                Rp {(((disbursedMonths[resident.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
+                              </span>
+                            </div>
+
+                            {/* 12 Interactive Month Chips */}
+                            <div className="flex flex-wrap gap-0.5 max-w-[210px]">
+                              {MONTHS_LIST.map((m, idx) => {
+                                const isDisbursed = (disbursedMonths[resident.nik] || []).includes(m.id);
+                                const isCurrentMonth = idx === new Date().getMonth();
+                                return (
+                                  <button
+                                    key={m.id}
+                                    type="button"
+                                    onClick={() => handleToggleMonth(resident.nik, m.id)}
+                                    title={`${m.fullName}: ${isDisbursed ? 'Sudah Salur ✓' : 'Belum Salur'}`}
+                                    className={`w-5 h-4.5 rounded text-[8px] font-black transition-all border flex items-center justify-center cursor-pointer active:scale-90 ${
+                                      isDisbursed
+                                        ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
+                                        : isCurrentMonth
+                                        ? 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200'
+                                        : 'bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 border-gray-200 dark:border-slate-700 hover:bg-emerald-100 hover:text-emerald-700'
+                                    }`}
+                                  >
+                                    {m.label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
                       </td>
 
@@ -2595,24 +2678,78 @@ export default function AdminBantuan({
                   </select>
                 </div>
 
-                {/* Status Penyaluran */}
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Status Penyaluran Bantuan</label>
-                  <select
-                    value={disbursedNiks.includes(selectedResidentDetailModal.nik) ? 'Sudah Salur (Tahap I)' : 'Belum Salur'}
-                    onChange={(e) => {
-                      if (e.target.value === 'Sudah Salur (Tahap I)') {
-                        setDisbursedNiks(prev => Array.from(new Set([...prev, selectedResidentDetailModal.nik])));
-                      } else {
-                        setDisbursedNiks(prev => prev.filter(n => n !== selectedResidentDetailModal.nik));
-                      }
-                    }}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="Belum Salur">Belum Salur</option>
-                    <option value="Sudah Salur (Tahap I)">Sudah Salur (Tahap I)</option>
-                    <option value="Sudah Salur (Tahap II)">Sudah Salur (Tahap II)</option>
-                  </select>
+                {/* Status Penyaluran Bulanan (Januari - Desember) */}
+                <div className="space-y-3 bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/60">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <label className="block text-xs font-extrabold text-emerald-900 dark:text-emerald-200 uppercase tracking-wider">
+                        Status Penyaluran Bulanan (12 Bulan)
+                      </label>
+                      <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
+                        Klik bulan di bawah ini untuk mencatat pencairan bantuan per bulan.
+                      </p>
+                    </div>
+                    <span className="text-xs font-black bg-emerald-700 text-white px-3 py-1 rounded-xl shadow-2xs whitespace-nowrap">
+                      {(disbursedMonths[selectedResidentDetailModal.nik] || []).length} / 12 Bulan Salur
+                    </span>
+                  </div>
+
+                  {/* 12 Month Grid */}
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 pt-1">
+                    {MONTHS_LIST.map((m, idx) => {
+                      const isDisbursed = (disbursedMonths[selectedResidentDetailModal.nik] || []).includes(m.id);
+                      const isCurrentMonth = idx === new Date().getMonth();
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => handleToggleMonth(selectedResidentDetailModal.nik, m.id)}
+                          className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-2xs active:scale-95 ${
+                            isDisbursed
+                              ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
+                              : isCurrentMonth
+                              ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200 ring-2 ring-amber-400/40'
+                              : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
+                          }`}
+                        >
+                          <span>{m.fullName}</span>
+                          <span className="text-[9px] opacity-80 font-mono">
+                            {isDisbursed ? '✓ Salur' : (isCurrentMonth ? 'Bulan Ini' : 'Belum')}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Summary & Quick Action Buttons */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-emerald-100 dark:border-emerald-900/40">
+                    <div className="text-xs font-bold text-gray-700 dark:text-slate-300">
+                      Total Dana Cair: <span className="font-mono text-emerald-700 dark:text-emerald-400 font-extrabold text-sm">Rp {(((disbursedMonths[selectedResidentDetailModal.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => handleSetMonthsUntil(selectedResidentDetailModal.nik, new Date().getMonth())}
+                        className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
+                      >
+                        Salur s.d. {MONTHS_LIST[new Date().getMonth()].fullName}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSetAll12Months(selectedResidentDetailModal.nik)}
+                        className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
+                      >
+                        Lunas 12 Bulan
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleResetMonths(selectedResidentDetailModal.nik)}
+                        className="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Quick Action Buttons */}
