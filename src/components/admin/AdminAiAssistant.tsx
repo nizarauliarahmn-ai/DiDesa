@@ -5,12 +5,12 @@ import ReactMarkdown from 'react-markdown';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
 export default function AdminAiAssistant() {
-  // Model chain: coba berurutan jika model sebelumnya tidak tersedia
+  // Model chain: urutan dari yang paling baru ke paling stabil
   const GEMINI_MODELS = [
     'gemini-2.0-flash',
-    'gemini-2.0-flash-exp',
     'gemini-1.5-flash',
-    'gemini-1.5-flash-latest',
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-pro',
   ];
   const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
@@ -166,6 +166,7 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
 
       for (const model of GEMINI_MODELS) {
         try {
+          console.log(`[Desi] Mencoba model: ${model}`);
           const response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -175,18 +176,24 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
           const data = await response.json();
 
           if (!response.ok) {
-            const errMsg: string = data.error?.message || '';
-            // Jika API key tidak valid, langsung berhenti
-            if (errMsg.includes('API key not valid') || errMsg.includes('INVALID_ARGUMENT')) {
+            const errMsg: string = data.error?.message || `HTTP ${response.status}`;
+            const errCode: number = data.error?.code || response.status;
+
+            // Hanya berhenti total jika auth error (401/403/invalid key)
+            const isAuthError = errCode === 401 || errCode === 403 ||
+              errMsg.includes('API key not valid') ||
+              errMsg.includes('API_KEY_INVALID') ||
+              errMsg.includes('PERMISSION_DENIED');
+
+            if (isAuthError) {
               resetApiKey();
-              throw new Error('API Key tidak valid atau telah kadaluarsa. Silakan masukkan API Key yang baru.');
+              throw new Error('API Key tidak valid atau tidak memiliki akses. Silakan masukkan API Key baru.');
             }
-            // Jika model tidak tersedia, coba model berikutnya
-            if (errMsg.includes('no longer available') || errMsg.includes('not found') || errMsg.includes('404')) {
-              lastError = errMsg;
-              continue;
-            }
-            throw new Error(errMsg || 'Terjadi kesalahan pada server AI');
+
+            // Semua error lain (model tidak tersedia, quota, dll) → coba model berikutnya
+            console.warn(`[Desi] Model ${model} gagal (${errCode}): ${errMsg}`);
+            lastError = `[${model}] ${errMsg}`;
+            continue;
           }
 
           reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Maaf, saya tidak mengerti maksud Anda.';
@@ -194,17 +201,22 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
           setActiveModel(model);
           break;
         } catch (modelErr: any) {
-          if (modelErr.message.includes('API Key') || modelErr.message.includes('kadaluarsa')) throw modelErr;
-          lastError = modelErr.message;
+          // Jika error auth sudah di-throw dari dalam, re-throw langsung
+          if (modelErr.message.includes('API Key') || modelErr.message.includes('kadaluarsa') || modelErr.message.includes('tidak memiliki akses')) {
+            throw modelErr;
+          }
+          // Error jaringan / unexpected → coba model berikutnya
+          console.warn(`[Desi] Exception model ${model}:`, modelErr.message);
+          lastError = `[${model}] ${modelErr.message}`;
         }
       }
 
       if (!reply) {
-        throw new Error(`Semua model AI tidak tersedia saat ini. Error terakhir: ${lastError}`);
+        throw new Error(`Semua model AI tidak tersedia.\n\nPastikan:\n1. API Key Google AI Studio valid (bukan Vertex AI)\n2. Billing aktif di akun Google Cloud\n3. API Key tidak dibatasi hanya untuk model tertentu\n\nError terakhir: ${lastError}`);
       }
 
       setMessages(prev => [...prev, { role: 'ai', content: reply }]);
-      console.log(`[Desi] Menggunakan model: ${usedModel}`);
+      console.log(`[Desi] ✅ Berhasil menggunakan model: ${usedModel}`);
     } catch (error: any) {
       console.error(error);
       setMessages(prev => [...prev, { role: 'ai', content: `Maaf, terjadi kesalahan: ${error.message}` }]);
