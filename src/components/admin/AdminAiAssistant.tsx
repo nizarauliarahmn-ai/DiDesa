@@ -164,13 +164,28 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
       let lastError = '';
       let usedModel = activeModel;
 
+      // Payload tanpa generationConfig yang bermasalah di beberapa model
+      const safePayload = {
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: geminiMessages,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1024,
+        }
+      };
+
       for (const model of GEMINI_MODELS) {
         try {
           console.log(`[Desi] Mencoba model: ${model}`);
+          // Kirim API key via header (x-goog-api-key) untuk mendukung format kunci baru AQ.xxx
+          // dan juga via URL param ?key= untuk kompatibilitas format lama AIzaSy...
           const response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            headers: {
+              'Content-Type': 'application/json',
+              'x-goog-api-key': apiKey,
+            },
+            body: JSON.stringify(safePayload)
           });
 
           const data = await response.json();
