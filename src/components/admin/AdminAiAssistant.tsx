@@ -5,11 +5,21 @@ import ReactMarkdown from 'react-markdown';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
 export default function AdminAiAssistant() {
+  // Model chain: coba berurutan jika model sebelumnya tidak tersedia
+  const GEMINI_MODELS = [
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-exp',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-latest',
+  ];
+  const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+
   const [messages, setMessages] = useState([
     { role: 'ai', content: 'Halo! Saya Desi, Asisten Pintar DiDesa. Ada yang bisa saya bantu terkait informasi desa, statistik penduduk, atau administrasi hari ini?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [activeModel, setActiveModel] = useState(GEMINI_MODELS[0]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [tenantId, setTenantId] = useState('sukamakmur');
@@ -83,6 +93,7 @@ export default function AdminAiAssistant() {
       let male = 0;
       let female = 0;
       let topJobsStr = '-';
+      let ageGroups = '';
       
       if (resData && typeof resData.json === 'function') {
         const residents = await resData.json();
@@ -97,21 +108,40 @@ export default function AdminAiAssistant() {
             jobCounts[job] = (jobCounts[job] || 0) + 1;
           });
           topJobsStr = Object.entries(jobCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(j => `${j[0]}: ${j[1]}`).join(', ');
+
+          // Kelompok usia
+          const anak = residents.filter(r => { const age = parseInt(r.age); return age >= 0 && age <= 14; }).length;
+          const remaja = residents.filter(r => { const age = parseInt(r.age); return age >= 15 && age <= 24; }).length;
+          const dewasa = residents.filter(r => { const age = parseInt(r.age); return age >= 25 && age <= 59; }).length;
+          const lansia = residents.filter(r => { const age = parseInt(r.age); return age >= 60; }).length;
+          ageGroups = `Anak (0-14): ${anak}, Remaja (15-24): ${remaja}, Dewasa (25-59): ${dewasa}, Lansia (60+): ${lansia}`;
         }
       }
 
-      const systemPrompt = `Kamu adalah Desi, Asisten Pintar "DiDesa".
-Tugasmu adalah membantu admin/perangkat desa dalam mengelola data, memberikan informasi statistik, serta menjawab pertanyaan administratif.
-Selalu gunakan bahasa Indonesia yang sopan, ramah, dan profesional. Jangan memberikan informasi fiktif jika kamu tidak tahu. Jawab dengan ringkas jika memungkinkan.
+      const villageName = localStorage.getItem('village_name') || 'Desa';
+      const kecamatan = localStorage.getItem('village_kecamatan') || '-';
+      const kabupaten = localStorage.getItem('village_kabupaten') || '-';
+      const kadesName = localStorage.getItem('kop_kades') || '-';
 
-[KONTEKS DATA DESA SAAT INI]
-- ID Desa: ${tenantId.toUpperCase()}
+      const systemPrompt = `Kamu adalah Desi, Asisten Pintar "DiDesa" — sistem manajemen desa digital berbasis AI.
+Tugasmu adalah membantu admin/perangkat desa dalam mengelola data, memberikan informasi statistik, serta menjawab pertanyaan administratif.
+Selalu gunakan bahasa Indonesia yang sopan, ramah, dan profesional.
+Jika kamu tidak tahu jawabannya, katakan dengan jujur. Jangan mengarang data.
+Format jawaban: gunakan poin atau paragraf singkat. Gunakan markdown untuk memformat.
+
+[PROFIL DESA]
+- Nama: ${villageName}
+- Kecamatan: ${kecamatan}
+- Kabupaten/Kota: ${kabupaten}
+- Kepala Desa: ${kadesName}
+
+[DATA KEPENDUDUKAN REAL-TIME]
 - Total Penduduk: ${totalResidents} jiwa
-- Laki-laki: ${male} jiwa
-- Perempuan: ${female} jiwa
+- Laki-laki: ${male} jiwa | Perempuan: ${female} jiwa
+- Kelompok Usia: ${ageGroups || '-'}
 - 5 Profesi Terbanyak: ${topJobsStr}
 
-Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
+Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah data aktual sistem.`;
 
       const geminiMessages = newMessages.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'model',
@@ -120,26 +150,61 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
 
       const payload = {
         system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: geminiMessages
+        contents: geminiMessages,
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
       };
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      // Coba setiap model dalam chain sampai berhasil
+      let reply = '';
+      let lastError = '';
+      let usedModel = activeModel;
 
-      const data = await response.json();
-      if (!response.ok) {
-        if (data.error && data.error.message.includes('API key not valid')) {
-          resetApiKey();
-          throw new Error('API Key tidak valid atau telah kadaluarsa.');
+      for (const model of GEMINI_MODELS) {
+        try {
+          const response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            const errMsg: string = data.error?.message || '';
+            // Jika API key tidak valid, langsung berhenti
+            if (errMsg.includes('API key not valid') || errMsg.includes('INVALID_ARGUMENT')) {
+              resetApiKey();
+              throw new Error('API Key tidak valid atau telah kadaluarsa. Silakan masukkan API Key yang baru.');
+            }
+            // Jika model tidak tersedia, coba model berikutnya
+            if (errMsg.includes('no longer available') || errMsg.includes('not found') || errMsg.includes('404')) {
+              lastError = errMsg;
+              continue;
+            }
+            throw new Error(errMsg || 'Terjadi kesalahan pada server AI');
+          }
+
+          reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Maaf, saya tidak mengerti maksud Anda.';
+          usedModel = model;
+          setActiveModel(model);
+          break;
+        } catch (modelErr: any) {
+          if (modelErr.message.includes('API Key') || modelErr.message.includes('kadaluarsa')) throw modelErr;
+          lastError = modelErr.message;
         }
-        throw new Error(data.error?.message || 'Terjadi kesalahan pada server AI');
       }
 
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, saya tidak mengerti maksud Anda.";
+      if (!reply) {
+        throw new Error(`Semua model AI tidak tersedia saat ini. Error terakhir: ${lastError}`);
+      }
+
       setMessages(prev => [...prev, { role: 'ai', content: reply }]);
+      console.log(`[Desi] Menggunakan model: ${usedModel}`);
     } catch (error: any) {
       console.error(error);
       setMessages(prev => [...prev, { role: 'ai', content: `Maaf, terjadi kesalahan: ${error.message}` }]);
@@ -147,6 +212,13 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
       setIsLoading(false);
     }
   };
+
+  const quickActions = [
+    'Berapa total penduduk desa ini?',
+    'Profesi terbanyak warga desa?',
+    'Bantu saya buat surat keterangan domisili',
+    'Jelaskan fitur DiDesa secara singkat',
+  ];
 
   return (
     <div className="max-w-4xl mx-auto pb-24 h-[calc(100vh-80px)] flex flex-col px-4 sm:px-0">
@@ -169,7 +241,10 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
                 ONLINE
               </span>
             </h2>
-            <p className="text-gray-500 dark:text-slate-400 text-sm font-medium">Tanya informasi layanan, statistik, atau panduan secara instan.</p>
+            <p className="text-gray-500 dark:text-slate-400 text-sm font-medium">
+              Tanya informasi layanan, statistik, atau panduan secara instan.
+              {apiKey && <span className="ml-2 text-indigo-400 text-[10px] font-mono bg-indigo-50 dark:bg-indigo-900/20 px-1.5 py-0.5 rounded">{activeModel}</span>}
+            </p>
           </div>
         </div>
         {!showConfig && apiKey && (
@@ -272,6 +347,22 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini.`;
               )}
               <div ref={messagesEndRef} />
             </div>
+
+            {/* Quick Actions — tampil hanya ketika percakapan masih awal */}
+            {messages.length <= 1 && !isLoading && (
+              <div className="px-6 pb-3 flex flex-wrap gap-2">
+                {quickActions.map((action) => (
+                  <button
+                    key={action}
+                    onClick={() => { setInput(action); }}
+                    className="text-xs px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors font-medium"
+                  >
+                    {action}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="p-4 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800">
               <form onSubmit={handleSend} className="relative">
                 <input 

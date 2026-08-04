@@ -162,12 +162,11 @@ export default function App() {
     localStorage.setItem('letter_cache_version', 'v4');
   }
 
-  // Wipe old dummy data
+  // Wipe old dummy data (NOT village_officers — that's valid data synced from Supabase)
   if (localStorage.getItem('data_wipe_v1') !== 'true') {
     localStorage.removeItem('didesa_feedbacks');
     localStorage.removeItem('didesa_aspirasi_data');
     localStorage.removeItem('local_residents');
-    localStorage.removeItem('village_officers');
     localStorage.setItem('data_wipe_v1', 'true');
   }
 
@@ -206,20 +205,6 @@ export default function App() {
   };
 
   React.useEffect(() => {
-    // Inisialisasi daftar pejabat desa (village_officers) jika belum ada di localStorage
-    if (!localStorage.getItem('village_officers')) {
-      const defaultOfficers = [
-        { name: 'Fazakkir Rahmad', role: 'Kepala Desa', nip: '-' },
-        { name: 'Siti Aminah', role: 'Sekretaris Desa', nip: '198510122010122003' },
-        { name: 'Muhammad Noor', role: 'Kasi Pemerintahan', nip: '198704152014021002' },
-        { name: 'Ahmad Rifai', role: 'Kasi Kesejahteraan', nip: '-' },
-        { name: 'Rahmadi', role: 'Kasi Pelayanan', nip: '-' },
-        { name: 'H. Supian', role: 'Kaur Keuangan', nip: '-' },
-        { name: 'Sri Wahyuni', role: 'Kaur Umum', nip: '-' }
-      ];
-      localStorage.setItem('village_officers', JSON.stringify(defaultOfficers));
-    }
-
     // ✅ PRIMARY SYNC & REALTIME SUBSCRIPTION: 
     // Pull SaaS global branding from Supabase + subscribe to instant WebSocket events (<100ms)
     const unsubscribeRealtime = subscribeGlobalBrandingRealtime();
@@ -229,10 +214,21 @@ export default function App() {
     const unsubscribeSaaS = subscribeSaaSSettingsRealtime();
 
     // ✅ SECONDARY SYNC: Pull tenant-specific settings from Supabase
+    // village_officers defaults ONLY set if Supabase returns empty (fresh tenant)
     const syncTenantSettings = async () => {
       try {
         const tid = await resolveCurrentTenant();
-        if (!tid) return;
+        if (!tid) {
+          // No tenant — safe to set offline defaults if nothing in localStorage
+          if (!localStorage.getItem('village_officers')) {
+            const defaultOfficers = [
+              { name: 'Kepala Desa', role: 'Kepala Desa', nip: '-' },
+              { name: 'Sekretaris Desa', role: 'Sekretaris Desa', nip: '-' },
+            ];
+            localStorage.setItem('village_officers', JSON.stringify(defaultOfficers));
+          }
+          return;
+        }
 
         // Fetch tenant details for name fallback
         const { data: tenant } = await supabase
@@ -262,9 +258,27 @@ export default function App() {
               localStorage.setItem(row.key, row.value);
             }
           });
+          // If Supabase has village_officers, it's already written above.
+          // If NOT present in Supabase at all (fresh tenant), set generic defaults.
+          const hasOfficers = data.some((r: any) => r.key === 'village_officers');
+          if (!hasOfficers && !localStorage.getItem('village_officers')) {
+            const defaultOfficers = [
+              { name: 'Kepala Desa', role: 'Kepala Desa', nip: '-' },
+              { name: 'Sekretaris Desa', role: 'Sekretaris Desa', nip: '-' },
+            ];
+            localStorage.setItem('village_officers', JSON.stringify(defaultOfficers));
+          }
+        } else if (!localStorage.getItem('village_officers')) {
+          // saas_settings empty for this tenant (fresh install)
+          const defaultOfficers = [
+            { name: 'Kepala Desa', role: 'Kepala Desa', nip: '-' },
+            { name: 'Sekretaris Desa', role: 'Sekretaris Desa', nip: '-' },
+          ];
+          localStorage.setItem('village_officers', JSON.stringify(defaultOfficers));
         }
         window.dispatchEvent(new Event('village_settings_updated'));
         window.dispatchEvent(new Event('app_theme_updated'));
+        window.dispatchEvent(new Event('letter_font_updated'));
         window.dispatchEvent(new Event('letter_classifications_updated'));
       } catch (err) {
         console.warn('[App] Gagal sinkronisasi pengaturan desa:', err);

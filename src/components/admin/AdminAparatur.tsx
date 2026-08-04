@@ -150,44 +150,46 @@ export default function AdminAparatur() {
     localStorage.setItem('village_rt_list', JSON.stringify(rtList));
     localStorage.setItem('village_rw_list', JSON.stringify(rwList));
 
-    // Save ONLINE to Supabase Cloud
+    // Save ONLINE to Supabase Cloud — Batch upsert (1 request, bukan 20)
     if (tenantId) {
       const settingsToSave = [
-        { key: 'village_officers', value: JSON.stringify(officers) },
-        { key: 'village_bpd', value: JSON.stringify(bpdList) },
-        { key: 'village_lpm', value: JSON.stringify(lpmList) },
-        { key: 'kop_kades', value: namaKades },
-        { key: 'village_signature_left_role', value: sigLeftRole },
-        { key: 'village_signature_left_name', value: sigLeftName },
-        { key: 'village_signature_left_pangkat', value: sigLeftPangkat },
-        { key: 'village_signature_left_nip', value: sigLeftNip },
-        { key: 'village_rt_list', value: JSON.stringify(rtList) },
-        { key: 'village_rw_list', value: JSON.stringify(rwList) }
+        { tenant_id: tenantId, key: 'village_officers', value: JSON.stringify(officers) },
+        { tenant_id: tenantId, key: 'village_bpd', value: JSON.stringify(bpdList) },
+        { tenant_id: tenantId, key: 'village_lpm', value: JSON.stringify(lpmList) },
+        { tenant_id: tenantId, key: 'kop_kades', value: namaKades },
+        { tenant_id: tenantId, key: 'village_signature_left_role', value: sigLeftRole },
+        { tenant_id: tenantId, key: 'village_signature_left_name', value: sigLeftName },
+        { tenant_id: tenantId, key: 'village_signature_left_pangkat', value: sigLeftPangkat },
+        { tenant_id: tenantId, key: 'village_signature_left_nip', value: sigLeftNip },
+        { tenant_id: tenantId, key: 'village_rt_list', value: JSON.stringify(rtList) },
+        { tenant_id: tenantId, key: 'village_rw_list', value: JSON.stringify(rwList) },
       ];
 
       try {
-        for (const s of settingsToSave) {
-          const { data: existing } = await supabase
-            .from('saas_settings')
-            .select('key')
-            .eq('tenant_id', tenantId)
-            .eq('key', s.key)
-            .maybeSingle();
+        const { error: upsertError } = await supabase
+          .from('saas_settings')
+          .upsert(settingsToSave, { onConflict: 'tenant_id,key' });
 
-          if (existing) {
-            await supabase
+        if (upsertError) {
+          // Fallback: jika upsert gagal (constraint belum ada), coba sequential
+          console.warn('[Aparatur] Upsert gagal, fallback sequential:', upsertError);
+          for (const s of settingsToSave) {
+            const { data: existing } = await supabase
               .from('saas_settings')
-              .update({ value: s.value })
+              .select('key')
               .eq('tenant_id', tenantId)
-              .eq('key', s.key);
-          } else {
-            await supabase
-              .from('saas_settings')
-              .insert({ tenant_id: tenantId, key: s.key, value: s.value });
+              .eq('key', s.key)
+              .maybeSingle();
+            if (existing) {
+              await supabase.from('saas_settings').update({ value: s.value }).eq('tenant_id', tenantId).eq('key', s.key);
+            } else {
+              await supabase.from('saas_settings').insert(s);
+            }
           }
         }
+
         setCloudSynced(true);
-        showToast('Berhasil menyimpan data aparatur & lembaga desa ke Cloud Supabase!', 'success');
+        showToast('Berhasil menyimpan data aparatur & disinkronkan ke cloud! ✓', 'success');
       } catch (err) {
         console.error('Failed to sync settings to Supabase', err);
         showToast('Tersimpan di lokal. Gagal sinkron ke Cloud Supabase.', 'error');

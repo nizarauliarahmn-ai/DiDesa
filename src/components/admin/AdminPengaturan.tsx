@@ -5,7 +5,7 @@ import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { 
   Building2, MapPin, Save, Image as ImageIcon, Check, Bot, Layout, Upload, Map,
-  Palette, Smartphone, Compass, Settings
+  Palette, Smartphone, Compass, Settings, FileText, Cloud
 } from 'lucide-react';
 import VillageMapModal from '../common/VillageMapModal';
 import VillageMapPreview from '../common/VillageMapPreview';
@@ -31,6 +31,7 @@ export default function AdminPengaturan() {
   const [villageLng, setVillageLng] = useState(() => parseFloat(localStorage.getItem('village_lng') || '115.227889'));
 
   const [appTheme, setAppTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
+  const [letterFont, setLetterFont] = useState(() => localStorage.getItem('village_letter_font') || 'Arial, sans-serif');
 
   // Fetch settings from Supabase on mount to keep device-agnostic sync
   useEffect(() => {
@@ -66,6 +67,7 @@ export default function AdminPengaturan() {
           set('village_aspirasi_banner_y_offset', setAspirasiBannerYOffset);
           set('village_aspirasi_banner_zoom', setAspirasiBannerZoom);
           set('app_theme', setAppTheme);
+          set('village_letter_font', setLetterFont);
           if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
           if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
           window.dispatchEvent(new Event('village_settings_updated'));
@@ -133,80 +135,63 @@ export default function AdminPengaturan() {
     // Allow UI to show spinner
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    localStorage.setItem('village_name', villageName);
-    localStorage.setItem('village_kecamatan', kecamatan);
-    localStorage.setItem('village_kabupaten', kabupaten);
-    localStorage.setItem('village_alamat', alamat);
-
-    // Save to kop keys for 100% synchronization
-    localStorage.setItem('kop_desa', villageName);
-    localStorage.setItem('kop_kecamatan', kecamatan);
-    localStorage.setItem('kop_kabupaten', kabupaten);
-    localStorage.setItem('kop_alamat', alamat);
-    localStorage.setItem('kop_kontak', kontak);
-    localStorage.setItem('kop_logo_url', logoUrl);
-
-    localStorage.setItem('village_welcome_banner_url', welcomeBannerUrl);
-    localStorage.setItem('village_welcome_banner_y_offset', welcomeBannerYOffset);
-    localStorage.setItem('village_welcome_banner_zoom', welcomeBannerZoom);
-    localStorage.setItem('village_aspirasi_banner_url', aspirasiBannerUrl);
-    localStorage.setItem('village_aspirasi_banner_y_offset', aspirasiBannerYOffset);
-    localStorage.setItem('village_aspirasi_banner_zoom', aspirasiBannerZoom);
-    
-    localStorage.setItem('village_lat', villageLat.toString());
-    localStorage.setItem('village_lng', villageLng.toString());
-    localStorage.setItem('app_theme', appTheme);
+    // ── 1. Simpan ke localStorage (instant apply) ─────────────────────
+    const localMap: Record<string, string> = {
+      village_name: villageName,
+      village_kecamatan: kecamatan,
+      village_kabupaten: kabupaten,
+      village_alamat: alamat,
+      kop_desa: villageName,
+      kop_kecamatan: kecamatan,
+      kop_kabupaten: kabupaten,
+      kop_alamat: alamat,
+      kop_kontak: kontak,
+      kop_logo_url: logoUrl,
+      village_welcome_banner_url: welcomeBannerUrl,
+      village_welcome_banner_y_offset: welcomeBannerYOffset,
+      village_welcome_banner_zoom: welcomeBannerZoom,
+      village_aspirasi_banner_url: aspirasiBannerUrl,
+      village_aspirasi_banner_y_offset: aspirasiBannerYOffset,
+      village_aspirasi_banner_zoom: aspirasiBannerZoom,
+      village_lat: villageLat.toString(),
+      village_lng: villageLng.toString(),
+      app_theme: appTheme,
+      village_letter_font: letterFont,
+    };
+    Object.entries(localMap).forEach(([key, value]) => localStorage.setItem(key, value));
 
     try {
-      const settingsToSave = [
-        { tenant_id: tenantId, key: 'village_name', value: villageName },
-        { tenant_id: tenantId, key: 'village_kecamatan', value: kecamatan },
-        { tenant_id: tenantId, key: 'village_kabupaten', value: kabupaten },
-        { tenant_id: tenantId, key: 'village_alamat', value: alamat },
-        { tenant_id: tenantId, key: 'kop_desa', value: villageName },
-        { tenant_id: tenantId, key: 'kop_kecamatan', value: kecamatan },
-        { tenant_id: tenantId, key: 'kop_kabupaten', value: kabupaten },
-        { tenant_id: tenantId, key: 'kop_alamat', value: alamat },
-        { tenant_id: tenantId, key: 'kop_kontak', value: kontak },
-        { tenant_id: tenantId, key: 'kop_logo_url', value: logoUrl },
-        { tenant_id: tenantId, key: 'village_welcome_banner_url', value: welcomeBannerUrl },
-        { tenant_id: tenantId, key: 'village_welcome_banner_y_offset', value: welcomeBannerYOffset },
-        { tenant_id: tenantId, key: 'village_welcome_banner_zoom', value: welcomeBannerZoom },
-        { tenant_id: tenantId, key: 'village_aspirasi_banner_url', value: aspirasiBannerUrl },
-        { tenant_id: tenantId, key: 'village_aspirasi_banner_y_offset', value: aspirasiBannerYOffset },
-        { tenant_id: tenantId, key: 'village_aspirasi_banner_zoom', value: aspirasiBannerZoom },
-        { tenant_id: tenantId, key: 'village_lat', value: villageLat.toString() },
-        { tenant_id: tenantId, key: 'village_lng', value: villageLng.toString() },
-        { tenant_id: tenantId, key: 'app_theme', value: appTheme }
-      ];
-      // Safe save
-      for (const s of settingsToSave) {
-        const { data: existing } = await supabase
-          .from('saas_settings')
-          .select('key')
-          .eq('tenant_id', tenantId)
-          .eq('key', s.key)
-          .maybeSingle();
+      // ── 2. Batch upsert ke Supabase (1 request, tidak 38 request) ────
+      const settingsToSave = Object.entries(localMap).map(([key, value]) => ({
+        tenant_id: tenantId,
+        key,
+        value,
+      }));
 
-        let opError = null;
-        if (existing) {
-          const { error } = await supabase.from('saas_settings').update({ value: s.value }).eq('tenant_id', tenantId).eq('key', s.key);
-          opError = error;
-        } else {
-          const { error } = await supabase.from('saas_settings').insert(s);
-          opError = error;
-        }
+      const { error: upsertError } = await supabase
+        .from('saas_settings')
+        .upsert(settingsToSave, { onConflict: 'tenant_id,key' });
 
-        if (opError) {
-          console.error('Supabase Save Error for key ' + s.key + ':', opError);
-          alert('Gagal menyinkronkan ke server Supabase.');
-          break; // Stop on first error
+      if (upsertError) {
+        // Fallback: upsert gagal mungkin karena constraint belum ada, coba manual
+        console.warn('[Pengaturan] Upsert gagal, mencoba fallback sequential save:', upsertError);
+        for (const s of settingsToSave) {
+          const { data: existing } = await supabase
+            .from('saas_settings')
+            .select('key')
+            .eq('tenant_id', tenantId!)
+            .eq('key', s.key)
+            .maybeSingle();
+          if (existing) {
+            await supabase.from('saas_settings').update({ value: s.value }).eq('tenant_id', tenantId!).eq('key', s.key);
+          } else {
+            await supabase.from('saas_settings').insert(s);
+          }
         }
       }
 
       const adminUserStr = localStorage.getItem('didesa_auth_user');
       const adminName = adminUserStr ? JSON.parse(adminUserStr).name : 'Admin Desa';
-
       addSaaSLog({
         admin: adminName,
         aksi: 'Pembaruan Pengaturan Desa',
@@ -214,12 +199,16 @@ export default function AdminPengaturan() {
         status: 'Berhasil',
         category: 'Desa'
       });
+
+      showToast('Pengaturan berhasil disimpan & disinkronkan ke cloud! ✓', 'success');
     } catch (err) {
       console.error('Failed to sync settings to Supabase', err);
+      showToast('Pengaturan disimpan lokal, namun gagal sync ke cloud. Periksa koneksi internet.', 'error');
     }
 
     window.dispatchEvent(new Event('village_settings_updated'));
     window.dispatchEvent(new Event('app_theme_updated'));
+    window.dispatchEvent(new Event('letter_font_updated'));
 
     setIsSaving(false);
   };
@@ -489,6 +478,47 @@ export default function AdminPengaturan() {
             </div>
           </div>
 
+          {/* Font Surat */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
+              <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-emerald-600" />
+                Font Surat
+              </h3>
+            </div>
+            <div className="p-5 space-y-3">
+              <p className="text-[10px] text-gray-400 dark:text-slate-500">Font yang digunakan di seluruh template cetak surat resmi desa.</p>
+              <div className="space-y-2">
+                {[
+                  { label: 'Times New Roman (Formal)', value: 'Times New Roman, serif' },
+                  { label: 'Arial (Modern)', value: 'Arial, sans-serif' },
+                  { label: 'Georgia (Klasik)', value: 'Georgia, serif' },
+                  { label: 'Calibri (Office)', value: 'Calibri, sans-serif' },
+                  { label: 'Palatino (Elegan)', value: 'Palatino Linotype, serif' },
+                  { label: 'Courier New (Mono)', value: 'Courier New, monospace' },
+                ].map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => setLetterFont(f.value)}
+                    className={`w-full px-3 py-2.5 rounded-xl border-2 flex items-center justify-between transition-all text-left ${
+                      letterFont === f.value
+                        ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10'
+                        : 'border-gray-100 dark:border-slate-800 hover:border-gray-200 bg-white dark:bg-slate-900'
+                    }`}
+                  >
+                    <span className="text-xs font-semibold text-gray-700 dark:text-slate-300">{f.label}</span>
+                    <span className="text-xs text-gray-400" style={{ fontFamily: f.value }}>Aa Bb</span>
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                <Cloud className="w-3 h-3" />
+                Tersinkronisasi ke cloud • berlaku di semua perangkat
+              </p>
+            </div>
+          </div>
+
+          {/* Tema Aplikasi */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
               <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
