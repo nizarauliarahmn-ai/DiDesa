@@ -28,7 +28,9 @@ import {
   SlidersHorizontal,
   Layers,
   DollarSign,
-  Award
+  Award,
+  Printer,
+  QrCode
 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import ConfirmModal from '../common/ConfirmModal';
@@ -202,6 +204,12 @@ const MONTHS_LIST = [
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortField, setSortField] = useState<'name' | 'nik' | 'rtRw' | 'status'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Comprehensive Print Suite States
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [printDocType, setPrintDocType] = useState<'rekap_12bln' | 'tanda_terima' | 'ba_musdes' | 'slip_warga'>('rekap_12bln');
+  const [selectedPrintResident, setSelectedPrintResident] = useState<any | null>(null);
+  const [selectedPrintMonth, setSelectedPrintMonth] = useState<string>(MONTHS_LIST[new Date().getMonth()].id);
 
   // Bulk Stop Modal State
   const [showBulkStopModal, setShowBulkStopModal] = useState(false);
@@ -1838,6 +1846,18 @@ const MONTHS_LIST = [
               </select>
 
               <button
+                onClick={() => {
+                  setSelectedPrintResident(null);
+                  setPrintDocType('rekap_12bln');
+                  setShowPrintModal(true);
+                }}
+                className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Cetak & Laporan
+              </button>
+
+              <button
                 onClick={() => setShowBaModal(true)}
                 className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-sm"
               >
@@ -2200,6 +2220,19 @@ const MONTHS_LIST = [
                             >
                               <Ban className="w-3.5 h-3.5 text-rose-600" />
                               <span>Hentikan</span>
+                            </button>
+
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPrintResident(resident);
+                                setPrintDocType('slip_warga');
+                                setShowPrintModal(true);
+                              }}
+                              className="p-1.5 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg border border-emerald-200/80 dark:border-emerald-800/80 transition-colors inline-flex items-center justify-center active:scale-95"
+                              title="Cetak Slip Bukti Penerimaan Warga"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
                             </button>
 
                             <button 
@@ -2771,6 +2804,19 @@ const MONTHS_LIST = [
                     <button
                       type="button"
                       onClick={() => {
+                        setSelectedPrintResident(selectedResidentDetailModal);
+                        setPrintDocType('slip_warga');
+                        setShowPrintModal(true);
+                      }}
+                      className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl border border-emerald-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
+                    >
+                      <Printer className="w-3.5 h-3.5 text-emerald-700" />
+                      Cetak Kupon / Slip Bukti Penerimaan
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
                         const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
                         handleSingleRollforward(selectedResidentDetailModal, nextYr);
                       }}
@@ -2814,6 +2860,392 @@ const MONTHS_LIST = [
               >
                 <Check className="w-4 h-4" /> Simpan Perubahan Bantuan
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Comprehensive Print & Reports Modal */}
+      {showPrintModal && (
+        <div className="fixed inset-0 z-[220] flex items-center justify-center bg-black/70 backdrop-blur-md p-2 sm:p-4 overflow-y-auto print:p-0 print:bg-white print:static">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 my-4 sm:my-8 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:w-full print:max-w-none print:rounded-none">
+            
+            {/* Modal Header & Options (Hidden when Printing) */}
+            <div className="p-4 sm:p-6 border-b border-gray-100 dark:border-slate-800 bg-gray-50/90 dark:bg-slate-800/90 space-y-4 print:hidden">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-bold">
+                    <Printer className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-lg text-gray-900 dark:text-white">Cetak Dokumen & Laporan Bantuan Sosial</h3>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">Pilih format laporan dan dokumen resmi desa untuk dicetak atau diunduh sebagai PDF.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => window.print()}
+                    className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs sm:text-sm rounded-xl flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                  >
+                    <Printer className="w-4 h-4" /> Cetak Dokumen (PDF)
+                  </button>
+                  <button 
+                    onClick={() => setShowPrintModal(false)}
+                    className="p-2 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-full text-gray-500 dark:text-slate-400 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Mode Selector Tabs */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200/60 dark:border-slate-700/60">
+                <button
+                  type="button"
+                  onClick={() => setPrintDocType('rekap_12bln')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    printDocType === 'rekap_12bln'
+                      ? 'bg-emerald-700 text-white shadow-sm'
+                      : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  1. Rekapitulasi 12 Bulan (Tabel Jan-Des)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPrintDocType('tanda_terima')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    printDocType === 'tanda_terima'
+                      ? 'bg-emerald-700 text-white shadow-sm'
+                      : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <CheckSquare className="w-3.5 h-3.5" />
+                  2. Daftar Tanda Terima (Pencairan)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPrintDocType('ba_musdes')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    printDocType === 'ba_musdes'
+                      ? 'bg-emerald-700 text-white shadow-sm'
+                      : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Award className="w-3.5 h-3.5" />
+                  3. Berita Acara Musdes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPrintDocType('slip_warga')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    printDocType === 'slip_warga'
+                      ? 'bg-emerald-700 text-white shadow-sm'
+                      : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <DollarSign className="w-3.5 h-3.5" />
+                  4. Slip / Kupon Penerima Warga
+                </button>
+              </div>
+
+              {/* Dynamic Controls per Mode */}
+              {printDocType === 'tanda_terima' && (
+                <div className="flex items-center gap-2 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800 text-xs">
+                  <span className="font-bold text-amber-900 dark:text-amber-200">Pilih Bulan Pencairan:</span>
+                  <select
+                    value={selectedPrintMonth}
+                    onChange={(e) => setSelectedPrintMonth(e.target.value)}
+                    className="px-3 py-1 bg-white dark:bg-slate-900 border border-amber-300 rounded-lg font-extrabold text-amber-900 dark:text-amber-100 outline-none"
+                  >
+                    {MONTHS_LIST.map(m => (
+                      <option key={m.id} value={m.id}>Bulan {m.fullName}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            {/* Printable Document Body Area */}
+            <div className="p-6 md:p-10 bg-white text-gray-900 font-sans leading-relaxed text-xs md:text-sm max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible print:p-0 print:text-black">
+              
+              {/* Document KOP Header */}
+              <div className="text-center border-b-4 border-double border-gray-900 pb-4 mb-6 space-y-1">
+                <h2 className="text-base md:text-lg font-bold uppercase tracking-wider">PEMERINTAH KABUPATEN HULU SUNGAI SELATAN</h2>
+                <h1 className="text-xl md:text-2xl font-black uppercase tracking-wide">KECAMATAN SIMPUR — DESA WASAH HILIR</h1>
+                <p className="text-[11px] font-sans text-gray-600 italic">Jl. Wasah Hilir No. 01, Simpur, HSS, Kalimantan Selatan • Kode Pos 71261</p>
+              </div>
+
+              {/* MODE 1: Rekapitulasi 12 Bulan (Jan - Des) */}
+              {printDocType === 'rekap_12bln' && (
+                <div className="space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="text-base md:text-lg font-black uppercase underline tracking-wide">
+                      LAPORAN REKAPITULASI PENYALURAN {selectedProgram.toUpperCase()}
+                    </h3>
+                    <p className="text-xs font-bold text-gray-700">TAHUN ANGGARAN {filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear()}</p>
+                    <p className="text-[11px] text-gray-500 font-mono">Dicetak pada: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-900 text-[10px] sm:text-xs">
+                      <thead>
+                        <tr className="bg-gray-100 text-center font-black">
+                          <th className="border border-gray-900 px-1 py-1.5 w-6">NO</th>
+                          <th className="border border-gray-900 px-2 py-1.5">NIK</th>
+                          <th className="border border-gray-900 px-2 py-1.5">NAMA PENERIMA (KPM)</th>
+                          <th className="border border-gray-900 px-1.5 py-1.5">RT/RW</th>
+                          {MONTHS_LIST.map(m => (
+                            <th key={m.id} className="border border-gray-900 px-1 py-1.5 text-[9px] font-black">{m.label}</th>
+                          ))}
+                          <th className="border border-gray-900 px-1.5 py-1.5 text-center">TOTAL CAIR</th>
+                          <th className="border border-gray-900 px-2 py-1.5 text-right">TOTAL NOMINAL</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredResidents.length === 0 ? (
+                          <tr>
+                            <td colSpan={18} className="border border-gray-900 px-3 py-4 text-center text-gray-500 italic">Tidak ada data penerima bantuan.</td>
+                          </tr>
+                        ) : (
+                          filteredResidents.map((res, index) => {
+                            const resMonths = disbursedMonths[res.nik] || [];
+                            const totalMonths = resMonths.length;
+                            const totalNominal = totalMonths * programAmountVal;
+
+                            return (
+                              <tr key={res.nik} className="hover:bg-gray-50">
+                                <td className="border border-gray-900 px-1 py-1 text-center font-bold">{index + 1}</td>
+                                <td className="border border-gray-900 px-2 py-1 font-mono font-semibold">{res.nik}</td>
+                                <td className="border border-gray-900 px-2 py-1 font-bold">{res.name}</td>
+                                <td className="border border-gray-900 px-1.5 py-1 text-center">RT {res.rt || "-"}/RW {res.rw || "-"}</td>
+                                {MONTHS_LIST.map(m => {
+                                  const isDisbursed = resMonths.includes(m.id);
+                                  return (
+                                    <td key={m.id} className={`border border-gray-900 text-center font-extrabold text-[9px] ${isDisbursed ? 'bg-emerald-50 text-emerald-800' : 'text-gray-300'}`}>
+                                      {isDisbursed ? '✓' : '-'}
+                                    </td>
+                                  );
+                                })}
+                                <td className="border border-gray-900 px-1.5 py-1 text-center font-extrabold">{totalMonths} Bln</td>
+                                <td className="border border-gray-900 px-2 py-1 text-right font-mono font-bold">Rp {totalNominal.toLocaleString('id-ID')}</td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-gray-100 font-extrabold text-xs">
+                          <td colSpan={16} className="border border-gray-900 px-3 py-2 text-right">TOTAL KESELURUHAN DANA SALUR:</td>
+                          <td colSpan={2} className="border border-gray-900 px-3 py-2 text-right font-mono text-sm">
+                            Rp {totalNominalDisbursed.toLocaleString('id-ID')}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+
+                  {/* Signatures Footer */}
+                  <div className="pt-6 font-sans text-xs grid grid-cols-3 gap-6 text-center break-inside-avoid">
+                    <div className="space-y-14">
+                      <p className="font-bold">Mengetahui,<br />Ketua BPD Wasah Hilir</p>
+                      <p className="font-bold underline uppercase">( H. AHMAD SHODIQ, S.IP )</p>
+                    </div>
+                    <div className="space-y-14">
+                      <p className="font-bold">Verifikator,<br />Kasi Kesejahteraan Desa</p>
+                      <p className="font-bold underline uppercase">( ZULKIFLI, S.SOS )</p>
+                    </div>
+                    <div className="space-y-14">
+                      <p className="font-bold">Disahkan Oleh,<br />Kepala Desa Wasah Hilir</p>
+                      <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* MODE 2: Lembar Tanda Terima Pencairan per KPM */}
+              {printDocType === 'tanda_terima' && (
+                <div className="space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="text-base md:text-lg font-black uppercase underline tracking-wide">
+                      DAFTAR HADIR & TANDA TERIMA PENCAIRAN {selectedProgram.toUpperCase()}
+                    </h3>
+                    <p className="text-xs font-bold text-gray-700">BULAN {MONTHS_LIST.find(m => m.id === selectedPrintMonth)?.fullName.toUpperCase()} {filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear()}</p>
+                    <p className="text-[11px] text-gray-500 font-mono">Pagu per KPM: Rp {programAmountVal.toLocaleString('id-ID')}</p>
+                  </div>
+
+                  <table className="w-full border-collapse border border-gray-900 text-xs">
+                    <thead>
+                      <tr className="bg-gray-100 text-center font-black">
+                        <th className="border border-gray-900 px-2 py-2 w-8">NO</th>
+                        <th className="border border-gray-900 px-3 py-2">NIK</th>
+                        <th className="border border-gray-900 px-3 py-2">NAMA PENERIMA (KPM)</th>
+                        <th className="border border-gray-900 px-2 py-2">RT / RW</th>
+                        <th className="border border-gray-900 px-3 py-2 text-right">NOMINAL (RP)</th>
+                        <th className="border border-gray-900 px-4 py-2 text-center w-48">TANDA TANGAN / CAP JEMPOL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredResidents.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="border border-gray-900 px-3 py-4 text-center text-gray-500 italic">Tidak ada data KPM.</td>
+                        </tr>
+                      ) : (
+                        filteredResidents.map((res, index) => (
+                          <tr key={res.nik} className="hover:bg-gray-50">
+                            <td className="border border-gray-900 px-2 py-2 text-center font-bold">{index + 1}</td>
+                            <td className="border border-gray-900 px-3 py-2 font-mono font-semibold">{res.nik}</td>
+                            <td className="border border-gray-900 px-3 py-2 font-bold">{res.name}</td>
+                            <td className="border border-gray-900 px-2 py-2 text-center">RT {res.rt || "-"}/RW {res.rw || "-"}</td>
+                            <td className="border border-gray-900 px-3 py-2 text-right font-mono font-bold">Rp {programAmountVal.toLocaleString('id-ID')}</td>
+                            <td className="border border-gray-900 px-3 py-2 text-left h-10 relative">
+                              <span className="text-[10px] text-gray-400 font-mono absolute top-1 left-2">{index + 1}.</span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+
+                  <div className="pt-6 font-sans text-xs grid grid-cols-2 gap-6 text-center break-inside-avoid">
+                    <div className="space-y-14">
+                      <p className="font-bold">Bendahara Desa Wasah Hilir</p>
+                      <p className="font-bold underline uppercase">( AKHMAD ZAINI )</p>
+                    </div>
+                    <div className="space-y-14">
+                      <p className="font-bold">Kepala Desa Wasah Hilir</p>
+                      <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* MODE 3: Berita Acara Musdes */}
+              {printDocType === 'ba_musdes' && (
+                <div className="space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="text-base md:text-lg font-bold uppercase underline tracking-wide">BERITA ACARA MUSYAWARAH DESA</h3>
+                    <p className="text-xs font-sans font-bold text-gray-700">
+                      PENETAPAN KELUARGA PENERIMA MANFAAT (KPM) PROGRAM {selectedProgram.toUpperCase()} TAHUN 2026
+                    </p>
+                    <p className="text-xs font-sans text-gray-500">Nomor: 140 / BA-MUSDES / {new Date().getFullYear()}</p>
+                  </div>
+
+                  <div className="space-y-3 text-justify font-sans text-xs md:text-sm leading-relaxed">
+                    <p>
+                      Pada hari ini <strong>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>, bertempat di Balai Desa Wasah Hilir, Kecamatan Simpur, Kabupaten Hulu Sungai Selatan, telah diselenggarakan Musyawarah Desa (Musdes) penetapan usulan calon Keluarga Penerima Manfaat (KPM) program bantuan sosial <strong>{selectedProgram}</strong>.
+                    </p>
+                    <p>
+                      Berdasarkan hasil verifikasi lapangan, verifikasi kriteria kelayakan kependudukan, dan alokasi APBDesa Wasah Hilir Tahun 2026, disepakati bahwa nama-nama warga di bawah ini dinyatakan <strong>SAH dan LAYAK</strong> sebagai penerima manfaat:
+                    </p>
+                  </div>
+
+                  <table className="w-full border-collapse border border-gray-900 text-xs">
+                    <thead>
+                      <tr className="bg-gray-100 text-center font-bold">
+                        <th className="border border-gray-900 px-3 py-2 w-10">NO</th>
+                        <th className="border border-gray-900 px-3 py-2">NIK</th>
+                        <th className="border border-gray-900 px-3 py-2">NAMA LENGKAP</th>
+                        <th className="border border-gray-900 px-3 py-2">ALAMAT / RT / RW</th>
+                        <th className="border border-gray-900 px-3 py-2">STATUS HUKUM</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredResidents.map((res, index) => (
+                        <tr key={res.nik} className="hover:bg-gray-50">
+                          <td className="border border-gray-900 px-3 py-2 text-center font-bold">{index + 1}</td>
+                          <td className="border border-gray-900 px-3 py-2 font-mono font-semibold">{res.nik}</td>
+                          <td className="border border-gray-900 px-3 py-2 font-bold">{res.name}</td>
+                          <td className="border border-gray-900 px-3 py-2">RT {res.rt || "-"}/RW {res.rw || "-"}, Desa Wasah Hilir</td>
+                          <td className="border border-gray-900 px-3 py-2 text-center font-semibold text-emerald-800">Ditetapkan Layak</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  <p className="font-sans text-xs md:text-sm text-justify">
+                    Demikian Berita Acara Musdes ini dibuat dan disahkan secara terbuka untuk dipergunakan sebagaimana mestinya.
+                  </p>
+
+                  <div className="pt-6 font-sans text-xs grid grid-cols-3 gap-6 text-center break-inside-avoid">
+                    <div className="space-y-14">
+                      <p className="font-bold">Ketua BPD Wasah Hilir</p>
+                      <p className="font-bold underline uppercase">( H. AHMAD SHODIQ, S.IP )</p>
+                    </div>
+                    <div className="space-y-14">
+                      <p className="font-bold">Sekretaris Desa</p>
+                      <p className="font-bold underline uppercase">( MUHAMMAD RIFQI, S.KOM )</p>
+                    </div>
+                    <div className="space-y-14">
+                      <p className="font-bold">Kepala Desa Wasah Hilir</p>
+                      <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* MODE 4: Slip / Kupon Penerima Warga (Individual Receipt) */}
+              {printDocType === 'slip_warga' && (
+                <div className="space-y-6">
+                  <div className="text-center space-y-1">
+                    <h3 className="text-base md:text-lg font-black uppercase underline tracking-wide">
+                      SLIP / KUPON RESMI BUKTI PENERIMAAN BANTUAN SOSIAL
+                    </h3>
+                    <p className="text-xs font-bold text-gray-700">PEMERINTAH DESA WASAH HILIR • TAHUN 2026</p>
+                  </div>
+
+                  {(selectedPrintResident ? [selectedPrintResident] : filteredResidents).slice(0, 10).map((res) => {
+                    const resMonths = disbursedMonths[res.nik] || [];
+                    return (
+                      <div key={res.nik} className="border-2 border-dashed border-gray-800 p-4 sm:p-6 rounded-2xl space-y-4 break-inside-avoid bg-gray-50/50">
+                        <div className="flex justify-between items-start border-b pb-3">
+                          <div>
+                            <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-800 text-white px-2 py-0.5 rounded">
+                              KUPON PENCAIRAN RESMI
+                            </span>
+                            <h4 className="text-base font-extrabold mt-1 text-gray-900">{res.name}</h4>
+                            <p className="text-xs font-mono font-semibold text-gray-600">NIK: {res.nik}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-gray-500">Program:</span>
+                            <p className="text-xs font-extrabold text-emerald-800">{selectedProgram}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                          <div>
+                            <span className="text-[10px] text-gray-500 font-bold">Dusun / RT / RW:</span>
+                            <p className="font-bold">{res.desa || "Wasah Hilir"} / RT {res.rt || "-"}</p>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-gray-500 font-bold">Total Bulan Cair:</span>
+                            <p className="font-extrabold text-emerald-800">{resMonths.length} / 12 Bulan</p>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-gray-500 font-bold">Total Dana Diterima:</span>
+                            <p className="font-mono font-black text-sm text-emerald-900">Rp {(resMonths.length * programAmountVal).toLocaleString('id-ID')}</p>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-gray-500 font-bold">Status Verifikasi:</span>
+                            <p className="font-bold text-emerald-700">✓ Terverifikasi Desa</p>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t flex justify-between items-center text-[10px] text-gray-500">
+                          <span>Dokumen dicetak secara elektronik oleh Sistem DiDesa. Simpan sebagai bukti sah.</span>
+                          <span className="font-mono font-bold">Ref: {res.nik.slice(0,6)}-{new Date().getFullYear()}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
             </div>
           </div>
         </div>
