@@ -5,21 +5,23 @@ import ReactMarkdown from 'react-markdown';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
 export default function AdminAiAssistant() {
-  // Model chain: urutan dari yang paling baru ke paling stabil
-  const GEMINI_MODELS = [
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
-    'gemini-1.5-pro',
+  // Daftar endpoint lengkap: url API + nama model, dari paling baru ke paling stabil
+  // Menggunakan v1 (stable) dan v1beta (experimental) untuk coverage maksimal
+  const GEMINI_ENDPOINTS = [
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-001:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-8b-001:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent' },
   ];
-  const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
   const [messages, setMessages] = useState([
     { role: 'ai', content: 'Halo! Saya Desi, Asisten Pintar DiDesa. Ada yang bisa saya bantu terkait informasi desa, statistik penduduk, atau administrasi hari ini?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeModel, setActiveModel] = useState(GEMINI_MODELS[0]);
+  const [activeModel, setActiveModel] = useState('gemini-1.5-flash');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [tenantId, setTenantId] = useState('sukamakmur');
@@ -174,12 +176,11 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
         }
       };
 
-      for (const model of GEMINI_MODELS) {
+      for (const endpoint of GEMINI_ENDPOINTS) {
+        const modelName = endpoint.url.split('/models/')[1]?.split(':')[0] || 'unknown';
         try {
-          console.log(`[Desi] Mencoba model: ${model}`);
-          // Kirim API key via header (x-goog-api-key) untuk mendukung format kunci baru AQ.xxx
-          // dan juga via URL param ?key= untuk kompatibilitas format lama AIzaSy...
-          const response = await fetch(`${GEMINI_API_BASE}/${model}:generateContent?key=${apiKey}`, {
+          console.log(`[Desi] Mencoba: ${endpoint.url}`);
+          const response = await fetch(`${endpoint.url}?key=${apiKey}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -195,7 +196,7 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
             const errCode: number = data.error?.code || response.status;
             const errStatus: string = data.error?.status || '';
 
-            console.warn(`[Desi] Model ${model} error ${errCode} (${errStatus}): ${errMsg}`);
+            console.warn(`[Desi] ${modelName} error ${errCode} (${errStatus}): ${errMsg}`);
 
             // 401 = API key genuinely invalid → reset
             if (errCode === 401 || errMsg.includes('API_KEY_INVALID')) {
@@ -216,28 +217,28 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
                   `Error: ${errMsg}`
                 );
               }
-              // 403 lain → coba model berikutnya
-              lastError = `[${model}] 403: ${errMsg}`;
+              // 403 lain → coba endpoint berikutnya
+              lastError = `[${modelName}] 403: ${errMsg}`;
               continue;
             }
 
-            // Semua error lain (404, 429, 500, dll) → coba model berikutnya
-            lastError = `[${model}] ${errCode}: ${errMsg}`;
+            // Semua error lain (404, 429, 500, dll) → coba endpoint berikutnya
+            lastError = `[${modelName}] ${errCode}: ${errMsg}`;
             continue;
           }
 
           reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Maaf, saya tidak mengerti maksud Anda.';
-          usedModel = model;
-          setActiveModel(model);
+          usedModel = modelName;
+          setActiveModel(modelName);
           break;
         } catch (modelErr: any) {
           // Jika error auth sudah di-throw dari dalam, re-throw langsung
-          if (modelErr.message.includes('API Key') || modelErr.message.includes('kadaluarsa') || modelErr.message.includes('tidak memiliki akses')) {
+          if (modelErr.message.includes('API Key') || modelErr.message.includes('kadaluarsa') || modelErr.message.includes('tidak memiliki akses') || modelErr.message.includes('belum diaktifkan')) {
             throw modelErr;
           }
-          // Error jaringan / unexpected → coba model berikutnya
-          console.warn(`[Desi] Exception model ${model}:`, modelErr.message);
-          lastError = `[${model}] ${modelErr.message}`;
+          // Error jaringan / unexpected → coba endpoint berikutnya
+          console.warn(`[Desi] Exception ${modelName}:`, modelErr.message);
+          lastError = `[${modelName}] ${modelErr.message}`;
         }
       }
 
