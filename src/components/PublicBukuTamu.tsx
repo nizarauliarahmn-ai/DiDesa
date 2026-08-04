@@ -7,7 +7,7 @@ import { Scanner } from '@yudiel/react-qr-scanner';
 import SignatureCanvas from 'react-signature-canvas';
 import {
   BookOpen, QrCode, User, MapPin, Briefcase, ChevronRight,
-  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search, FileSignature, X
+  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search, FileSignature, X, AlertCircle
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 

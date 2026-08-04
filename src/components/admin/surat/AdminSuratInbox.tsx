@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, FileText, CheckCircle, Clock } from 'lucide-react';
-import { fetchLetterHistoryAsync, LetterHistory, saveLetterHistory } from '../../../utils/letterHistory';
+import { fetchLetterHistoryAsync, LetterHistory, updateLetterHistoryAsync } from '../../../utils/letterHistory';
 
 interface AdminSuratInboxProps {
   onEditLetter?: (letter: LetterHistory) => void;
@@ -31,8 +31,8 @@ export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) 
   const handleReview = async (s: LetterHistory) => {
     if (onEditLetter) {
       if (s.status === 'pending' || (s.status as string) === 'Menunggu') {
-        const updated = { ...s, status: 'Proses' };
-        await saveLetterHistory(updated);
+        await updateLetterHistoryAsync(s.id, { status: 'Proses' });
+        const updated: LetterHistory = { ...s, status: 'Proses' };
         setSuratList(prev => prev.filter(item => item.id !== s.id));
         onEditLetter(updated);
       } else {

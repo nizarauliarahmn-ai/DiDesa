@@ -5,6 +5,7 @@ export interface KopSuratOptions {
   desa?: string;
   alamat?: string;
   kontak?: string;
+  fontFamily?: string;
 }
 
 export const generateKopSuratHTML = (options: KopSuratOptions = {}) => {

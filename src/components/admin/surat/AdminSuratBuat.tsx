@@ -1499,7 +1499,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                               </p>
                             </div>
 
-                            {renderReactSignature(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat, useEsignature)}
+                            {renderReactSignature(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
                           </div>
                         );
                       }
