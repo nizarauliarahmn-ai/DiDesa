@@ -193,21 +193,36 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
           if (!response.ok) {
             const errMsg: string = data.error?.message || `HTTP ${response.status}`;
             const errCode: number = data.error?.code || response.status;
+            const errStatus: string = data.error?.status || '';
 
-            // Hanya berhenti total jika auth error (401/403/invalid key)
-            const isAuthError = errCode === 401 || errCode === 403 ||
-              errMsg.includes('API key not valid') ||
-              errMsg.includes('API_KEY_INVALID') ||
-              errMsg.includes('PERMISSION_DENIED');
+            console.warn(`[Desi] Model ${model} error ${errCode} (${errStatus}): ${errMsg}`);
 
-            if (isAuthError) {
+            // 401 = API key genuinely invalid → reset
+            if (errCode === 401 || errMsg.includes('API_KEY_INVALID')) {
               resetApiKey();
-              throw new Error('API Key tidak valid atau tidak memiliki akses. Silakan masukkan API Key baru.');
+              throw new Error('API Key tidak valid (401). Silakan buat API Key baru di aistudio.google.com/app/apikey');
             }
 
-            // Semua error lain (model tidak tersedia, quota, dll) → coba model berikutnya
-            console.warn(`[Desi] Model ${model} gagal (${errCode}): ${errMsg}`);
-            lastError = `[${model}] ${errMsg}`;
+            // 403 = berbagai kemungkinan — jangan reset key dulu, berikan info spesifik
+            if (errCode === 403) {
+              if (errMsg.includes('has not been used') || errMsg.includes('is disabled') || errStatus === 'PERMISSION_DENIED') {
+                // API belum diaktifkan di project ini
+                throw new Error(
+                  `Generative Language API belum diaktifkan di project Google Cloud Anda.\n\n` +
+                  `Cara mengaktifkan:\n` +
+                  `1. Buka: console.cloud.google.com/apis/api/generativelanguage.googleapis.com\n` +
+                  `2. Klik "Enable API"\n` +
+                  `3. Tunggu 1-2 menit lalu coba lagi\n\n` +
+                  `Error: ${errMsg}`
+                );
+              }
+              // 403 lain → coba model berikutnya
+              lastError = `[${model}] 403: ${errMsg}`;
+              continue;
+            }
+
+            // Semua error lain (404, 429, 500, dll) → coba model berikutnya
+            lastError = `[${model}] ${errCode}: ${errMsg}`;
             continue;
           }
 
