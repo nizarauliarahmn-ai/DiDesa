@@ -364,7 +364,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
       let lastError = '';
       for (const endpoint of GEMINI_ENDPOINTS) {
         try {
-          console.log('[SPPD AI] Mencoba:', endpoint);
+          console.log(`[AdminSuratSPPD] Mencoba endpoint: ${endpoint}`);
           const res = await fetch(`${endpoint}?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -387,14 +387,24 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
         }
       }
 
-      if (!success || !rawText) throw new Error(lastError || 'Semua endpoint Gemini gagal merespons');
+      if (!success || !rawText) {
+        let availableModels = '';
+        try {
+          const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          const mData = await mRes.json();
+          if (mData.models && Array.isArray(mData.models)) {
+            const names = mData.models.filter((m: any) => m.name.includes('gemini')).map((m: any) => m.name.replace('models/', '')).join(', ');
+            availableModels = `\n\n📌 Model yang diizinkan untuk API Key ini:\n${names || 'Tidak ada model Gemini yang tersedia'}`;
+          }
+        } catch (e) {}
+        throw new Error(`Ekstraksi gagal. Semua model tidak tersedia.${availableModels}\n\nError terakhir: ${lastError}`);
+      }
 
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Format respons tidak valid dari AI');
 
       const parsed = JSON.parse(jsonMatch[0]);
 
-      // Autofill form fields
       if (parsed.nomorUndangan) {
         setDasarNo(parsed.nomorUndangan);
         setIsDasarManual(false);

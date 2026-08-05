@@ -15,6 +15,9 @@ export default function AdminAiAssistant() {
     { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-001:generateContent' },
     { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent' },
     { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent' },
   ];
 
   const [messages, setMessages] = useState([
@@ -181,13 +184,28 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
         const modelName = endpoint.url.split('/models/')[1]?.split(':')[0] || 'unknown';
         try {
           console.log(`[Desi] Mencoba: ${endpoint.url}`);
+          
+          let currentPayload = { ...safePayload };
+          // Model lama (1.0-pro) tidak mendukung system_instruction, jadi masukkan ke contents
+          if (modelName === 'gemini-pro' || modelName === 'gemini-1.0-pro') {
+            const contentsWithSystem = [
+              { role: 'user', parts: [{ text: `[System Instruction: ${systemPrompt}]\n\nUser: Halo` }] },
+              { role: 'model', parts: [{ text: 'Mengerti, saya akan mengikuti instruksi sistem tersebut.' }] },
+              ...geminiMessages
+            ];
+            currentPayload = {
+              contents: contentsWithSystem,
+              generationConfig: safePayload.generationConfig
+            } as any;
+          }
+
           const response = await fetch(`${endpoint.url}?key=${apiKey}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'x-goog-api-key': apiKey,
             },
-            body: JSON.stringify(safePayload)
+            body: JSON.stringify(currentPayload)
           });
 
           const data = await response.json();
@@ -244,7 +262,18 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
       }
 
       if (!reply) {
-        throw new Error(`Semua model AI tidak tersedia.\n\nPastikan:\n1. API Key Google AI Studio valid (bukan Vertex AI)\n2. Billing aktif di akun Google Cloud\n3. API Key tidak dibatasi hanya untuk model tertentu\n\nError terakhir: ${lastError}`);
+        let availableModels = '';
+        try {
+          // Jika semua gagal, bantu user mengecek model apa yang sebenarnya diizinkan oleh API key ini
+          const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          const mData = await mRes.json();
+          if (mData.models && Array.isArray(mData.models)) {
+            const names = mData.models.filter((m: any) => m.name.includes('gemini')).map((m: any) => m.name.replace('models/', '')).join(', ');
+            availableModels = `\n\n📌 Model yang diizinkan untuk API Key ini:\n${names || 'Tidak ada model Gemini yang tersedia'}`;
+          }
+        } catch (e) {}
+        
+        throw new Error(`Semua model AI tidak tersedia.${availableModels}\n\nPastikan:\n1. API Key Google AI Studio valid (bukan Vertex AI)\n2. Billing aktif di akun Google Cloud\n3. API Key tidak dibatasi hanya untuk model tertentu\n\nError terakhir: ${lastError}`);
       }
 
       setMessages(prev => [...prev, { role: 'ai', content: reply }]);
