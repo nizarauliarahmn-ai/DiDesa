@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Calendar, User, ArrowRight, X, Heart, MessageSquare, Share2, Send, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { getRelativeDateString } from '../../utils/dateHelper';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 interface NewsComment {
   id: string;
@@ -109,6 +111,7 @@ const sanitizeNewsList = (rawList: NewsItem[]): NewsItem[] => {
 };
 
 export default function BeritaDesa() {
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [news, setNews] = useState<NewsItem[]>(() => {
     const saved = localStorage.getItem('didesa_news_list');
     const parsed = saved ? JSON.parse(saved) : INITIAL_NEWS;
@@ -116,6 +119,42 @@ export default function BeritaDesa() {
   });
 
   const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+
+  // Fetch news from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    const fetchNews = async () => {
+      const tid = await resolveCurrentTenant();
+      if (!isMounted) return;
+      setTenantId(tid);
+      if (!tid) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('tenant_id', tid)
+          .eq('key', 'didesa_news_list')
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.warn('Gagal memuat berita dari server:', error);
+          return;
+        }
+
+        if (data && data.value && isMounted) {
+          const parsed = JSON.parse(data.value);
+          const sanitized = sanitizeNewsList(parsed);
+          setNews(sanitized);
+          localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
+        }
+      } catch (err) {
+        console.warn('Error fetching news:', err);
+      }
+    };
+    fetchNews();
+    return () => { isMounted = false; };
+  }, []);
 
   useEffect(() => {
     const handleSettingsUpdate = () => {
@@ -136,10 +175,43 @@ export default function BeritaDesa() {
   const [commentName, setCommentName] = useState('');
   const [commentText, setCommentText] = useState('');
 
+  // Sync real-time (and save to Supabase when user likes or comments)
   useEffect(() => {
     const sanitized = sanitizeNewsList(news);
-    localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
-  }, [news]);
+    const serialized = JSON.stringify(sanitized);
+    const savedLocal = localStorage.getItem('didesa_news_list');
+
+    if (savedLocal === serialized) return; // hindari loop
+
+    localStorage.setItem('didesa_news_list', serialized);
+    window.dispatchEvent(new Event('didesa_news_updated'));
+
+    if (tenantId) {
+      supabase.from('saas_settings').upsert({
+        tenant_id: tenantId,
+        key: 'didesa_news_list',
+        value: serialized
+      }, { onConflict: 'tenant_id,key' }).then(({ error }) => {
+        if (error) console.error('Gagal menyimpan berita ke server:', error);
+      });
+    }
+  }, [news, tenantId]);
+
+  // Sync when Admin updates news
+  useEffect(() => {
+    const handleNewsUpdate = () => {
+      const saved = localStorage.getItem('didesa_news_list');
+      if (saved) {
+        setNews(JSON.parse(saved));
+      }
+    };
+    window.addEventListener('didesa_news_updated', handleNewsUpdate);
+    window.addEventListener('storage', handleNewsUpdate);
+    return () => {
+      window.removeEventListener('didesa_news_updated', handleNewsUpdate);
+      window.removeEventListener('storage', handleNewsUpdate);
+    };
+  }, []);
 
   const processedNews = useMemo(() => {
     return news.map(item => {

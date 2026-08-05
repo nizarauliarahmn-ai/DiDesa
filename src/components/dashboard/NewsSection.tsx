@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { getRelativeDateString } from '../../utils/dateHelper';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function NewsSection({ onTabChange }: { onTabChange?: (tab: string) => void }) {
   const [news, setNews] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadNews = () => {
+    let isMounted = true;
+
+    const loadLocalNews = () => {
       const saved = localStorage.getItem('didesa_news_list');
       if (saved) {
         setNews(JSON.parse(saved).slice(0, 2)); // Ambil 2 terbaru
@@ -35,9 +39,42 @@ export default function NewsSection({ onTabChange }: { onTabChange?: (tab: strin
       }
     };
 
-    loadNews();
-    window.addEventListener('storage', loadNews);
-    return () => window.removeEventListener('storage', loadNews);
+    const fetchSupabaseNews = async () => {
+      const tid = await resolveCurrentTenant();
+      if (!isMounted || !tid) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('tenant_id', tid)
+          .eq('key', 'didesa_news_list')
+          .single();
+
+        if (error && error.code !== 'PGRST116') return;
+
+        if (data && data.value && isMounted) {
+          const parsed = JSON.parse(data.value);
+          setNews(parsed.slice(0, 2));
+          localStorage.setItem('didesa_news_list', JSON.stringify(parsed));
+        }
+      } catch (err) {
+        console.warn('Error fetching news section:', err);
+      }
+    };
+
+    // 1. Load local fast
+    loadLocalNews();
+    // 2. Fetch fresh from DB
+    fetchSupabaseNews();
+
+    window.addEventListener('didesa_news_updated', loadLocalNews);
+    window.addEventListener('storage', loadLocalNews);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('didesa_news_updated', loadLocalNews);
+      window.removeEventListener('storage', loadLocalNews);
+    };
   }, []);
 
   return (
