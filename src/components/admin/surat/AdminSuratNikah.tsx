@@ -11,7 +11,7 @@ import { getLetterClassifications, saveLetterClassifications, incrementSequenceN
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
-import { capitalizeResidentFields } from '../../../utils/textUtils';
+import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 export default function AdminSuratNikah({ 
@@ -184,8 +184,6 @@ export default function AdminSuratNikah({
       return true;
     });
   };
-
-import { capitalizeWords } from '../../../utils/textUtils';
 
   const v = (val: any, fallback?: string) => (val && String(val).trim() !== '') ? capitalizeWords(String(val)) : (fallback ?? '..............................');
   
