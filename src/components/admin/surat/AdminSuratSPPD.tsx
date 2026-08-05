@@ -340,6 +340,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
 
       // Gunakan fetch langsung seperti AdminAiAssistant — kompatibel dengan semua API key
       const GEMINI_ENDPOINTS = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
@@ -361,7 +362,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
 
       let rawText = '';
       let success = false;
-      let lastError = '';
+      let allErrors: string[] = [];
       for (const endpoint of GEMINI_ENDPOINTS) {
         try {
           console.log(`[AdminSuratSPPD] Mencoba endpoint: ${endpoint}`);
@@ -372,18 +373,17 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
           });
           const data = await res.json();
           if (!res.ok) {
-            const errMsg = data.error?.message || `HTTP ${res.status}`;
-            console.warn('[SPPD AI]', endpoint.split('/models/')[1], errMsg);
-            lastError = errMsg;
+            allErrors.push(`[${modelName}] ${data.error?.code || res.status}: ${data.error?.message || 'Unknown'}`);
             continue;
           }
           rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
           success = true;
-          console.log('[SPPD AI] Berhasil dengan:', endpoint.split('/models/')[1]);
+          console.log('[SPPD AI] Berhasil dengan:', modelName);
           break;
-        } catch (e: any) {
-          console.warn('[SPPD AI] Endpoint gagal:', endpoint, e);
-          lastError = e.message || 'Network error';
+        } catch (err: any) {
+          const modelName = endpoint.split('/models/')[1].split(':')[0];
+          console.warn('[SPPD AI] Endpoint gagal:', endpoint, err);
+          allErrors.push(`[${modelName}] Exception: ${err.message}`);
         }
       }
 
@@ -397,7 +397,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
             availableModels = `\n\n📌 Model yang diizinkan untuk API Key ini:\n${names || 'Tidak ada model Gemini yang tersedia'}`;
           }
         } catch (e) {}
-        throw new Error(`Ekstraksi gagal. Semua model tidak tersedia.${availableModels}\n\nError terakhir: ${lastError}`);
+        throw new Error(`Ekstraksi gagal. Semua model tidak tersedia.${availableModels}\n\nLog Error Detail:\n${allErrors.join('\n')}`);
       }
 
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);

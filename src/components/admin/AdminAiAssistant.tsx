@@ -8,6 +8,7 @@ export default function AdminAiAssistant() {
   // Daftar endpoint lengkap: url API + nama model, dari paling baru ke paling stabil
   // Menggunakan v1 (stable) dan v1beta (experimental) untuk coverage maksimal
   const GEMINI_ENDPOINTS = [
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent' },
     { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent' },
     { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent' },
     { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent' },
@@ -167,12 +168,12 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
 
       // Coba setiap model dalam chain sampai berhasil
       let reply = '';
-      let lastError = '';
+      let allErrors: string[] = [];
       let usedModel = activeModel;
 
       // Payload tanpa generationConfig yang bermasalah di beberapa model
       const safePayload = {
-        system_instruction: { parts: [{ text: systemPrompt }] },
+        systemInstruction: { parts: [{ text: systemPrompt }] },
         contents: geminiMessages,
         generationConfig: {
           temperature: 0.7,
@@ -237,12 +238,12 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
                 );
               }
               // 403 lain → coba endpoint berikutnya
-              lastError = `[${modelName}] 403: ${errMsg}`;
+              allErrors.push(`[${modelName}] 403: ${errMsg}`);
               continue;
             }
 
             // Semua error lain (404, 429, 500, dll) → coba endpoint berikutnya
-            lastError = `[${modelName}] ${errCode}: ${errMsg}`;
+            allErrors.push(`[${modelName}] ${errCode}: ${errMsg}`);
             continue;
           }
 
@@ -257,7 +258,7 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
           }
           // Error jaringan / unexpected → coba endpoint berikutnya
           console.warn(`[Desi] Exception ${modelName}:`, modelErr.message);
-          lastError = `[${modelName}] ${modelErr.message}`;
+          allErrors.push(`[${modelName}] Exception: ${modelErr.message}`);
         }
       }
 
@@ -273,7 +274,7 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
           }
         } catch (e) {}
         
-        throw new Error(`Semua model AI tidak tersedia.${availableModels}\n\nPastikan:\n1. API Key Google AI Studio valid (bukan Vertex AI)\n2. Billing aktif di akun Google Cloud\n3. API Key tidak dibatasi hanya untuk model tertentu\n\nError terakhir: ${lastError}`);
+        throw new Error(`Semua model AI tidak tersedia.${availableModels}\n\nPastikan:\n1. API Key Google AI Studio valid (bukan Vertex AI)\n2. Billing aktif di akun Google Cloud\n3. API Key tidak dibatasi hanya untuk model tertentu\n\nLog Error Detail:\n${allErrors.join('\n')}`);
       }
 
       setMessages(prev => [...prev, { role: 'ai', content: reply }]);
