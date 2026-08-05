@@ -611,39 +611,65 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
         {/* STEP 1: Select Template */}
         {step === 1 && (
           <div className="p-8 animate-in fade-in duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Pilih Jenis & Template Surat</h3>
-                <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Gunakan salah satu dari {classifications.length} jenis surat resmi {desaName.replace(/^(desa|kelurahan)\s+/i, '')}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <input 
-                    type="text"
-                    placeholder="Cari jenis surat..."
-                    value={searchLetterQuery}
-                    onChange={(e) => setSearchLetterQuery(e.target.value)}
-                    className="pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none w-56 font-semibold"
-                  />
-                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            {(() => {
+              const uniqueFiltered = filteredClassifications.filter((t, index, self) =>
+                index === self.findIndex((v) => v.klasifikasi === t.klasifikasi)
+              );
+              const filteredCount = uniqueFiltered.length;
+              const activeCount = classifications.filter(c => c.isVisible !== false).length;
+
+              return (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <h3 className="text-xl font-black text-gray-900 dark:text-white">Pilih Jenis & Template Surat</h3>
+                      <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-extrabold text-xs border border-emerald-300/60 shadow-sm flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {filteredCount} Surat Dapat Dipilih
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 font-semibold mt-1.5 flex items-center gap-1.5">
+                      {searchLetterQuery.trim() ? (
+                        <span>Menampilkan <strong>{filteredCount}</strong> jenis surat cocok dengan kata kunci <em>"{searchLetterQuery}"</em></span>
+                      ) : statusFilter === 'active' ? (
+                        <span>Menampilkan <strong>{filteredCount} jenis surat aktif</strong> yang dapat dipilih untuk diterbitkan</span>
+                      ) : statusFilter === 'inactive' ? (
+                        <span>Menampilkan <strong>{filteredCount} jenis surat non-aktif</strong></span>
+                      ) : (
+                        <span>Gunakan salah satu dari <strong>{filteredCount} jenis surat resmi</strong> {desaName.replace(/^(desa|kelurahan)\s+/i, '')} ({activeCount} surat aktif tersedia)</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <input 
+                        type="text"
+                        placeholder="Cari Jenis Surat..."
+                        value={searchLetterQuery}
+                        onChange={(e) => setSearchLetterQuery(e.target.value)}
+                        className="pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none w-56 font-semibold"
+                      />
+                      <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    </div>
+                    <select 
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value as any)}
+                      className="px-3 py-2 text-sm border border-emerald-300 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold bg-emerald-50/50 dark:bg-slate-900 text-emerald-900 dark:text-emerald-300"
+                    >
+                      <option value="all">Semua Status</option>
+                      <option value="active">Aktif</option>
+                      <option value="inactive">Non-Aktif</option>
+                    </select>
+                    <button 
+                      onClick={onBack}
+                      className="text-gray-500 dark:text-slate-400 hover:text-emerald-700 font-bold text-sm transition-colors border border-gray-200 dark:border-slate-700 px-4 py-2 rounded-xl bg-white dark:bg-slate-900"
+                    >
+                      Batal
+                    </button>
+                  </div>
                 </div>
-                <select 
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300"
-                >
-                  <option value="all">Semua Status</option>
-                  <option value="active">Aktif</option>
-                  <option value="inactive">Tidak Aktif</option>
-                </select>
-                <button 
-                  onClick={onBack}
-                  className="text-gray-500 dark:text-slate-400 hover:text-emerald-700 font-bold text-sm transition-colors border border-gray-200 dark:border-slate-700 px-4 py-2 rounded-xl bg-white dark:bg-slate-900"
-                >
-                  Batal
-                </button>
-              </div>
-            </div>
+              );
+            })()}
             
             <div className="flex flex-col gap-8 max-h-[600px] overflow-y-auto pr-2">
               {(() => {
