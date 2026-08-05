@@ -14,7 +14,7 @@ import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHist
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
-import { capitalizeResidentFields } from '../../../utils/textUtils';
+import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 interface Resident {
@@ -411,7 +411,7 @@ export default function AdminSuratSKL({
     setSuccess(true);
   };
 
-  const v = (val: any, fallback = '_______________________') => val ? val : fallback;
+  const v = (val: any, fallback = '_______________________') => val ? capitalizeWords(String(val)) : fallback;
   
     const generateHTML = () => {
     const today = new Date();

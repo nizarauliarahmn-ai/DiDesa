@@ -185,7 +185,9 @@ export default function AdminSuratNikah({
     });
   };
 
-  const v = (val: any, fallback?: string) => (val && String(val).trim() !== '') ? val : (fallback ?? '..............................');
+import { capitalizeWords } from '../../../utils/textUtils';
+
+  const v = (val: any, fallback?: string) => (val && String(val).trim() !== '') ? capitalizeWords(String(val)) : (fallback ?? '..............................');
   
   const fmtTgl = (iso: string) => {
     if (!iso) return null;

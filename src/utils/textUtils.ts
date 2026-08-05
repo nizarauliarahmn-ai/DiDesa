@@ -8,13 +8,12 @@
  */
 export function capitalizeWords(str: string): string {
   if (!str) return str;
-  return str
-    .split(' ')
-    .map(word => {
-      if (!word) return word;
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(' ');
+  return str.replace(/([a-zA-ZáéíóúÁÉÍÓÚàèìòùÀÈÌÒÙäëïöüÄËÏÖÜñÑ]+)/g, (match) => {
+    if (/^(nik|rt|rw|kk|nib|hp|wa|id|uu|ri|no|sk|sktm|skd|sku|sdu|sppd|spt)$/i.test(match)) {
+      return match.toUpperCase();
+    }
+    return match.charAt(0).toUpperCase() + match.slice(1);
+  });
 }
 
 export interface ParsedAddress {

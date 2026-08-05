@@ -13,7 +13,7 @@ import {
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
-import { capitalizeResidentFields } from '../../../utils/textUtils';
+import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 // ===================== INTERFACES =====================
@@ -65,7 +65,7 @@ const fmtDate = (d: string) => {
   } catch { return d; }
 };
 const v = (val: any, fallback = '-') =>
-  (val !== undefined && val !== null && String(val).trim() !== '') ? String(val) : fallback;
+  (val !== undefined && val !== null && String(val).trim() !== '') ? capitalizeWords(String(val)) : fallback;
 const cleanStr = (s: string, regex: RegExp) => (s || '').replace(regex, '');
 
 // Map familyRelation to Ahli Waris relationship label

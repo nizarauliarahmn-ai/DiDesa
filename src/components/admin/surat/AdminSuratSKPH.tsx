@@ -15,7 +15,7 @@ import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHist
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
-import { capitalizeResidentFields } from '../../../utils/textUtils';
+import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 interface Resident {
@@ -381,7 +381,7 @@ export default function AdminSuratSKPH({
     setSuccess(true);
   };
 
-  const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? val : fallback);
+  const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? capitalizeWords(val) : fallback);
   
   const formatRupiah = (numberStr: string) => {
     if (!numberStr) return '';

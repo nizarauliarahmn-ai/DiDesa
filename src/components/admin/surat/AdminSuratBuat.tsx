@@ -8,6 +8,7 @@ import {
   Mail, Heart, Landmark, FileCheck, MapPin, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
 import { addLetterHistory } from '../../../utils/letterHistory';
@@ -1449,7 +1450,8 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       // Helper to get latest data (prefer proposed changes if they exist)
                       const getLatest = (field: string, defaultValue: string = '-') => {
                         if (!selectedResident) return defaultValue;
-                        return selectedResident.pendingMeta?.details?.[field] || selectedResident[field] || defaultValue;
+                        const raw = selectedResident.pendingMeta?.details?.[field] || selectedResident[field] || defaultValue;
+                        return capitalizeWords(String(raw));
                       };
 
                       const name = getLatest('name', 'Budi Santoso');

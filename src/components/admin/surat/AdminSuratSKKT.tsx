@@ -11,6 +11,7 @@ import { showToast } from '../../../utils/toast';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
+import { capitalizeWords } from '../../../utils/textUtils';
 
 interface Resident {
   nik: string;
@@ -189,11 +190,8 @@ export default function AdminSuratSKKT({
     setSearchQuery('');
   };
 
-  const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? val : fallback);
-  const toTitleCase = (str: string) => {
-    if (!str) return '';
-    return str.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
-  };
+  const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? capitalizeWords(val) : fallback);
+  const toTitleCase = (str: string) => capitalizeWords(str);
 
   const generatePolygonSVG = () => {
     const pts = formData.polygonPoints;
