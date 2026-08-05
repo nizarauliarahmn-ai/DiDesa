@@ -23,6 +23,7 @@ export default function AdminGlobalBranding() {
   const [globalFooterSocial2Icon, setGlobalFooterSocial2Icon] = useState(() => localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
   const [globalFooterSocial2Link, setGlobalFooterSocial2Link] = useState(() => localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
   const [globalFooterCopyright, setGlobalFooterCopyright] = useState(() => localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
+  const [masterGeminiApiKey, setMasterGeminiApiKey] = useState(() => localStorage.getItem('master_gemini_api_key') ?? '');
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +55,7 @@ export default function AdminGlobalBranding() {
       apply('global_footer_social2_icon', setGlobalFooterSocial2Icon);
       apply('global_footer_social2_link', setGlobalFooterSocial2Link);
       apply('global_footer_copyright', setGlobalFooterCopyright);
+      apply('master_gemini_api_key', setMasterGeminiApiKey);
     });
   }, []);
 
@@ -121,7 +123,8 @@ export default function AdminGlobalBranding() {
       global_footer_social1_link: globalFooterSocial1Link,
       global_footer_social2_icon: globalFooterSocial2Icon,
       global_footer_social2_link: globalFooterSocial2Link,
-      global_footer_copyright: globalFooterCopyright
+      global_footer_copyright: globalFooterCopyright,
+      master_gemini_api_key: masterGeminiApiKey.trim()
     };
 
     // Use centralized utility: strictly saves to Supabase Cloud Online first
@@ -580,6 +583,35 @@ export default function AdminGlobalBranding() {
                   </>
                 )}
               </button>
+            </div>
+          </div>
+
+          {/* Master API Key Gemini SaaS */}
+          <div className="bg-gradient-to-br from-purple-900/10 via-indigo-900/10 to-slate-900/5 dark:bg-slate-900/50 rounded-3xl p-6 border border-purple-500/20 shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shadow-sm">
+                🤖
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-gray-900 dark:text-white">Master API Key Gemini (SaaS AI Terpusat)</h4>
+                <p className="text-xs text-gray-500 dark:text-slate-400">API Key ini akan digunakan secara terpusat oleh SELURUH DESA yang berlangganan DiDesa (dengan kuota bulanan per desa).</p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 dark:text-slate-300 mb-1">
+                Google Cloud Gemini API Key (Billing-Enabled)
+              </label>
+              <input
+                type="password"
+                value={masterGeminiApiKey}
+                onChange={(e) => setMasterGeminiApiKey(e.target.value)}
+                placeholder="AIzaSy..."
+                className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-purple-200 dark:border-purple-900/50 rounded-xl font-mono text-sm focus:ring-2 focus:ring-purple-500 outline-none text-gray-900 dark:text-white"
+              />
+              <p className="text-[11px] text-purple-600 dark:text-purple-400 mt-1 font-medium">
+                *Kunci ini disimpan aman secara online di Supabase dan disinkronkan langsung ke seluruh desa. Desa yang tidak memasukkan API Key sendiri akan otomatis menggunakan Master Key ini.
+              </p>
             </div>
           </div>
           

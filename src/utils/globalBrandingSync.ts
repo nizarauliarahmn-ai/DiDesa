@@ -29,6 +29,7 @@ const GLOBAL_BRANDING_KEYS = [
   'global_footer_social2_icon',
   'global_footer_social2_link',
   'global_footer_copyright',
+  'master_gemini_api_key',
 ];
 
 // Kunci setting SaaS global yang tersimpan di tabel saas_settings

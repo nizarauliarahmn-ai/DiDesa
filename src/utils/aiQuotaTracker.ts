@@ -40,21 +40,42 @@ export const incrementMonthlyUsage = (tenantId: string): number => {
 };
 
 /**
- * Memuat Master Key dari Supabase saas_settings jika ada.
+ * Memuat Master Key dari localStorage/Supabase.
  */
 export const fetchMasterKeyFromSupabase = async (): Promise<string | null> => {
+  const localMaster = localStorage.getItem('master_gemini_api_key');
+  if (localMaster && localMaster.trim().length > 0) {
+    return localMaster.trim();
+  }
+
+  try {
+    const { data } = await supabase
+      .from('global_settings')
+      .select('value')
+      .eq('key', 'master_gemini_api_key')
+      .single();
+    if (data && data.value && data.value.trim().length > 0) {
+      localStorage.setItem('master_gemini_api_key', data.value.trim());
+      return data.value.trim();
+    }
+  } catch (e) {
+    // ignore
+  }
+
   try {
     const { data } = await supabase
       .from('saas_settings')
       .select('value')
       .eq('key', 'master_gemini_api_key')
       .single();
-    if (data && data.value) {
+    if (data && data.value && data.value.trim().length > 0) {
+      localStorage.setItem('master_gemini_api_key', data.value.trim());
       return data.value.trim();
     }
   } catch (e) {
     // ignore
   }
+
   return null;
 };
 
