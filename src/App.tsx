@@ -115,7 +115,7 @@ export default function App() {
   if (tabParam === 'kios_aspirasi') {
     return <><PublicKiosAspirasi /><ToastContainer /></>;
   }
-  if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat') {
+  if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
     return <><PublicVerifikasiSurat /><ToastContainer /></>;
   }
 

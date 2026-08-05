@@ -37,7 +37,8 @@ export function getPrintSignatureHTML(
   jabatanPejabat: string, 
   nipPejabat?: string,
   includeCamatOverride?: boolean,
-  useEsignature?: boolean
+  useEsignature?: boolean,
+  nomorSurat?: string
 ): string {
   const isDual = includeCamatOverride === true;
   const isKades = isKadesOfficial(namaPejabat);
@@ -86,7 +87,11 @@ export function getPrintSignatureHTML(
   }
 
   const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://sistemdidesa.id';
-  const verifyQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=${encodeURIComponent(`${originUrl}/?tab=verifikasi`)}`;
+  const cleanNomor = (nomorSurat || '').trim();
+  const verifyTargetUrl = cleanNomor 
+    ? `${originUrl}/?tab=verifikasi&no=${encodeURIComponent(cleanNomor)}`
+    : `${originUrl}/?tab=verifikasi`;
+  const verifyQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(verifyTargetUrl)}`;
 
   const cleanRole = rightRoleHtml.replace(/<br\s*\/?>/gi, ' ');
   const signatureContentHtml = showTTE ? `
