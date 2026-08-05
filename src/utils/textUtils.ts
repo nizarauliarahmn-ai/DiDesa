@@ -12,7 +12,7 @@ export function capitalizeWords(str: string): string {
     if (/^(nik|rt|rw|kk|nib|hp|wa|id|uu|ri|no|sk|sktm|skd|sku|sdu|sppd|spt)$/i.test(match)) {
       return match.toUpperCase();
     }
-    return match.charAt(0).toUpperCase() + match.slice(1);
+    return match.charAt(0).toUpperCase() + match.slice(1).toLowerCase();
   });
 }
 

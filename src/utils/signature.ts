@@ -86,7 +86,12 @@ export function getPrintSignatureHTML(
        <p style="margin:0 0 5px 0;border-bottom:1px solid #000;padding-bottom:5px;display:inline-block;">Pada Tanggal : ${tglFormatted}</p>`;
   }
 
-  const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://sistemdidesa.id';
+  const isLocalhost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1' || 
+    window.location.hostname.startsWith('192.168.')
+  );
+  const originUrl = isLocalhost ? window.location.origin : 'https://sistemdidesa.id';
   const cleanNomor = (nomorSurat || '').trim();
   const verifyTargetUrl = cleanNomor 
     ? `${originUrl}/?tab=verifikasi&no=${encodeURIComponent(cleanNomor)}`
