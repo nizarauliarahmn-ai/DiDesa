@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { resolveAiKeyAndQuota } from '../../../utils/aiQuotaTracker';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
@@ -300,7 +301,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       const authUser = authUserStr ? JSON.parse(authUserStr) : null;
       if (authUser?.tenantId) tenantId = authUser.tenantId;
     } catch (e) {}
-    const apiKey = localStorage.getItem(`desi_api_key_${tenantId}`) || '';
+    
+    const quotaInfo = await resolveAiKeyAndQuota(tenantId);
+    const apiKey = quotaInfo.apiKey;
 
     if (!apiKey) {
       showToast('API Key Gemini belum diatur. Buka menu Asisten AI (Desi) untuk mengaturnya terlebih dahulu.', 'error');

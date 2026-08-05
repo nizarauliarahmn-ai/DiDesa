@@ -3,6 +3,7 @@ import { Bot, Sparkles, Send, User, AlertTriangle, Loader2, Key, Save } from 'lu
 import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import { fetchResidentsCached } from '../../utils/apiCache';
+import { resolveAiKeyAndQuota, incrementMonthlyUsage, AiKeyQuotaInfo } from '../../utils/aiQuotaTracker';
 
 export default function AdminAiAssistant() {
   // Daftar endpoint lengkap: url API + nama model, dari paling baru ke paling stabil
@@ -31,9 +32,16 @@ export default function AdminAiAssistant() {
   
   const [tenantId, setTenantId] = useState('sukamakmur');
   const [apiKey, setApiKey] = useState('');
+  const [quotaInfo, setQuotaInfo] = useState<AiKeyQuotaInfo | null>(null);
   const [inputApiKey, setInputApiKey] = useState('');
   const [showConfig, setShowConfig] = useState(false);
   const [globalDesiLogo, setGlobalDesiLogo] = useState(() => localStorage.getItem('global_desi_logo') || '');
+
+  const refreshQuotaAndKey = async (tId: string) => {
+    const q = await resolveAiKeyAndQuota(tId);
+    setQuotaInfo(q);
+    setApiKey(q.apiKey);
+  };
 
   useEffect(() => {
     const authUserStr = localStorage.getItem('didesa_auth_user');
@@ -45,19 +53,20 @@ export default function AdminAiAssistant() {
       } catch(e) {}
     }
     setTenantId(tId);
-    
-    const storedKey = localStorage.getItem(`desi_api_key_${tId}`);
-    if (storedKey) {
-      setApiKey(storedKey);
-    } else {
-      setShowConfig(true);
-    }
+    refreshQuotaAndKey(tId);
     
     const handleBrandingUpdate = () => {
       setGlobalDesiLogo(localStorage.getItem('global_desi_logo') || '');
     };
+    const handleQuotaUpdate = () => {
+      refreshQuotaAndKey(tId);
+    };
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
-    return () => window.removeEventListener('global_branding_updated', handleBrandingUpdate);
+    window.addEventListener('didesa_ai_usage_updated', handleQuotaUpdate);
+    return () => {
+      window.removeEventListener('global_branding_updated', handleBrandingUpdate);
+      window.removeEventListener('didesa_ai_usage_updated', handleQuotaUpdate);
+    };
   }, []);
 
   const scrollToBottom = () => {
@@ -85,8 +94,30 @@ export default function AdminAiAssistant() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || !apiKey) return;
+    if (!input.trim() || isLoading) return;
     
+    // Resolve Key & Kuota terbaru
+    const currentQuota = await resolveAiKeyAndQuota(tenantId);
+    setQuotaInfo(currentQuota);
+
+    if (!currentQuota.apiKey) {
+      setShowConfig(true);
+      setMessages(prev => [...prev, { 
+        role: 'ai', 
+        content: 'Silakan masukkan API Key Gemini di pengaturan AI terlebih dahulu atau hubungi Administrator DiDesa.' 
+      }]);
+      return;
+    }
+
+    if (currentQuota.isMasterKey && !currentQuota.hasQuota) {
+      setMessages(prev => [...prev, { 
+        role: 'ai', 
+        content: `⚠️ **Kuota AI Bawaan Bulan Ini Telah Habis**\n\nDesa Anda telah menggunakan **${currentQuota.usedQuota} / ${currentQuota.totalQuota}** kuota chat gratis bulanan dari DiDesa. Kuota akan diperbarui otomatis pada awal bulan depan.\n\nJika desa Anda memerlukan akses tanpa batas, silakan masukkan **API Key Gemini Desa** sendiri melalui tombol ikon Kunci di pojok kanan atas.` 
+      }]);
+      return;
+    }
+
+    const effectiveApiKey = currentQuota.apiKey;
     const userMessage = input.trim();
     const newMessages = [...messages, { role: 'user', content: userMessage }];
     setMessages(newMessages);
@@ -200,11 +231,11 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
             } as any;
           }
 
-          const response = await fetch(`${endpoint.url}?key=${apiKey}`, {
+          const response = await fetch(`${endpoint.url}?key=${effectiveApiKey}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'x-goog-api-key': apiKey,
+              'x-goog-api-key': effectiveApiKey,
             },
             body: JSON.stringify(currentPayload)
           });
@@ -266,7 +297,7 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
         let availableModels = '';
         try {
           // Jika semua gagal, bantu user mengecek model apa yang sebenarnya diizinkan oleh API key ini
-          const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${effectiveApiKey}`);
           const mData = await mRes.json();
           if (mData.models && Array.isArray(mData.models)) {
             const names = mData.models.filter((m: any) => m.name.includes('gemini')).map((m: any) => m.name.replace('models/', '')).join(', ');
@@ -278,6 +309,11 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
       }
 
       setMessages(prev => [...prev, { role: 'ai', content: reply }]);
+      // Tambahkan kuota jika menggunakan Master Key
+      if (currentQuota.isMasterKey) {
+        incrementMonthlyUsage(tenantId);
+        refreshQuotaAndKey(tenantId);
+      }
       console.log(`[Desi] ✅ Berhasil menggunakan model: ${usedModel}`);
     } catch (error: any) {
       console.error(error);
@@ -315,9 +351,19 @@ Gunakan data di atas untuk menjawab pertanyaan terkait desa ini. Data ini adalah
                 ONLINE
               </span>
             </h2>
-            <p className="text-gray-500 dark:text-slate-400 text-sm font-medium">
+            <p className="text-gray-500 dark:text-slate-400 text-sm font-medium flex items-center gap-2">
               Tanya informasi layanan, statistik, atau panduan secara instan.
-              {apiKey && <span className="ml-2 text-indigo-400 text-[10px] font-mono bg-indigo-50 dark:bg-indigo-900/20 px-1.5 py-0.5 rounded">{activeModel}</span>}
+              {quotaInfo && (
+                quotaInfo.isMasterKey ? (
+                  <span className="text-xs font-semibold bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800">
+                    SaaS Master Key • Kuota: {quotaInfo.usedQuota}/{quotaInfo.totalQuota} Chat
+                  </span>
+                ) : (
+                  <span className="text-xs font-semibold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                    API Key Kustom Desa (Tanpa Batas)
+                  </span>
+                )
+              )}
             </p>
           </div>
         </div>
