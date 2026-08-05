@@ -105,8 +105,9 @@ const CATEGORIES = [
   { label: 'SOSIAL & BANTUAN', color: 'bg-purple-50 text-purple-700 border-purple-100' }
 ];
 
-const compressImage = (file: File): Promise<Blob> => {
+const compressImage = (file: File): Promise<{ blob: Blob; originalSize: number; compressedSize: number }> => {
   return new Promise((resolve, reject) => {
+    const originalSize = file.size;
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = (event) => {
@@ -114,8 +115,8 @@ const compressImage = (file: File): Promise<Blob> => {
       img.src = event.target?.result as string;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1200;
-        const MAX_HEIGHT = 1200;
+        const MAX_WIDTH = 900;
+        const MAX_HEIGHT = 900;
         let width = img.width;
         let height = img.height;
 
@@ -138,11 +139,11 @@ const compressImage = (file: File): Promise<Blob> => {
         
         canvas.toBlob((blob) => {
           if (blob) {
-            resolve(blob);
+            resolve({ blob, originalSize, compressedSize: blob.size });
           } else {
             reject(new Error('Canvas to Blob failed'));
           }
-        }, 'image/jpeg', 0.8);
+        }, 'image/jpeg', 0.65);
       };
       img.onerror = (error) => reject(error);
     };
@@ -177,6 +178,22 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
     localStorage.setItem('didesa_news_list', JSON.stringify(news));
   }, [news]);
 
+  // Sync real-time when citizens like or comment from Portal Warga
+  useEffect(() => {
+    const handleNewsUpdate = () => {
+      const saved = localStorage.getItem('didesa_news_list');
+      if (saved) {
+        setNews(JSON.parse(saved));
+      }
+    };
+    window.addEventListener('didesa_news_updated', handleNewsUpdate);
+    window.addEventListener('storage', handleNewsUpdate);
+    return () => {
+      window.removeEventListener('didesa_news_updated', handleNewsUpdate);
+      window.removeEventListener('storage', handleNewsUpdate);
+    };
+  }, []);
+
   const filteredNews = useMemo(() => {
     return news.filter(item => 
       item.title.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
@@ -191,7 +208,7 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
       setIsUploading(true);
       const file = e.target.files[0];
       
-      const compressedBlob = await compressImage(file);
+      const { blob: compressedBlob, originalSize, compressedSize } = await compressImage(file);
       const fileName = `news-${Date.now()}-${Math.floor(Math.random() * 10000)}.jpg`;
       
       const { error: uploadError } = await supabase.storage
@@ -207,7 +224,9 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
         .getPublicUrl(fileName);
 
       setFormData(prev => ({ ...prev, image: publicUrl }));
-      showToast('Gambar berhasil diunggah', 'success');
+      const savedKb = Math.round((originalSize - compressedSize) / 1024);
+      const compressedKb = Math.round(compressedSize / 1024);
+      showToast(`Gambar dikompresi (${compressedKb} KB, hemat ${savedKb} KB)`, 'success');
       
       e.target.value = '';
     } catch (error: any) {
@@ -221,7 +240,7 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
   const handleProgressPhotoUpload = async (index: number, file: File) => {
     try {
       setUploadingStageIndex(index);
-      const compressedBlob = await compressImage(file);
+      const { blob: compressedBlob, originalSize, compressedSize } = await compressImage(file);
       const fileName = `progress-${Date.now()}-${Math.floor(Math.random() * 10000)}.jpg`;
       
       const { error: uploadError } = await supabase.storage
@@ -239,7 +258,8 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
         updated[index] = { ...updated[index], imageUrl: publicUrl };
         return { ...prev, progressPhotos: updated };
       });
-      showToast('Foto tahapan berhasil diunggah', 'success');
+      const compressedKb = Math.round(compressedSize / 1024);
+      showToast(`Foto tahapan terkompresi (${compressedKb} KB)`, 'success');
     } catch (error: any) {
       console.error('Error uploading progress photo:', error);
       showToast('Gagal mengunggah foto tahapan', 'error');

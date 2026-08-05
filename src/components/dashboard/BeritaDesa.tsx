@@ -198,27 +198,32 @@ export default function BeritaDesa() {
     return matchesCategory && matchesSearch;
   });
 
-  const handleLike = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setNews(prev => prev.map(item => {
-      if (item.id === id) {
-        return { ...item, likes: item.likes + 1 };
-      }
-      return item;
-    }));
-    showToast('Menyukai berita ini!', 'success');
-  };
-
-  const handleModalLike = (id: string) => {
-    setNews(prev => prev.map(item => {
-      if (item.id === id) {
-        const updated = { ...item, likes: item.likes + 1 };
-        setSelectedNews(updated);
-        return updated;
-      }
-      return item;
-    }));
-    showToast('Menyukai berita ini!', 'success');
+  const toggleLike = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const isLiked = localStorage.getItem(`didesa_liked_${id}`) === 'true';
+    if (isLiked) {
+      localStorage.removeItem(`didesa_liked_${id}`);
+      setNews(prev => prev.map(item => {
+        if (item.id === id) {
+          const updated = { ...item, likes: Math.max(0, item.likes - 1) };
+          if (selectedNews?.id === id) setSelectedNews(updated);
+          return updated;
+        }
+        return item;
+      }));
+      showToast('Batal menyukai berita', 'info');
+    } else {
+      localStorage.setItem(`didesa_liked_${id}`, 'true');
+      setNews(prev => prev.map(item => {
+        if (item.id === id) {
+          const updated = { ...item, likes: item.likes + 1 };
+          if (selectedNews?.id === id) setSelectedNews(updated);
+          return updated;
+        }
+        return item;
+      }));
+      showToast('Menyukai berita ini!', 'success');
+    }
   };
 
   const handleSubmitComment = (e: React.FormEvent) => {
@@ -356,10 +361,10 @@ export default function BeritaDesa() {
                 <div className="flex items-center justify-between border-t border-gray-50 pt-4 mt-auto">
                   <div className="flex items-center gap-3 text-xs text-gray-400 font-semibold">
                     <button 
-                      onClick={(e) => handleLike(item.id, e)}
-                      className="flex items-center gap-1 hover:text-rose-600 transition-colors group/btn"
+                      onClick={(e) => toggleLike(item.id, e)}
+                      className={`flex items-center gap-1 transition-colors group/btn ${localStorage.getItem(`didesa_liked_${item.id}`) === 'true' ? 'text-rose-600 font-bold' : 'hover:text-rose-600'}`}
                     >
-                      <Heart className="w-4 h-4 group-hover/btn:fill-rose-600 group-hover/btn:text-rose-600 transition-colors" />
+                      <Heart className={`w-4 h-4 ${localStorage.getItem(`didesa_liked_${item.id}`) === 'true' ? 'fill-rose-600 text-rose-600' : 'group-hover/btn:fill-rose-600 group-hover/btn:text-rose-600'}`} />
                       <span>{item.likes}</span>
                     </button>
                     <span className="flex items-center gap-1">
@@ -474,11 +479,15 @@ export default function BeritaDesa() {
               <div className="flex items-center justify-between border-t border-b border-gray-50 py-4">
                 <div className="flex items-center gap-4">
                   <button 
-                    onClick={() => handleModalLike(activeSelectedNews.id)}
-                    className="flex items-center gap-2 bg-rose-50 text-rose-700 hover:bg-rose-100 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                    onClick={() => toggleLike(activeSelectedNews.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                      localStorage.getItem(`didesa_liked_${activeSelectedNews.id}`) === 'true' 
+                        ? 'bg-rose-100 text-rose-800 border border-rose-200 shadow-sm' 
+                        : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                    }`}
                   >
-                    <Heart className="w-4 h-4 fill-rose-600 text-rose-600" />
-                    <span>Sukai Berita ({activeSelectedNews.likes})</span>
+                    <Heart className={`w-4 h-4 ${localStorage.getItem(`didesa_liked_${activeSelectedNews.id}`) === 'true' ? 'fill-rose-600 text-rose-600' : 'fill-rose-600 text-rose-600'}`} />
+                    <span>{localStorage.getItem(`didesa_liked_${activeSelectedNews.id}`) === 'true' ? 'Disukai' : 'Sukai Berita'} ({activeSelectedNews.likes})</span>
                   </button>
                   <button 
                     onClick={() => {
