@@ -295,7 +295,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
     // Ambil API key dari localStorage — pola sama dengan AdminAiAssistant
     const authUserStr = localStorage.getItem('didesa_auth_user');
-    let tenantId = 'default';
+    let tenantId = 'sukamakmur'; // default sama dengan AdminAiAssistant.tsx
     try {
       const authUser = authUserStr ? JSON.parse(authUserStr) : null;
       if (authUser?.tenantId) tenantId = authUser.tenantId;
