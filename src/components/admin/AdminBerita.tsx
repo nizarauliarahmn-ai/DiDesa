@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Edit2, Trash2, Calendar, MessageSquare, Heart, Image as ImageIcon, X, Upload, Newspaper, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Calendar, MessageSquare, Heart, Image as ImageIcon, X, Upload, Newspaper, AlertTriangle, Star, Check } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { getRelativeDateString } from '../../utils/dateHelper';
 import { supabase } from '../../utils/supabase';
@@ -307,7 +307,11 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
         tag: item.tag,
         image: item.image,
         author: item.author || '',
-        progressPhotos: item.progressPhotos ? [...item.progressPhotos] : []
+        progressPhotos: item.progressPhotos && item.progressPhotos.length > 0 ? [...item.progressPhotos] : [
+          { id: `p-0-${Date.now()}`, stage: '0%', title: 'Titik Nol / Persiapan Awal', imageUrl: '' },
+          { id: `p-50-${Date.now()}`, stage: '50%', title: 'Progres Pelaksanaan 50%', imageUrl: '' },
+          { id: `p-100-${Date.now()}`, stage: '100%', title: 'Penyelesaian & Serah Terima 100%', imageUrl: '' }
+        ]
       });
     } else {
       setEditingNews(null);
@@ -318,7 +322,11 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
         tag: CATEGORIES[0].label,
         image: '',
         author: '',
-        progressPhotos: []
+        progressPhotos: [
+          { id: `p-0-${Date.now()}`, stage: '0%', title: 'Titik Nol / Persiapan Awal', imageUrl: '' },
+          { id: `p-50-${Date.now()}`, stage: '50%', title: 'Progres Pelaksanaan 50%', imageUrl: '' },
+          { id: `p-100-${Date.now()}`, stage: '100%', title: 'Penyelesaian & Serah Terima 100%', imageUrl: '' }
+        ]
       });
     }
     setIsModalOpen(true);
@@ -333,11 +341,19 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.excerpt || !formData.fullContent || !formData.image) {
-      showToast('Harap lengkapi semua isian', 'error');
+    const uploadedPhotos = formData.progressPhotos.filter(p => p.imageUrl.trim() !== '');
+    
+    if (!formData.title || !formData.excerpt || !formData.fullContent) {
+      showToast('Harap lengkapi judul, ringkasan, dan isi berita', 'error');
       return;
     }
 
+    if (uploadedPhotos.length === 0 && !formData.image) {
+      showToast('Harap unggah minimal 1 foto tahapan kegiatan', 'error');
+      return;
+    }
+
+    const coverImage = formData.image || uploadedPhotos[0]?.imageUrl || 'https://images.unsplash.com/photo-1541888081156-fce1fa5427d6?auto=format&fit=crop&q=80&w=800';
     const tagInfo = CATEGORIES.find(c => c.label === formData.tag) || CATEGORIES[0];
     const currentDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     const authorName = formData.author || (localStorage.getItem('didesa_auth_user') ? JSON.parse(localStorage.getItem('didesa_auth_user')!).name : 'Admin');
@@ -350,9 +366,9 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
         fullContent: formData.fullContent,
         tag: tagInfo.label,
         tagColor: tagInfo.color,
-        image: formData.image,
+        image: coverImage,
         author: formData.author || n.author,
-        progressPhotos: formData.progressPhotos.filter(p => p.imageUrl.trim() !== '')
+        progressPhotos: uploadedPhotos
       } : n));
       showToast('Berita berhasil diperbarui', 'success');
     } else {
@@ -363,12 +379,12 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
         fullContent: formData.fullContent,
         tag: tagInfo.label,
         tagColor: tagInfo.color,
-        image: formData.image,
+        image: coverImage,
         author: authorName,
         date: currentDate,
         likes: 0,
         comments: [],
-        progressPhotos: formData.progressPhotos.filter(p => p.imageUrl.trim() !== '')
+        progressPhotos: uploadedPhotos
       };
       setNews(prev => [newItem, ...prev]);
       showToast('Berita berhasil ditambahkan', 'success');
@@ -499,194 +515,139 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
                     />
                   </div>
 
-                  <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">Gambar Cover *</label>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-                      <div className="flex-1 w-full">
-                        <input 
-                          type="text" 
-                          required
-                          value={formData.image}
-                          onChange={e => setFormData({...formData, image: e.target.value})}
-                          className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                          placeholder="URL Gambar atau unggah dari komputer..."
-                        />
-                      </div>
-                      <div className="relative shrink-0 w-full sm:w-auto">
-                        <input 
-                          type="file" 
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          disabled={isUploading}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                        />
-                        <button 
-                          type="button" 
-                          disabled={isUploading}
-                          className="w-full sm:w-auto px-4 py-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 border border-indigo-200 dark:border-indigo-800"
-                        >
-                          {isUploading ? (
-                            <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <Upload className="w-4 h-4" />
-                          )}
-                          Unggah Foto
-                        </button>
-                      </div>
-                    </div>
-                    {formData.image && (
-                      <div className="mt-3 rounded-xl overflow-hidden h-48 border border-gray-200 dark:border-slate-700 relative w-full sm:w-2/3 md:w-1/2">
-                        <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Dokumentasi Multi-Foto Progress Tahapan Dana Desa */}
-                  <div className="space-y-3 md:col-span-2 p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 rounded-2xl">
+                  {/* Dokumentasi 3 Tahapan Dana Desa & Cover Selection */}
+                  <div className="space-y-4 md:col-span-2 p-5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-3xl">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
-                        <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-300 flex items-center gap-1.5">
-                          <ImageIcon className="w-4 h-4 text-emerald-600" />
-                          Dokumentasi Progress Tahapan (Laporan Pendamping Dana Desa)
+                        <h4 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                          <ImageIcon className="w-5 h-5 text-emerald-600" />
+                          Dokumentasi 3 Tahapan Progress Dana Desa
                         </h4>
-                        <p className="text-xs text-emerald-700/80 dark:text-emerald-400 mt-0.5">
-                          Unggah foto dokumentasi per persentase tahapan (contoh: 0% Titik Nol, 50% Pengerjaan, 100% Selesai).
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
+                          Unggah foto 3 persentase tahapan (0%, 50%, 100%). Klik <strong className="text-amber-600">Pilih Cover</strong> pada foto untuk menjadikannya Sampul Utama Berita.
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={addDanaDesaPresets}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1"
-                        >
-                          + Presets Dana Desa (0%, 50%, 100%)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={addCustomProgressSlot}
-                          className="px-3 py-1.5 bg-white dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-bold transition-all"
-                        >
-                          + Tambah Foto
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={addCustomProgressSlot}
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 shadow-sm"
+                      >
+                        + Tambah Tahap
+                      </button>
                     </div>
 
-                    {formData.progressPhotos.length > 0 ? (
-                      <div className="space-y-3 pt-2">
-                        {formData.progressPhotos.map((photo, idx) => (
-                          <div key={photo.id || idx} className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-emerald-100 dark:border-slate-800 space-y-3 shadow-sm">
-                            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
-                              {/* Stage Selector */}
-                              <div className="sm:col-span-1">
-                                <label className="text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Persentase Tahap</label>
-                                <select
-                                  value={photo.stage}
-                                  onChange={e => {
-                                    const val = e.target.value;
-                                    setFormData(prev => {
-                                      const updated = [...prev.progressPhotos];
-                                      updated[idx] = { ...updated[idx], stage: val };
-                                      return { ...prev, progressPhotos: updated };
-                                    });
-                                  }}
-                                  className="w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-xs font-bold text-emerald-700 dark:text-emerald-400 outline-none"
-                                >
-                                  <option value="0%">0% (Titik Nol / Awal)</option>
-                                  <option value="40%">40% (Pelaksanaan Awal)</option>
-                                  <option value="50%">50% (Pertengahan)</option>
-                                  <option value="80%">80% (Hampir Selesai)</option>
-                                  <option value="100%">100% (Serah Terima / Selesai)</option>
-                                  <option value="Laporan">Laporan Kegiatan</option>
-                                </select>
-                              </div>
-
-                              {/* Title / Description */}
-                              <div className="sm:col-span-2">
-                                <label className="text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-1">Keterangan / Judul Foto</label>
-                                <input
-                                  type="text"
-                                  value={photo.title}
-                                  onChange={e => {
-                                    const val = e.target.value;
-                                    setFormData(prev => {
-                                      const updated = [...prev.progressPhotos];
-                                      updated[idx] = { ...updated[idx], title: val };
-                                      return { ...prev, progressPhotos: updated };
-                                    });
-                                  }}
-                                  placeholder="Contoh: Titik Nol Survei Lapangan..."
-                                  className="w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-gray-900 dark:text-white outline-none"
-                                />
-                              </div>
-
-                              {/* Delete Slot Button */}
-                              <div className="sm:col-span-1 flex justify-end">
-                                <button
-                                  type="button"
-                                  onClick={() => removeProgressSlot(idx)}
-                                  className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" /> Hapus
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Image Input & Upload */}
-                            <div className="flex flex-col sm:flex-row items-center gap-3">
-                              <input
-                                type="text"
-                                value={photo.imageUrl}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                      {formData.progressPhotos.map((photo, idx) => {
+                        const isCover = (formData.image && formData.image === photo.imageUrl) || (!formData.image && idx === 0 && photo.imageUrl !== '');
+                        return (
+                          <div key={photo.id || idx} className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 bg-white dark:bg-slate-900 relative ${isCover ? 'border-amber-500 ring-2 ring-amber-500/20 shadow-md' : 'border-gray-200 dark:border-slate-700'}`}>
+                            {/* Header: Stage Badge + Star Cover Button */}
+                            <div className="flex items-center justify-between">
+                              <select
+                                value={photo.stage}
                                 onChange={e => {
                                   const val = e.target.value;
                                   setFormData(prev => {
                                     const updated = [...prev.progressPhotos];
-                                    updated[idx] = { ...updated[idx], imageUrl: val };
+                                    updated[idx] = { ...updated[idx], stage: val };
                                     return { ...prev, progressPhotos: updated };
                                   });
                                 }}
-                                placeholder="URL foto atau unggah langsung..."
-                                className="flex-1 w-full px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs outline-none"
-                              />
-                              <div className="relative shrink-0 w-full sm:w-auto">
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={e => e.target.files?.[0] && handleProgressPhotoUpload(idx, e.target.files[0])}
-                                  disabled={uploadingStageIndex === idx}
-                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                                />
+                                className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs font-black text-emerald-700 dark:text-emerald-400 outline-none cursor-pointer"
+                              >
+                                <option value="0%">TAHAP 0%</option>
+                                <option value="40%">TAHAP 40%</option>
+                                <option value="50%">TAHAP 50%</option>
+                                <option value="80%">TAHAP 80%</option>
+                                <option value="100%">TAHAP 100%</option>
+                              </select>
+
+                              {photo.imageUrl && (
                                 <button
                                   type="button"
-                                  disabled={uploadingStageIndex === idx}
-                                  className="w-full sm:w-auto px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 border border-emerald-200 dark:border-emerald-800"
+                                  onClick={() => setFormData(prev => ({ ...prev, image: photo.imageUrl }))}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-extrabold flex items-center gap-1 transition-all cursor-pointer ${
+                                    isCover
+                                      ? 'bg-amber-500 text-white shadow-sm'
+                                      : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-amber-100 hover:text-amber-700'
+                                  }`}
+                                  title="Jadikan Gambar Cover Utama Berita"
                                 >
-                                  {uploadingStageIndex === idx ? (
-                                    <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
-                                  ) : (
-                                    <Upload className="w-3.5 h-3.5" />
-                                  )}
-                                  Unggah Foto Tahap Ini
+                                  <Star className={`w-3 h-3 ${isCover ? 'fill-white' : ''}`} />
+                                  {isCover ? 'Cover Utama' : 'Pilih Cover'}
                                 </button>
-                              </div>
+                              )}
                             </div>
 
-                            {/* Preview thumbnail if available */}
-                            {photo.imageUrl && (
-                              <div className="h-28 rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700 relative w-full sm:w-48">
-                                <img src={photo.imageUrl} alt={photo.title} className="w-full h-full object-cover" />
-                                <span className="absolute top-2 left-2 bg-emerald-700 text-white text-[10px] font-black px-2 py-0.5 rounded shadow">
-                                  {photo.stage}
-                                </span>
-                              </div>
-                            )}
+                            {/* Center: Image Upload Dropzone */}
+                            <div className="relative h-36 rounded-xl overflow-hidden border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 flex items-center justify-center group">
+                              {photo.imageUrl ? (
+                                <>
+                                  <img src={photo.imageUrl} alt={photo.title} className="w-full h-full object-cover" />
+                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                                    <label className="p-2 bg-white text-gray-800 rounded-xl cursor-pointer shadow hover:bg-emerald-50 hover:text-emerald-700 transition-colors text-xs font-bold flex items-center gap-1">
+                                      <Upload className="w-3.5 h-3.5" /> Ganti
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={e => e.target.files?.[0] && handleProgressPhotoUpload(idx, e.target.files[0])}
+                                        disabled={uploadingStageIndex === idx}
+                                        className="hidden"
+                                      />
+                                    </label>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeProgressSlot(idx)}
+                                      className="p-2 bg-white text-red-600 rounded-xl shadow hover:bg-red-50 transition-colors"
+                                      title="Hapus Slot Tahap Ini"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </>
+                              ) : (
+                                <label className="w-full h-full flex flex-col items-center justify-center p-3 cursor-pointer text-center hover:bg-emerald-50/50 dark:hover:bg-slate-700/50 transition-colors">
+                                  {uploadingStageIndex === idx ? (
+                                    <div className="w-6 h-6 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mb-1" />
+                                  ) : (
+                                    <Upload className="w-6 h-6 text-emerald-600 mb-1" />
+                                  )}
+                                  <span className="text-xs font-bold text-gray-700 dark:text-slate-300">
+                                    {uploadingStageIndex === idx ? 'Mengunggah...' : `Unggah Foto (${photo.stage})`}
+                                  </span>
+                                  <span className="text-[10px] text-gray-400 mt-0.5">Format JPG / PNG</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => e.target.files?.[0] && handleProgressPhotoUpload(idx, e.target.files[0])}
+                                    disabled={uploadingStageIndex === idx}
+                                    className="hidden"
+                                  />
+                                </label>
+                              )}
+                            </div>
+
+                            {/* Caption Input */}
+                            <div>
+                              <input
+                                type="text"
+                                value={photo.title}
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setFormData(prev => {
+                                    const updated = [...prev.progressPhotos];
+                                    updated[idx] = { ...updated[idx], title: val };
+                                    return { ...prev, progressPhotos: updated };
+                                  });
+                                }}
+                                placeholder="Keterangan foto..."
+                                className="w-full px-3 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-xs text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                              />
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="p-4 border-2 border-dashed border-emerald-200 dark:border-emerald-900/50 rounded-xl text-center text-xs text-emerald-700 dark:text-emerald-400">
-                        Belum ada foto dokumentasi tahapan. Klik tombol <strong>"+ Presets Dana Desa"</strong> di atas untuk membuat slot foto persentase 0%, 50%, dan 100% secara otomatis.
-                      </div>
-                    )}
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="space-y-1.5 md:col-span-2">
