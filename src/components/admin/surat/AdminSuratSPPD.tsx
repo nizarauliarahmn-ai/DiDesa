@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Component } from 'react';
-import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
@@ -10,6 +10,7 @@ import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHist
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import { GoogleGenAI } from '@google/genai';
 
 // Error Boundary to catch and display any rendering errors
 class SPPDErrorBoundary extends Component<{children: React.ReactNode, onBack: () => void}, {hasError: boolean, error: any}> {
@@ -58,7 +59,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [officers, setOfficers] = useState<any[]>([]);
 
   // Desa Settings
-  const [desaName, setDesaName] = useState('Desa Sukamakmur');
+  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Wasah Hilir');
+  // PDF AI autofill state
+  const [showPdfUpload, setShowPdfUpload] = useState(false);
+  const [pdfAnalyzing, setPdfAnalyzing] = useState(false);
+  const [pdfFileName, setPdfFileName] = useState('');
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [namaKades, setNamaKades] = useState('FAZAKKIR RAHMAD');
   const [roleKades, setRoleKades] = useState('Kepala Desa');
   const [nipKades, setNipKades] = useState('');
@@ -120,7 +126,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   // Detail Perjalanan
   const [maksudPerjalanan, setMaksudPerjalanan] = useState(editData?.maksudPerjalanan || '');
   const [alatAngkut, setAlatAngkut] = useState(editData?.alatAngkut || '');
-  const [tempatBerangkat, setTempatBerangkat] = useState(editData?.tempatBerangkat || 'Desa Sukamakmur');
+  const [tempatBerangkat, setTempatBerangkat] = useState(() => editData?.tempatBerangkat || localStorage.getItem('kop_desa') || 'Wasah Hilir');
   const [tempatTujuan, setTempatTujuan] = useState(editData?.tempatTujuan || '');
   const [lamaPerjalanan, setLamaPerjalanan] = useState(editData?.lamaPerjalanan || '1 (Satu) Hari');
   const [tanggalBerangkat, setTanggalBerangkat] = useState(editData?.tanggalBerangkat || '');
@@ -137,7 +143,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const dragProps = useDragScroll();
 
   useEffect(() => {
-    setDesaName(localStorage.getItem('kop_desa') || 'Sukamakmur');
+    const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+    setDesaName(activeDesa);
     setNamaKades(localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD');
     setRoleKades('Kepala Desa');
     
@@ -280,7 +287,86 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     }));
   };
 
+  // ─── AI PDF AUTOFILL ───
+  const handlePdfUpload = async (file: File) => {
+    if (!file || file.type !== 'application/pdf') {
+      showToast('Hanya file PDF yang diterima.', 'error');
+      return;
+    }
+    setPdfFileName(file.name);
+    setPdfAnalyzing(true);
+    showToast('DiDesa AI sedang menganalisa isi surat undangan...', 'info');
+
+    try {
+      const apiKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GOOGLE_AI_API_KEY) || 'AIzaSyDummy';
+      const ai = new GoogleGenAI({ apiKey });
+
+      // Convert PDF to base64
+      const arrayBuffer = await file.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      let binary = '';
+      for (let i = 0; i < uint8Array.length; i++) {
+        binary += String.fromCharCode(uint8Array[i]);
+      }
+      const base64Data = btoa(binary);
+
+      const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+      const prompt = `Anda adalah asisten administrasi pemerintah desa. Analisis surat undangan/disposisi ini dan ekstrak informasi untuk mengisi formulir SPPD (Surat Perjalanan Perjalanan Dinas) desa.
+
+Desa pengirim SPPD: ${activeDesa}
+
+Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa penjelasan lain):
+{
+  "nomorUndangan": "nomor surat undangan jika ada",
+  "tanggalUndangan": "tanggal surat dalam format YYYY-MM-DD jika ada",
+  "maksudPerjalanan": "tujuan/agenda/maksud kegiatan yang harus dihadiri, ringkas dan jelas",
+  "tempatTujuan": "lokasi/tempat kegiatan berlangsung (nama gedung, kota, instansi)",
+  "tanggalBerangkat": "tanggal pelaksanaan kegiatan dalam format YYYY-MM-DD",
+  "tanggalKembali": "tanggal selesai kegiatan dalam format YYYY-MM-DD (sama jika 1 hari)",
+  "instansiPengirim": "nama instansi/lembaga pengirim undangan",
+  "kepadaYth": "jabatan/nama yang dituju dalam surat undangan"
+}`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: 'application/pdf', data: base64Data } }
+          ]
+        }]
+      });
+
+      const rawText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Format respons tidak valid dari AI');
+
+      const parsed = JSON.parse(jsonMatch[0]);
+
+      // Autofill form fields
+      if (parsed.nomorUndangan) {
+        setDasarNo(parsed.nomorUndangan);
+        setIsDasarManual(false);
+      }
+      if (parsed.tanggalUndangan) setDasarTgl(parsed.tanggalUndangan);
+      if (parsed.maksudPerjalanan) setMaksudPerjalanan(parsed.maksudPerjalanan);
+      if (parsed.tempatTujuan) setTempatTujuan(parsed.tempatTujuan);
+      if (parsed.tanggalBerangkat) setTanggalBerangkat(parsed.tanggalBerangkat);
+      if (parsed.tanggalKembali) setTanggalKembali(parsed.tanggalKembali);
+      if (parsed.kepadaYth) setKepadaYth(parsed.kepadaYth);
+
+      setShowPdfUpload(false);
+      showToast('✅ DiDesa AI berhasil mengisi form SPPD dari surat undangan! Silakan periksa dan sesuaikan data.', 'success');
+    } catch (err: any) {
+      console.error('AI PDF Error:', err);
+      showToast('Gagal menganalisa PDF. Pastikan API Key Gemini valid dan coba lagi.', 'error');
+    } finally {
+      setPdfAnalyzing(false);
+    }
+  };
+
   const formatDateFull = (dateStr: string) => {
+
     if (!dateStr) return '';
     const date = new Date(dateStr);
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -311,9 +397,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const generateHTML = () => {
     const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
     const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
-    const activeDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
-    const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
+    const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+    const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RW.001';
+    const kontakKantor = localStorage.getItem('kop_kontak') || '';
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const isAn = (roleKades || '').toLowerCase() !== 'kepala desa';
     const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
@@ -778,6 +864,70 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       {/* TAB: PENGISIAN FORM */}
       {activeTab === 'form' && (
       <div className="max-w-2xl mx-auto space-y-6">
+
+          {/* AI PDF AUTOFILL CARD */}
+          <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-5 rounded-2xl shadow-md text-white">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center shrink-0">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm">DiDesa AI — Isi SPPD dari Surat Undangan</h4>
+                  <p className="text-xs text-white/80 mt-0.5 leading-relaxed">
+                    Upload PDF surat undangan dari instansi lain, AI akan mendeteksi tujuan, tanggal, nomor surat, dan tempat kegiatan secara otomatis.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPdfUpload(!showPdfUpload)}
+                className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-700 font-bold text-xs rounded-xl hover:bg-indigo-50 transition-colors shrink-0"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                Upload Undangan
+              </button>
+            </div>
+
+            {showPdfUpload && (
+              <div className="mt-4 bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePdfUpload(file);
+                    e.target.value = '';
+                  }}
+                />
+                {pdfAnalyzing ? (
+                  <div className="flex items-center gap-3 py-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    <div>
+                      <p className="font-semibold text-sm">Menganalisa: {pdfFileName}</p>
+                      <p className="text-xs text-white/70">Gemini AI sedang membaca dan mengekstrak data surat undangan...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className="border-2 border-dashed border-white/40 rounded-xl p-6 text-center cursor-pointer hover:border-white/70 hover:bg-white/5 transition-all"
+                    onClick={() => pdfInputRef.current?.click()}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handlePdfUpload(file);
+                    }}
+                  >
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-white/60" />
+                    <p className="font-semibold text-sm">Klik atau Seret PDF ke sini</p>
+                    <p className="text-xs text-white/60 mt-1">Format: PDF • Maks: 10MB • Surat undangan dari dinas/instansi</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Identitas Surat</h3>
