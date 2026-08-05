@@ -151,10 +151,22 @@ const compressImage = (file: File): Promise<{ blob: Blob; originalSize: number; 
   });
 };
 
+const sanitizeNewsList = (rawList: NewsItem[]): NewsItem[] => {
+  return rawList.map(item => {
+    const isLikedByUser = localStorage.getItem(`didesa_liked_${item.id}`) === 'true';
+    const isLegacyDummy = item.likes === 35 || item.likes === 42 || item.likes === 18 || item.likes === 55 || item.likes === 31;
+    return {
+      ...item,
+      likes: isLegacyDummy ? (isLikedByUser ? 1 : 0) : item.likes
+    };
+  });
+};
+
 export default function AdminBerita({ searchQuery = '', setSearchQuery, debouncedSearchQuery = '' }: { searchQuery?: string, setSearchQuery?: (v: string) => void, debouncedSearchQuery?: string }) {
   const [news, setNews] = useState<NewsItem[]>(() => {
     const saved = localStorage.getItem('didesa_news_list');
-    return saved ? JSON.parse(saved) : INITIAL_NEWS;
+    const parsed = saved ? JSON.parse(saved) : INITIAL_NEWS;
+    return sanitizeNewsList(parsed);
   });
 
   const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
@@ -175,7 +187,8 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
   const [uploadingStageIndex, setUploadingStageIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    localStorage.setItem('didesa_news_list', JSON.stringify(news));
+    const sanitized = sanitizeNewsList(news);
+    localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
   }, [news]);
 
   // Sync real-time when citizens like or comment from Portal Warga

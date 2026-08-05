@@ -97,10 +97,22 @@ const INITIAL_NEWS: NewsItem[] = [
   }
 ];
 
+const sanitizeNewsList = (rawList: NewsItem[]): NewsItem[] => {
+  return rawList.map(item => {
+    const isLikedByUser = localStorage.getItem(`didesa_liked_${item.id}`) === 'true';
+    const isLegacyDummy = item.likes === 35 || item.likes === 42 || item.likes === 18 || item.likes === 55 || item.likes === 31;
+    return {
+      ...item,
+      likes: isLegacyDummy ? (isLikedByUser ? 1 : 0) : item.likes
+    };
+  });
+};
+
 export default function BeritaDesa() {
   const [news, setNews] = useState<NewsItem[]>(() => {
     const saved = localStorage.getItem('didesa_news_list');
-    return saved ? JSON.parse(saved) : INITIAL_NEWS;
+    const parsed = saved ? JSON.parse(saved) : INITIAL_NEWS;
+    return sanitizeNewsList(parsed);
   });
 
   const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
@@ -125,7 +137,8 @@ export default function BeritaDesa() {
   const [commentText, setCommentText] = useState('');
 
   useEffect(() => {
-    localStorage.setItem('didesa_news_list', JSON.stringify(news));
+    const sanitized = sanitizeNewsList(news);
+    localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
   }, [news]);
 
   const processedNews = useMemo(() => {
