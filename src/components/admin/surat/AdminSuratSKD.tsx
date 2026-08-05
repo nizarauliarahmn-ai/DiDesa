@@ -527,6 +527,15 @@ export default function AdminSuratSKD({
     (r.nik || '').includes(searchQuery || '')
   ).slice(0, 5);
 
+  const activeClassification = React.useMemo(() => {
+    try {
+      const cls = getLetterClassifications();
+      const found = cls.find(c => c.id === '5' || c.klasifikasi === 'SDP' || c.klasifikasi === 'SKD' || c.klasifikasi === 'SKDPR');
+      if (found) return found;
+    } catch(e) {}
+    return { klasifikasi: 'SDP', jenis: 'SK DOMISILI PERORANGAN' };
+  }, []);
+
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
       {/* Header */}
@@ -536,8 +545,8 @@ export default function AdminSuratSKD({
             <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           </button>
           <div>
-            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat SKD</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
+            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat {activeClassification.klasifikasi}</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{activeClassification.jenis}</span></p>
           </div>
         </div>
         <div className="flex gap-2">
