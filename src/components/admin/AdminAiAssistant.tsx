@@ -8,12 +8,11 @@ export default function AdminAiAssistant() {
   // Daftar endpoint lengkap: url API + nama model, dari paling baru ke paling stabil
   // Menggunakan v1 (stable) dan v1beta (experimental) untuk coverage maksimal
   const GEMINI_ENDPOINTS = [
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent' },
     { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent' },
-    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent' },
-    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-001:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent' },
     { url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent' },
-    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-8b-001:generateContent' },
-    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent' },
+    { url: 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent' },
   ];
 
   const [messages, setMessages] = useState([

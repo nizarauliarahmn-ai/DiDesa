@@ -340,9 +340,11 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
 
       // Gunakan fetch langsung seperti AdminAiAssistant — kompatibel dengan semua API key
       const GEMINI_ENDPOINTS = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent',
         'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
       ];
 
       const payload = {
@@ -357,27 +359,33 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
 
       let rawText = '';
       let success = false;
+      let lastError = '';
       for (const endpoint of GEMINI_ENDPOINTS) {
         try {
+          console.log('[SPPD AI] Mencoba:', endpoint);
           const res = await fetch(`${endpoint}?key=${apiKey}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
           const data = await res.json();
           if (!res.ok) {
-            console.warn('[SPPD AI]', endpoint, data.error?.message);
+            const errMsg = data.error?.message || `HTTP ${res.status}`;
+            console.warn('[SPPD AI]', endpoint.split('/models/')[1], errMsg);
+            lastError = errMsg;
             continue;
           }
           rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
           success = true;
+          console.log('[SPPD AI] Berhasil dengan:', endpoint.split('/models/')[1]);
           break;
-        } catch (e) {
+        } catch (e: any) {
           console.warn('[SPPD AI] Endpoint gagal:', endpoint, e);
+          lastError = e.message || 'Network error';
         }
       }
 
-      if (!success || !rawText) throw new Error('Semua endpoint Gemini gagal merespons');
+      if (!success || !rawText) throw new Error(lastError || 'Semua endpoint Gemini gagal merespons');
 
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Format respons tidak valid dari AI');
