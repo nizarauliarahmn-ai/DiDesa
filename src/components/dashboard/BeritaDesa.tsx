@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Calendar, User, ArrowRight, X, Heart, MessageSquare, Share2, Send } from 'lucide-react';
+import { Search, Calendar, User, ArrowRight, X, Heart, MessageSquare, Share2, Send, Image as ImageIcon } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { getRelativeDateString } from '../../utils/dateHelper';
 
@@ -8,6 +8,13 @@ interface NewsComment {
   name: string;
   text: string;
   date: string;
+}
+
+interface ProgressPhoto {
+  id: string;
+  stage: string;
+  title: string;
+  imageUrl: string;
 }
 
 interface NewsItem {
@@ -22,6 +29,7 @@ interface NewsItem {
   author: string;
   likes: number;
   comments: NewsComment[];
+  progressPhotos?: ProgressPhoto[];
 }
 
 const INITIAL_NEWS: NewsItem[] = [
@@ -39,6 +47,11 @@ const INITIAL_NEWS: NewsItem[] = [
     comments: [
       { id: 'c1', name: 'Ahmad Bukhori', text: 'Alhamdulillah, jembatannya sangat kokoh dan membantu sekali untuk mengangkut padi saat panen!', date: '25 Okt 2023' },
       { id: 'c2', name: 'Deddy Setiawan', text: 'Luar biasa Pemdes Sukamakmur. Pembangunan merata dan transparan.', date: '25 Okt 2023' }
+    ],
+    progressPhotos: [
+      { id: 'p-0', stage: '0%', title: 'Titik Nol (Survei Lokasi & Persiapan)', imageUrl: 'https://images.unsplash.com/photo-1541888081156-fce1fa5427d6?auto=format&fit=crop&q=80&w=800' },
+      { id: 'p-50', stage: '50%', title: 'Progres Pemasangan Pondasi & Tiang', imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&q=80&w=800' },
+      { id: 'p-100', stage: '100%', title: 'Serah Terima Pembangunan Rampung 100%', imageUrl: 'https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8?auto=format&fit=crop&q=80&w=800' }
     ]
   },
   {
@@ -105,6 +118,7 @@ export default function BeritaDesa() {
   const [activeCategory, setActiveCategory] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; title: string; stage?: string } | null>(null);
 
   // Comments & Likes State
   const [commentName, setCommentName] = useState('');
@@ -379,6 +393,52 @@ export default function BeritaDesa() {
                 <div className="text-gray-700 dark:text-slate-300 leading-relaxed text-sm space-y-4 text-justify whitespace-pre-wrap font-medium">
                   {activeSelectedNews.fullContent}
                 </div>
+
+                {/* Multi-Photo Progress Gallery (Dana Desa / Laporan Pendamping) */}
+                {activeSelectedNews.progressPhotos && activeSelectedNews.progressPhotos.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-gray-100 dark:border-slate-800 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <ImageIcon className="w-5 h-5 text-emerald-600" />
+                        Dokumentasi Progress Tahapan Dana Desa
+                      </h4>
+                      <span className="text-xs text-emerald-700 font-bold bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-900">
+                        {activeSelectedNews.progressPhotos.length} Foto Dokumentasi
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {activeSelectedNews.progressPhotos.map((photo, idx) => (
+                        <div
+                          key={photo.id || idx}
+                          onClick={() => setLightboxImage({ url: photo.imageUrl, title: photo.title, stage: photo.stage })}
+                          className="group relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col"
+                        >
+                          <div className="h-40 bg-gray-100 dark:bg-slate-800 overflow-hidden relative">
+                            <img
+                              src={photo.imageUrl}
+                              alt={photo.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                              <span className="text-white text-xs font-semibold flex items-center gap-1">
+                                Klik untuk memperbesar
+                              </span>
+                            </div>
+                            <span className="absolute top-2.5 left-2.5 bg-emerald-600 text-white text-[10px] font-black px-2.5 py-1 rounded-lg shadow-md tracking-wider">
+                              TAHAP {photo.stage}
+                            </span>
+                          </div>
+                          <div className="p-3 bg-white dark:bg-slate-900">
+                            <p className="text-xs font-bold text-gray-800 dark:text-slate-200 line-clamp-2">
+                              {photo.title || `Dokumentasi Tahap ${photo.stage}`}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Likes & Sharing footer */}
@@ -463,6 +523,29 @@ export default function BeritaDesa() {
         </div>
       )}
 
+      {/* Lightbox Preview Modal */}
+      {lightboxImage && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn" onClick={() => setLightboxImage(null)}>
+          <div className="relative max-w-4xl w-full bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800" onClick={e => e.stopPropagation()}>
+            <div className="p-4 bg-slate-900/90 flex justify-between items-center border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                {lightboxImage.stage && (
+                  <span className="bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-0.5 rounded-md">
+                    TAHAP {lightboxImage.stage}
+                  </span>
+                )}
+                <span className="text-sm font-bold text-white line-clamp-1">{lightboxImage.title}</span>
+              </div>
+              <button onClick={() => setLightboxImage(null)} className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-2 bg-black flex items-center justify-center max-h-[75vh]">
+              <img src={lightboxImage.url} alt={lightboxImage.title} className="max-h-[70vh] w-auto object-contain rounded-xl" />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
