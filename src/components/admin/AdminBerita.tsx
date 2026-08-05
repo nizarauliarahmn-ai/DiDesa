@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Edit2, Trash2, Calendar, MessageSquare, Heart, Image as ImageIcon, X, Upload, Newspaper } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Calendar, MessageSquare, Heart, Image as ImageIcon, X, Upload, Newspaper, AlertTriangle } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { getRelativeDateString } from '../../utils/dateHelper';
 import { supabase } from '../../utils/supabase';
@@ -146,6 +146,7 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
   const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<NewsItem | null>(null);
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
   const [formData, setFormData] = useState({
     title: '',
@@ -227,11 +228,11 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus berita ini?')) {
-      setNews(prev => prev.filter(n => n.id !== id));
-      showToast('Berita berhasil dihapus', 'success');
-    }
+  const handleDeleteConfirm = () => {
+    if (!itemToDelete) return;
+    setNews(prev => prev.filter(n => n.id !== itemToDelete.id));
+    showToast('Berita berhasil dihapus', 'success');
+    setItemToDelete(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -320,7 +321,7 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
                 <button onClick={(e) => { e.stopPropagation(); handleOpenModal(item); }} className="p-2 bg-white/90 backdrop-blur-sm hover:bg-white text-blue-600 rounded-lg shadow-sm transition-colors" title="Edit Berita">
                   <Edit2 className="w-4 h-4" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} className="p-2 bg-white/90 backdrop-blur-sm hover:bg-white text-red-600 rounded-lg shadow-sm transition-colors" title="Hapus Berita">
+                <button onClick={(e) => { e.stopPropagation(); setItemToDelete(item); }} className="p-2 bg-white/90 backdrop-blur-sm hover:bg-white text-red-600 rounded-lg shadow-sm transition-colors" title="Hapus Berita">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
@@ -483,6 +484,38 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
                 className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium transition-colors shadow-sm"
               >
                 {editingNews ? 'Simpan Perubahan' : 'Terbitkan Berita'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modern Confirmation Delete Modal */}
+      {itemToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-md w-full p-6 border border-gray-100 dark:border-slate-800 transform transition-all text-center">
+            <div className="w-16 h-16 bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-100 dark:border-red-900/50 shadow-inner">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Hapus Berita Ini?</h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mb-6 leading-relaxed">
+              Apakah Anda yakin ingin menghapus berita <strong className="text-gray-800 dark:text-slate-200">"{itemToDelete.title}"</strong>? Berita yang dihapus akan hilang dari Portal Warga.
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(null)}
+                className="flex-1 py-3 px-4 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-semibold hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteConfirm}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-semibold shadow-lg shadow-red-500/25 transition-all text-sm flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Ya, Hapus
               </button>
             </div>
           </div>
