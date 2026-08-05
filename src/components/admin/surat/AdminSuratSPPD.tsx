@@ -10,7 +10,6 @@ import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHist
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import { GoogleGenAI } from '@google/genai';
 
 // Error Boundary to catch and display any rendering errors
 class SPPDErrorBoundary extends Component<{children: React.ReactNode, onBack: () => void}, {hasError: boolean, error: any}> {
@@ -293,14 +292,26 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       showToast('Hanya file PDF yang diterima.', 'error');
       return;
     }
+
+    // Ambil API key dari localStorage — pola sama dengan AdminAiAssistant
+    const authUserStr = localStorage.getItem('didesa_auth_user');
+    let tenantId = 'default';
+    try {
+      const authUser = authUserStr ? JSON.parse(authUserStr) : null;
+      if (authUser?.tenantId) tenantId = authUser.tenantId;
+    } catch (e) {}
+    const apiKey = localStorage.getItem(`desi_api_key_${tenantId}`) || '';
+
+    if (!apiKey) {
+      showToast('API Key Gemini belum diatur. Buka menu Asisten AI (Desi) untuk mengaturnya terlebih dahulu.', 'error');
+      return;
+    }
+
     setPdfFileName(file.name);
     setPdfAnalyzing(true);
     showToast('DiDesa AI sedang menganalisa isi surat undangan...', 'info');
 
     try {
-      const apiKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GOOGLE_AI_API_KEY) || 'AIzaSyDummy';
-      const ai = new GoogleGenAI({ apiKey });
-
       // Convert PDF to base64
       const arrayBuffer = await file.arrayBuffer();
       const uint8Array = new Uint8Array(arrayBuffer);
@@ -311,14 +322,14 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       const base64Data = btoa(binary);
 
       const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
-      const prompt = `Anda adalah asisten administrasi pemerintah desa. Analisis surat undangan/disposisi ini dan ekstrak informasi untuk mengisi formulir SPPD (Surat Perjalanan Perjalanan Dinas) desa.
+      const prompt = `Anda adalah asisten administrasi pemerintah desa. Analisis surat undangan/disposisi ini dan ekstrak informasi untuk mengisi formulir SPPD (Surat Perjalanan Dinas) desa.
 
 Desa pengirim SPPD: ${activeDesa}
 
-Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa penjelasan lain):
+Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kode blok, tanpa penjelasan lain):
 {
-  "nomorUndangan": "nomor surat undangan jika ada",
-  "tanggalUndangan": "tanggal surat dalam format YYYY-MM-DD jika ada",
+  "nomorUndangan": "nomor surat undangan jika ada, kosongkan jika tidak ada",
+  "tanggalUndangan": "tanggal surat dalam format YYYY-MM-DD jika ada, kosongkan jika tidak ada",
   "maksudPerjalanan": "tujuan/agenda/maksud kegiatan yang harus dihadiri, ringkas dan jelas",
   "tempatTujuan": "lokasi/tempat kegiatan berlangsung (nama gedung, kota, instansi)",
   "tanggalBerangkat": "tanggal pelaksanaan kegiatan dalam format YYYY-MM-DD",
@@ -327,17 +338,47 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa pen
   "kepadaYth": "jabatan/nama yang dituju dalam surat undangan"
 }`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
+      // Gunakan fetch langsung seperti AdminAiAssistant — kompatibel dengan semua API key
+      const GEMINI_ENDPOINTS = [
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent',
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+      ];
+
+      const payload = {
         contents: [{
           parts: [
             { text: prompt },
-            { inlineData: { mimeType: 'application/pdf', data: base64Data } }
+            { inline_data: { mime_type: 'application/pdf', data: base64Data } }
           ]
-        }]
-      });
+        }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 1024 }
+      };
 
-      const rawText = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      let rawText = '';
+      let success = false;
+      for (const endpoint of GEMINI_ENDPOINTS) {
+        try {
+          const res = await fetch(`${endpoint}?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            console.warn('[SPPD AI]', endpoint, data.error?.message);
+            continue;
+          }
+          rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          success = true;
+          break;
+        } catch (e) {
+          console.warn('[SPPD AI] Endpoint gagal:', endpoint, e);
+        }
+      }
+
+      if (!success || !rawText) throw new Error('Semua endpoint Gemini gagal merespons');
+
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Format respons tidak valid dari AI');
 
@@ -359,7 +400,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa pen
       showToast('✅ DiDesa AI berhasil mengisi form SPPD dari surat undangan! Silakan periksa dan sesuaikan data.', 'success');
     } catch (err: any) {
       console.error('AI PDF Error:', err);
-      showToast('Gagal menganalisa PDF. Pastikan API Key Gemini valid dan coba lagi.', 'error');
+      showToast(`Gagal menganalisa PDF: ${err.message || 'Coba lagi'}`, 'error');
     } finally {
       setPdfAnalyzing(false);
     }
