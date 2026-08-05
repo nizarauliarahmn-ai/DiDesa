@@ -18,6 +18,7 @@ import AdminApprovalQueue from './components/admin/AdminApprovalQueue';
 import AdminTenants from './components/admin/AdminTenants';
 import AdminAspirasi from './components/admin/AdminAspirasi';
 import AdminBukuTamu from './components/admin/AdminBukuTamu';
+import AdminBerita from './components/admin/AdminBerita';
 import PublicBukuTamu from './components/PublicBukuTamu';
 import PublicVerifikasiSurat from './components/PublicVerifikasiSurat';
 import AdminAiAssistant from './components/admin/AdminAiAssistant';
@@ -432,6 +433,13 @@ export default function App() {
                   />
                 )}
                 {adminTab === 'buku_tamu' && <AdminBukuTamu />}
+                {adminTab === 'berita' && (
+                  <AdminBerita 
+                    searchQuery={globalSearch}
+                    setSearchQuery={setGlobalSearch}
+                    debouncedSearchQuery={debouncedSearch}
+                  />
+                )}
                 {adminTab === 'panduan' && <AdminPanduan />}
                 {adminTab === 'antrean' && (user.role === 'kades' || user.role === 'saas_admin') && <AdminApprovalQueue />}
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
