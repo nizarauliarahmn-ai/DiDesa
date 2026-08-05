@@ -495,30 +495,12 @@ export default function App() {
           toggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)} 
           activeTab={publicTab}
           setActiveTab={setPublicTab}
+          user={user}
+          onAdminLogin={() => setView('admin')}
           onLogout={handleLogout}
         />
         <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scroll-smooth">
           <div className="p-4 md:p-6 lg:p-8 pb-72 lg:pb-80 flex flex-col min-h-full">
-            <div className="max-w-7xl mx-auto mb-6 flex justify-between items-center w-full">
-              <div></div>
-              <div className="flex gap-3">
-                 {(user?.role === 'admin' || user?.role === 'kades' || user?.role === 'saas_admin') && (
-                   <button onClick={() => setView('admin')} className="bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-700 transition-colors cursor-pointer">
-                     Masuk Mode Admin Desa
-                   </button>
-                 )}
-                 {user ? (
-                   <button onClick={handleLogout} className="bg-rose-50 hover:bg-rose-100 text-rose-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none border border-rose-200 transition-colors cursor-pointer">
-                     Keluar Sesi
-                   </button>
-                 ) : (
-                   <button onClick={() => setView('admin')} className="bg-emerald-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-700 transition-colors cursor-pointer">
-                     Masuk / Login
-                   </button>
-                 )}
-              </div>
-            </div>
-            
             
             <div className="flex-1 w-full">
               <PageTransition pageKey={publicTab}>

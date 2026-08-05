@@ -1,24 +1,92 @@
 import React from 'react';
 import WelcomeBanner from './dashboard/WelcomeBanner';
 import StatCards from './dashboard/StatCards';
-import BudgetSummary from './dashboard/BudgetSummary';
-import NewsSection from './dashboard/NewsSection';
-import RightSidebar from './dashboard/RightSidebar';
+import LayananMandiri from './dashboard/LayananMandiri';
+import ProfilDesa from './dashboard/ProfilDesa';
+import TransparansiDana from './dashboard/TransparansiDana';
+import BeritaDesa from './dashboard/BeritaDesa';
+import PetaWilayah from './dashboard/PetaWilayah';
+import AspirasiWarga from './dashboard/AspirasiWarga';
 
 export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: string) => void }) {
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-24">
-      <WelcomeBanner onTabChange={setPublicTab} />
-      <StatCards />
-      
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-        <div className="xl:col-span-2 space-y-6">
-          <BudgetSummary />
-          <NewsSection onTabChange={setPublicTab} />
+    <div className="max-w-7xl mx-auto space-y-16 pb-24">
+      {/* 1. Hero Welcome Banner */}
+      <div id="section-dashboard" className="scroll-mt-24">
+        <WelcomeBanner onTabChange={setPublicTab} />
+      </div>
+
+      {/* 2. Layanan Mandiri & Kios Surat Digital */}
+      <div id="section-layanan_mandiri" className="scroll-mt-24">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-2.5 h-8 bg-emerald-600 rounded-full"></div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Persuratan Mandiri & Kios Digital</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Pengajuan & cetak surat mandiri online 24 jam dengan TTE Digital</p>
+          </div>
         </div>
-        <div className="xl:col-span-1 sticky top-24">
-          <RightSidebar onTabChange={setPublicTab} />
+        <LayananMandiri />
+      </div>
+
+      {/* 3. Profil & Statistik Kependudukan */}
+      <div id="section-profil_desa" className="scroll-mt-24 space-y-8">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-8 bg-teal-600 rounded-full"></div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Profil & Demografi Kependudukan</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Data kependudukan & statistik perkembangan wilayah desa</p>
+          </div>
         </div>
+        <StatCards />
+        <ProfilDesa />
+      </div>
+
+      {/* 4. Transparansi APBD & Keuangan Desa */}
+      <div id="section-transparansi" className="scroll-mt-24 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-8 bg-sky-600 rounded-full"></div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Transparansi Anggaran & Dana Desa (APBD)</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Publikasi realisasi pendapatan & belanja desa secara terbuka</p>
+          </div>
+        </div>
+        <TransparansiDana />
+      </div>
+
+      {/* 5. Berita & Informasi Kegiatan Desa */}
+      <div id="section-berita" className="scroll-mt-24 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-8 bg-amber-500 rounded-full"></div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Berita & Pengumuman Desa</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Kabar kegiatan, proyek Dana Desa, dan informasi resmi pemerintah desa</p>
+          </div>
+        </div>
+        <BeritaDesa />
+      </div>
+
+      {/* 6. Peta GIS Interaktif Wilayah */}
+      <div id="section-peta_wilayah" className="scroll-mt-24 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-8 bg-indigo-600 rounded-full"></div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Peta GIS & Batas Wilayah Desa</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Pemetaan lokasi RT/RW, potensi desa, dan fasilitas umum</p>
+          </div>
+        </div>
+        <PetaWilayah />
+      </div>
+
+      {/* 7. Aspirasi & Pengaduan Warga 24/7 */}
+      <div id="section-aspirasi" className="scroll-mt-24 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-2.5 h-8 bg-rose-600 rounded-full"></div>
+          <div>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kios Aspirasi & Pengaduan Warga</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Kirim masukan, keluhan, atau ide pembangunan desa secara cepat</p>
+          </div>
+        </div>
+        <AspirasiWarga />
       </div>
     </div>
   );
