@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Calendar, User, ArrowRight, X, Heart, MessageSquare, Share2, Send, Image as ImageIcon } from 'lucide-react';
+import { Search, Calendar, User, ArrowRight, X, Heart, MessageSquare, Share2, Send, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { getRelativeDateString } from '../../utils/dateHelper';
 
@@ -251,6 +251,35 @@ export default function BeritaDesa() {
     showToast('Komentar berhasil dikirim!', 'success');
   };
 
+  // Auto-open selected news modal if navigated from Portal Dashboard
+  useEffect(() => {
+    const selectedId = localStorage.getItem('didesa_selected_news_id');
+    if (selectedId && processedNews.length > 0) {
+      const found = processedNews.find(n => n.id === selectedId);
+      if (found) {
+        setSelectedNews(found);
+      }
+      localStorage.removeItem('didesa_selected_news_id');
+    }
+  }, [processedNews]);
+
+  const handleDeleteComment = (newsId: string, commentId: string) => {
+    setNews(prev => prev.map(item => {
+      if (item.id === newsId) {
+        const updated = {
+          ...item,
+          comments: item.comments.filter(c => c.id !== commentId)
+        };
+        if (selectedNews?.id === newsId) {
+          setSelectedNews(updated);
+        }
+        return updated;
+      }
+      return item;
+    }));
+    showToast('Komentar berhasil dihapus', 'success');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -473,10 +502,19 @@ export default function BeritaDesa() {
                 <div className="space-y-4">
                   {activeSelectedNews.comments.length > 0 ? (
                     activeSelectedNews.comments.map(c => (
-                      <div key={c.id} className="p-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100/50 space-y-1 text-sm">
+                      <div key={c.id} className="p-4 bg-gray-50 dark:bg-slate-800 rounded-2xl border border-gray-100/50 space-y-1 text-sm group relative">
                         <div className="flex justify-between items-center">
                           <span className="font-extrabold text-gray-900 dark:text-white">{c.name}</span>
-                          <span className="text-[10px] text-gray-400 font-bold">{c.date}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-gray-400 font-bold">{c.date}</span>
+                            <button
+                              onClick={() => handleDeleteComment(activeSelectedNews.id, c.id)}
+                              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors"
+                              title="Hapus Komentar"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                         <p className="text-gray-600 dark:text-slate-400 font-medium">{c.text}</p>
                       </div>

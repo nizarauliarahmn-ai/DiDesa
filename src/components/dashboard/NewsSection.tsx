@@ -58,6 +58,14 @@ export default function NewsSection({ onTabChange }: { onTabChange?: (tab: strin
             tagColor={item.tagColor || 'bg-emerald-50 text-emerald-700'}
             title={item.title}
             excerpt={item.excerpt}
+            onClick={() => {
+              if (item.id) {
+                localStorage.setItem('didesa_selected_news_id', item.id);
+              }
+              if (onTabChange) {
+                onTabChange('berita');
+              }
+            }}
           />
         ))}
       </div>
@@ -65,9 +73,9 @@ export default function NewsSection({ onTabChange }: { onTabChange?: (tab: strin
   );
 }
 
-function NewsCard({ image, tag, tagColor, title, excerpt }: { image: string, tag: string, tagColor: string, title: string, excerpt: string }) {
+function NewsCard({ image, tag, tagColor, title, excerpt, onClick }: { image: string, tag: string, tagColor: string, title: string, excerpt: string, onClick?: () => void }) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 hover:shadow-md transition-all group cursor-pointer flex flex-col h-full">
+    <div onClick={onClick} className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 hover:shadow-md hover:-translate-y-1 transition-all duration-300 group cursor-pointer flex flex-col h-full">
       <div className="h-48 bg-cover bg-center overflow-hidden" >
         <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       </div>
