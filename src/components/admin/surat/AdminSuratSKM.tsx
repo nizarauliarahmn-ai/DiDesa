@@ -418,11 +418,7 @@ export default function AdminSuratSKM({
         <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
       </div>
 
-      <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
-        Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa :
-      </p>
-
-
+      <!-- DATA PEJABAT -->
       <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
         Yang bertanda tangan di bawah ini:
       </p>
