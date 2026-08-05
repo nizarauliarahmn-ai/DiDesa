@@ -55,6 +55,7 @@ export function SupabaseSync() {
             window.dispatchEvent(new Event('app_theme_updated'));
             window.dispatchEvent(new Event('settingsUpdated'));
             window.dispatchEvent(new Event('brandingUpdated'));
+            window.dispatchEvent(new Event('didesa_news_updated'));
           }
         }
         
@@ -110,6 +111,7 @@ export function SupabaseSync() {
               window.dispatchEvent(new Event('app_theme_updated'));
               window.dispatchEvent(new Event('settingsUpdated'));
               window.dispatchEvent(new Event('brandingUpdated'));
+              window.dispatchEvent(new Event('didesa_news_updated'));
             }
           }
         }
