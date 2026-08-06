@@ -874,26 +874,32 @@ export default function AdminSuratUndangan({
               style={{ ...dragProps.style }}
               className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
             >
+              {/* Outer wrapper to collapse the bounding box width for scrollbars */}
               <div 
                 style={{
                   width: `${794 * previewZoom}px`,
                   transition: 'width 0.2s ease-out',
                 }}
-                className="m-auto shrink-0 relative flex flex-col gap-8"
+                className="m-auto shrink-0 relative"
               >
-
-                {/* PAGE 1: Main Surat Undangan */}
+                {/* Inner wrapper that actually scales the pages */}
                 <div 
-                  id="undangan-page-1"
-                  style={{ 
-                    transform: `scale(${previewZoom})`, 
-                    transformOrigin: 'top left',
+                  style={{
                     width: '794px',
-                    minHeight: '1123px',
-                    boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+                    transform: `scale(${previewZoom})`,
+                    transformOrigin: 'top left',
                   }}
-                  className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
+                  className="flex flex-col gap-8"
                 >
+                  {/* PAGE 1: Main Surat Undangan */}
+                  <div 
+                    id="undangan-page-1"
+                    style={{ 
+                      minHeight: '1123px',
+                      boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+                    }}
+                    className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
+                  >
               <div>
                 {/* Official Village Header (Kop Surat) */}
                 <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
@@ -1023,9 +1029,8 @@ export default function AdminSuratUndangan({
 
                     {/* Right: Pejabat Penandatangan */}
                     <div className="w-[45%] text-center">
-                      <p className="font-bold">{pejabatJabatan}</p>
-                      <div className="my-2 min-h-[75px] flex items-center justify-center">
-                        {isTTE ? (
+                      {isTTE ? (
+                        <div className="my-2 min-h-[75px] flex items-center justify-center">
                           <TTESignatureBox
                             officerTitle={pejabatJabatan}
                             officerName={pejabatNama}
@@ -1033,22 +1038,24 @@ export default function AdminSuratUndangan({
                             dateStr={fmtShortDate(tanggalSurat)}
                             verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
                           />
-                        ) : (
-                          <div className="h-20" />
-                        )}
-                      </div>
-                      <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
-                      {pejabatNip && pejabatNip !== '-' && (
-                        <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="font-bold">{pejabatJabatan}</p>
+                          <div className="my-2 h-20" />
+                          <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
+                          {pejabatNip && pejabatNip !== '-' && (
+                            <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
                 ) : (
                   <div className="flex justify-end text-center">
                     <div className="w-[55%]">
-                      <p className="font-bold">{pejabatJabatan}</p>
-                      <div className="my-2 min-h-[75px] flex items-center justify-center">
-                        {isTTE ? (
+                      {isTTE ? (
+                        <div className="my-2 min-h-[75px] flex items-center justify-center">
                           <TTESignatureBox
                             officerTitle={pejabatJabatan}
                             officerName={pejabatNama}
@@ -1056,13 +1063,16 @@ export default function AdminSuratUndangan({
                             dateStr={fmtShortDate(tanggalSurat)}
                             verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
                           />
-                        ) : (
-                          <div className="h-20" />
-                        )}
-                      </div>
-                      <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
-                      {pejabatNip && pejabatNip !== '-' && (
-                        <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="font-bold">{pejabatJabatan}</p>
+                          <div className="my-2 h-20" />
+                          <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
+                          {pejabatNip && pejabatNip !== '-' && (
+                            <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
@@ -1078,9 +1088,6 @@ export default function AdminSuratUndangan({
               <div 
                 id="undangan-page-2"
                 style={{ 
-                  transform: `scale(${previewZoom})`, 
-                  transformOrigin: 'top left',
-                  width: '794px',
                   minHeight: '1123px',
                   boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                 }}
@@ -1145,9 +1152,8 @@ export default function AdminSuratUndangan({
                 <div className="mt-8 font-sans text-[11pt]">
                   <div className="flex justify-end text-center">
                     <div className="w-[55%]">
-                      <p className="font-bold">{pejabatJabatan}</p>
-                      <div className="my-2 min-h-[75px] flex items-center justify-center">
-                        {isTTE ? (
+                      {isTTE ? (
+                        <div className="my-2 min-h-[75px] flex items-center justify-center">
                           <TTESignatureBox
                             officerTitle={pejabatJabatan}
                             officerName={pejabatNama}
@@ -1155,13 +1161,16 @@ export default function AdminSuratUndangan({
                             dateStr={fmtShortDate(tanggalSurat)}
                             verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
                           />
-                        ) : (
-                          <div className="h-20" />
-                        )}
-                      </div>
-                      <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
-                      {pejabatNip && pejabatNip !== '-' && (
-                        <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="font-bold">{pejabatJabatan}</p>
+                          <div className="my-2 h-20" />
+                          <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
+                          {pejabatNip && pejabatNip !== '-' && (
+                            <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
@@ -1171,9 +1180,9 @@ export default function AdminSuratUndangan({
                 <div className="mt-8" dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }} />
               </div>
             )}
-
+                </div>
               </div>
-            </div>
+            </div></div>
           </div>
         </div>
       </div>
