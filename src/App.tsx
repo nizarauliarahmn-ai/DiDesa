@@ -23,6 +23,7 @@ import PublicBukuTamu from './components/PublicBukuTamu';
 import PublicVerifikasiSurat from './components/PublicVerifikasiSurat';
 import AdminAiAssistant from './components/admin/AdminAiAssistant';
 import AdminSaaSLogs from './components/admin/AdminSaaSLogs';
+import AdminSaaSLeads from './components/admin/AdminSaaSLeads';
 import AdminGlobalBranding from './components/admin/AdminGlobalBranding';
 import AdminSaaSTemplateSurat from './components/admin/AdminSaaSTemplateSurat';
 import AdminPanduan from './components/admin/AdminPanduan';
@@ -470,6 +471,7 @@ export default function App() {
                 {adminTab === 'panduan' && <AdminPanduan />}
                 {adminTab === 'antrean' && (user.role === 'kades' || user.role === 'saas_admin') && <AdminApprovalQueue />}
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
+                {adminTab === 'saas_leads' && user.role === 'saas_admin' && <AdminSaaSLeads onSetActiveTab={setAdminTab} />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
                 {adminTab === 'global_branding' && user.role === 'saas_admin' && <AdminGlobalBranding />}
                 {adminTab === 'template_surat' && user.role === 'saas_admin' && <AdminSaaSTemplateSurat />}

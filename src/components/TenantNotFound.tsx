@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SearchX, Globe, ArrowRight, Loader2, User, Phone, CheckCircle2 } from 'lucide-react';
 import { addSaaSNotification } from '../utils/saasLogs';
+import { addSaaSTenantRequest } from '../utils/saasLeads';
 
 export default function TenantNotFound() {
   const subdomain = window.location.hostname.split('.')[0];
@@ -28,6 +29,14 @@ export default function TenantNotFound() {
         `Pengajuan pendaftaran desa dari ${formData.nama} (${formData.phone}) - Jabatan: ${formData.jabatan || '-'}. Subdomain: ${subdomain}.sistemdidesa.id (Desa ${name}).`,
         name
       );
+
+      await addSaaSTenantRequest({
+        subdomain,
+        villageName: name,
+        applicantName: formData.nama,
+        phone: formData.phone,
+        jobTitle: formData.jabatan || '-',
+      });
       
       setIsSuccess(true);
       // Tunggu agak lama agar pesan sukses terbaca
