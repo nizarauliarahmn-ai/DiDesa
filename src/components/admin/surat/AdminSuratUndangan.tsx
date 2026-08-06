@@ -978,9 +978,9 @@ export default function AdminSuratUndangan({
                 {/* Paragraf Pembuka */}
                 <div className="font-sans text-[11pt] text-justify space-y-2 leading-relaxed mb-3">
                   {showParagrafKustom && paragrafKustom?.trim() && (
-                    <p>{paragrafKustom}</p>
+                    <p className="indent-8">{paragrafKustom}</p>
                   )}
-                  <p>{paragrafPembuka}</p>
+                  <p className="indent-8">{paragrafPembuka}</p>
                 </div>
 
                 {/* Detail Pelaksanaan Acara (Tight line spacing, no bold on date/location) */}
@@ -1008,7 +1008,7 @@ export default function AdminSuratUndangan({
 
                 {/* Paragraf Penutup */}
                 <div className="font-sans text-[11pt] text-justify leading-relaxed mb-8">
-                  <p>{paragrafPenutup}</p>
+                  <p className="indent-8">{paragrafPenutup}</p>
                 </div>
               </div>
 
