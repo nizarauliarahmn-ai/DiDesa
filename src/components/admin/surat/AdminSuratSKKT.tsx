@@ -665,8 +665,7 @@ export default function AdminSuratSKKT({
       <iframe ref={iframeRef} className="absolute opacity-0 pointer-events-none -z-50 w-[210mm] h-[297mm]" title="Print Frame SKKT" />
 
       {/* Header Bar */}
-      <div className="sticky top-16 z-30">
-        <SuratEditorHeader 
+      <SuratEditorHeader 
           title="Surat Keterangan Kepemilikan Tanah (SKKT)"
           templateDesc="Surat Pernyataan Penguasaan Fisik Bidang Tanah & Gambar Situasi Kasar Tanah"
           onBack={onBack}
@@ -674,7 +673,6 @@ export default function AdminSuratSKKT({
           isSaving={loading}
           printLabel="Simpan & Cetak"
         />
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Form Input Side */}

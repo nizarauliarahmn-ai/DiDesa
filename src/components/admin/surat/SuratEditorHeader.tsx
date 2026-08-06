@@ -27,7 +27,7 @@ export default function SuratEditorHeader({
   children
 }: SuratEditorHeaderProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+    <div className="sticky top-20 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none mb-6">
       <div className="flex items-center gap-4">
         <button 
           onClick={onBack} 

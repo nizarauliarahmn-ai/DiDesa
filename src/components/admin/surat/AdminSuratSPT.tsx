@@ -710,25 +710,23 @@ export default function AdminSuratSPT({
   return (
     <div className="max-w-7xl mx-auto space-y-5 pb-20">
       {/* 📜 Header 📜 */}
-      <div className="sticky top-16 z-30">
-        <SuratEditorHeader 
-          title="Buat SPT"
-          templateKode={templateKode}
-          templateDesc={templateDesc}
-          onBack={onBack}
-          onPrint={handlePrint}
-          printLabel="Cetak Surat"
+      <SuratEditorHeader 
+        title="Buat SPT"
+        templateKode={templateKode}
+        templateDesc={templateDesc}
+        onBack={onBack}
+        onPrint={handlePrint}
+        printLabel="Cetak Surat"
+      >
+        <button
+          onClick={syncToResidents}
+          disabled={syncing || !selectedPewaris}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-xl font-bold text-sm hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all disabled:opacity-40"
         >
-          <button
-            onClick={syncToResidents}
-            disabled={syncing || !selectedPewaris}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-xl font-bold text-sm hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all disabled:opacity-40"
-          >
-            {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-            Sinkron Data
-          </button>
-        </SuratEditorHeader>
-      </div>
+          {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          Sinkron Data
+        </button>
+      </SuratEditorHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         {/* ═══════ LEFT: FORM ═══════ */}

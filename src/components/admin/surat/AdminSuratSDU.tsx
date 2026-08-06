@@ -575,15 +575,13 @@ export default function AdminSuratSDU({
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
-      <div className="sticky top-16 z-30">
-        <SuratEditorHeader 
+      <SuratEditorHeader 
           title="Buat SDU"
           templateKode={templateKode}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"
         />
-      </div>
 
       <AnimatePresence>
         {showRiwayat && (

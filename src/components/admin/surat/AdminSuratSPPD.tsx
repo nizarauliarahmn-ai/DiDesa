@@ -887,8 +887,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
-      <div className="sticky top-16 z-30">
-        <SuratEditorHeader 
+      <SuratEditorHeader 
           title="Buat Surat"
           templateKode={templateKode}
           onBack={onBack}
@@ -897,7 +896,6 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
           isSaving={isSaving}
           printLabel="Cetak Surat"
         />
-      </div>
 
       {/* TAB: PENGISIAN FORM */}
       {activeTab === 'form' && (
