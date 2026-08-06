@@ -127,7 +127,7 @@ export default function AdminSuratUndangan({
   const [savedLetterId, setSavedLetterId] = useState<string>('');
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const { isDragging, handleMouseDown, handleMouseMove, handleMouseUpOrLeave } = useDragScroll();
+  const dragProps = useDragScroll();
 
   // Village Kop Config
   const rawDesa = localStorage.getItem('kop_desa') || 'Desa Wasah Hilir';
@@ -894,11 +894,13 @@ export default function AdminSuratUndangan({
             
             {/* Scrollable Preview Canvas */}
             <div 
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUpOrLeave}
-              onMouseLeave={handleMouseUpOrLeave}
-              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8 cursor-grab active:cursor-grabbing"
+              ref={dragProps.ref}
+              onMouseDown={dragProps.onMouseDown}
+              onMouseLeave={dragProps.onMouseLeave}
+              onMouseUp={dragProps.onMouseUp}
+              onMouseMove={dragProps.onMouseMove}
+              style={{ ...dragProps.style }}
+              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
             >
               <div 
                 style={{
