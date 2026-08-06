@@ -1182,7 +1182,7 @@ export default function AdminSuratUndangan({
             )}
                 </div>
               </div>
-            </div></div>
+            </div>
           </div>
         </div>
       </div>
