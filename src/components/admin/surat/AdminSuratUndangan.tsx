@@ -100,7 +100,7 @@ export default function AdminSuratUndangan({
   );
   const [paragrafPembuka, setParagrafPembuka] = useState(
     editData?.paragrafPembuka || 
-    'Dengan hormat, sehubungan dengan pelaksanaan agenda kegiatan desa, kami mengundang Bapak/Ibu/Saudara(i) untuk dapat berhadiri pada pertemuan yang akan diselenggarakan pada:'
+    'Dengan hormat, kami mengundang Bapak/Ibu/Saudara(i) untuk dapat berhadir pada pertemuan yang akan diselenggarakan pada:'
   );
   const [paragrafPenutup, setParagrafPenutup] = useState(
     editData?.paragrafPenutup || 
