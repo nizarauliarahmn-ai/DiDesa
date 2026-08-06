@@ -315,10 +315,10 @@ export function incrementSequenceNumber(klasifikasi: string) {
   window.dispatchEvent(new Event('letter_classifications_updated'));
 }
 
-export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: string, nextNoVal?: number): string {
+export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: string, nextNoVal?: number | string, customDate?: Date): string {
   const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]';
   
-  const date = new Date();
+  const date = customDate || new Date();
   const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
   const romanMonth = romanMonths[date.getMonth()];
   const numericMonth = String(date.getMonth() + 1).padStart(2, '0');
@@ -341,7 +341,16 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
   const desaInitial = getDesaInitial(villageName);
 
   const finalNoSeq = nextNoVal !== undefined ? nextNoVal : getNextSequenceNumber(klasifikasi);
-  const nextNoStr = String(finalNoSeq).padStart(3, '0');
+  
+  // Jika nextNoVal adalah string (seperti 055.1), jangan di-pad 0 di depannya jika sudah ada.
+  // Tapi untuk amannya, kita padStart(3, '0') asalkan bukan custom string yang kompleks
+  let nextNoStr = String(finalNoSeq);
+  if (typeof finalNoSeq === 'number' || !nextNoStr.includes('.')) {
+    nextNoStr = nextNoStr.padStart(3, '0');
+  } else if (nextNoStr.includes('.') && nextNoStr.split('.')[0].length < 3) {
+    const parts = nextNoStr.split('.');
+    nextNoStr = `${parts[0].padStart(3, '0')}.${parts[1]}`;
+  }
 
   return formatTemplate
     .replace(/\[NO KODE SURAT\]/g, kodeKlasifikasi || '140')

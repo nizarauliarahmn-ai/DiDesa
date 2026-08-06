@@ -11,6 +11,7 @@ import { FileText, ArrowLeft, Printer, Save, Search, User,
   ZoomIn, ZoomOut, DollarSign
 } from 'lucide-react';
 import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -49,6 +50,18 @@ export default function AdminSuratSKPH({
   }, [presetResident]);
 
   const [loading, setLoading] = useState(false);
+  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKPH') || { klasifikasi: 'SKPH', kodeKlasifikasi: '400' };
+  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+
+  useEffect(() => {
+    if (isBackdate && customNomorSurat && !editData) {
+      setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+    } else if (!isBackdate && !editData && formData.nomorSurat === customNomorSurat) {
+      setFormData(prev => ({ ...prev, nomorSurat: '' }));
+    }
+  }, [customNomorSurat, isBackdate, editData]);
+
   const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SKPH', 'Surat Keterangan Penghasilan / Gaji');
   const templateKode = useLetterKode('SKPH');
@@ -190,7 +203,7 @@ export default function AdminSuratSKPH({
     const skph = configs.find(c => c.klasifikasi === 'SKPH') || { id: 'fallback_skph', jenis: 'SK PENGHASILAN', klasifikasi: 'SKPH', kodeKlasifikasi: '400', noUrutTerakhir: 0 };
     
     if (!editData) {
-      const generatedNo = generateLetterNumber(skph.klasifikasi, skph.kodeKlasifikasi || '400');
+      const generatedNo = generateLetterNumber(skph.klasifikasi, skph.kodeKlasifikasi || '400', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setFormData(prev => ({
         ...prev,
         nomorSurat: generatedNo
@@ -361,17 +374,17 @@ export default function AdminSuratSKPH({
       addLetterHistory({
         ...updatedFields,
         jenis: 'SK PENGHASILAN',
-        tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
         status: 'Selesai'
       });
-      incrementSequenceNumber('SKPH');
+      if (!isBackdate) incrementSequenceNumber('SKPH');
     }
 
     const newEntry = {
       id: Date.now(),
       nama: formData.nama,
       nomor: formData.nomorSurat,
-      tanggal: new Date().toISOString(),
+      tanggal: isBackdate ? new Date(tanggalSurat).toISOString() : new Date().toISOString(),
       data: formData
     };
     const updatedRiwayat = [newEntry, ...riwayat].slice(0, 50);
@@ -395,7 +408,8 @@ export default function AdminSuratSKPH({
 
   const generateHTML = () => {
     const today = new Date();
-    const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const printDate = isBackdate ? new Date(tanggalSurat) : today;
+    const tglFormatted = printDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
 
     const activeKabupaten = localStorage.getItem('kop_kabupaten') || formData.namaKabupaten || 'Hulu Sungai Selatan';
@@ -422,7 +436,7 @@ export default function AdminSuratSKPH({
       <!-- JUDUL SURAT -->
       <div style="text-align:center;margin-bottom:15px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN PENGHASILAN</h3>
-        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + today.getFullYear())}</p>
+        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + printDate.getFullYear())}</p>
       </div>
 
 

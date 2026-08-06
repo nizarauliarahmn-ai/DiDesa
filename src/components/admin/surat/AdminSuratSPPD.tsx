@@ -157,7 +157,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     if (editData?.nomorSurat) {
       setNomorSurat(editData.nomorSurat);
     } else {
-      const generatedNo = generateLetterNumber('SPPD', kodeKlasifikasi || '094');
+      const generatedNo = generateLetterNumber('SPPD', kodeKlasifikasi || '094', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat, isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat, isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined) : undefined) : undefined);
       setNomorSurat(generatedNo);
     }
   }, [editData, kodeKlasifikasi]);
@@ -200,7 +200,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       const formDataPayload = {
         klasifikasi: 'SPPD',
         nomorSurat: nomorSurat,
-        tanggal: new Date().toISOString(),
+        tanggal: isBackdate ? new Date(tanggalSurat).toISOString() : new Date().toISOString(),
         pemohon: pelaksanaList[0]?.nama || 'Pelaksana',
         nikPemohon: pelaksanaList[0]?.nip || '-',
         pelaksanaList,
@@ -223,7 +223,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         nomor: nomorSurat,
         nama: pelaksanaList[0]?.nama || 'Pelaksana',
         nik: pelaksanaList[0]?.nip || '-',
-        tanggal: new Date().toISOString(),
+        tanggal: isBackdate ? new Date(tanggalSurat).toISOString() : new Date().toISOString(),
         status: 'Selesai' as const,
         keperluan: maksudPerjalanan || 'Perjalanan Dinas',
         formData: formDataPayload

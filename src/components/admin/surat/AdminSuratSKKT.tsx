@@ -38,6 +38,18 @@ export default function AdminSuratSKKT({
   editLetterId?: string | null
 }) {
   const [loading, setLoading] = useState(false);
+  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKKT') || { klasifikasi: 'SKKT', kodeKlasifikasi: '400' };
+  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+
+  useEffect(() => {
+    if (isBackdate && customNomorSurat && !editData) {
+      setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+    } else if (!isBackdate && !editData && formData.nomorSurat === customNomorSurat) {
+      setFormData(prev => ({ ...prev, nomorSurat: '' }));
+    }
+  }, [customNomorSurat, isBackdate, editData]);
+
   const templateKode = useLetterKode('SKKT');
   const templateDesc = useLetterDescription('SKKT', 'Surat Keterangan Kepemilikan Tanah');
   const [residents, setResidents] = useState<Resident[]>([]);
@@ -126,7 +138,7 @@ export default function AdminSuratSKKT({
       if (!skkt) {
         skkt = { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
       }
-      const generatedNo = generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251');
+      const generatedNo = generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
     }
   }, [editData]);
@@ -315,7 +327,8 @@ export default function AdminSuratSKKT({
   
   const generateHTML = () => {
     const today = new Date();
-    const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const printDate = isBackdate ? new Date(tanggalSurat) : today;
+    const tglFormatted = printDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     
     const isAn = (formData.jabatanPejabat || '').toLowerCase() !== 'kepala desa';
     const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
@@ -534,7 +547,7 @@ export default function AdminSuratSKKT({
       jenis: 'Surat Pernyataan Penguasaan Fisik Bidang Tanah (SKKT)',
       nik: formData.nik,
       nama: formData.nama,
-      tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+      tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
       keperluan: formData.keperluan,
       status: 'Selesai' as const,
       data: formData

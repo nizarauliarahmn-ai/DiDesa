@@ -61,7 +61,8 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
     try {
       const tenantId = await resolveCurrentTenant();
       if (!tenantId) return;
-      await supabase.from('surat').insert([{
+      
+      const insertData: any = {
         tenant_id: tenantId,
         nomor: letter.nomor,
         jenis_surat: letter.jenis,
@@ -70,7 +71,17 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
         keterangan: letter.keperluan,
         status: letter.status === 'Proses' ? 'pending' : (letter.status || 'pending'),
         data: letter.data
-      }]);
+      };
+
+      // Gunakan custom date untuk backdate jika ada, dengan validasi format tanggal ISO
+      if (letter.tanggal && !letter.tanggal.includes(' ')) {
+        const parsedDate = new Date(letter.tanggal);
+        if (!isNaN(parsedDate.getTime())) {
+          insertData.created_at = parsedDate.toISOString();
+        }
+      }
+
+      await supabase.from('surat').insert([insertData]);
       
       let adminName = 'Admin Desa';
       try {

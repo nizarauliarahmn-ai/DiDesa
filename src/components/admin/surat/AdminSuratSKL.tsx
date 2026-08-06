@@ -40,6 +40,18 @@ export default function AdminSuratSKL({
   editLetterId?: string | null;
 }) {
   const [loading, setLoading] = useState(false);
+  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKL') || { klasifikasi: 'SKL', kodeKlasifikasi: '400' };
+  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+
+  useEffect(() => {
+    if (isBackdate && customNomorSurat && !editData) {
+      setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+    } else if (!isBackdate && !editData && formData.nomorSurat === customNomorSurat) {
+      setFormData(prev => ({ ...prev, nomorSurat: '' }));
+    }
+  }, [customNomorSurat, isBackdate, editData]);
+
   const templateDesc = useLetterDescription('SKL', 'Surat Keterangan Kelahiran');
   const templateKode = useLetterKode('SKL');
   const [success, setSuccess] = useState(false);
@@ -53,7 +65,6 @@ export default function AdminSuratSKL({
 
   // State untuk Nomor dan Tanggal Surat
   const [noSurat, setNoSurat] = useState('');
-  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
 
   // Data Anak
   const [anakData, setAnakData] = useState({
@@ -162,7 +173,7 @@ export default function AdminSuratSKL({
     const skl = configs.find(c => c.klasifikasi === 'SKL') || { id: 'fallback_skl', jenis: 'SKL', klasifikasi: 'SKL', kodeKlasifikasi: '474.1', noUrutTerakhir: 0 };
     
     if (!editData) {
-      const generatedNo = generateLetterNumber(skl.klasifikasi, skl.kodeKlasifikasi || '474.1');
+      const generatedNo = generateLetterNumber(skl.klasifikasi, skl.kodeKlasifikasi || '474.1', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setNoSurat(generatedNo);
     }
 
@@ -387,17 +398,17 @@ export default function AdminSuratSKL({
       addLetterHistory({
         ...updatedFields,
         jenis: 'SKL',
-        tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
         status: 'Selesai'
       });
-      incrementSequenceNumber('SKL');
+      if (!isBackdate) incrementSequenceNumber('SKL');
     }
 
     const newEntry = {
       id: Date.now(),
       nama: anakData.nama,
       nomor: noSurat,
-      tanggal: new Date().toISOString(),
+      tanggal: isBackdate ? new Date(tanggalSurat).toISOString() : new Date().toISOString(),
       data: payloadData
     };
     const updatedRiwayat = [newEntry, ...riwayat].slice(0, 50);
@@ -415,7 +426,8 @@ export default function AdminSuratSKL({
   
     const generateHTML = () => {
     const today = new Date();
-    const tglFormatted = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const printDate = isBackdate ? new Date(tanggalSurat) : today;
+    const tglFormatted = printDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const noSuratVal = noSurat || 'SKL/146/WHi/2026';
     const cleanStr = (str, pattern) => str.replace(pattern, '').trim();

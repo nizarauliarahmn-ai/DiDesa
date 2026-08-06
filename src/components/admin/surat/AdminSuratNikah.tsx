@@ -8,6 +8,7 @@ import PrintSuccessDialog from './PrintSuccessDialog';
 import { ArrowLeft, Save, Printer, Download, Upload, Trash2, History, Heart, ZoomIn, ZoomOut, CheckCircle2, FileText } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
@@ -250,7 +251,7 @@ export default function AdminSuratNikah({
     if (!formData.nomorSurat && !editData) {
       const configs = getLetterClassifications();
       const sknConfig = configs.find(c => c.klasifikasi === 'SKN') || { id: 'fallback_skn', jenis: 'SURAT PENGANTAR NIKAH', klasifikasi: 'SKN', kodeKlasifikasi: '474', noUrutTerakhir: 0 };
-      const generatedNo = generateLetterNumber(sknConfig.klasifikasi, sknConfig.kodeKlasifikasi || '474');
+      const generatedNo = generateLetterNumber(sknConfig.klasifikasi, sknConfig.kodeKlasifikasi || '474', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
     }
 
@@ -336,7 +337,7 @@ export default function AdminSuratNikah({
       return;
     }
     // Increment sequence number for SKN
-    incrementSequenceNumber('SKN');
+    if (!isBackdate) incrementSequenceNumber('SKN');
 
     // Auto-save resident data if they are ours
     const updateResidentData = async (nik: string, data: any) => {

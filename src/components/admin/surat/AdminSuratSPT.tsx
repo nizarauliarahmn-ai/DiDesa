@@ -98,6 +98,18 @@ export default function AdminSuratSPT({
 
   // ─── State ───
   const [loading, setLoading] = useState(false);
+  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SPT') || { klasifikasi: 'SPT', kodeKlasifikasi: '400' };
+  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+
+  useEffect(() => {
+    if (isBackdate && customNomorSurat && !editData) {
+      setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+    } else if (!isBackdate && !editData && formData.nomorSurat === customNomorSurat) {
+      setFormData(prev => ({ ...prev, nomorSurat: '' }));
+    }
+  }, [customNomorSurat, isBackdate, editData]);
+
   const templateDesc = useLetterDescription('SPT', 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk');
   const templateKode = useLetterKode('SPT');
   const [success, setSuccess] = useState(false);
@@ -149,7 +161,7 @@ export default function AdminSuratSPT({
     if (!editData) {
       const configs = getLetterClassifications();
       const sptConfig = configs.find(c => c.klasifikasi === 'SPT') || { klasifikasi: 'SPT', kodeKlasifikasi: '474', noUrutTerakhir: 0 };
-      setFormData(p => ({ ...p, nomorSurat: generateLetterNumber(sptConfig.klasifikasi, sptConfig.kodeKlasifikasi || '474') }));
+      setFormData(p => ({ ...p, nomorSurat: generateLetterNumber(sptConfig.klasifikasi, sptConfig.kodeKlasifikasi || '474', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined) }));
     }
   }, []);
 
@@ -391,11 +403,11 @@ export default function AdminSuratSPT({
       addLetterHistory({
         nomor: formData.nomorSurat, jenis: 'SPT',
         nik: selectedPewaris.nik, nama: selectedPewaris.name,
-        tanggal: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+        tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
         status: 'Selesai', keperluan: formData.keperluanKlaim,
         data: { ...formData, heirsList, pewarisData: selectedPewaris }
       });
-      incrementSequenceNumber('SPT');
+      if (!isBackdate) incrementSequenceNumber('SPT');
     }
 
     setLoading(false);
