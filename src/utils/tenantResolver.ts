@@ -53,10 +53,15 @@ export async function resolveCurrentTenant(): Promise<string | null> {
         cachedTenantId = data.id;
         isResolving = false;
         return data.id;
+      } else {
+        // If an explicit target domain was provided but not found, DO NOT fallback.
+        // It means the subdomain is unregistered.
+        isResolving = false;
+        return null;
       }
     }
 
-    // 3. Fallback: Gunakan sesi otentikasi login jika pencarian domain gagal atau tidak ada parameter
+    // 3. Fallback: Gunakan sesi otentikasi login jika tidak ada parameter dan bukan subdomain spesifik
     const localAuth = localStorage.getItem('didesa_auth_user');
     if (localAuth) {
       try {

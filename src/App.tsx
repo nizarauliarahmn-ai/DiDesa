@@ -30,6 +30,7 @@ import ToastContainer from './components/common/ToastContainer';
 import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
+import TenantNotFound from './components/TenantNotFound';
 import Footer from './components/common/Footer';
 import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
@@ -119,6 +120,7 @@ export default function App() {
     return <><PublicVerifikasiSurat /><ToastContainer /></>;
   }
 
+  
   const hostname = window.location.hostname;
   const parts = hostname.split('.');
   const isRootDomain = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost') && !urlParams.get('tenant') && !urlParams.get('t_id');
