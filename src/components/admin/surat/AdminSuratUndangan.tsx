@@ -373,8 +373,8 @@ export default function AdminSuratUndangan({
 
       {/* Main Form & Preview Workspace (Matching SKTM 7/5 Grid Ratio) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Form Input Side */}
-        <div className="lg:col-span-6 xl:col-span-5 space-y-6">
+        {/* Left Column: Input Form Controls (lg:col-span-7) */}
+        <div className="lg:col-span-7 space-y-6">
           
           {/* Card 1: Header & Naskah Surat */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
@@ -826,7 +826,7 @@ export default function AdminSuratUndangan({
         </div>
 
         {/* Right Column: Live A4 Engine Preview (Identical to SKTM) */}
-        <div className="lg:col-span-6 xl:col-span-7 relative">
+        <div className="lg:col-span-5 relative">
           <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[calc(100vh-120px)] sticky top-28">
             {/* Live Engine Top Control Bar */}
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
