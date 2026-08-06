@@ -36,7 +36,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
           
           const statsMap: Record<string, any> = {};
           await Promise.all(data.map(async (t) => {
-             const { count: pendudukCount } = await supabase.from('penduduk').select('*', { count: 'exact', head: true }).eq('tenant_id', t.id);
+             const { count: pendudukCount } = await supabase.from('residents').select('*', { count: 'exact', head: true }).eq('tenant_id', t.id);
              
              const today = new Date();
              today.setHours(0,0,0,0);
