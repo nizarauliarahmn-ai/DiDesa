@@ -121,13 +121,23 @@ export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' |
     window.dispatchEvent(new Event('saas_logs_updated'));
 
     // Realtime Broadcast across all connected clients & tenants
-    const channel = getLogsChannel();
+    const channel = initLogsChannel();
     if (channel) {
-      channel.send({
-        type: 'broadcast',
-        event: 'new_saas_log',
-        payload: { logs: updatedLogs }
-      }).catch((err: any) => console.warn('Broadcast send error:', err));
+      if (channel.state === 'joined') {
+        channel.send({
+          type: 'broadcast',
+          event: 'new_saas_log',
+          payload: { logs: updatedLogs }
+        }).catch((err: any) => console.warn('Broadcast send error:', err));
+      } else {
+        setTimeout(() => {
+          channel.send({
+            type: 'broadcast',
+            event: 'new_saas_log',
+            payload: { logs: updatedLogs }
+          }).catch((err: any) => console.warn('Broadcast send error:', err));
+        }, 1500);
+      }
     }
   } catch (e) {
     console.error('Error adding SaaS log:', e);
@@ -136,37 +146,36 @@ export const addSaaSLog = async (log: Omit<SaaSLog, 'id' | 'tanggal' | 'waktu' |
 
 let _logsChannel: any = null;
 
-const getLogsChannel = () => {
+const initLogsChannel = () => {
   if (!_logsChannel) {
     _logsChannel = supabase.channel('public:saas_logs_realtime_broadcast');
-    _logsChannel.subscribe();
+    
+    _logsChannel
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'saas_settings' },
+        (payload: any) => {
+          if (payload.new && payload.new.key === 'saas_global_activity_logs') {
+            if (payload.new.value) {
+              localStorage.setItem('saas_global_activity_logs', payload.new.value);
+            }
+            window.dispatchEvent(new Event('saas_logs_updated'));
+          }
+        }
+      )
+      .on('broadcast', { event: 'new_saas_log' }, (payload: any) => {
+        if (payload?.payload?.logs) {
+          localStorage.setItem('saas_global_activity_logs', JSON.stringify(payload.payload.logs));
+        }
+        window.dispatchEvent(new Event('saas_logs_updated'));
+      })
+      .subscribe();
   }
   return _logsChannel;
 };
 
 export function subscribeSaaSLogsRealtime(): () => void {
-  const channel = getLogsChannel();
-  
-  channel
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'saas_settings' },
-      (payload: any) => {
-        if (payload.new && payload.new.key === 'saas_global_activity_logs') {
-          if (payload.new.value) {
-            localStorage.setItem('saas_global_activity_logs', payload.new.value);
-          }
-          window.dispatchEvent(new Event('saas_logs_updated'));
-        }
-      }
-    )
-    .on('broadcast', { event: 'new_saas_log' }, (payload: any) => {
-      if (payload?.payload?.logs) {
-        localStorage.setItem('saas_global_activity_logs', JSON.stringify(payload.payload.logs));
-      }
-      window.dispatchEvent(new Event('saas_logs_updated'));
-    });
-
+  initLogsChannel();
   return () => {
     // We don't remove channel here because we still need it to send logs
   };
@@ -186,7 +195,7 @@ export const addSaaSNotification = async (
     id: 'notif-saas-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
     title: title,
     message: message,
-    category: 'SaaS Global', // Changed to SaaS Global to ensure SaaS Admin sees it
+    category: 'System', // Reverted to 'System' to prevent DB enum/constraint errors
     time: 'Baru saja',
     is_read: false,
     tenant_id: null, // SaaS notifications belong to SaaS Admin
