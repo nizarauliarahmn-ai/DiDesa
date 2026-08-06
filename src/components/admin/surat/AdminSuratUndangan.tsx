@@ -3,7 +3,7 @@ import {
   ArrowLeft, Printer, Search, User, FileText, FileSignature, 
   ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, 
   Loader2, RefreshCw, Calendar, CheckCircle2, Users, FileSpreadsheet,
-  ToggleLeft, ToggleRight, Trash2
+  ToggleLeft, ToggleRight, Trash2, MapPin, Building2, ChevronRight
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { fetchResidentsCached } from '../../../utils/apiCache';
@@ -14,7 +14,7 @@ import { getLetterClassifications, incrementSequenceNumber, generateLetterNumber
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
-import { capitalizeWords } from '../../../utils/textUtils';
+import { capitalizeWords, capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
 export interface Recipient {
@@ -22,6 +22,15 @@ export interface Recipient {
   name: string;
   jabatan?: string;
   alamat?: string;
+}
+
+interface Resident {
+  nik: string;
+  name: string;
+  gender?: string;
+  address?: string;
+  job?: string;
+  rt_rw?: string;
 }
 
 const fmtDate = (d: string) => {
@@ -59,40 +68,44 @@ export default function AdminSuratUndangan({
   const [nomorSurat, setNomorSurat] = useState(editData?.nomor || '');
   const [sifat, setSifat] = useState(editData?.sifat || 'Penting');
   const [lampiran, setLampiran] = useState(editData?.lampiran || '-');
-  const [perihal, setPerihal] = useState(editData?.perihal || editData?.keperluan || 'Undangan Pertemuan / Rapat Koordinasi');
+  const [perihal, setPerihal] = useState(editData?.perihal || editData?.keperluan || 'Musyawarah Batas Tanah Posyandu HPTT');
 
   // Recipients State
   const [recipients, setRecipients] = useState<Recipient[]>(editData?.recipients || [
-    { id: '1', name: 'Seluruh Ketua RT / RW', jabatan: 'Lembaga Kemasyarakatan Desa', alamat: 'di - Tempat' },
-    { id: '2', name: 'Pengurus BPD Desa', jabatan: 'Badan Permusyawaratan Desa', alamat: 'di - Tempat' }
+    { id: '1', name: 'Isya Ansari', jabatan: 'BPD', alamat: 'di Tempat' },
+    { id: '2', name: 'Norliani', jabatan: 'RT.03', alamat: 'di Tempat' },
+    { id: '3', name: 'Mahyudi', jabatan: '', alamat: 'di Tempat' }
   ]);
   const [forceAttachment, setForceAttachment] = useState<boolean>(editData?.forceAttachment || false);
 
-  // New Recipient Inputs
+  // Resident Autocomplete Search State
+  const [residents, setResidents] = useState<Resident[]>([]);
+  const [residentSearchQuery, setResidentSearchQuery] = useState('');
+  const [showResidentDropdown, setShowResidentDropdown] = useState(false);
+
+  // New Manual Recipient Inputs
   const [newRecipName, setNewRecipName] = useState('');
   const [newRecipJabatan, setNewRecipJabatan] = useState('');
-  const [newRecipAlamat, setNewRecipAlamat] = useState('di - Tempat');
+  const [newRecipAlamat, setNewRecipAlamat] = useState('di Tempat');
 
   // Event Details State
   const [tglAcara, setTglAcara] = useState(editData?.tglAcara || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]);
-  const [waktuAcara, setWaktuAcara] = useState(editData?.waktuAcara || '09.00 WITA s/d Selesai');
-  const [tempatAcara, setTempatAcara] = useState(editData?.tempatAcara || 'Balai Desa Sukamakmur');
-  const [agendaAcara, setAgendaAcara] = useState(editData?.agendaAcara || 'Musyawarah & Evaluasi Program Kerja Desa');
-  const [pakaianCatatan, setPakaianCatatan] = useState(editData?.pakaianCatatan || 'Batik / Pakaian Bebas Rapi (Membawa Catatan)');
+  const [waktuAcara, setWaktuAcara] = useState(editData?.waktuAcara || '08.00 WITA s.d selesai');
+  const [tempatAcara, setTempatAcara] = useState(editData?.tempatAcara || 'Kantor Desa Wasah Hilir');
 
   // Paragraf Text
   const [paragrafPembuka, setParagrafPembuka] = useState(
     editData?.paragrafPembuka || 
-    'Dengan hormat, sehubungan dengan pelaksanaan agenda kegiatan desa, kami mengundang Bapak/Ibu/Saudara(i) untuk dapat berhadiri pada pertemuan yang akan diselenggarakan pada:'
+    'Sehubungan akan di bangunnya Posyandu Harapan Pahlawan Tumpang Talu RT.03 Desa Wasah Hilir, Perlu adanya kesepakatan terkait batas tanah yang akan di bangun.'
   );
   const [paragrafPenutup, setParagrafPenutup] = useState(
     editData?.paragrafPenutup || 
-    'Mengingat pentingnya acara tersebut, kami sangat mengharapkan kehadiran Bapak/Ibu/Saudara(i) tepat pada waktunya. Demikian undangan ini kami sampaikan, atas perhatian dan kerjasamanya diucapkan terima kasih.'
+    'Demikian undangan ini disampaikan, atas perhatian Kami ucapkan terimakasih.'
   );
 
   // Signature State
-  const [pejabatNama, setPejabatNama] = useState(() => localStorage.getItem('kades_name') || localStorage.getItem('village_kades_name') || 'NIZAR AULIA RAHMAN');
-  const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('kades_title') || 'Kepala Desa Sukamakmur');
+  const [pejabatNama, setPejabatNama] = useState(() => localStorage.getItem('kop_kades') || localStorage.getItem('village_kades_name') || 'FAZAKKIR RAHMAD');
+  const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('kades_title') || 'Kepala Desa');
   const [pejabatNip, setPejabatNip] = useState(() => localStorage.getItem('kades_nip') || '-');
   const [isTTE, setIsTTE] = useState<boolean>(true);
 
@@ -106,11 +119,29 @@ export default function AdminSuratUndangan({
   const { isDragging, handleMouseDown, handleMouseMove, handleMouseUpOrLeave } = useDragScroll();
 
   // Village Kop Config
-  const activeDesa = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
+  const rawDesa = localStorage.getItem('kop_desa') || 'Desa Wasah Hilir';
+  const cleanDesaName = rawDesa.replace(/^desa\s+/i, '');
+  const activeDesa = rawDesa.startsWith('Desa') ? rawDesa : `Desa ${rawDesa}`;
   const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
   const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
   const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
   const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
+
+  // Load residents for autocomplete
+  useEffect(() => {
+    const loadResidents = async () => {
+      try {
+        const res = await fetchResidentsCached();
+        if (res.ok) {
+          const data = await res.json();
+          setResidents(data);
+        }
+      } catch (e) {
+        console.error('Failed to load residents for invitation letter:', e);
+      }
+    };
+    loadResidents();
+  }, []);
 
   // Auto Numbering effect
   useEffect(() => {
@@ -122,25 +153,27 @@ export default function AdminSuratUndangan({
     }
   }, [customNomorSurat, isBackdate, editData]);
 
-  // Recipient Attachment Logic
+  // Recipient Attachment Logic (>3 recipients auto-attaches to Lampiran Page 2)
   const isAttached = forceAttachment || recipients.length > 3;
 
-  // Add Recipient Handler
-  const handleAddRecipient = () => {
-    if (!newRecipName.trim()) {
-      showToast('Nama / Jabatan penerima tidak boleh kosong', 'warning');
-      return;
-    }
+  // Add Recipient Handlers
+  const handleAddRecipient = (name: string, jabatan?: string, alamat?: string) => {
+    if (!name.trim()) return;
     const newEntry: Recipient = {
-      id: Date.now().toString(),
-      name: newRecipName.trim(),
-      jabatan: newRecipJabatan.trim() || undefined,
-      alamat: newRecipAlamat.trim() || 'di - Tempat'
+      id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 4),
+      name: capitalizeWords(name.trim()),
+      jabatan: jabatan ? jabatan.trim() : undefined,
+      alamat: alamat ? alamat.trim() : 'di Tempat'
     };
-    setRecipients([...recipients, newEntry]);
-    setNewRecipName('');
-    setNewRecipJabatan('');
-    showToast('Penerima undangan berhasil ditambahkan', 'success');
+    setRecipients(prev => [...prev, newEntry]);
+    showToast(`Berhasil menambahkan ${name}`, 'success');
+  };
+
+  const handleSelectResident = (res: Resident) => {
+    const formatted = capitalizeResidentFields(res);
+    handleAddRecipient(formatted.name, res.job || 'Warga Desa', formatted.address || 'di Tempat');
+    setResidentSearchQuery('');
+    setShowResidentDropdown(false);
   };
 
   const handleRemoveRecipient = (id: string) => {
@@ -150,25 +183,30 @@ export default function AdminSuratUndangan({
   // Preset Recipients
   const handleAddPreset = (presetType: string) => {
     if (presetType === 'rt_rw') {
-      setRecipients([
-        ...recipients,
-        { id: Date.now().toString() + '_1', name: 'Seluruh Ketua RT (RT 01 s/d RT 06)', jabatan: 'Ketua RT', alamat: 'di - Tempat' },
-        { id: Date.now().toString() + '_2', name: 'Seluruh Ketua RW (RW 01 & RW 02)', jabatan: 'Ketua RW', alamat: 'di - Tempat' }
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_rt', name: 'Seluruh Ketua RT (RT 01 s/d RT 06)', jabatan: 'Ketua RT', alamat: 'di Tempat' },
+        { id: Date.now().toString() + '_rw', name: 'Seluruh Ketua RW (RW 01 & RW 02)', jabatan: 'Ketua RW', alamat: 'di Tempat' }
       ]);
     } else if (presetType === 'bpd') {
-      setRecipients([
-        ...recipients,
-        { id: Date.now().toString() + '_bpd', name: 'Ketua & Anggota BPD', jabatan: 'Badan Permusyawaratan Desa', alamat: 'di - Tempat' }
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_bpd', name: 'Ketua & Anggota BPD', jabatan: 'Badan Permusyawaratan Desa', alamat: 'di Tempat' }
+      ]);
+    } else if (presetType === 'perangkat') {
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_pkk', name: 'Seluruh Perangkat Desa & Staf', jabatan: 'Pemerintah Desa', alamat: 'di Tempat' }
       ]);
     } else if (presetType === 'tokoh') {
-      setRecipients([
-        ...recipients,
-        { id: Date.now().toString() + '_tokoh', name: 'Tokoh Agama & Tokoh Masyarakat Desa', jabatan: 'Tokoh Masyarakat', alamat: 'di - Tempat' }
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_tokoh', name: 'Tokoh Agama & Tokoh Masyarakat Desa', jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' }
       ]);
     }
   };
 
-  // Save to History & Supabase
+  // Save Handler
   const handleSave = async () => {
     if (recipients.length === 0) {
       showToast('Harap tambahkan minimal 1 penerima undangan', 'warning');
@@ -188,8 +226,6 @@ export default function AdminSuratUndangan({
         tglAcara,
         waktuAcara,
         tempatAcara,
-        agendaAcara,
-        pakaianCatatan,
         paragrafPembuka,
         paragrafPenutup,
         pejabatNama,
@@ -247,9 +283,14 @@ export default function AdminSuratUndangan({
     }
   };
 
+  const filteredResidents = residentSearchQuery.trim() === '' ? [] : residents.filter(r => 
+    r.name?.toLowerCase().includes(residentSearchQuery.toLowerCase()) || 
+    r.nik?.includes(residentSearchQuery)
+  ).slice(0, 5);
+
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-24">
-      {/* Header Bar */}
+      {/* Top Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-4">
           <button 
@@ -263,7 +304,7 @@ export default function AdminSuratUndangan({
               005 / UND
             </span>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              Surat Undangan Resmi Desa
+              Pembuat Surat Undangan Resmi
             </h1>
           </div>
         </div>
@@ -287,20 +328,21 @@ export default function AdminSuratUndangan({
         </div>
       </div>
 
-      {/* Main Workspace (Split Grid: Left Form, Right Preview) */}
+      {/* Main Form & Preview Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Form Controls */}
+        {/* Left Column: Input Form Controls (Optimized like SKTM) */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Card 1: Pengaturan Naskah & Nomor */}
+          
+          {/* Card 1: Header & Naskah Surat */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 border-b pb-3 dark:border-slate-800">
               <FileText size={18} className="text-emerald-500" />
-              <span>Tata Naskah Surat</span>
+              <span>1. Header & Nomor Surat</span>
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tanggal Surat</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tanggal Dibuat Surat</label>
                 <input 
                   type="date"
                   value={tanggalSurat}
@@ -351,6 +393,7 @@ export default function AdminSuratUndangan({
                   type="text"
                   value={perihal}
                   onChange={(e) => setPerihal(e.target.value)}
+                  placeholder="Misal: Musyawarah Batas Tanah Posyandu HPTT..."
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold"
                 />
               </div>
@@ -362,21 +405,21 @@ export default function AdminSuratUndangan({
             <div className="flex justify-between items-center border-b pb-3 dark:border-slate-800">
               <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
                 <Users size={18} className="text-emerald-500" />
-                <span>Penerima Undangan (Kepada Yth.)</span>
+                <span>2. Penerima Undangan (Yth.)</span>
               </h3>
-              <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full text-xs font-bold">
-                {recipients.length} Penerima
+              <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 rounded-full text-xs font-bold">
+                {recipients.length} Orang
               </span>
             </div>
 
             {/* Auto Attachment Indicator */}
-            <div className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center justify-between ${
+            <div className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center justify-between transition-all ${
               isAttached ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
             }`}>
               <div className="flex items-center gap-2">
                 <FileSpreadsheet size={16} className={isAttached ? 'text-amber-600' : 'text-slate-400'} />
                 <span>
-                  {isAttached ? 'Daftar penerima dimasukkan ke Lampiran Halaman 2 (>3 penerima / dipaksa)' : 'Daftar penerima ditampilkan langsung pada Halaman 1 (≤3 penerima)'}
+                  {isAttached ? 'Daftar penerima dialihkan ke Lampiran Halaman 2 (>3 penerima)' : 'Daftar penerima ditampilkan langsung di Halaman 1 (≤3 penerima)'}
                 </span>
               </div>
               <button
@@ -388,93 +431,161 @@ export default function AdminSuratUndangan({
               </button>
             </div>
 
-            {/* Quick Presets */}
-            <div className="flex flex-wrap gap-2 pt-1">
-              <button 
-                onClick={() => handleAddPreset('rt_rw')}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-              >
-                + RT / RW
-              </button>
-              <button 
-                onClick={() => handleAddPreset('bpd')}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-              >
-                + Pengurus BPD
-              </button>
-              <button 
-                onClick={() => handleAddPreset('tokoh')}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-              >
-                + Tokoh Masyarakat
-              </button>
-            </div>
+            {/* Resident Autocomplete Search Input */}
+            <div className="relative">
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Cari dari Data Penduduk Desa:</label>
+              <div className="relative">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input 
+                  type="text"
+                  value={residentSearchQuery}
+                  onChange={(e) => {
+                    setResidentSearchQuery(e.target.value);
+                    setShowResidentDropdown(true);
+                  }}
+                  onFocus={() => setShowResidentDropdown(true)}
+                  placeholder="Ketik Nama / NIK warga desa..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium focus:border-emerald-500 outline-none"
+                />
+              </div>
 
-            {/* Existing List */}
-            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-              {recipients.map((r, index) => (
-                <div key={r.id} className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl flex justify-between items-center text-xs border border-slate-100 dark:border-slate-800">
-                  <div>
-                    <p className="font-bold text-slate-900 dark:text-white">{index + 1}. {r.name}</p>
-                    {r.jabatan && <p className="text-slate-500 dark:text-slate-400 text-[11px]">{r.jabatan} • {r.alamat}</p>}
-                  </div>
-                  <button 
-                    onClick={() => handleRemoveRecipient(r.id)}
-                    className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+              {/* Autocomplete Dropdown */}
+              {showResidentDropdown && filteredResidents.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl z-20 overflow-hidden max-h-48 overflow-y-auto">
+                  {filteredResidents.map(r => (
+                    <button
+                      key={r.nik}
+                      type="button"
+                      onClick={() => handleSelectResident(r)}
+                      className="w-full text-left p-3 hover:bg-emerald-50 dark:hover:bg-slate-700/60 border-b border-slate-100 dark:border-slate-700/40 last:border-0 flex items-center justify-between transition-colors"
+                    >
+                      <div>
+                        <p className="font-bold text-slate-900 dark:text-white text-xs">{r.name}</p>
+                        <p className="text-[10px] text-slate-400 font-mono">NIK: {r.nik} • {r.job || 'Warga'}</p>
+                      </div>
+                      <Plus size={14} className="text-emerald-600" />
+                    </button>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
 
-            {/* Add New Recipient Input Form */}
-            <div className="pt-2 border-t dark:border-slate-800 space-y-2">
+            {/* Quick Presets */}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Preset Cepat:</label>
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  onClick={() => handleAddPreset('rt_rw')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Ketua RT / RW
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('bpd')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Pengurus BPD
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('perangkat')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Perangkat Desa
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('tokoh')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Tokoh Masyarakat
+                </button>
+              </div>
+            </div>
+
+            {/* Added Recipients List */}
+            <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+              {recipients.length === 0 ? (
+                <p className="text-xs text-slate-400 italic text-center py-3">Belum ada penerima yang ditambahkan</p>
+              ) : (
+                recipients.map((r, index) => (
+                  <div key={r.id} className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl flex justify-between items-center text-xs border border-slate-100 dark:border-slate-800">
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-white">{index + 1}. {r.name}</p>
+                      {r.jabatan && <p className="text-slate-500 dark:text-slate-400 text-[11px]">{r.jabatan} • {r.alamat}</p>}
+                    </div>
+                    <button 
+                      onClick={() => handleRemoveRecipient(r.id)}
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-all"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Add New Manual Recipient Form */}
+            <div className="pt-3 border-t dark:border-slate-800 space-y-2">
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400">Tambah Penerima Manual:</p>
               <input 
                 type="text"
-                placeholder="Nama / Jabatan Penerima (misal: Bpk. H. Ahmad)..."
+                placeholder="Nama / Penerima (misal: Isya Ansari)..."
                 value={newRecipName}
                 onChange={(e) => setNewRecipName(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
               />
               <div className="grid grid-cols-2 gap-2">
                 <input 
                   type="text"
-                  placeholder="Jabatan / Instansi (Opsional)..."
+                  placeholder="Jabatan (misal: BPD / RT.03)..."
                   value={newRecipJabatan}
                   onChange={(e) => setNewRecipJabatan(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
                 />
                 <input 
                   type="text"
-                  placeholder="Lokasi (misal: di - Tempat)..."
+                  placeholder="Lokasi (default: di Tempat)..."
                   value={newRecipAlamat}
                   onChange={(e) => setNewRecipAlamat(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
                 />
               </div>
               <button
                 type="button"
-                onClick={handleAddRecipient}
-                className="w-full py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                onClick={() => {
+                  if (newRecipName.trim()) {
+                    handleAddRecipient(newRecipName, newRecipJabatan, newRecipAlamat);
+                    setNewRecipName('');
+                    setNewRecipJabatan('');
+                  }
+                }}
+                className="w-full py-2.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
               >
                 <Plus size={14} />
-                <span>Tambahkan ke Daftar Penerima</span>
+                <span>Tambahkan Penerima</span>
               </button>
             </div>
           </div>
 
-          {/* Card 3: Detail Acara & Waktu */}
+          {/* Card 3: Isi Surat & Detail Pelaksanaan Acara */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 border-b pb-3 dark:border-slate-800">
               <Calendar size={18} className="text-emerald-500" />
-              <span>Detail Pelaksanaan Acara</span>
+              <span>3. Isi & Detail Pelaksanaan Acara</span>
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tanggal Acara</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Maksud / Kalimat Pembuka</label>
+                <textarea 
+                  rows={2}
+                  value={paragrafPembuka}
+                  onChange={(e) => setParagrafPembuka(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Hari / Tanggal Acara</label>
                 <input 
                   type="date"
                   value={tglAcara}
@@ -484,11 +595,12 @@ export default function AdminSuratUndangan({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Waktu / Jam</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Waktu / Pukul</label>
                 <input 
                   type="text"
                   value={waktuAcara}
                   onChange={(e) => setWaktuAcara(e.target.value)}
+                  placeholder="08.00 WITA s.d selesai"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium"
                 />
               </div>
@@ -499,27 +611,18 @@ export default function AdminSuratUndangan({
                   type="text"
                   value={tempatAcara}
                   onChange={(e) => setTempatAcara(e.target.value)}
+                  placeholder="Kantor Desa Wasah Hilir"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Agenda / Maksud Acara</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Kalimat Penutup Surat</label>
                 <textarea 
                   rows={2}
-                  value={agendaAcara}
-                  onChange={(e) => setAgendaAcara(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Pakaian / Catatan Tambahan</label>
-                <input 
-                  type="text"
-                  value={pakaianCatatan}
-                  onChange={(e) => setPakaianCatatan(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium"
+                  value={paragrafPenutup}
+                  onChange={(e) => setParagrafPenutup(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium resize-none"
                 />
               </div>
             </div>
@@ -529,12 +632,12 @@ export default function AdminSuratUndangan({
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 border-b pb-3 dark:border-slate-800">
               <FileSignature size={18} className="text-emerald-500" />
-              <span>Pejabat Penandatangan</span>
+              <span>4. Pejabat Penandatangan</span>
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Jabatan Penandatangan</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Jabatan Pejabat</label>
                 <input 
                   type="text"
                   value={pejabatJabatan}
@@ -575,11 +678,11 @@ export default function AdminSuratUndangan({
           </div>
         </div>
 
-        {/* Right Live Document Preview (A4 Standard) */}
+        {/* Right Column: Live Document Preview (Matching Exact Sample Layout) */}
         <div className="lg:col-span-7 space-y-4 sticky top-6">
-          {/* Zoom Control Bar */}
+          {/* Zoom Controls Bar */}
           <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Pratinjau Dokumen Siap Cetak (A4)</span>
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Pratinjau Resmi Surat Undangan (A4)</span>
             <div className="flex items-center gap-2">
               <button 
                 onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
@@ -597,7 +700,7 @@ export default function AdminSuratUndangan({
             </div>
           </div>
 
-          {/* Paper View Container */}
+          {/* Document Paper Container */}
           <div 
             className="overflow-auto max-h-[850px] p-6 bg-slate-200 dark:bg-slate-950 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-inner flex flex-col items-center gap-8 cursor-grab active:cursor-grabbing"
             onMouseDown={handleMouseDown}
@@ -605,10 +708,10 @@ export default function AdminSuratUndangan({
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
           >
-            {/* PAGE 1: Main Letter */}
+            {/* PAGE 1: Main Surat Undangan */}
             <div 
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
-              className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[12pt] leading-relaxed relative flex flex-col justify-between shrink-0"
+              className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
             >
               <div>
                 {/* Official Village Header (Kop Surat) */}
@@ -622,12 +725,17 @@ export default function AdminSuratUndangan({
                   </div>
                 </div>
 
-                {/* Surat Information Header */}
-                <div className="flex justify-between items-start text-[11pt] font-sans mb-6">
-                  <table className="w-[60%] border-collapse text-[11pt]">
+                {/* Date on Top Right */}
+                <div className="flex justify-end font-sans text-[11pt] mb-2">
+                  <p>{cleanDesaName}, {fmtShortDate(tanggalSurat)}</p>
+                </div>
+
+                {/* Surat Information Attributes Header */}
+                <div className="font-sans text-[11pt] mb-6">
+                  <table className="w-[70%] border-collapse text-[11pt]">
                     <tbody>
                       <tr>
-                        <td className="w-20 font-normal py-0.5">Nomor</td>
+                        <td className="w-24 font-normal py-0.5">Nomor</td>
                         <td className="w-4 text-center">:</td>
                         <td className="font-bold">{nomorSurat}</td>
                       </tr>
@@ -642,68 +750,71 @@ export default function AdminSuratUndangan({
                         <td>{isAttached ? '1 (satu) Lembar' : lampiran}</td>
                       </tr>
                       <tr>
-                        <td className="font-normal py-0.5">Perihal</td>
+                        <td className="font-normal py-0.5">Hal</td>
                         <td className="text-center">:</td>
-                        <td className="font-bold underline">{perihal}</td>
+                        <td className="font-bold">{perihal}</td>
                       </tr>
                     </tbody>
                   </table>
+                </div>
 
-                  <div className="w-[38%] text-left font-sans text-[11pt]">
-                    <p>{activeDesa.replace(/^desa\s+/i, '')}, {fmtShortDate(tanggalSurat)}</p>
-                    <p className="mt-2 font-bold">Kepada Yth.</p>
-                    {isAttached ? (
-                      <div className="mt-1 pl-2 font-bold text-gray-900 border-l-2 border-emerald-600">
-                        <p>Daftar Undangan Terlampir</p>
-                        <p className="font-normal text-[10pt] italic text-gray-600">di - Tempat</p>
-                      </div>
-                    ) : (
-                      <div className="mt-1 space-y-1">
-                        {recipients.map((r, i) => (
-                          <div key={r.id} className="text-[10.5pt]">
-                            <p className="font-bold">{i + 1}. {r.name}</p>
-                            {r.jabatan && <p className="text-[9.5pt] text-gray-700 pl-3">{r.jabatan}</p>}
-                          </div>
-                        ))}
-                        <p className="text-[10pt] italic mt-1">{recipients[0]?.alamat || 'di - Tempat'}</p>
-                      </div>
-                    )}
-                  </div>
+                {/* Recipient Section (Kepada Yth.) Matched with Sample Layout */}
+                <div className="font-sans text-[11pt] mb-6">
+                  <table className="border-collapse">
+                    <tbody>
+                      <tr>
+                        <td className="w-12 align-top font-normal">Yth.</td>
+                        <td className="align-top">
+                          {isAttached ? (
+                            <div>
+                              <p className="font-bold">Daftar Penerima Undangan Terlampir</p>
+                              <p className="italic text-[10.5pt] mt-2">di<br/>Tempat</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="space-y-0.5">
+                                {recipients.map((r, i) => (
+                                  <div key={r.id} className="flex gap-2">
+                                    <span className="min-w-[18px]">{i + 1}.</span>
+                                    <span>
+                                      {r.name} {r.jabatan ? `(${r.jabatan})` : ''}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                              <p className="italic text-[10.5pt] mt-3">di<br/>Tempat</p>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Paragraf Pembuka */}
-                <div className="font-sans text-[11pt] text-justify space-y-4 leading-relaxed mb-4">
+                <div className="font-sans text-[11pt] text-justify space-y-3 leading-relaxed mb-4">
                   <p>{paragrafPembuka}</p>
+                  <p>Dengan itu, Kami mengundang Bapak/Ibu pada:</p>
                 </div>
 
-                {/* Table Detail Acara */}
-                <div className="pl-6 font-sans text-[11pt] mb-6">
+                {/* Detail Pelaksanaan Acara (Matching Sample Formatting) */}
+                <div className="pl-8 font-sans text-[11pt] mb-6">
                   <table className="w-full border-collapse">
                     <tbody>
                       <tr>
-                        <td className="w-36 py-1.5 font-bold">Hari / Tanggal</td>
+                        <td className="w-36 py-1 font-normal">Hari/Tanggal</td>
                         <td className="w-4 text-center">:</td>
-                        <td className="font-bold py-1.5">{fmtDate(tglAcara)}</td>
+                        <td className="font-bold py-1">{fmtDate(tglAcara)}</td>
                       </tr>
                       <tr>
-                        <td className="py-1.5 font-bold">Waktu</td>
+                        <td className="py-1 font-normal">Pukul</td>
                         <td className="text-center">:</td>
-                        <td className="py-1.5">{waktuAcara}</td>
+                        <td className="py-1">{waktuAcara}</td>
                       </tr>
                       <tr>
-                        <td className="py-1.5 font-bold">Tempat</td>
+                        <td className="py-1 font-normal">Tempat</td>
                         <td className="text-center">:</td>
-                        <td className="font-bold py-1.5">{tempatAcara}</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1.5 font-bold">Agenda / Acara</td>
-                        <td className="text-center">:</td>
-                        <td className="py-1.5 font-bold text-emerald-950">{agendaAcara}</td>
-                      </tr>
-                      <tr>
-                        <td className="py-1.5 font-bold">Pakaian / Catatan</td>
-                        <td className="text-center">:</td>
-                        <td className="py-1.5 italic text-gray-800">{pakaianCatatan}</td>
+                        <td className="font-bold py-1">{tempatAcara}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -715,12 +826,12 @@ export default function AdminSuratUndangan({
                 </div>
               </div>
 
-              {/* Signature Block (Modular TTE / Classic) */}
-              <div className="flex justify-end font-sans mt-8 text-[11pt]">
-                <div className="w-[60%] text-center">
+              {/* Signature Block */}
+              <div className="flex justify-end font-sans mt-6 text-[11pt]">
+                <div className="w-[55%] text-center">
                   <p className="font-bold">{pejabatJabatan}</p>
                   
-                  <div className="my-4 min-h-[90px] flex items-center justify-center">
+                  <div className="my-4 min-h-[85px] flex items-center justify-center">
                     {isTTE ? (
                       <TTESignatureBox
                         officerTitle={pejabatJabatan}
@@ -749,7 +860,7 @@ export default function AdminSuratUndangan({
             {isAttached && (
               <div 
                 style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
-                className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[12pt] leading-relaxed relative flex flex-col justify-between shrink-0"
+                className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
               >
                 <div>
                   {/* Header Lampiran */}
@@ -788,7 +899,7 @@ export default function AdminSuratUndangan({
                     <thead>
                       <tr className="bg-gray-100">
                         <th className="border border-black px-3 py-2 text-center w-12">NO</th>
-                        <th className="border border-black px-4 py-2 text-left">NAMA / NAMA LEMBAGA</th>
+                        <th className="border border-black px-4 py-2 text-left">NAMA / PENERIMA</th>
                         <th className="border border-black px-4 py-2 text-left">JABATAN / INSTANSI</th>
                         <th className="border border-black px-3 py-2 text-center w-28">ALAMAT</th>
                       </tr>
@@ -799,7 +910,7 @@ export default function AdminSuratUndangan({
                           <td className="border border-black px-3 py-2.5 text-center font-bold">{i + 1}</td>
                           <td className="border border-black px-4 py-2.5 font-bold">{r.name}</td>
                           <td className="border border-black px-4 py-2.5">{r.jabatan || '-'}</td>
-                          <td className="border border-black px-3 py-2.5 text-center italic">{r.alamat || 'di - Tempat'}</td>
+                          <td className="border border-black px-3 py-2.5 text-center italic">{r.alamat || 'di Tempat'}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -808,7 +919,7 @@ export default function AdminSuratUndangan({
 
                 {/* Signature Block on Lampiran */}
                 <div className="flex justify-end font-sans text-[11pt]">
-                  <div className="w-[60%] text-center">
+                  <div className="w-[55%] text-center">
                     <p className="font-bold">{pejabatJabatan}</p>
                     
                     <div className="my-4 min-h-[80px] flex items-center justify-center">
