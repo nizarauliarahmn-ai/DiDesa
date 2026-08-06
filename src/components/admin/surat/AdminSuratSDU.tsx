@@ -1,3 +1,4 @@
+import SuratEditorHeader from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
@@ -573,27 +574,15 @@ export default function AdminSuratSDU({
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-16 z-30">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
-            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat SDU</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          
-          <button 
-            onClick={handlePrint}
-            className="flex items-center gap-2 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg dark:shadow-none shadow-emerald-900/20 active:scale-95"
-          >
-            <Printer className="w-4 h-4" />
-            Cetak Surat
-          </button>
-        </div>
+      {/* Header (Reusable Standard Header) */}
+      <div className="sticky top-16 z-30">
+        <SuratEditorHeader 
+          title="Buat SDU"
+          templateKode={templateKode}
+          onBack={onBack}
+          onPrint={handlePrint}
+          printLabel="Cetak Surat"
+        />
       </div>
 
       <AnimatePresence>

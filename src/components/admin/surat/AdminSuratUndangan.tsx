@@ -17,6 +17,7 @@ import { showToast } from '../../../utils/toast';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { capitalizeWords, capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import SuratEditorHeader from './SuratEditorHeader';
 
 export interface Recipient {
   id: string;
@@ -361,43 +362,16 @@ export default function AdminSuratUndangan({
 
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-24">
-      {/* Top Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-2xl transition-all"
-          >
-            <ArrowLeft size={20} className="text-slate-700 dark:text-slate-200" />
-          </button>
-          <div>
-            <span className="px-3 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 text-xs font-bold rounded-full uppercase tracking-wider">
-              005 / UND
-            </span>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
-              Pembuat Surat Undangan Resmi
-            </h1>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="px-5 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95"
-          >
-            {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-            <span>Simpan</span>
-          </button>
-          <button
-            onClick={handlePrint}
-            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all active:scale-95"
-          >
-            <Printer size={18} />
-            <span>Cetak / Download PDF</span>
-          </button>
-        </div>
-      </div>
+      {/* Top Bar (Reusable Standard Header) */}
+      <SuratEditorHeader 
+        title="Pembuat Surat Undangan Resmi"
+        templateKode="005 / UND"
+        onBack={onBack}
+        onSave={handleSave}
+        onPrint={handlePrint}
+        isSaving={isSaving}
+        printLabel="Cetak / Download PDF"
+      />
 
       {/* Main Form & Preview Workspace (Matching SKTM 7/5 Grid Ratio) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

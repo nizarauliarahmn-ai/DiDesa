@@ -1,3 +1,4 @@
+import SuratEditorHeader from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2, Calendar, CheckCircle2 } from 'lucide-react';
@@ -885,62 +886,18 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-20">
-      {/* Header */}
-    <div className="flex items-center justify-between bg-white dark:bg-slate-900 px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-16 z-50">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="p-2 text-gray-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              {editData ? 'Edit SPPD' : 'Buat SPPD'}
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-slate-400">Surat Perjalanan Dinas</p>
-          </div>
-        </div>
-
-        {/* Center: Tab switcher — fixed layout, no shift */}
-        <div className="flex items-center bg-gray-100 dark:bg-slate-800 rounded-xl p-1 gap-0.5">
-          <button
-            onClick={() => setActiveTab('form')}
-            className={`flex items-center gap-1.5 min-w-[140px] justify-center px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'form'
-                ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                : 'text-gray-500 dark:text-slate-400'
-            }`}
-          >
-            <FileText size={14} /> Pengisian Form
-          </button>
-          <button
-            onClick={() => setActiveTab('cetak')}
-            className={`flex items-center gap-1.5 min-w-[150px] justify-center px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'cetak'
-                ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                : 'text-gray-500 dark:text-slate-400'
-            }`}
-          >
-            <Eye size={14} /> Pratinjau & Cetak
-          </button>
-        </div>
-
-        {/* Right: actions — always the same */}
-        <div className="flex items-center gap-2">
-          <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg font-mono text-sm font-semibold border border-emerald-100 dark:border-emerald-500/20">
-            {kodeKlasifikasi}/{nomorSurat}
-          </div>
-          <button
-            onClick={handleRecord}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-sm shadow-emerald-200 dark:shadow-none font-semibold disabled:opacity-50 text-sm"
-          >
-            <Save size={16} />
-            {isSaving ? 'Menyimpan...' : (hasRecorded ? 'Perbarui Data' : 'Catat & Simpan')}
-          </button>
-        </div>
-    </div>
+      {/* Header (Reusable Standard Header) */}
+      <div className="sticky top-16 z-30">
+        <SuratEditorHeader 
+          title="Buat Surat"
+          templateKode={templateKode}
+          onBack={onBack}
+          onPrint={handlePrint}
+          onSave={handleSave}
+          isSaving={isSaving}
+          printLabel="Cetak Surat"
+        />
+      </div>
 
       {/* TAB: PENGISIAN FORM */}
       {activeTab === 'form' && (

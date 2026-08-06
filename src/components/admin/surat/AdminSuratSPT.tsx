@@ -13,6 +13,7 @@ import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import SuratEditorHeader from './SuratEditorHeader';
 
 // ===================== INTERFACES =====================
 interface FullResident {
@@ -708,35 +709,25 @@ export default function AdminSuratSPT({
   // ===================== RENDER =====================
   return (
     <div className="max-w-7xl mx-auto space-y-5 pb-20">
-      {/* ─── Header ─── */}
-      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-none sticky top-16 z-30">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
-            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Buat SPT</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center mt-1">{templateKode && <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[10px] border border-slate-200 dark:border-slate-700 mr-2">Kode: {templateKode}</span>}<span>{templateDesc}</span></p>
-          </div>
-        </div>
-        <div className="flex gap-2">
+      {/* 📜 Header 📜 */}
+      <div className="sticky top-16 z-30">
+        <SuratEditorHeader 
+          title="Buat SPT"
+          templateKode={templateKode}
+          templateDesc={templateDesc}
+          onBack={onBack}
+          onPrint={handlePrint}
+          printLabel="Cetak Surat"
+        >
           <button
             onClick={syncToResidents}
             disabled={syncing || !selectedPewaris}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl font-bold text-sm hover:bg-blue-100 transition-all disabled:opacity-40"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-xl font-bold text-sm hover:bg-blue-100 dark:hover:bg-blue-800/50 transition-all disabled:opacity-40"
           >
             {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
             Sinkron Data
           </button>
-          <button
-            onClick={handlePrint}
-            disabled={loading}
-            className="flex items-center gap-2 px-5 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all shadow-lg dark:shadow-none shadow-emerald-900/20 active:scale-95 disabled:opacity-60"
-          >
-            <Printer className="w-4 h-4" />
-            {loading ? 'Memproses...' : `Cetak ${activeHeirs.length > 5 ? '4' : '2'} Lembar`}
-          </button>
-        </div>
+        </SuratEditorHeader>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">

@@ -13,6 +13,7 @@ import { useDragScroll } from '../../../hooks/useDragScroll';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
+import SuratEditorHeader from './SuratEditorHeader';
 
 interface Resident {
   nik: string;
@@ -664,24 +665,15 @@ export default function AdminSuratSKKT({
       <iframe ref={iframeRef} className="absolute opacity-0 pointer-events-none -z-50 w-[210mm] h-[297mm]" title="Print Frame SKKT" />
 
       {/* Header Bar */}
-      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-slate-400" />
-          </button>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Surat Keterangan Kepemilikan Tanah (SKKT)</h2>
-            <p className="text-xs text-gray-500 dark:text-slate-400">Surat Pernyataan Penguasaan Fisik Bidang Tanah & Gambar Situasi Kasar Tanah</p>
-          </div>
-        </div>
-        <button 
-          onClick={handleSave}
-          disabled={loading}
-          className="flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all"
-        >
-          <Save className="w-4 h-4" />
-          {loading ? 'Menyimpan...' : 'Simpan & Cetak'}
-        </button>
+      <div className="sticky top-16 z-30">
+        <SuratEditorHeader 
+          title="Surat Keterangan Kepemilikan Tanah (SKKT)"
+          templateDesc="Surat Pernyataan Penguasaan Fisik Bidang Tanah & Gambar Situasi Kasar Tanah"
+          onBack={onBack}
+          onSave={handleSave}
+          isSaving={loading}
+          printLabel="Simpan & Cetak"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
