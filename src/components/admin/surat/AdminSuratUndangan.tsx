@@ -276,11 +276,71 @@ export default function AdminSuratUndangan({
   // Print Document Handler
   const handlePrint = () => {
     handleSave();
-    const printFrame = iframeRef.current;
-    if (printFrame && printFrame.contentWindow) {
-      printFrame.contentWindow.focus();
-      printFrame.contentWindow.print();
-    }
+    
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
+
+    const page1Element = document.getElementById('undangan-page-1');
+    const page2Element = document.getElementById('undangan-page-2');
+
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(el => el.outerHTML)
+      .join('\n');
+
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Surat Undangan - ${nomorSurat}</title>
+          ${styles}
+          <style>
+            @page { size: A4 portrait; margin: 0 !important; }
+            body { 
+              margin: 0; 
+              padding: 0; 
+              background: white; 
+              color: black;
+              -webkit-print-color-adjust: exact; 
+              print-color-adjust: exact; 
+            }
+            .page { 
+              width: 210mm; 
+              min-height: 297mm; 
+              margin: 0 auto; 
+              box-sizing: border-box; 
+              background: white; 
+              position: relative;
+              page-break-after: always;
+            }
+            .page:last-child { page-break-after: avoid; }
+          </style>
+        </head>
+        <body>
+          <div class="page">
+            ${page1Element ? page1Element.outerHTML : ''}
+          </div>
+          ${isAttached && page2Element ? `
+            <div class="page">
+              ${page2Element.outerHTML}
+            </div>
+          ` : ''}
+        </body>
+      </html>
+    `);
+    doc.close();
+
+    setTimeout(() => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } catch (e) {
+        console.error("Iframe print error:", e);
+      }
+    }, 500);
   };
 
   const filteredResidents = residentSearchQuery.trim() === '' ? [] : residents.filter(r => 
@@ -710,6 +770,7 @@ export default function AdminSuratUndangan({
           >
             {/* PAGE 1: Main Surat Undangan */}
             <div 
+              id="undangan-page-1"
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
               className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
             >
@@ -859,6 +920,7 @@ export default function AdminSuratUndangan({
             {/* PAGE 2: Lampiran Daftar Penerima (If Attached > 3 or Forced) */}
             {isAttached && (
               <div 
+                id="undangan-page-2"
                 style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
                 className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
               >
@@ -956,36 +1018,6 @@ export default function AdminSuratUndangan({
         ref={iframeRef}
         title="Print Frame"
         className="hidden"
-        srcDoc={`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Surat Undangan - ${nomorSurat}</title>
-              <style>
-                @page { size: A4 portrait; margin: 15mm; }
-                body { font-family: system-ui, -apple-system, sans-serif; color: black; margin: 0; padding: 0; }
-                .page { page-break-after: always; width: 100%; min-h: 297mm; }
-                .page:last-child { page-break-after: avoid; }
-                table { border-collapse: collapse; }
-              </style>
-            </head>
-            <body>
-              <div class="page">
-                ${document.querySelector('.w-\\[210mm\\]')?.outerHTML || ''}
-              </div>
-              ${isAttached ? `
-                <div class="page">
-                  ${document.querySelectorAll('.w-\\[210mm\\]')[1]?.outerHTML || ''}
-                </div>
-              ` : ''}
-              <script>
-                window.onload = function() {
-                  window.print();
-                };
-              </script>
-            </body>
-          </html>
-        `}
       />
 
       {/* Success Dialog */}
