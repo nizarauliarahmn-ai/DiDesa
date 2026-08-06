@@ -207,7 +207,7 @@ export default function AdminSaaSLogs() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto" ref={printRef}>
+        <div className="overflow-x-auto">
           <div className="hidden print:block mb-6 p-6">
             <h1 className="text-2xl font-bold mb-2">Laporan Log Aktivitas SaaS</h1>
             <p className="text-sm text-gray-500">Dicetak pada: {new Date().toLocaleString('id-ID')}</p>
