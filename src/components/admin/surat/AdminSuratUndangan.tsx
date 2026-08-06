@@ -69,14 +69,10 @@ export default function AdminSuratUndangan({
   const [nomorSurat, setNomorSurat] = useState(editData?.nomor || '');
   const [sifat, setSifat] = useState(editData?.sifat || 'Penting');
   const [lampiran, setLampiran] = useState(editData?.lampiran || '-');
-  const [perihal, setPerihal] = useState(editData?.perihal || editData?.keperluan || 'Musyawarah Batas Tanah Posyandu HPTT');
+  const [perihal, setPerihal] = useState(editData?.perihal || editData?.keperluan || '');
 
-  // Recipients State
-  const [recipients, setRecipients] = useState<Recipient[]>(editData?.recipients || [
-    { id: '1', name: 'Isya Ansari', jabatan: 'BPD', alamat: 'di Tempat' },
-    { id: '2', name: 'Norliani', jabatan: 'RT.03', alamat: 'di Tempat' },
-    { id: '3', name: 'Mahyudi', jabatan: '', alamat: 'di Tempat' }
-  ]);
+  // Recipients State (Default empty array, no dummy data)
+  const [recipients, setRecipients] = useState<Recipient[]>(editData?.recipients || []);
   const [forceAttachment, setForceAttachment] = useState<boolean>(editData?.forceAttachment || false);
 
   // Resident Autocomplete Search State
@@ -92,16 +88,16 @@ export default function AdminSuratUndangan({
   // Event Details State
   const [tglAcara, setTglAcara] = useState(editData?.tglAcara || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]);
   const [waktuAcara, setWaktuAcara] = useState(editData?.waktuAcara || '08.00 WITA s.d selesai');
-  const [tempatAcara, setTempatAcara] = useState(editData?.tempatAcara || 'Kantor Desa Wasah Hilir');
+  const [tempatAcara, setTempatAcara] = useState(editData?.tempatAcara || '');
 
   // Paragraf Text
   const [paragrafPembuka, setParagrafPembuka] = useState(
     editData?.paragrafPembuka || 
-    'Sehubungan akan di bangunnya Posyandu Harapan Pahlawan Tumpang Talu RT.03 Desa Wasah Hilir, Perlu adanya kesepakatan terkait batas tanah yang akan di bangun.'
+    'Dengan hormat, sehubungan dengan pelaksanaan agenda kegiatan desa, kami mengundang Bapak/Ibu/Saudara(i) untuk dapat berhadiri pada pertemuan yang akan diselenggarakan pada:'
   );
   const [paragrafPenutup, setParagrafPenutup] = useState(
     editData?.paragrafPenutup || 
-    'Demikian undangan ini disampaikan, atas perhatian Kami ucapkan terimakasih.'
+    'Demikian undangan ini disampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.'
   );
 
   // Signature State
@@ -785,44 +781,49 @@ export default function AdminSuratUndangan({
                 </div>
 
                 {/* Surat Information Attributes Header */}
-                <div className="font-sans text-[11pt] mb-6">
-                  <table className="w-[70%] border-collapse text-[11pt]">
+                <div className="font-sans text-[11pt] mb-4">
+                  <table className="w-[70%] border-collapse text-[11pt] leading-tight">
                     <tbody>
                       <tr>
-                        <td className="w-24 font-normal py-0.5">Nomor</td>
-                        <td className="w-4 text-center">:</td>
-                        <td className="font-bold">{nomorSurat}</td>
+                        <td className="w-20 font-normal py-0.5 align-top">Nomor</td>
+                        <td className="w-4 text-center py-0.5 align-top">:</td>
+                        <td className="font-bold py-0.5 align-top">{nomorSurat}</td>
                       </tr>
                       <tr>
-                        <td className="font-normal py-0.5">Sifat</td>
-                        <td className="text-center">:</td>
-                        <td>{sifat}</td>
+                        <td className="font-normal py-0.5 align-top">Sifat</td>
+                        <td className="text-center py-0.5 align-top">:</td>
+                        <td className="py-0.5 align-top">{sifat}</td>
                       </tr>
                       <tr>
-                        <td className="font-normal py-0.5">Lampiran</td>
-                        <td className="text-center">:</td>
-                        <td>{isAttached ? '1 (satu) Lembar' : lampiran}</td>
+                        <td className="font-normal py-0.5 align-top">Lampiran</td>
+                        <td className="text-center py-0.5 align-top">:</td>
+                        <td className="py-0.5 align-top">{isAttached ? '1 (satu) Lembar' : lampiran}</td>
                       </tr>
                       <tr>
-                        <td className="font-normal py-0.5">Hal</td>
-                        <td className="text-center">:</td>
-                        <td className="font-bold">{perihal}</td>
+                        <td className="font-normal py-0.5 align-top">Hal</td>
+                        <td className="text-center py-0.5 align-top">:</td>
+                        <td className="font-bold py-0.5 align-top">{perihal || ''}</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
 
-                {/* Recipient Section (Kepada Yth.) Matched with Sample Layout */}
-                <div className="font-sans text-[11pt] mb-6">
-                  <table className="border-collapse">
+                {/* Recipient Section (Kepada Yth.) */}
+                <div className="font-sans text-[11pt] mb-4">
+                  <table className="border-collapse leading-tight">
                     <tbody>
                       <tr>
-                        <td className="w-12 align-top font-normal">Yth.</td>
-                        <td className="align-top">
+                        <td className="w-12 align-top font-normal py-0.5">Yth.</td>
+                        <td className="align-top py-0.5">
                           {isAttached ? (
                             <div>
                               <p className="font-bold">Daftar Penerima Undangan Terlampir</p>
-                              <p className="italic text-[10.5pt] mt-2">di<br/>Tempat</p>
+                              <p className="italic text-[10.5pt] mt-1">di<br/>Tempat</p>
+                            </div>
+                          ) : recipients.length === 0 ? (
+                            <div>
+                              <p className="italic text-gray-400 text-[10.5pt]">................................................</p>
+                              <p className="italic text-[10.5pt] mt-1">di<br/>Tempat</p>
                             </div>
                           ) : (
                             <div>
@@ -836,7 +837,7 @@ export default function AdminSuratUndangan({
                                   </div>
                                 ))}
                               </div>
-                              <p className="italic text-[10.5pt] mt-3">di<br/>Tempat</p>
+                              <p className="italic text-[10.5pt] mt-2">di<br/>Tempat</p>
                             </div>
                           )}
                         </td>
@@ -846,29 +847,29 @@ export default function AdminSuratUndangan({
                 </div>
 
                 {/* Paragraf Pembuka */}
-                <div className="font-sans text-[11pt] text-justify space-y-3 leading-relaxed mb-4">
+                <div className="font-sans text-[11pt] text-justify space-y-2 leading-relaxed mb-3">
                   <p>{paragrafPembuka}</p>
                   <p>Dengan itu, Kami mengundang Bapak/Ibu pada:</p>
                 </div>
 
-                {/* Detail Pelaksanaan Acara (Matching Sample Formatting) */}
-                <div className="pl-8 font-sans text-[11pt] mb-6">
-                  <table className="w-full border-collapse">
+                {/* Detail Pelaksanaan Acara (Tight line spacing, no bold on date/location) */}
+                <div className="pl-8 font-sans text-[11pt] mb-4">
+                  <table className="w-full border-collapse leading-snug">
                     <tbody>
                       <tr>
-                        <td className="w-36 py-1 font-normal">Hari/Tanggal</td>
-                        <td className="w-4 text-center">:</td>
-                        <td className="font-bold py-1">{fmtDate(tglAcara)}</td>
+                        <td className="w-36 py-0.5 font-normal">Hari/Tanggal</td>
+                        <td className="w-4 text-center py-0.5">:</td>
+                        <td className="py-0.5 font-normal">{fmtDate(tglAcara)}</td>
                       </tr>
                       <tr>
-                        <td className="py-1 font-normal">Pukul</td>
-                        <td className="text-center">:</td>
-                        <td className="py-1">{waktuAcara}</td>
+                        <td className="py-0.5 font-normal">Pukul</td>
+                        <td className="text-center py-0.5">:</td>
+                        <td className="py-0.5 font-normal">{waktuAcara}</td>
                       </tr>
                       <tr>
-                        <td className="py-1 font-normal">Tempat</td>
-                        <td className="text-center">:</td>
-                        <td className="font-bold py-1">{tempatAcara}</td>
+                        <td className="py-0.5 font-normal">Tempat</td>
+                        <td className="text-center py-0.5">:</td>
+                        <td className="py-0.5 font-normal">{tempatAcara}</td>
                       </tr>
                     </tbody>
                   </table>
