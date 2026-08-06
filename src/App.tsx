@@ -117,37 +117,6 @@ export default function App() {
     verifyDomain();
   }, [isRootDomain]);
 
-  if (tenantValid === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-      </div>
-    );
-  }
-
-  if (urlParams.get('print') === 'qr_kiosk') {
-    return <PrintQRKiosk />;
-  }
-  
-  if (tabParam === 'kios') {
-    return <><PublicKiosPortal /><ToastContainer /></>;
-  }
-  if (tabParam === 'buku_tamu') {
-    return <><PublicBukuTamu /><ToastContainer /></>;
-  }
-  if (tabParam === 'kios_surat') {
-    return <><PublicKiosSurat /><ToastContainer /></>;
-  }
-  if (tabParam === 'kios_aspirasi') {
-    return <><PublicKiosAspirasi /><ToastContainer /></>;
-  }
-  if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
-    return <><PublicVerifikasiSurat /><ToastContainer /></>;
-  }
-
-  if (tenantValid === false) {
-    return <TenantNotFound />;
-  }
 
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
     if (new URLSearchParams(window.location.search).get('preview') === 'true') {
@@ -382,6 +351,38 @@ export default function App() {
   };
 
   // If not authenticated, force login screen UNLESS view is public
+  if (tenantValid === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
+  if (urlParams.get('print') === 'qr_kiosk') {
+    return <PrintQRKiosk />;
+  }
+  
+  if (tabParam === 'kios') {
+    return <><PublicKiosPortal /><ToastContainer /></>;
+  }
+  if (tabParam === 'buku_tamu') {
+    return <><PublicBukuTamu /><ToastContainer /></>;
+  }
+  if (tabParam === 'kios_surat') {
+    return <><PublicKiosSurat /><ToastContainer /></>;
+  }
+  if (tabParam === 'kios_aspirasi') {
+    return <><PublicKiosAspirasi /><ToastContainer /></>;
+  }
+  if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
+    return <><PublicVerifikasiSurat /><ToastContainer /></>;
+  }
+
+  if (tenantValid === false) {
+    return <TenantNotFound />;
+  }
+
   if (!user && view !== 'public') {
     return (
       <>
