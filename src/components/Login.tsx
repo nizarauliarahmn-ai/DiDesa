@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server } from 'lucide-react';
+import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server, MapPin } from 'lucide-react';
 import { showToast } from '../utils/toast';
 import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
@@ -14,24 +14,15 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Available Tenants for Global Login Dropdown
+  const [allTenants, setAllTenants] = useState<any[]>([]);
+  const [selectedTenantId, setSelectedTenantId] = useState<string>('');
+
+  // Determine if we are on a specific subdomain or explicit tenant parameter
+  const [isSpecificSubdomain, setIsSpecificSubdomain] = useState(false);
+
   // Village Settings for Dynamic branding in login screen
-  const [desaName, setDesaName] = useState(() => {
-    const local = localStorage.getItem('kop_desa');
-    if (local) return local;
-    
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const t = params.get('tenant');
-      if (t) return t.charAt(0).toUpperCase() + t.slice(1);
-      
-      const parts = window.location.hostname.split('.');
-      if (parts.length >= 2 && !['www', 'localhost', 'didesa', 'dev', 'staging', 'preview'].includes(parts[0])) {
-        return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
-      }
-    } catch(e) {}
-    
-    return '';
-  });
+  const [desaName, setDesaName] = useState('');
   const [kabupatenName, setKabupatenName] = useState(() => localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
 
@@ -45,13 +36,30 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   useEffect(() => {
     const initializeTenantAndBranding = async () => {
       try {
-        // Fetch Tenant
+        // Load all registered tenants for global selection
+        const { data: tenantsList } = await supabase.from('tenants').select('*').order('nama_desa', { ascending: true });
+        if (tenantsList) {
+          setAllTenants(tenantsList);
+        }
+
+        // Check if current URL is a specific subdomain or tenant parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const tenantParam = urlParams.get('tenant');
+        const hostname = window.location.hostname;
+        const parts = hostname.split('.');
+        const hasSubdomain = parts.length >= 2 && !['www', 'localhost', 'didesa', 'dev', 'staging', 'preview'].includes(parts[0]);
+        
+        const isSpecific = !!(tenantParam || hasSubdomain);
+        setIsSpecificSubdomain(isSpecific);
+
+        // Fetch Resolved Tenant
         const tenantId = await resolveCurrentTenant();
         if (tenantId) {
           const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
           if (data) {
             setCurrentTenant(data);
-            if (data.nama_desa) {
+            setSelectedTenantId(data.id);
+            if (isSpecific && data.nama_desa) {
               setDesaName(data.nama_desa);
             }
           }
@@ -80,27 +88,22 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       }
     };
     initializeTenantAndBranding();
-    
-    const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || '');
-      setKabupatenName(localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
-      setLogoUrl(localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
-    };
-
-    const handleBrandingUpdate = () => {
-      setGlobalName(localStorage.getItem('global_app_name') || 'DiDesa');
-      setGlobalLogo(localStorage.getItem('global_app_logo') || '');
-      setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
-    };
-
-    window.addEventListener('village_settings_updated', handleSettingsUpdate);
-    window.addEventListener('global_branding_updated', handleBrandingUpdate);
-    
-    return () => {
-      window.removeEventListener('village_settings_updated', handleSettingsUpdate);
-      window.removeEventListener('global_branding_updated', handleBrandingUpdate);
-    };
   }, []);
+
+  // Handle manual tenant selection from dropdown on global domain
+  const handleSelectTenantChange = (tId: string) => {
+    setSelectedTenantId(tId);
+    if (!tId) {
+      setCurrentTenant(null);
+      setDesaName('');
+    } else {
+      const match = allTenants.find(t => t.id === tId);
+      if (match) {
+        setCurrentTenant(match);
+        setDesaName(match.nama_desa);
+      }
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,27 +131,40 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         return;
       }
 
-      // MUST STRICTLY ENFORCE: Only check credentials against the CURRENT domain/tenant!
-      if (!currentTenant?.id) {
-        showToast('Domain atau Desa tidak valid. Silakan gunakan link website desa Anda yang benar.', 'error');
+      // If a specific tenant is currently selected or resolved
+      let targetTenant = currentTenant;
+
+      // If on global domain without a selected tenant, search across ALL tenants in database
+      if (!targetTenant) {
+        const { data: globalMatches, error: searchErr } = await supabase
+          .from('tenants')
+          .select('*')
+          .or(`admin_email.eq."${email}",kades_email.eq."${email}"`);
+
+        if (!searchErr && globalMatches && globalMatches.length > 0) {
+          targetTenant = globalMatches[0];
+        }
+      }
+
+      if (!targetTenant) {
+        showToast('Email atau kata sandi tidak terdaftar di desa manapun.', 'error');
         setIsLoading(false);
         return;
       }
 
-      // Check credentials in Supabase tenants table, STRICTLY for the current tenant
+      // Verify credentials for the target tenant
       const { data: tenantMatches, error } = await supabase
         .from('tenants')
         .select('*')
-        .eq('id', currentTenant.id) // SECURITY FIX: Lock query to the active domain's tenant ID
+        .eq('id', targetTenant.id)
         .or(`admin_email.eq."${email}",kades_email.eq."${email}"`);
 
       if (error) throw error;
+
       const matchingTenantAdmin = tenantMatches?.find(t => t.admin_email?.toLowerCase() === email.toLowerCase() && t.admin_password === password);
       const matchingTenantKades = tenantMatches?.find(t => t.kades_email?.toLowerCase() === email.toLowerCase() && t.kades_password === password);
 
-
       if (matchingTenantKades) {
-        // Log in as Super Admin for this tenant
         const loggedUser = {
           email: email,
           role: 'kades' as const,
@@ -157,6 +173,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Kades'
         };
         localStorage.setItem('kop_desa', matchingTenantKades.nama_desa);
+        localStorage.setItem('village_name', matchingTenantKades.nama_desa);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
         onLoginSuccess(loggedUser);
         showToast(`Selamat datang kembali di Portal Desa ${matchingTenantKades.nama_desa}!`, 'success');
@@ -165,7 +182,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       }
 
       if (matchingTenantAdmin) {
-        // Log in as Admin for this tenant
         const loggedUser = {
           email: email,
           role: 'admin' as const,
@@ -174,6 +190,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Admin'
         };
         localStorage.setItem('kop_desa', matchingTenantAdmin.nama_desa);
+        localStorage.setItem('village_name', matchingTenantAdmin.nama_desa);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
         onLoginSuccess(loggedUser);
         showToast(`Selamat datang kembali di Portal Desa ${matchingTenantAdmin.nama_desa}!`, 'success');
@@ -181,14 +198,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         return;
       }
 
-      // Jika tidak ada yang cocok di database
-      showToast('Email atau kata sandi salah! Pastikan kredensial Anda terdaftar di desa ini.', 'error');
+      showToast('Kata sandi yang Anda masukkan salah!', 'error');
       setIsLoading(false);
       return;
 
     } catch (err) {
       console.error(err);
-      showToast('Terjadi kesalahan koneksi, masuk menggunakan mode demo offline.', 'error');
+      showToast('Terjadi kesalahan koneksi saat memverifikasi akun.', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -241,6 +257,32 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-5">
+          {/* Village Selection Dropdown (Only when on global domain) */}
+          {!isSpecificSubdomain && allTenants.length > 0 && (
+            <div>
+              <label className="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                Pilih Desa / Instansi
+              </label>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <MapPin size={16} />
+                </span>
+                <select
+                  value={selectedTenantId}
+                  onChange={(e) => handleSelectTenantChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50 text-slate-900 dark:text-white"
+                >
+                  <option value="">Deteksi Otomatis dari Email</option>
+                  {allTenants.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nama_desa.startsWith('Desa') ? t.nama_desa : `Desa ${t.nama_desa}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
               Email atau Nama Pengguna
