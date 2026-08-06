@@ -208,6 +208,7 @@ export default function AdminSurat({
             onOpenSPT={() => changeTab('spt')}
             onOpenSPPD={() => changeTab('sppd')}
             onOpenSKKT={() => changeTab('skkt')}
+            onOpenUndangan={() => changeTab('undangan')}
           />
         )}
         {activeTab === 'skkt' && (
