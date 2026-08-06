@@ -367,9 +367,7 @@ export default function AdminSuratUndangan({
         title="Pembuat Surat Undangan Resmi"
         templateKode="005 / UND"
         onBack={onBack}
-        onSave={handleSave}
         onPrint={handlePrint}
-        isSaving={isSaving}
         printLabel="Cetak / Download PDF"
       />
 
