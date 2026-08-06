@@ -87,10 +87,16 @@ export default function AdminSuratUndangan({
 
   // Event Details State
   const [tglAcara, setTglAcara] = useState(editData?.tglAcara || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]);
-  const [waktuAcara, setWaktuAcara] = useState(editData?.waktuAcara || '08.00 WITA s.d selesai');
+  const [waktuAcara, setWaktuAcara] = useState(editData?.waktuAcara || '08.00 WITA s.d Selesai');
+  const [isCustomWaktu, setIsCustomWaktu] = useState(false);
   const [tempatAcara, setTempatAcara] = useState(editData?.tempatAcara || '');
 
   // Paragraf Text
+  const [showParagrafKustom, setShowParagrafKustom] = useState<boolean>(editData?.showParagrafKustom || false);
+  const [paragrafKustom, setParagrafKustom] = useState(
+    editData?.paragrafKustom || 
+    'Sehubungan akan di bangunnya Posyandu Harapan Pahlawan Tumpang Talu RT.03 Desa Wasah Hilir, Perlu adanya kesepakatan terkait batas tanah yang akan di bangun.'
+  );
   const [paragrafPembuka, setParagrafPembuka] = useState(
     editData?.paragrafPembuka || 
     'Dengan hormat, sehubungan dengan pelaksanaan agenda kegiatan desa, kami mengundang Bapak/Ibu/Saudara(i) untuk dapat berhadiri pada pertemuan yang akan diselenggarakan pada:'
@@ -100,7 +106,14 @@ export default function AdminSuratUndangan({
     'Demikian undangan ini disampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.'
   );
 
-  // Signature State
+  // Signature State & Village Officers List (SKTM-style)
+  const officerList: any[] = (() => {
+    try {
+      const stored = localStorage.getItem('village_officers');
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  })();
+
   const [pejabatNama, setPejabatNama] = useState(() => localStorage.getItem('kop_kades') || localStorage.getItem('village_kades_name') || 'FAZAKKIR RAHMAD');
   const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('kades_title') || 'Kepala Desa');
   const [pejabatNip, setPejabatNip] = useState(() => localStorage.getItem('kades_nip') || '-');
@@ -631,14 +644,33 @@ export default function AdminSuratUndangan({
             </h3>
 
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Maksud / Kalimat Pembuka</label>
-                <textarea 
-                  rows={2}
-                  value={paragrafPembuka}
-                  onChange={(e) => setParagrafPembuka(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium resize-none"
-                />
+              {/* Custom Paragraph Toggle & Textarea */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/60 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    Tambah Paragraf Pengantar Kustom (Sebelum Kalimat Pembuka)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowParagrafKustom(!showParagrafKustom)}
+                    className={`p-1 rounded-full transition-colors ${showParagrafKustom ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}`}
+                  >
+                    {showParagrafKustom ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
+                  </button>
+                </div>
+
+                {showParagrafKustom && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 mb-1">Teks Paragraf Kustom (Opsional):</label>
+                    <textarea 
+                      rows={2}
+                      value={paragrafKustom}
+                      onChange={(e) => setParagrafKustom(e.target.value)}
+                      placeholder="Contoh: Sehubungan akan dibangunnya Posyandu Harapan..."
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium resize-none"
+                    />
+                  </div>
+                )}
               </div>
 
               <div>
@@ -653,13 +685,41 @@ export default function AdminSuratUndangan({
 
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Waktu / Pukul</label>
-                <input 
-                  type="text"
-                  value={waktuAcara}
-                  onChange={(e) => setWaktuAcara(e.target.value)}
-                  placeholder="08.00 WITA s.d selesai"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium"
-                />
+                <div className="space-y-2">
+                  <select 
+                    value={isCustomWaktu ? 'custom' : waktuAcara}
+                    onChange={(e) => {
+                      if (e.target.value === 'custom') {
+                        setIsCustomWaktu(true);
+                      } else {
+                        setIsCustomWaktu(false);
+                        setWaktuAcara(e.target.value);
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold"
+                  >
+                    <option value="08.00 WITA s.d Selesai">08.00 WITA s.d Selesai</option>
+                    <option value="08.30 WITA s.d Selesai">08.30 WITA s.d Selesai</option>
+                    <option value="09.00 WITA s.d Selesai">09.00 WITA s.d Selesai</option>
+                    <option value="09.30 WITA s.d Selesai">09.30 WITA s.d Selesai</option>
+                    <option value="10.00 WITA s.d Selesai">10.00 WITA s.d Selesai</option>
+                    <option value="13.30 WITA s.d Selesai">13.30 WITA s.d Selesai</option>
+                    <option value="14.00 WITA s.d Selesai">14.00 WITA s.d Selesai</option>
+                    <option value="19.30 WITA s.d Selesai">19.30 WITA s.d Selesai</option>
+                    <option value="20.00 WITA s.d Selesai">20.00 WITA s.d Selesai</option>
+                    <option value="custom">+ Ketik Manual / Kustom...</option>
+                  </select>
+
+                  {(isCustomWaktu || !['08.00 WITA s.d Selesai','08.30 WITA s.d Selesai','09.00 WITA s.d Selesai','09.30 WITA s.d Selesai','10.00 WITA s.d Selesai','13.30 WITA s.d Selesai','14.00 WITA s.d Selesai','19.30 WITA s.d Selesai','20.00 WITA s.d Selesai'].includes(waktuAcara)) && (
+                    <input 
+                      type="text"
+                      value={waktuAcara}
+                      onChange={(e) => setWaktuAcara(e.target.value)}
+                      placeholder="Contoh: 08.00 WITA s.d Selesai..."
+                      className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
+                    />
+                  )}
+                </div>
               </div>
 
               <div>
@@ -668,7 +728,7 @@ export default function AdminSuratUndangan({
                   type="text"
                   value={tempatAcara}
                   onChange={(e) => setTempatAcara(e.target.value)}
-                  placeholder="Kantor Desa Wasah Hilir"
+                  placeholder="Contoh: Kantor Desa Wasah Hilir..."
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold"
                 />
               </div>
@@ -693,6 +753,41 @@ export default function AdminSuratUndangan({
             </h3>
 
             <div className="space-y-3">
+              {/* SKTM-style Officer Selector Dropdown */}
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Pilih Pejabat Penandatangan (SKTM Style)</label>
+                <select 
+                  value={pejabatNama}
+                  onChange={(e) => {
+                    const selectedName = e.target.value;
+                    setPejabatNama(selectedName);
+
+                    // Auto-resolve role & NIP from village_officers or Kop Kades
+                    const defaultKades = localStorage.getItem('kop_kades') || localStorage.getItem('village_kades_name') || 'FAZAKKIR RAHMAD';
+                    if (selectedName === defaultKades) {
+                      setPejabatJabatan(localStorage.getItem('kades_title') || 'Kepala Desa');
+                      setPejabatNip(localStorage.getItem('kades_nip') || '-');
+                    } else {
+                      const found = officerList.find(o => o.name === selectedName);
+                      if (found) {
+                        setPejabatJabatan(found.role || 'Perangkat Desa');
+                        setPejabatNip(found.nip || '-');
+                      }
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold"
+                >
+                  <option value={localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'}>
+                    {localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'} (Kepala Desa)
+                  </option>
+                  {officerList.map((o, idx) => (
+                    <option key={idx} value={o.name}>
+                      {o.name} ({o.role || 'Aparatur'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Jabatan Pejabat</label>
                 <input 
@@ -848,8 +943,10 @@ export default function AdminSuratUndangan({
 
                 {/* Paragraf Pembuka */}
                 <div className="font-sans text-[11pt] text-justify space-y-2 leading-relaxed mb-3">
+                  {showParagrafKustom && paragrafKustom?.trim() && (
+                    <p>{paragrafKustom}</p>
+                  )}
                   <p>{paragrafPembuka}</p>
-                  <p>Dengan itu, Kami mengundang Bapak/Ibu pada:</p>
                 </div>
 
                 {/* Detail Pelaksanaan Acara (Tight line spacing, no bold on date/location) */}
