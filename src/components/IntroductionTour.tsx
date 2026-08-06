@@ -86,68 +86,79 @@ export default function IntroductionTour({ role }: IntroductionTourProps) {
 
   useEffect(() => {
     if (role === 'saas_admin') return;
-    const hasSeenTour = localStorage.getItem(`has_seen_tour_${role}`);
     
-    if (!hasSeenTour) {
-      localStorage.setItem(`has_seen_tour_${role}`, 'true');
-      const isMobile = window.innerWidth < 1024;
-      
-      if (role === 'admin' || role === 'kades') {
-        setSteps([
-          {
-            target: 'body',
-            content: 'Selamat datang di Panel Admin DiDesa! Mari kita mulai tur singkat untuk mengenalkan fitur-fitur utama.',
-            placement: 'center',
-            disableBeacon: true,
-          },
-          {
-            target: '#tour-dashboard',
-            content: 'Ini adalah Dashboard utama Anda. Di sini Anda dapat melihat statistik ringkasan dan aktivitas terbaru desa.',
-          },
-          {
-            target: '#tour-penduduk',
-            content: 'Kelola data penduduk desa secara mudah dan cepat di menu ini.',
-          },
-          {
-            target: '#tour-surat',
-            content: 'Pusat layanan administrasi persuratan elektronik. Anda dapat menyetujui atau menolak permohonan warga dari sini.',
-          },
-        ]);
-      } else {
-        setSteps([
-          {
-            target: 'body',
-            content: 'Selamat datang di Layanan Mandiri DiDesa! Mari kita mulai tur singkat untuk mengenalkan fitur-fitur utama.',
-            placement: 'center',
-            disableBeacon: true,
-          },
-          {
-            target: isMobile ? '#tour-mobile-layanan' : '#tour-public-layanan',
-            content: 'Ajukan layanan surat pengantar secara mandiri di menu ini.',
-          },
-          {
-            target: isMobile ? '#tour-mobile-aspirasi' : '#tour-public-aspirasi',
-            content: 'Sampaikan aspirasi dan laporan Anda langsung kepada pemerintah desa.',
-          },
-          {
-            target: isMobile ? '#tour-mobile-berita' : '#tour-public-berita',
-            content: 'Baca berita dan pengumuman terbaru dari desa Anda.',
-          }
-        ]);
-      }
-      
-      setTimeout(() => {
-        setRun(true);
-      }, 1000);
+    // Cek apakah pengguna sudah pernah melihat tour (baik secara global maupun per role)
+    const hasSeenGlobal = localStorage.getItem('has_seen_tour') === 'true';
+    const hasSeenRole = localStorage.getItem(`has_seen_tour_${role}`) === 'true';
+
+    if (hasSeenGlobal || hasSeenRole) {
+      return;
     }
+
+    // Tandai langsung ke localStorage agar tidak muncul lagi walau direload atau role berubah
+    localStorage.setItem('has_seen_tour', 'true');
+    localStorage.setItem(`has_seen_tour_${role}`, 'true');
+
+    const isMobile = window.innerWidth < 1024;
+    
+    if (role === 'admin' || role === 'kades') {
+      setSteps([
+        {
+          target: 'body',
+          content: 'Selamat datang di Panel Admin DiDesa! Mari kita mulai tur singkat untuk mengenalkan fitur-fitur utama.',
+          placement: 'center',
+          disableBeacon: true,
+        },
+        {
+          target: '#tour-dashboard',
+          content: 'Ini adalah Dashboard utama Anda. Di sini Anda dapat melihat statistik ringkasan dan aktivitas terbaru desa.',
+        },
+        {
+          target: '#tour-penduduk',
+          content: 'Kelola data penduduk desa secara mudah dan cepat di menu ini.',
+        },
+        {
+          target: '#tour-surat',
+          content: 'Pusat layanan administrasi persuratan elektronik. Anda dapat menyetujui atau menolak permohonan warga dari sini.',
+        },
+      ]);
+    } else {
+      setSteps([
+        {
+          target: 'body',
+          content: 'Selamat datang di Layanan Mandiri DiDesa! Mari kita mulai tur singkat untuk mengenalkan fitur-fitur utama.',
+          placement: 'center',
+          disableBeacon: true,
+        },
+        {
+          target: isMobile ? '#tour-mobile-layanan' : '#tour-public-layanan',
+          content: 'Ajukan layanan surat pengantar secara mandiri di menu ini.',
+        },
+        {
+          target: isMobile ? '#tour-mobile-aspirasi' : '#tour-public-aspirasi',
+          content: 'Sampaikan aspirasi dan laporan Anda langsung kepada pemerintah desa.',
+        },
+        {
+          target: isMobile ? '#tour-mobile-berita' : '#tour-public-berita',
+          content: 'Baca berita dan pengumuman terbaru dari desa Anda.',
+        }
+      ]);
+    }
+    
+    const timer = setTimeout(() => {
+      setRun(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, [role]);
 
   const handleJoyrideCallback = (data: any) => {
-    const { status } = data;
+    const { status, action } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
-    if (finishedStatuses.includes(status)) {
+    if (finishedStatuses.includes(status) || action === 'close') {
       setRun(false);
+      localStorage.setItem('has_seen_tour', 'true');
       localStorage.setItem(`has_seen_tour_${role}`, 'true');
     }
   };
