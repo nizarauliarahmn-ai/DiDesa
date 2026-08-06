@@ -1,9 +1,29 @@
-import React from 'react';
-import { SearchX, Globe, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { SearchX, Globe, ArrowRight, Loader2 } from 'lucide-react';
+import { addSaaSNotification } from '../utils/saasLogs';
 
 export default function TenantNotFound() {
   const subdomain = window.location.hostname.split('.')[0];
   const name = subdomain.charAt(0).toUpperCase() + subdomain.slice(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleApply = async () => {
+    setIsSubmitting(true);
+    try {
+      await addSaaSNotification(
+        'system',
+        'Pengajuan Desa Baru',
+        `Ada pengguna yang tertarik untuk mendaftarkan subdomain ${subdomain}.sistemdidesa.id (Desa ${name}).`,
+        name
+      );
+      // Tunggu sebentar agar efek UI terasa
+      setTimeout(() => {
+        window.location.href = 'https://sistemdidesa.id';
+      }, 800);
+    } catch (e) {
+      window.location.href = 'https://sistemdidesa.id';
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 p-4 relative overflow-hidden">
@@ -19,18 +39,28 @@ export default function TenantNotFound() {
           Sistem belum menemukan data untuk Desa <strong>{name}</strong>. Jika Anda adalah perangkat desa ini, Anda dapat mendaftarkan desa Anda ke dalam ekosistem DiDesa.
         </p>
 
-        <a 
-          href="https://sistemdidesa.id?apply=true"
-          className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 group"
+        <button 
+          onClick={handleApply}
+          disabled={isSubmitting}
+          className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 group"
         >
-          <span>Ajukan Desa Anda Sekarang</span>
-          <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-        </a>
+          {isSubmitting ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              <span>Memproses Pengajuan...</span>
+            </>
+          ) : (
+            <>
+              <span>Ajukan Desa Anda Sekarang</span>
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </>
+          )}
+        </button>
 
         <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700">
           <a href="https://sistemdidesa.id" className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center justify-center gap-2">
             <Globe size={16} />
-            Kembali ke Portal Utama
+            Kunjungi sistemdidesa.id
           </a>
         </div>
       </div>

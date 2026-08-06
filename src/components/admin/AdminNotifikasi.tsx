@@ -70,25 +70,34 @@ export default function AdminNotifikasi({
       const resolvedTenant = await resolveCurrentTenant();
       setTenantId(resolvedTenant);
 
-      if (resolvedTenant) {
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('tenant_id', resolvedTenant)
-          .order('timestamp', { ascending: false });
+      const savedUserStr = localStorage.getItem('didesa_auth_user');
+      const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+      const isSaaSAdmin = savedUser?.role === 'saas_admin';
 
-        if (data && !error) {
-          const formatted = data.map(n => ({
-            id: n.id,
-            title: n.title,
-            message: n.message,
-            category: n.category as any,
-            time: n.time || '',
-            timestamp: n.timestamp,
-            isRead: n.is_read
-          }));
-          setNotifications(formatted);
-        }
+      let query = supabase.from('notifications').select('*').order('timestamp', { ascending: false });
+
+      if (isSaaSAdmin) {
+        query = query.is('tenant_id', null);
+      } else if (resolvedTenant) {
+        query = query.eq('tenant_id', resolvedTenant);
+      } else {
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await query;
+
+      if (data && !error) {
+        const formatted = data.map(n => ({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          category: n.category as any,
+          time: n.time || '',
+          timestamp: n.timestamp,
+          isRead: n.is_read
+        }));
+        setNotifications(formatted);
       }
     } catch (err) {
       console.error("Error fetching notifications:", err);
@@ -121,13 +130,24 @@ export default function AdminNotifikasi({
 
   // Mark all as read
   const handleMarkAllAsRead = async () => {
-    if (!tenantId) return;
+    const savedUserStr = localStorage.getItem('didesa_auth_user');
+    const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+    const isSaaSAdmin = savedUser?.role === 'saas_admin';
+
+    if (!tenantId && !isSaaSAdmin) return;
     try {
-      const { error } = await supabase
+      let query = supabase
         .from('notifications')
         .update({ is_read: true })
-        .eq('tenant_id', tenantId)
         .eq('is_read', false);
+
+      if (isSaaSAdmin) {
+        query = query.is('tenant_id', null);
+      } else if (tenantId) {
+        query = query.eq('tenant_id', tenantId);
+      }
+
+      const { error } = await query;
 
       if (!error) {
         // Optimistic UI update or refresh
@@ -141,13 +161,17 @@ export default function AdminNotifikasi({
   // Add custom simulated notification
   const handleSimulateNotification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!simTitle || !simMessage || !tenantId) return;
+    const savedUserStr = localStorage.getItem('didesa_auth_user');
+    const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+    const isSaaSAdmin = savedUser?.role === 'saas_admin';
+
+    if (!simTitle || !simMessage || (!tenantId && !isSaaSAdmin)) return;
 
     try {
       const newId = `notif-${Date.now()}`;
       const payload = {
         id: newId,
-        tenant_id: tenantId,
+        tenant_id: isSaaSAdmin ? null : tenantId,
         title: simTitle,
         message: simMessage,
         category: simCategory,
@@ -175,8 +199,18 @@ export default function AdminNotifikasi({
   // Toggle specific notification read state (local memory helper)
   const toggleReadStatus = async (id: string) => {
     const notif = notifications.find(n => n.id === id);
-    if (notif && tenantId) {
-      await supabase.from('notifications').update({ is_read: !notif.isRead }).eq('id', id).eq('tenant_id', tenantId);
+    const savedUserStr = localStorage.getItem('didesa_auth_user');
+    const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
+    const isSaaSAdmin = savedUser?.role === 'saas_admin';
+
+    if (notif && (tenantId || isSaaSAdmin)) {
+      let query = supabase.from('notifications').update({ is_read: !notif.isRead }).eq('id', id);
+      if (isSaaSAdmin) {
+        query = query.is('tenant_id', null);
+      } else if (tenantId) {
+        query = query.eq('tenant_id', tenantId);
+      }
+      await query;
     }
     setNotifications(prev => prev.map(n => {
       if (n.id === id) {
