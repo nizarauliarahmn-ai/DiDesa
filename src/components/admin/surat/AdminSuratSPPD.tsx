@@ -1,6 +1,6 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import React, { useState, useEffect, useRef, Component } from 'react';
-import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2, Calendar, CheckCircle2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { resolveAiKeyAndQuota } from '../../../utils/aiQuotaTracker';
 import { capitalizeResidentFields } from '../../../utils/textUtils';

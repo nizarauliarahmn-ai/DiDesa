@@ -4,10 +4,7 @@ import { useLetterKode } from '../../../hooks/useLetterKode';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import {
-  ArrowLeft, Printer, Search, User, FileText, FileSignature,
-  ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw
-} from 'lucide-react';
+import { ArrowLeft, Printer, Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw, Calendar, CheckCircle2 } from 'lucide-react';
 import {
   getLetterClassifications, incrementSequenceNumber, generateLetterNumber
 } from '../../../utils/letterClassifications';

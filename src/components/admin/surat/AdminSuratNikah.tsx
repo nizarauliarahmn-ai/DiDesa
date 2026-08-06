@@ -6,7 +6,7 @@ import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Save, Printer, Download, Upload, Trash2, History, Heart, ZoomIn, ZoomOut, CheckCircle2, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Printer, Download, Upload, Trash2, History, Heart, ZoomIn, ZoomOut, CheckCircle2, FileText, Calendar } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
