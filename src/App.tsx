@@ -561,7 +561,6 @@ export default function App() {
           </button>
         </nav>
       </div>
-      <IntroductionTour role={user?.role || 'public'} />
       <ToastContainer />
       <GlobalUpdateNotifier isBusy={isBusy} />
     </div>

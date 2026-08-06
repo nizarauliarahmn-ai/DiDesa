@@ -84,10 +84,13 @@ export default function IntroductionTour({ role }: IntroductionTourProps) {
   const [run, setRun] = useState(false);
   const [steps, setSteps] = useState<any[]>([]);
 
+  // Hanya jalankan tur untuk Admin Desa dan Kades
+  const isAdminOrKades = role === 'admin' || role === 'kades';
+
   useEffect(() => {
-    if (role === 'saas_admin') return;
+    if (!isAdminOrKades) return;
     
-    // Cek apakah pengguna sudah pernah melihat tour (baik secara global maupun per role)
+    // Cek apakah pengurus desa sudah pernah melihat tour (secara global atau per role)
     const hasSeenGlobal = localStorage.getItem('has_seen_tour') === 'true';
     const hasSeenRole = localStorage.getItem(`has_seen_tour_${role}`) === 'true';
 
@@ -95,62 +98,37 @@ export default function IntroductionTour({ role }: IntroductionTourProps) {
       return;
     }
 
-    // Tandai langsung ke localStorage agar tidak muncul lagi walau direload atau role berubah
+    // Tandai langsung ke localStorage agar tidak muncul lagi walau direload
     localStorage.setItem('has_seen_tour', 'true');
     localStorage.setItem(`has_seen_tour_${role}`, 'true');
 
-    const isMobile = window.innerWidth < 1024;
-    
-    if (role === 'admin' || role === 'kades') {
-      setSteps([
-        {
-          target: 'body',
-          content: 'Selamat datang di Panel Admin DiDesa! Mari kita mulai tur singkat untuk mengenalkan fitur-fitur utama.',
-          placement: 'center',
-          disableBeacon: true,
-        },
-        {
-          target: '#tour-dashboard',
-          content: 'Ini adalah Dashboard utama Anda. Di sini Anda dapat melihat statistik ringkasan dan aktivitas terbaru desa.',
-        },
-        {
-          target: '#tour-penduduk',
-          content: 'Kelola data penduduk desa secara mudah dan cepat di menu ini.',
-        },
-        {
-          target: '#tour-surat',
-          content: 'Pusat layanan administrasi persuratan elektronik. Anda dapat menyetujui atau menolak permohonan warga dari sini.',
-        },
-      ]);
-    } else {
-      setSteps([
-        {
-          target: 'body',
-          content: 'Selamat datang di Layanan Mandiri DiDesa! Mari kita mulai tur singkat untuk mengenalkan fitur-fitur utama.',
-          placement: 'center',
-          disableBeacon: true,
-        },
-        {
-          target: isMobile ? '#tour-mobile-layanan' : '#tour-public-layanan',
-          content: 'Ajukan layanan surat pengantar secara mandiri di menu ini.',
-        },
-        {
-          target: isMobile ? '#tour-mobile-aspirasi' : '#tour-public-aspirasi',
-          content: 'Sampaikan aspirasi dan laporan Anda langsung kepada pemerintah desa.',
-        },
-        {
-          target: isMobile ? '#tour-mobile-berita' : '#tour-public-berita',
-          content: 'Baca berita dan pengumuman terbaru dari desa Anda.',
-        }
-      ]);
-    }
+    setSteps([
+      {
+        target: 'body',
+        content: 'Selamat datang di Panel Admin DiDesa! Mari kita mulai tur singkat untuk mengenalkan fitur-fitur utama.',
+        placement: 'center',
+        disableBeacon: true,
+      },
+      {
+        target: '#tour-dashboard',
+        content: 'Ini adalah Dashboard utama Anda. Di sini Anda dapat melihat statistik ringkasan dan aktivitas terbaru desa.',
+      },
+      {
+        target: '#tour-penduduk',
+        content: 'Kelola data penduduk desa secara mudah dan cepat di menu ini.',
+      },
+      {
+        target: '#tour-surat',
+        content: 'Pusat layanan administrasi persuratan elektronik. Anda dapat menyetujui atau menolak permohonan warga dari sini.',
+      },
+    ]);
     
     const timer = setTimeout(() => {
       setRun(true);
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [role]);
+  }, [role, isAdminOrKades]);
 
   const handleJoyrideCallback = (data: any) => {
     const { status, action } = data;
@@ -162,6 +140,8 @@ export default function IntroductionTour({ role }: IntroductionTourProps) {
       localStorage.setItem(`has_seen_tour_${role}`, 'true');
     }
   };
+
+  if (!isAdminOrKades) return null;
 
   const JoyrideComponent = Joyride as any;
 
