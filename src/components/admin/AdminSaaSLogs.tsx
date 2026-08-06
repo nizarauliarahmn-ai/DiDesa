@@ -1,7 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
-import { Database, Search, Filter, Trash2, Download, AlertCircle, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Database, Search, Filter, Trash2, Download, AlertCircle, CheckCircle2, AlertTriangle, Clock, Printer } from 'lucide-react';
 import { fetchSaaSLogs, SaaSLog, subscribeSaaSLogsRealtime } from '../../utils/saasLogs';
+import { useReactToPrint } from 'react-to-print';
 
 export default function AdminSaaSLogs() {
   const [logs, setLogs] = useState<SaaSLog[]>([]);
@@ -9,6 +10,12 @@ export default function AdminSaaSLogs() {
   const [filterStatus, setFilterStatus] = useState<string>('Semua');
 
   const [filterCategory, setFilterCategory] = useState<string>('Semua Kategori');
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handleExportPDF = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: `Log_Aktivitas_SaaS_${new Date().toISOString().split('T')[0]}`,
+  });
 
   useEffect(() => {
     const handleUpdate = () => fetchSaaSLogs().then(setLogs);
@@ -38,6 +45,32 @@ export default function AdminSaaSLogs() {
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
+  const handleExportCSV = () => {
+    if (filteredLogs.length === 0) return;
+    
+    const headers = ['Waktu', 'Tanggal', 'Desa / Tenant', 'Administrator', 'Kategori', 'Aksi', 'Target', 'Status'];
+    const csvData = filteredLogs.map(log => [
+      log.waktu,
+      log.tanggal,
+      log.tenant_name || '-',
+      log.admin_name,
+      log.category,
+      log.action,
+      log.target,
+      log.status
+    ].map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(','));
+    
+    const csvContent = [headers.join(','), ...csvData].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `log_aktivitas_saas_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const getStatusIcon = (status: SaaSLog['status']) => {
     switch (status) {
       case 'Berhasil': return <CheckCircle2 size={14} className="text-emerald-500" />;
@@ -55,9 +88,13 @@ export default function AdminSaaSLogs() {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Rekam jejak seluruh aksi administratif pada platform global</p>
         </div>
         <div className="flex gap-3">
-          <button className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-400 text-sm font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+          <button onClick={handleExportCSV} className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-400 text-sm font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
             <Download size={16} />
-            <span>Ekspor CSV</span>
+            <span className="hidden sm:inline">CSV</span>
+          </button>
+          <button onClick={handleExportPDF} className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-rose-600/20 transition-all">
+            <Printer size={16} />
+            <span>Cetak PDF</span>
           </button>
         </div>
       </div>
@@ -102,8 +139,12 @@ export default function AdminSaaSLogs() {
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto" ref={printRef}>
+          <div className="hidden print:block mb-6 p-6">
+            <h1 className="text-2xl font-bold mb-2">Laporan Log Aktivitas SaaS</h1>
+            <p className="text-sm text-gray-500">Dicetak pada: {new Date().toLocaleString('id-ID')}</p>
+          </div>
+          <table className="w-full text-left text-sm print:text-xs">
             <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100 dark:border-slate-800">
               <tr>
                 <th className="px-6 py-4">Waktu</th>
