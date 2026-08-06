@@ -228,7 +228,7 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
               <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Terverifikasi Cloud Supabase
               </span>
-              <span className="font-mono text-[9px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700">v4.0 Live</span>
+              <span className="font-mono text-[9px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700">v4.1 Live</span>
             </div>
 
           </div>
