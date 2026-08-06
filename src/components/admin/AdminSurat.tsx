@@ -17,6 +17,7 @@ import AdminSuratSDU from './surat/AdminSuratSDU';
 import AdminSuratSPT from './surat/AdminSuratSPT';
 import AdminSuratSPPD from './surat/AdminSuratSPPD';
 import AdminSuratSKKT from './surat/AdminSuratSKKT';
+import AdminSuratUndangan from './surat/AdminSuratUndangan';
 import { getLetterFullData } from '../../utils/letterHistory';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
@@ -33,7 +34,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
   const [localPresetResident, setLocalPresetResident] = useState<any>(null);
@@ -103,6 +104,8 @@ export default function AdminSurat({
       setActiveTab('skl');
     } else if (jenis.includes('SKKT') || jenis.includes('TANAH')) {
       setActiveTab('skkt');
+    } else if (jenis.includes('UND') || jenis.includes('UNDANGAN')) {
+      setActiveTab('undangan');
     }
   };
 
@@ -311,6 +314,13 @@ export default function AdminSurat({
         )}
         {activeTab === 'sppd' && (
           <AdminSuratSPPD 
+            editData={editData}
+            editLetterId={editLetterId}
+            onBack={() => changeTab('dashboard')} 
+          />
+        )}
+        {activeTab === 'undangan' && (
+          <AdminSuratUndangan 
             editData={editData}
             editLetterId={editLetterId}
             onBack={() => changeTab('dashboard')} 
