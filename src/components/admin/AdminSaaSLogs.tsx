@@ -1,8 +1,6 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Database, Search, Filter, Trash2, Download, AlertCircle, CheckCircle2, AlertTriangle, Clock, Printer } from 'lucide-react';
 import { fetchSaaSLogs, SaaSLog, subscribeSaaSLogsRealtime } from '../../utils/saasLogs';
-import { useReactToPrint } from 'react-to-print';
 
 export default function AdminSaaSLogs() {
   const [logs, setLogs] = useState<SaaSLog[]>([]);
@@ -10,12 +8,6 @@ export default function AdminSaaSLogs() {
   const [filterStatus, setFilterStatus] = useState<string>('Semua');
 
   const [filterCategory, setFilterCategory] = useState<string>('Semua Kategori');
-  const printRef = useRef<HTMLDivElement>(null);
-
-  const handleExportPDF = useReactToPrint({
-    content: () => printRef.current,
-    documentTitle: `Log_Aktivitas_SaaS_${new Date().toISOString().split('T')[0]}`,
-  });
 
   useEffect(() => {
     const handleUpdate = () => fetchSaaSLogs().then(setLogs);
@@ -25,7 +17,7 @@ export default function AdminSaaSLogs() {
     
     return () => {
       window.removeEventListener('saas_logs_updated', handleUpdate);
-      unsubscribe();
+      if (unsubscribe) unsubscribe();
     };
   }, []);
 
@@ -69,6 +61,82 @@ export default function AdminSaaSLogs() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleExportPDF = () => {
+    if (filteredLogs.length === 0) {
+      alert('Tidak ada data log untuk dicetak.');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Mohon izinkan pop-up peramban untuk mengunduh PDF.');
+      return;
+    }
+
+    const rowsHtml = filteredLogs.map((log, index) => `
+      <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f9fafb'};">
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.waktu}<br/><small style="color: #6b7280;">${log.tanggal}</small></td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">${log.tenant_name || '-'}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.admin_name}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.category}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.action}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-style: italic;">${log.target}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: ${log.status === 'Berhasil' ? '#059669' : log.status === 'Gagal' ? '#dc2626' : '#d97706'};">${log.status}</td>
+      </tr>
+    `).join('');
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Laporan Log Aktivitas SaaS - ${new Date().toLocaleDateString('id-ID')}</title>
+          <style>
+            body { font-family: system-ui, -apple-system, sans-serif; padding: 24px; color: #111827; }
+            .header { margin-bottom: 24px; border-bottom: 2px solid #10b981; padding-bottom: 12px; }
+            .header h1 { margin: 0; font-size: 22px; color: #064e3b; }
+            .header p { margin: 6px 0 0 0; color: #6b7280; font-size: 13px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
+            th { background-color: #f3f4f6; text-align: left; padding: 10px; border-bottom: 2px solid #d1d5db; font-size: 11px; text-transform: uppercase; color: #374151; letter-spacing: 0.05em; }
+            @media print {
+              @page { size: A4 landscape; margin: 15mm; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>DiDesa SaaS - Laporan Log Aktivitas Sistem</h1>
+            <p>Dicetak Pada: ${new Date().toLocaleString('id-ID')} | Total Catatan: ${filteredLogs.length}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Waktu & Tanggal</th>
+                <th>Desa / Tenant</th>
+                <th>Administrator</th>
+                <th>Kategori</th>
+                <th>Aksi</th>
+                <th>Target</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
 
   const getStatusIcon = (status: SaaSLog['status']) => {
