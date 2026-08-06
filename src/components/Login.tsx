@@ -15,7 +15,23 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Village Settings for Dynamic branding in login screen
-  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || '');
+  const [desaName, setDesaName] = useState(() => {
+    const local = localStorage.getItem('kop_desa');
+    if (local) return local;
+    
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const t = params.get('tenant');
+      if (t) return t.charAt(0).toUpperCase() + t.slice(1);
+      
+      const parts = window.location.hostname.split('.');
+      if (parts.length >= 2 && !['www', 'localhost', 'didesa', 'dev', 'staging', 'preview'].includes(parts[0])) {
+        return parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+      }
+    } catch(e) {}
+    
+    return '';
+  });
   const [kabupatenName, setKabupatenName] = useState(() => localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
 
@@ -35,7 +51,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
           if (data) {
             setCurrentTenant(data);
-            setDesaName(data.nama_desa || '');
+            if (data.nama_desa) {
+              setDesaName(data.nama_desa);
+            }
           }
         }
         
@@ -236,7 +254,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 data-no-cap
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@desa.id"
+                placeholder={`admin@${desaName ? desaName.toLowerCase().replace(/\s+/g, '') : 'desa'}.id`}
                 className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
               />
             </div>
