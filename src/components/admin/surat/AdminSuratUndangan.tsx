@@ -1204,6 +1204,8 @@ export default function AdminSuratUndangan({
                 <div className="mt-8" dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }} />
               </div>
             )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
