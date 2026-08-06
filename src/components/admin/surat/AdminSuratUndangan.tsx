@@ -120,8 +120,8 @@ export default function AdminSuratUndangan({
   const [isTTE, setIsTTE] = useState<boolean>(true);
   const [includeCamat, setIncludeCamat] = useState<boolean>(editData?.includeCamat || false);
 
-  // UI States
-  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  // UI States (SKTM Live Engine Defaults)
+  const [previewZoom, setPreviewZoom] = useState<number>(0.45);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
   const [savedLetterId, setSavedLetterId] = useState<string>('');
@@ -399,10 +399,10 @@ export default function AdminSuratUndangan({
         </div>
       </div>
 
-      {/* Main Form & Preview Workspace */}
+      {/* Main Form & Preview Workspace (Matching SKTM 7/5 Grid Ratio) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Input Form Controls (Optimized like SKTM) */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Left Column: Input Form Controls (lg:col-span-7) */}
+        <div className="lg:col-span-7 space-y-6">
           
           {/* Card 1: Header & Naskah Surat */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
@@ -853,42 +853,81 @@ export default function AdminSuratUndangan({
           </div>
         </div>
 
-        {/* Right Column: Live Document Preview (Matching Exact Sample Layout) */}
-        <div className="lg:col-span-7 space-y-4 sticky top-6">
-          {/* Zoom Controls Bar */}
-          <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Pratinjau Resmi Surat Undangan (A4)</span>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setZoomLevel(Math.max(50, zoomLevel - 10))}
-                className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-slate-600 dark:text-slate-300"
-              >
-                <ZoomOut size={16} />
-              </button>
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 min-w-[40px] text-center">{zoomLevel}%</span>
-              <button 
-                onClick={() => setZoomLevel(Math.min(150, zoomLevel + 10))}
-                className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-slate-600 dark:text-slate-300"
-              >
-                <ZoomIn size={16} />
-              </button>
+        {/* Right Column: Live A4 Engine Preview (Identical to SKTM) */}
+        <div className="lg:col-span-5 space-y-6">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
+            {/* Live Engine Top Control Bar */}
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+              </div>
+              
+              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
+                <button 
+                  onClick={() => setPreviewZoom(prev => Math.max(0.3, prev - 0.05))} 
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
+                  title="Zoom Out"
+                >
+                  <ZoomOut size={16} />
+                </button>
+                <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
+                  {Math.round(previewZoom * 100)}%
+                </span>
+                <button 
+                  onClick={() => setPreviewZoom(prev => Math.min(1.2, prev + 0.05))} 
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
+                  title="Zoom In"
+                >
+                  <ZoomIn size={16} />
+                </button>
+                <div className="w-px h-5 bg-slate-200 mx-1"></div>
+                <button 
+                  onClick={() => setPreviewZoom(0.45)} 
+                  className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-[10px] font-bold"
+                  title="Reset Zoom"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
-          </div>
-
-          {/* Document Paper Container */}
-          <div 
-            className="overflow-auto max-h-[850px] p-6 bg-slate-200 dark:bg-slate-950 rounded-3xl border border-slate-300 dark:border-slate-800 shadow-inner flex flex-col items-center gap-8 cursor-grab active:cursor-grabbing"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUpOrLeave}
-            onMouseLeave={handleMouseUpOrLeave}
-          >
-            {/* PAGE 1: Main Surat Undangan */}
+            
+            {/* Scrollable Preview Canvas */}
             <div 
-              id="undangan-page-1"
-              style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
-              className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8 cursor-grab active:cursor-grabbing"
             >
+              <div 
+                style={{
+                  width: `${794 * previewZoom}px`,
+                  overflow: 'hidden',
+                  position: 'relative',
+                  boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                  borderRadius: '12px',
+                  transition: 'width 0.2s ease-out, height 0.2s ease-out'
+                }}
+                className="bg-white dark:bg-slate-900 m-auto shrink-0 relative flex flex-col gap-6"
+              >
+                {/* Visual Crop Marks */}
+                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
+
+                {/* PAGE 1: Main Surat Undangan */}
+                <div 
+                  id="undangan-page-1"
+                  style={{ 
+                    transform: `scale(${previewZoom})`, 
+                    transformOrigin: 'top left',
+                    width: '794px',
+                    minHeight: '1123px'
+                  }}
+                  className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
+                >
               <div>
                 {/* Official Village Header (Kop Surat) */}
                 <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
@@ -1072,8 +1111,13 @@ export default function AdminSuratUndangan({
             {isAttached && (
               <div 
                 id="undangan-page-2"
-                style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
-                className="w-[210mm] min-h-[297mm] bg-white text-black p-[20mm] shadow-2xl font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
+                style={{ 
+                  transform: `scale(${previewZoom})`, 
+                  transformOrigin: 'top left',
+                  width: '794px',
+                  minHeight: '1123px'
+                }}
+                className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
               >
                 <div>
                   {/* Header Lampiran */}
