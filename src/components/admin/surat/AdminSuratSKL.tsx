@@ -1,3 +1,4 @@
+import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
@@ -39,19 +40,21 @@ export default function AdminSuratSKL({
   editData?: any;
   editLetterId?: string | null;
 }) {
-  const [loading, setLoading] = useState(false);
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKL') || { klasifikasi: 'SKL', kodeKlasifikasi: '400' };
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && !editData) {
-      setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
-    } else if (!isBackdate && !editData && formData.nomorSurat === customNomorSurat) {
-      setFormData(prev => ({ ...prev, nomorSurat: '' }));
+    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+      if (typeof setFormData === 'function') {
+        setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+      } else if (typeof setNoSurat === 'function') {
+        setNoSurat(customNomorSurat);
+      }
     }
   }, [customNomorSurat, isBackdate, editData]);
 
+  const [loading, setLoading] = useState(false);
   const templateDesc = useLetterDescription('SKL', 'Surat Keterangan Kelahiran');
   const templateKode = useLetterKode('SKL');
   const [success, setSuccess] = useState(false);

@@ -1,3 +1,4 @@
+import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
@@ -52,6 +53,20 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
 }
 
 function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () => void, editData?: any, editLetterId?: string | null }) {
+  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SPPD') || { klasifikasi: 'SPPD', kodeKlasifikasi: '400' };
+  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+
+  useEffect(() => {
+    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+      if (typeof setFormData === 'function') {
+        setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+      } else if (typeof setNoSurat === 'function') {
+        setNoSurat(customNomorSurat);
+      }
+    }
+  }, [customNomorSurat, isBackdate, editData]);
+
   const [isSaving, setIsSaving] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -157,7 +172,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     if (editData?.nomorSurat) {
       setNomorSurat(editData.nomorSurat);
     } else {
-      const generatedNo = generateLetterNumber('SPPD', kodeKlasifikasi || '094', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat, isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat, isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined) : undefined) : undefined);
+      const generatedNo = generateLetterNumber('SPPD', kodeKlasifikasi || '094', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setNomorSurat(generatedNo);
     }
   }, [editData, kodeKlasifikasi]);
@@ -997,7 +1012,44 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
             <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Identitas Surat</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nomor Surat</label>
+                
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-slate-800 dark:text-slate-200">Pengaturan Tanggal & Nomor Surat</h3>
+              </div>
+              
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Surat (Opsional/Backdate)</label>
+                <input 
+                  type="date"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100"
+                  value={tanggalSurat}
+                  onChange={(e) => setTanggalSurat(e.target.value)}
+                />
+                <p className="mt-1 text-[10px] text-slate-500">Ubah ke tanggal mundur untuk mengaktifkan penomoran sisipan otomatis.</p>
+              </div>
+              
+              {isBackdate && (
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg flex gap-3 items-start">
+                  <div className="mt-0.5">
+                    {isBackdateLoading ? (
+                      <div className="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Backdate Aktif</p>
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
+                      Sistem otomatis melacak arsip pada {new Date(tanggalSurat).toLocaleDateString('id-ID')} dan menyisipkan sub-nomor berikutnya.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+<label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Nomor Surat</label>
                 <input 
                   type="text" 
                   value={nomorSurat}

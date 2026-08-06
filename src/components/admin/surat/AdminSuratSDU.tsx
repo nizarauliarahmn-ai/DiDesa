@@ -1,3 +1,4 @@
+import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
@@ -11,7 +12,6 @@ import { FileText, ArrowLeft, Printer, Save, Search, User,
   ZoomIn, ZoomOut, ChevronRight, X
 } from 'lucide-react';
 import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
-import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -56,19 +56,21 @@ export default function AdminSuratSDU({
   editData?: any,
   editLetterId?: string | null
 }) {
-  const [loading, setLoading] = useState(false);
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SDU') || { klasifikasi: 'SDU', kodeKlasifikasi: '400' };
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && !editData) {
-      setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
-    } else if (!isBackdate && !editData && formData.nomorSurat === customNomorSurat) {
-      setFormData(prev => ({ ...prev, nomorSurat: '' }));
+    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+      if (typeof setFormData === 'function') {
+        setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+      } else if (typeof setNoSurat === 'function') {
+        setNoSurat(customNomorSurat);
+      }
     }
   }, [customNomorSurat, isBackdate, editData]);
 
+  const [loading, setLoading] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SDU', 'Surat Keterangan Domisili Usaha');
   const templateKode = useLetterKode('SDU');
@@ -487,7 +489,7 @@ export default function AdminSuratSDU({
       <!-- JUDUL SURAT -->
       <div style="text-align:center;margin-bottom:15px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">Surat Keterangan Domisili Usaha</h3>
-        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + printDate.getFullYear())}</p>
+        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear())}</p>
       </div>
 
       <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">
