@@ -7,7 +7,7 @@ import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
-import { getLetterClassifications, generateLetterNumber, getGlobalSequenceNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, generateLetterNumber, getGlobalSequenceNumber, incrementSequenceNumber } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -60,9 +60,11 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   useEffect(() => {
     if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
-        setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
         setNoSurat(customNomorSurat);
+      } else if (typeof setNomorSurat === 'function') {
+        setNomorSurat(customNomorSurat);
       }
     }
   }, [customNomorSurat, isBackdate, editData]);

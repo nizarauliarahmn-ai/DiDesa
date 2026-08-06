@@ -50,9 +50,11 @@ export default function AdminSuratSKD({
   useEffect(() => {
     if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
-        setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
         setNoSurat(customNomorSurat);
+      } else if (typeof setNomorSurat === 'function') {
+        setNomorSurat(customNomorSurat);
       }
     }
   }, [customNomorSurat, isBackdate, editData]);

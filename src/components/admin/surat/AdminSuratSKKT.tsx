@@ -4,7 +4,7 @@ import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compa
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLetterKode } from '../../../hooks/useLetterKode';
-import { getLetterClassifications, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, generateLetterNumber, incrementSequenceNumber } from '../../../utils/letterClassifications';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
@@ -45,9 +45,11 @@ export default function AdminSuratSKKT({
   useEffect(() => {
     if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
-        setFormData(prev => ({ ...prev, nomorSurat: customNomorSurat }));
+        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
         setNoSurat(customNomorSurat);
+      } else if (typeof setNomorSurat === 'function') {
+        setNomorSurat(customNomorSurat);
       }
     }
   }, [customNomorSurat, isBackdate, editData]);
