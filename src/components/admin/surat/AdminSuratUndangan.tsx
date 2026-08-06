@@ -118,6 +118,7 @@ export default function AdminSuratUndangan({
   const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('kades_title') || 'Kepala Desa');
   const [pejabatNip, setPejabatNip] = useState(() => localStorage.getItem('kades_nip') || '-');
   const [isTTE, setIsTTE] = useState<boolean>(true);
+  const [includeCamat, setIncludeCamat] = useState<boolean>(editData?.includeCamat || false);
 
   // UI States
   const [zoomLevel, setZoomLevel] = useState<number>(100);
@@ -745,87 +746,109 @@ export default function AdminSuratUndangan({
             </div>
           </div>
 
-          {/* Card 4: Penandatanganan */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 border-b pb-3 dark:border-slate-800">
-              <FileSignature size={18} className="text-emerald-500" />
-              <span>4. Pejabat Penandatangan</span>
-            </h3>
-
-            <div className="space-y-3">
-              {/* SKTM-style Officer Selector Dropdown */}
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Pilih Pejabat Penandatangan (SKTM Style)</label>
-                <select 
-                  value={pejabatNama}
-                  onChange={(e) => {
-                    const selectedName = e.target.value;
-                    setPejabatNama(selectedName);
-
-                    // Auto-resolve role & NIP from village_officers or Kop Kades
-                    const defaultKades = localStorage.getItem('kop_kades') || localStorage.getItem('village_kades_name') || 'FAZAKKIR RAHMAD';
-                    if (selectedName === defaultKades) {
-                      setPejabatJabatan(localStorage.getItem('kades_title') || 'Kepala Desa');
-                      setPejabatNip(localStorage.getItem('kades_nip') || '-');
-                    } else {
-                      const found = officerList.find(o => o.name === selectedName);
-                      if (found) {
-                        setPejabatJabatan(found.role || 'Perangkat Desa');
-                        setPejabatNip(found.nip || '-');
-                      }
-                    }
-                  }}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-bold"
-                >
-                  <option value={localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'}>
-                    {localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'} (Kepala Desa)
-                  </option>
-                  {officerList.map((o, idx) => (
-                    <option key={idx} value={o.name}>
-                      {o.name} ({o.role || 'Aparatur'})
-                    </option>
-                  ))}
-                </select>
+          {/* Card 4: Penandatanganan (Identical to SKTM) */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                <FileSignature className="w-4 h-4 text-amber-600" />
               </div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100">Pejabat Penandatangan</h3>
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Jabatan Pejabat</label>
-                <input 
-                  type="text"
-                  value={pejabatJabatan}
-                  onChange={(e) => setPejabatJabatan(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Nama Lengkap Pejabat</label>
-                <input 
-                  type="text"
-                  value={pejabatNama}
-                  onChange={(e) => setPejabatNama(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-bold uppercase"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">NIP (Opsional)</label>
-                <input 
-                  type="text"
-                  value={pejabatNip}
-                  onChange={(e) => setPejabatNip(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono"
-                />
+            <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
+                  <select 
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold text-slate-800 dark:text-slate-100"
+                    value={pejabatNama}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setPejabatNama(name);
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          const found = list.find((o: any) => o.name === name);
+                          if (found) {
+                            setPejabatJabatan(found.role || 'Perangkat Desa');
+                            if (found.nip) setPejabatNip(found.nip);
+                          } else {
+                            setPejabatJabatan(localStorage.getItem('kades_title') || 'Kepala Desa');
+                            setPejabatNip(localStorage.getItem('kades_nip') || '-');
+                          }
+                        }
+                      } catch (e) {}
+                    }}
+                  >
+                    {(() => {
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          return list.map((o: any, i: number) => (
+                            <option key={i} value={o.name}>{o.name} ({o.role})</option>
+                          ));
+                        }
+                      } catch (e) {}
+                      return (
+                        <option value={localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'}>
+                          {localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'} (Kepala Desa)
+                        </option>
+                      );
+                    })()}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-amber-900">Jabatan</label>
+                  <input 
+                    type="text"
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none font-medium text-slate-800 dark:text-slate-100"
+                    value={pejabatJabatan}
+                    onChange={(e) => setPejabatJabatan(e.target.value)}
+                  />
+                </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Tanda Tangan Elektronik (TTE QR Code)</span>
-                <button
-                  type="button"
-                  onClick={() => setIsTTE(!isTTE)}
-                  className={`p-1 rounded-full transition-colors ${isTTE ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400'}`}
-                >
-                  {isTTE ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
-                </button>
+              <div className="mt-6 pt-6 border-t border-amber-100 space-y-3">
+                {/* Toggle TTE / QR Code */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={isTTE} 
+                      onChange={(e) => setIsTTE(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
+
+                {/* Toggle Mengetahui Camat */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={includeCamat} 
+                      onChange={(e) => setIncludeCamat(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
               </div>
+
+              <p className="mt-4 text-[10px] text-amber-700 font-medium italic">
+                * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
+              </p>
             </div>
           </div>
         </div>
@@ -978,30 +1001,67 @@ export default function AdminSuratUndangan({
                 </div>
               </div>
 
-              {/* Signature Block */}
-              <div className="flex justify-end font-sans mt-6 text-[11pt]">
-                <div className="w-[55%] text-center">
-                  <p className="font-bold">{pejabatJabatan}</p>
-                  
-                  <div className="my-4 min-h-[85px] flex items-center justify-center">
-                    {isTTE ? (
-                      <TTESignatureBox
-                        officerTitle={pejabatJabatan}
-                        officerName={pejabatNama}
-                        nip={pejabatNip}
-                        dateStr={fmtShortDate(tanggalSurat)}
-                        verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
-                      />
-                    ) : (
-                      <div className="h-20" />
-                    )}
-                  </div>
+              {/* Signature Block (Supports TTE & Dual Camat Signature) */}
+              <div className="mt-8 font-sans text-[11pt]">
+                {includeCamat ? (
+                  <div className="flex justify-between items-start text-center">
+                    {/* Left: Camat */}
+                    <div className="w-[45%]">
+                      <p className="font-bold">Mengetahui,</p>
+                      <p className="font-bold">Camat Simpur</p>
+                      <div className="h-20 flex items-center justify-center">
+                        <span className="text-xs text-gray-400 font-sans italic">(Tanda Tangan Camat)</span>
+                      </div>
+                      <p className="font-bold uppercase underline text-[11pt]">........................................</p>
+                      <p className="text-[9.5pt] text-gray-700 mt-0.5">NIP. ....................................</p>
+                    </div>
 
-                  <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
-                  {pejabatNip && pejabatNip !== '-' && (
-                    <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
-                  )}
-                </div>
+                    {/* Right: Pejabat Penandatangan */}
+                    <div className="w-[45%] text-center">
+                      <p className="font-bold">{pejabatJabatan}</p>
+                      <div className="my-2 min-h-[75px] flex items-center justify-center">
+                        {isTTE ? (
+                          <TTESignatureBox
+                            officerTitle={pejabatJabatan}
+                            officerName={pejabatNama}
+                            nip={pejabatNip}
+                            dateStr={fmtShortDate(tanggalSurat)}
+                            verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
+                          />
+                        ) : (
+                          <div className="h-20" />
+                        )}
+                      </div>
+                      <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
+                      {pejabatNip && pejabatNip !== '-' && (
+                        <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-end text-center">
+                    <div className="w-[55%]">
+                      <p className="font-bold">{pejabatJabatan}</p>
+                      <div className="my-2 min-h-[75px] flex items-center justify-center">
+                        {isTTE ? (
+                          <TTESignatureBox
+                            officerTitle={pejabatJabatan}
+                            officerName={pejabatNama}
+                            nip={pejabatNip}
+                            dateStr={fmtShortDate(tanggalSurat)}
+                            verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
+                          />
+                        ) : (
+                          <div className="h-20" />
+                        )}
+                      </div>
+                      <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
+                      {pejabatNip && pejabatNip !== '-' && (
+                        <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* SaaS Global Footer */}
