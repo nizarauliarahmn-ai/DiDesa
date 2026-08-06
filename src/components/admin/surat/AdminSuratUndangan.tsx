@@ -372,9 +372,9 @@ export default function AdminSuratUndangan({
       />
 
       {/* Main Form & Preview Workspace (Matching SKTM 7/5 Grid Ratio) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: Input Form Controls (lg:col-span-7) */}
-        <div className="lg:col-span-7 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Form Input Side */}
+        <div className="lg:col-span-6 xl:col-span-5 space-y-6">
           
           {/* Card 1: Header & Naskah Surat */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
@@ -826,8 +826,8 @@ export default function AdminSuratUndangan({
         </div>
 
         {/* Right Column: Live A4 Engine Preview (Identical to SKTM) */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
+        <div className="lg:col-span-6 xl:col-span-7 relative">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[calc(100vh-120px)] sticky top-28">
             {/* Live Engine Top Control Bar */}
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-2">
@@ -877,19 +877,10 @@ export default function AdminSuratUndangan({
               <div 
                 style={{
                   width: `${794 * previewZoom}px`,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                  borderRadius: '12px',
-                  transition: 'width 0.2s ease-out, height 0.2s ease-out'
+                  transition: 'width 0.2s ease-out',
                 }}
-                className="bg-white dark:bg-slate-900 m-auto shrink-0 relative flex flex-col gap-6"
+                className="m-auto shrink-0 relative flex flex-col gap-8"
               >
-                {/* Visual Crop Marks */}
-                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
 
                 {/* PAGE 1: Main Surat Undangan */}
                 <div 
@@ -898,9 +889,10 @@ export default function AdminSuratUndangan({
                     transform: `scale(${previewZoom})`, 
                     transformOrigin: 'top left',
                     width: '794px',
-                    minHeight: '1123px'
+                    minHeight: '1123px',
+                    boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                   }}
-                  className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
+                  className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
                 >
               <div>
                 {/* Official Village Header (Kop Surat) */}
@@ -1089,88 +1081,89 @@ export default function AdminSuratUndangan({
                   transform: `scale(${previewZoom})`, 
                   transformOrigin: 'top left',
                   width: '794px',
-                  minHeight: '1123px'
+                  minHeight: '1123px',
+                  boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                 }}
-                className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0"
+                className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
               >
                 <div>
                   {/* Header Lampiran */}
-                  <div className="font-sans text-[10pt] border-b-2 border-black pb-3 mb-6">
-                    <div className="flex justify-between font-bold">
-                      <span>LAMPIRAN SURAT UNDANGAN</span>
+                  <div className="font-sans border-b-[3px] border-black pb-4 mb-8">
+                    <div className="flex justify-between font-bold text-[11pt] mb-1">
+                      <span className="tracking-wide">LAMPIRAN SURAT UNDANGAN</span>
                       <span>Halaman 2</span>
                     </div>
-                    <table className="mt-2 text-[10pt] font-sans">
+                    <table className="mt-3 text-[10pt] font-sans">
                       <tbody>
                         <tr>
-                          <td className="w-28 font-normal">Nomor Surat</td>
-                          <td className="w-4 text-center">:</td>
-                          <td className="font-bold">{nomorSurat}</td>
+                          <td className="w-28 font-normal py-0.5">Nomor Surat</td>
+                          <td className="w-4 text-center py-0.5">:</td>
+                          <td className="font-bold py-0.5">{nomorSurat}</td>
                         </tr>
                         <tr>
-                          <td className="font-normal">Tanggal Surat</td>
-                          <td className="text-center">:</td>
-                          <td>{fmtShortDate(tanggalSurat)}</td>
+                          <td className="font-normal py-0.5">Tanggal Surat</td>
+                          <td className="text-center py-0.5">:</td>
+                          <td className="py-0.5">{fmtShortDate(tanggalSurat)}</td>
                         </tr>
                         <tr>
-                          <td className="font-normal">Perihal</td>
-                          <td className="text-center">:</td>
-                          <td className="font-bold">{perihal}</td>
+                          <td className="font-normal py-0.5">Perihal</td>
+                          <td className="text-center py-0.5">:</td>
+                          <td className="font-bold py-0.5">{perihal}</td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
 
-                  <h3 className="text-center font-bold font-sans uppercase text-[12pt] underline mb-6">
+                  <h3 className="text-center font-bold font-sans uppercase text-[13pt] mb-6">
                     DAFTAR PENERIMA UNDANGAN
                   </h3>
 
                   {/* Recipients Table */}
-                  <table className="w-full border-collapse border border-black font-sans text-[10.5pt] mb-8">
+                  <table className="w-full border-collapse border border-black font-sans text-[11pt] mb-8">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="border border-black px-3 py-2 text-center w-12">NO</th>
-                        <th className="border border-black px-4 py-2 text-left">NAMA / PENERIMA</th>
-                        <th className="border border-black px-4 py-2 text-left">JABATAN / INSTANSI</th>
-                        <th className="border border-black px-3 py-2 text-center w-28">ALAMAT</th>
+                        <th className="border border-black px-3 py-3 text-center w-12 font-bold">NO</th>
+                        <th className="border border-black px-4 py-3 text-center font-bold">NAMA / PENERIMA</th>
+                        <th className="border border-black px-4 py-3 text-center font-bold">JABATAN / INSTANSI</th>
+                        <th className="border border-black px-3 py-3 text-center w-36 font-bold">ALAMAT</th>
                       </tr>
                     </thead>
                     <tbody>
                       {recipients.map((r, i) => (
                         <tr key={r.id}>
-                          <td className="border border-black px-3 py-2.5 text-center font-bold">{i + 1}</td>
-                          <td className="border border-black px-4 py-2.5 font-bold">{r.name}</td>
-                          <td className="border border-black px-4 py-2.5">{r.jabatan || '-'}</td>
-                          <td className="border border-black px-3 py-2.5 text-center italic">{r.alamat || 'di Tempat'}</td>
+                          <td className="border border-black px-3 py-2 text-center font-bold">{i + 1}</td>
+                          <td className="border border-black px-4 py-2 font-bold">{r.name}</td>
+                          <td className="border border-black px-4 py-2">{r.jabatan || '-'}</td>
+                          <td className="border border-black px-3 py-2 text-center italic">{r.alamat || 'di Tempat'}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
 
-                {/* Signature Block on Lampiran */}
-                <div className="flex justify-end font-sans text-[11pt]">
-                  <div className="w-[55%] text-center">
-                    <p className="font-bold">{pejabatJabatan}</p>
-                    
-                    <div className="my-4 min-h-[80px] flex items-center justify-center">
-                      {isTTE ? (
-                        <TTESignatureBox
-                          officerTitle={pejabatJabatan}
-                          officerName={pejabatNama}
-                          nip={pejabatNip}
-                          dateStr={fmtShortDate(tanggalSurat)}
-                          verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
-                        />
-                      ) : (
-                        <div className="h-16" />
+                {/* Signature Block for Page 2 */}
+                <div className="mt-8 font-sans text-[11pt]">
+                  <div className="flex justify-end text-center">
+                    <div className="w-[55%]">
+                      <p className="font-bold">{pejabatJabatan}</p>
+                      <div className="my-2 min-h-[75px] flex items-center justify-center">
+                        {isTTE ? (
+                          <TTESignatureBox
+                            officerTitle={pejabatJabatan}
+                            officerName={pejabatNama}
+                            nip={pejabatNip}
+                            dateStr={fmtShortDate(tanggalSurat)}
+                            verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
+                          />
+                        ) : (
+                          <div className="h-20" />
+                        )}
+                      </div>
+                      <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
+                      {pejabatNip && pejabatNip !== '-' && (
+                        <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
                       )}
                     </div>
-
-                    <p className="font-bold uppercase underline text-[11pt]">{pejabatNama}</p>
-                    {pejabatNip && pejabatNip !== '-' && (
-                      <p className="text-[9.5pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
-                    )}
                   </div>
                 </div>
 
@@ -1178,6 +1171,7 @@ export default function AdminSuratUndangan({
                 <div className="mt-8" dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }} />
               </div>
             )}
+
               </div>
             </div>
           </div>
