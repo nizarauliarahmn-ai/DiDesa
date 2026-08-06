@@ -125,6 +125,32 @@ export default function App() {
   const parts = hostname.split('.');
   const isRootDomain = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost') && !urlParams.get('tenant') && !urlParams.get('t_id');
 
+  const [tenantValid, setTenantValid] = useState<boolean | null>(null);
+
+  React.useEffect(() => {
+    const verifyDomain = async () => {
+      if (isRootDomain) {
+        setTenantValid(true);
+        return;
+      }
+      const tid = await resolveCurrentTenant();
+      setTenantValid(tid !== null);
+    };
+    verifyDomain();
+  }, [isRootDomain]);
+
+  if (tenantValid === null) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
+  if (tenantValid === false) {
+    return <TenantNotFound />;
+  }
+
   const [user, setUser] = useState<{ email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string } | null>(() => {
     if (new URLSearchParams(window.location.search).get('preview') === 'true') {
       return null;
