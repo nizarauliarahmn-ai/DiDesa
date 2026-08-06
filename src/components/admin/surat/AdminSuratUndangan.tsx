@@ -14,6 +14,7 @@ import { getLetterClassifications, incrementSequenceNumber, generateLetterNumber
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
+import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { capitalizeWords, capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 
@@ -776,15 +777,7 @@ export default function AdminSuratUndangan({
             >
               <div>
                 {/* Official Village Header (Kop Surat) */}
-                <div className="flex items-center gap-4 border-b-4 border-double border-black pb-3 mb-6 text-center font-serif">
-                  <img src={villageLogo} alt="Logo" className="w-20 h-24 object-contain shrink-0" />
-                  <div className="flex-1">
-                    <h4 className="text-[11pt] font-bold uppercase tracking-widest leading-tight">{activeKabupaten}</h4>
-                    <h3 className="text-[12pt] font-bold uppercase tracking-widest leading-tight">KECAMATAN {activeKecamatan.toUpperCase()}</h3>
-                    <h2 className="text-[16pt] font-black uppercase tracking-wider leading-tight">{activeDesa.toUpperCase()}</h2>
-                    <p className="text-[9pt] font-normal italic leading-snug mt-1 font-sans text-gray-700">{activeAlamat}</p>
-                  </div>
-                </div>
+                <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
 
                 {/* Date on Top Right */}
                 <div className="flex justify-end font-sans text-[11pt] mb-2">
