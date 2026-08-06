@@ -35,7 +35,7 @@ import TenantNotFound from './components/TenantNotFound';
 import Footer from './components/common/Footer';
 import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
-import { resolveCurrentTenant } from './utils/tenantResolver';
+import { resolveCurrentTenant, clearTenantCache } from './utils/tenantResolver';
 
 // Public views
 import TransparansiDana from './components/dashboard/TransparansiDana';
@@ -320,6 +320,22 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.tenantId && parsed.role !== 'saas_admin') {
+          // STRICT ROUTING: If on root domain, redirect to tenant subdomain!
+          const hostname = window.location.hostname;
+          const parts = hostname.split('.');
+          const isRoot = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost') && !window.location.search.includes('tenant=') && !window.location.search.includes('t_id=');
+          
+          if (isRoot) {
+            const { data } = await supabase.from('tenants').select('domain').eq('id', parsed.tenantId).single();
+            if (data && data.domain) {
+              const targetUrl = hostname.includes('localhost')
+                ? `${window.location.origin}?tenant=${data.domain}&mode=admin`
+                : `https://${data.domain}.sistemdidesa.id?mode=admin`;
+              window.location.href = targetUrl;
+              return;
+            }
+          }
+
           const currentTenantId = await resolveCurrentTenant();
           if (currentTenantId !== parsed.tenantId) {
             console.warn('[Security] Tenant mismatch detected. Logging out to prevent data leakage.', parsed.tenantId, currentTenantId);
@@ -342,13 +358,37 @@ export default function App() {
   }, [adminTab, publicTab, view]);
 
   const handleLogout = () => {
-    localStorage.removeItem('didesa_auth_user');
-    localStorage.removeItem('kop_desa');
-    localStorage.removeItem('kop_kabupaten');
-    localStorage.removeItem('kop_logo_url');
+    // Clear ALL tenant-specific cache keys to prevent cross-session contamination
+    const keysToRemove = [
+      'didesa_auth_user', 
+      'kop_desa', 
+      'kop_kabupaten', 
+      'kop_logo_url', 
+      'village_name',
+      'village_officers',
+      'village_welcome_banner_url',
+      'app_theme',
+      'local_residents',
+      'didesa_feedbacks',
+      'didesa_aspirasi_data',
+      'letter_classifications',
+      'saas_global_letter_catalog',
+      'letter_cache_version',
+      'didesa_impersonator'
+    ];
+    
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // Reset React states
     setUser(null);
     setAdminTab('dashboard');
     setPublicTab('dashboard');
+    
+    // Clear resolver cache
+    clearTenantCache();
+
+    // Reload page to ensure all components start fresh and fetch correct default/tenant data
+    window.location.href = '/';
   };
 
   // If not authenticated, force login screen UNLESS view is public

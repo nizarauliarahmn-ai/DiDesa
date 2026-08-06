@@ -16,7 +16,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   // Available Tenants for Global Login Dropdown
   const [allTenants, setAllTenants] = useState<any[]>([]);
-  const [selectedTenantId, setSelectedTenantId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSaaSLogin, setShowSaaSLogin] = useState(false);
 
   // Determine if we are on a specific subdomain or explicit tenant parameter
   const [isSpecificSubdomain, setIsSpecificSubdomain] = useState(false);
@@ -58,7 +59,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           const { data } = await supabase.from('tenants').select('*').eq('id', tenantId).single();
           if (data) {
             setCurrentTenant(data);
-            setSelectedTenantId(data.id);
             if (isSpecific && data.nama_desa) {
               setDesaName(data.nama_desa);
             }
@@ -90,21 +90,6 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     initializeTenantAndBranding();
   }, []);
 
-  // Handle manual tenant selection from dropdown on global domain
-  const handleSelectTenantChange = (tId: string) => {
-    setSelectedTenantId(tId);
-    if (!tId) {
-      setCurrentTenant(null);
-      setDesaName('');
-    } else {
-      const match = allTenants.find(t => t.id === tId);
-      if (match) {
-        setCurrentTenant(match);
-        setDesaName(match.nama_desa);
-      }
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -134,20 +119,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       // If a specific tenant is currently selected or resolved
       let targetTenant = currentTenant;
 
-      // If on global domain without a selected tenant, search across ALL tenants in database
       if (!targetTenant) {
-        const { data: globalMatches, error: searchErr } = await supabase
-          .from('tenants')
-          .select('*')
-          .or(`admin_email.eq."${email}",kades_email.eq."${email}"`);
-
-        if (!searchErr && globalMatches && globalMatches.length > 0) {
-          targetTenant = globalMatches[0];
-        }
-      }
-
-      if (!targetTenant) {
-        showToast('Email atau kata sandi tidak terdaftar di desa manapun.', 'error');
+        showToast('Portal desa tidak ditemukan. Harap akses melalui subdomain yang benar.', 'error');
         setIsLoading(false);
         return;
       }
@@ -175,6 +148,17 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         localStorage.setItem('kop_desa', matchingTenantKades.nama_desa);
         localStorage.setItem('village_name', matchingTenantKades.nama_desa);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
+        
+        // Strict Root Domain Routing
+        if (!isSpecificSubdomain && matchingTenantKades.domain) {
+          const hostname = window.location.hostname;
+          const targetUrl = hostname.includes('localhost')
+            ? `${window.location.origin}?tenant=${matchingTenantKades.domain}&mode=admin`
+            : `https://${matchingTenantKades.domain}.sistemdidesa.id?mode=admin`;
+          window.location.href = targetUrl;
+          return;
+        }
+
         onLoginSuccess(loggedUser);
         showToast(`Selamat datang kembali di Portal Desa ${matchingTenantKades.nama_desa}!`, 'success');
         setIsLoading(false);
@@ -192,6 +176,17 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         localStorage.setItem('kop_desa', matchingTenantAdmin.nama_desa);
         localStorage.setItem('village_name', matchingTenantAdmin.nama_desa);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
+        
+        // Strict Root Domain Routing
+        if (!isSpecificSubdomain && matchingTenantAdmin.domain) {
+          const hostname = window.location.hostname;
+          const targetUrl = hostname.includes('localhost')
+            ? `${window.location.origin}?tenant=${matchingTenantAdmin.domain}&mode=admin`
+            : `https://${matchingTenantAdmin.domain}.sistemdidesa.id?mode=admin`;
+          window.location.href = targetUrl;
+          return;
+        }
+
         onLoginSuccess(loggedUser);
         showToast(`Selamat datang kembali di Portal Desa ${matchingTenantAdmin.nama_desa}!`, 'success');
         setIsLoading(false);
@@ -213,6 +208,119 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
   const welcomeBannerUrl = localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000';
 
+  // Halaman Pengantar (Intro Page) untuk Pemilihan Desa di Domain Utama
+  if (!isSpecificSubdomain && !showSaaSLogin) {
+    const filteredTenants = allTenants.filter(t => 
+      t.nama_desa?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      t.domain?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 p-4 relative overflow-hidden transition-colors duration-500">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-400/20 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-300/20 blur-[100px] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#047857_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.03] dark:opacity-[0.05] pointer-events-none z-0" />
+
+        <div className="w-full max-w-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[32px] border border-white/90 dark:border-slate-800/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-emerald-950/20 p-8 sm:p-10 relative z-10 animate-in fade-in zoom-in-95 duration-300 flex flex-col h-[80vh] max-h-[600px]">
+          
+          {/* Header */}
+          <div className="flex flex-col items-center text-center mb-6 shrink-0">
+            <div 
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md dark:shadow-none mb-4"
+              style={{ backgroundColor: globalColor }}
+            >
+              {globalLogo ? (
+                <img src={globalLogo} alt={globalName} className="w-8 h-8 object-contain" />
+              ) : (
+                <Building2 className="text-white w-8 h-8" />
+              )}
+            </div>
+            <h1 className="text-2xl font-black tracking-tight leading-none mb-2 text-slate-900 dark:text-white">
+              Pilih Portal Desa Anda
+            </h1>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              Silakan cari dan pilih desa Anda untuk masuk ke sistem.
+            </p>
+          </div>
+
+          {/* Search Input */}
+          <div className="relative mb-4 shrink-0">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+            <input
+              type="text"
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Ketik nama desa Anda..."
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-emerald-100 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all font-bold text-slate-900 dark:text-white placeholder:font-medium placeholder:text-slate-400"
+            />
+          </div>
+
+          {/* Results */}
+          <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+            {allTenants.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600 mx-auto mb-2"></div>
+                <p className="text-xs">Memuat daftar desa...</p>
+              </div>
+            ) : filteredTenants.length === 0 ? (
+              <div className="text-center py-8 text-slate-400">
+                <p className="text-sm font-bold text-slate-600 dark:text-slate-300">Desa "{searchQuery}" tidak ditemukan</p>
+                <p className="text-xs mt-1">Pastikan penulisan nama desa sudah benar.</p>
+              </div>
+            ) : (
+              filteredTenants.map((tenant) => {
+                const targetUrl = window.location.hostname.includes('localhost')
+                  ? `${window.location.origin}?tenant=${tenant.domain}&mode=admin`
+                  : `https://${tenant.domain}.sistemdidesa.id?mode=admin`;
+                  
+                return (
+                  <a
+                    key={tenant.id}
+                    href={targetUrl}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-emerald-50 dark:hover:bg-slate-800 border border-transparent hover:border-emerald-100 dark:hover:border-slate-700 transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-900 flex items-center justify-center shrink-0 border border-gray-200 dark:border-slate-800 group-hover:border-emerald-200">
+                      {tenant.logo_url ? (
+                        <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-6 h-6 object-contain" />
+                      ) : (
+                        <Building2 className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 truncate">
+                        {tenant.nama_desa.startsWith('Desa') ? tenant.nama_desa : `Desa ${tenant.nama_desa}`}
+                      </h4>
+                      <p className="text-[10px] text-slate-400 font-mono truncate mt-0.5">
+                        {tenant.domain}.sistemdidesa.id
+                      </p>
+                    </div>
+                    <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <ArrowRight size={14} />
+                    </div>
+                  </a>
+                );
+              })
+            )}
+          </div>
+
+          {/* Footer / Toggle SaaS */}
+          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-slate-800 text-center shrink-0">
+            <button 
+              onClick={() => setShowSaaSLogin(true)}
+              className="text-[10px] font-bold text-slate-400 hover:text-emerald-600 transition-colors uppercase tracking-wider"
+            >
+              Masuk sebagai Pengelola Platform
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Halaman Login Bersih (Email/Password)
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950 p-4 relative overflow-hidden transition-colors duration-500">
       {/* Decorative Blur Orbs */}
@@ -235,11 +343,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               <img src={globalLogo} alt={globalName} className="w-10 h-10 object-contain animate-fade-in" />
             ) : (
               <svg viewBox="0 0 100 100" className="w-9 h-9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Smart Village building icon in white */}
                 <path d="M50 20 L80 45 L70 45 L70 75 L30 75 L30 45 L20 45 Z" fill="white" />
-                {/* Tech glowing node in the center */}
                 <circle cx="50" cy="52" r="6" fill="#34d399" />
-                {/* Connection lines */}
                 <line x1="50" y1="52" x2="50" y2="75" stroke="#34d399" strokeWidth="3" />
                 <line x1="30" y1="45" x2="50" y2="52" stroke="#34d399" strokeWidth="2" />
                 <line x1="70" y1="45" x2="50" y2="52" stroke="#34d399" strokeWidth="2" />
@@ -251,38 +356,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
             {globalName}
           </h1>
           <p className="text-xs font-bold text-emerald-800/70 dark:text-emerald-400/70 uppercase tracking-widest leading-none">
-            Sistem Digitalisasi {desaName ? (desaName.startsWith('Desa') ? desaName : `Desa ${desaName}`) : 'Desa'}
+            {showSaaSLogin ? 'Pusat Pengelola SaaS' : `Sistem Digitalisasi ${desaName ? (desaName.startsWith('Desa') ? desaName : `Desa ${desaName}`) : 'Desa'}`}
           </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-5">
-          {/* Village Selection Dropdown (Only when on global domain) */}
-          {!isSpecificSubdomain && allTenants.length > 0 && (
-            <div>
-              <label className="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                Pilih Desa / Instansi
-              </label>
-              <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                  <MapPin size={16} />
-                </span>
-                <select
-                  value={selectedTenantId}
-                  onChange={(e) => handleSelectTenantChange(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50 text-slate-900 dark:text-white"
-                >
-                  <option value="">Deteksi Otomatis dari Email</option>
-                  {allTenants.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.nama_desa.startsWith('Desa') ? t.nama_desa : `Desa ${t.nama_desa}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          )}
-
           <div>
             <label className="block text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
               Email atau Nama Pengguna
@@ -296,7 +375,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
                 data-no-cap
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={`admin@${desaName ? desaName.toLowerCase().replace(/\s+/g, '') : 'desa'}.id`}
+                placeholder={showSaaSLogin ? 'admin@sistemdidesa.id' : `admin@${desaName ? desaName.toLowerCase().replace(/\s+/g, '') : 'desa'}.id`}
                 className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-gray-200 dark:border-slate-700 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-slate-50/50"
               />
             </div>
@@ -346,10 +425,20 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         </form>
 
         {/* Footer */}
-        <p className="text-[10px] text-center text-gray-400 mt-6 leading-relaxed">
-          Sistem Informasi Administrasi Desa & Layanan Mandiri Terintegrasi.<br />
-          &copy; {new Date().getFullYear()} {globalName}. Seluruh Hak Cipta Dilindungi.
-        </p>
+        <div className="mt-6 text-center space-y-4">
+          {showSaaSLogin && (
+            <button 
+              onClick={() => setShowSaaSLogin(false)}
+              className="text-[10px] font-bold text-slate-400 hover:text-emerald-600 transition-colors uppercase tracking-wider"
+            >
+              &larr; Kembali ke Pencarian Desa
+            </button>
+          )}
+          <p className="text-[10px] text-gray-400 leading-relaxed">
+            Sistem Informasi Administrasi Desa & Layanan Mandiri Terintegrasi.<br />
+            &copy; {new Date().getFullYear()} {globalName}. Seluruh Hak Cipta Dilindungi.
+          </p>
+        </div>
       </div>
 
       {/* Trust Badge Indicators */}
