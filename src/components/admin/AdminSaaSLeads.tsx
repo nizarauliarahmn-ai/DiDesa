@@ -23,7 +23,7 @@ export default function AdminSaaSLeads({ onSetActiveTab }: AdminSaaSLeadsProps) 
   useEffect(() => {
     loadRequests();
 
-    const channel = supabase.channel('public:saas_logs_realtime_broadcast_listener');
+    const channel = supabase.channel('public:saas_leads_broadcast');
     channel.on('broadcast', { event: 'new_tenant_request' }, (payload: any) => {
       if (payload?.payload?.requests) {
         setRequests(payload.payload.requests);

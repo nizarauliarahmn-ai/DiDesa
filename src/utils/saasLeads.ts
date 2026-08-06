@@ -67,8 +67,8 @@ export const addSaaSTenantRequest = async (request: Omit<SaaSTenantRequest, 'id'
         .insert({ tenant_id: masterTenantId, key: 'saas_tenant_requests', value: jsonStr });
     }
     
-    // Broadcast real-time update using an ephemeral channel
-    const broadcastChannel = supabase.channel('public:saas_logs_realtime_broadcast_' + Date.now());
+    // Broadcast real-time update
+    const broadcastChannel = supabase.channel('public:saas_leads_broadcast');
     broadcastChannel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
         broadcastChannel.send({
@@ -97,7 +97,7 @@ export const updateSaaSTenantRequestStatus = async (id: string, newStatus: SaaST
       .eq('key', 'saas_tenant_requests');
       
     // Broadcast real-time update
-    const broadcastChannel = supabase.channel('public:saas_logs_realtime_broadcast_' + Date.now());
+    const broadcastChannel = supabase.channel('public:saas_leads_broadcast');
     broadcastChannel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
         broadcastChannel.send({

@@ -4,6 +4,7 @@ import { getFormattedDate } from '../../utils/dateHelper';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { fetchSaaSTenantRequests } from '../../utils/saasLeads';
 
 export default function AdminHeader({ 
   setActiveTab, 
@@ -193,6 +194,20 @@ export default function AdminHeader({
                     });
                   });
                 }
+                
+                // Inject new leads from saas_tenant_requests
+                const newLeads = await fetchSaaSTenantRequests();
+                newLeads.filter(l => l.status === 'Menunggu').forEach(l => {
+                  roleData.unshift({
+                    id: `saas-lead-${l.id}`,
+                    title: 'Pengajuan Pendaftaran Desa Baru',
+                    message: `Desa ${l.villageName} (${l.subdomain}.sistemdidesa.id) diajukan oleh ${l.applicantName} (${l.phone}).`,
+                    category: 'System',
+                    time: 'Baru saja',
+                    timestamp: l.timestamp,
+                    isRead: false
+                  });
+                });
               } else if (role === 'kades') {
                 roleData = data.filter(n => n.category === 'System' || n.category === 'Assistance' || n.category === 'Services' || (n.title && n.title.toLowerCase().includes('persetujuan')));
               } else {
@@ -234,6 +249,11 @@ export default function AdminHeader({
          loadNotifications();
       })
       .subscribe();
+      
+    const leadsChannel = supabase.channel('public:saas_leads_broadcast_listener');
+    leadsChannel.on('broadcast', { event: 'new_tenant_request' }, () => {
+      loadNotifications();
+    }).subscribe();
 
     // 3-second Polling fallback to guarantee instant updates
     const pollInterval = setInterval(() => {
@@ -245,6 +265,7 @@ export default function AdminHeader({
 
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(leadsChannel);
       clearInterval(pollInterval);
       window.removeEventListener('didesa_notification_created', handleCustomNotif);
     };
