@@ -94,31 +94,9 @@ function useUrlSync<T extends string>(
 }
 
 export default function App() {
-  // Khusus untuk Halaman Print (Terisolasi dari semua layout)
   const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('print') === 'qr_kiosk') {
-    return <PrintQRKiosk />;
-  }
-
-  // Khusus untuk Kiosk Publik, tampilkan fullscreen (tanpa Header/Sidebar/Footer)
-  // Ini harus ditaruh SEBELUM pengecekan login (!user) agar warga bisa menggunakan Kiosk tanpa harus punya akun/login
   const tabParam = urlParams.get('tab');
-  
-  if (tabParam === 'kios') {
-    return <><PublicKiosPortal /><ToastContainer /></>;
-  }
-  if (tabParam === 'buku_tamu') {
-    return <><PublicBukuTamu /><ToastContainer /></>;
-  }
-  if (tabParam === 'kios_surat') {
-    return <><PublicKiosSurat /><ToastContainer /></>;
-  }
-  if (tabParam === 'kios_aspirasi') {
-    return <><PublicKiosAspirasi /><ToastContainer /></>;
-  }
-  if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
-    return <><PublicVerifikasiSurat /><ToastContainer /></>;
-  }
+
 
   
   const hostname = window.location.hostname;
@@ -145,6 +123,26 @@ export default function App() {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
       </div>
     );
+  }
+
+  if (urlParams.get('print') === 'qr_kiosk') {
+    return <PrintQRKiosk />;
+  }
+  
+  if (tabParam === 'kios') {
+    return <><PublicKiosPortal /><ToastContainer /></>;
+  }
+  if (tabParam === 'buku_tamu') {
+    return <><PublicBukuTamu /><ToastContainer /></>;
+  }
+  if (tabParam === 'kios_surat') {
+    return <><PublicKiosSurat /><ToastContainer /></>;
+  }
+  if (tabParam === 'kios_aspirasi') {
+    return <><PublicKiosAspirasi /><ToastContainer /></>;
+  }
+  if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
+    return <><PublicVerifikasiSurat /><ToastContainer /></>;
   }
 
   if (tenantValid === false) {
