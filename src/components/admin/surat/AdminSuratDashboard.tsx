@@ -408,6 +408,7 @@ export default function AdminSuratDashboard({
     const getKlasifikasiFromSurat = (s: LetterHistory) => {
       const typeLower = (s.jenis || '').toLowerCase();
       const nomorSafe = (s.nomor || '');
+      if (typeLower.includes('nikah') || typeLower.includes('skn') || typeLower === 'skn' || nomorSafe.includes('/SKN/')) return 'SKN';
       if (typeLower.includes('kematian') || typeLower === 'skm' || nomorSafe.includes('/SKM/')) return 'SKM';
       if (typeLower.includes('ahli waris') || typeLower === 'skaw' || nomorSafe.includes('/SKAW/')) return 'SKAW';
       if (typeLower.includes('tidak mampu') || typeLower.includes('sktm') || nomorSafe.includes('/SKTM/')) return 'SKTM';
@@ -415,12 +416,11 @@ export default function AdminSuratDashboard({
       if (typeLower.includes('penghasilan') || typeLower === 'skph' || nomorSafe.includes('/SKPH/')) return 'SKPH';
       if (typeLower.includes('belum menikah') || typeLower.includes('belum kawin') || typeLower === 'skbm' || nomorSafe.includes('/SKBM/')) return 'SKBM';
       if (typeLower.includes('kelahiran') || typeLower.includes('lahir') || typeLower === 'skl' || nomorSafe.includes('/SKL/')) return 'SKL';
-      if (typeLower.includes('pindah') || typeLower === 'sph' || nomorSafe.includes('/SPH/')) return 'SPH';
+      if (typeLower.includes('pindah') || typeLower === 'skp' || typeLower === 'sph' || nomorSafe.includes('/SPH/') || nomorSafe.includes('/SKP/')) return 'SKP';
       if (typeLower.includes('kehilangan') || typeLower === 'skh' || nomorSafe.includes('/SKH/')) return 'SKH';
       if (typeLower.includes('undangan') || typeLower === 'und' || nomorSafe.includes('/UND/')) return 'UND';
       if (typeLower === 'su' || nomorSafe.includes('/SU/') || typeLower.includes('umum') || typeLower.includes('dinas')) return 'SU';
       if (typeLower.includes('domisili') || typeLower === 'skd' || typeLower === 'sdp' || nomorSafe.includes('/SKD/') || nomorSafe.includes('/SDP/')) return 'SDP';
-      if (typeLower.includes('pengantar') || typeLower === 'skp' || nomorSafe.includes('/SKP/')) return 'SKP';
       return typeLower.toUpperCase();
     };
 
@@ -549,6 +549,7 @@ export default function AdminSuratDashboard({
               <h6 className="font-bold underline uppercase text-[16px] tracking-wide" style={{ letterSpacing: '1px' }}>
                 {(() => {
                   switch (code) {
+                    case 'SKN': return 'SURAT PENGANTAR NIKAH (SKN)';
                     case 'SKM': return 'SURAT KETERANGAN KEMATIAN (SKM)';
                     case 'SKAW': return 'SURAT KETERANGAN AHLI WARIS (SKAW)';
                     case 'SKTM': return 'SURAT KETERANGAN TIDAK MAMPU (SKTM)';
@@ -837,6 +838,40 @@ export default function AdminSuratDashboard({
                       Adalah benar nama tersebut di atas merupakan warga kami yang berdomisili sah di Desa {desaName.replace(/desa|kelurahan/gi, '').trim()}, dan berdasarkan data/pengakuan yang bersangkutan memiliki rincian penghasilan bulanan yang sah dengan rata-rata sebesar <strong>Rp {sd.penghasilan || '-'}</strong> per bulan.
                     </p>
                     {penutup(surat.keperluan, 'Penghasilan')}
+                    {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
+                  </>
+                );
+              } else if (code === 'SKN') {
+                return (
+                  <>
+                    <p className="text-justify leading-relaxed indent-8 mb-2">
+                      Yang bertanda tangan di bawah ini Kepala {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')} Kabupaten {kabupatenName.replace(/^(kabupaten|kota)\s+/i, '')}, menerangkan dengan sebenarnya bahwa:
+                    </p>
+                    <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
+                      <tbody>
+                        <tr><td style={{width: '30%'}}>Nama Lengkap</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{name}</strong></td></tr>
+                        <tr><td>NIK</td><td>:</td><td>{nik}</td></tr>
+                        <tr><td>Tempat, Tanggal lahir</td><td>:</td><td>{birthPlace}, {fmtDate(birthDate)}</td></tr>
+                        <tr><td>Jenis Kelamin</td><td>:</td><td>{gender}</td></tr>
+                        <tr><td>Agama</td><td>:</td><td>{sd.agama || '-'}</td></tr>
+                        <tr><td>Pekerjaan</td><td>:</td><td>{sd.pekerjaan || '-'}</td></tr>
+                        <tr><td>Status Perkawinan</td><td>:</td><td>{sd.statusPerkawinan || '-'}</td></tr>
+                        <tr><td>Alamat</td><td>:</td><td>{address}</td></tr>
+                      </tbody>
+                    </table>
+                    <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
+                      Orang tersebut di atas adalah benar-benar warga Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} yang hendak mengurus <strong>Persyaratan Pernikahan / Pengantar Nikah</strong>{sd.namaPasangan ? ` dengan pasangan bernama:` : '.'}
+                    </p>
+                    {sd.namaPasangan && (
+                      <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
+                        <tbody>
+                          <tr><td style={{width: '30%'}}>Nama Pasangan</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{sd.namaPasangan}</strong></td></tr>
+                          {sd.nikPasangan && <tr><td>NIK Pasangan</td><td>:</td><td>{sd.nikPasangan}</td></tr>}
+                          {sd.tanggalNikah && <tr><td>Rencana Tgl Nikah</td><td>:</td><td>{fmtDate(sd.tanggalNikah)}</td></tr>}
+                        </tbody>
+                      </table>
+                    )}
+                    {penutup(surat.keperluan || 'Persyaratan Nikah', 'Pengantar Nikah')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
                   </>
                 );
