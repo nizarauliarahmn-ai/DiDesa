@@ -882,7 +882,6 @@ export default function AdminAparatur() {
             </div>
           </div>
 
-          </div>
         </div>
       </div>
     </div>
