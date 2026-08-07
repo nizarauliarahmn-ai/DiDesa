@@ -3,7 +3,8 @@ import {
   ArrowLeft, Printer, Search, User, FileText, FileSignature, 
   ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, 
   Loader2, RefreshCw, Calendar, CheckCircle2, Users, FileSpreadsheet,
-  ToggleLeft, ToggleRight, Trash2, MapPin, Building2, ChevronRight
+  ToggleLeft, ToggleRight, Trash2, MapPin, Building2, ChevronRight,
+  ArrowUp, ArrowDown, GripVertical
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { fetchResidentsCached } from '../../../utils/apiCache';
@@ -235,6 +236,16 @@ export default function AdminSuratUndangan({
         { id: Date.now().toString() + '_tokoh', name: 'Tokoh Agama & Tokoh Masyarakat Desa', jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' }
       ]);
     }
+  };
+
+  // Move Recipient Order Handler
+  const handleMoveRecipient = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= recipients.length) return;
+    const newRecipients = [...recipients];
+    const [movedItem] = newRecipients.splice(index, 1);
+    newRecipients.splice(targetIndex, 0, movedItem);
+    setRecipients(newRecipients);
   };
 
   // Save Handler
@@ -570,9 +581,29 @@ export default function AdminSuratUndangan({
               ) : (
                 recipients.map((r, index) => (
                   <div key={r.id} className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl flex justify-between items-center text-xs border border-slate-100 dark:border-slate-800">
-                    <div>
-                      <p className="font-bold text-slate-900 dark:text-white">{index + 1}. {r.name}</p>
-                      {r.jabatan && <p className="text-slate-500 dark:text-slate-400 text-[11px]">{r.jabatan} • {r.alamat}</p>}
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex flex-col gap-0.5 bg-slate-200/60 dark:bg-slate-700/60 p-1 rounded-lg">
+                        <button 
+                          disabled={index === 0}
+                          onClick={() => handleMoveRecipient(index, 'up')}
+                          className="hover:text-emerald-600 dark:hover:text-emerald-400 disabled:opacity-20 disabled:hover:text-inherit transition-all p-0.5"
+                          title="Geser Ke Atas"
+                        >
+                          <ArrowUp size={12} />
+                        </button>
+                        <button 
+                          disabled={index === recipients.length - 1}
+                          onClick={() => handleMoveRecipient(index, 'down')}
+                          className="hover:text-emerald-600 dark:hover:text-emerald-400 disabled:opacity-20 disabled:hover:text-inherit transition-all p-0.5"
+                          title="Geser Ke Bawah"
+                        >
+                          <ArrowDown size={12} />
+                        </button>
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 dark:text-white">{index + 1}. {r.name}</p>
+                        {r.jabatan && <p className="text-slate-500 dark:text-slate-400 text-[11px]">{r.jabatan} • {r.alamat}</p>}
+                      </div>
                     </div>
                     <button 
                       onClick={() => handleRemoveRecipient(r.id)}
