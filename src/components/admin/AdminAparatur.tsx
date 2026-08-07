@@ -61,6 +61,9 @@ export default function AdminAparatur() {
           print-color-adjust: exact !important;
         }
         .printable-report {
+          display: block !important;
+          position: static !important;
+          opacity: 1 !important;
           width: 100% !important;
           padding: 0 !important;
         }
@@ -663,7 +666,7 @@ export default function AdminAparatur() {
       )}
 
       {/* Hidden Container for Printing Official Aparatur Data Report */}
-      <div className="hidden">
+      <div style={{ position: 'fixed', left: '-9999px', top: '-9999px', opacity: 0, pointerEvents: 'none', zIndex: -100 }}>
         <div ref={reportPrintRef} className="printable-report p-6 font-serif text-black bg-white">
           {/* Kop Surat Resmi */}
           <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
