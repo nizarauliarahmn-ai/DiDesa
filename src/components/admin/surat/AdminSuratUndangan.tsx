@@ -195,7 +195,7 @@ export default function AdminSuratUndangan({
   // Preset Recipients
   const handleAddPreset = (presetType: string) => {
     if (presetType === 'rt_rw') {
-      const formatGroup = (type: 'RT' | 'RW', defaultCount: number) => {
+      const formatGroup = (type: 'RT' | 'RW') => {
         let nums: string[] = [];
         try {
           const list = JSON.parse(localStorage.getItem(`village_${type.toLowerCase()}_list`) || '[]');
@@ -205,7 +205,7 @@ export default function AdminSuratUndangan({
         } catch { }
 
         if (nums.length === 0) {
-          nums = Array.from({length: defaultCount}, (_, i) => (i + 1).toString().padStart(2, '0'));
+          return `Seluruh Ketua ${type}`;
         }
 
         if (nums.length === 1) return `Seluruh Ketua ${type} (${type}.${nums[0]})`;
@@ -216,8 +216,8 @@ export default function AdminSuratUndangan({
 
       setRecipients(prev => [
         ...prev,
-        { id: Date.now().toString() + '_rt', name: formatGroup('RT', 6), jabatan: 'Ketua RT', alamat: 'di Tempat' },
-        { id: Date.now().toString() + '_rw', name: formatGroup('RW', 2), jabatan: 'Ketua RW', alamat: 'di Tempat' }
+        { id: Date.now().toString() + '_rt', name: formatGroup('RT'), jabatan: 'Ketua RT', alamat: 'di Tempat' },
+        { id: Date.now().toString() + '_rw', name: formatGroup('RW'), jabatan: 'Ketua RW', alamat: 'di Tempat' }
       ]);
     } else if (presetType === 'bpd') {
       setRecipients(prev => [
@@ -1206,7 +1206,7 @@ export default function AdminSuratUndangan({
       <iframe 
         ref={iframeRef}
         title="Print Frame"
-        className="hidden"
+        style={{ position: 'absolute', width: 0, height: 0, border: 0, overflow: 'hidden' }}
       />
 
       {/* Success Dialog */}
