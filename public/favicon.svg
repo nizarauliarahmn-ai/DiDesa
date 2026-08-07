@@ -1,19 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <!-- Transparent Background - Icon Only -->
-  <g transform="translate(48, 48)">
-    <!-- Main Green Outer Document Body -->
-    <path d="M70 20 H310 C365 20 410 65 410 120 V296 C410 351 365 396 310 396 H70 C31 396 0 365 0 326 V90 C0 51 31 20 70 20 Z" fill="#047857" />
+  <!-- Completely Transparent Background - White Document + Yellow Spines Only -->
+  <g transform="translate(64, 64)">
+    <!-- Main White Document Sheet -->
+    <rect x="0" y="0" width="220" height="384" rx="48" fill="#FFFFFF" />
+    
+    <!-- Subtle Spine Accent on Left of White Sheet -->
+    <rect x="0" y="0" width="64" height="384" rx="32" fill="#E2E8F0" opacity="0.7" />
 
-    <!-- Inner Spine Cutout / Fold Detail -->
-    <path d="M70 20 C31 20 0 51 0 90 V326 C0 365 31 396 70 396 H110 V20 H70 Z" fill="#059669" opacity="0.9" />
+    <!-- Yellow Accent Bookmark Spine 1 -->
+    <rect x="246" y="32" width="64" height="320" rx="32" fill="#FACC15" />
 
-    <!-- White Page Sheet Cutout inside -->
-    <rect x="130" y="70" width="150" height="276" rx="24" fill="#FFFFFF" />
-
-    <!-- Yellow Accent Spine 1 -->
-    <rect x="300" y="80" width="46" height="256" rx="23" fill="#FACC15" />
-
-    <!-- Yellow Accent Spine 2 -->
-    <rect x="360" y="110" width="30" height="196" rx="15" fill="#F59E0B" />
+    <!-- Orange Accent Bookmark Spine 2 -->
+    <rect x="330" y="72" width="44" height="240" rx="22" fill="#F59E0B" />
   </g>
 </svg>
