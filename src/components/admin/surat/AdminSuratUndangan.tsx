@@ -271,6 +271,49 @@ export default function AdminSuratUndangan({
         ...prev,
         { id: Date.now().toString() + '_posyandu', name: `Kader Posyandu ${desaName}`, jabatan: 'Kader Posyandu', alamat: 'di Tempat' }
       ]);
+    } else if (presetType === 'rembuk_stunting') {
+      const kec = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
+      const kecName = kec.startsWith('Kecamatan') ? kec : `Kecamatan ${kec}`;
+      const kecOnly = kec.replace(/^Kecamatan\s+/i, '');
+      const kab = localStorage.getItem('kop_kabupaten') || 'Kabupaten Hulu Sungai Selatan';
+      const kabClean = kab.replace(/^Pemerintah\s+/i, '');
+      const kabName = kabClean.startsWith('Kabupaten') ? kabClean : `Kabupaten ${kabClean}`;
+      const rawDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+      const desaName = rawDesa.startsWith('Desa') ? rawDesa : `Desa ${rawDesa}`;
+
+      const formatGroup = (type: 'RT' | 'RW') => {
+        let nums: string[] = [];
+        try {
+          const list = JSON.parse(localStorage.getItem(`village_${type.toLowerCase()}_list`) || '[]');
+          if (Array.isArray(list) && list.length > 0) {
+            nums = list.map(item => item.no.toString().padStart(2, '0'));
+          }
+        } catch { }
+        if (nums.length === 0) return `Seluruh Ketua ${type}`;
+        if (nums.length === 1) return `Seluruh Ketua ${type} (${type}.${nums[0]})`;
+        if (nums.length === 2) return `Seluruh Ketua ${type} (${type}.${nums[0]} dan ${nums[1]})`;
+        const last = nums.pop();
+        return `Seluruh Ketua ${type} (${type}.${nums.join(', ')}, dan ${last})`;
+      };
+
+      const now = Date.now();
+      setRecipients(prev => [
+        ...prev,
+        { id: now + '_1', name: `Camat ${kecOnly}`, jabatan: 'Camat', alamat: 'di Tempat' },
+        { id: now + '_2', name: `Kepala Puskesmas & Bidan Desa`, jabatan: 'Puskesmas / Kesehatan', alamat: 'di Tempat' },
+        { id: now + '_3', name: `PD & PLD ${kecName}`, jabatan: 'Pendamping Desa', alamat: 'di Tempat' },
+        { id: now + '_4', name: `Tenaga Ahli ${kabName}`, jabatan: 'Tenaga Ahli P3MD', alamat: 'di Tempat' },
+        { id: now + '_5', name: `Ketua & Anggota BPD`, jabatan: 'Badan Permusyawaratan Desa', alamat: 'di Tempat' },
+        { id: now + '_6', name: `Seluruh Perangkat Desa & Staf`, jabatan: 'Pemerintah Desa', alamat: 'di Tempat' },
+        { id: now + '_7', name: `Ketua TP-PKK ${desaName}`, jabatan: 'Ketua TP-PKK', alamat: 'di Tempat' },
+        { id: now + '_8', name: `Kader Posyandu & KPM ${desaName}`, jabatan: 'Kader Kesehatan & KPM', alamat: 'di Tempat' },
+        { id: now + '_9', name: formatGroup('RT'), jabatan: 'Ketua RT', alamat: 'di Tempat' },
+        { id: now + '_10', name: `Tokoh Agama & Tokoh Masyarakat Desa`, jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' },
+      ]);
+
+      if (!perihal.trim()) {
+        setPerihal(`Pelaksanaan Rembuk Stunting ${desaName}`);
+      }
     }
   };
 
@@ -636,6 +679,13 @@ export default function AdminSuratUndangan({
                   className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
                 >
                   + Kader Posyandu
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('rembuk_stunting')}
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm hover:shadow transition-all flex items-center gap-1.5"
+                  title="Otomatis menambahkan 10 daftar penerima standar acara Rembuk Stunting"
+                >
+                  + Paket Rembuk Stunting (10 Penerima)
                 </button>
               </div>
             </div>
