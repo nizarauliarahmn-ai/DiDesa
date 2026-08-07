@@ -660,7 +660,7 @@ export default function AdminAparatur() {
 
       {/* Hidden Container for Printing Official Aparatur Data Report */}
       <div style={{ display: 'none' }}>
-        <div ref={reportPrintRef} className="p-8 font-serif text-black bg-white w-[794px] max-w-none text-left">
+        <div ref={reportPrintRef} className="p-8 font-serif text-black bg-white w-full text-left">
           {/* Kop Surat Resmi */}
           <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
 
