@@ -271,6 +271,13 @@ export default function AdminSuratUndangan({
         ...prev,
         { id: Date.now().toString() + '_posyandu', name: `Kader Posyandu ${desaName}`, jabatan: 'Kader Posyandu', alamat: 'di Tempat' }
       ]);
+    } else if (presetType === 'hpk') {
+      const rawDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+      const desaName = rawDesa.startsWith('Desa') ? rawDesa : `Desa ${rawDesa}`;
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_hpk', name: `Keluarga Sasaran 1000 HPK ${desaName}`, jabatan: 'Sasaran 1000 HPK', alamat: 'di Tempat' }
+      ]);
     } else if (presetType === 'rembuk_stunting') {
       const kec = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
       const kecName = kec.startsWith('Kecamatan') ? kec : `Kecamatan ${kec}`;
@@ -307,9 +314,10 @@ export default function AdminSuratUndangan({
         { id: now + '_6', name: `Seluruh Perangkat Desa & Staf`, jabatan: 'Pemerintah Desa', alamat: 'di Tempat' },
         { id: now + '_7', name: `Ketua TP-PKK ${desaName}`, jabatan: 'Ketua TP-PKK', alamat: 'di Tempat' },
         { id: now + '_8', name: `Kader Posyandu & KPM ${desaName}`, jabatan: 'Kader Kesehatan & KPM', alamat: 'di Tempat' },
-        { id: now + '_9', name: formatGroup('RT'), jabatan: 'Ketua RT', alamat: 'di Tempat' },
-        { id: now + '_10', name: formatGroup('RW'), jabatan: 'Ketua RW', alamat: 'di Tempat' },
-        { id: now + '_11', name: `Tokoh Agama & Tokoh Masyarakat Desa`, jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' },
+        { id: now + '_9', name: `Keluarga Sasaran 1000 HPK ${desaName}`, jabatan: 'Sasaran 1000 HPK', alamat: 'di Tempat' },
+        { id: now + '_10', name: formatGroup('RT'), jabatan: 'Ketua RT', alamat: 'di Tempat' },
+        { id: now + '_11', name: formatGroup('RW'), jabatan: 'Ketua RW', alamat: 'di Tempat' },
+        { id: now + '_12', name: `Tokoh Agama & Tokoh Masyarakat Desa`, jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' },
       ]);
 
       if (!perihal.trim()) {
@@ -682,11 +690,17 @@ export default function AdminSuratUndangan({
                   + Kader Posyandu
                 </button>
                 <button 
+                  onClick={() => handleAddPreset('hpk')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Sasaran 1000 HPK
+                </button>
+                <button 
                   onClick={() => handleAddPreset('rembuk_stunting')}
                   className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm hover:shadow transition-all flex items-center gap-1.5"
-                  title="Otomatis menambahkan 11 daftar penerima standar acara Rembuk Stunting"
+                  title="Otomatis menambahkan 12 daftar penerima standar acara Rembuk Stunting"
                 >
-                  + Paket Rembuk Stunting (11 Penerima)
+                  + Paket Rembuk Stunting (12 Penerima)
                 </button>
               </div>
             </div>
