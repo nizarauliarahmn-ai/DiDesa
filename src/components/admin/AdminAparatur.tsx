@@ -882,33 +882,6 @@ export default function AdminAparatur() {
             </div>
           </div>
 
-          {/* SIGNATURE BLOCK */}
-          <div className="mt-12 font-sans text-[10.5pt] break-inside-avoid">
-            <div className="flex justify-between items-start">
-              {/* Left Signature (Camat / Mengetahui) */}
-              <div className="text-center w-[45%]">
-                <p>Mengetahui,</p>
-                <p className="font-bold">{sigLeftRole || 'Camat'}</p>
-                <div className="my-3 h-16"></div>
-                <p className="font-bold uppercase underline">{sigLeftName || '........................'}</p>
-                {sigLeftPangkat && <p className="text-[9.5pt] text-gray-800">{sigLeftPangkat}</p>}
-                {sigLeftNip && <p className="text-[9.5pt] text-gray-800">NIP. {sigLeftNip}</p>}
-              </div>
-
-              {/* Right Signature (Kepala Desa) */}
-              <div className="text-center w-[45%]">
-                <p>{(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir').replace(/desa|kelurahan/gi, '').trim()}, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                <p className="font-bold">Kepala Desa</p>
-                <div className="my-3 h-16"></div>
-                <p className="font-bold uppercase underline">{namaKades}</p>
-                {(() => {
-                  const kadesObj = officers.find(o => o.name === namaKades || o.role.toLowerCase().includes('kepala desa'));
-                  return kadesObj?.nip && kadesObj.nip !== '-' ? (
-                    <p className="text-[9.5pt] text-gray-800">NIP. {kadesObj.nip}</p>
-                  ) : null;
-                })()}
-              </div>
-            </div>
           </div>
         </div>
       </div>
