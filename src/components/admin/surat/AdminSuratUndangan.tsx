@@ -406,71 +406,9 @@ export default function AdminSuratUndangan({
   // Print Document Handler
   const handlePrint = () => {
     handleSave();
-    
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-
-    const doc = iframe.contentWindow?.document;
-    if (!doc) return;
-
-    const page1Element = document.getElementById('undangan-page-1');
-    const page2Element = document.getElementById('undangan-page-2');
-
-    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map(el => el.outerHTML)
-      .join('\n');
-
-    doc.open();
-    doc.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Surat Undangan - ${nomorSurat}</title>
-          ${styles}
-          <style>
-            @page { size: A4 portrait; margin: 0 !important; }
-            body { 
-              margin: 0; 
-              padding: 0; 
-              background: white; 
-              color: black;
-              -webkit-print-color-adjust: exact; 
-              print-color-adjust: exact; 
-            }
-            .page { 
-              width: 210mm; 
-              min-height: 297mm; 
-              margin: 0 auto; 
-              box-sizing: border-box; 
-              background: white; 
-              position: relative;
-              page-break-after: always;
-            }
-            .page:last-child { page-break-after: avoid; }
-          </style>
-        </head>
-        <body>
-          <div class="page">
-            ${page1Element ? page1Element.outerHTML : ''}
-          </div>
-          ${isAttached && page2Element ? `
-            <div class="page">
-              ${page2Element.outerHTML}
-            </div>
-          ` : ''}
-        </body>
-      </html>
-    `);
-    doc.close();
-
     setTimeout(() => {
-      try {
-        iframe.contentWindow?.focus();
-        iframe.contentWindow?.print();
-      } catch (e) {
-        console.error("Iframe print error:", e);
-      }
-    }, 500);
+      window.print();
+    }, 150);
   };
 
   const filteredResidents = residentSearchQuery.trim() === '' ? [] : residents.filter(r => 
@@ -1065,6 +1003,7 @@ export default function AdminSuratUndangan({
               >
                 {/* Inner wrapper that actually scales the pages */}
                 <div 
+                  id="undangan-print-wrapper"
                   style={{
                     width: '794px',
                     transform: `scale(${previewZoom})`,
@@ -1079,7 +1018,7 @@ export default function AdminSuratUndangan({
                       minHeight: '1123px',
                       boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                     }}
-                    className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
+                    className="undangan-page-sheet bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
                   >
               <div>
                 {/* Official Village Header (Kop Surat) */}
@@ -1270,7 +1209,7 @@ export default function AdminSuratUndangan({
                   minHeight: '1123px',
                   boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                 }}
-                className="bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
+                className="undangan-page-sheet bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
               >
                 <div>
                   {/* Header Lampiran */}
@@ -1364,12 +1303,45 @@ export default function AdminSuratUndangan({
         </div>
       </div>
 
-      {/* Hidden Print Iframe */}
-      <iframe 
-        ref={iframeRef}
-        title="Print Frame"
-        style={{ position: 'absolute', width: 0, height: 0, border: 0, overflow: 'hidden' }}
-      />
+      {/* Print Stylesheet for High Fidelity A4 Print Preview */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #undangan-print-wrapper, #undangan-print-wrapper * {
+            visibility: visible !important;
+          }
+          #undangan-print-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            transform: none !important;
+          }
+          .undangan-page-sheet {
+            width: 210mm !important;
+            min-height: 297mm !important;
+            margin: 0 auto !important;
+            box-shadow: none !important;
+            border: none !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            background: white !important;
+          }
+          .undangan-page-sheet:last-child {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+          @page {
+            size: A4 portrait;
+            margin: 0 !important;
+          }
+        }
+      `}</style>
 
       {/* Success Dialog */}
       {showSuccessDialog && (
