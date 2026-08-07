@@ -1280,7 +1280,7 @@ export default function AdminSuratDashboard({
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-gray-400" />
+                        <FileText className="w-4 h-4 text-gray-400 shrink-0" />
                         <span className="text-sm font-medium text-gray-700 dark:text-slate-300">{getFullLetterName(surat.jenis)}</span>
                       </div>
                     </td>

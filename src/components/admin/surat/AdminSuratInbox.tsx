@@ -108,7 +108,7 @@ export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) 
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-emerald-600" />
+                        <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span className="text-sm font-bold text-emerald-700 dark:text-emerald-500">
                           {surat.jenis}
                         </span>
