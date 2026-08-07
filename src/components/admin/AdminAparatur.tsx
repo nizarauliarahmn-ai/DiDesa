@@ -3,7 +3,6 @@ import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
-import { useReactToPrint } from 'react-to-print';
 import { generateKopSuratHTML } from '../../utils/letterFormat';
 
 interface Officer {
@@ -44,32 +43,73 @@ export default function AdminAparatur() {
 
   // Print Report Setup
   const reportPrintRef = useRef<HTMLDivElement>(null);
-  const handleTriggerPrintReport = useReactToPrint({
-    contentRef: reportPrintRef,
-    documentTitle: `Laporan_Data_Aparatur_${(localStorage.getItem('kop_desa') || 'Desa').replace(/\s+/g, '_')}`,
-    pageStyle: `
-      @page {
-        size: A4 portrait;
-        margin: 15mm !important;
-      }
-      @media print {
-        html, body {
-          background: #ffffff !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-        table {
-          page-break-inside: auto;
-        }
-        tr {
-          page-break-inside: avoid;
-          page-break-after: auto;
-        }
-      }
-    `
-  });
+  
+  const handleTriggerPrintReport = () => {
+    if (!reportPrintRef.current) return;
+    
+    const printContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Laporan_Data_Aparatur_${(localStorage.getItem('kop_desa') || 'Desa').replace(/\s+/g, '_')}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 15mm !important;
+            }
+            @media print {
+              html, body {
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+              }
+              table {
+                page-break-inside: auto;
+              }
+              tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+              }
+            }
+            body { font-family: serif; color: black; background: white; margin: 0; }
+          </style>
+        </head>
+        <body>
+          <div class="p-8 font-serif text-black bg-white w-full text-left">
+            ${reportPrintRef.current.innerHTML}
+          </div>
+        </body>
+      </html>
+    `;
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    iframe.style.zIndex = '-9999';
+    document.body.appendChild(iframe);
+    
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(printContent);
+      doc.close();
+      
+      // Wait for Tailwind to process styles before printing
+      setTimeout(() => {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+      }, 700);
+    }
+  };
 
   const isSuperAdmin = authUser?.role === 'kades' || authUser?.isImpersonated;
 
