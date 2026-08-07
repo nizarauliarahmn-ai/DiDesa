@@ -212,6 +212,19 @@ export default function AdminSuratUndangan({
   // Recipient Attachment Logic (>3 recipients auto-attaches to Lampiran Page 2)
   const isAttached = forceAttachment || recipients.length > 3;
 
+  // Chunk recipients for multi-page attachment handling (12 per page)
+  const recipientChunks = (() => {
+    const size = 12;
+    const chunks = [];
+    for (let i = 0; i < recipients.length; i += size) {
+      chunks.push({
+        items: recipients.slice(i, i + size),
+        startIndex: i
+      });
+    }
+    return chunks.length > 0 ? chunks : [{ items: [], startIndex: 0 }];
+  })();
+
   // Add Recipient Handlers
   const handleAddRecipient = (name: string, jabatan?: string, alamat?: string) => {
     if (!name.trim()) return;
@@ -1245,101 +1258,110 @@ export default function AdminSuratUndangan({
               <div className="mt-8" dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }} />
             </div>
 
-            {/* PAGE 2: Lampiran Daftar Penerima (If Attached > 3 or Forced) */}
-            {isAttached && (
-              <div 
-                id="undangan-page-2"
-                style={{ 
-                  minHeight: '1123px',
-                  boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
-                }}
-                className="undangan-page-sheet bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
-              >
-                <div>
-                  {/* Header Lampiran */}
-                  <div className="font-sans border-b-[3px] border-black pb-4 mb-8">
-                    <div className="flex justify-between font-bold text-[11pt] mb-1">
-                      <span className="tracking-wide">LAMPIRAN SURAT UNDANGAN</span>
-                      <span>Halaman 2</span>
+            {/* PAGE 2+: Lampiran Daftar Penerima (If Attached > 3 or Forced) */}
+            {isAttached && recipientChunks.map((chunk, chunkIdx) => {
+              const pageNum = chunkIdx + 2;
+              const isLastChunk = chunkIdx === recipientChunks.length - 1;
+              return (
+                <div 
+                  key={`lampiran-page-${chunkIdx}`}
+                  id={chunkIdx === 0 ? "undangan-page-2" : `undangan-page-${pageNum}`}
+                  style={{ 
+                    minHeight: '1123px',
+                    boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+                  }}
+                  className="undangan-page-sheet bg-white text-black p-[20mm] font-serif text-[11pt] leading-relaxed relative flex flex-col justify-between shrink-0 overflow-hidden"
+                >
+                  <div>
+                    {/* Header Lampiran */}
+                    <div className="font-sans border-b-[3px] border-black pb-4 mb-8">
+                      <div className="flex justify-between font-bold text-[11pt] mb-1">
+                        <span className="tracking-wide">LAMPIRAN SURAT UNDANGAN</span>
+                        <span>Halaman {pageNum}</span>
+                      </div>
+                      <table className="mt-3 text-[10pt] font-sans">
+                        <tbody>
+                          <tr>
+                            <td className="w-28 font-normal py-0.5">Nomor Surat</td>
+                            <td className="w-4 text-center py-0.5">:</td>
+                            <td className="py-0.5">{nomorSurat}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-normal py-0.5">Tanggal Surat</td>
+                            <td className="text-center py-0.5">:</td>
+                            <td className="py-0.5">{fmtShortDate(tanggalSurat)}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-normal py-0.5">Perihal</td>
+                            <td className="text-center py-0.5">:</td>
+                            <td className="font-bold py-0.5">{perihal}</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
-                    <table className="mt-3 text-[10pt] font-sans">
+
+                    <h3 className="text-center font-bold font-sans uppercase text-[13pt] mb-6">
+                      DAFTAR PENERIMA UNDANGAN {recipientChunks.length > 1 ? `(BAGIAN ${chunkIdx + 1})` : ''}
+                    </h3>
+
+                    {/* Recipients Table */}
+                    <table className="w-full border-collapse border border-black font-sans text-[11pt] mb-8">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border border-black px-3 py-3 text-center w-12 font-bold">NO</th>
+                          <th className="border border-black px-4 py-3 text-center font-bold">NAMA / PENERIMA</th>
+                          <th className="border border-black px-4 py-3 text-center font-bold">JABATAN / INSTANSI</th>
+                        </tr>
+                      </thead>
                       <tbody>
-                        <tr>
-                          <td className="w-28 font-normal py-0.5">Nomor Surat</td>
-                          <td className="w-4 text-center py-0.5">:</td>
-                          <td className="py-0.5">{nomorSurat}</td>
-                        </tr>
-                        <tr>
-                          <td className="font-normal py-0.5">Tanggal Surat</td>
-                          <td className="text-center py-0.5">:</td>
-                          <td className="py-0.5">{fmtShortDate(tanggalSurat)}</td>
-                        </tr>
-                        <tr>
-                          <td className="font-normal py-0.5">Perihal</td>
-                          <td className="text-center py-0.5">:</td>
-                          <td className="font-bold py-0.5">{perihal}</td>
-                        </tr>
+                        {chunk.items.map((r, i) => (
+                          <tr key={r.id}>
+                            <td className="border border-black px-3 py-2 text-center font-bold">{chunk.startIndex + i + 1}</td>
+                            <td className="border border-black px-4 py-2 font-bold">{r.name}</td>
+                            <td className="border border-black px-4 py-2">{r.jabatan || '-'}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
 
-                  <h3 className="text-center font-bold font-sans uppercase text-[13pt] mb-6">
-                    DAFTAR PENERIMA UNDANGAN
-                  </h3>
-
-                  {/* Recipients Table */}
-                  <table className="w-full border-collapse border border-black font-sans text-[11pt] mb-8">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border border-black px-3 py-3 text-center w-12 font-bold">NO</th>
-                        <th className="border border-black px-4 py-3 text-center font-bold">NAMA / PENERIMA</th>
-                        <th className="border border-black px-4 py-3 text-center font-bold">JABATAN / INSTANSI</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recipients.map((r, i) => (
-                        <tr key={r.id}>
-                          <td className="border border-black px-3 py-2 text-center font-bold">{i + 1}</td>
-                          <td className="border border-black px-4 py-2 font-bold">{r.name}</td>
-                          <td className="border border-black px-4 py-2">{r.jabatan || '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Signature Block for Page 2 */}
-                <div className="mt-8 font-sans text-[11pt]">
-                  <div className="flex justify-end text-center">
-                    <div className="w-[55%]">
-                      {isTTE ? (
-                        <div className="my-2 min-h-[75px] flex items-center justify-center">
-                          <TTESignatureBox
-                            officerTitle={pejabatJabatan}
-                            officerName={pejabatNama}
-                            nip={pejabatNip}
-                            dateStr={fmtShortDate(tanggalSurat)}
-                            verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
-                          />
+                  <div>
+                    {/* Signature Block for Page 2 (Only on the LAST chunk page) */}
+                    {isLastChunk && (
+                      <div className="mt-8 font-sans text-[11pt]">
+                        <div className="flex justify-end text-center">
+                          <div className="w-[55%]">
+                            {isTTE ? (
+                              <div className="my-2 min-h-[75px] flex items-center justify-center">
+                                <TTESignatureBox
+                                  officerTitle={pejabatJabatan}
+                                  officerName={pejabatNama}
+                                  nip={pejabatNip}
+                                  dateStr={fmtShortDate(tanggalSurat)}
+                                  verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
+                                />
+                              </div>
+                            ) : (
+                              <>
+                                <p className="font-bold">{pejabatJabatan}</p>
+                                <div className="my-2 h-20" />
+                                <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
+                                {pejabatNip && pejabatNip !== '-' && (
+                                  <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </div>
-                      ) : (
-                        <>
-                          <p className="font-bold">{pejabatJabatan}</p>
-                          <div className="my-2 h-20" />
-                          <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
-                          {pejabatNip && pejabatNip !== '-' && (
-                            <p className="text-[10pt] text-gray-800 mt-0.5">NIP. {pejabatNip}</p>
-                          )}
-                        </>
-                      )}
-                    </div>
+                      </div>
+                    )}
+
+                    {/* SaaS Global Footer */}
+                    <div className="mt-8" dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }} />
                   </div>
                 </div>
-
-                {/* SaaS Global Footer */}
-                <div className="mt-8" dangerouslySetInnerHTML={{ __html: SAAS_CONFIG.globalFooterHTML }} />
-              </div>
-            )}
+              );
+            })}
                 </div>
               </div>
             </div>
