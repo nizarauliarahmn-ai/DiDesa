@@ -196,10 +196,20 @@ export default function AdminSuratUndangan({
   const handleAddPreset = (presetType: string) => {
     if (presetType === 'rt_rw') {
       const formatGroup = (type: 'RT' | 'RW', defaultCount: number) => {
-        const count = parseInt(localStorage.getItem(`total_${type.toLowerCase()}`) || defaultCount.toString());
-        if (count <= 1) return `Seluruh Ketua ${type} (${type}.01)`;
-        const nums = Array.from({length: count}, (_, i) => (i + 1).toString().padStart(2, '0'));
-        if (count === 2) return `Seluruh Ketua ${type} (${type}.${nums[0]} dan ${nums[1]})`;
+        let nums: string[] = [];
+        try {
+          const list = JSON.parse(localStorage.getItem(`village_${type.toLowerCase()}_list`) || '[]');
+          if (Array.isArray(list) && list.length > 0) {
+            nums = list.map(item => item.no.toString().padStart(2, '0'));
+          }
+        } catch { }
+
+        if (nums.length === 0) {
+          nums = Array.from({length: defaultCount}, (_, i) => (i + 1).toString().padStart(2, '0'));
+        }
+
+        if (nums.length === 1) return `Seluruh Ketua ${type} (${type}.${nums[0]})`;
+        if (nums.length === 2) return `Seluruh Ketua ${type} (${type}.${nums[0]} dan ${nums[1]})`;
         const last = nums.pop();
         return `Seluruh Ketua ${type} (${type}.${nums.join(', ')}, dan ${last})`;
       };
