@@ -195,10 +195,19 @@ export default function AdminSuratUndangan({
   // Preset Recipients
   const handleAddPreset = (presetType: string) => {
     if (presetType === 'rt_rw') {
+      const formatGroup = (type: 'RT' | 'RW', defaultCount: number) => {
+        const count = parseInt(localStorage.getItem(`total_${type.toLowerCase()}`) || defaultCount.toString());
+        if (count <= 1) return `Seluruh Ketua ${type} (${type}.01)`;
+        const nums = Array.from({length: count}, (_, i) => (i + 1).toString().padStart(2, '0'));
+        if (count === 2) return `Seluruh Ketua ${type} (${type}.${nums[0]} dan ${nums[1]})`;
+        const last = nums.pop();
+        return `Seluruh Ketua ${type} (${type}.${nums.join(', ')}, dan ${last})`;
+      };
+
       setRecipients(prev => [
         ...prev,
-        { id: Date.now().toString() + '_rt', name: 'Seluruh Ketua RT (RT 01 s/d RT 06)', jabatan: 'Ketua RT', alamat: 'di Tempat' },
-        { id: Date.now().toString() + '_rw', name: 'Seluruh Ketua RW (RW 01 & RW 02)', jabatan: 'Ketua RW', alamat: 'di Tempat' }
+        { id: Date.now().toString() + '_rt', name: formatGroup('RT', 6), jabatan: 'Ketua RT', alamat: 'di Tempat' },
+        { id: Date.now().toString() + '_rw', name: formatGroup('RW', 2), jabatan: 'Ketua RW', alamat: 'di Tempat' }
       ]);
     } else if (presetType === 'bpd') {
       setRecipients(prev => [
@@ -960,9 +969,7 @@ export default function AdminSuratUndangan({
                                 {recipients.map((r, i) => (
                                   <div key={r.id} className="flex gap-2">
                                     <span className="min-w-[18px]">{i + 1}.</span>
-                                    <span>
-                                      {r.name} {r.jabatan ? `(${r.jabatan})` : ''}
-                                    </span>
+                                    <span>{r.name}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1132,7 +1139,6 @@ export default function AdminSuratUndangan({
                         <th className="border border-black px-3 py-3 text-center w-12 font-bold">NO</th>
                         <th className="border border-black px-4 py-3 text-center font-bold">NAMA / PENERIMA</th>
                         <th className="border border-black px-4 py-3 text-center font-bold">JABATAN / INSTANSI</th>
-                        <th className="border border-black px-3 py-3 text-center w-36 font-bold">ALAMAT</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1141,7 +1147,6 @@ export default function AdminSuratUndangan({
                           <td className="border border-black px-3 py-2 text-center font-bold">{i + 1}</td>
                           <td className="border border-black px-4 py-2 font-bold">{r.name}</td>
                           <td className="border border-black px-4 py-2">{r.jabatan || '-'}</td>
-                          <td className="border border-black px-3 py-2 text-center italic">{r.alamat || 'di Tempat'}</td>
                         </tr>
                       ))}
                     </tbody>
