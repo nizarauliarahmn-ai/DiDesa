@@ -308,7 +308,8 @@ export default function AdminSuratUndangan({
         { id: now + '_7', name: `Ketua TP-PKK ${desaName}`, jabatan: 'Ketua TP-PKK', alamat: 'di Tempat' },
         { id: now + '_8', name: `Kader Posyandu & KPM ${desaName}`, jabatan: 'Kader Kesehatan & KPM', alamat: 'di Tempat' },
         { id: now + '_9', name: formatGroup('RT'), jabatan: 'Ketua RT', alamat: 'di Tempat' },
-        { id: now + '_10', name: `Tokoh Agama & Tokoh Masyarakat Desa`, jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' },
+        { id: now + '_10', name: formatGroup('RW'), jabatan: 'Ketua RW', alamat: 'di Tempat' },
+        { id: now + '_11', name: `Tokoh Agama & Tokoh Masyarakat Desa`, jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' },
       ]);
 
       if (!perihal.trim()) {
@@ -683,9 +684,9 @@ export default function AdminSuratUndangan({
                 <button 
                   onClick={() => handleAddPreset('rembuk_stunting')}
                   className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm hover:shadow transition-all flex items-center gap-1.5"
-                  title="Otomatis menambahkan 10 daftar penerima standar acara Rembuk Stunting"
+                  title="Otomatis menambahkan 11 daftar penerima standar acara Rembuk Stunting"
                 >
-                  + Paket Rembuk Stunting (10 Penerima)
+                  + Paket Rembuk Stunting (11 Penerima)
                 </button>
               </div>
             </div>
