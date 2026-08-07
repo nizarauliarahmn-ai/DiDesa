@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, Cloud, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, Cloud, RefreshCw, Printer } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { useReactToPrint } from 'react-to-print';
+import { generateKopSuratHTML } from '../../utils/letterFormat';
 
 interface Officer {
   name: string;
@@ -39,6 +41,39 @@ export default function AdminAparatur() {
   const [modalCategory, setModalCategory] = useState<'perangkat' | 'bpd' | 'lpm'>('perangkat');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [officerForm, setOfficerForm] = useState<Officer>({ name: '', role: '', nip: '-' });
+
+  // Print Report Setup
+  const reportPrintRef = useRef<HTMLDivElement>(null);
+  const handleTriggerPrintReport = useReactToPrint({
+    contentRef: reportPrintRef,
+    documentTitle: `Laporan_Data_Aparatur_${(localStorage.getItem('kop_desa') || 'Desa').replace(/\s+/g, '_')}`,
+    pageStyle: `
+      @page {
+        size: A4 portrait;
+        margin: 15mm !important;
+      }
+      @media print {
+        html, body {
+          background: #ffffff !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .printable-report {
+          width: 100% !important;
+          padding: 0 !important;
+        }
+        table {
+          page-break-inside: auto;
+        }
+        tr {
+          page-break-inside: avoid;
+          page-break-after: auto;
+        }
+      }
+    `
+  });
 
   const isSuperAdmin = authUser?.role === 'kades' || authUser?.isImpersonated;
 
@@ -304,10 +339,20 @@ export default function AdminAparatur() {
           >
             <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
           </button>
+
+          <button 
+            onClick={() => handleTriggerPrintReport()}
+            disabled={isSyncing}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 dark:shadow-none disabled:opacity-50 text-sm"
+            title="Cetak atau Download PDF Laporan Data Aparatur, BPD, LPM, & RT/RW"
+          >
+            <Printer size={18} /> Cetak Laporan PDF
+          </button>
+
           <button 
             onClick={handleSaveAll}
             disabled={isSyncing}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg dark:shadow-none shadow-emerald-200 disabled:opacity-50"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg dark:shadow-none shadow-emerald-200 disabled:opacity-50 text-sm"
           >
             <Save size={18} /> {isSyncing ? 'Menyimpan...' : 'Simpan Perubahan Online'}
           </button>
@@ -621,6 +666,215 @@ export default function AdminAparatur() {
           </div>
         </div>
       )}
+
+      {/* Hidden Container for Printing Official Aparatur Data Report */}
+      <div className="hidden">
+        <div ref={reportPrintRef} className="printable-report p-6 font-serif text-black bg-white">
+          {/* Kop Surat Resmi */}
+          <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
+
+          {/* Title Header */}
+          <div className="text-center my-6">
+            <h2 className="text-[14pt] font-bold uppercase tracking-wider underline">
+              LAPORAN DATA APARATUR, BPD, LPM & KETUA RT/RW
+            </h2>
+            <p className="text-[11pt] font-sans font-bold mt-1 uppercase">
+              DESA {(localStorage.getItem('kop_desa') || 'WASAH HILIR').replace(/desa|kelurahan/gi, '').trim()} • KECAMATAN {(localStorage.getItem('kop_kecamatan') || 'SIMPUR').replace(/^kecamatan\s+/i, '').trim()}
+            </p>
+          </div>
+
+          {/* 1. TABLE PERANGKAT DESA */}
+          <div className="mb-6 font-sans">
+            <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
+              I. PEMERINTAH & PERANGKAT DESA
+            </h3>
+            <table className="w-full border-collapse border border-black text-[10pt]">
+              <thead>
+                <tr className="bg-gray-100 font-bold">
+                  <th className="border border-black px-2 py-1.5 text-center w-10">NO</th>
+                  <th className="border border-black px-3 py-1.5 text-left">NAMA LENGKAP</th>
+                  <th className="border border-black px-3 py-1.5 text-left">JABATAN</th>
+                  <th className="border border-black px-3 py-1.5 text-left">NIP / NIK</th>
+                  <th className="border border-black px-2 py-1.5 text-center w-36">STATUS TTD</th>
+                </tr>
+              </thead>
+              <tbody>
+                {officers.length > 0 ? (
+                  officers.map((off, idx) => (
+                    <tr key={idx}>
+                      <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
+                      <td className="border border-black px-3 py-1.5 font-bold uppercase">{off.name}</td>
+                      <td className="border border-black px-3 py-1.5">{off.role}</td>
+                      <td className="border border-black px-3 py-1.5 font-mono">{off.nip || '-'}</td>
+                      <td className="border border-black px-2 py-1.5 text-center text-[9pt]">
+                        {off.name === namaKades ? 'Penandatangan Utama' : '-'}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data perangkat desa</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2. TABLE BPD */}
+          <div className="mb-6 font-sans">
+            <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
+              II. BADAN PERMUSYAWARATAN DESA (BPD)
+            </h3>
+            <table className="w-full border-collapse border border-black text-[10pt]">
+              <thead>
+                <tr className="bg-gray-100 font-bold">
+                  <th className="border border-black px-2 py-1.5 text-center w-10">NO</th>
+                  <th className="border border-black px-3 py-1.5 text-left">NAMA LENGKAP</th>
+                  <th className="border border-black px-3 py-1.5 text-left">JABATAN BPD</th>
+                  <th className="border border-black px-3 py-1.5 text-left">NIP / KETERANGAN</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bpdList.length > 0 ? (
+                  bpdList.map((bpd, idx) => (
+                    <tr key={idx}>
+                      <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
+                      <td className="border border-black px-3 py-1.5 font-bold uppercase">{bpd.name}</td>
+                      <td className="border border-black px-3 py-1.5">{bpd.role}</td>
+                      <td className="border border-black px-3 py-1.5 font-mono">{bpd.nip || '-'}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data pengurus BPD</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 3. TABLE LPM */}
+          <div className="mb-6 font-sans">
+            <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
+              III. LEMBAGA PEMBERDAYAAN MASYARAKAT (LPM)
+            </h3>
+            <table className="w-full border-collapse border border-black text-[10pt]">
+              <thead>
+                <tr className="bg-gray-100 font-bold">
+                  <th className="border border-black px-2 py-1.5 text-center w-10">NO</th>
+                  <th className="border border-black px-3 py-1.5 text-left">NAMA LENGKAP</th>
+                  <th className="border border-black px-3 py-1.5 text-left">JABATAN LPM</th>
+                  <th className="border border-black px-3 py-1.5 text-left">NIP / KETERANGAN</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lpmList.length > 0 ? (
+                  lpmList.map((lpm, idx) => (
+                    <tr key={idx}>
+                      <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
+                      <td className="border border-black px-3 py-1.5 font-bold uppercase">{lpm.name}</td>
+                      <td className="border border-black px-3 py-1.5">{lpm.role}</td>
+                      <td className="border border-black px-3 py-1.5 font-mono">{lpm.nip || '-'}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data pengurus LPM</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 4. TABLE RT & RW */}
+          <div className="mb-8 font-sans grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="font-bold text-[10.5pt] uppercase mb-2 border-b border-black pb-1">
+                IV. DAFTAR KETUA RT
+              </h3>
+              <table className="w-full border-collapse border border-black text-[9.5pt]">
+                <thead>
+                  <tr className="bg-gray-100 font-bold">
+                    <th className="border border-black px-2 py-1 text-center w-16">NO. RT</th>
+                    <th className="border border-black px-3 py-1 text-left">NAMA KETUA RT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rtList.length > 0 ? (
+                    rtList.map((rt, idx) => (
+                      <tr key={idx}>
+                        <td className="border border-black px-2 py-1 text-center font-bold">RT.{rt.no}</td>
+                        <td className="border border-black px-3 py-1 font-semibold">{rt.name}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={2} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data RT</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-[10.5pt] uppercase mb-2 border-b border-black pb-1">
+                V. DAFTAR KETUA RW
+              </h3>
+              <table className="w-full border-collapse border border-black text-[9.5pt]">
+                <thead>
+                  <tr className="bg-gray-100 font-bold">
+                    <th className="border border-black px-2 py-1 text-center w-16">NO. RW</th>
+                    <th className="border border-black px-3 py-1 text-left">NAMA KETUA RW</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rwList.length > 0 ? (
+                    rwList.map((rw, idx) => (
+                      <tr key={idx}>
+                        <td className="border border-black px-2 py-1 text-center font-bold">RW.{rw.no}</td>
+                        <td className="border border-black px-3 py-1 font-semibold">{rw.name}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={2} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data RW</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* SIGNATURE BLOCK */}
+          <div className="mt-12 font-sans text-[10.5pt] break-inside-avoid">
+            <div className="flex justify-between items-start">
+              {/* Left Signature (Camat / Mengetahui) */}
+              <div className="text-center w-[45%]">
+                <p>Mengetahui,</p>
+                <p className="font-bold">{sigLeftRole || 'Camat'}</p>
+                <div className="my-3 h-16"></div>
+                <p className="font-bold uppercase underline">{sigLeftName || '........................'}</p>
+                {sigLeftPangkat && <p className="text-[9.5pt] text-gray-800">{sigLeftPangkat}</p>}
+                {sigLeftNip && <p className="text-[9.5pt] text-gray-800">NIP. {sigLeftNip}</p>}
+              </div>
+
+              {/* Right Signature (Kepala Desa) */}
+              <div className="text-center w-[45%]">
+                <p>{(localStorage.getItem('kop_desa') || 'Desa Wasah Hilir').replace(/desa|kelurahan/gi, '').trim()}, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                <p className="font-bold">Kepala Desa</p>
+                <div className="my-3 h-16"></div>
+                <p className="font-bold uppercase underline">{namaKades}</p>
+                {(() => {
+                  const kadesObj = officers.find(o => o.name === namaKades || o.role.toLowerCase().includes('kepala desa'));
+                  return kadesObj?.nip && kadesObj.nip !== '-' ? (
+                    <p className="text-[9.5pt] text-gray-800">NIP. {kadesObj.nip}</p>
+                  ) : null;
+                })()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
