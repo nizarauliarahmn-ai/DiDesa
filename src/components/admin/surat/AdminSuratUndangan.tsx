@@ -235,6 +235,42 @@ export default function AdminSuratUndangan({
         ...prev,
         { id: Date.now().toString() + '_tokoh', name: 'Tokoh Agama & Tokoh Masyarakat Desa', jabatan: 'Tokoh Masyarakat', alamat: 'di Tempat' }
       ]);
+    } else if (presetType === 'pld') {
+      const kec = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
+      const kecName = kec.startsWith('Kecamatan') ? kec : `Kecamatan ${kec}`;
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_pld', name: `PD & PLD ${kecName}`, jabatan: 'Pendamping Desa', alamat: 'di Tempat' }
+      ]);
+    } else if (presetType === 'ta') {
+      const kab = localStorage.getItem('kop_kabupaten') || 'Kabupaten Hulu Sungai Selatan';
+      const kabClean = kab.replace(/^Pemerintah\s+/i, '');
+      const kabName = kabClean.startsWith('Kabupaten') ? kabClean : `Kabupaten ${kabClean}`;
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_ta', name: `Tenaga Ahli ${kabName}`, jabatan: 'Tenaga Ahli P3MD', alamat: 'di Tempat' }
+      ]);
+    } else if (presetType === 'camat') {
+      const kec = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
+      const kecOnly = kec.replace(/^Kecamatan\s+/i, '');
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_camat', name: `Camat ${kecOnly}`, jabatan: 'Camat', alamat: 'di Tempat' }
+      ]);
+    } else if (presetType === 'pkk') {
+      const rawDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+      const desaName = rawDesa.startsWith('Desa') ? rawDesa : `Desa ${rawDesa}`;
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_pkk_ketua', name: `Ketua TP-PKK ${desaName}`, jabatan: 'Ketua TP-PKK', alamat: 'di Tempat' }
+      ]);
+    } else if (presetType === 'posyandu') {
+      const rawDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+      const desaName = rawDesa.startsWith('Desa') ? rawDesa : `Desa ${rawDesa}`;
+      setRecipients(prev => [
+        ...prev,
+        { id: Date.now().toString() + '_posyandu', name: `Kader Posyandu ${desaName}`, jabatan: 'Kader Posyandu', alamat: 'di Tempat' }
+      ]);
     }
   };
 
@@ -570,6 +606,36 @@ export default function AdminSuratUndangan({
                   className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
                 >
                   + Tokoh Masyarakat
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('pld')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + PD & PLD
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('ta')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Tenaga Ahli Kabupaten
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('camat')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Camat
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('pkk')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Ketua TP-PKK Desa
+                </button>
+                <button 
+                  onClick={() => handleAddPreset('posyandu')}
+                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
+                >
+                  + Kader Posyandu
                 </button>
               </div>
             </div>
