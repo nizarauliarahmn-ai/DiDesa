@@ -19,6 +19,7 @@ import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { capitalizeWords, capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import SuratEditorHeader from './SuratEditorHeader';
+import { useReactToPrint } from 'react-to-print';
 
 export interface Recipient {
   id: string;
@@ -124,6 +125,48 @@ export default function AdminSuratUndangan({
 
   // UI States (SKTM Live Engine Defaults)
   const [previewZoom, setPreviewZoom] = useState<number>(0.45);
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handleTriggerPrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `Surat_Undangan_${nomorSurat ? nomorSurat.replace(/[\/\s]/g, '_') : 'Undangan'}`,
+    pageStyle: `
+      @page {
+        size: A4 portrait;
+        margin: 0 !important;
+      }
+      @media print {
+        html, body {
+          background: #ffffff !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .print-wrapper-container {
+          transform: none !important;
+          width: 100% !important;
+          max-width: none !important;
+        }
+        .undangan-page-sheet {
+          width: 210mm !important;
+          min-height: 297mm !important;
+          box-shadow: none !important;
+          border: none !important;
+          margin: 0 auto !important;
+          padding: 20mm !important;
+          background: white !important;
+          page-break-after: always !important;
+          break-after: page !important;
+        }
+        .undangan-page-sheet:last-child {
+          page-break-after: avoid !important;
+          break-after: avoid !important;
+        }
+      }
+    `
+  });
+
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
   const [savedLetterId, setSavedLetterId] = useState<string>('');
@@ -407,7 +450,7 @@ export default function AdminSuratUndangan({
   const handlePrint = () => {
     handleSave();
     setTimeout(() => {
-      window.print();
+      handleTriggerPrint();
     }, 150);
   };
 
@@ -1003,13 +1046,14 @@ export default function AdminSuratUndangan({
               >
                 {/* Inner wrapper that actually scales the pages */}
                 <div 
+                  ref={printRef}
                   id="undangan-print-wrapper"
                   style={{
                     width: '794px',
                     transform: `scale(${previewZoom})`,
                     transformOrigin: 'top left',
                   }}
-                  className="flex flex-col gap-8"
+                  className="print-wrapper-container flex flex-col gap-8"
                 >
                   {/* PAGE 1: Main Surat Undangan */}
                   <div 
