@@ -316,25 +316,20 @@ export default function AdminAparatur() {
   return (
     <div className="pt-6 pb-24 px-4 md:px-8 max-w-7xl mx-auto animate-in fade-in duration-300">
       {/* HEADER BAR */}
-      <div className="flex items-center justify-between mb-8 flex-col md:flex-row gap-4 md:gap-0">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Building2 className="text-emerald-600" />
-              Aparatur Desa & Lembaga SDM
-            </h1>
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${cloudSynced ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-              <Cloud className="w-3.5 h-3.5" />
-              {isSyncing ? 'Mengumpulkan data...' : cloudSynced ? 'Tersinkron Cloud Supabase' : 'Lokal (Menunggu Sync)'}
-            </span>
-          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <Building2 className="text-emerald-600 w-6 h-6" />
+            Aparatur Desa & Lembaga SDM
+          </h1>
           <p className="text-gray-500 dark:text-slate-400 text-sm mt-1">Kelola data Kepala Desa, Perangkat Desa, BPD, LPM, RT/RW, dan Pejabat Pengesah secara online real-time.</p>
         </div>
-        <div className="flex items-center gap-3 w-full md:w-auto">
+
+        <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap shrink-0">
           <button 
             onClick={fetchCloudSettings}
             disabled={isSyncing}
-            className="p-2.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 rounded-xl hover:bg-gray-200 transition-colors"
+            className="p-2.5 bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors shrink-0"
             title="Muat Ulang dari Cloud Supabase"
           >
             <RefreshCw size={18} className={isSyncing ? 'animate-spin' : ''} />
@@ -343,18 +338,18 @@ export default function AdminAparatur() {
           <button 
             onClick={() => handleTriggerPrintReport()}
             disabled={isSyncing}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 dark:shadow-none disabled:opacity-50 text-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-200 dark:shadow-none disabled:opacity-50 text-xs sm:text-sm whitespace-nowrap"
             title="Cetak atau Download PDF Laporan Data Aparatur, BPD, LPM, & RT/RW"
           >
-            <Printer size={18} /> Cetak Laporan PDF
+            <Printer size={16} /> Cetak Laporan PDF
           </button>
 
           <button 
             onClick={handleSaveAll}
             disabled={isSyncing}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg dark:shadow-none shadow-emerald-200 disabled:opacity-50 text-sm"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-all shadow-md shadow-emerald-200 dark:shadow-none disabled:opacity-50 text-xs sm:text-sm whitespace-nowrap"
           >
-            <Save size={18} /> {isSyncing ? 'Menyimpan...' : 'Simpan Perubahan Online'}
+            <Save size={16} /> {isSyncing ? 'Menyimpan...' : 'Simpan Perubahan'}
           </button>
         </div>
       </div>
