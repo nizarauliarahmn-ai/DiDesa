@@ -1260,7 +1260,14 @@ export default function AdminSuratDashboard({
                     </td>
                     <td className="px-6 py-4 print:hidden text-center">
                       <div className="flex items-center justify-center gap-1">
-                        
+                        <button 
+                          onClick={() => setSelectedSurat(surat)}
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:hover:bg-blue-950/40 rounded-lg transition-colors" 
+                          title="Lihat Hasil Cetak Pratinjau Surat"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+
                         {!isCancelled && (
                           <>
                             <button 
@@ -1443,12 +1450,24 @@ export default function AdminSuratDashboard({
 
                 <div className="space-y-2 mt-6">
                   {!selectedSurat.status || selectedSurat.status !== 'Dibatalkan' ? (
-                    <button 
-                      onClick={() => triggerSinglePrint(selectedSurat)}
-                      className="w-full flex items-center justify-center gap-2 bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all"
-                    >
-                      <Printer className="w-4 h-4" /> Cetak Surat
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => triggerSinglePrint(selectedSurat)}
+                        className="w-full flex items-center justify-center gap-2 bg-emerald-700 text-white py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all"
+                      >
+                        <Printer className="w-4 h-4" /> Cetak Surat
+                      </button>
+                      <button 
+                        onClick={() => {
+                          const s = selectedSurat;
+                          setSelectedSurat(null);
+                          onEditLetter?.(s);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 border border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 hover:bg-amber-100 py-2.5 rounded-xl text-sm font-bold transition-all"
+                      >
+                        <Edit2 className="w-4 h-4" /> Perbaiki / Edit Surat
+                      </button>
+                    </>
                   ) : (
                     <div className="w-full text-center py-2.5 bg-red-50 text-red-700 rounded-xl text-sm font-bold border border-red-100">
                       Surat Dibatalkan
