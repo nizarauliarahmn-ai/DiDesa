@@ -58,10 +58,7 @@ export default function AdminAparatur() {
           <style>
             @page {
               size: A4 portrait;
-              margin-top: 15mm !important;
-              margin-bottom: 25mm !important;
-              margin-left: 15mm !important;
-              margin-right: 15mm !important;
+              margin: 0 !important;
             }
             @media print {
               html, body {
@@ -80,10 +77,10 @@ export default function AdminAparatur() {
               }
               .saas-global-footer {
                 position: fixed !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                width: 100% !important;
+                bottom: 10mm !important;
+                left: 15mm !important;
+                right: 15mm !important;
+                width: auto !important;
                 background: white !important;
               }
             }
@@ -91,9 +88,23 @@ export default function AdminAparatur() {
           </style>
         </head>
         <body>
-          <div class="font-serif text-black bg-white w-full text-left">
-            ${reportPrintRef.current.innerHTML}
-          </div>
+          <table style="width: 100%; border-collapse: collapse; border: none;">
+            <thead style="display: table-header-group;">
+              <tr><td style="height: 15mm; padding: 0; border: none;"></td></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0 15mm; border: none;">
+                  <div class="font-serif text-black bg-white w-full text-left">
+                    ${reportPrintRef.current.innerHTML}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+            <tfoot style="display: table-footer-group;">
+              <tr><td style="height: 25mm; padding: 0; border: none;"></td></tr>
+            </tfoot>
+          </table>
           ${SAAS_CONFIG.globalFooterHTML}
         </body>
       </html>
