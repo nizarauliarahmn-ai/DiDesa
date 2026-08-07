@@ -4,6 +4,7 @@ import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { generateKopSuratHTML } from '../../utils/letterFormat';
+import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 
 interface Officer {
   name: string;
@@ -57,7 +58,7 @@ export default function AdminAparatur() {
           <style>
             @page {
               size: A4 portrait;
-              margin: 15mm !important;
+              margin: 0 !important;
             }
             @media print {
               html, body {
@@ -74,14 +75,22 @@ export default function AdminAparatur() {
                 page-break-inside: avoid;
                 page-break-after: auto;
               }
+              .saas-global-footer {
+                position: fixed !important;
+                bottom: 15mm !important;
+                left: 15mm !important;
+                right: 15mm !important;
+                background: white !important;
+              }
             }
             body { font-family: serif; color: black; background: white; margin: 0; }
           </style>
         </head>
         <body>
-          <div class="p-8 font-serif text-black bg-white w-full text-left">
+          <div class="p-8 pb-32 font-serif text-black bg-white w-full text-left" style="padding-top: 15mm; padding-left: 15mm; padding-right: 15mm; padding-bottom: 25mm;">
             ${reportPrintRef.current.innerHTML}
           </div>
+          ${SAAS_CONFIG.globalFooterHTML}
         </body>
       </html>
     `;
