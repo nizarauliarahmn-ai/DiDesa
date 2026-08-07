@@ -283,6 +283,44 @@ export function getGlobalBranding(
 }
 
 /**
+ * Dynamically updates the browser tab favicon to match the SaaS global logo (global_app_logo).
+ * If no custom logo is uploaded in global settings, falls back to /favicon.svg.
+ */
+export function updateDynamicFavicon(): void {
+  try {
+    const customLogo = localStorage.getItem('global_app_logo');
+    const targetHref = (customLogo && customLogo.trim() !== '') ? customLogo.trim() : '/favicon.svg';
+
+    let faviconEl = document.querySelector<HTMLLinkElement>("link[rel='icon']") ||
+                    document.querySelector<HTMLLinkElement>("link[rel='shortcut icon']");
+
+    if (faviconEl) {
+      if (faviconEl.href !== targetHref) {
+        faviconEl.href = targetHref;
+        if (!customLogo || customLogo.trim() === '') {
+          faviconEl.type = 'image/svg+xml';
+        } else {
+          faviconEl.removeAttribute('type');
+        }
+      }
+    } else {
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = targetHref;
+      document.head.appendChild(link);
+    }
+  } catch (e) {
+    console.warn('[GlobalBranding] Failed to update dynamic favicon:', e);
+  }
+}
+
+// Auto-listen to global branding updates to refresh tab favicon dynamically
+if (typeof window !== 'undefined') {
+  window.addEventListener('global_branding_updated', updateDynamicFavicon);
+  setTimeout(updateDynamicFavicon, 100);
+}
+
+/**
  * Helper hook-like function to read all branding values at once.
  */
 export function getAllGlobalBranding() {
