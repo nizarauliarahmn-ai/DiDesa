@@ -80,6 +80,7 @@ export default function AdminAparatur() {
                 bottom: 15mm !important;
                 left: 15mm !important;
                 right: 15mm !important;
+                width: auto !important;
                 background: white !important;
               }
             }
@@ -735,7 +736,6 @@ export default function AdminAparatur() {
                   <th className="border border-black px-3 py-1.5 text-left">NAMA LENGKAP</th>
                   <th className="border border-black px-3 py-1.5 text-left">JABATAN</th>
                   <th className="border border-black px-3 py-1.5 text-left">NIP / NIK</th>
-                  <th className="border border-black px-2 py-1.5 text-center w-36">STATUS TTD</th>
                 </tr>
               </thead>
               <tbody>
@@ -746,14 +746,11 @@ export default function AdminAparatur() {
                       <td className="border border-black px-3 py-1.5 font-bold uppercase">{off.name}</td>
                       <td className="border border-black px-3 py-1.5">{off.role}</td>
                       <td className="border border-black px-3 py-1.5 font-mono">{off.nip || '-'}</td>
-                      <td className="border border-black px-2 py-1.5 text-center text-[9pt]">
-                        {off.name === namaKades ? 'Penandatangan Utama' : '-'}
-                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data perangkat desa</td>
+                    <td colSpan={4} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data perangkat desa</td>
                   </tr>
                 )}
               </tbody>
