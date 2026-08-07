@@ -1072,6 +1072,7 @@ export default function AdminSuratUndangan({
                   <div 
                     id="undangan-page-1"
                     style={{ 
+                      width: '794px',
                       minHeight: '1123px',
                       boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                     }}
@@ -1267,6 +1268,7 @@ export default function AdminSuratUndangan({
                   key={`lampiran-page-${chunkIdx}`}
                   id={chunkIdx === 0 ? "undangan-page-2" : `undangan-page-${pageNum}`}
                   style={{ 
+                    width: '794px',
                     minHeight: '1123px',
                     boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
                   }}
