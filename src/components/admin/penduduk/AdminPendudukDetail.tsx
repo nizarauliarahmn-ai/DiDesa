@@ -6,6 +6,7 @@ import { showToast } from '../../../utils/toast';
 import { fetchResidentLettersAsync, LetterHistory } from '../../../utils/letterHistory';
 import ConfirmModal from '../../common/ConfirmModal';
 import { QRCodeSVG } from 'qrcode.react';
+import { supabase } from '../../../utils/supabase';
 
 interface AdminPendudukDetailProps {
   onBack: () => void;
@@ -95,19 +96,23 @@ export default function AdminPendudukDetail({
         `Apakah Anda yakin ingin mengajukan permohonan hapus data warga ${data.name}? Pengajuan ini memerlukan persetujuan dari Super Admin (Verifikator).`,
         async () => {
           try {
-            const res = await fetch(`/api/residents/${data.nik}/request-approval`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                actionType: 'delete',
-                originalStatus: data.status || 'Belum Kawin'
-              })
-            });
-            if (res.ok) {
-              const result = await res.json();
+            const { error } = await supabase.from('residents')
+              .update({ status: 'pending_approval', status_color: 'amber' })
+              .eq('nik', data.nik);
+              
+            if (!error) {
+              await supabase.from('notifications').insert([{
+                id: `notif-${Date.now()}`,
+                tenant_id: data.tenant_id || data.tenantId,
+                title: "Pengajuan Hapus Penduduk",
+                message: `Admin Desa mengajukan penghapusan untuk data penduduk ${data.name} (NIK: ${data.nik}).`,
+                category: "Residents",
+                is_read: false,
+                timestamp: new Date().toISOString()
+              }]);
               showToast(`Pengajuan hapus data warga ${data.name} berhasil diajukan ke Super Admin!`, "success");
               if (onUpdateResident) {
-                onUpdateResident(result.resident);
+                onUpdateResident({ ...data, status: 'pending_approval', status_color: 'amber' });
               }
               onBack();
             } else {
@@ -124,10 +129,20 @@ export default function AdminPendudukDetail({
         `Apakah Anda yakin ingin menghapus data warga ${data.name}? Data akan dipindahkan ke Tong Sampah dan baru akan dihapus permanen secara otomatis setelah 30 hari.`,
         async () => {
           try {
-            const res = await fetch(`/api/residents/${data.nik}`, {
-              method: 'DELETE',
-            });
-            if (res.ok) {
+            const { error } = await supabase.from('residents')
+              .update({ status: 'archived' })
+              .eq('nik', data.nik);
+              
+            if (!error) {
+              await supabase.from('notifications').insert([{
+                id: `notif-${Date.now()}`,
+                tenant_id: data.tenant_id || data.tenantId,
+                title: "Penduduk Masuk Tong Sampah",
+                message: `Data penduduk ${data.name} (NIK: ${data.nik}) dipindahkan ke Tong Sampah oleh Super Admin.`,
+                category: "Residents",
+                is_read: false,
+                timestamp: new Date().toISOString()
+              }]);
               showToast(`Data warga ${data.name} berhasil dipindahkan ke Tong Sampah!`, "success");
               onBack();
             } else {
@@ -150,19 +165,23 @@ export default function AdminPendudukDetail({
         `Apakah Anda yakin ingin mengajukan permohonan mutasi pindah keluar wilayah untuk warga ${data.name}? Pengajuan ini memerlukan persetujuan dari Super Admin (Verifikator).`,
         async () => {
           try {
-            const res = await fetch(`/api/residents/${data.nik}/request-approval`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                actionType: 'move',
-                originalStatus: data.status || 'Belum Kawin'
-              })
-            });
-            if (res.ok) {
-              const result = await res.json();
+            const { error } = await supabase.from('residents')
+              .update({ status: 'pending_approval', status_color: 'amber' })
+              .eq('nik', data.nik);
+              
+            if (!error) {
+              await supabase.from('notifications').insert([{
+                id: `notif-${Date.now()}`,
+                tenant_id: data.tenant_id || data.tenantId,
+                title: "Pengajuan Mutasi Pindah",
+                message: `Admin Desa mengajukan mutasi pindah keluar untuk penduduk ${data.name} (NIK: ${data.nik}).`,
+                category: "Residents",
+                is_read: false,
+                timestamp: new Date().toISOString()
+              }]);
               showToast(`Pengajuan mutasi pindah warga ${data.name} berhasil diajukan ke Super Admin!`, "success");
               if (onUpdateResident) {
-                onUpdateResident(result.resident);
+                onUpdateResident({ ...data, status: 'pending_approval', status_color: 'amber' });
               }
               onBack();
             } else {
@@ -179,10 +198,20 @@ export default function AdminPendudukDetail({
         `Apakah Anda yakin ingin memproses mutasi pindah keluar secara langsung untuk warga ${data.name}? Data warga akan langsung dihapus dari sistem kependudukan aktif.`,
         async () => {
           try {
-            const res = await fetch(`/api/residents/${data.nik}`, {
-              method: 'DELETE',
-            });
-            if (res.ok) {
+            const { error } = await supabase.from('residents')
+              .delete()
+              .eq('nik', data.nik);
+              
+            if (!error) {
+              await supabase.from('notifications').insert([{
+                id: `notif-${Date.now()}`,
+                tenant_id: data.tenant_id || data.tenantId,
+                title: "Penduduk Mutasi Pindah Keluar",
+                message: `Data penduduk ${data.name} (NIK: ${data.nik}) telah dimutasikan pindah keluar dari sistem oleh Super Admin.`,
+                category: "Residents",
+                is_read: false,
+                timestamp: new Date().toISOString()
+              }]);
               showToast(`Data warga ${data.name} berhasil dimutasikan keluar!`, "success");
               onBack();
             } else {
@@ -219,14 +248,13 @@ export default function AdminPendudukDetail({
     setIsUpdatingAid(true);
     setAidError("");
     try {
-      const res = await fetch(`/api/residents/${data.nik}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activeAids: updatedAids })
-      });
-      if (res.ok) {
+      const { error } = await supabase.from('residents')
+        .update({ active_aids: JSON.stringify(updatedAids) })
+        .eq('nik', data.nik);
+        
+      if (!error) {
         showToast("Bantuan sosial berhasil ditambahkan!", "success");
-        if (onUpdateResident) onUpdateResident({ ...data, activeAids: updatedAids });
+        if (onUpdateResident) onUpdateResident({ ...data, activeAids: updatedAids, active_aids: JSON.stringify(updatedAids) });
       } else {
         throw new Error("Gagal menambah bantuan");
       }
@@ -246,14 +274,13 @@ export default function AdminPendudukDetail({
         const updatedAids = currentAids.filter((p: string) => p !== programName);
         setIsUpdatingAid(true);
         try {
-          const res = await fetch(`/api/residents/${data.nik}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ activeAids: updatedAids })
-          });
-          if (res.ok) {
+          const { error } = await supabase.from('residents')
+            .update({ active_aids: JSON.stringify(updatedAids) })
+            .eq('nik', data.nik);
+            
+          if (!error) {
             showToast("Bantuan sosial berhasil dihentikan!", "success");
-            if (onUpdateResident) onUpdateResident({ ...data, activeAids: updatedAids });
+            if (onUpdateResident) onUpdateResident({ ...data, activeAids: updatedAids, active_aids: JSON.stringify(updatedAids) });
           } else {
             throw new Error("Gagal menghentikan bantuan");
           }

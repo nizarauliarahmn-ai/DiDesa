@@ -451,12 +451,13 @@ export default function AdminPenduduk({
     try {
       if (isSuperAdmin) {
         // Super Admin: Move directly to Trash Bin (soft delete)
-        const res = await fetch(`/api/residents/${nik}`, {
-          method: 'DELETE',
-        });
-        if (!res.ok) throw new Error("Gagal memindahkan ke Tong Sampah.");
+        const { error } = await supabase.from('residents')
+          .update({ status: 'archived' })
+          .eq('nik', nik)
+          .eq('tenant_id', tenantId);
 
-        showToast(`Data ${name} berhasil dipindahkan ke Tong Sampah!`, 'success');
+        if (error) throw error;
+        showToast(`Data ${name} berhasil dipindahkan ke Tong Sampah (Recycle Bin)!`, 'success');
         
         // Log notification
         await supabase.from('notifications').insert([{
@@ -471,16 +472,12 @@ export default function AdminPenduduk({
 
       } else {
         // Admin biasa: Send for Super Admin approval
-        const res = await fetch(`/api/residents/${nik}/request-approval`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            actionType: 'delete',
-            originalStatus: 'Aktif' // default
-          })
-        });
-        if (!res.ok) throw new Error("Gagal mengajukan penghapusan.");
+        const { error } = await supabase.from('residents')
+          .update({ status: 'pending_approval', status_color: 'amber' })
+          .eq('nik', nik)
+          .eq('tenant_id', tenantId);
 
+        if (error) throw error;
         showToast(`Pengajuan hapus data ${name} berhasil dikirim ke Super Admin!`, 'success');
         
         // Log notification
