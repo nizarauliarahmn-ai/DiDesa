@@ -14,6 +14,8 @@ interface QuickAddResidentModalProps {
 
 export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, initialData }: QuickAddResidentModalProps) {
   const [loading, setLoading] = useState(false);
+  const [checkingKk, setCheckingKk] = useState(false);
+  const [familyMembers, setFamilyMembers] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     nik: '',
     name: '',
@@ -63,6 +65,46 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
     }
   }, [isOpen, initialData]);
 
+  // Real-time No KK validation
+  useEffect(() => {
+    const checkKk = async () => {
+      if (!formData.noKk || formData.noKk.length < 16) {
+        setFamilyMembers([]);
+        return;
+      }
+
+      setCheckingKk(true);
+      try {
+        const tenantId = await resolveCurrentTenant();
+        if (!tenantId) return;
+
+        const { data, error } = await supabase
+          .from('residents')
+          .select('name, family_relation, nik')
+          .eq('no_kk', formData.noKk)
+          .eq('tenant_id', tenantId);
+
+        if (!error && data) {
+          setFamilyMembers(data);
+          
+          // Auto-update default familyRelation if Kepala Keluarga already exists
+          const hasHead = data.some(m => (m.family_relation || '').toLowerCase().includes('kepala keluarga'));
+          if (hasHead && formData.familyRelation === 'Kepala Keluarga') {
+            setFormData(prev => ({ ...prev, familyRelation: 'Istri' }));
+          }
+        }
+      } catch (err) {
+        console.error('Error checking KK:', err);
+      } finally {
+        setCheckingKk(false);
+      }
+    };
+
+    // Debounce the check
+    const timeoutId = setTimeout(checkKk, 500);
+    return () => clearTimeout(timeoutId);
+  }, [formData.noKk]);
+
   if (!isOpen) return null;
 
   const calculateAge = (dob: string) => {
@@ -81,6 +123,12 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
     e.preventDefault();
     if (!formData.nik || !formData.name) {
       showToast('NIK dan Nama wajib diisi.', 'error');
+      return;
+    }
+
+    const hasHead = familyMembers.some(m => (m.family_relation || '').toLowerCase().includes('kepala keluarga'));
+    if (hasHead && formData.familyRelation === 'Kepala Keluarga') {
+      showToast('Keluarga ini sudah memiliki Kepala Keluarga. Silakan pilih status hubungan keluarga yang lain.', 'error');
       return;
     }
 
@@ -205,14 +253,42 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
           </button>
         </div>
         
-        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-900/50 flex gap-3 shrink-0">
-          <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-          <div>
-            <h3 className="text-sm font-bold text-amber-800 dark:text-amber-400">Warga Belum Terdaftar</h3>
-            <p className="text-xs text-amber-700 dark:text-amber-500 mt-0.5">
-              NIK pemohon ini belum ada di Data Penduduk. Silakan tinjau dan lengkapi data di bawah ini untuk menambahkannya ke Data Penduduk secara otomatis sebelum surat dicetak.
-            </p>
+        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-900/50 flex flex-col gap-3 shrink-0">
+          <div className="flex gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-sm font-bold text-amber-800 dark:text-amber-400">Warga Belum Terdaftar</h3>
+              <p className="text-xs text-amber-700 dark:text-amber-500 mt-0.5">
+                NIK pemohon ini belum ada di Data Penduduk. Silakan tinjau dan lengkapi data di bawah ini untuk menambahkannya ke Data Penduduk secara otomatis sebelum surat dicetak.
+              </p>
+            </div>
           </div>
+          
+          {familyMembers.length > 0 && (
+            <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <h4 className="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1 flex items-center justify-between">
+                <span>Informasi No. KK: {formData.noKk}</span>
+                <span className="bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 px-2 py-0.5 rounded text-[10px]">
+                  Terdaftar ({familyMembers.length} Anggota)
+                </span>
+              </h4>
+              <p className="text-xs text-blue-700 dark:text-blue-400 mb-2">
+                Keluarga dengan No. KK ini sudah terdaftar di database. Pastikan NIK yang Anda masukkan adalah benar anggota dari keluarga ini dan tentukan Status Hubungan Keluarga yang sesuai.
+              </p>
+              <div className="text-[11px] bg-white dark:bg-slate-800 p-2 rounded border border-blue-100 dark:border-blue-800 max-h-24 overflow-y-auto">
+                <table className="w-full text-left">
+                  <tbody>
+                    {familyMembers.map((m, idx) => (
+                      <tr key={idx} className="border-b border-slate-100 dark:border-slate-700 last:border-0">
+                        <td className="py-1 text-slate-800 dark:text-slate-200 font-medium">{m.name}</td>
+                        <td className="py-1 text-slate-500 dark:text-slate-400">{m.family_relation}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
@@ -251,6 +327,25 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Pekerjaan</label>
               <input type="text" value={formData.job} onChange={e => setFormData({...formData, job: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex justify-between">
+                <span>Hubungan Keluarga *</span>
+                {checkingKk && <span className="text-[10px] text-slate-400 italic">Mengecek KK...</span>}
+              </label>
+              <select value={formData.familyRelation} onChange={e => setFormData({...formData, familyRelation: e.target.value})} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-1 focus:ring-emerald-500">
+                <option value="Kepala Keluarga">Kepala Keluarga</option>
+                <option value="Istri">Istri</option>
+                <option value="Suami">Suami</option>
+                <option value="Anak">Anak</option>
+                <option value="Menantu">Menantu</option>
+                <option value="Cucu">Cucu</option>
+                <option value="Orang Tua">Orang Tua</option>
+                <option value="Mertua">Mertua</option>
+                <option value="Famili Lain">Famili Lain</option>
+                <option value="Pembantu">Pembantu</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Agama</label>
