@@ -130,9 +130,10 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
 
   const handleOpenAddModal = () => {
     setEditingItem(null);
+    const nextVerNum = updates.length > 0 ? updates.length + 1 : 1;
     setFormData({
       title: '',
-      version: `v${(updates.length + 1).toFixed(1)}.0`,
+      version: `v1.${nextVerNum}`,
       type: 'feature',
       release_date: new Date().toISOString().split('T')[0],
       is_active: 1,
@@ -599,17 +600,47 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Kode Versi */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Kode Versi <span className="text-rose-500">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Kode Versi <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[10px] text-slate-400">misal: v1.1 atau v2.0</span>
+                  </div>
+
                   <input
                     type="text"
                     required
                     value={formData.version}
                     onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-                    placeholder="misal: v2.5.0"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    placeholder="misal: v1.1"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
+
+                  {/* Quick Version Selection Pills */}
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                    <span className="text-[10px] font-bold text-slate-400">Pilih Cepat:</span>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, version: `v1.${updates.length > 0 ? updates.length : 1}` })}
+                      className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-mono font-bold rounded-md border border-slate-200 dark:border-slate-700 cursor-pointer"
+                    >
+                      v1.{updates.length > 0 ? updates.length : 1}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, version: `v1.${(updates.length > 0 ? updates.length : 1) + 1}` })}
+                      className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-mono font-bold rounded-md border border-slate-200 dark:border-slate-700 cursor-pointer"
+                    >
+                      v1.{(updates.length > 0 ? updates.length : 1) + 1}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, version: `v${(updates.length > 0 ? updates.length : 1) + 1}.0` })}
+                      className="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-mono font-bold rounded-md border border-indigo-200 dark:border-indigo-800 cursor-pointer"
+                    >
+                      v{(updates.length > 0 ? updates.length : 1) + 1}.0
+                    </button>
+                  </div>
                 </div>
 
                 {/* Tipe Pembaruan */}
@@ -640,6 +671,17 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, release_date: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
+                </div>
+              </div>
+
+              {/* Card Petunjuk Penjelasan Kode Versi */}
+              <div className="p-3.5 bg-indigo-50/70 dark:bg-indigo-950/30 rounded-2xl border border-indigo-100 dark:border-indigo-900/40 flex items-start gap-2.5 text-xs text-indigo-900 dark:text-indigo-200">
+                <Info size={16} className="text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <span className="font-bold block text-slate-900 dark:text-white">💡 Penjelasan Kode Versi:</span>
+                  <p className="text-[11px] leading-relaxed text-indigo-800 dark:text-indigo-300">
+                    Kode versi adalah nomor penanda rilis (contoh: <strong>v1.1</strong>, <strong>v1.2</strong>, atau <strong>v2.0</strong>). Ketika Anda merilis versi baru yang nomornya belum pernah dilihat oleh akun desa, jendela pop-up pengumuman akan <strong>otomatis muncul di layar mereka secara realtime</strong>. Anda bebas mengetik penanda (misal: <em>v1.1</em>) atau mengeklik tombol <em>Pilih Cepat</em> di atas!
+                  </p>
                 </div>
               </div>
 
