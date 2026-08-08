@@ -159,7 +159,6 @@ export default function AdminPenduduk({
       age: savedResident.age,
       blood_type: savedResident.bloodType,
       religion: savedResident.religion,
-      marital_status: savedResident.maritalStatus,
       education: savedResident.education,
       job: savedResident.job,
       address: savedResident.address,

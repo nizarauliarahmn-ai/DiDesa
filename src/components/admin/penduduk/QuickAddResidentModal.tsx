@@ -121,7 +121,6 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
         age: age,
         blood_type: formData.bloodType || '-',
         religion: formData.religion || 'Islam',
-        marital_status: formData.maritalStatus || 'Belum Kawin',
         education: formData.education || 'SLTA/SEDERAJAT',
         job: formData.job || 'Wiraswasta',
         address: formData.address || '-',
@@ -139,14 +138,20 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
         status_color: 'emerald'
       };
 
-      let { error } = await supabase.from('residents').insert([dbPayload]);
+      let insertPayload = { ...dbPayload };
+      let { error } = await supabase.from('residents').insert([insertPayload]);
 
-      if (error) {
-        // If error is about created_at or schema cache, retry with created_at explicitly or without optional fields
-        if (error.message?.includes('created_at')) {
-          const payloadWithCreatedAt = { ...dbPayload, created_at: nowIso };
-          const retry = await supabase.from('residents').insert([payloadWithCreatedAt]);
+      // Robust auto-strip for missing columns in Supabase schema cache
+      let retries = 0;
+      while (error && error.message?.includes('Could not find the') && error.message?.includes('column') && retries < 5) {
+        const match = error.message.match(/'([^']+)' column/);
+        if (match && match[1]) {
+          delete insertPayload[match[1]];
+          const retry = await supabase.from('residents').insert([insertPayload]);
           error = retry.error;
+          retries++;
+        } else {
+          break;
         }
       }
 

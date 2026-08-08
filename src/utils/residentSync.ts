@@ -179,7 +179,6 @@ export async function autoSyncResidentFromLetter(nik: string, letterData: any, l
         age: calculateAge(letterData.birthDate || letterData.tanggalLahir),
         blood_type: letterData.bloodType || letterData.golonganDarah || '-',
         religion: letterData.religion || letterData.agama || 'Islam',
-        marital_status: letterData.maritalStatus || letterData.statusPerkawinan || 'Belum Kawin',
         education: letterData.education || letterData.pendidikan || 'SLTA/SEDERAJAT',
         job: letterData.job || letterData.pekerjaan || 'Wiraswasta',
         address: letterData.address || letterData.alamat || '-',
@@ -197,10 +196,20 @@ export async function autoSyncResidentFromLetter(nik: string, letterData: any, l
         status_color: 'emerald'
       };
 
-      let { error } = await supabase.from('residents').insert([dbPayload]);
-      if (error && error.message?.includes('created_at')) {
-        const retry = await supabase.from('residents').insert([{ ...dbPayload, created_at: nowIso }]);
-        error = retry.error;
+      let insertPayload = { ...dbPayload };
+      let { error } = await supabase.from('residents').insert([insertPayload]);
+      
+      let retries = 0;
+      while (error && error.message?.includes('Could not find the') && error.message?.includes('column') && retries < 5) {
+        const match = error.message.match(/'([^']+)' column/);
+        if (match && match[1]) {
+          delete insertPayload[match[1]];
+          const retry = await supabase.from('residents').insert([insertPayload]);
+          error = retry.error;
+          retries++;
+        } else {
+          break;
+        }
       }
       if (!error) {
         addSaaSLog({
