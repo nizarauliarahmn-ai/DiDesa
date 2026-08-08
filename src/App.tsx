@@ -25,6 +25,7 @@ import AdminAiAssistant from './components/admin/AdminAiAssistant';
 import AdminSaaSLogs from './components/admin/AdminSaaSLogs';
 import AdminSaaSLeads from './components/admin/AdminSaaSLeads';
 import AdminGlobalBranding from './components/admin/AdminGlobalBranding';
+import AdminSaaSGlobalUpdates from './components/admin/AdminSaaSGlobalUpdates';
 import AdminSaaSTemplateSurat from './components/admin/AdminSaaSTemplateSurat';
 import AdminPanduan from './components/admin/AdminPanduan';
 import ToastContainer from './components/common/ToastContainer';
@@ -513,6 +514,7 @@ export default function App() {
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
                 {adminTab === 'saas_leads' && user.role === 'saas_admin' && <AdminSaaSLeads onSetActiveTab={setAdminTab} />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
+                {adminTab === 'log_pembaruan' && user.role === 'saas_admin' && <AdminSaaSGlobalUpdates />}
                 {adminTab === 'global_branding' && user.role === 'saas_admin' && <AdminGlobalBranding />}
                 {adminTab === 'template_surat' && user.role === 'saas_admin' && <AdminSaaSTemplateSurat />}
                 {adminTab === 'pengaturan' && <AdminPengaturan />}

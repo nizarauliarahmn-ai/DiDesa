@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, X, Rocket, ShieldCheck, Zap, Info } from 'lucide-react';
 import Markdown from 'react-markdown';
+import { supabase } from '../utils/supabase';
 
 interface GlobalUpdate {
   id: string;
@@ -40,29 +41,43 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false }) => {
 
     const fetchUpdates = async () => {
       try {
-        const response = await fetch('/api/global-updates');
-        if (!response.ok) return;
-        const updates: GlobalUpdate[] = await response.json();
+        const { data, error } = await supabase
+          .from('global_updates')
+          .select('*')
+          .eq('is_active', 1)
+          .order('release_date', { ascending: false });
         
-        if (updates.length > 0) {
-          const latest = updates[0];
+        if (!error && data && data.length > 0) {
+          const latest = data[0];
           const lastSeenVersion = localStorage.getItem('didesa_last_seen_version');
           
           if (lastSeenVersion !== latest.version) {
             setLatestUpdate(latest);
-            // Don't show immediately, wait a bit for the app to settle
-            setTimeout(() => setIsVisible(true), 2000);
+            setTimeout(() => setIsVisible(true), 1500);
           }
         }
       } catch (err) {
-        console.error('Failed to fetch global updates:', err);
+        console.error('Failed to fetch global updates from Supabase:', err);
       }
     };
 
     fetchUpdates();
+
+    window.addEventListener('global_updates_updated', fetchUpdates);
+
+    // Supabase Realtime Subscription
+    const channel = supabase
+      .channel('public_global_updates_notifier')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'global_updates' }, () => {
+        fetchUpdates();
+      })
+      .subscribe();
+
     return () => {
       window.removeEventListener('global_branding_updated', handleBrandingUpdate);
       window.removeEventListener('force_reload_requested', handleForceReload);
+      window.removeEventListener('global_updates_updated', fetchUpdates);
+      supabase.removeChannel(channel);
     };
   }, []);
 
