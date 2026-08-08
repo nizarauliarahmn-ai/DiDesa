@@ -55,6 +55,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
   const [authUser, setAuthUser] = React.useState<{ name: string; email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; avatar: string } | null>(null);
   const [unreadFeedbacks, setUnreadFeedbacks] = useState(0);
+  const [pendingBugsCount, setPendingBugsCount] = useState(0);
   
   // Global Branding
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
