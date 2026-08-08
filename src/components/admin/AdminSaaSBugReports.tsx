@@ -78,6 +78,8 @@ export const AdminSaaSBugReports: React.FC = () => {
     setIsUpdatingStatus(true);
     try {
       let success = true;
+      let statusChangedByReply = false;
+      
       if (adminReplyInput.trim()) {
         success = await replyToBugReportOnline(selectedReport.id, {
           sender: 'SaaS Admin',
@@ -85,11 +87,18 @@ export const AdminSaaSBugReports: React.FC = () => {
           text: adminReplyInput
         });
         setAdminReplyInput('');
-        if (newStatus === 'Menunggu') newStatus = 'Diproses';
+        if (newStatus === 'Menunggu') {
+          newStatus = 'Diproses';
+        }
+        statusChangedByReply = true;
       }
       
-      if (newStatus !== selectedReport.status) {
-        success = await updateBugReportStatusOnline(selectedReport.id, newStatus) && success;
+      // If we didn't send a reply OR we are explicitly changing to a different status like 'Selesai'
+      if (success && !statusChangedByReply && newStatus !== selectedReport.status) {
+        success = await updateBugReportStatusOnline(selectedReport.id, newStatus);
+      } else if (success && statusChangedByReply && newStatus !== 'Diproses') {
+        // If they replied BUT also clicked "Selesai", we should update status to Selesai after replying
+        success = await updateBugReportStatusOnline(selectedReport.id, newStatus);
       }
 
       if (success) {
