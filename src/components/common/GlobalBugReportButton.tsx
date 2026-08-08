@@ -81,33 +81,31 @@ export const GlobalBugReportButton: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-[90] flex items-center gap-2">
         <button
           onClick={handleOpen}
-          className="group relative flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-600 via-pink-600 to-rose-700 hover:from-rose-500 hover:to-pink-500 text-white rounded-full font-bold text-xs shadow-xl shadow-rose-600/30 hover:shadow-rose-600/50 transition-all duration-300 active:scale-95 cursor-pointer border border-rose-400/30"
-          title="Laporkan Bug atau Kendala Sistem ke SaaS Admin"
+          className="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-full font-bold shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300 active:scale-95 cursor-pointer border border-emerald-400/30"
+          title="Hubungi Pusat Bantuan / Laporkan Kendala"
         >
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute -top-0.5 -right-0.5" />
-          <Bug size={18} className="animate-bounce shrink-0" />
-          <span className="font-extrabold tracking-wide hidden sm:inline">Laporkan Bug / Kendala</span>
-          <span className="sm:hidden font-extrabold">Bantuan</span>
+          <div className="w-3 h-3 rounded-full bg-rose-400 animate-ping absolute top-0 right-0" />
+          <MessageSquare size={24} className="shrink-0" />
         </button>
       </div>
 
       {/* MODAL FORM LAPORAN BUG / KENDALA */}
       {isOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="fixed bottom-24 right-6 z-[110] flex items-end justify-end p-0">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-[380px] sm:w-[420px] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[75vh] overflow-hidden origin-bottom-right animate-in zoom-in-95 duration-200 shadow-emerald-900/20">
             
             {/* Header */}
-            <div className="p-6 bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white flex items-center justify-between relative overflow-hidden">
-              <div className="absolute right-0 top-0 w-64 h-64 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="p-5 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 text-white flex items-center justify-between relative overflow-hidden">
+              <div className="absolute right-0 top-0 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="relative z-10 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-rose-500/20 text-rose-300 border border-rose-400/20 flex items-center justify-center font-bold">
-                  <LifeBuoy size={22} />
+                <div className="w-10 h-10 rounded-2xl bg-white/20 text-white border border-white/30 flex items-center justify-center font-bold shadow-inner">
+                  <MessageSquare size={20} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-extrabold tracking-tight">Pusat Bantuan & Laporan Kendala</h3>
-                  <p className="text-xs text-rose-200/80">
-                    Kirim laporan langsung ke Tim SaaS Platform ({villageName})
+                  <h3 className="text-sm font-extrabold tracking-tight">Hubungi Tim SaaS</h3>
+                  <p className="text-[10px] text-emerald-100">
+                    Bantuan teknis untuk {villageName}
                   </p>
                 </div>
               </div>
@@ -126,57 +124,57 @@ export const GlobalBugReportButton: React.FC = () => {
               {/* Context Info Banner */}
               <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between text-xs text-slate-600 dark:text-slate-300">
                 <div className="flex items-center gap-2">
-                  <Monitor size={15} className="text-rose-500 shrink-0" />
-                  <span>Pelapor: <strong className="text-slate-900 dark:text-white font-bold">{authUser.name || 'Admin'}</strong> ({villageName})</span>
+                  <Monitor size={14} className="text-emerald-600 shrink-0" />
+                  <span>Pelapor: <strong className="text-slate-900 dark:text-white font-bold">{authUser.name || 'Admin'}</strong></span>
                 </div>
-                <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] rounded-full border border-emerald-200 dark:border-emerald-800">
-                  Cloud Live
+                <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold text-[9px] rounded-full flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online
                 </span>
               </div>
 
               {/* Tipe Laporan Options */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">
-                  Tipe Laporan <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Topik <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'bug' })}
-                    className={`p-3 rounded-2xl border text-xs font-bold transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
+                    className={`p-2.5 rounded-2xl border text-[10px] font-bold transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
                       formData.type === 'bug'
                         ? 'bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-500/20'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Bug size={18} />
-                    <span>🐞 Error / Bug</span>
+                    <Bug size={16} />
+                    <span>Error / Bug</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'feature_request' })}
-                    className={`p-3 rounded-2xl border text-xs font-bold transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
+                    className={`p-2.5 rounded-2xl border text-[10px] font-bold transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
                       formData.type === 'feature_request'
                         ? 'bg-indigo-600 text-white border-indigo-700 shadow-md shadow-indigo-600/20'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Sparkles size={18} />
-                    <span>💡 Usulan Fitur</span>
+                    <Sparkles size={16} />
+                    <span>Usulan Fitur</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'question' })}
-                    className={`p-3 rounded-2xl border text-xs font-bold transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
+                    className={`p-2.5 rounded-2xl border text-[10px] font-bold transition-all flex flex-col items-center gap-1.5 cursor-pointer ${
                       formData.type === 'question'
                         ? 'bg-teal-600 text-white border-teal-700 shadow-md shadow-teal-600/20'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <HelpCircle size={18} />
-                    <span>❓ Pertanyaan</span>
+                    <HelpCircle size={16} />
+                    <span>Pertanyaan</span>
                   </button>
                 </div>
               </div>
@@ -261,7 +259,7 @@ export const GlobalBugReportButton: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-rose-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
