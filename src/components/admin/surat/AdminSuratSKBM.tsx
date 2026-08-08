@@ -603,9 +603,9 @@ export default function AdminSuratSKBM({
                   setFormData={setFormData}
                   residents={residents}
                   onOpenQuickAdd={(nik, name) => {
-                  setQuickAddInitialData({ nik: nik || formData.nik, name: name || formData.nama || (formData as any).name || (formData as any).namaAyah || (formData as any).namaIbu });
-                  setShowQuickAddModal(true);
-                }}
+                    setQuickAddInitialData({ nik: nik || formData.nik, name: name || formData.nama || (formData as any).name || (formData as any).namaAyah || (formData as any).namaIbu });
+                    setShowQuickAddModal(true);
+                  }}
                 />
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>

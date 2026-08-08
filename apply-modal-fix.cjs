@@ -23,20 +23,23 @@ for (const file of files) {
   // 2. Add state variables if missing
   if (!content.includes('setShowQuickAddModal] = useState')) {
     const stateInjection = `const [showQuickAddModal, setShowQuickAddModal] = useState(false);\n  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});\n  const [tanggalSurat`;
-    
-    // robust replace based on `tanggalSurat` declaration
     content = content.replace(/const \[\s*tanggalSurat/, stateInjection);
   }
 
-  // 3. Fix onOpenQuickAdd calls
-  const onOpenQuickAddRegex = /onOpenQuickAdd=\{[^\}]*\}/g;
-  const fixedOnOpen = `onOpenQuickAdd={(nik, name) => {\n                  setQuickAddInitialData({ nik: nik || formData.nik, name: name || formData.nama || (formData as any).name || (formData as any).namaAyah || (formData as any).namaIbu });\n                  setShowQuickAddModal(true);\n                }}`;
-  
-  if (onOpenQuickAddRegex.test(content)) {
-    content = content.replace(onOpenQuickAddRegex, fixedOnOpen);
-  }
+  // 3. Clean replacement for UnifiedResidentSearch tag
+  const unifiedSearchClean = `<UnifiedResidentSearch
+                  formData={formData}
+                  setFormData={setFormData}
+                  residents={residents}
+                  onOpenQuickAdd={(nik, name) => {
+                    setQuickAddInitialData({ nik: nik || formData.nik, name: name || formData.nama || (formData as any).name || (formData as any).namaAyah || (formData as any).namaIbu });
+                    setShowQuickAddModal(true);
+                  }}
+                />`;
 
-  // 4. Inject Modal Component JSX at the end of the return statement
+  content = content.replace(/<UnifiedResidentSearch[\s\S]*?\/>/g, unifiedSearchClean);
+
+  // 4. Inject Modal Component JSX at the end of the return statement if missing
   if (!content.includes('<QuickAddResidentModal')) {
     const modalJsx = `\n      <QuickAddResidentModal
         isOpen={showQuickAddModal}
@@ -58,11 +61,13 @@ for (const file of files) {
             rw: savedData.rw,
             desa: savedData.desa
           }));
+          if (typeof setResidents === 'function') {
+            setResidents((prev: any) => [savedData, ...prev.filter((r: any) => r.nik !== savedData.nik)]);
+          }
           setShowQuickAddModal(false);
         }}
       />\n    `;
       
-    // Inject right before the very last `);` and `}` in the file
     content = content.replace(/(\s*<\/[a-zA-Z0-9>]+>\s*\);\s*\})/, `${modalJsx}$1`);
   }
 
