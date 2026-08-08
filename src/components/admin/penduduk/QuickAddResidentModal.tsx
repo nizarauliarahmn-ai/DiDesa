@@ -107,6 +107,9 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
         return;
       }
 
+      const nowIso = new Date().toISOString();
+      const age = calculateAge(formData.birthDate);
+
       const dbPayload: any = {
         tenant_id: tenantId,
         nik: formData.nik,
