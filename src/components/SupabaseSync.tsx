@@ -139,10 +139,41 @@ export function SupabaseSync() {
       })
       .subscribe();
 
+    // 5. Global Settings Realtime Subscription (SaaS Logs, Bug Reports)
+    const globalSettingsChannel = supabase
+      .channel('global-saas-settings')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'saas_settings',
+          filter: `tenant_id=eq.00000000-0000-0000-0000-000000000000`
+        },
+        (payload) => {
+          const newRow = payload.new as { key: string; value: string };
+          if (newRow && newRow.key) {
+            const currentVal = localStorage.getItem(newRow.key);
+            if (currentVal !== newRow.value) {
+              localStorage.setItem(newRow.key, newRow.value);
+              // Trigger specific UI re-renders for global data
+              if (newRow.key === 'saas_global_bug_reports') {
+                window.dispatchEvent(new Event('bug_reports_updated'));
+              }
+              if (newRow.key === 'saas_global_activity_logs') {
+                window.dispatchEvent(new Event('saas_logs_updated'));
+              }
+            }
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       isMounted = false;
       supabase.removeChannel(channel);
       supabase.removeChannel(globalChannel);
+      supabase.removeChannel(globalSettingsChannel);
     };
   }, [tenantId]);
 

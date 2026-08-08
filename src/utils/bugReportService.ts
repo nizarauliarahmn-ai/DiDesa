@@ -22,6 +22,7 @@ export interface BugReport {
 }
 
 const SETTINGS_KEY = 'saas_global_bug_reports';
+const GLOBAL_TENANT_ID = '00000000-0000-0000-0000-000000000000';
 
 /**
  * Fetch all bug reports from Supabase Cloud (online across all villages)
@@ -32,6 +33,7 @@ export const fetchBugReportsOnline = async (): Promise<BugReport[]> => {
       .from('saas_settings')
       .select('value')
       .eq('key', SETTINGS_KEY)
+      .eq('tenant_id', GLOBAL_TENANT_ID)
       .limit(1)
       .maybeSingle();
 
@@ -84,20 +86,32 @@ export const submitBugReportOnline = async (
     const updatedReports = [newReport, ...currentReports];
     const stringified = JSON.stringify(updatedReports);
 
-    // Save online to Supabase saas_settings
-    const { error } = await supabase
+    // Save online to Supabase saas_settings globally
+    const { data: existing } = await supabase
       .from('saas_settings')
-      .upsert([
-        {
+      .select('key')
+      .eq('key', SETTINGS_KEY)
+      .eq('tenant_id', GLOBAL_TENANT_ID)
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabase
+        .from('saas_settings')
+        .update({ value: stringified, updated_at: new Date().toISOString() })
+        .eq('key', SETTINGS_KEY)
+        .eq('tenant_id', GLOBAL_TENANT_ID);
+      if (error) console.warn('Update bug report warning:', error);
+    } else {
+      const { error } = await supabase
+        .from('saas_settings')
+        .insert({
           key: SETTINGS_KEY,
-          tenant_id: tenantId,
+          tenant_id: GLOBAL_TENANT_ID,
           value: stringified,
           updated_at: new Date().toISOString()
-        }
-      ]);
-
-    if (error) {
-      console.warn('Upsert bug report warning:', error);
+        });
+      if (error) console.warn('Insert bug report warning:', error);
     }
 
     // Save locally
@@ -143,21 +157,31 @@ export const updateBugReportStatusOnline = async (
     currentReports[index].updated_at = new Date().toISOString();
 
     const stringified = JSON.stringify(currentReports);
-    const tenantId = currentReports[index].tenant_id || '11111111-1111-1111-1111-111111111111';
-
-    const { error } = await supabase
+    const { data: existing } = await supabase
       .from('saas_settings')
-      .upsert([
-        {
+      .select('key')
+      .eq('key', SETTINGS_KEY)
+      .eq('tenant_id', GLOBAL_TENANT_ID)
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      const { error } = await supabase
+        .from('saas_settings')
+        .update({ value: stringified, updated_at: new Date().toISOString() })
+        .eq('key', SETTINGS_KEY)
+        .eq('tenant_id', GLOBAL_TENANT_ID);
+      if (error) console.warn('Update bug report status warning:', error);
+    } else {
+      const { error } = await supabase
+        .from('saas_settings')
+        .insert({
           key: SETTINGS_KEY,
-          tenant_id: tenantId,
+          tenant_id: GLOBAL_TENANT_ID,
           value: stringified,
           updated_at: new Date().toISOString()
-        }
-      ]);
-
-    if (error) {
-      console.warn('Update bug report status warning:', error);
+        });
+      if (error) console.warn('Insert bug report status warning:', error);
     }
 
     localStorage.setItem(SETTINGS_KEY, stringified);
