@@ -4,6 +4,7 @@ import { RefreshCw, Trash2, RotateCcw, AlertCircle, ArrowLeft } from 'lucide-rea
 import { showToast } from '../../../utils/toast';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
+import { forcePerformCleanup } from '../../../utils/cleanupService';
 
 interface Resident {
   nik: string;
@@ -53,7 +54,9 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
   };
 
   useEffect(() => {
-    fetchArchived();
+    forcePerformCleanup().then(() => {
+      fetchArchived();
+    });
   }, []);
 
   const [confirmModal, setConfirmModal] = useState<{ action: 'restore' | 'delete', nik: string, name: string } | null>(null);
@@ -64,7 +67,7 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
       const tenantId = await resolveCurrentTenant();
       const { error } = await supabase
         .from('residents')
-        .update({ status: 'Aktif', status_color: 'emerald' })
+        .update({ status: 'Aktif', status_color: 'emerald', deleted_at: null })
         .eq('nik', nik)
         .eq('tenant_id', tenantId);
 

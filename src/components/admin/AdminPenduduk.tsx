@@ -452,7 +452,7 @@ export default function AdminPenduduk({
       if (isSuperAdmin) {
         // Super Admin: Move directly to Trash Bin (soft delete)
         const { error } = await supabase.from('residents')
-          .update({ status: 'archived' })
+          .update({ status: 'archived', deleted_at: new Date().toISOString() })
           .eq('nik', nik)
           .eq('tenant_id', tenantId);
 

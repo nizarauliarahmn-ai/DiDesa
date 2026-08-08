@@ -130,7 +130,7 @@ export default function AdminPendudukDetail({
         async () => {
           try {
             const { error } = await supabase.from('residents')
-              .update({ status: 'archived' })
+              .update({ status: 'archived', deleted_at: new Date().toISOString() })
               .eq('nik', data.nik);
               
             if (!error) {

@@ -39,6 +39,7 @@ import Footer from './components/common/Footer';
 import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant, clearTenantCache } from './utils/tenantResolver';
+import { performLazyCleanup } from './utils/cleanupService';
 
 // Public views
 import TransparansiDana from './components/dashboard/TransparansiDana';
@@ -117,6 +118,9 @@ export default function App() {
       }
       const tid = await resolveCurrentTenant();
       setTenantValid(tid !== null);
+      if (tid !== null) {
+        performLazyCleanup();
+      }
     };
     verifyDomain();
   }, [isRootDomain]);
