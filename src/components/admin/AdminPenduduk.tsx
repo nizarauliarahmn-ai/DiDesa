@@ -600,7 +600,7 @@ export default function AdminPenduduk({
     return (
       <AdminPendudukDetail 
         data={selectedPenduduk} 
-        onBack={() => setSelectedPenduduk(null)} 
+        onBack={() => { setSelectedPenduduk(null); fetchResidents(); }} 
         onEdit={() => { setEditingPenduduk(selectedPenduduk); setSelectedPenduduk(null); }} 
         residents={residents}
         onSelectResident={(resident) => setSelectedPenduduk(resident)}
