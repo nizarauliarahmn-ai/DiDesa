@@ -12,6 +12,16 @@ export function useBackdateNumber(
   const [customNomorSurat, setCustomNomorSurat] = useState<string>('');
   const [isBackdate, setIsBackdate] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // Add a toggle state to force re-render when global event fires
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setRefreshTrigger(prev => prev + 1);
+    };
+    window.addEventListener('letter_classifications_updated', handleUpdate);
+    return () => window.removeEventListener('letter_classifications_updated', handleUpdate);
+  }, []);
 
   useEffect(() => {
     async function calculateBackdate() {
@@ -29,10 +39,12 @@ export function useBackdateNumber(
       today.setHours(0, 0, 0, 0);
 
       // Jika tanggal hari ini atau masa depan, bukan backdate
+      // Tetapi KITA TETAP memberikan nomor terbaru yang di-generate
       if (selectedDate >= today) {
         setIsBackdate(false);
         setCustomNumber(undefined);
-        setCustomNomorSurat('');
+        const normalFormat = generateLetterNumber(klasifikasi, kodeKlasifikasi);
+        setCustomNomorSurat(normalFormat);
         return;
       }
 
@@ -126,7 +138,7 @@ export function useBackdateNumber(
     }
 
     calculateBackdate();
-  }, [tanggalSurat, klasifikasi, kodeKlasifikasi]);
+  }, [tanggalSurat, klasifikasi, kodeKlasifikasi, refreshTrigger]);
 
   return { customNumber, customNomorSurat, isBackdate, isLoading };
 }

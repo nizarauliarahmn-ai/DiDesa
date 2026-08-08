@@ -20,6 +20,9 @@ import { capitalizeWords, capitalizeResidentFields } from '../../../utils/textUt
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import SuratEditorHeader from './SuratEditorHeader';
 import { useReactToPrint } from 'react-to-print';
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
 
 export interface Recipient {
   id: string;
@@ -201,13 +204,10 @@ export default function AdminSuratUndangan({
 
   // Auto Numbering effect
   useEffect(() => {
-    if (!editData && isBackdate && customNomorSurat) {
+    if (!editData && customNomorSurat) {
       setNomorSurat(customNomorSurat);
-    } else if (!editData && !nomorSurat) {
-      const generated = generateLetterNumber('UND', '005');
-      setNomorSurat(generated);
     }
-  }, [customNomorSurat, isBackdate, editData]);
+  }, [customNomorSurat, editData]);
 
   // Recipient Attachment Logic (>3 recipients auto-attaches to Lampiran Page 2)
   const isAttached = forceAttachment || recipients.length > 3;
@@ -1407,6 +1407,7 @@ export default function AdminSuratUndangan({
           @page {
             size: A4 portrait;
             margin: 0 !important;
+
           }
         }
       `}</style>
@@ -1422,6 +1423,16 @@ export default function AdminSuratUndangan({
           onPrint={handlePrint}
         />
       )}
+    
+      <QuickAddResidentModal
+        isOpen={showQuickAddModal}
+        onClose={() => setShowQuickAddModal(false)}
+        onSuccess={() => {
+          setShowQuickAddModal(false);
+          handlePrint(true);
+        }}
+        initialData={formData}
+      />
     </div>
   );
 }

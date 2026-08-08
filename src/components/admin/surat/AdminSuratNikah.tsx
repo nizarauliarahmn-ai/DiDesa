@@ -31,7 +31,7 @@ export default function AdminSuratNikah({
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
         setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
@@ -391,7 +391,7 @@ export default function AdminSuratNikah({
     };
 
     if (formData.nikSuami) {
-      await updateResidentData(formData.nikSuami, { 
+      await autoSyncResidentFromLetter(formData.nikSuami, { 
         name: formData.namaSuami, 
         birthPlace: formData.tempatLahirSuami, 
         birthDate: formData.tanggalLahirSuami, 
@@ -403,10 +403,10 @@ export default function AdminSuratNikah({
         no_kk: formData.noKKSuami,
         status: 'Kawin',
         statusColor: 'emerald'
-      });
+      }, 'Pembuatan Surat');
     }
     if (formData.nikIstri) {
-      await updateResidentData(formData.nikIstri, { 
+      await autoSyncResidentFromLetter(formData.nikIstri, { 
         name: formData.namaIstri, 
         birthPlace: formData.tempatLahirIstri, 
         birthDate: formData.tanggalLahirIstri, 
@@ -418,7 +418,7 @@ export default function AdminSuratNikah({
         no_kk: formData.noKKIstri,
         status: 'Kawin',
         statusColor: 'emerald'
-      });
+      }, 'Pembuatan Surat');
     }
     
     // Modern isolated iframe printing to prevent scale/overflow truncation & default browser headers/footers
@@ -947,6 +947,12 @@ export default function AdminSuratNikah({
             body { margin: 0; padding: 0; background: white !important; -webkit-print-color-adjust: exact; }
             .print\\:hidden { display: none !important; }
             .printable-area { display: block !important; }
+
+
+import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
           }
         `}} />
       </div>
@@ -1675,10 +1681,16 @@ export default function AdminSuratNikah({
         jenisSurat="Surat Pengantar Nikah (SKN)"
         onBackToTemplates={onBack}
       />
+    
+      <QuickAddResidentModal
+        isOpen={showQuickAddModal}
+        onClose={() => setShowQuickAddModal(false)}
+        onSuccess={() => {
+          setShowQuickAddModal(false);
+          handlePrint(true);
+        }}
+        initialData={formData}
+      />
     </div>
   );
 }
-
-
-
-

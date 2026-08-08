@@ -1,3 +1,5 @@
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import SuratEditorHeader from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
@@ -57,7 +59,7 @@ export default function AdminSuratSKP({
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
         setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
@@ -75,6 +77,7 @@ export default function AdminSuratSKP({
   }, [presetResident]);
 
   const [loading, setLoading] = useState(false);
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SKP', 'Surat Keterangan Pindah (Warga Keluar)');
   const templateKode = useLetterKode('SKP');
@@ -239,13 +242,7 @@ export default function AdminSuratSKP({
     const configs = getLetterClassifications();
     const skp = configs.find(c => c.klasifikasi === 'SKP') || { id: 'fallback_skp', jenis: 'SURAT KETERANGAN PINDAH', klasifikasi: 'SKP', kodeKlasifikasi: '475', noUrutTerakhir: 0 };
     
-    if (!editData) {
-      const generatedNo = generateLetterNumber(skp.klasifikasi, skp.kodeKlasifikasi || '475', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
-      setFormData(prev => ({
-        ...prev,
-        nomorSurat: generatedNo
-      }));
-    }
+    
 
     const savedRiwayat = localStorage.getItem('riwayat_surat_skp');
     if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
@@ -367,7 +364,7 @@ export default function AdminSuratSKP({
     }
     setLoading(true);
 
-    await updateResidentData(formData.nik, { 
+    await autoSyncResidentFromLetter(formData.nik, { 
       name: formData.nama, 
       birthPlace: formData.tempatLahir, 
       birthDate: formData.tanggalLahir, 
@@ -378,11 +375,11 @@ export default function AdminSuratSKP({
       rt: formData.rt,
       rw: formData.rw,
       status: 'Pindah'
-    });
+    }, 'Pembuatan Surat');
 
     if (checkedFamilyNiks && checkedFamilyNiks.length > 0) {
       for (const followerNik of checkedFamilyNiks) {
-        await updateResidentData(followerNik, { status: 'Pindah' });
+        await autoSyncResidentFromLetter(followerNik, { status: 'Pindah' }, 'Pembuatan Surat');
       }
     }
 
@@ -466,6 +463,8 @@ export default function AdminSuratSKP({
               }
               tr { page-break-inside: avoid !important; }
               thead { display: table-header-group !important; }
+
+import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
             }
           </style>
         </head>
@@ -894,61 +893,7 @@ export default function AdminSuratSKP({
         {/* Form Column */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Pencarian Warga */}
-          <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <Search className="w-4 h-4 text-emerald-600" />
-              Pilih Penduduk (Warga)
-            </h3>
-            <div className="relative">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input 
-                  type="text"
-                  placeholder="Cari NIK atau Nama Warga..."
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <p className="mt-2 text-emerald-600 font-medium text-[10px]">* Pencarian otomatis melengkapi biodata, alamat asal, dan pekerjaan warga desa terpilih</p>
-              {searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-20">
-                  {filteredResidents.length > 0 ? (
-                    filteredResidents.map(res => (
-                      <button
-                        key={res.nik}
-                        onClick={() => handleSelectResident(res)}
-                        className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
-                      >
-                        <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 font-bold shrink-0">
-                          {res.name[0]}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} &bull; {res.desa}</p>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="p-4 text-sm text-slate-500 dark:text-slate-400 italic text-center">Warga tidak ditemukan.</p>
-                  )}
-                </div>
-              )}
-            </div>
-            {selectedChild && (
-              <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <div>
-                    <p className="text-sm font-bold text-emerald-900">{selectedChild.name}</p>
-                    <p className="text-[10px] text-emerald-700">Warga Terpilih</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedChild(null)} className="text-xs font-bold text-emerald-600 hover:underline">Ganti</button>
-              </div>
-            )}
-          </section>
+          
 
           {/* Form Detail */}
           <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
@@ -1647,7 +1592,8 @@ export default function AdminSuratSKP({
         jenisSurat="Surat Keterangan Pindah (SKP)"
         onBackToTemplates={onBack}
       />
-    </div>
+      <QuickAddResidentModal isOpen={showQuickAddModal} onClose={() => setShowQuickAddModal(false)} onSuccess={() => { setShowQuickAddModal(false); handlePrint(true); }} initialData={formData} />
+</div>
   );
 }
 

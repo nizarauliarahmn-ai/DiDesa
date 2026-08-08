@@ -19,6 +19,9 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
 
 interface Resident {
   nik: string;
@@ -49,7 +52,7 @@ export default function AdminSuratSKPH({
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
         setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
@@ -67,6 +70,7 @@ export default function AdminSuratSKPH({
   }, [presetResident]);
 
   const [loading, setLoading] = useState(false);
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SKPH', 'Surat Keterangan Penghasilan / Gaji');
   const templateKode = useLetterKode('SKPH');
@@ -207,13 +211,7 @@ export default function AdminSuratSKPH({
     const configs = getLetterClassifications();
     const skph = configs.find(c => c.klasifikasi === 'SKPH') || { id: 'fallback_skph', jenis: 'SK PENGHASILAN', klasifikasi: 'SKPH', kodeKlasifikasi: '400', noUrutTerakhir: 0 };
     
-    if (!editData) {
-      const generatedNo = generateLetterNumber(skph.klasifikasi, skph.kodeKlasifikasi || '400', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
-      setFormData(prev => ({
-        ...prev,
-        nomorSurat: generatedNo
-      }));
-    }
+    
 
     const savedRiwayat = localStorage.getItem('riwayat_surat_skph');
     if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
@@ -253,24 +251,22 @@ export default function AdminSuratSKPH({
     setSearchQuery('');
   };
 
-  const handlePrint = async () => {
+  const handlePrint = async (skipCheck = false) => {
     if (!formData.nama || !formData.nama.trim()) {
       showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
       return;
     }
     setLoading(true);
+    if (!skipCheck && (formData.nama || formData.nik)) {
+      setLoading(true);
+      const exists = await checkResidentExists(formData.nik, formData.nama);
+      setLoading(false);
+      if (!exists) {
+        setShowQuickAddModal(true);
+        return;
+      }
+    }
 
-    await updateResidentData(formData.nik, { 
-      name: formData.nama, 
-      birthPlace: formData.tempatLahir, 
-      birthDate: formData.tanggalLahir, 
-      gender: formData.jenisKelamin,
-      religion: formData.agama,
-      job: formData.pekerjaan,
-      address: formData.alamat,
-      rt: formData.rt,
-      rw: formData.rw
-    });
 
     const content = generateHTML();
     const iframe = iframeRef.current;
@@ -333,6 +329,7 @@ export default function AdminSuratSKPH({
             /* Hide crop marks in print */
             .crop-mark { 
               display: none !important; 
+
             }
             @media print {
               body, .page { 
@@ -602,61 +599,7 @@ export default function AdminSuratSKPH({
         {/* Form Column */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Pencarian Warga */}
-          <section className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <Search className="w-4 h-4 text-emerald-600" />
-              Pilih Warga (Penduduk)
-            </h3>
-            <div className="relative">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                <input 
-                  type="text"
-                  placeholder="Cari NIK atau Nama Warga..."
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <p className="mt-2 text-emerald-600 font-medium text-[10px]">* Pencarian otomatis melengkapi biodata, alamat, KK, pendidikan, dan pekerjaan warga desa terpilih</p>
-              {searchQuery && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-20">
-                  {filteredResidents.length > 0 ? (
-                    filteredResidents.map(res => (
-                      <button
-                        key={res.nik}
-                        onClick={() => handleSelectResident(res)}
-                        className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
-                      >
-                        <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 font-bold shrink-0">
-                          {res.name[0]}
-                        </div>
-                        <div>
-                          <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} &bull; {res.desa}</p>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <p className="p-4 text-sm text-slate-500 dark:text-slate-400 italic text-center">Warga tidak ditemukan.</p>
-                  )}
-                </div>
-              )}
-            </div>
-            {selectedChild && (
-              <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <div>
-                    <p className="text-sm font-bold text-emerald-900">{selectedChild.name}</p>
-                    <p className="text-[10px] text-emerald-700">Warga Terpilih</p>
-                  </div>
-                </div>
-                <button onClick={() => setSelectedChild(null)} className="text-xs font-bold text-emerald-600 hover:underline">Ganti</button>
-              </div>
-            )}
-          </section>
+          
 
           {/* Form Detail */}
           <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
@@ -1093,10 +1036,16 @@ export default function AdminSuratSKPH({
         jenisSurat="Surat Keterangan Penghasilan (SKPH)"
         onBackToTemplates={onBack}
       />
+    
+      <QuickAddResidentModal
+        isOpen={showQuickAddModal}
+        onClose={() => setShowQuickAddModal(false)}
+        onSuccess={() => {
+          setShowQuickAddModal(false);
+          handlePrint(true);
+        }}
+        initialData={formData}
+      />
     </div>
   );
 }
-
-
-
-

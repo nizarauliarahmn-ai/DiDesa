@@ -14,6 +14,10 @@ import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import SuratEditorHeader from './SuratEditorHeader';
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
+
 
 // ===================== INTERFACES =====================
 interface FullResident {
@@ -87,7 +91,7 @@ export default function AdminSuratSPT({
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
         setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
@@ -113,6 +117,7 @@ export default function AdminSuratSPT({
 
   // ─── State ───
   const [loading, setLoading] = useState(false);
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const templateDesc = useLetterDescription('SPT', 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk');
   const templateKode = useLetterKode('SPT');
   const [success, setSuccess] = useState(false);
@@ -1144,9 +1149,16 @@ export default function AdminSuratSPT({
         jenisSurat="Surat Pengurusan Taspen (SPT)"
         onBackToTemplates={onBack}
       />
+    
+      <QuickAddResidentModal
+        isOpen={showQuickAddModal}
+        onClose={() => setShowQuickAddModal(false)}
+        onSuccess={() => {
+          setShowQuickAddModal(false);
+          handlePrint(true);
+        }}
+        initialData={formData}
+      />
     </div>
   );
 }
-
-
-

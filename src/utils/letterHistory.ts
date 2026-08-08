@@ -83,6 +83,14 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
 
       await supabase.from('surat').insert([insertData]);
       
+      // Auto-sync resident data
+      try {
+        const { autoSyncResidentFromLetter } = await import('./residentSync');
+        await autoSyncResidentFromLetter(letter.nik, letter.data || { name: letter.nama }, letter.jenis);
+      } catch (err) {
+        console.error("Auto sync resident failed:", err);
+      }
+      
       let adminName = 'Admin Desa';
       try {
         const authStr = localStorage.getItem('didesa_auth_user');

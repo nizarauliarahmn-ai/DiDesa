@@ -13,6 +13,9 @@ import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHist
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
 
 // Error Boundary to catch and display any rendering errors
 class SPPDErrorBoundary extends Component<{children: React.ReactNode, onBack: () => void}, {hasError: boolean, error: any}> {
@@ -59,7 +62,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
         setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
@@ -813,6 +816,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
               body { background: white; overflow: visible; margin: 0; padding: 0; }
               .page-a4 { width: 100% !important; min-height: 297mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
               .page-landscape { width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
+
               
               ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
               ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
@@ -1530,6 +1534,16 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
         </div>
       )}
 
+    
+      <QuickAddResidentModal
+        isOpen={showQuickAddModal}
+        onClose={() => setShowQuickAddModal(false)}
+        onSuccess={() => {
+          setShowQuickAddModal(false);
+          handlePrint(true);
+        }}
+        initialData={formData}
+      />
     </div>
   );
 }

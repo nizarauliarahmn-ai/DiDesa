@@ -14,6 +14,9 @@ import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
 import SuratEditorHeader from './SuratEditorHeader';
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
 
 interface Resident {
   nik: string;
@@ -44,7 +47,7 @@ export default function AdminSuratSKKT({
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
 
   useEffect(() => {
-    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
+    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
       if (typeof setFormData === 'function') {
         setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
       } else if (typeof setNoSurat === 'function') {
@@ -56,6 +59,7 @@ export default function AdminSuratSKKT({
   }, [customNomorSurat, isBackdate, editData]);
 
   const [loading, setLoading] = useState(false);
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const templateKode = useLetterKode('SKKT');
   const templateDesc = useLetterDescription('SKKT', 'Surat Keterangan Kepemilikan Tanah');
   const [residents, setResidents] = useState<Resident[]>([]);
@@ -585,6 +589,7 @@ export default function AdminSuratSKKT({
               @page { 
                 size: A4; 
                 margin: 0 !important; 
+
               }
               body { 
                 margin: 0; 
@@ -1126,6 +1131,16 @@ export default function AdminSuratSKKT({
           onClose={() => setShowMapModal(false)}
         />
       )}
+    
+      <QuickAddResidentModal
+        isOpen={showQuickAddModal}
+        onClose={() => setShowQuickAddModal(false)}
+        onSuccess={() => {
+          setShowQuickAddModal(false);
+          handlePrint(true);
+        }}
+        initialData={formData}
+      />
     </div>
   );
 }

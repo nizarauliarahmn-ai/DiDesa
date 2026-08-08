@@ -70,7 +70,7 @@ export default function SuratEditorHeader({
         
         {onPrint && (
           <button
-            onClick={onPrint}
+            onClick={() => onPrint()}
             className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/30 dark:shadow-none transition-all active:scale-95"
           >
             <Printer className="w-4 h-4" />
