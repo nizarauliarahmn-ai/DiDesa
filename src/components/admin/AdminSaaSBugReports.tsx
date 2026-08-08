@@ -3,7 +3,7 @@ import {
   Bug, LifeBuoy, AlertTriangle, CheckCircle2, Clock, 
   Search, RefreshCw, Eye, MessageSquare, ShieldAlert,
   Send, User, Building2, Monitor, ArrowRight, Filter,
-  Check, X, Sparkles, HelpCircle, Tag
+  Check, X, Sparkles, HelpCircle, Tag, Info
 } from 'lucide-react';
 import { 
   fetchBugReportsOnline, 
