@@ -599,7 +599,7 @@ export async function deleteResident(nik: string, silent: boolean = false): Prom
 
   if (drizzleDb) {
     try {
-      await pgPool.query("UPDATE residents SET is_deleted = 1 WHERE nik = $1", [nik]);
+      await pgPool.query("UPDATE residents SET status = 'archived' WHERE nik = $1", [nik]);
       if (!silent) addNotification("Penduduk Dipindahkan ke Arsip", `Data penduduk ${residentName} (NIK: ${nik}) telah dipindahkan ke arsip/tong sampah.`, "Residents");
       return true;
     } catch (err: any) {
@@ -610,7 +610,7 @@ export async function deleteResident(nik: string, silent: boolean = false): Prom
 
   if (supabase) {
     try {
-      const { error } = await supabase.from("residents").update({ is_deleted: 1 }).eq("nik", nik);
+      const { error } = await supabase.from("residents").update({ status: 'archived' }).eq("nik", nik);
       if (error) throw error;
       if (!silent) addNotification("Penduduk Dipindahkan ke Arsip", `Data penduduk ${residentName} (NIK: ${nik}) telah dipindahkan ke arsip/tong sampah.`, "Residents");
       return true;
@@ -622,7 +622,7 @@ export async function deleteResident(nik: string, silent: boolean = false): Prom
 
   const foundMem = memoryResidents.find(r => r.nik === nik);
   if (foundMem) {
-    (foundMem as any).is_deleted = 1;
+    (foundMem as any).status = 'archived';
   }
   if (!silent) addNotification("Penduduk Dipindahkan ke Arsip", `Data penduduk ${residentName} (NIK: ${nik}) telah dipindahkan ke arsip/tong sampah.`, "Residents");
   return true;
@@ -631,17 +631,17 @@ export async function deleteResident(nik: string, silent: boolean = false): Prom
 export async function getArchivedResidents(): Promise<any[]> {
   if (drizzleDb) {
     try {
-      const res = await pgPool.query("SELECT * FROM residents WHERE is_deleted = 1 ORDER BY name ASC");
+      const res = await pgPool.query("SELECT * FROM residents WHERE status = 'archived' ORDER BY name ASC");
       return res.rows.map(normalizeResident);
     } catch (err: any) {}
   }
   if (supabase) {
     try {
-      const { data } = await supabase.from("residents").select("*").eq("is_deleted", 1).order("name", { ascending: true });
+      const { data } = await supabase.from("residents").select("*").eq("status", "archived").order("name", { ascending: true });
       if (data) return data.map(normalizeResident);
     } catch (err: any) {}
   }
-  return memoryResidents.filter(r => (r as any).is_deleted === 1);
+  return memoryResidents.filter(r => (r as any).status === 'archived');
 }
 
 export async function restoreResident(nik: string): Promise<boolean> {

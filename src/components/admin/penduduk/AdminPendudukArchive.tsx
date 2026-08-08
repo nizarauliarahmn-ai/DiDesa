@@ -64,7 +64,7 @@ export default function AdminPendudukArchive({ onBack }: { onBack: () => void })
       const tenantId = await resolveCurrentTenant();
       const { error } = await supabase
         .from('residents')
-        .update({ is_deleted: 0, status: 'Aktif', status_color: 'emerald' })
+        .update({ status: 'Aktif', status_color: 'emerald' })
         .eq('nik', nik)
         .eq('tenant_id', tenantId);
 

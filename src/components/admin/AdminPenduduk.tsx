@@ -128,7 +128,7 @@ export default function AdminPenduduk({
            statusColor: r.status_color,
            _orderKey: r.created_at ? new Date(r.created_at).getTime() : (r.id && !isNaN(Number(r.id)) ? Number(r.id) : 0)
         }));
-        setResidents(formatted.filter(r => String(r.is_deleted) !== '1' && r.is_deleted !== true));
+        setResidents(formatted.filter(r => String(r.is_deleted) !== '1' && r.is_deleted !== true && (r.status || '').toLowerCase() !== 'archived' && (r.status || '').toLowerCase() !== 'deleted'));
       }
     }
     setLoading(false);
@@ -308,7 +308,8 @@ export default function AdminPenduduk({
       const safeNik = (item.nik || '').toString();
       const query = (debouncedSearchQuery || '').toLowerCase();
       
-      const matchesSearch = safeName.includes(query) || safeNik.includes(query);
+      const safeKk = (item.noKk || item.no_kk || '').toString();
+      const matchesSearch = safeName.includes(query) || safeNik.includes(query) || safeKk.includes(query);
 
       // Category filter
       let matchesFilter = true;
@@ -451,7 +452,7 @@ export default function AdminPenduduk({
       if (isSuperAdmin) {
         // Super Admin: Move directly to Trash Bin (soft delete)
         const { error } = await supabase.from('residents')
-          .update({ is_deleted: 1, status: 'archived' })
+          .update({ status: 'archived' })
           .eq('nik', nik)
           .eq('tenant_id', tenantId);
 
@@ -759,7 +760,7 @@ export default function AdminPenduduk({
                 type="text" 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Masukkan NIK atau Nama Penduduk..." 
+                placeholder="Masukkan NIK, No. KK, atau Nama Penduduk..." 
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-gray-800 dark:text-slate-100 placeholder:text-gray-400 outline-none transition-shadow"
               />
             </div>

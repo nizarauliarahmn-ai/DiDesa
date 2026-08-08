@@ -49,13 +49,17 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
 
   const getFilteredResidents = () => {
     if (!activeField) return [];
-    const query = activeField === 'nama' ? formData.nama : formData.nik;
+    const query = (activeField === 'nama' ? formData.nama : formData.nik) || '';
     if (!query) return [];
     
-    return residents.filter((r: any) => 
-      (r.name || '').toLowerCase().includes((query || '').toLowerCase()) || 
-      (r.nik || '').includes(query || '')
-    ).slice(0, 5);
+    return residents.filter((r: any) => {
+      const safeName = (r.name || '').toLowerCase();
+      const safeNik = (r.nik || '').toString();
+      const safeKk = (r.noKk || r.no_kk || '').toString();
+      const q = query.toLowerCase();
+      
+      return safeName.includes(q) || safeNik.includes(q) || safeKk.includes(q);
+    }).slice(0, 5);
   };
 
   const filteredResidents = getFilteredResidents();
