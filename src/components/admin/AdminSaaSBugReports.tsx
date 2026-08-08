@@ -73,6 +73,16 @@ export const AdminSaaSBugReports: React.FC = () => {
     setAdminReplyInput(report.admin_reply || '');
   };
 
+  // Keep selected report in sync with realtime updates
+  useEffect(() => {
+    if (selectedReport) {
+      const updated = reports.find(r => r.id === selectedReport.id);
+      if (updated && JSON.stringify(updated.messages) !== JSON.stringify(selectedReport.messages)) {
+        setSelectedReport(updated);
+      }
+    }
+  }, [reports]);
+
   const handleUpdateStatus = async (newStatus: BugReport['status']) => {
     if (!selectedReport) return;
     setIsUpdatingStatus(true);

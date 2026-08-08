@@ -214,7 +214,7 @@ export default function AdminHeader({
                 const allBugs = await fetchBugReportsOnline();
                 allBugs.filter(b => b.status === 'Menunggu' || (b.messages && b.messages[b.messages.length - 1]?.role !== 'SaaS Admin')).forEach(b => {
                   roleData.unshift({
-                    id: `saas-bug-${b.id}`,
+                    id: `saas-bug-${b.id}-${b.messages?.length || 0}`,
                     title: 'Pesan Tiket Bantuan Baru',
                     message: `Pesan baru dari ${b.tenant_name}: ${b.title}`,
                     category: 'Assistance',
