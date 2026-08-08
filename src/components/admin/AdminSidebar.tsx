@@ -210,11 +210,9 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} />
             <NavItem icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
               <NavItem icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); }} />
-            {authUser?.role === 'kades' && <NavItem icon={<ShieldCheck size={18} className="text-amber-600 animate-pulse" />} label="Antrean Konfirmasi" active={activeTab === 'antrean'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('antrean'); }} /> }
-            
             <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Lainnya</p>
             <NavItem icon={<BookOpen size={18} className="text-emerald-600" />} label="Panduan & Tutorial" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
-            <NavItem icon={<Settings size={18} />} label="Pengaturan" active={activeTab === 'pengaturan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pengaturan'); }} />
+            {authUser?.role === 'kades' && <NavItem icon={<Settings size={18} />} label="Pengaturan" active={activeTab === 'pengaturan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pengaturan'); }} />}
           </>
         ) : (
           <>

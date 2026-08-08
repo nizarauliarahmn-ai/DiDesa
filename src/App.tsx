@@ -474,7 +474,7 @@ export default function App() {
                 <PageTransition pageKey={adminTab}>
                 {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
                 {adminTab === 'produk_hukum' && <AdminProdukHukum />}
-                {adminTab === 'aparatur' && user.role === 'kades' && <AdminAparatur />}
+                {adminTab === 'aparatur' && (user.role === 'kades' || user.role === 'saas_admin') && <AdminAparatur />}
                  {adminTab === 'penduduk' && (
                   <AdminPenduduk 
                     onNavigateToTab={setAdminTab} 
@@ -516,7 +516,7 @@ export default function App() {
                   />
                 )}
                 {adminTab === 'panduan' && <AdminPanduan />}
-                {adminTab === 'antrean' && (user.role === 'kades' || user.role === 'saas_admin') && <AdminApprovalQueue />}
+
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
                 {adminTab === 'saas_leads' && user.role === 'saas_admin' && <AdminSaaSLeads onSetActiveTab={setAdminTab} />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
@@ -524,7 +524,7 @@ export default function App() {
                 {adminTab === 'saas_bugs' && user.role === 'saas_admin' && <AdminSaaSBugReports />}
                 {adminTab === 'global_branding' && user.role === 'saas_admin' && <AdminGlobalBranding />}
                 {adminTab === 'template_surat' && user.role === 'saas_admin' && <AdminSaaSTemplateSurat />}
-                {adminTab === 'pengaturan' && <AdminPengaturan />}
+                {adminTab === 'pengaturan' && (user.role === 'kades' || user.role === 'saas_admin') && <AdminPengaturan />}
                 {adminTab === 'notifikasi' && (
                   <AdminNotifikasi 
                     searchQuery={globalSearch}

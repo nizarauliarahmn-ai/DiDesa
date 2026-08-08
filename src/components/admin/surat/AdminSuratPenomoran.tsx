@@ -416,7 +416,7 @@ return (
             Akses Terbatas (Baca-Saja)
           </p>
           <p className="text-[11px] text-amber-700 leading-relaxed mt-0.5">
-            Anda masuk sebagai Admin biasa. Hanya Kepala Desa (Super Admin) yang
+            Anda masuk sebagai Admin biasa. Hanya Super Admin (IT) yang
             memiliki wewenang penuh untuk mengubah format penomoran surat maupun
             menentukan surat mana saja yang aktif/tampil di portal layanan
             mandiri warga.
