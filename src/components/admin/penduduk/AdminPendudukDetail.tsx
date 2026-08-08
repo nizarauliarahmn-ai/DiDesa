@@ -120,15 +120,15 @@ export default function AdminPendudukDetail({
       );
     } else {
       showConfirm(
-        "Hapus Data Penduduk (Permanen)",
-        `Apakah Anda yakin ingin menghapus data warga ${data.name} secara langsung? Tindakan ini bersifat permanen dan seketika.`,
+        "Pindahkan ke Tong Sampah",
+        `Apakah Anda yakin ingin menghapus data warga ${data.name}? Data akan dipindahkan ke Tong Sampah dan baru akan dihapus permanen secara otomatis setelah 30 hari.`,
         async () => {
           try {
             const res = await fetch(`/api/residents/${data.nik}`, {
               method: 'DELETE',
             });
             if (res.ok) {
-              showToast(`Data warga ${data.name} berhasil dihapus permanen!`, "success");
+              showToast(`Data warga ${data.name} berhasil dipindahkan ke Tong Sampah!`, "success");
               onBack();
             } else {
               throw new Error("Gagal menghapus data warga.");
@@ -444,7 +444,8 @@ export default function AdminPendudukDetail({
                 <button onClick={handleMoveResident} className="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors flex items-center justify-center" title="Mutasi Warga">
                   <ArrowRightLeft className="w-4 h-4" />
                 </button>
-                <button onClick={handleDeleteResident} className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 transition-colors flex items-center justify-center" title="Hapus Warga">
+                <div className="w-[1px] h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                <button onClick={handleDeleteResident} className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 transition-colors flex items-center justify-center border border-rose-100" title="Pindah ke Tong Sampah">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </>
