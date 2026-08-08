@@ -8,6 +8,7 @@ import Markdown from 'react-markdown';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 import { addSaaSLog } from '../../utils/saasLogs';
+import ConfirmModal from '../common/ConfirmModal';
 
 export interface GlobalUpdateItem {
   id: string;
@@ -193,8 +194,13 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
     }
   };
 
-  const handleDelete = async (item: GlobalUpdateItem) => {
-    if (!window.confirm(`Apakah Anda yakin ingin menghapus catatan rilis versi ${item.version} (${item.title})?`)) return;
+  // Delete Confirm State
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState<GlobalUpdateItem | null>(null);
+
+  const executeDelete = async () => {
+    if (!deleteConfirmItem) return;
+    const item = deleteConfirmItem;
+    setDeleteConfirmItem(null);
 
     try {
       const { error } = await supabase
@@ -506,7 +512,7 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(item)}
+                      onClick={() => setDeleteConfirmItem(item)}
                       className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-all border border-rose-200 dark:border-rose-900/40 cursor-pointer"
                       title="Hapus Pembaruan"
                     >
@@ -756,6 +762,21 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
           </div>
         </div>
       )}
+      {/* MODAL KONFIRMASI HAPUS MODERN */}
+      <ConfirmModal
+        isOpen={!!deleteConfirmItem}
+        title="Hapus Catatan Pembaruan"
+        message={
+          <span>
+            Apakah Anda yakin ingin menghapus catatan rilis versi <strong className="text-slate-900 dark:text-white font-bold">{deleteConfirmItem?.version}</strong> ({deleteConfirmItem?.title})? Tindakan ini akan menghapus data secara permanen dari Supabase Cloud.
+          </span>
+        }
+        confirmText="Ya, Hapus Pembaruan"
+        cancelText="Batal"
+        type="danger"
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteConfirmItem(null)}
+      />
     </div>
   );
 };
