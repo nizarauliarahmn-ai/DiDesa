@@ -194,11 +194,14 @@ export async function autoSyncResidentFromLetter(nik: string, letterData: any, l
         mother_name: letterData.motherName || letterData.namaIbu || '-',
         active_aids: '[]',
         gender_color: 'blue',
-        status_color: 'emerald',
-        created_at: nowIso
+        status_color: 'emerald'
       };
 
-      const { error } = await supabase.from('residents').insert([dbPayload]);
+      let { error } = await supabase.from('residents').insert([dbPayload]);
+      if (error && error.message?.includes('created_at')) {
+        const retry = await supabase.from('residents').insert([{ ...dbPayload, created_at: nowIso }]);
+        error = retry.error;
+      }
       if (!error) {
         addSaaSLog({
           admin: 'Sistem',

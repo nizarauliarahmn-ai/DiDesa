@@ -107,10 +107,7 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
         return;
       }
 
-      const nowIso = new Date().toISOString();
-      const age = calculateAge(formData.birthDate);
-
-      const dbPayload = {
+      const dbPayload: any = {
         tenant_id: tenantId,
         nik: formData.nik,
         name: formData.name,
@@ -136,11 +133,19 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
         mother_name: formData.motherName || '-',
         active_aids: '[]',
         gender_color: 'blue',
-        status_color: 'emerald',
-        created_at: nowIso
+        status_color: 'emerald'
       };
 
-      const { error } = await supabase.from('residents').insert([dbPayload]);
+      let { error } = await supabase.from('residents').insert([dbPayload]);
+
+      if (error) {
+        // If error is about created_at or schema cache, retry with created_at explicitly or without optional fields
+        if (error.message?.includes('created_at')) {
+          const payloadWithCreatedAt = { ...dbPayload, created_at: nowIso };
+          const retry = await supabase.from('residents').insert([payloadWithCreatedAt]);
+          error = retry.error;
+        }
+      }
 
       if (error) throw error;
 
