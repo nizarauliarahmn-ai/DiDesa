@@ -68,6 +68,8 @@ export default function AdminSuratUndangan({
   editLetterId?: string | null;
 }) {
   // Form Header State
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [tanggalSurat, setTanggalSurat] = useState(editData?.tanggal || new Date().toISOString().split('T')[0]);
   const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'UND') || { klasifikasi: 'UND', kodeKlasifikasi: '005' };
   const { customNomorSurat, isBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);

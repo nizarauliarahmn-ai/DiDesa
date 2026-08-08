@@ -1,3 +1,4 @@
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import SuratEditorHeader from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
@@ -47,6 +48,8 @@ export default function AdminSuratSKTM({
   editLetterId?: string | null;
   presetResident?: any;
 }) {
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKTM') || { klasifikasi: 'SKTM', kodeKlasifikasi: '400' };
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
@@ -611,7 +614,10 @@ export default function AdminSuratSKTM({
                   formData={formData}
                   setFormData={setFormData}
                   residents={residents}
-                  onOpenQuickAdd={() => setShowQuickAddModal(true)}
+                  onOpenQuickAdd={(nik, name) => {
+                  setQuickAddInitialData({ nik: nik || formData.nik, name: name || formData.nama || (formData as any).name || (formData as any).namaAyah || (formData as any).namaIbu });
+                  setShowQuickAddModal(true);
+                }}
                 />
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
@@ -978,6 +984,30 @@ export default function AdminSuratSKTM({
         jenisSurat="Surat Keterangan Tidak Mampu (SKTM)"
         onBackToTemplates={onBack}
       />
+      <QuickAddResidentModal
+        isOpen={showQuickAddModal}
+        onClose={() => setShowQuickAddModal(false)}
+        initialData={quickAddInitialData}
+        onSuccess={(savedData) => {
+          setFormData((prev: any) => ({
+            ...prev,
+            nik: savedData.nik,
+            nama: savedData.name,
+            name: savedData.name,
+            tempatLahir: savedData.birth_place,
+            tanggalLahir: savedData.birth_date,
+            jenisKelamin: savedData.gender,
+            agama: savedData.religion,
+            pekerjaan: savedData.job,
+            alamat: savedData.address,
+            rt: savedData.rt,
+            rw: savedData.rw,
+            desa: savedData.desa
+          }));
+          setShowQuickAddModal(false);
+        }}
+      />
+    
     </div>
   );
 }

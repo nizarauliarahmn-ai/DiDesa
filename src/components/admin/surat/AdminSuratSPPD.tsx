@@ -57,6 +57,8 @@ export default function AdminSuratSPPD({ onBack, editData, editLetterId }: { onB
 }
 
 function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () => void, editData?: any, editLetterId?: string | null }) {
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SPPD') || { klasifikasi: 'SPPD', kodeKlasifikasi: '400' };
   const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
