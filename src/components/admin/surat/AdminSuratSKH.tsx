@@ -612,24 +612,12 @@ export default function AdminSuratSKH({
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Penduduk</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-                  <input 
-                    type="text"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.nama}
-                    onChange={(e) => setFormData({...formData, nama: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-                  <input 
-                    type="text"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.nik}
-                    onChange={(e) => setFormData({...formData, nik: e.target.value})}
-                  />
-                </div>
+                                <UnifiedResidentSearch
+                  formData={formData}
+                  setFormData={setFormData}
+                  residents={residents}
+                  onOpenQuickAdd={() => setShowQuickAddModal(true)}
+                />
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
                   <select 

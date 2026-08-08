@@ -1,3 +1,4 @@
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
