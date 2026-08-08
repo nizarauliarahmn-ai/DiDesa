@@ -3,6 +3,7 @@ import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Be
 import { X } from 'lucide-react';
 import { getFeedbacks } from '../../utils/feedbackData';
 import { fetchBugReportsOnline } from '../../utils/bugReportService';
+import { fetchSaaSTenantRequests } from '../../utils/saasLeads';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 
@@ -56,6 +57,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   const [authUser, setAuthUser] = React.useState<{ name: string; email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; avatar: string } | null>(null);
   const [unreadFeedbacks, setUnreadFeedbacks] = useState(0);
   const [pendingBugsCount, setPendingBugsCount] = useState(0);
+  const [pendingLeadsCount, setPendingLeadsCount] = useState(0);
   
   // Global Branding
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
@@ -137,20 +139,28 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
     const handleBugsUpdate = async () => {
       const reports = await fetchBugReportsOnline();
-      setPendingBugsCount(reports.filter(r => r.status === 'Menunggu').length);
+      setPendingBugsCount(reports.filter(r => r.status === 'Menunggu' || (r.messages && r.messages[r.messages.length - 1]?.role !== 'SaaS Admin')).length);
     };
     handleBugsUpdate();
+
+    const handleLeadsUpdate = async () => {
+      const leads = await fetchSaaSTenantRequests();
+      setPendingLeadsCount(leads.filter(l => l.status === 'Menunggu').length);
+    };
+    handleLeadsUpdate();
 
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
     window.addEventListener('feedback_updated', handleFeedbackUpdate);
     window.addEventListener('bug_reports_updated', handleBugsUpdate);
+    window.addEventListener('tenant_requests_updated', handleLeadsUpdate);
     
     return () => {
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
       window.removeEventListener('global_branding_updated', handleBrandingUpdate);
       window.removeEventListener('feedback_updated', handleFeedbackUpdate);
       window.removeEventListener('bug_reports_updated', handleBugsUpdate);
+      window.removeEventListener('tenant_requests_updated', handleLeadsUpdate);
     };
   }, []);
 
@@ -181,7 +191,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: globalColor }}>{globalName}</h1>
-            <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v4.1</span>
+            <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v5.0</span>
           </div>
           <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1">
             {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
@@ -218,7 +228,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
           <>
             <NavItem icon={<LayoutDashboard size={18} />} label="SaaS Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
             <NavItem icon={<Building2 size={18} className="text-blue-600" />} label="Manajemen Klien" active={activeTab === 'tenants'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('tenants'); }} badgeCount={unreadFeedbacks} />
-            <NavItem icon={<Users size={18} className="text-orange-500" />} label="Prospek & Pengajuan" active={activeTab === 'saas_leads'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_leads'); }} />
+            <NavItem icon={<Users size={18} className="text-orange-500" />} label="Prospek & Pengajuan" active={activeTab === 'saas_leads'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_leads'); }} badgeCount={pendingLeadsCount} />
             <NavItem icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
             <NavItem icon={<Sparkles size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
             <NavItem icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={pendingBugsCount} />

@@ -167,6 +167,17 @@ export function SupabaseSync() {
           }
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'saas_tenant_requests'
+        },
+        () => {
+          window.dispatchEvent(new Event('tenant_requests_updated'));
+        }
+      )
       .subscribe();
 
     return () => {

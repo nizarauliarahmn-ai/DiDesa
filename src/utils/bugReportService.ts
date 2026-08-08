@@ -16,6 +16,7 @@ export interface BugReport {
   urgency: 'Rendah' | 'Sedang' | 'Tinggi' | 'Mendesak';
   status: 'Menunggu' | 'Diproses' | 'Selesai';
   admin_reply?: string;
+  messages?: { sender: string; role: string; text: string; timestamp: string }[];
   created_at: string;
   updated_at?: string;
   page_url?: string;
@@ -54,6 +55,15 @@ export const fetchBugReportsOnline = async (): Promise<BugReport[]> => {
 };
 
 /**
+ * Fetch bug reports specific to the current village tenant
+ */
+export const fetchVillageBugReportsOnline = async (): Promise<BugReport[]> => {
+  const allReports = await fetchBugReportsOnline();
+  const tenantId = await resolveCurrentTenant();
+  return allReports.filter(r => r.tenant_id === tenantId);
+};
+
+/**
  * Submit a new bug report from village admin to Supabase Cloud
  */
 export const submitBugReportOnline = async (
@@ -78,6 +88,12 @@ export const submitBugReportOnline = async (
       tenant_id: tenantId,
       tenant_name: villageName,
       status: 'Menunggu',
+      messages: [{
+        sender: report.reporter_name || 'Admin Desa',
+        role: report.reporter_role || 'Admin Desa',
+        text: report.description,
+        timestamp: new Date().toISOString()
+      }],
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -189,6 +205,76 @@ export const updateBugReportStatusOnline = async (
     return true;
   } catch (e) {
     console.error('Error updating bug report status:', e);
+    return false;
+  }
+};
+
+/**
+ * Reply to a bug report (2-way chat)
+ */
+export const replyToBugReportOnline = async (
+  reportId: string,
+  reply: { sender: string; role: string; text: string }
+): Promise<boolean> => {
+  try {
+    const currentReports = await fetchBugReportsOnline();
+    const index = currentReports.findIndex(r => r.id === reportId);
+    
+    if (index !== -1) {
+      const report = currentReports[index];
+      const newMessages = [...(report.messages || []), {
+        ...reply,
+        timestamp: new Date().toISOString()
+      }];
+
+      currentReports[index] = {
+        ...report,
+        messages: newMessages,
+        status: reply.role === 'SaaS Admin' ? 'Diproses' : 'Menunggu',
+        updated_at: new Date().toISOString()
+      };
+
+      const stringified = JSON.stringify(currentReports);
+
+      const { error } = await supabase
+        .from('saas_settings')
+        .update({ value: stringified, updated_at: new Date().toISOString() })
+        .eq('key', SETTINGS_KEY)
+        .eq('tenant_id', GLOBAL_TENANT_ID);
+
+      if (error) {
+          // fallback insert if update fails due to missing row (edge case but handled above mostly)
+          await supabase.from('saas_settings').insert({
+            key: SETTINGS_KEY,
+            tenant_id: GLOBAL_TENANT_ID,
+            value: stringified,
+            updated_at: new Date().toISOString()
+          });
+      }
+
+      localStorage.setItem(SETTINGS_KEY, stringified);
+      window.dispatchEvent(new Event('bug_reports_updated'));
+      
+      // Notify Admin
+      if (reply.role === 'SaaS Admin') {
+        await supabase.from('notifications').insert([{
+           id: `notif-chat-${Date.now()}`,
+           tenant_id: report.tenant_id,
+           title: "Balasan Tiket Bantuan",
+           message: `SaaS Admin merespon tiket Anda: "${report.title}".`,
+           category: "Assistance",
+           is_read: false,
+           timestamp: new Date().toISOString()
+        }]);
+      } else {
+        // Notify SaaS (Global notification trigger will be caught by AdminHeader)
+      }
+
+      return true;
+    }
+    return false;
+  } catch (e: any) {
+    console.error('Error replying to bug report online:', e);
     return false;
   }
 };

@@ -5,6 +5,7 @@ import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { fetchSaaSTenantRequests } from '../../utils/saasLeads';
+import { fetchBugReportsOnline } from '../../utils/bugReportService';
 
 export default function AdminHeader({ 
   setActiveTab, 
@@ -208,6 +209,20 @@ export default function AdminHeader({
                     isRead: false
                   });
                 });
+
+                // Inject unread bug reports / chats
+                const allBugs = await fetchBugReportsOnline();
+                allBugs.filter(b => b.status === 'Menunggu' || (b.messages && b.messages[b.messages.length - 1]?.role !== 'SaaS Admin')).forEach(b => {
+                  roleData.unshift({
+                    id: `saas-bug-${b.id}`,
+                    title: 'Pesan Tiket Bantuan Baru',
+                    message: `Pesan baru dari ${b.tenant_name}: ${b.title}`,
+                    category: 'Assistance',
+                    time: 'Baru saja',
+                    timestamp: b.updated_at || b.created_at,
+                    isRead: false
+                  });
+                });
               } else if (role === 'kades') {
                 roleData = data.filter(n => n.category === 'System' || n.category === 'Assistance' || n.category === 'Services' || (n.title && n.title.toLowerCase().includes('persetujuan')));
               } else {
@@ -276,7 +291,12 @@ export default function AdminHeader({
       const allIds = notifications.map(n => n.id);
       const authUserStr = localStorage.getItem('didesa_auth_user');
       const role = authUserStr ? JSON.parse(authUserStr).role : 'unknown';
-      localStorage.setItem(`didesa_read_notifs_${role}`, JSON.stringify(allIds));
+      const storageKey = `didesa_read_notifs_${role}`;
+      const existingReadIdsStr = localStorage.getItem(storageKey);
+      const existingReadIds = existingReadIdsStr ? JSON.parse(existingReadIdsStr) : [];
+      const newReadIds = Array.from(new Set([...existingReadIds, ...allIds]));
+      
+      localStorage.setItem(storageKey, JSON.stringify(newReadIds));
       
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);

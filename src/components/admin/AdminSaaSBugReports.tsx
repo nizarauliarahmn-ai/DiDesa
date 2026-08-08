@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { 
   fetchBugReportsOnline, 
-  updateBugReportStatusOnline, 
+  updateBugReportStatusOnline,
+  replyToBugReportOnline,
   BugReport 
 } from '../../utils/bugReportService';
 import { showToast } from '../../utils/toast';
@@ -76,11 +77,20 @@ export const AdminSaaSBugReports: React.FC = () => {
     if (!selectedReport) return;
     setIsUpdatingStatus(true);
     try {
-      const success = await updateBugReportStatusOnline(
-        selectedReport.id,
-        newStatus,
-        adminReplyInput
-      );
+      let success = true;
+      if (adminReplyInput.trim()) {
+        success = await replyToBugReportOnline(selectedReport.id, {
+          sender: 'SaaS Admin',
+          role: 'SaaS Admin',
+          text: adminReplyInput
+        });
+        setAdminReplyInput('');
+        if (newStatus === 'Menunggu') newStatus = 'Diproses';
+      }
+      
+      if (newStatus !== selectedReport.status) {
+        success = await updateBugReportStatusOnline(selectedReport.id, newStatus) && success;
+      }
 
       if (success) {
         showToast(`Status tiket ${selectedReport.id} diperbarui menjadi '${newStatus}'!`, 'success');
@@ -435,14 +445,23 @@ export const AdminSaaSBugReports: React.FC = () => {
                 </div>
               </div>
 
-              {/* Detail Message */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Rincian Deskripsi Kendala:
-                </label>
-                <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs leading-relaxed text-slate-800 dark:text-slate-200 whitespace-pre-wrap font-sans">
-                  {selectedReport.description}
-                </div>
+              {/* Detail Message as Chat History */}
+              <div className="space-y-4">
+                {selectedReport.messages?.map((msg, idx) => (
+                  <div key={idx} className={`flex flex-col ${msg.role === 'SaaS Admin' ? 'items-end' : 'items-start'}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-bold text-slate-500">{msg.sender} ({msg.role})</span>
+                      <span className="text-[9px] text-slate-400">{new Date(msg.timestamp).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div className={`p-3.5 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
+                      msg.role === 'SaaS Admin' 
+                        ? 'bg-indigo-600 text-white rounded-tr-sm shadow-md shadow-indigo-600/20' 
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm border border-slate-200 dark:border-slate-700'
+                    }`}>
+                      {msg.text}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* Status Update Quick Action Buttons */}
@@ -501,7 +520,7 @@ export const AdminSaaSBugReports: React.FC = () => {
                   rows={3}
                   value={adminReplyInput}
                   onChange={(e) => setAdminReplyInput(e.target.value)}
-                  placeholder="Tuliskan catatan perbaikan atau solusi untuk dikirimkan ke admin desa..."
+                  placeholder="Ketik balasan pesan ke desa di sini..."
                   className="w-full p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs leading-relaxed focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
