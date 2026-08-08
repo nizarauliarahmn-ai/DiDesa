@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ResidentStatusBadge } from './ResidentStatusBadge';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
+import { UserPlus } from 'lucide-react';
 
 interface UnifiedResidentSearchProps {
   formData: any;
@@ -59,6 +60,55 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
 
   const filteredResidents = getFilteredResidents();
 
+  const renderDropdown = (field: 'nama' | 'nik') => {
+    const queryVal = field === 'nama' ? formData.nama : formData.nik;
+    if (!showDropdown || activeField !== field || !queryVal) return null;
+
+    return (
+      <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-30">
+        {filteredResidents.length > 0 ? (
+          filteredResidents.map((res: any) => (
+            <button
+              key={res.nik}
+              onClick={() => handleSelectResident(res)}
+              className="w-full p-3.5 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 cursor-pointer"
+              type="button"
+            >
+              <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-sm">
+                {res.name?.[0]}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate">{res.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">NIK: {res.nik} &bull; {res.desa || 'Desa'}</p>
+              </div>
+            </button>
+          ))
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setShowDropdown(false);
+              onOpenQuickAdd();
+            }}
+            className="w-full p-3.5 flex items-center gap-3 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left transition-colors cursor-pointer group"
+          >
+            <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/60 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 font-bold group-hover:scale-105 transition-transform">
+              <UserPlus className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-emerald-700 dark:text-emerald-400 text-xs truncate">
+                + Tambah "{queryVal}" sebagai Warga Baru
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Warga belum ada di Data Desa. Klik untuk mendaftarkan.
+              </p>
+            </div>
+          </button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
@@ -66,7 +116,8 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
         <input 
           type="text"
           className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-          value={formData.nama}
+          placeholder="Ketik nama warga..."
+          value={formData.nama || ''}
           onChange={(e) => {
             const val = e.target.value;
             setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nama: val}) : {...formData, nama: val});
@@ -78,43 +129,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
             if (formData.nama) setShowDropdown(true);
           }}
         />
-        {showDropdown && activeField === 'nama' && formData.nama && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-20">
-            {filteredResidents.length > 0 ? (
-              filteredResidents.map((res: any) => (
-                <button
-                  key={res.nik}
-                  onClick={() => handleSelectResident(res)}
-                  className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
-                  type="button"
-                >
-                  <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 font-bold shrink-0">
-                    {res.name?.[0]}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} &bull; {res.desa}</p>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="p-4 text-center space-y-3">
-                <p className="text-sm text-slate-500 dark:text-slate-400 italic">Warga tidak ditemukan di Data Desa.</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDropdown(false);
-                    onOpenQuickAdd();
-                  }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md transition-all text-xs cursor-pointer"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                  <span>+ Tambah Warga Baru</span>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        {renderDropdown('nama')}
       </div>
 
       <div className="space-y-2 relative" ref={activeField === 'nik' ? dropdownRef : null}>
@@ -122,7 +137,8 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
         <input 
           type="text"
           className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-          value={formData.nik}
+          placeholder="Ketik NIK warga..."
+          value={formData.nik || ''}
           onChange={(e) => {
             const val = e.target.value;
             setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nik: val}) : {...formData, nik: val});
@@ -134,43 +150,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
             if (formData.nik) setShowDropdown(true);
           }}
         />
-        {showDropdown && activeField === 'nik' && formData.nik && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-20">
-            {filteredResidents.length > 0 ? (
-              filteredResidents.map((res: any) => (
-                <button
-                  key={res.nik}
-                  onClick={() => handleSelectResident(res)}
-                  className="w-full p-4 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0"
-                  type="button"
-                >
-                  <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 font-bold shrink-0">
-                    {res.name?.[0]}
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{res.name}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {res.nik} &bull; {res.desa}</p>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="p-4 text-center space-y-3">
-                <p className="text-sm text-slate-500 dark:text-slate-400 italic">Warga tidak ditemukan di Data Desa.</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDropdown(false);
-                    onOpenQuickAdd();
-                  }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold shadow-md transition-all text-xs cursor-pointer"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                  <span>+ Tambah Warga Baru</span>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        {renderDropdown('nik')}
         <ResidentStatusBadge
           nik={formData.nik}
           name={formData.nama}
