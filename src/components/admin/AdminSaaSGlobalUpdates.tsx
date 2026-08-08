@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Plus, Edit3, Trash2, Rocket, ShieldCheck, Zap, Info, 
   Search, RefreshCw, Eye, CheckCircle2, Clock, Globe, AlertCircle,
-  FileText, Check, X, Tag, Calendar
+  FileText, Check, X, Tag, Calendar, Bold, Italic, Heading2, Heading3,
+  List, ListOrdered, Quote, Code, Minus, Wand2, LayoutTemplate, Strikethrough
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase } from '../../utils/supabase';
@@ -43,6 +44,45 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
     content: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Textarea Ref for Word-style Toolbar Selection Wrapping
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const insertFormatting = (prefix: string, suffix: string = '', defaultPlaceholder: string = '') => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setFormData(prev => ({ ...prev, content: prev.content + `${prefix}${defaultPlaceholder}${suffix}` }));
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = formData.content;
+
+    const selectedText = currentText.substring(start, end) || defaultPlaceholder;
+    const replacement = `${prefix}${selectedText}${suffix}`;
+
+    const newText = currentText.substring(0, start) + replacement + currentText.substring(end);
+    setFormData(prev => ({ ...prev, content: newText }));
+
+    // Refocus & select inserted text
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+    }, 50);
+  };
+
+  const applyPresetTemplate = (presetType: 'standard' | 'bugfix' | 'major') => {
+    let tpl = '';
+    if (presetType === 'standard') {
+      tpl = `### ✨ Apa yang baru di versi ini?\n\n- **🚀 Fitur Baru**:\n  - Penambahan fitur utama...\n\n- **🛡️ Perbaikan System**:\n  - Perbaikan pada modul kependudukan...\n\n- **⚡ Peningkatan**:\n  - Peningkatan kecepatan halaman kependudukan...`;
+    } else if (presetType === 'bugfix') {
+      tpl = `### 🛡️ Catatan Perbaikan & Keamanan System\n\n1. **Perbaikan Fitur**: Perbaikan pada modul cetak surat...\n2. **Stabilitas Cloud**: Optimasi kestabilan Supabase Realtime...`;
+    } else if (presetType === 'major') {
+      tpl = `### 🚀 Rilis Fitur Utama Baru!\n\nKami dengan senang hati merilis pembaruan besar untuk seluruh instansi desa:\n\n- **Modul Baru**: Penjelasan fitur utama...\n- **Integrasi Cloud**: Otomatisasi data realtime...\n\n> 💡 *Petunjuk lengkap penggunaan dapat diakses melalui menu Panduan.*`;
+    }
+    setFormData(prev => ({ ...prev, content: tpl }));
+  };
 
   // Preview Modal
   const [previewItem, setPreviewItem] = useState<GlobalUpdateItem | null>(null);
@@ -637,41 +677,186 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
               </div>
 
               {/* Detail Content (Write / Preview Tabs) */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
+              {/* Detail Content (Word-Style Rich Editor + Tabs) */}
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Isi Catatan Pembaruan (Mendukung Format Markdown) <span className="text-rose-500">*</span>
+                    Isi Catatan Pembaruan <span className="text-rose-500">*</span>
                   </label>
                   
-                  <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => setActiveTabForm('write')}
-                      className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTabForm === 'write' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs' : 'text-slate-500'}`}
-                    >
-                      Tulis Markdown
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTabForm('preview')}
-                      className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTabForm === 'preview' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs' : 'text-slate-500'}`}
-                    >
-                      Preview Tampilan
-                    </button>
+                  <div className="flex items-center gap-2">
+                    {/* Quick Template Presets */}
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden md:inline">Template:</span>
+                      <button
+                        type="button"
+                        onClick={() => applyPresetTemplate('standard')}
+                        className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded-lg text-[11px] font-bold transition-all border border-indigo-200 dark:border-indigo-800 cursor-pointer flex items-center gap-1"
+                        title="Gunakan Template Rilis Standar"
+                      >
+                        <Wand2 size={12} /> Standar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyPresetTemplate('bugfix')}
+                        className="px-2 py-1 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 rounded-lg text-[11px] font-bold transition-all border border-rose-200 dark:border-rose-800 cursor-pointer flex items-center gap-1"
+                        title="Gunakan Template Perbaikan Bug"
+                      >
+                        <ShieldCheck size={12} /> Bug Fix
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyPresetTemplate('major')}
+                        className="px-2 py-1 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 rounded-lg text-[11px] font-bold transition-all border border-purple-200 dark:border-purple-800 cursor-pointer flex items-center gap-1"
+                        title="Gunakan Template Fitur Utama"
+                      >
+                        <Rocket size={12} /> Fitur Utama
+                      </button>
+                    </div>
+
+                    <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTabForm('write')}
+                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTabForm === 'write' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs' : 'text-slate-500'}`}
+                      >
+                        Edit Teks
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTabForm('preview')}
+                        className={`px-3 py-1 rounded-md font-semibold transition-all ${activeTabForm === 'preview' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-xs' : 'text-slate-500'}`}
+                      >
+                        Hasil Tampilan
+                      </button>
+                    </div>
                   </div>
                 </div>
 
                 {activeTabForm === 'write' ? (
-                  <textarea
-                    rows={8}
-                    required
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Tuliskan poin-poin fitur baru, perbaikan bug, atau peningkatan dalam bentuk markdown..."
-                    className="w-full p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs leading-relaxed focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                  />
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-xs bg-white dark:bg-slate-800">
+                    {/* Word-Style Toolbar Header */}
+                    <div className="bg-slate-100 dark:bg-slate-800/90 p-2 border-b border-slate-200 dark:border-slate-700/80 flex flex-wrap items-center gap-1 text-slate-700 dark:text-slate-300">
+                      {/* Bold */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('**', '**', 'teks tebal')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold flex items-center gap-1"
+                        title="Tebal (Bold)"
+                      >
+                        <Bold size={15} />
+                      </button>
+
+                      {/* Italic */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('*', '*', 'teks miring')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold"
+                        title="Miring (Italic)"
+                      >
+                        <Italic size={15} />
+                      </button>
+
+                      {/* Strikethrough */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('~~', '~~', 'teks dicoret')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold"
+                        title="Coret Teks (Strikethrough)"
+                      >
+                        <Strikethrough size={15} />
+                      </button>
+
+                      <div className="h-4 w-[1px] bg-slate-300 dark:bg-slate-600 mx-1" />
+
+                      {/* Heading 2 */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('## ', '', 'Judul Utama')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold flex items-center gap-0.5"
+                        title="Judul Utama (H2)"
+                      >
+                        <Heading2 size={15} />
+                      </button>
+
+                      {/* Heading 3 */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('### ', '', 'Sub Judul')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold flex items-center gap-0.5"
+                        title="Sub Judul (H3)"
+                      >
+                        <Heading3 size={15} />
+                      </button>
+
+                      <div className="h-4 w-[1px] bg-slate-300 dark:bg-slate-600 mx-1" />
+
+                      {/* Bullet List */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('- ', '', 'Poin pembaruan')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold flex items-center gap-1"
+                        title="Daftar Poin (Bullet List)"
+                      >
+                        <List size={15} />
+                      </button>
+
+                      {/* Numbered List */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('1. ', '', 'Poin kesatu')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold flex items-center gap-1"
+                        title="Daftar Nomor (Numbered List)"
+                      >
+                        <ListOrdered size={15} />
+                      </button>
+
+                      <div className="h-4 w-[1px] bg-slate-300 dark:bg-slate-600 mx-1" />
+
+                      {/* Quote */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('> 💡 ', '', 'Catatan penting untuk pengguna...')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold"
+                        title="Sorotan / Kutipan Penting"
+                      >
+                        <Quote size={15} />
+                      </button>
+
+                      {/* Inline Code */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('`', '`', 'nama_fitur')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold"
+                        title="Format Kode Singkat"
+                      >
+                        <Code size={15} />
+                      </button>
+
+                      {/* Horizontal Rule Divider */}
+                      <button
+                        type="button"
+                        onClick={() => insertFormatting('\n---\n', '', '')}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all text-xs font-bold"
+                        title="Garis Pembatas"
+                      >
+                        <Minus size={15} />
+                      </button>
+                    </div>
+
+                    {/* Textarea Editor */}
+                    <textarea
+                      ref={textareaRef}
+                      rows={9}
+                      required
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      placeholder="Gunakan tombol di atas untuk menebalkan, membuat penomoran, daftar poin, atau klik template cepat..."
+                      className="w-full p-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-xs leading-relaxed focus:outline-none resize-y min-h-[180px]"
+                    />
+                  </div>
                 ) : (
-                  <div className="min-h-[200px] max-h-[300px] overflow-y-auto p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs prose dark:prose-invert max-w-none">
+                  <div className="min-h-[220px] max-h-[320px] overflow-y-auto p-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 text-xs prose dark:prose-invert max-w-none shadow-inner">
                     {formData.content ? (
                       <Markdown>{formData.content}</Markdown>
                     ) : (
