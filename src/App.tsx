@@ -26,6 +26,8 @@ import AdminSaaSLogs from './components/admin/AdminSaaSLogs';
 import AdminSaaSLeads from './components/admin/AdminSaaSLeads';
 import AdminGlobalBranding from './components/admin/AdminGlobalBranding';
 import AdminSaaSGlobalUpdates from './components/admin/AdminSaaSGlobalUpdates';
+import AdminSaaSBugReports from './components/admin/AdminSaaSBugReports';
+import GlobalBugReportButton from './components/common/GlobalBugReportButton';
 import AdminSaaSTemplateSurat from './components/admin/AdminSaaSTemplateSurat';
 import AdminPanduan from './components/admin/AdminPanduan';
 import ToastContainer from './components/common/ToastContainer';
@@ -515,6 +517,7 @@ export default function App() {
                 {adminTab === 'saas_leads' && user.role === 'saas_admin' && <AdminSaaSLeads onSetActiveTab={setAdminTab} />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
                 {adminTab === 'log_pembaruan' && user.role === 'saas_admin' && <AdminSaaSGlobalUpdates />}
+                {adminTab === 'saas_bugs' && user.role === 'saas_admin' && <AdminSaaSBugReports />}
                 {adminTab === 'global_branding' && user.role === 'saas_admin' && <AdminGlobalBranding />}
                 {adminTab === 'template_surat' && user.role === 'saas_admin' && <AdminSaaSTemplateSurat />}
                 {adminTab === 'pengaturan' && <AdminPengaturan />}
@@ -634,6 +637,7 @@ export default function App() {
       </div>
       <ToastContainer />
       <GlobalUpdateNotifier isBusy={isBusy} />
+      {user && user.role !== 'saas_admin' && <GlobalBugReportButton />}
     </div>
   );
 }

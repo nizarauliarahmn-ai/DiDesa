@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug } from 'lucide-react';
 import { X } from 'lucide-react';
 import { getFeedbacks } from '../../utils/feedbackData';
+import { fetchBugReportsOnline } from '../../utils/bugReportService';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 
@@ -133,14 +134,22 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
     };
     handleFeedbackUpdate();
 
+    const handleBugsUpdate = async () => {
+      const reports = await fetchBugReportsOnline();
+      setPendingBugsCount(reports.filter(r => r.status === 'Menunggu').length);
+    };
+    handleBugsUpdate();
+
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
     window.addEventListener('feedback_updated', handleFeedbackUpdate);
+    window.addEventListener('bug_reports_updated', handleBugsUpdate);
     
     return () => {
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
       window.removeEventListener('global_branding_updated', handleBrandingUpdate);
       window.removeEventListener('feedback_updated', handleFeedbackUpdate);
+      window.removeEventListener('bug_reports_updated', handleBugsUpdate);
     };
   }, []);
 
@@ -213,6 +222,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem icon={<Users size={18} className="text-orange-500" />} label="Prospek & Pengajuan" active={activeTab === 'saas_leads'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_leads'); }} />
             <NavItem icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
             <NavItem icon={<Sparkles size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
+            <NavItem icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={pendingBugsCount} />
             <NavItem icon={<FileText size={18} className="text-emerald-600" />} label="Template Surat Global" active={activeTab === 'template_surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('template_surat'); }} />
             <NavItem icon={<BookOpen size={18} className="text-teal-600" />} label="Panduan & Documentation" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
             <NavItem icon={<Settings size={18} />} label="Branding Platform" active={activeTab === 'global_branding'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('global_branding'); }} />
