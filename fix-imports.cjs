@@ -1,44 +1,29 @@
 const fs = require('fs');
 const path = require('path');
 
-const suratDir = path.join(__dirname, 'src', 'components', 'admin', 'surat');
-const files = fs.readdirSync(suratDir).filter(f => f.startsWith('AdminSurat') && f.endsWith('.tsx'));
+const dir = path.join(__dirname, 'src/components/admin/surat');
+const files = fs.readdirSync(dir).filter(f => f.startsWith('AdminSurat') && f.endsWith('.tsx'));
 
 for (const file of files) {
-  const filePath = path.join(suratDir, file);
-  let content = fs.readFileSync(filePath, 'utf-8');
+  const filePath = path.join(dir, file);
+  let content = fs.readFileSync(filePath, 'utf8');
 
-  let changed = false;
+  // Check if it uses the component but misses the import
+  const hasUsage = content.includes('<UnifiedResidentSearch');
+  const hasImport = content.includes('import { UnifiedResidentSearch }');
 
-  // 1. Remove incorrectly placed imports
-  const badImport1 = /import QuickAddResidentModal from '\.\.\/penduduk\/QuickAddResidentModal';\r?\n/g;
-  const badImport2 = /import \{ checkResidentExists \} from '\.\.\/\.\.\/\.\.\/utils\/residentSync';\r?\n/g;
-
-  if (badImport1.test(content) || badImport2.test(content)) {
-    content = content.replace(badImport1, '');
-    content = content.replace(badImport2, '');
-
-    // 2. Add them properly at the top (after the first block of imports)
-    const importRegex = /import [^;]+;/g;
-    let match;
-    let lastImportIndex = 0;
-    while ((match = importRegex.exec(content)) !== null) {
-      if (match[0].includes('QuickAddResidentModal') || match[0].includes('checkResidentExists')) continue;
-      lastImportIndex = match.index + match[0].length;
+  if (hasUsage && !hasImport) {
+    console.log(`Missing import in ${file}, fixing...`);
+    // Insert import after the last import or at the top
+    const importStatement = `import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';\n`;
+    
+    // Find QuickAddResidentModal import to put it next to it, or just put it at top
+    if (content.includes(`import QuickAddResidentModal`)) {
+        content = content.replace(/(import QuickAddResidentModal.*?;\n)/, `$1${importStatement}`);
+    } else {
+        content = importStatement + content;
     }
-
-    if (lastImportIndex > 0) {
-      const before = content.substring(0, lastImportIndex);
-      const after = content.substring(lastImportIndex);
-      
-      const importsToAdd = `\nimport QuickAddResidentModal from '../penduduk/QuickAddResidentModal';\nimport { checkResidentExists } from '../../../utils/residentSync';`;
-      content = before + importsToAdd + after;
-      changed = true;
-    }
-  }
-
-  if (changed) {
-    fs.writeFileSync(filePath, content, 'utf-8');
-    console.log(`Fixed imports in ${file}`);
+    
+    fs.writeFileSync(filePath, content, 'utf8');
   }
 }

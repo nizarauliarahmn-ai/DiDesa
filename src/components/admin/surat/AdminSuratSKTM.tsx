@@ -1,3 +1,4 @@
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import SuratEditorHeader from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
