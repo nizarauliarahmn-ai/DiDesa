@@ -1,12 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { 
 
   ArrowLeft, Camera, Info, MapPin, Users, User, 
-  Check, Save, Briefcase, GraduationCap, Home, Heart, Trash2 
+  Check, Save, Briefcase, GraduationCap, Home, Heart, Trash2, 
+  ChevronDown, Search, PenLine, UserCheck, ListFilter
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords, parseAddressString } from '../../../utils/textUtils';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 
 interface AdminPendudukEditProps {
   onBack: () => void;
@@ -30,6 +33,152 @@ const PEKERJAAN_OPTIONS = [
   'Nelayan / Perikanan',
   'Lainnya'
 ];
+
+// Searchable dropdown to pick a family member (parent) from the same KK
+function KkParentCombobox({
+  label,
+  members,
+  value,
+  onChange,
+  onToggleManual,
+  isManual,
+  genderFilter,
+  placeholder
+}: {
+  label: string;
+  members: any[];
+  value: string;
+  onChange: (name: string) => void;
+  onToggleManual: (manual: boolean) => void;
+  isManual: boolean;
+  genderFilter: 'Laki-laki' | 'Perempuan';
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const base = members.filter((m: any) => {
+      const g = String(m.gender || '').toLowerCase();
+      const want = genderFilter === 'Laki-laki' ? ['laki-laki', 'l', 'laki'] : ['perempuan', 'p', 'wanita'];
+      return want.includes(g);
+    });
+    if (!q) return base;
+    return base.filter((m: any) =>
+      String(m.name || '').toLowerCase().includes(q) ||
+      String(m.nik || '').includes(q)
+    );
+  }, [members, query, genderFilter]);
+
+  const selectedMember = members.find((m: any) => String(m.name || '').toLowerCase() === String(value || '').toLowerCase());
+
+  return (
+    <div className="space-y-1" ref={boxRef}>
+      <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+        {label} <span className="text-gray-400 font-normal text-[10px] lowercase tracking-normal ml-1.5">(Opsional)</span>
+      </label>
+
+      {!isManual ? (
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setOpen(o => !o)}
+            className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-left text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 flex items-center justify-between gap-2"
+          >
+            <span className={`truncate ${value ? '' : 'text-gray-400'}`}>
+              {selectedMember
+                ? `${selectedMember.name}${selectedMember.familyRelation ? ` (${selectedMember.familyRelation})` : ''}`
+                : value || placeholder}
+            </span>
+            <ChevronDown className={`w-4 h-4 text-gray-400 flex-none transition-transform ${open ? 'rotate-180' : ''}`} />
+          </button>
+
+          {open && (
+            <div className="absolute z-30 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl overflow-hidden">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 dark:border-slate-800">
+                <Search className="w-4 h-4 text-gray-400 flex-none" />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Cari nama / NIK..."
+                  className="w-full text-sm outline-none bg-transparent"
+                />
+              </div>
+              <div className="max-h-52 overflow-y-auto">
+                {filtered.length === 0 ? (
+                  <div className="px-4 py-6 text-center">
+                    <p className="text-xs text-gray-500">Tidak ada anggota KK berjenis kelamin {genderFilter === 'Laki-laki' ? 'laki-laki' : 'perempuan'} ditemukan.</p>
+                    <button
+                      type="button"
+                      onClick={() => { setOpen(false); onToggleManual(true); }}
+                      className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800"
+                    >
+                      <PenLine className="w-3.5 h-3.5" /> Ketik manual
+                    </button>
+                  </div>
+                ) : (
+                  filtered.map((m: any) => (
+                    <button
+                      key={m.nik || m.id}
+                      type="button"
+                      onClick={() => { onChange(m.name); setOpen(false); setQuery(''); }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-emerald-50 dark:hover:bg-slate-800 flex items-start justify-between gap-2"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{m.name}</p>
+                        <p className="text-[10px] text-gray-500">{m.nik || '-'}</p>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded flex-none mt-0.5">
+                        {m.familyRelation || 'Anggota KK'}
+                      </span>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(capitalizeWords(e.target.value))}
+          className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+          placeholder="Masukkan nama secara manual..."
+        />
+      )}
+
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] text-gray-400">
+          {!isManual
+            ? 'Diambil dari anggota KK yang sama'
+            : 'Nama di luar KK (mis. sudah meninggal / di luar desa)'}
+        </p>
+        <button
+          type="button"
+          onClick={() => { onToggleManual(!isManual); setOpen(false); }}
+          className="text-[10px] font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
+        >
+          {isManual ? <UserCheck className="w-3 h-3" /> : <PenLine className="w-3 h-3" />}
+          {isManual ? 'Pilih dari KK' : 'Ketik Manual'}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudukEditProps) {
   const isAdd = !data || !data.nik;
@@ -58,6 +207,12 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   const [fatherName, setFatherName] = useState(capitalizeWords(data?.fatherName || ''));
   const [motherName, setMotherName] = useState(capitalizeWords(data?.motherName || ''));
   
+  // Same-KK family members used for parent dropdowns
+  const [kkMembers, setKkMembers] = useState<any[]>([]);
+  const [kkLoading, setKkLoading] = useState(false);
+  const [fatherManual, setFatherManual] = useState(false);
+  const [motherManual, setMotherManual] = useState(false);
+  
   const [address, setAddress] = useState(capitalizeWords(data?.address || ''));
   const [rt, setRt] = useState(data?.rt || '01');
   const [rw, setRw] = useState(data?.rw || '01');
@@ -77,6 +232,57 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   // Errors state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Load family members sharing the same KK (for parent dropdowns)
+  useEffect(() => {
+    let cancelled = false;
+    const loadKkMembers = async () => {
+      const kk = (noKk || '').trim();
+      if (!kk) { setKkMembers([]); return; }
+      setKkLoading(true);
+      try {
+        const tenantId = await resolveCurrentTenant();
+        if (!tenantId) return;
+        const { data: rows, error } = await supabase
+          .from('residents')
+          .select('*')
+          .eq('tenant_id', tenantId)
+          .eq('no_kk', kk);
+        if (error) throw error;
+        if (cancelled) return;
+        const formatted = (rows || []).map((r: any) => ({
+          ...r,
+          name: r.name,
+          nik: r.nik,
+          gender: r.gender,
+          noKk: r.no_kk,
+          familyRelation: r.family_relation,
+        }));
+        setKkMembers(formatted);
+      } catch (e) {
+        console.error('Gagal memuat anggota KK:', e);
+      } finally {
+        if (!cancelled) setKkLoading(false);
+      }
+    };
+    loadKkMembers();
+    return () => { cancelled = true; };
+  }, [noKk]);
+
+  // If stored parent is not found among KK members, fall back to manual typing
+  useEffect(() => {
+    const exists = (name: string, gender: string) => {
+      if (!name) return false;
+      return kkMembers.some((m: any) =>
+        String(m.gender || '').toLowerCase() === (gender === 'Laki-laki' ? 'laki-laki' : 'perempuan') &&
+        String(m.name || '').toLowerCase() === String(name).toLowerCase()
+      );
+    };
+    if (kkMembers.length > 0) {
+      if (fatherName && !exists(fatherName, 'Laki-laki')) setFatherManual(true);
+      if (motherName && !exists(motherName, 'Perempuan')) setMotherManual(true);
+    }
+  }, [kkMembers]);
 
   // Auto populate RW: rt 01/02 -> rw 01; rt 03/04 -> rw 02
   const handleRtChange = (val: string) => {
@@ -431,32 +637,38 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 </select>
               </div>
 
-              {/* Father and Mother Names (Marked Opsional) */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Nama Ayah Kandung <span className="text-gray-400 font-normal text-[10px] lowercase tracking-normal ml-1.5">(Opsional)</span>
-                </label>
-                <input 
-                  type="text"
-                  value={fatherName}
-                  onChange={(e) => setFatherName(capitalizeWords(e.target.value))}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                  placeholder="Masukkan nama ayah kandung..."
-                />
+              {/* Father and Mother Names (Linked to Same-KK Members) */}
+              <div className="md:col-span-2 flex items-center gap-2 text-[10px] text-gray-400 mb-1">
+                {kkLoading ? (
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /> Memuat anggota KK...</span>
+                ) : kkMembers.length > 0 ? (
+                  <span className="flex items-center gap-1.5"><ListFilter className="w-3.5 h-3.5" /> {kkMembers.length} anggota ditemukan dalam KK {noKk || '-'}</span>
+                ) : (
+                  <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> Tidak ada anggota KK ditemukan — gunakan "Ketik Manual"</span>
+                )}
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Nama Ibu Kandung <span className="text-gray-400 font-normal text-[10px] lowercase tracking-normal ml-1.5">(Opsional)</span>
-                </label>
-                <input 
-                  type="text"
-                  value={motherName}
-                  onChange={(e) => setMotherName(capitalizeWords(e.target.value))}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                  placeholder="Masukkan nama ibu kandung..."
-                />
-              </div>
+              <KkParentCombobox
+                label="Nama Ayah Kandung"
+                members={kkMembers}
+                value={fatherName}
+                onChange={setFatherName}
+                onToggleManual={setFatherManual}
+                isManual={fatherManual}
+                genderFilter="Laki-laki"
+                placeholder="Pilih ayah dari anggota KK..."
+              />
+
+              <KkParentCombobox
+                label="Nama Ibu Kandung"
+                members={kkMembers}
+                value={motherName}
+                onChange={setMotherName}
+                onToggleManual={setMotherManual}
+                isManual={motherManual}
+                genderFilter="Perempuan"
+                placeholder="Pilih ibu dari anggota KK..."
+              />
             </div>
           </section>
 

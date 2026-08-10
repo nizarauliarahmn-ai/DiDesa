@@ -339,6 +339,9 @@ export default function AdminSuratNikah({
       pendidikanSuami: isMale ? (res.education || '') : prev.pendidikanSuami,
       alamatSuami: isMale ? (res.address || '') : prev.alamatSuami,
 
+      namaAyahSuami: isMale ? (res.fatherName || res.father_name || prev.namaAyahSuami) : prev.namaAyahSuami,
+      namaIbuSuami: isMale ? (res.motherName || res.mother_name || prev.namaIbuSuami) : prev.namaIbuSuami,
+
       namaIstri: !isMale ? res.name : prev.namaIstri,
       nikIstri: !isMale ? res.nik : prev.nikIstri,
       noKKIstri: !isMale ? (res.noKk || res.no_kk || '') : prev.noKKIstri,
@@ -348,6 +351,9 @@ export default function AdminSuratNikah({
       pekerjaanIstri: !isMale ? (res.job || '') : prev.pekerjaanIstri,
       pendidikanIstri: !isMale ? (res.education || '') : prev.pendidikanIstri,
       alamatIstri: !isMale ? (res.address || '') : prev.alamatIstri,
+
+      namaAyahIstri: !isMale ? (res.fatherName || res.father_name || prev.namaAyahIstri) : prev.namaAyahIstri,
+      namaIbuIstri: !isMale ? (res.motherName || res.mother_name || prev.namaIbuIstri) : prev.namaIbuIstri,
     }));
     setSearchQuery('');
   };
