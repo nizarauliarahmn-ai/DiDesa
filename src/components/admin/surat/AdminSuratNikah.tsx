@@ -704,20 +704,21 @@ export default function AdminSuratNikah({
     else if (activeDoc === 'n2') {
       html = `
         ${lampiranHtml('N2')}
-        <p style="text-align:right;">${tempatTgl()}</p>
-        <p>Perihal: Permohonan Kehendak Perkawinan</p>
-        <p>Kepada Yth.<br>Kepala ${v(formData.namaKUA, 'KUA Kecamatan')}<br>di - Tempat</p>
-        <p>Dengan hormat, kami mengajukan permohonan kehendak perkawinan untuk atas kami:</p>
-        ${dtTable([
+        <div style="line-height:1.3;margin:0;padding:0;">
+        <p style="text-align:right;margin:0 0 2px 0;">${tempatTgl()}</p>
+        <p style="margin:0 0 2px 0;">Perihal: Permohonan Kehendak Perkawinan</p>
+        <p style="margin:0 0 2px 0;">Kepada Yth.<br>Kepala ${v(formData.namaKUA, 'KUA Kecamatan')}<br>di - Tempat</p>
+        <p style="margin:0 0 2px 0;">Dengan hormat, kami mengajukan permohonan kehendak perkawinan untuk atas kami:</p>
+        ${dtTableCompact([
           ['Calon Suami', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaSuami)}</span>`],
           ['dengan Calon Istri', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaIstri)}</span>`],
           ['Hari', v(formData.hariMenikah)],
           ['Tanggal', v(fmtTgl(formData.tanggalMenikah))],
           ['Jam', v(formData.jamMenikah)],
           ['Bertempat di', v(formData.tempatMenikah)]
-        ])})
-        <p>Bersama ini kami lampirkan surat-surat yang diperlukan untuk diperiksa sebagai berikut:</p>
-        <ol style="margin:6px 0;padding-left:18px;font-size:10.8px;">
+        ])}
+        <p style="margin:0 0 2px 0;">Bersama ini kami lampirkan surat-surat yang diperlukan untuk diperiksa sebagai berikut:</p>
+        <ol style="margin:0 0 2px 0;padding-left:20px;font-size:10.8px;list-style:decimal;">
           <li>Surat Pengantar Perkawinan dari Desa/Kelurahan (Model N1)</li>
           <li>Surat Permohonan Kehendak Perkawinan (Model N2)</li>
           <li>Surat Persetujuan Mempelai (Model N3)</li>
@@ -729,8 +730,9 @@ export default function AdminSuratNikah({
           <li>Dokumen tambahan sesuai ketentuan (akta cerai, izin atasan, dispensasi, dsb.) bila berlaku</li>
           <li>Pas foto berwarna</li>
         </ol>
-        <p>Demikian permohonan ini kami sampaikan, kiranya dapat diperiksa, dihadiri, dan dicatat sesuai dengan ketentuan perundang-undangan.</p>
-        <div style="margin-top:22px;display:flex;justify-content:space-between;">
+        <p style="margin:0 0 2px 0;">Demikian permohonan ini kami sampaikan, kiranya dapat diperiksa, dihadiri, dan dicatat sesuai dengan ketentuan perundang-undangan.</p>
+        </div>
+        <div style="margin-top:16px;display:flex;justify-content:space-between;">
           <div style="text-align:center;width:44%;">Yang menerima,<br>Kepala ${v(formData.namaKUA, 'KUA')}<span style="font-weight:700;margin-top:56px;display:block;">&nbsp;</span></div>
           <div style="text-align:center;width:44%;">Pemohon,<span style="font-weight:700;margin-top:56px;display:block;">${v(formData.isWargaSuami ? formData.namaSuami : formData.namaIstri).toUpperCase()}</span>${formData.isWargaSuami ? 'BIN' : 'BINTI'} ${v(formData.isWargaSuami ? formData.namaAyahSuami : formData.namaAyahIstri).toUpperCase()}</div>
         </div>
