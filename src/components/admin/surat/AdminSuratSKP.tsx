@@ -21,6 +21,7 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
 
 interface Resident {
   nik: string;
@@ -463,8 +464,6 @@ export default function AdminSuratSKP({
               }
               tr { page-break-inside: avoid !important; }
               thead { display: table-header-group !important; }
-
-import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
             }
           </style>
         </head>

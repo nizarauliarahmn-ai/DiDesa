@@ -14,7 +14,10 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-
+import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
 export default function AdminSuratNikah({ 
   onBack, 
   presetResident,
@@ -949,12 +952,6 @@ export default function AdminSuratNikah({
             body { margin: 0; padding: 0; background: white !important; -webkit-print-color-adjust: exact; }
             .print\\:hidden { display: none !important; }
             .printable-area { display: block !important; }
-
-
-import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
-import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
           }
         `}} />
       </div>

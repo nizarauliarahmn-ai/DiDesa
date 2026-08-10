@@ -17,6 +17,7 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
 
 interface Resident {
   nik: string;
@@ -344,8 +345,6 @@ export default function AdminSuratSKL({
             /* Hide crop marks in print */
             .crop-mark { 
               display: none !important; 
-
-import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
             }
             @media print {
               body, .page { 
