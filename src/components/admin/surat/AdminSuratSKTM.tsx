@@ -213,7 +213,7 @@ export default function AdminSuratSKTM({
     const sktm = configs.find(c => c.klasifikasi === 'SKTM') || { id: 'fallback_sktm', jenis: 'SKTM', klasifikasi: 'SKTM', kodeKlasifikasi: '400', noUrutTerakhir: 0 };
     
     if (!editData) {
-      const generatedNo = generateLetterNumber(sktm.klasifikasi, sktm.kodeKlasifikasi || '400', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
+      const generatedNo = generateLetterNumber(sktm.klasifikasi, sktm.kodeKlasifikasi || '400', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setFormData(prev => ({
         ...prev,
         nomorSurat: generatedNo

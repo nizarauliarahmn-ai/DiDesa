@@ -272,7 +272,7 @@ export default function AdminSuratNikah({
     if (!formData.nomorSurat && !editData) {
       const configs = getLetterClassifications();
       const sknConfig = configs.find(c => c.klasifikasi === 'SKN') || { id: 'fallback_skn', jenis: 'SURAT PENGANTAR NIKAH', klasifikasi: 'SKN', kodeKlasifikasi: '474', noUrutTerakhir: 0 };
-      const generatedNo = generateLetterNumber(sknConfig.klasifikasi, sknConfig.kodeKlasifikasi || '474', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
+      const generatedNo = generateLetterNumber(sknConfig.klasifikasi, sknConfig.kodeKlasifikasi || '474', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
     }
 

@@ -148,7 +148,7 @@ export default function AdminSuratSKKT({
       if (!skkt) {
         skkt = { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
       }
-      const generatedNo = generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
+      const generatedNo = generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
     }
   }, [editData]);

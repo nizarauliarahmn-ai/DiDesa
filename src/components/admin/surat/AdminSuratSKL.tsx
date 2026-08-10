@@ -180,7 +180,7 @@ export default function AdminSuratSKL({
     const skl = configs.find(c => c.klasifikasi === 'SKL') || { id: 'fallback_skl', jenis: 'SKL', klasifikasi: 'SKL', kodeKlasifikasi: '474.1', noUrutTerakhir: 0 };
     
     if (!editData) {
-      const generatedNo = generateLetterNumber(skl.klasifikasi, skl.kodeKlasifikasi || '474.1', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined);
+      const generatedNo = generateLetterNumber(skl.klasifikasi, skl.kodeKlasifikasi || '474.1', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
       setNoSurat(generatedNo);
     }
 

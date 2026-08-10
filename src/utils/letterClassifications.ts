@@ -352,21 +352,25 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
     nextNoStr = `${parts[0].padStart(3, '0')}.${parts[1]}`;
   }
 
-  return formatTemplate
+  const raw = formatTemplate
     .replace(/\[NO KODE SURAT\]/g, kodeKlasifikasi || '140')
     .replace(/\[KODE KLASIFIKASI\]/g, kodeKlasifikasi || '140')
     .replace(/\[NO URUT SURAT\]/g, nextNoStr)
     .replace(/\[NO\]/g, nextNoStr)
-    .replace(/\[KODE\]/g, klasifikasi)
-    .replace(/\[SINGKATAN SURAT\]/g, klasifikasi)
+    .replace(/\[KODE\]/g, klasifikasi.toUpperCase())
+    .replace(/\[SINGKATAN SURAT\]/g, klasifikasi.toUpperCase())
     .replace(/\[BULAN\]/g, romanMonth)
     .replace(/\[BULAN_ANGKA\]/g, numericMonth)
     .replace(/\[TAHUN\]/g, String(year))
     .replace(/\[TAHUN_2D\]/g, year2D)
-    .replace(/\[NAMA_DESA\]/g, villageName.replace(/desa\s+/gi, ''))
-    .replace(/\[KECAMATAN\]/g, kecamatan)
-    .replace(/\[KABUPATEN\]/g, kabupaten)
-    .replace(/\[DESA\]/g, desaInitial);
+    .replace(/\[NAMA_DESA\]/g, villageName.replace(/desa\s+/gi, '').toUpperCase())
+    .replace(/\[KECAMATAN\]/g, kecamatan.toUpperCase())
+    .replace(/\[KABUPATEN\]/g, kabupaten.toUpperCase())
+    .replace(/\[DESA\]/g, desaInitial.toUpperCase());
+  
+  // Uppercase seluruh nomor surat kecuali angka, /, -, dan titik
+  // Ini memastikan bagian hardcode di template (mis. 'WHi') ikut jadi kapital
+  return raw.toUpperCase();
 }
 
 
