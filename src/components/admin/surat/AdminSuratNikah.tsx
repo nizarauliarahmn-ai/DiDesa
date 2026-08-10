@@ -573,9 +573,16 @@ export default function AdminSuratNikah({
     try {
       let html = '';
       
+      // Standard table: values not bold
       const dtTable = (rows: any[]) => `
         <table style="width:100%;border-collapse:collapse;margin:6px 0;font-family:${letterFont};">
-          ${rows.map(r => `<tr><td style="width:38%;padding:2.5px 4px;vertical-align:top;">${r[0]}</td><td style="width:2%;padding:2.5px 4px;vertical-align:top;">:</td><td style="padding:2.5px 4px;vertical-align:top;font-weight:700;">${r[1]}</td></tr>`).join('')}
+          ${rows.map(r => `<tr><td style="width:38%;padding:2.5px 4px;vertical-align:top;">${r[0]}</td><td style="width:2%;padding:2.5px 4px;vertical-align:top;">:</td><td style="padding:2.5px 4px;vertical-align:top;">${r[1]}</td></tr>`).join('')}
+        </table>
+      `;
+      // Compact header table (no bottom margin), values not bold
+      const dtTableCompact = (rows: any[]) => `
+        <table style="width:100%;border-collapse:collapse;margin:2px 0 4px 0;font-family:${letterFont};">
+          ${rows.map(r => `<tr><td style="width:38%;padding:1px 4px;vertical-align:top;line-height:1.4;">${r[0]}</td><td style="width:2%;padding:1px 4px;vertical-align:top;line-height:1.4;">:</td><td style="padding:1px 4px;vertical-align:top;line-height:1.4;">${r[1]}</td></tr>`).join('')}
         </table>
       `;
 
@@ -637,16 +644,16 @@ export default function AdminSuratNikah({
     else if (activeDoc === 'n1') {
       html = `
         ${lampiranHtml('N1')}
-        ${dtTable([
+        ${dtTableCompact([
           ['KANTOR DESA', v(formData.namaDesa).toUpperCase()],
           ['KECAMATAN', v(formData.namaKecamatan).toUpperCase()],
           ['KABUPATEN', v(formData.namaKabupaten).toUpperCase()]
         ])}
-        <h3 style="text-align:center;font-size:14px;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PENGANTAR PERKAWINAN</h3>
+        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p style="text-align:center;margin-top:-6px;">Nomor: ${v(formData.nomorSurat)}</p>
         <p>yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
-          ['1. Nama', v(P.nama)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(P.nama)}</span>`],
           ['2. NIK', v(P.nik)],
           ['3. No. KK', v(P.noKK)],
           ['4. Jenis Kelamin', P.jk],
@@ -660,7 +667,7 @@ export default function AdminSuratNikah({
         ])}
         <p>adalah benar anak kandung dari perkawinan seorang pria:</p>
         ${dtTable([
-          ['1. Nama', v(P.ayah)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(P.ayah)}</span>`],
           ['2. NIK', v(P.nikAyah)],
           ['3. Tempat Tanggal Lahir', P.ttlAyah],
           ['4. Pekerjaan', v(P.kerjaAyah)],
@@ -668,7 +675,7 @@ export default function AdminSuratNikah({
         ])}
         <p>dengan seorang wanita:</p>
         ${dtTable([
-          ['1. Nama', v(P.ibu)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(P.ibu)}</span>`],
           ['2. NIK', v(P.nikIbu)],
           ['3. Tempat Tanggal Lahir', P.ttlIbu],
           ['4. Pekerjaan', v(P.kerjaIbu)],
@@ -681,7 +688,6 @@ export default function AdminSuratNikah({
           v(fmtTgl(formData.tanggalSurat)),
           formData.namaPejabat,
           formData.jabatanPejabat,
-          // Optional NIP lookup from officers
           (() => {
             try {
               const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
@@ -703,13 +709,13 @@ export default function AdminSuratNikah({
         <p>Kepada Yth.<br>Kepala ${v(formData.namaKUA, 'KUA Kecamatan')}<br>di - Tempat</p>
         <p>Dengan hormat, kami mengajukan permohonan kehendak perkawinan untuk atas kami:</p>
         ${dtTable([
-          ['Calon Suami', v(formData.namaSuami)],
-          ['dengan Calon Istri', v(formData.namaIstri)],
+          ['Calon Suami', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaSuami)}</span>`],
+          ['dengan Calon Istri', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaIstri)}</span>`],
           ['Hari', v(formData.hariMenikah)],
           ['Tanggal', v(fmtTgl(formData.tanggalMenikah))],
           ['Jam', v(formData.jamMenikah)],
           ['Bertempat di', v(formData.tempatMenikah)]
-        ])}
+        ])})
         <p>Bersama ini kami lampirkan surat-surat yang diperlukan untuk diperiksa sebagai berikut:</p>
         <ol style="margin:6px 0;padding-left:18px;font-size:10.8px;">
           <li>Surat Pengantar Perkawinan dari Desa/Kelurahan (Model N1)</li>
@@ -733,11 +739,11 @@ export default function AdminSuratNikah({
     else if (activeDoc === 'n3') {
       html = `
         ${lampiranHtml('N3')}
-        <h3 style="text-align:center;font-size:14px;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PERSETUJUAN MEMPELAI</h3>
+        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PERSETUJUAN MEMPELAI</h3>
         <p>yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;">A. Calon Suami</p>
         ${dtTable([
-          ['1. Nama', v(formData.namaSuami)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaSuami)}</span>`],
           ['2. NIK', v(formData.nikSuami)],
           ['3. Jenis Kelamin', 'Laki-Laki'],
           ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami)],
@@ -746,7 +752,7 @@ export default function AdminSuratNikah({
         ])}
         <p style="font-weight:700;">B. Calon Istri</p>
         ${dtTable([
-          ['1. Nama', v(formData.namaIstri)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaIstri)}</span>`],
           ['2. NIK', v(formData.nikIstri)],
           ['3. Jenis Kelamin', 'Perempuan'],
           ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri)],
@@ -783,11 +789,11 @@ export default function AdminSuratNikah({
 
       html = `
         ${lampiranHtml('N4')}
-        <h3 style="text-align:center;font-size:14px;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT IZIN ORANG TUA</h3>
+        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT IZIN ORANG TUA</h3>
         <p>yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;">A. AYAH</p>
         ${dtTable([
-          ['1. Nama', v(anak.ayah)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(anak.ayah)}</span>`],
           ['2. NIK', v(anak.nikAyah)],
           ['3. Tempat Tanggal Lahir', anak.ttlAyah],
           ['4. Agama', v(anak.agamaAyah, 'Islam')],
@@ -796,7 +802,7 @@ export default function AdminSuratNikah({
         ])}
         <p style="font-weight:700;">B. IBU</p>
         ${dtTable([
-          ['1. Nama', v(anak.ibu)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(anak.ibu)}</span>`],
           ['2. NIK', v(anak.nikIbu)],
           ['3. Tempat Tanggal Lahir', anak.ttlIbu],
           ['4. Agama', v(anak.agamaIbu, 'Islam')],
@@ -805,7 +811,7 @@ export default function AdminSuratNikah({
         ])}
         <p>adalah ayah kandung dan ibu kandung dari:</p>
         ${dtTable([
-          ['1. Nama', v(anak.nama)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(anak.nama)}</span>`],
           ['2. NIK', v(anak.nik)],
           ['3. Jenis Kelamin', anak.jk],
           ['4. Tempat Tanggal Lahir', anak.ttl],
@@ -814,7 +820,7 @@ export default function AdminSuratNikah({
         ])}
         <p>memberikan izin kepada anak kami untuk melakukan perkawinan dengan:</p>
         ${dtTable([
-          ['1. Nama', v(anak.pasangan)],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${v(anak.pasangan)}</span>`],
           ['2. NIK', v(anak.nikPasangan)],
           ['3. Jenis Kelamin', anak.jkPasangan],
           ['4. Tempat Tanggal Lahir', anak.ttlPasangan],
