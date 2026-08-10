@@ -1151,7 +1151,7 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
       <td className="px-6 py-3.5 whitespace-nowrap">
         <div className="flex flex-col">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-bold text-gray-900 dark:text-white">{name}</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-white uppercase">{name}</span>
             {item.created_at && (Date.now() - new Date(item.created_at).getTime() < 14 * 24 * 60 * 60 * 1000) && (
               <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/80 shrink-0 flex items-center gap-1 shadow-sm">
                 <Sparkles className="w-2.5 h-2.5 text-emerald-600 dark:text-emerald-400 animate-pulse" />

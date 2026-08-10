@@ -382,7 +382,7 @@ export default function AdminPendudukDetail({
             </div>
 
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-2">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-2 uppercase">
                 {data?.name || "Nama Penduduk"}
                 {(() => {
                   const s = (data?.status || 'Aktif').trim().toLowerCase();

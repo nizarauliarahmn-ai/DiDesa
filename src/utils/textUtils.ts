@@ -68,17 +68,20 @@ export function parseAddressString(input: string, currentRt = '', currentRw = ''
 /**
  * Capitalizes all relevant string fields from a resident object.
  * Use when auto-filling surat/SK form data from resident selection.
+ * Names (name, fatherName, motherName) are forced to UPPERCASE to comply with
+ * official village administration document standards; places/address stay Title Case.
  */
 export function capitalizeResidentFields(res: any): any {
   if (!res) return res;
   const cap = capitalizeWords;
+  const upper = (v: any) => String(v || '').toUpperCase();
   return {
     ...res,
-    name: cap(res.name || ''),
+    name: upper(res.name),
     birthPlace: cap(res.birthPlace || ''),
     address: cap(res.address || ''),
-    fatherName: cap(res.fatherName || ''),
-    motherName: cap(res.motherName || ''),
+    fatherName: upper(res.fatherName),
+    motherName: upper(res.motherName),
     desa: cap(res.desa || ''),
   };
 }

@@ -138,7 +138,7 @@ function KkParentCombobox({
                       className="w-full text-left px-4 py-2.5 hover:bg-emerald-50 dark:hover:bg-slate-800 flex items-start justify-between gap-2"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{m.name}</p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate uppercase">{m.name}</p>
                         <p className="text-[10px] text-gray-500">{m.nik || '-'}</p>
                       </div>
                       <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded flex-none mt-0.5">
@@ -155,7 +155,7 @@ function KkParentCombobox({
         <input
           type="text"
           value={value}
-          onChange={(e) => onChange(capitalizeWords(e.target.value))}
+          onChange={(e) => onChange(e.target.value.toUpperCase())}
           className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
           placeholder="Masukkan nama secara manual..."
         />
@@ -195,7 +195,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   };
 
   // Form State
-  const [name, setName] = useState(capitalizeWords(data?.name || ''));
+  const [name, setName] = useState((data?.name || '').toUpperCase());
   const [nik, setNik] = useState(data?.nik || '');
   const [noKk, setNoKk] = useState(data?.noKk || '320412008890001');
   const [gender, setGender] = useState(data?.gender || 'Laki-laki');
@@ -204,8 +204,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   const [bloodType, setBloodType] = useState(data?.bloodType || 'O');
   const [religion, setReligion] = useState(data?.religion || 'Islam');
   const [job, setJob] = useState(data?.job || 'Wiraswasta');
-  const [fatherName, setFatherName] = useState(capitalizeWords(data?.fatherName || ''));
-  const [motherName, setMotherName] = useState(capitalizeWords(data?.motherName || ''));
+  const [fatherName, setFatherName] = useState((data?.fatherName || '').toUpperCase());
+  const [motherName, setMotherName] = useState((data?.motherName || '').toUpperCase());
   
   // Same-KK family members used for parent dropdowns
   const [kkMembers, setKkMembers] = useState<any[]>([]);
@@ -366,7 +366,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       ...data,
       nik,
       noKk,
-      name,
+      name: (name || '').trim().toUpperCase(),
       age,
       gender,
       genderColor,
@@ -387,8 +387,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       domicileStatus,
       familyRelation,
       education,
-      fatherName,
-      motherName,
+      fatherName: (fatherName || '').trim().toUpperCase(),
+      motherName: (motherName || '').trim().toUpperCase(),
       activeAids,
       photo: photoPreview
     };
@@ -486,7 +486,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   type="text"
                   value={name}
                   onChange={(e) => {
-                    setName(capitalizeWords(e.target.value));
+                    setName(e.target.value.toUpperCase());
                     if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
                   }}
                   className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
