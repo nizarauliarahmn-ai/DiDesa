@@ -585,6 +585,12 @@ export default function AdminSuratNikah({
           ${rows.map(r => `<tr><td style="width:38%;padding:1px 4px;vertical-align:top;line-height:1.4;">${r[0]}</td><td style="width:2%;padding:1px 4px;vertical-align:top;line-height:1.4;">:</td><td style="padding:1px 4px;vertical-align:top;line-height:1.4;">${r[1]}</td></tr>`).join('')}
         </table>
       `;
+      // Extra-tight table used only by N2 biodata/waktu block, values not bold
+      const dtTableN2 = (rows: any[]) => `
+        <table style="width:100%;border-collapse:collapse;margin:0;font-family:${letterFont};">
+          ${rows.map(r => `<tr><td style="width:38%;padding:0px 4px;vertical-align:top;line-height:1.2;">${r[0]}</td><td style="width:2%;padding:0px 4px;vertical-align:top;line-height:1.2;">:</td><td style="padding:0px 4px;vertical-align:top;line-height:1.2;">${r[1]}</td></tr>`).join('')}
+        </table>
+      `;
 
     const isSuami = activeDoc === 'biodata_suami' || (activeDoc === 'n1' && formData.isWargaSuami);
     const isIstri = activeDoc === 'biodata_istri' || (activeDoc === 'n1' && !formData.isWargaSuami);
@@ -704,12 +710,12 @@ export default function AdminSuratNikah({
     else if (activeDoc === 'n2') {
       html = `
         ${lampiranHtml('N2')}
-        <div style="line-height:1.3;margin:0;padding:0;">
-        <p style="text-align:right;margin:0 0 2px 0;">${tempatTgl()}</p>
-        <p style="margin:0 0 2px 0;">Perihal: Permohonan Kehendak Perkawinan</p>
-        <p style="margin:0 0 2px 0;">Kepada Yth.<br>Kepala ${v(formData.namaKUA, 'KUA Kecamatan')}<br>di - Tempat</p>
+        <div style="line-height:1.35;margin:0;padding:0;">
+        <p style="text-align:right;margin:0 0 10px 0;">${tempatTgl()}</p>
+        <p style="margin:0 0 8px 0;">Perihal: Permohonan Kehendak Perkawinan</p>
+        <p style="margin:0 0 18px 0;line-height:1.45;">Kepada Yth.<br>Kepala ${v(formData.namaKUA, 'KUA Kecamatan')}<br>di - Tempat</p>
         <p style="margin:0 0 2px 0;">Dengan hormat, kami mengajukan permohonan kehendak perkawinan untuk atas kami:</p>
-        ${dtTableCompact([
+        ${dtTableN2([
           ['Calon Suami', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaSuami)}</span>`],
           ['dengan Calon Istri', `<span style="font-weight:700;text-transform:uppercase;">${v(formData.namaIstri)}</span>`],
           ['Hari', v(formData.hariMenikah)],
@@ -717,7 +723,7 @@ export default function AdminSuratNikah({
           ['Jam', v(formData.jamMenikah)],
           ['Bertempat di', v(formData.tempatMenikah)]
         ])}
-        <p style="margin:0 0 2px 0;">Bersama ini kami lampirkan surat-surat yang diperlukan untuk diperiksa sebagai berikut:</p>
+        <p style="margin:18px 0 2px 0;">Bersama ini kami lampirkan surat-surat yang diperlukan untuk diperiksa sebagai berikut:</p>
         <ol style="margin:0 0 2px 0;padding-left:20px;font-size:10.8px;list-style:decimal;">
           <li>Surat Pengantar Perkawinan dari Desa/Kelurahan (Model N1)</li>
           <li>Surat Permohonan Kehendak Perkawinan (Model N2)</li>
