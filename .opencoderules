@@ -1,0 +1,51 @@
+# DiDesa — Aturan Baku Sistem 3 Role Pengguna
+
+Dokumen ini adalah **pedoman utama** (master rule) yang WAJIB diingat dan dipatuhi pada **setiap** tugas coding: analisis, refactoring, perbaikan bug, maupun pembuatan fitur baru. Jika terjadi konflik antara aturan lain dan dokumen ini, dokumen ini yang menang (kecuali ada instruksi eksplisit dari pengguna).
+
+## 1. Definisi Resmi 3 Role
+
+1. **`admin`**
+   - Perangkat desa yang ditunjuk untuk mengelola data dan surat operasional harian.
+   - Scope: data penduduk, pembuatan/penomoran surat harian, operasional kantor desa.
+   - Tidak berhak mengubah pengaturan tingkat desa, aparatur, template global, atau data SaaS.
+
+2. **`super_admin`**
+   - Perangkat desa yang lebih mahir IT / mengetik (operator tingkat lanjut).
+   - **SANGAT PENTING: Role ini BUKAN Kades/Kepala Desa.** Ia tetap perangkat desa, hanya lebih teknis.
+   - Hak lebih: mengelola aparatur desa, pengaturan desa, penomoran surat, validasi/persetujuan antrean yang diajukan `admin`.
+   - Tidak berhak mengakses area SaaS (tenant lain, log SaaS, branding global, template surat global).
+
+3. **`admin_saas`**
+   - Pemilik / Pengembang Platform Web SaaS (akses penuh tertinggi).
+   - Akses lintas seluruh tenant: manajemen tenant, log aktivitas SaaS, log pembaruan, laporan bug, branding global, template surat global, pengaturan semua desa.
+   - Tidak terikat pada satu desa/tenant (mengelola platform secara keseluruhan).
+
+## 2. Hierarki Akses
+
+```
+admin_saas (tertinggi)  >  super_admin (per desa)  >  admin (per desa)
+```
+
+- Setiap role hanya boleh melihat/mengubah data dalam lingkup wewenangnya.
+- Fitur yang menyentuh kebijakan platform/global HANYA untuk `admin_saas`.
+- Fitur persetujuan/validasi antar perangkat desa HANYA melibatkan `admin` dan `super_admin`.
+- Jangan pernah memberikan akses `admin_saas` kepada role di bawahnya, dan jangan pernah membatasi `admin_saas` dari akses yang semestinya.
+
+## 3. Pedoman Saat Coding (WAJIB)
+
+Sebelum menganalisis, merefactor, atau membuat fitur baru, lakukan langkah berikut:
+
+1. **Identifikasi role**: Tentukan role mana yang memakai fitur tersebut (`admin`, `super_admin`, atau `admin_saas`).
+2. **Periksa konteks tenant**: Fitur berbasis desa harus memfilter `tenant_id`; fitur SaaS global harus bebas `tenant_id`.
+3. **Jaga batas akses**: Jangan menghapus/menambal cek role (`authUser.role === ...`) tanpa alasan yang jelas.
+4. **Konsisten dengan definisi resmi**: Jangan mencampur logika role dengan jabatan (mis. "super_admin" tidak boleh disamakan dengan "Kades").
+5. **Tanyakan jika ambigu**: Jika sebuah perubahan akan mengubah perilaku akses suatu role, konfirmasi ke pengguna terlebih dahulu.
+
+## 4. Catatan Pemetaan ke Kode Saat Ini (untuk refactoring nanti)
+
+> Aturan ini hanya catatan implementasi eksisting, BUKAN definisi resmi. Definisi resmi ada di bagian 1.
+
+- Di sebagian besar file (mis. `App.tsx`, `AdminSidebar.tsx`, `Login.tsx`), nilai role yang dipakai saat ini adalah: `'admin' | 'kades' | 'saas_admin' | 'public'`.
+- `'saas_admin'` pada kode sekarang berkorespondensi dengan definisi resmi **`admin_saas`**.
+- `'kades'` pada kode sekarang sering dipakai sebagai "Super Admin per desa" — ini perlu disejajarkan perlahan-lahan ke definisi resmi **`super_admin`** (yang BUKAN berarti Kades).
+- Ketika merefactor, usahakan menyeragamkan penamaan ke definisi resmi (`admin`, `super_admin`, `admin_saas`) agar tidak ambigu, tanpa merusak fitur yang berjalan.

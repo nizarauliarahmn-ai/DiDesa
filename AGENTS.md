@@ -2,6 +2,8 @@
 
 Dokumen ini berisi sekumpulan aturan utama, panduan UI/UX, serta prinsip sistem untuk semua AI Coding Assistant (Antigravity, Cursor, Roo Code, Aider, dll) saat mengerjakan codebase **DiDesa**.
 
+> **⚠️ PEDOMAN UTAMA — SISTEM 3 ROLE**: Selalu patuhi definisi resmi 3 Role Pengguna (`admin`, `super_admin`, `admin_saas`) yang tercantum lengkap di file **`.opencoderules`**. Dokumen itu adalah master rule untuk setiap analisis, refactoring, atau pembuatan fitur baru.
+
 ---
 
 ## 🎨 1. Panduan UI/UX & Kerapian Tabel (Strict)
