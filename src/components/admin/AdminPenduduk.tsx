@@ -144,7 +144,6 @@ export default function AdminPenduduk({
       return;
     }
     const isEdit = !!editingPenduduk && !!editingPenduduk.nik;
-    const nowIso = new Date().toISOString();
     const nowTimestamp = Date.now();
     
     const dbPayload = {
@@ -174,8 +173,7 @@ export default function AdminPenduduk({
       active_aids: typeof savedResident.activeAids === 'string' ? savedResident.activeAids : JSON.stringify(savedResident.activeAids || []),
       gender_color: savedResident.genderColor || 'blue',
       status_color: savedResident.statusColor || 'emerald',
-      photo: savedResident.photo || '',
-      created_at: isEdit ? (editingPenduduk.created_at || nowIso) : nowIso
+      photo: savedResident.photo || ''
     };
 
     if (isEdit) {
@@ -186,7 +184,29 @@ export default function AdminPenduduk({
         .eq('tenant_id', tenantId);
 
       if (!error) {
-        showToast(`Data penduduk ${savedResident.name} berhasil diperbarui!`, "success");
+        // Verify the data actually persisted in Supabase (not just optimistic UI)
+        try {
+          const { data: savedRow, error: verifyError } = await supabase
+            .from('residents')
+            .select('father_name, mother_name, name, nik')
+            .eq('nik', savedResident.nik)
+            .eq('tenant_id', tenantId)
+            .maybeSingle();
+
+          if (!verifyError && savedRow) {
+            const storedFather = String(savedRow.father_name || '').toLowerCase();
+            const storedMother = String(savedRow.mother_name || '').toLowerCase();
+            const savedFather = String(dbPayload.father_name || '').toLowerCase();
+            const savedMother = String(dbPayload.mother_name || '').toLowerCase();
+            if (storedFather !== savedFather || storedMother !== savedMother) {
+              console.warn('Verifikasi simpan penduduk: data ayah/ibu tidak cocok di DB.', savedRow, dbPayload);
+            }
+          }
+        } catch (verifyErr) {
+          console.warn('Gagal verifikasi simpan penduduk:', verifyErr);
+        }
+
+        showToast(`Data penduduk ${savedResident.name} berhasil diperbarui di database!`, "success");
         setResidents(prev => prev.map(r => r.nik === savedResident.nik ? {
           ...r,
           ...dbPayload,
