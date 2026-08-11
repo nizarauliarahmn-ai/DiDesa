@@ -142,6 +142,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       const matchingTenantKades = tenantMatches?.find(t => t.kades_email?.toLowerCase() === email.toLowerCase() && t.kades_password === password);
 
       if (matchingTenantKades) {
+        if (matchingTenantKades.status === 'pending_approval') {
+          setIsLoading(false);
+          showToast('Pendaftaran Anda masih dalam proses verifikasi oleh Tim DiDesa. Silakan tunggu konfirmasi via WhatsApp.', 'error');
+          return;
+        }
+        if (matchingTenantKades.status === 'inactive') {
+          setIsLoading(false);
+          showToast('Akun desa ini sedang dinonaktifkan. Hubungi Pengelola Platform untuk informasi lebih lanjut.', 'error');
+          return;
+        }
         const loggedUser = {
           email: email,
           role: 'kades' as const,
@@ -170,6 +180,16 @@ export default function Login({ onLoginSuccess }: LoginProps) {
       }
 
       if (matchingTenantAdmin) {
+        if (matchingTenantAdmin.status === 'pending_approval') {
+          setIsLoading(false);
+          showToast('Pendaftaran Anda masih dalam proses verifikasi oleh Tim DiDesa. Silakan tunggu konfirmasi via WhatsApp.', 'error');
+          return;
+        }
+        if (matchingTenantAdmin.status === 'inactive') {
+          setIsLoading(false);
+          showToast('Akun desa ini sedang dinonaktifkan. Hubungi Pengelola Platform untuk informasi lebih lanjut.', 'error');
+          return;
+        }
         const loggedUser = {
           email: email,
           role: 'admin' as const,

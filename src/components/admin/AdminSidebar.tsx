@@ -58,6 +58,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   const [unreadFeedbacks, setUnreadFeedbacks] = useState(0);
   const [pendingBugsCount, setPendingBugsCount] = useState(0);
   const [pendingLeadsCount, setPendingLeadsCount] = useState(0);
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
   
   // Global Branding
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
@@ -149,11 +150,25 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
     };
     handleLeadsUpdate();
 
+    const handleApprovalsUpdate = async () => {
+      try {
+        const { count } = await supabase
+          .from('tenants')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending_approval');
+        setPendingApprovalsCount(count || 0);
+      } catch (e) {
+        setPendingApprovalsCount(0);
+      }
+    };
+    handleApprovalsUpdate();
+
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
     window.addEventListener('feedback_updated', handleFeedbackUpdate);
     window.addEventListener('bug_reports_updated', handleBugsUpdate);
     window.addEventListener('tenant_requests_updated', handleLeadsUpdate);
+    window.addEventListener('tenant_approvals_updated', handleApprovalsUpdate);
     
     return () => {
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
@@ -161,6 +176,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       window.removeEventListener('feedback_updated', handleFeedbackUpdate);
       window.removeEventListener('bug_reports_updated', handleBugsUpdate);
       window.removeEventListener('tenant_requests_updated', handleLeadsUpdate);
+      window.removeEventListener('tenant_approvals_updated', handleApprovalsUpdate);
     };
   }, []);
 
@@ -229,6 +245,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem icon={<LayoutDashboard size={18} />} label="SaaS Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
             <NavItem icon={<Building2 size={18} className="text-blue-600" />} label="Manajemen Klien" active={activeTab === 'tenants'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('tenants'); }} badgeCount={activeTab === 'tenants' ? 0 : unreadFeedbacks} />
             <NavItem icon={<Users size={18} className="text-orange-500" />} label="Prospek & Pengajuan" active={activeTab === 'saas_leads'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_leads'); }} badgeCount={activeTab === 'saas_leads' ? 0 : pendingLeadsCount} />
+            <NavItem icon={<ShieldCheck size={18} className="text-emerald-600" />} label="Persetujuan Desa" active={activeTab === 'pending_approvals'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pending_approvals'); }} badgeCount={activeTab === 'pending_approvals' ? 0 : pendingApprovalsCount} />
             <NavItem icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
             <NavItem icon={<Sparkles size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
             <NavItem icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={activeTab === 'saas_bugs' ? 0 : pendingBugsCount} />

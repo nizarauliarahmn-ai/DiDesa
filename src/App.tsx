@@ -35,6 +35,8 @@ import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
 import TenantNotFound from './components/TenantNotFound';
+import TenantPending from './components/TenantPending';
+import AdminPendingApprovals from './components/admin/AdminPendingApprovals';
 import Footer from './components/common/Footer';
 import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
@@ -109,17 +111,30 @@ export default function App() {
   const isRootDomain = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost') && !urlParams.get('tenant') && !urlParams.get('t_id');
 
   const [tenantValid, setTenantValid] = useState<boolean | null>(null);
+  const [tenantStatus, setTenantStatus] = useState<string | null>(null);
 
   React.useEffect(() => {
     const verifyDomain = async () => {
       if (isRootDomain) {
         setTenantValid(true);
+        setTenantStatus(null);
         return;
       }
       const tid = await resolveCurrentTenant();
       setTenantValid(tid !== null);
       if (tid !== null) {
         performLazyCleanup();
+        // Cek status tenant: pending_approval / inactive -> blokir akses login
+        try {
+          const { data } = await supabase
+            .from('tenants')
+            .select('status')
+            .eq('id', tid)
+            .maybeSingle();
+          setTenantStatus((data && data.status) || 'active');
+        } catch (e) {
+          setTenantStatus('active');
+        }
       }
     };
     verifyDomain();
@@ -399,7 +414,7 @@ export default function App() {
   };
 
   // If not authenticated, force login screen UNLESS view is public
-  if (tenantValid === null) {
+  if (tenantValid === null || (!isRootDomain && tenantStatus === null)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
@@ -429,6 +444,11 @@ export default function App() {
 
   if (tenantValid === false) {
     return <TenantNotFound />;
+  }
+
+  // Blokir akses portal untuk desa yang belum disetujui / dinonaktifkan
+  if (tenantStatus === 'pending_approval' || tenantStatus === 'inactive') {
+    return <TenantPending status={tenantStatus === 'pending_approval' ? 'pending_approval' : 'inactive'} />;
   }
 
   if (!user && view !== 'public') {
@@ -519,6 +539,7 @@ export default function App() {
 
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
                 {adminTab === 'saas_leads' && user.role === 'saas_admin' && <AdminSaaSLeads onSetActiveTab={setAdminTab} />}
+                {adminTab === 'pending_approvals' && user.role === 'saas_admin' && <AdminPendingApprovals />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
                 {adminTab === 'log_pembaruan' && user.role === 'saas_admin' && <AdminSaaSGlobalUpdates />}
                 {adminTab === 'saas_bugs' && user.role === 'saas_admin' && <AdminSaaSBugReports />}
