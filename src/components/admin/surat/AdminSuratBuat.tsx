@@ -58,7 +58,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('active');
   
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null); // holds classification code or ID
   const [searchQuery, setSearchQuery] = useState('');
