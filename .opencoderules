@@ -49,3 +49,26 @@ Sebelum menganalisis, merefactor, atau membuat fitur baru, lakukan langkah berik
 - `'saas_admin'` pada kode sekarang berkorespondensi dengan definisi resmi **`admin_saas`**.
 - `'kades'` pada kode sekarang sering dipakai sebagai "Super Admin per desa" — ini perlu disejajarkan perlahan-lahan ke definisi resmi **`super_admin`** (yang BUKAN berarti Kades).
 - Ketika merefactor, usahakan menyeragamkan penamaan ke definisi resmi (`admin`, `super_admin`, `admin_saas`) agar tidak ambigu, tanpa merusak fitur yang berjalan.
+
+---
+
+## 5. Keamanan Isolasi Data Multi-Tenant (Isolasi Antar Desa) — SANGAT KRUSIAL
+
+==================================================
+[MULTI-TENANCY & ISOLASI DATA DESA - SANGAT KRUSIAL]
+==================================================
+
+1. **Prinsip Multi-Tenant (Isolasi Data Desa)**:
+   - Setiap tabel di Supabase yang menyimpan data operasional (seperti `residents`, `letters`, `aspirations`, `apparatus`, dll) WAJIB memiliki kolom pengenal desa (`village_id` atau `tenant_id`).
+   - DILARANG keras menjalankan query SELECT, INSERT, UPDATE, atau DELETE tanpa menyertakan filter `village_id` / `tenant_id` milik desa yang sedang aktif/login.
+
+2. **Proteksi Query & Backend**:
+   - Setiap query ke Supabase WAJIB mengambil `village_id` secara langsung dari konteks sesi autentikasi pengguna yang valid (JWT / Session Server), BUKAN mempercayai parameter dari client/frontend begitu saja.
+   - Pastikan Row Level Security (RLS) di Supabase terpasang dengan benar untuk memastikan user dari Desa A sama sekali TIDAK BISA membaca atau mengubah data milik Desa B, baik via UI maupun manipulasi API / URL.
+
+3. **Pengecualian Akses Admin SaaS**:
+   - HANYA role `admin_saas` yang diizinkan mengakses data lintas desa (misalnya untuk keperluan agregasi total desa terdaftar, kelola persetujuan akun, atau reset password).
+   - Saat role `admin_saas` menggunakan fitur Impersonation (masuk sebagai desa tertentu), pastikan konteks `village_id` terkunci secara ketat pada desa yang sedang di-impersonate.
+
+4. **Verifikasi Keamanan Sebelum Commit**:
+   - Setiap kali membuat atau mengubah query database baru, pastikan untuk selalu memeriksa kembali: "Apakah query ini sudah terisolasi berdasarkan village_id pengguna?"
