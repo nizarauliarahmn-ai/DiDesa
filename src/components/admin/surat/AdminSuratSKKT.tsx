@@ -43,14 +43,7 @@ export default function AdminSuratSKKT({
   editLetterId?: string | null
 }) {
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
-  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKKT') || { klasifikasi: 'SKKT', kodeKlasifikasi: '400' };
-  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
-
-  useEffect(() => {
-    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-    }
-  }, [customNomorSurat, isBackdate, editData]);
+  const { isBackdate, setIsBackdate } = useBackdateNumber();
 
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
@@ -136,16 +129,22 @@ export default function AdminSuratSKKT({
   useEffect(() => {
     if (editData) {
       setFormData(prev => ({ ...prev, ...editData }));
-    } else {
-      const configs = getLetterClassifications();
-      let skkt = configs.find(c => c.klasifikasi === 'SKKT');
-      if (!skkt) {
-        skkt = { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
-      }
-      const generatedNo = generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
-      setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
     }
   }, [editData]);
+
+  useEffect(() => {
+    if (editData) return;
+
+    if (isBackdate) {
+      setFormData(prev => ({ ...prev, nomorSurat: '' }));
+      return;
+    }
+
+    const configs = getLetterClassifications();
+    const skkt = configs.find(c => c.klasifikasi === 'SKKT') || { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
+    setFormData(prev => ({ ...prev, nomorSurat: generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251') }));
+    setTanggalSurat(new Date().toISOString().split('T')[0]);
+  }, [isBackdate, editData]);
 
     useEffect(() => {
       fetchResidentsCached()
@@ -763,40 +762,68 @@ export default function AdminSuratSKKT({
                 <Calendar className="w-5 h-5 text-emerald-600" />
                 <h3 className="font-bold text-slate-800 dark:text-slate-200">Pengaturan Tanggal & Nomor Surat</h3>
               </div>
-              
+
+              <label className="flex items-start gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isBackdate}
+                  onChange={(e) => setIsBackdate(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 accent-emerald-600"
+                />
+                <div>
+                  <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Buat Surat Sisipan (Tanggal Mundur)</span>
+                  <span className="block text-[10px] text-slate-500 mt-0.5">Aktifkan untuk menyisipkan surat lama. Nomor surat wajib diisi manual.</span>
+                </div>
+              </label>
+
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Surat (Opsional/Backdate)</label>
-                <input 
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                  Tanggal Surat {isBackdate ? '(Backdate)' : '(Hari Ini)'}
+                </label>
+                <input
                   type="date"
-                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
                   value={tanggalSurat}
+                  disabled={!isBackdate}
+                  max={isBackdate ? new Date().toISOString().split('T')[0] : undefined}
                   onChange={(e) => setTanggalSurat(e.target.value)}
                 />
-                <p className="mt-1 text-[10px] text-slate-500">Ubah ke tanggal mundur untuk mengaktifkan penomoran sisipan otomatis.</p>
+                <p className="mt-1 text-[10px] text-slate-500">
+                  {isBackdate
+                    ? 'Pilih tanggal surat (maksimal hari ini). Nomor surat diisi manual di bawah.'
+                    : 'Tanggal terkunci ke hari ini. Aktifkan toggle di atas untuk membuat surat sisipan.'}
+                </p>
               </div>
-              
+
               {isBackdate && (
                 <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg flex gap-3 items-start">
                   <div className="mt-0.5">
-                    {isBackdateLoading ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    )}
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Backdate Aktif</p>
+                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Surat Sisipan Aktif</p>
                     <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
-                      Sistem otomatis melacak arsip pada {new Date(tanggalSurat).toLocaleDateString('id-ID')} dan menyisipkan sub-nomor berikutnya.
+                      Nomor surat wajib diisi manual, contoh: 251/SKKT/VII/2026.1
                     </p>
                   </div>
                 </div>
               )}
             </div>
 
-<label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nomor Surat</label>
-                <input type="text" placeholder="251/SKKT/VII/2026" value={formData.nomorSurat} onChange={e => setFormData({ ...formData, nomorSurat: e.target.value })} className="w-full p-2 border rounded-lg" />
-              </div>
+            <div>
+              <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">
+                Nomor Surat {isBackdate && <span className="text-red-500">*</span>}
+              </label>
+              <input
+                type="text"
+                placeholder={isBackdate ? '251/SKKT/VII/2026.1' : '251/SKKT/VII/2026'}
+                value={formData.nomorSurat}
+                disabled={!isBackdate}
+                onChange={e => setFormData({ ...formData, nomorSurat: e.target.value })}
+                className="w-full p-2 border rounded-lg disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed dark:disabled:bg-slate-800"
+              />
+            </div>
+            </div>
             </div>
 
             <div className="text-xs">
