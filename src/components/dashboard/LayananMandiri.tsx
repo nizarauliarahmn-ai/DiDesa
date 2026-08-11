@@ -9,6 +9,7 @@ import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHist
 import { showToast } from '../../utils/toast';
 import { getLetterClassifications, LetterClassification, generateLetterNumber } from '../../utils/letterClassifications';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { supabase } from '../../utils/supabase';
 
 export default function LayananMandiri() {
   const [nikInput, setNikInput] = useState('');
@@ -126,7 +127,7 @@ export default function LayananMandiri() {
         showToast('Gagal memproses surat, Tenant ID tidak ditemukan.', 'error');
         return;
       }
-      import('../../utils/supabase').then(async ({ supabase }) => {
+      Promise.resolve().then(async () => {
         try {
         await supabase.from('surat').insert([{
           tenant_id: tenantId,
@@ -177,7 +178,7 @@ export default function LayananMandiri() {
         showToast('Gagal mengirim aspirasi, Tenant ID tidak ditemukan.', 'error');
         return;
       }
-      import('../../utils/supabase').then(async ({ supabase }) => {
+      Promise.resolve().then(async () => {
         try {
         await supabase.from('aspirasi').insert([{
           tenant_id: tenantId,

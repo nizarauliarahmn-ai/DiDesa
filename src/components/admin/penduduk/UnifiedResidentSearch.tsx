@@ -7,7 +7,7 @@ interface UnifiedResidentSearchProps {
   formData: any;
   setFormData: (data: any) => void;
   residents: any[];
-  onOpenQuickAdd: () => void;
+  onOpenQuickAdd: (nik?: string, name?: string) => void;
 }
 
 export function UnifiedResidentSearch({ formData, setFormData, residents, onOpenQuickAdd }: UnifiedResidentSearchProps) {
@@ -92,7 +92,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
             type="button"
             onClick={() => {
               setShowDropdown(false);
-              onOpenQuickAdd();
+              onOpenQuickAdd(field === 'nik' ? queryVal : undefined, field === 'nama' ? queryVal : undefined);
             }}
             className="w-full p-3.5 flex items-center gap-3 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left transition-colors cursor-pointer group"
           >

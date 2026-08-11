@@ -4,6 +4,7 @@ import { Megaphone, CheckCircle2, Home, User, ArrowLeft } from 'lucide-react';
 import { showToast } from '../utils/toast';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { fetchResidentsCached } from '../utils/apiCache';
+import { supabase } from '../utils/supabase';
 
 export default function PublicKiosAspirasi() {
   const [step, setStep] = useState(1);
@@ -86,7 +87,6 @@ export default function PublicKiosAspirasi() {
     }
 
     try {
-      const { supabase } = await import('../utils/supabase');
       
       // 1. Insert into aspirasi
       await supabase.from('aspirasi').insert([{

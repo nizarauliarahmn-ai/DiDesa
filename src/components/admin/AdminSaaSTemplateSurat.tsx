@@ -3,6 +3,7 @@ import { FileText, Plus, Search, Edit2, Trash2, CheckCircle2, X } from 'lucide-r
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { INITIAL_CLASSIFICATIONS } from '../../utils/letterClassifications';
 
 export default function AdminSaaSTemplateSurat() {
   const [templates, setTemplates] = useState<any[]>([]);
@@ -29,8 +30,8 @@ export default function AdminSaaSTemplateSurat() {
   useEffect(() => {
     // SUPABASE-FIRST LOAD: selalu fetch dari Supabase, localStorage hanya fallback sementara
     const loadTemplates = async () => {
-      import('../../utils/letterClassifications').then(async (mod) => {
-        const initial = mod.INITIAL_CLASSIFICATIONS;
+      Promise.resolve().then(async () => {
+        const initial = INITIAL_CLASSIFICATIONS;
 
         // 1. Coba ambil dari Supabase dulu (sumber kebenaran)
         let supabaseData: any[] | null = null;

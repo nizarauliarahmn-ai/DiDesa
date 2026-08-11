@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { addSaaSLog } from './saasLogs';
+import { autoSyncResidentFromLetter } from './residentSync';
 
 export interface LetterHistory {
   id: string;
@@ -85,7 +86,6 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
       
       // Auto-sync resident data
       try {
-        const { autoSyncResidentFromLetter } = await import('./residentSync');
         await autoSyncResidentFromLetter(letter.nik, letter.data || { name: letter.nama }, letter.jenis);
       } catch (err) {
         console.error("Auto sync resident failed:", err);

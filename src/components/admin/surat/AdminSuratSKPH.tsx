@@ -53,13 +53,7 @@ export default function AdminSuratSKPH({
 
   useEffect(() => {
     if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      if (typeof setFormData === 'function') {
-        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-      } else if (typeof setNoSurat === 'function') {
-        setNoSurat(customNomorSurat);
-      } else if (typeof setNomorSurat === 'function') {
-        setNomorSurat(customNomorSurat);
-      }
+      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
     }
   }, [customNomorSurat, isBackdate, editData]);
 
@@ -71,6 +65,7 @@ export default function AdminSuratSKPH({
 
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SKPH', 'Surat Keterangan Penghasilan / Gaji');
   const templateKode = useLetterKode('SKPH');
@@ -1035,7 +1030,7 @@ export default function AdminSuratSKPH({
           setShowQuickAddModal(false);
           handlePrint(true);
         }}
-        initialData={formData}
+        initialData={quickAddInitialData}
       />
     </div>
   );

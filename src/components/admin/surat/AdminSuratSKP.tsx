@@ -61,13 +61,7 @@ export default function AdminSuratSKP({
 
   useEffect(() => {
     if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      if (typeof setFormData === 'function') {
-        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-      } else if (typeof setNoSurat === 'function') {
-        setNoSurat(customNomorSurat);
-      } else if (typeof setNomorSurat === 'function') {
-        setNomorSurat(customNomorSurat);
-      }
+      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
     }
   }, [customNomorSurat, isBackdate, editData]);
 
@@ -79,6 +73,7 @@ export default function AdminSuratSKP({
 
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SKP', 'Surat Keterangan Pindah (Warga Keluar)');
   const templateKode = useLetterKode('SKP');
@@ -1582,7 +1577,7 @@ export default function AdminSuratSKP({
         jenisSurat="Surat Keterangan Pindah (SKP)"
         onBackToTemplates={onBack}
       />
-      <QuickAddResidentModal isOpen={showQuickAddModal} onClose={() => setShowQuickAddModal(false)} onSuccess={() => { setShowQuickAddModal(false); handlePrint(true); }} initialData={formData} />
+      <QuickAddResidentModal isOpen={showQuickAddModal} onClose={() => setShowQuickAddModal(false)} onSuccess={() => { setShowQuickAddModal(false); handlePrint(); }} initialData={quickAddInitialData} />
 </div>
   );
 }

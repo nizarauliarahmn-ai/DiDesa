@@ -53,18 +53,13 @@ export default function AdminSuratSKD({
 
   useEffect(() => {
     if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      if (typeof setFormData === 'function') {
-        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-      } else if (typeof setNoSurat === 'function') {
-        setNoSurat(customNomorSurat);
-      } else if (typeof setNomorSurat === 'function') {
-        setNomorSurat(customNomorSurat);
-      }
+      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
     }
   }, [customNomorSurat, isBackdate, editData]);
 
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
   const templateDesc = useLetterDescription('SKD', 'Surat Keterangan Domisili Perorangan');
   const templateKode = useLetterKode('SKD');
@@ -1068,7 +1063,7 @@ export default function AdminSuratSKD({
           setShowQuickAddModal(false);
           handlePrint(true);
         }}
-        initialData={formData}
+        initialData={quickAddInitialData}
       />
     </div>
   );

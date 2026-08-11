@@ -397,7 +397,7 @@ export default function AdminSuratUndangan({
   // Save Handler
   const handleSave = async () => {
     if (recipients.length === 0) {
-      showToast('Harap tambahkan minimal 1 penerima undangan', 'warning');
+      showToast('Harap tambahkan minimal 1 penerima undangan', 'info');
       return;
     }
 
@@ -1417,11 +1417,12 @@ export default function AdminSuratUndangan({
       {/* Success Dialog */}
       {showSuccessDialog && (
         <PrintSuccessDialog
-          letterId={savedLetterId}
+          isOpen={showSuccessDialog}
           nomorSurat={nomorSurat}
           jenisSurat="Surat Undangan"
-          namaPenduduk={recipients[0]?.name || 'Daftar Penerima'}
+          namaWarga={recipients[0]?.name || 'Daftar Penerima'}
           onClose={() => setShowSuccessDialog(false)}
+          onBackToTemplates={onBack}
           onPrint={handlePrint}
         />
       )}
@@ -1431,9 +1432,9 @@ export default function AdminSuratUndangan({
         onClose={() => setShowQuickAddModal(false)}
         onSuccess={() => {
           setShowQuickAddModal(false);
-          handlePrint(true);
+          handlePrint();
         }}
-        initialData={formData}
+        initialData={quickAddInitialData}
       />
     </div>
   );

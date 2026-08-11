@@ -47,13 +47,7 @@ export default function AdminSuratSKL({
 
   useEffect(() => {
     if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      if (typeof setFormData === 'function') {
-        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-      } else if (typeof setNoSurat === 'function') {
-        setNoSurat(customNomorSurat);
-      } else if (typeof setNomorSurat === 'function') {
-        setNomorSurat(customNomorSurat);
-      }
+      setNoSurat(customNomorSurat);
     }
   }, [customNomorSurat, isBackdate, editData]);
 
@@ -1138,7 +1132,7 @@ export default function AdminSuratSKL({
         jenisSurat="Surat Keterangan Kelahiran"
         onBackToTemplates={onBack}
       />
-      <QuickAddResidentModal isOpen={showQuickAddModal} onClose={() => setShowQuickAddModal(false)} onSuccess={() => { setShowQuickAddModal(false); handlePrint(true); }} initialData={formData} />
+      <QuickAddResidentModal isOpen={showQuickAddModal} onClose={() => setShowQuickAddModal(false)} onSuccess={() => { setShowQuickAddModal(false); handlePrint(); }} initialData={anakData} />
 </div>
   );
 }

@@ -65,13 +65,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
   useEffect(() => {
     if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      if (typeof setFormData === 'function') {
-        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-      } else if (typeof setNoSurat === 'function') {
-        setNoSurat(customNomorSurat);
-      } else if (typeof setNomorSurat === 'function') {
-        setNomorSurat(customNomorSurat);
-      }
+      setNomorSurat(customNomorSurat);
     }
   }, [customNomorSurat, isBackdate, editData]);
 
@@ -390,6 +384,7 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
       let success = false;
       let allErrors: string[] = [];
       for (const endpoint of GEMINI_ENDPOINTS) {
+        const modelName = endpoint.split('/models/')[1].split(':')[0];
         try {
           console.log(`[AdminSuratSPPD] Mencoba endpoint: ${endpoint}`);
           const res = await fetch(`${endpoint}?key=${apiKey}`, {
@@ -407,7 +402,6 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
           console.log('[SPPD AI] Berhasil dengan:', modelName);
           break;
         } catch (err: any) {
-          const modelName = endpoint.split('/models/')[1].split(':')[0];
           console.warn('[SPPD AI] Endpoint gagal:', endpoint, err);
           allErrors.push(`[${modelName}] Exception: ${err.message}`);
         }
@@ -895,10 +889,10 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
           title="Buat Surat"
-          templateKode={templateKode}
+          templateKode={kodeKlasifikasi}
           onBack={onBack}
           onPrint={handlePrint}
-          onSave={handleSave}
+          onSave={handleRecord}
           isSaving={isSaving}
           printLabel="Cetak Surat"
         />
@@ -1542,9 +1536,9 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
         onClose={() => setShowQuickAddModal(false)}
         onSuccess={() => {
           setShowQuickAddModal(false);
-          handlePrint(true);
+          handlePrint();
         }}
-        initialData={formData}
+        initialData={quickAddInitialData}
       />
     </div>
   );

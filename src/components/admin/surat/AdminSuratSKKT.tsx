@@ -48,13 +48,7 @@ export default function AdminSuratSKKT({
 
   useEffect(() => {
     if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      if (typeof setFormData === 'function') {
-        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-      } else if (typeof setNoSurat === 'function') {
-        setNoSurat(customNomorSurat);
-      } else if (typeof setNomorSurat === 'function') {
-        setNomorSurat(customNomorSurat);
-      }
+      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
     }
   }, [customNomorSurat, isBackdate, editData]);
 
@@ -1137,7 +1131,7 @@ export default function AdminSuratSKKT({
         onClose={() => setShowQuickAddModal(false)}
         onSuccess={() => {
           setShowQuickAddModal(false);
-          handlePrint(true);
+          handleSave();
         }}
         initialData={formData}
       />

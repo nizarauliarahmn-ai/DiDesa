@@ -92,13 +92,7 @@ export default function AdminSuratSPT({
 
   useEffect(() => {
     if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      if (typeof setFormData === 'function') {
-        setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-      } else if (typeof setNoSurat === 'function') {
-        setNoSurat(customNomorSurat);
-      } else if (typeof setNomorSurat === 'function') {
-        setNomorSurat(customNomorSurat);
-      }
+      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
     }
   }, [customNomorSurat, isBackdate, editData]);
 
@@ -282,7 +276,7 @@ export default function AdminSuratSPT({
     setSyncing(true);
 
     const authUser = JSON.parse(localStorage.getItem('didesa_auth_user') || '{}');
-    const isSuperAdmin = authUser.role === 'superadmin' || authUser.role === 'super_admin';
+    const isSuperAdmin = authUser.role === 'kades' || authUser.role === 'saas_admin';
 
     // Only sync changes made to heirs that came from actual resident records (not manual)
     const edited = heirCandidates.filter(h => !h.isManual && h.resident.nik);
@@ -1155,7 +1149,7 @@ export default function AdminSuratSPT({
         onClose={() => setShowQuickAddModal(false)}
         onSuccess={() => {
           setShowQuickAddModal(false);
-          handlePrint(true);
+          handlePrint();
         }}
         initialData={formData}
       />

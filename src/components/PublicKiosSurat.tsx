@@ -6,6 +6,7 @@ import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { addLetterHistory } from '../utils/letterHistory';
 import { fetchResidentsCached } from '../utils/apiCache';
 import { showToast } from '../utils/toast';
+import { supabase } from '../utils/supabase';
 
 export default function PublicKiosSurat() {
   const [step, setStep] = useState(1);
@@ -135,7 +136,6 @@ export default function PublicKiosSurat() {
     }
 
     try {
-      const { supabase } = await import('../utils/supabase');
       
       // 1. Insert into surat
       await supabase.from('surat').insert([{

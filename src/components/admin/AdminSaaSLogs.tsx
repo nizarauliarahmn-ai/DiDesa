@@ -45,9 +45,9 @@ export default function AdminSaaSLogs() {
       log.waktu,
       log.tanggal,
       log.tenant_name || '-',
-      log.admin_name,
+      log.admin,
       log.category,
-      log.action,
+      log.aksi,
       log.target,
       log.status
     ].map(field => `"${String(field || '').replace(/"/g, '""')}"`).join(','));
@@ -79,9 +79,9 @@ export default function AdminSaaSLogs() {
       <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f9fafb'};">
         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.waktu}<br/><small style="color: #6b7280;">${log.tanggal}</small></td>
         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">${log.tenant_name || '-'}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.admin_name}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.admin}</td>
         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.category}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.action}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${log.aksi}</td>
         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-style: italic;">${log.target}</td>
         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; font-weight: bold; color: ${log.status === 'Berhasil' ? '#059669' : log.status === 'Gagal' ? '#dc2626' : '#d97706'};">${log.status}</td>
       </tr>

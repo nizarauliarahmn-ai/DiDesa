@@ -9,6 +9,7 @@ interface PrintSuccessDialogProps {
   namaWarga: string;
   jenisSurat: string;
   onBackToTemplates: () => void;
+  onPrint?: () => void;
 }
 
 export default function PrintSuccessDialog({
@@ -18,6 +19,7 @@ export default function PrintSuccessDialog({
   namaWarga,
   jenisSurat,
   onBackToTemplates,
+  onPrint,
 }: PrintSuccessDialogProps) {
   return (
     <AnimatePresence>
@@ -38,6 +40,18 @@ export default function PrintSuccessDialog({
             </p>
 
             <div className="space-y-2">
+              {onPrint && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onPrint();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold rounded-xl transition-all shadow-sm dark:shadow-none"
+                >
+                  <FileText className="h-4 w-4" />
+                  Cetak Surat
+                </button>
+              )}
               <button
                 onClick={() => {
                   onClose();

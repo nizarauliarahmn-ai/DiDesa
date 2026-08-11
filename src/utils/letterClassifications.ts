@@ -1,3 +1,6 @@
+import { supabase } from './supabase';
+import { resolveCurrentTenant } from './tenantResolver';
+
 export interface LetterField {
   id: string;
   label: string;
@@ -235,8 +238,6 @@ export function saveLetterClassifications(classifications: LetterClassification[
   // Background sync to Supabase
   setTimeout(async () => {
     try {
-      const { supabase } = await import('./supabase');
-      const { resolveCurrentTenant } = await import('./tenantResolver');
       const tenantId = await resolveCurrentTenant();
       
       if (tenantId) {
@@ -291,8 +292,6 @@ export function incrementSequenceNumber(klasifikasi: string) {
   // Also push to Supabase in background
   setTimeout(async () => {
     try {
-      const { supabase } = await import('./supabase');
-      const { resolveCurrentTenant } = await import('./tenantResolver');
       const tenantId = await resolveCurrentTenant();
       
       if (tenantId) {
