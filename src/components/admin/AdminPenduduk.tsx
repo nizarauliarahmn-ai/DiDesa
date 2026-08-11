@@ -11,7 +11,7 @@ import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
-const FILTERS = ["Semua", "✨ Terbaru", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati", "Lansia"];
+const FILTERS = ["Semua", "✨ Terbaru", "Laki-laki", "Perempuan", "Anak (0-11)", "Remaja (12-17)", "Dewasa (18-59)", "Lansia", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati"];
 
 export default function AdminPenduduk({ 
   onNavigateToTab, 
@@ -93,7 +93,7 @@ export default function AdminPenduduk({
           .from('residents')
           .select('*')
           .eq('tenant_id', resolvedTenant)
-          .order('name', { ascending: true })
+          .order('created_at', { ascending: false })
           .range(page * pageSize, (page + 1) * pageSize - 1);
           
         if (error) {
@@ -363,6 +363,19 @@ export default function AdminPenduduk({
           const rt = activeFilter.split(' ')[1];
           const itemRt = item.rt || (item.rtRw ? item.rtRw.split(/[\/\s-]+/)[0] : '');
           matchesFilter = (itemRt || '').trim().padStart(2, '0') === rt.trim().padStart(2, '0');
+        } else if (activeFilter === 'Laki-laki') {
+          matchesFilter = item.gender === 'Laki-laki';
+        } else if (activeFilter === 'Perempuan') {
+          matchesFilter = item.gender === 'Perempuan';
+        } else if (activeFilter === 'Anak (0-11)') {
+          const age = parseInt(item.age);
+          matchesFilter = !isNaN(age) && age >= 0 && age < 12;
+        } else if (activeFilter === 'Remaja (12-17)') {
+          const age = parseInt(item.age);
+          matchesFilter = !isNaN(age) && age >= 12 && age <= 17;
+        } else if (activeFilter === 'Dewasa (18-59)') {
+          const age = parseInt(item.age);
+          matchesFilter = !isNaN(age) && age >= 18 && age <= 59;
         } else if (activeFilter === 'Lansia') {
           matchesFilter = typeof item.age === 'number' ? item.age >= 60 : parseInt(item.age || '0') >= 60;
         } else {
@@ -612,6 +625,26 @@ export default function AdminPenduduk({
     return !isNaN(age) && age >= 60;
   }).length;
 
+  const statCardData = [
+    { label: 'Total', value: totalCount, filter: 'Semua', active: activeFilter === 'Semua', span: 'col-span-2 md:col-span-1', emerald: true },
+    { label: 'Laki-Laki', value: maleCount, filter: 'Laki-laki', active: activeFilter === 'Laki-laki', span: '', emerald: false },
+    { label: 'Perempuan', value: femaleCount, filter: 'Perempuan', active: activeFilter === 'Perempuan', span: '', emerald: false },
+    { label: 'Anak (0-11)', value: childCount, filter: 'Anak (0-11)', active: activeFilter === 'Anak (0-11)', span: '', emerald: false },
+    { label: 'Remaja (12-17)', value: teenagerCount, filter: 'Remaja (12-17)', active: activeFilter === 'Remaja (12-17)', span: '', emerald: false },
+    { label: 'Dewasa (18-59)', value: adultCount, filter: 'Dewasa (18-59)', active: activeFilter === 'Dewasa (18-59)', span: '', emerald: false },
+    { label: 'Lansia (60+)', value: elderlyCount, filter: 'Lansia', active: activeFilter === 'Lansia', span: '', emerald: false },
+  ];
+
+  const applyStatFilter = (label: string) => {
+    setActiveFilter(label);
+    if (label === 'Semua') {
+      setSortOrder('No. KK');
+    }
+    setSearchQuery('');
+    setAidFilter('Semua Bantuan');
+    setCurrentPage(1);
+  };
+
   if (editingPenduduk) {
     return <AdminPendudukEdit data={editingPenduduk} onBack={() => setEditingPenduduk(null)} onSave={handleSavePenduduk} />;
   }
@@ -715,36 +748,25 @@ export default function AdminPenduduk({
         </div>
       </div>
 
-      {/* Stats Overview */}
+      {/* Stats Overview - clickable, triggers table filter */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center col-span-2 md:col-span-1">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Total</p>
-            <h3 className="text-xl font-bold text-emerald-700"><NumberCounter end={totalCount} /></h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Laki-Laki</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white"><NumberCounter end={maleCount} /></h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Perempuan</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white"><NumberCounter end={femaleCount} /></h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Anak (0-11)</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white"><NumberCounter end={childCount} /></h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Remaja (12-17)</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white"><NumberCounter end={teenagerCount} /></h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Dewasa (18-59)</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white"><NumberCounter end={adultCount} /></h3>
-        </div>
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center">
-            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">Lansia (60+)</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white"><NumberCounter end={elderlyCount} /></h3>
-        </div>
+        {statCardData.map((card) => (
+          <button
+            key={card.label}
+            onClick={() => applyStatFilter(card.filter)}
+            className={`${card.span} bg-white dark:bg-slate-900 p-4 rounded-2xl border shadow-sm dark:shadow-none flex flex-col justify-center items-center text-center cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all ${
+              card.active
+                ? 'border-emerald-500 ring-2 ring-emerald-500/20'
+                : 'border-gray-100 dark:border-slate-800 hover:border-emerald-300'
+            }`}
+            title={`Klik untuk menampilkan ${card.label}`}
+          >
+            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1">{card.label}</p>
+            <h3 className={`text-xl font-bold ${card.emerald ? 'text-emerald-700' : 'text-gray-900 dark:text-white'}`}>
+              <NumberCounter end={card.value} />
+            </h3>
+          </button>
+        ))}
       </div>
 
       {/* Filters & Search */}
@@ -760,6 +782,8 @@ export default function AdminPenduduk({
                     setActiveFilter(filter);
                     if (filter === '✨ Terbaru') {
                       setSortOrder('Terbaru');
+                    } else if (filter === 'Semua') {
+                      setSortOrder('No. KK');
                     }
                   }}
                   className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors shadow-sm dark:shadow-none ${
