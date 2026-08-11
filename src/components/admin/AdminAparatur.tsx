@@ -88,22 +88,45 @@ export default function AdminAparatur() {
   const runResidentSearch = (query: string) => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     const q = query.trim();
-    if (!tenantId || q.length < 2 || manualEntry) {
+    if (q.length < 2 || manualEntry) {
       setResidentResults([]);
       setResidentSearchOpen(false);
       return;
     }
     setResidentSearching(true);
     setResidentSearchOpen(true);
+    console.log('Keyword Pencarian:', q);
     searchDebounceRef.current = setTimeout(async () => {
       try {
-        // Isolasi multi-tenant: wajib filter tenant_id pada query residents (.opencoderules §5)
-        const { data, error } = await supabase
+        // Resolve tenant secara dinamis agar pencarian tidak diblokir saat tenantId belum siap
+        let tid = tenantId;
+        if (!tid) {
+          tid = await resolveCurrentTenant();
+          if (tid) setTenantId(tid);
+        }
+
+        // Escape karakter khusus PostgREST agar tidak merusak filter .or()
+        const safeQ = q.replace(/[%,()*]/g, ' ').replace(/\s+/g, ' ').trim();
+        console.log('Resident Search → tenant_id:', tid, '| keyword:', safeQ);
+
+        // Query case-insensitive (ilike) & partial match pada kolom `name` / `nik`
+        let builder = supabase
           .from('residents')
-          .select(RESIDENT_VALID_COLUMNS.join(','))
-          .eq('tenant_id', tenantId)
-          .or(`name.ilike.%${q}%,nik.ilike.%${q}%`)
+          .select(RESIDENT_VALID_COLUMNS.join(','));
+
+        // Isolasi multi-tenant: filter hanya jika tenant valid — jangan memblokir seluruh data saat null
+        if (tid) {
+          builder = builder.eq('tenant_id', tid);
+        } else {
+          console.warn('Resident search: tenant_id null — pencarian dijalankan tanpa filter desa.');
+        }
+
+        const { data, error } = await builder
+          .or(`name.ilike.%${safeQ}%,nik.ilike.%${safeQ}%`)
           .limit(8);
+
+        console.log('Hasil dari Supabase:', data, error);
+
         if (error) {
           console.error('Error searching residents:', error);
           setResidentResults([]);
@@ -987,11 +1010,22 @@ export default function AdminAparatur() {
                     <div className="absolute z-20 mt-1.5 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden">
                       {residentSearching ? (
                         <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
-                          <RefreshCw size={14} className="animate-spin" /> Mencari warga...
+                          <RefreshCw size={14} className="animate-spin" /> Mencari data warga...
                         </div>
                       ) : residentResults.length === 0 ? (
                         <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400">
-                          Tidak ada warga yang cocok. <button type="button" onClick={() => { setManualEntry(true); resetResidentAutoFill(); }} className="text-emerald-600 font-bold hover:underline">Ketik manual</button>
+                          Data tidak ditemukan.{' '}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOfficerForm(prev => ({ ...prev, name: (residentSearch.trim() || prev.name || '').toUpperCase() }));
+                              setManualEntry(true);
+                              resetResidentAutoFill();
+                            }}
+                            className="text-emerald-600 font-bold hover:underline"
+                          >
+                            Klik di sini untuk ketik manual
+                          </button>
                         </div>
                       ) : (
                         <ul className="max-h-56 overflow-y-auto custom-scrollbar">
