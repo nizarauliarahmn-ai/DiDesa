@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, Cloud, RefreshCw, Printer, Search, MapPin, Calendar, MessageCircle, IdCard, BadgeCheck, User } from 'lucide-react';
+import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, Cloud, RefreshCw, Printer, MapPin, Calendar, MessageCircle, IdCard, BadgeCheck, User } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { generateKopSuratHTML } from '../../utils/letterFormat';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
+import ResidentSearchInput from './ResidentSearchInput';
 
 interface Officer {
   name: string;
@@ -23,12 +24,9 @@ interface Officer {
   period?: string;
 }
 
-// Kolom yang sah (valid) pada tabel `residents` — dipakai untuk search & auto-fill agar
-// payload ke Supabase tidak pernah memuat kolom yang tidak ada (TUGAS 2).
-const RESIDENT_VALID_COLUMNS = [
-  'nik', 'name', 'gender', 'gender_color', 'birth_place', 'birth_date',
-  'rt_rw', 'rt', 'rw', 'address', 'desa', 'photo'
-];
+interface RtRwItem extends Officer {
+  no: string;
+}
 
 // Kolom yang sah (valid) pada objek aparatur — hanya field ini yang boleh masuk
 // ke saas_settings (value JSON) saat insert/update.
@@ -65,10 +63,10 @@ export default function AdminAparatur() {
   const [sigLeftNip, setSigLeftNip] = useState('');
 
   // RT / RW
-  const [rtList, setRtList] = useState<{no: string; name: string}[]>([]);
-  const [rwList, setRwList] = useState<{no: string; name: string}[]>([]);
-  const [rtForm, setRtForm] = useState({ no: '', name: '' });
-  const [rwForm, setRwForm] = useState({ no: '', name: '' });
+  const [rtList, setRtList] = useState<RtRwItem[]>([]);
+  const [rwList, setRwList] = useState<RtRwItem[]>([]);
+  const [rtForm, setRtForm] = useState<RtRwItem>({ no: '', name: '', role: 'Ketua RT', nip: '-' });
+  const [rwForm, setRwForm] = useState<RtRwItem>({ no: '', name: '', role: 'Ketua RW', nip: '-' });
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,71 +74,8 @@ export default function AdminAparatur() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [officerForm, setOfficerForm] = useState<Officer>({ name: '', role: '', nip: '-' });
 
-  // Hybrid Search (Autocomplete) Warga dari Data Penduduk — TUGAS 1
-  const [residentSearch, setResidentSearch] = useState('');
-  const [residentResults, setResidentResults] = useState<any[]>([]);
-  const [residentSearching, setResidentSearching] = useState(false);
-  const [residentSearchOpen, setResidentSearchOpen] = useState(false);
-  const [manualEntry, setManualEntry] = useState(false);
-  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const runResidentSearch = (query: string) => {
-    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-    const q = query.trim();
-    if (q.length < 2 || manualEntry) {
-      setResidentResults([]);
-      setResidentSearchOpen(false);
-      return;
-    }
-    setResidentSearching(true);
-    setResidentSearchOpen(true);
-    console.log('Keyword Pencarian:', q);
-    searchDebounceRef.current = setTimeout(async () => {
-      try {
-        // Resolve tenant secara dinamis agar pencarian tidak diblokir saat tenantId belum siap
-        let tid = tenantId;
-        if (!tid) {
-          tid = await resolveCurrentTenant();
-          if (tid) setTenantId(tid);
-        }
-
-        // Escape karakter khusus PostgREST agar tidak merusak filter .or()
-        const safeQ = q.replace(/[%,()*]/g, ' ').replace(/\s+/g, ' ').trim();
-        console.log('Resident Search → tenant_id:', tid, '| keyword:', safeQ);
-
-        // Query case-insensitive (ilike) & partial match pada kolom `name` / `nik`
-        let builder = supabase
-          .from('residents')
-          .select(RESIDENT_VALID_COLUMNS.join(','));
-
-        // Isolasi multi-tenant: filter hanya jika tenant valid — jangan memblokir seluruh data saat null
-        if (tid) {
-          builder = builder.eq('tenant_id', tid);
-        } else {
-          console.warn('Resident search: tenant_id null — pencarian dijalankan tanpa filter desa.');
-        }
-
-        const { data, error } = await builder
-          .or(`name.ilike.%${safeQ}%,nik.ilike.%${safeQ}%`)
-          .limit(8);
-
-        console.log('Hasil dari Supabase:', data, error);
-
-        if (error) {
-          console.error('Error searching residents:', error);
-          setResidentResults([]);
-        } else {
-          setResidentResults((data || []).filter((r: any) => String(r.is_deleted) !== '1' && r.is_deleted !== true));
-        }
-        setResidentSearching(false);
-      } catch (e) {
-        console.error('Error searching residents:', e);
-        setResidentResults([]);
-        setResidentSearching(false);
-      }
-    }, 300);
-  };
+  // Hybrid Search & Auto-Fill ditangani komponen reusable <ResidentSearchInput />
+  // (query .ilike ke tabel residents, isolasi tenant_id, toggle manual).
 
   const applyResidentToForm = (resident: any) => {
     setOfficerForm(prev => ({
@@ -155,26 +90,36 @@ export default function AdminAparatur() {
       rtRw: resident.rt_rw || prev.rtRw,
       photo: resident.photo || prev.photo,
     }));
-    setResidentSearch(resident.name || '');
-    setResidentResults([]);
-    setResidentSearchOpen(false);
-    setManualEntry(false);
   };
 
-  const resetResidentAutoFill = () => {
-    setOfficerForm(prev => ({
+  const applyResidentToRtForm = (resident: any) => {
+    setRtForm(prev => ({
       ...prev,
-      residentId: undefined,
-      nik: undefined,
-      gender: undefined,
-      birthPlace: undefined,
-      birthDate: undefined,
-      address: undefined,
-      rtRw: undefined,
-      photo: undefined,
+      name: String(resident.name || prev.name || '').toUpperCase(),
+      residentId: resident.nik || undefined,
+      nik: resident.nik || prev.nik,
+      gender: resident.gender || prev.gender,
+      birthPlace: resident.birth_place || prev.birthPlace,
+      birthDate: resident.birth_date || prev.birthDate,
+      address: resident.address || prev.address,
+      rtRw: resident.rt_rw || prev.rtRw,
+      photo: resident.photo || prev.photo,
     }));
-    setResidentResults([]);
-    setResidentSearchOpen(false);
+  };
+
+  const applyResidentToRwForm = (resident: any) => {
+    setRwForm(prev => ({
+      ...prev,
+      name: String(resident.name || prev.name || '').toUpperCase(),
+      residentId: resident.nik || undefined,
+      nik: resident.nik || prev.nik,
+      gender: resident.gender || prev.gender,
+      birthPlace: resident.birth_place || prev.birthPlace,
+      birthDate: resident.birth_date || prev.birthDate,
+      address: resident.address || prev.address,
+      rtRw: resident.rt_rw || prev.rtRw,
+      photo: resident.photo || prev.photo,
+    }));
   };
 
   // Print Report Setup
@@ -440,10 +385,6 @@ export default function AdminAparatur() {
     if (cat === 'bpd') defaultRole = 'Anggota BPD';
     if (cat === 'lpm') defaultRole = 'Anggota LPM';
     setOfficerForm({ name: '', role: defaultRole, nip: '-' });
-    setResidentSearch('');
-    setResidentResults([]);
-    setResidentSearchOpen(false);
-    setManualEntry(false);
     setIsModalOpen(true);
   };
 
@@ -455,10 +396,6 @@ export default function AdminAparatur() {
     else if (cat === 'bpd') existing = bpdList[idx];
     else existing = lpmList[idx];
     setOfficerForm(existing);
-    setResidentSearch(existing.residentId ? String(existing.name || '') : '');
-    setResidentResults([]);
-    setResidentSearchOpen(false);
-    setManualEntry(!existing.residentId);
     setIsModalOpen(true);
   };
 
@@ -493,6 +430,35 @@ export default function AdminAparatur() {
     if (cat === 'perangkat') setOfficers(prev => prev.filter((_, i) => i !== idx));
     else if (cat === 'bpd') setBpdList(prev => prev.filter((_, i) => i !== idx));
     else setLpmList(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleAddRtRw = (kind: 'rt' | 'rw') => {
+    const form = kind === 'rt' ? rtForm : rwForm;
+    if (!form.no.trim() || !form.name.trim()) {
+      showToast(kind === 'rt' ? 'Nomor RT dan Nama Ketua RT wajib diisi!' : 'Nomor RW dan Nama Ketua RW wajib diisi!', 'error');
+      return;
+    }
+    const clean: RtRwItem = { ...sanitizeOfficer(form) as RtRwItem, no: form.no.trim() };
+    if (kind === 'rt') {
+      setRtList(prev => [...prev, clean]);
+      setRtForm({ no: '', name: '', role: 'Ketua RT', nip: '-' });
+    } else {
+      setRwList(prev => [...prev, clean]);
+      setRwForm({ no: '', name: '', role: 'Ketua RW', nip: '-' });
+    }
+  };
+
+  const handleEditRtRw = (kind: 'rt' | 'rw', idx: number) => {
+    const item = kind === 'rt' ? rtList[idx] : rwList[idx];
+    if (kind === 'rt') setRtForm({ ...item });
+    else setRwForm({ ...item });
+    if (kind === 'rt') setRtList(prev => prev.filter((_, i) => i !== idx));
+    else setRwList(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleDeleteRtRw = (kind: 'rt' | 'rw', idx: number) => {
+    if (kind === 'rt') setRtList(prev => prev.filter((_, i) => i !== idx));
+    else setRwList(prev => prev.filter((_, i) => i !== idx));
   };
 
   const getRoleOptions = () => {
@@ -537,16 +503,6 @@ export default function AdminAparatur() {
     return (
       <div className={`w-14 h-14 rounded-full ${colorClass} flex items-center justify-center text-white font-extrabold text-base shrink-0 shadow-sm`}>
         {getInitials(officer.name)}
-      </div>
-    );
-  };
-
-  const OfficerDetailRow = ({ label, value }: { label: string; value?: string }) => {
-    if (!value) return null;
-    return (
-      <div className="flex items-start gap-2">
-        <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mt-0.5 w-16 shrink-0">{label}</span>
-        <span className="text-xs text-gray-700 dark:text-slate-300 break-words min-w-0">{value}</span>
       </div>
     );
   };
@@ -848,44 +804,118 @@ export default function AdminAparatur() {
               {/* RT List */}
               <div className="space-y-3">
                 <p className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider border-b pb-2">Ketua RT</p>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
                   {rtList.map((rt, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm">
-                      <div className="flex items-center gap-2 overflow-hidden">
+                    <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm gap-2">
+                      <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
                         <span className="font-bold text-gray-700 dark:text-slate-300 shrink-0">RT {rt.no}</span>
-                        <span className="text-gray-600 dark:text-slate-400 truncate">{rt.name}</span>
+                        <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">
+                          {getInitials(rt.name)}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="text-gray-900 dark:text-white font-bold truncate block uppercase">{rt.name}</span>
+                          {rt.nik && <span className="text-[10px] text-gray-500 dark:text-slate-400 font-mono block truncate">NIK. {rt.nik}</span>}
+                        </span>
+                        {toWaLink(rt.phone) && (
+                          <a
+                            href={toWaLink(rt.phone)!}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-green-600 dark:text-green-400 shrink-0 hover:scale-110 transition-transform"
+                            title="Chat WhatsApp"
+                          >
+                            <MessageCircle size={16} />
+                          </a>
+                        )}
                       </div>
-                      <button onClick={() => setRtList(p => p.filter((_, i) => i !== idx))} className="text-rose-400 hover:text-rose-600 p-1 shrink-0"><X size={14}/></button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => handleEditRtRw('rt', idx)} className="text-gray-400 hover:text-emerald-600 p-1"><Edit3 size={14}/></button>
+                        <button onClick={() => handleDeleteRtRw('rt', idx)} className="text-rose-400 hover:text-rose-600 p-1"><X size={14}/></button>
+                      </div>
                     </div>
                   ))}
                   {rtList.length === 0 && <p className="text-xs text-gray-400 italic">Belum ada data RT.</p>}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                  <input type="text" placeholder="No RT" value={rtForm.no} onChange={e => setRtForm(p => ({...p, no: e.target.value}))} className="w-full sm:w-24 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
-                  <input type="text" placeholder="Nama Ketua RT" value={rtForm.name} onChange={e => setRtForm(p => ({...p, name: e.target.value}))} className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
-                  <button onClick={() => { if (rtForm.no && rtForm.name) { setRtList(p => [...p, rtForm]); setRtForm({ no: '', name: '' }); }}} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-bold sm:w-auto w-full">+</button>
+                <div className="border border-dashed border-gray-200 dark:border-slate-700 rounded-xl p-3 space-y-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input type="text" placeholder="No RT" value={rtForm.no} onChange={e => setRtForm(p => ({...p, no: e.target.value}))} className="w-full sm:w-24 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
+                    <input type="text" placeholder="No. WhatsApp (Opsional)" value={rtForm.phone || ''} onChange={e => setRtForm(p => ({...p, phone: e.target.value}))} className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
+                    <button
+                      onClick={() => handleAddRtRw('rt')}
+                      className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-bold sm:w-auto w-full"
+                    >
+                      {rtForm.no || rtForm.name ? 'Simpan Ketua RT' : '+ Tambah Ketua RT'}
+                    </button>
+                  </div>
+                  <ResidentSearchInput
+                    tenantId={tenantId}
+                    initialText=""
+                    logLabel="RT/RW"
+                    onSelect={applyResidentToRtForm}
+                    onManualName={(name) => setRtForm(p => ({ ...p, name }))}
+                    onManualChange={(manual) => {
+                      if (manual) setRtForm(p => ({ ...p, residentId: undefined, nik: undefined, gender: undefined, birthPlace: undefined, birthDate: undefined, address: undefined, rtRw: undefined, photo: undefined }));
+                    }}
+                  />
                 </div>
               </div>
 
               {/* RW List */}
               <div className="space-y-3">
                 <p className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider border-b pb-2">Ketua RW</p>
-                <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
                   {rwList.map((rw, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm">
-                      <div className="flex items-center gap-2 overflow-hidden">
+                    <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm gap-2">
+                      <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
                         <span className="font-bold text-gray-700 dark:text-slate-300 shrink-0">RW {rw.no}</span>
-                        <span className="text-gray-600 dark:text-slate-400 truncate">{rw.name}</span>
+                        <span className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">
+                          {getInitials(rw.name)}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="text-gray-900 dark:text-white font-bold truncate block uppercase">{rw.name}</span>
+                          {rw.nik && <span className="text-[10px] text-gray-500 dark:text-slate-400 font-mono block truncate">NIK. {rw.nik}</span>}
+                        </span>
+                        {toWaLink(rw.phone) && (
+                          <a
+                            href={toWaLink(rw.phone)!}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-green-600 dark:text-green-400 shrink-0 hover:scale-110 transition-transform"
+                            title="Chat WhatsApp"
+                          >
+                            <MessageCircle size={16} />
+                          </a>
+                        )}
                       </div>
-                      <button onClick={() => setRwList(p => p.filter((_, i) => i !== idx))} className="text-rose-400 hover:text-rose-600 p-1 shrink-0"><X size={14}/></button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button onClick={() => handleEditRtRw('rw', idx)} className="text-gray-400 hover:text-indigo-600 p-1"><Edit3 size={14}/></button>
+                        <button onClick={() => handleDeleteRtRw('rw', idx)} className="text-rose-400 hover:text-rose-600 p-1"><X size={14}/></button>
+                      </div>
                     </div>
                   ))}
                   {rwList.length === 0 && <p className="text-xs text-gray-400 italic">Belum ada data RW.</p>}
                 </div>
-                <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                  <input type="text" placeholder="No RW" value={rwForm.no} onChange={e => setRwForm(p => ({...p, no: e.target.value}))} className="w-full sm:w-24 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
-                  <input type="text" placeholder="Nama Ketua RW" value={rwForm.name} onChange={e => setRwForm(p => ({...p, name: e.target.value}))} className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
-                  <button onClick={() => { if (rwForm.no && rwForm.name) { setRwList(p => [...p, rwForm]); setRwForm({ no: '', name: '' }); }}} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-bold sm:w-auto w-full">+</button>
+                <div className="border border-dashed border-gray-200 dark:border-slate-700 rounded-xl p-3 space-y-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input type="text" placeholder="No RW" value={rwForm.no} onChange={e => setRwForm(p => ({...p, no: e.target.value}))} className="w-full sm:w-24 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-indigo-500 outline-none" />
+                    <input type="text" placeholder="No. WhatsApp (Opsional)" value={rwForm.phone || ''} onChange={e => setRwForm(p => ({...p, phone: e.target.value}))} className="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-indigo-500 outline-none" />
+                    <button
+                      onClick={() => handleAddRtRw('rw')}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-bold sm:w-auto w-full"
+                    >
+                      {rwForm.no || rwForm.name ? 'Simpan Ketua RW' : '+ Tambah Ketua RW'}
+                    </button>
+                  </div>
+                  <ResidentSearchInput
+                    tenantId={tenantId}
+                    initialText=""
+                    logLabel="RT/RW"
+                    onSelect={applyResidentToRwForm}
+                    onManualName={(name) => setRwForm(p => ({ ...p, name }))}
+                    onManualChange={(manual) => {
+                      if (manual) setRwForm(p => ({ ...p, residentId: undefined, nik: undefined, gender: undefined, birthPlace: undefined, birthDate: undefined, address: undefined, rtRw: undefined, photo: undefined }));
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -937,133 +967,17 @@ export default function AdminAparatur() {
             </div>
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
               {/* Nama Lengkap — Hybrid Search dari Data Penduduk */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nama Lengkap</label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = !manualEntry;
-                      setManualEntry(next);
-                      if (next) {
-                        setOfficerForm(prev => ({
-                          ...prev,
-                          name: (residentSearch.trim() || prev.name || '').toUpperCase(),
-                        }));
-                        resetResidentAutoFill();
-                      } else {
-                        setResidentSearch(officerForm.name);
-                      }
-                    }}
-                    className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${manualEntry ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-300'}`}
-                  >
-                    {manualEntry ? '✏️ Ketik Manual' : '🔎 Cari Warga'}
-                  </button>
-                </div>
-
-                <div className="relative">
-                  <div className="flex items-center gap-2">
-                    {!manualEntry && (
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                          ref={searchInputRef}
-                          type="text"
-                          className="w-full pl-9 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500"
-                          value={residentSearch}
-                          onChange={e => {
-                            const v = e.target.value;
-                            setResidentSearch(v);
-                            runResidentSearch(v);
-                          }}
-                          onFocus={() => { if (residentSearch.trim().length >= 2) setResidentSearchOpen(true); }}
-                          placeholder="Cari warga berdasarkan Nama / NIK..."
-                        />
-                      </div>
-                    )}
-                    {!manualEntry && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOfficerForm(prev => ({ ...prev, name: (residentSearch.trim() || prev.name || '').toUpperCase() }));
-                          setManualEntry(true);
-                          resetResidentAutoFill();
-                        }}
-                        className="shrink-0 text-[10px] font-bold px-2.5 py-2.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-300 hover:bg-gray-200"
-                        title="Lewati pencarian, ketik nama manual"
-                      >
-                        Skip
-                      </button>
-                    )}
-                    {manualEntry && (
-                      <input
-                        type="text"
-                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500"
-                        value={officerForm.name}
-                        onChange={e => setOfficerForm({ ...officerForm, name: e.target.value.toUpperCase() })}
-                        placeholder="Nama pejabat / pengurus"
-                      />
-                    )}
-                  </div>
-
-                  {residentSearchOpen && !manualEntry && (
-                    <div className="absolute z-20 mt-1.5 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden">
-                      {residentSearching ? (
-                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
-                          <RefreshCw size={14} className="animate-spin" /> Mencari data warga...
-                        </div>
-                      ) : residentResults.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400">
-                          Data tidak ditemukan.{' '}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOfficerForm(prev => ({ ...prev, name: (residentSearch.trim() || prev.name || '').toUpperCase() }));
-                              setManualEntry(true);
-                              resetResidentAutoFill();
-                            }}
-                            className="text-emerald-600 font-bold hover:underline"
-                          >
-                            Klik di sini untuk ketik manual
-                          </button>
-                        </div>
-                      ) : (
-                        <ul className="max-h-56 overflow-y-auto custom-scrollbar">
-                          {residentResults.map((r, i) => (
-                            <li key={r.nik || i}>
-                              <button
-                                type="button"
-                                onClick={() => applyResidentToForm(r)}
-                                className="w-full text-left px-4 py-2.5 hover:bg-emerald-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors"
-                              >
-                                <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">
-                                  {getInitials(r.name)}
-                                </span>
-                                <span className="min-w-0 flex-1">
-                                  <span className="block text-sm font-bold text-gray-900 dark:text-white truncate uppercase">{r.name}</span>
-                                  <span className="block text-[11px] text-gray-500 dark:text-slate-400 truncate">
-                                    NIK. {r.nik} • {r.gender || '-'}{r.rt_rw ? ` • RT/RW ${r.rt_rw}` : ''}
-                                  </span>
-                                </span>
-                                <span className="text-[10px] text-emerald-600 font-bold shrink-0">Pilih</span>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {!manualEntry && officerForm.residentId && (
-                  <p className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
-                    <Check size={12} /> Data terisi otomatis dari warga terdaftar. Gunakan mode "✏️ Ketik Manual" untuk mengubah.
-                  </p>
-                )}
-                <p className="text-[11px] text-gray-400 dark:text-slate-500">
-                  {!manualEntry ? 'Ketik minimal 2 karakter untuk mencari nama atau NIK warga. Data profil akan terisi otomatis.' : 'Mode manual aktif — masukkan data secara manual.'}
-                </p>
-              </div>
+              <ResidentSearchInput
+                tenantId={tenantId}
+                initialText={editingIndex !== null && officerForm.residentId ? officerForm.name : ''}
+                initialManual={editingIndex !== null ? !officerForm.residentId : false}
+                logLabel={modalCategory === 'perangkat' ? 'PERANGKAT' : modalCategory === 'bpd' ? 'BPD' : 'LPM'}
+                onSelect={applyResidentToForm}
+                onManualName={(name) => setOfficerForm(prev => ({ ...prev, name }))}
+                onManualChange={(manual) => {
+                  if (manual) setOfficerForm(prev => ({ ...prev, residentId: undefined, nik: undefined, gender: undefined, birthPlace: undefined, birthDate: undefined, address: undefined, rtRw: undefined, photo: undefined }));
+                }}
+              />
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Jabatan / Peran</label>
