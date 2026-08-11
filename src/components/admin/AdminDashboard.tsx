@@ -2,7 +2,7 @@ import NumberCounter from '../common/NumberCounter';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
 import React, { useState, useEffect } from 'react';
-import { Users, FileText, Gift, MessageSquare, TrendingUp, ChevronDown, UserPlus, PenTool, ExternalLink, Loader2, Building2, BarChart3, Clock, AlertTriangle, CheckCircle2, MessageCircle, Sparkles } from 'lucide-react';
+import { Users, FileText, MessageSquare, TrendingUp, ChevronDown, UserPlus, PenTool, ExternalLink, Loader2, Building2, BarChart3, Clock, AlertTriangle, CheckCircle2, MessageCircle, Sparkles } from 'lucide-react';
 import { getAspirasi } from '../../utils/aspirasiData';
 import { fetchFeedbacksAsync, Feedback } from '../../utils/feedbackData';
 import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
@@ -168,6 +168,18 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   const aspirasiBaru = aspirasiList.filter(a => a.status === 'Baru').length;
   const aspirasiDiproses = aspirasiList.filter(a => a.status === 'Diproses').length;
   const aspirasiSelesai = aspirasiList.filter(a => a.status === 'Selesai').length;
+
+  // Statistik surat riil per jenis (dari Supabase)
+  const letterTypeCounts: Record<string, number> = {};
+  letterHistory.forEach(h => {
+    const jenis = (h.jenis || 'Surat Lainnya').trim();
+    letterTypeCounts[jenis] = (letterTypeCounts[jenis] || 0) + 1;
+  });
+  const topLetterTypes = Object.entries(letterTypeCounts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+  const maxLetterCount = topLetterTypes.length > 0 ? topLetterTypes[0][1] : 1;
+
+  // Surat terakhir keluar
+  const recentLetters = letterHistory.slice(0, 4);
 
   if (authUser?.role === 'saas_admin') {
     const totalDesa = saasTenants.length || 0;
@@ -546,7 +558,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
 
           {/* Live Hero Metrics Widget */}
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4 shrink-0 w-full lg:w-72">
-            <div className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div onClick={() => setActiveTab?.('penduduk')} className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-colors">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shrink-0">
                 <Users className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
@@ -557,7 +569,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               </div>
             </div>
 
-            <div className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4">
+            <div onClick={() => setActiveTab?.('surat')} className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-colors">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0">
                 <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
@@ -581,7 +593,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
 
         {/* Top Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-          <div className="standard-card p-6 border-l-4 border-primary">
+          <div onClick={() => setActiveTab?.('surat')} className="standard-card p-6 border-l-4 border-primary cursor-pointer hover:shadow-md transition-all">
             <div className="flex justify-between items-start mb-4">
               <div className="w-10 h-10 bg-primary-container/10 rounded-lg flex items-center justify-center text-primary">
                 <FileText className="w-5 h-5" />
@@ -592,7 +604,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={letterHistory.length} /></h3>
           </div>
           
-          <div className="standard-card p-6 border-l-4 border-tertiary">
+          <div onClick={() => setActiveTab?.('aspirasi')} className="standard-card p-6 border-l-4 border-tertiary cursor-pointer hover:shadow-md transition-all">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-700">
                 <MessageSquare className="w-5 h-5" />
@@ -602,7 +614,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={aspirasiList.length} /></h3>
           </div>
 
-          <div className="standard-card p-6 border-l-4 border-emerald-500">
+          <div onClick={() => setActiveTab?.('produk_hukum')} className="standard-card p-6 border-l-4 border-emerald-500 cursor-pointer hover:shadow-md transition-all">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-700">
                 <FileText className="w-5 h-5" />
@@ -615,7 +627,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             </div>
           </div>
 
-          <div className="standard-card p-6 border-l-4 border-indigo-500">
+          <div onClick={() => setActiveTab?.('surat')} className="standard-card p-6 border-l-4 border-indigo-500 cursor-pointer hover:shadow-md transition-all">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-700">
                 <BarChart3 className="w-5 h-5" />
@@ -628,7 +640,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             </div>
           </div>
 
-          <div className="standard-card p-6 border-l-4 border-secondary">
+          <div onClick={() => setActiveTab?.('aspirasi')} className="standard-card p-6 border-l-4 border-secondary cursor-pointer hover:shadow-md transition-all">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-700">
                 <CheckCircle2 className="w-5 h-5" />
@@ -638,7 +650,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={aspirasiSelesai} /></h3>
           </div>
 
-          <div className="standard-card p-6 border-l-4 border-gray-400">
+          <div onClick={() => setActiveTab?.('surat')} className="standard-card p-6 border-l-4 border-gray-400 cursor-pointer hover:shadow-md transition-all">
             <div className="flex items-center gap-4 mb-4">
               <div className="w-10 h-10 bg-gray-100 dark:bg-slate-800 rounded-lg flex items-center justify-center text-gray-600 dark:text-slate-400">
                 <Users className="w-5 h-5" />
@@ -663,42 +675,23 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-4 md:col-span-2">
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-2">
-                  <span>SKU (Keterangan Usaha)</span>
-                  <span className="text-primary">450</span>
+              {topLetterTypes.length > 0 ? topLetterTypes.map(([jenis, count]) => (
+                <div key={jenis}>
+                  <div className="flex justify-between text-xs font-bold mb-2">
+                    <span>{jenis}</span>
+                    <span className="text-primary">{count}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 dark:bg-slate-800 h-2 rounded-full">
+                    <div className="bg-primary h-full rounded-full" style={{ width: `${(count / maxLetterCount) * 100}%` }}></div>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-100 dark:bg-slate-800 h-2 rounded-full">
-                  <div className="bg-primary h-full w-[85%] rounded-full"></div>
+              )) : (
+                <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-slate-400">
+                  <BarChart3 size={40} className="mb-3 opacity-30" />
+                  <p className="text-sm font-bold">Belum ada data surat.</p>
+                  <p className="text-xs mt-1">Statistik akan muncul setelah surat diterbitkan.</p>
                 </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-2">
-                  <span>SKTM (Keterangan Tidak Mampu)</span>
-                  <span className="text-primary">320</span>
-                </div>
-                <div className="w-full bg-gray-100 dark:bg-slate-800 h-2 rounded-full">
-                  <div className="bg-primary h-full w-[60%] rounded-full"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-2">
-                  <span>Domisili</span>
-                  <span className="text-primary">280</span>
-                </div>
-                <div className="w-full bg-gray-100 dark:bg-slate-800 h-2 rounded-full">
-                  <div className="bg-primary h-full w-[50%] rounded-full"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-2">
-                  <span>Kelahiran / Kematian</span>
-                  <span className="text-primary">120</span>
-                </div>
-                <div className="w-full bg-gray-100 dark:bg-slate-800 h-2 rounded-full">
-                  <div className="bg-primary h-full w-[25%] rounded-full"></div>
-                </div>
-              </div>
+              )}
             </div>
             
             <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-6 flex flex-col justify-center border border-gray-100 dark:border-slate-800 shadow-inner">
@@ -722,78 +715,56 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
         </div>
       </div>
 
-      {/* Activity Feed */}
+      {/* Activity Feed: Surat Terakhir Keluar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-3 standard-card p-6 overflow-hidden">
           <div className="flex justify-between items-center mb-6">
-            <h4 className="text-xl font-bold text-gray-900 dark:text-white">Aktivitas Terkini</h4>
-            <button onClick={() => setActiveTab && setActiveTab('notifikasi')} className="text-primary font-bold text-xs hover:underline uppercase tracking-wider">Lihat Semua</button>
+            <div>
+              <h4 className="text-xl font-bold text-gray-900 dark:text-white">Surat Terakhir Keluar</h4>
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Daftar surat resmi yang baru saja diterbitkan</p>
+            </div>
+            <button onClick={() => setActiveTab?.('surat')} className="text-primary font-bold text-xs hover:underline uppercase tracking-wider">Lihat Semua</button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl transition-colors border border-transparent hover:border-gray-200">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <h5 className="font-bold text-sm">Penerbitan SKU</h5>
-                  <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold">14:20 WIB</span>
+          {recentLetters.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recentLetters.map((letter) => (
+                <div key={letter.id} className="flex items-start gap-4 p-4 bg-white dark:bg-slate-800/50 border border-gray-100 dark:border-slate-700/50 rounded-xl hover:shadow-sm transition-all">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between gap-2">
+                      <h5 className="font-bold text-sm truncate">{letter.jenis}</h5>
+                      <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold whitespace-nowrap">{letter.tanggal}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 truncate">
+                      No: <span className="text-gray-900 dark:text-white font-extrabold">{letter.nomor}</span>
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
+                      Pemohon: <span className="text-gray-900 dark:text-white font-extrabold">{letter.nama}</span>
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        letter.status === 'Selesai'
+                          ? 'bg-primary text-white'
+                          : letter.status === 'Dibatalkan'
+                          ? 'bg-rose-100 text-rose-700'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {letter.status}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Pemohon: <span className="text-gray-900 dark:text-white font-extrabold">Bpk. Ahmad Subarjo</span> (RT 04)</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold">Selesai</span>
-                </div>
-              </div>
+              ))}
             </div>
-            
-            <div className="flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl transition-colors border border-transparent hover:border-gray-200">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
-                <Gift className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <h5 className="font-bold text-sm">Penyaluran BLT</h5>
-                  <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold">10:15 WIB</span>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Status: <span className="text-gray-900 dark:text-white font-extrabold">150 KPM Tersalurkan</span></p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold">Selesai</span>
-                </div>
-              </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-14 text-gray-400 dark:text-slate-400">
+              <FileText size={40} className="mb-3 opacity-30" />
+              <p className="text-sm font-bold">Belum ada surat terbit.</p>
+              <p className="text-xs mt-1">Surat yang berhasil diterbitkan akan tampil di sini otomatis.</p>
             </div>
-            
-            <div className="flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl transition-colors border border-transparent hover:border-gray-200">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
-                <Users className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <h5 className="font-bold text-sm">Pembaruan Kartu Keluarga</h5>
-                  <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold">Kemarin</span>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Pemohon: <span className="text-gray-900 dark:text-white font-extrabold">Ibu Siti Aminah</span></p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-bold">Proses</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-slate-800 rounded-xl transition-colors border border-transparent hover:border-gray-200">
-              <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-slate-400 shrink-0">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <h5 className="font-bold text-sm">Surat Keterangan Domisili</h5>
-                  <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold">Kemarin</span>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Pemohon: <span className="text-gray-900 dark:text-white font-extrabold">Andi Wijaya</span></p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-bold">Selesai</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

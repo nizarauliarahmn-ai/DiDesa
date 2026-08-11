@@ -8,10 +8,7 @@ import {
   FileText, 
   Gift, 
   Info, 
-  Clock, 
-  Plus, 
-  Check, 
-  AlertCircle 
+  Clock
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -55,12 +52,6 @@ export default function AdminNotifikasi({
   const debouncedSearchQuery = externalDebouncedSearchQuery !== undefined ? externalDebouncedSearchQuery : localDebouncedSearchQuery;
   const [activeFilter, setActiveFilter] = useState<'all' | 'unread' | 'Residents' | 'Services' | 'Assistance' | 'System'>('all');
   
-  // Custom simulation states
-  const [simTitle, setSimTitle] = useState("");
-  const [simMessage, setSimMessage] = useState("");
-  const [simCategory, setSimCategory] = useState<"Residents" | "Services" | "Assistance" | "System">("System");
-  const [showSimModal, setShowSimModal] = useState(false);
-  const [simSuccess, setSimSuccess] = useState(false);
   const [tenantId, setTenantId] = useState<string | null>(null);
 
   // Fetch notifications from API
@@ -155,44 +146,6 @@ export default function AdminNotifikasi({
       }
     } catch (err) {
       console.error("Error marking all as read:", err);
-    }
-  };
-
-  // Add custom simulated notification
-  const handleSimulateNotification = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const savedUserStr = localStorage.getItem('didesa_auth_user');
-    const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
-    const isSaaSAdmin = savedUser?.role === 'saas_admin';
-
-    if (!simTitle || !simMessage || (!tenantId && !isSaaSAdmin)) return;
-
-    try {
-      const newId = `notif-${Date.now()}`;
-      const payload = {
-        id: newId,
-        tenant_id: isSaaSAdmin ? null : tenantId,
-        title: simTitle,
-        message: simMessage,
-        category: simCategory,
-        time: 'Baru saja',
-        is_read: false
-      };
-
-      const { error } = await supabase.from('notifications').insert([payload]);
-
-      if (!error) {
-        await fetchNotifications(); // Refresh to get proper timestamp
-        setSimTitle("");
-        setSimMessage("");
-        setSimSuccess(true);
-        setTimeout(() => {
-          setSimSuccess(false);
-          setShowSimModal(false);
-        }, 1200);
-      }
-    } catch (err) {
-      console.error("Error simulating notification:", err);
     }
   };
 
@@ -295,13 +248,6 @@ export default function AdminNotifikasi({
           </p>
         </div>
         <div className="flex items-center gap-2 self-start md:self-auto">
-          <button 
-            onClick={() => setShowSimModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-xl text-sm font-bold border border-emerald-200 transition-colors"
-          >
-            <Plus size={16} />
-            Simulasi Notifikasi
-          </button>
           <button 
             onClick={handleMarkAllAsRead}
             disabled={unreadCount === 0}
@@ -481,88 +427,6 @@ export default function AdminNotifikasi({
         )}
       </div>
 
-      {/* Simulation Modal */}
-      {showSimModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="bg-slate-50 dark:bg-slate-800 border-b border-gray-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
-              <h3 className="text-base font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
-                <Bell className="text-emerald-700 w-5 h-5" />
-                Simulasikan Notifikasi
-              </h3>
-              <button 
-                onClick={() => setShowSimModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-lg font-bold"
-              >
-                &times;
-              </button>
-            </div>
-            
-            <form onSubmit={handleSimulateNotification} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Judul Notifikasi</label>
-                <input 
-                  type="text" 
-                  required
-                  placeholder="Misal: Penyaluran Bantuan Selesai"
-                  value={simTitle}
-                  onChange={(e) => setSimTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Pesan / Konten</label>
-                <textarea 
-                  required
-                  rows={3}
-                  placeholder="Deskripsi detail apa yang baru saja diperbarui atau terjadi..."
-                  value={simMessage}
-                  onChange={(e) => setSimMessage(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Kategori</label>
-                <select 
-                  value={simCategory}
-                  onChange={(e) => setSimCategory(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                >
-                  <option value="Residents">Kependudukan (Residents)</option>
-                  <option value="Services">Layanan (Services)</option>
-                  <option value="Assistance">Bantuan (Assistance)</option>
-                  <option value="System">Sistem (System)</option>
-                </select>
-              </div>
-
-              {simSuccess && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs text-emerald-800 font-medium">
-                  <Check className="w-4 h-4 text-emerald-700" />
-                  Berhasil mengirimkan notifikasi simulasi!
-                </div>
-              )}
-
-              <div className="pt-2 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowSimModal(false)}
-                  className="px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 rounded-xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-colors shadow-sm dark:shadow-none"
-                >
-                  Kirim Notifikasi
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
   );
 }
