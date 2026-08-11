@@ -11,7 +11,7 @@ import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
-const FILTERS = ["Semua", "✨ Terbaru", "Laki-laki", "Perempuan", "Anak (0-11)", "Remaja (12-17)", "Dewasa (18-59)", "Lansia", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati"];
+const FILTERS = ["Semua", "✨ Terbaru", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati"];
 
 export default function AdminPenduduk({ 
   onNavigateToTab, 
