@@ -178,7 +178,7 @@ export default function AdminAparatur() {
                 background: white !important;
               }
             }
-            body { font-family: serif; color: black; background: white; margin: 0; }
+            body { font-family: sans-serif; color: black; background: white; margin: 0; }
           </style>
         </head>
         <body>
@@ -189,7 +189,7 @@ export default function AdminAparatur() {
             <tbody>
               <tr>
                 <td style="padding: 0 15mm; border: none;">
-                  <div class="font-serif text-black bg-white w-full text-left">
+                  <div class="font-sans text-black bg-white w-full text-left">
                     ${reportPrintRef.current.innerHTML}
                   </div>
                 </td>
@@ -1154,16 +1154,16 @@ export default function AdminAparatur() {
 
       {/* Hidden Container for Printing Official Aparatur Data Report */}
       <div style={{ display: 'none' }}>
-        <div ref={reportPrintRef} className="p-8 font-serif text-black bg-white w-full text-left">
+        <div ref={reportPrintRef} className="p-8 font-sans text-black bg-white w-full text-left">
           {/* Kop Surat Resmi */}
           <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
 
           {/* Title Header */}
           <div className="text-center my-6">
-            <h2 className="text-[14pt] font-bold uppercase tracking-wider underline">
-              LAPORAN DATA APARATUR, BPD, LPM & KETUA RT/RW
+            <h2 className="font-sans text-[14pt] font-bold uppercase tracking-wider">
+              DATA APARATUR & LEMBAGA DESA
             </h2>
-            <p className="text-[11pt] font-sans font-bold mt-1 uppercase">
+            <p className="font-sans text-[11pt] font-bold mt-1 uppercase">
               DESA {(localStorage.getItem('kop_desa') || 'WASAH HILIR').replace(/desa|kelurahan/gi, '').trim()} • KECAMATAN {(localStorage.getItem('kop_kecamatan') || 'SIMPUR').replace(/^kecamatan\s+/i, '').trim()}
             </p>
           </div>
