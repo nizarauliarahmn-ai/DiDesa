@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, Cloud, RefreshCw, Printer } from 'lucide-react';
+import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, Cloud, RefreshCw, Printer, Search, MapPin, Calendar, MessageCircle, IdCard, BadgeCheck, User } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -10,6 +10,40 @@ interface Officer {
   name: string;
   role: string;
   nip?: string;
+  residentId?: string;
+  nik?: string;
+  gender?: string;
+  birthPlace?: string;
+  birthDate?: string;
+  address?: string;
+  rtRw?: string;
+  photo?: string;
+  phone?: string;
+  status?: string;
+  period?: string;
+}
+
+// Kolom yang sah (valid) pada tabel `residents` — dipakai untuk search & auto-fill agar
+// payload ke Supabase tidak pernah memuat kolom yang tidak ada (TUGAS 2).
+const RESIDENT_VALID_COLUMNS = [
+  'nik', 'name', 'gender', 'gender_color', 'birth_place', 'birth_date',
+  'rt_rw', 'rt', 'rw', 'address', 'desa', 'photo'
+];
+
+// Kolom yang sah (valid) pada objek aparatur — hanya field ini yang boleh masuk
+// ke saas_settings (value JSON) saat insert/update.
+const OFFICER_VALID_FIELDS = ['name', 'role', 'nip', 'residentId', 'nik', 'gender', 'birthPlace', 'birthDate', 'address', 'rtRw', 'photo', 'phone', 'status', 'period'];
+
+function sanitizeOfficer(raw: Officer): Officer {
+  const clean: Officer = { name: String(raw.name || '').trim().toUpperCase(), role: raw.role || '' };
+  for (const key of OFFICER_VALID_FIELDS) {
+    if (key === 'name' || key === 'role') continue;
+    const value = (raw as any)[key];
+    if (value !== undefined && value !== null && String(value).trim() !== '' && String(value).trim() !== '-') {
+      (clean as any)[key] = value;
+    }
+  }
+  return clean;
 }
 
 export default function AdminAparatur() {
@@ -41,6 +75,84 @@ export default function AdminAparatur() {
   const [modalCategory, setModalCategory] = useState<'perangkat' | 'bpd' | 'lpm'>('perangkat');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [officerForm, setOfficerForm] = useState<Officer>({ name: '', role: '', nip: '-' });
+
+  // Hybrid Search (Autocomplete) Warga dari Data Penduduk — TUGAS 1
+  const [residentSearch, setResidentSearch] = useState('');
+  const [residentResults, setResidentResults] = useState<any[]>([]);
+  const [residentSearching, setResidentSearching] = useState(false);
+  const [residentSearchOpen, setResidentSearchOpen] = useState(false);
+  const [manualEntry, setManualEntry] = useState(false);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const runResidentSearch = (query: string) => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    const q = query.trim();
+    if (!tenantId || q.length < 2 || manualEntry) {
+      setResidentResults([]);
+      setResidentSearchOpen(false);
+      return;
+    }
+    setResidentSearching(true);
+    setResidentSearchOpen(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        // Isolasi multi-tenant: wajib filter tenant_id pada query residents (.opencoderules §5)
+        const { data, error } = await supabase
+          .from('residents')
+          .select(RESIDENT_VALID_COLUMNS.join(','))
+          .eq('tenant_id', tenantId)
+          .or(`name.ilike.%${q}%,nik.ilike.%${q}%`)
+          .limit(8);
+        if (error) {
+          console.error('Error searching residents:', error);
+          setResidentResults([]);
+        } else {
+          setResidentResults((data || []).filter((r: any) => String(r.is_deleted) !== '1' && r.is_deleted !== true));
+        }
+        setResidentSearching(false);
+      } catch (e) {
+        console.error('Error searching residents:', e);
+        setResidentResults([]);
+        setResidentSearching(false);
+      }
+    }, 300);
+  };
+
+  const applyResidentToForm = (resident: any) => {
+    setOfficerForm(prev => ({
+      ...prev,
+      name: String(resident.name || prev.name || '').toUpperCase(),
+      residentId: resident.nik || undefined,
+      nik: resident.nik || prev.nik,
+      gender: resident.gender || prev.gender,
+      birthPlace: resident.birth_place || prev.birthPlace,
+      birthDate: resident.birth_date || prev.birthDate,
+      address: resident.address || prev.address,
+      rtRw: resident.rt_rw || prev.rtRw,
+      photo: resident.photo || prev.photo,
+    }));
+    setResidentSearch(resident.name || '');
+    setResidentResults([]);
+    setResidentSearchOpen(false);
+    setManualEntry(false);
+  };
+
+  const resetResidentAutoFill = () => {
+    setOfficerForm(prev => ({
+      ...prev,
+      residentId: undefined,
+      nik: undefined,
+      gender: undefined,
+      birthPlace: undefined,
+      birthDate: undefined,
+      address: undefined,
+      rtRw: undefined,
+      photo: undefined,
+    }));
+    setResidentResults([]);
+    setResidentSearchOpen(false);
+  };
 
   // Print Report Setup
   const reportPrintRef = useRef<HTMLDivElement>(null);
@@ -305,38 +417,49 @@ export default function AdminAparatur() {
     if (cat === 'bpd') defaultRole = 'Anggota BPD';
     if (cat === 'lpm') defaultRole = 'Anggota LPM';
     setOfficerForm({ name: '', role: defaultRole, nip: '-' });
+    setResidentSearch('');
+    setResidentResults([]);
+    setResidentSearchOpen(false);
+    setManualEntry(false);
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (cat: 'perangkat' | 'bpd' | 'lpm', idx: number) => {
     setModalCategory(cat);
     setEditingIndex(idx);
-    if (cat === 'perangkat') setOfficerForm(officers[idx]);
-    else if (cat === 'bpd') setOfficerForm(bpdList[idx]);
-    else setOfficerForm(lpmList[idx]);
+    let existing: Officer;
+    if (cat === 'perangkat') existing = officers[idx];
+    else if (cat === 'bpd') existing = bpdList[idx];
+    else existing = lpmList[idx];
+    setOfficerForm(existing);
+    setResidentSearch(existing.residentId ? String(existing.name || '') : '');
+    setResidentResults([]);
+    setResidentSearchOpen(false);
+    setManualEntry(!existing.residentId);
     setIsModalOpen(true);
   };
 
   const handleSaveModal = () => {
-    if (!officerForm.name.trim()) {
+    const sanitized = sanitizeOfficer(officerForm);
+    if (!sanitized.name.trim()) {
       showToast('Nama lengkap wajib diisi!', 'error');
       return;
     }
 
     if (modalCategory === 'perangkat') {
       let updated = [...officers];
-      if (editingIndex !== null) updated[editingIndex] = officerForm;
-      else updated.push(officerForm);
+      if (editingIndex !== null) updated[editingIndex] = sanitized;
+      else updated.push(sanitized);
       setOfficers(updated);
     } else if (modalCategory === 'bpd') {
       let updated = [...bpdList];
-      if (editingIndex !== null) updated[editingIndex] = officerForm;
-      else updated.push(officerForm);
+      if (editingIndex !== null) updated[editingIndex] = sanitized;
+      else updated.push(sanitized);
       setBpdList(updated);
     } else if (modalCategory === 'lpm') {
       let updated = [...lpmList];
-      if (editingIndex !== null) updated[editingIndex] = officerForm;
-      else updated.push(officerForm);
+      if (editingIndex !== null) updated[editingIndex] = sanitized;
+      else updated.push(sanitized);
       setLpmList(updated);
     }
 
@@ -361,6 +484,48 @@ export default function AdminAparatur() {
       'Kaur Perencanaan', 'Kasi Pemerintahan', 'Kasi Kesejahteraan', 
       'Kasi Pelayanan', 'Staf Desa', 'Kepala Dusun'
     ];
+  };
+
+  const getInitials = (name: string) => {
+    return (name || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  };
+
+  const formatDateID = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+  };
+
+  const toWaLink = (phone?: string) => {
+    if (!phone) return null;
+    let digits = phone.replace(/\D/g, '');
+    if (!digits) return null;
+    if (digits.startsWith('0')) digits = '62' + digits.slice(1);
+    return `https://wa.me/${digits}?text=${encodeURIComponent('Assalamualaikum, saya menghubungi melalui aplikasi Desa.')}`;
+  };
+
+  const OfficerAvatar = ({ officer, colorClass }: { officer: Officer; colorClass: string }) => {
+    if (officer.photo) {
+      return (
+        <img src={officer.photo} alt={officer.name} className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm shrink-0" />
+      );
+    }
+    return (
+      <div className={`w-14 h-14 rounded-full ${colorClass} flex items-center justify-center text-white font-extrabold text-base shrink-0 shadow-sm`}>
+        {getInitials(officer.name)}
+      </div>
+    );
+  };
+
+  const OfficerDetailRow = ({ label, value }: { label: string; value?: string }) => {
+    if (!value) return null;
+    return (
+      <div className="flex items-start gap-2">
+        <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mt-0.5 w-16 shrink-0">{label}</span>
+        <span className="text-xs text-gray-700 dark:text-slate-300 break-words min-w-0">{value}</span>
+      </div>
+    );
   };
 
   if (authUser && !isSuperAdmin) {
@@ -437,20 +602,47 @@ export default function AdminAparatur() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {officers.map((officer, index) => (
               <div key={index} className="p-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-emerald-200 transition-all group relative">
-                <div className="pr-12">
-                  <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{officer.name}</p>
-                  <p className="text-xs text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider mt-0.5">{officer.role}</p>
+                <div className="pr-12 flex items-start gap-3">
+                  <OfficerAvatar officer={officer} colorClass="bg-emerald-500" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-gray-900 dark:text-white truncate uppercase">{officer.name}</p>
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider mt-0.5">{officer.role}</p>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1.5">
                   {officer.nip && officer.nip !== '-' && (
-                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-1">NIP. {officer.nip}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono">NIP. {officer.nip}</p>
                   )}
-                  {namaKades === officer.name ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold mt-2 border border-emerald-200">
+                  {(officer.nik || officer.residentId) && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><IdCard className="w-3.5 h-3.5 text-emerald-500" /> NIK. {officer.nik || officer.residentId}</p>
+                  )}
+                  {officer.gender && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><User className="w-3.5 h-3.5 text-emerald-500" /> {officer.gender}{officer.birthPlace ? ` • ${officer.birthPlace}` : ''}{officer.birthDate ? `, ${formatDateID(officer.birthDate)}` : ''}</p>
+                  )}
+                  {(officer.address || officer.rtRw) && (
+                    <p className="flex items-start gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><MapPin className="w-3.5 h-3.5 text-emerald-500 mt-0.5 shrink-0" /> {[officer.rtRw, officer.address].filter(Boolean).join(' • ')}</p>
+                  )}
+                  {(officer.status || officer.period) && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><BadgeCheck className="w-3.5 h-3.5 text-emerald-500" /> {[officer.status, officer.period].filter(Boolean).join(' • ')}</p>
+                  )}
+                  {toWaLink(officer.phone) && (
+                    <a
+                      href={toWaLink(officer.phone)!}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-green-600 dark:text-green-400 hover:underline mt-1"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" /> Chat WhatsApp
+                    </a>
+                  )}
+                  {namaKades.toUpperCase() === officer.name.toUpperCase() ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold mt-1 border border-emerald-200">
                       ★ Penandatangan Utama
                     </span>
                   ) : (
                     <button
                       onClick={() => setNamaKades(officer.name)}
-                      className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-emerald-700 font-bold block mt-2 hover:underline"
+                      className="text-[10px] text-gray-500 dark:text-slate-400 hover:text-emerald-700 font-bold block mt-1 hover:underline"
                     >
                       Jadikan Penandatangan Utama
                     </button>
@@ -495,11 +687,38 @@ export default function AdminAparatur() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {bpdList.map((bpd, index) => (
               <div key={index} className="p-4 bg-indigo-50/50 dark:bg-slate-800/60 rounded-xl border border-indigo-100 dark:border-slate-800 hover:border-indigo-300 transition-all group relative">
-                <div className="pr-12">
-                  <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{bpd.name}</p>
-                  <p className="text-xs text-indigo-700 dark:text-indigo-400 font-extrabold uppercase tracking-wider mt-0.5">{bpd.role}</p>
+                <div className="pr-12 flex items-start gap-3">
+                  <OfficerAvatar officer={bpd} colorClass="bg-indigo-500" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-gray-900 dark:text-white truncate uppercase">{bpd.name}</p>
+                    <p className="text-xs text-indigo-700 dark:text-indigo-400 font-extrabold uppercase tracking-wider mt-0.5">{bpd.role}</p>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1.5">
                   {bpd.nip && bpd.nip !== '-' && (
-                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-1">NIP/NID. {bpd.nip}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono">NIP/NID. {bpd.nip}</p>
+                  )}
+                  {(bpd.nik || bpd.residentId) && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><IdCard className="w-3.5 h-3.5 text-indigo-500" /> NIK. {bpd.nik || bpd.residentId}</p>
+                  )}
+                  {bpd.gender && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><User className="w-3.5 h-3.5 text-indigo-500" /> {bpd.gender}{bpd.birthPlace ? ` • ${bpd.birthPlace}` : ''}{bpd.birthDate ? `, ${formatDateID(bpd.birthDate)}` : ''}</p>
+                  )}
+                  {(bpd.address || bpd.rtRw) && (
+                    <p className="flex items-start gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><MapPin className="w-3.5 h-3.5 text-indigo-500 mt-0.5 shrink-0" /> {[bpd.rtRw, bpd.address].filter(Boolean).join(' • ')}</p>
+                  )}
+                  {(bpd.status || bpd.period) && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><BadgeCheck className="w-3.5 h-3.5 text-indigo-500" /> {[bpd.status, bpd.period].filter(Boolean).join(' • ')}</p>
+                  )}
+                  {toWaLink(bpd.phone) && (
+                    <a
+                      href={toWaLink(bpd.phone)!}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-green-600 dark:text-green-400 hover:underline mt-1"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" /> Chat WhatsApp
+                    </a>
                   )}
                 </div>
                 <div className="absolute top-4 right-4 flex flex-col gap-1 sm:flex-row opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
@@ -541,11 +760,38 @@ export default function AdminAparatur() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {lpmList.map((lpm, index) => (
               <div key={index} className="p-4 bg-amber-50/40 dark:bg-slate-800/60 rounded-xl border border-amber-100 dark:border-slate-800 hover:border-amber-300 transition-all group relative">
-                <div className="pr-12">
-                  <p className="font-bold text-sm text-gray-900 dark:text-white truncate">{lpm.name}</p>
-                  <p className="text-xs text-amber-700 dark:text-amber-400 font-extrabold uppercase tracking-wider mt-0.5">{lpm.role}</p>
+                <div className="pr-12 flex items-start gap-3">
+                  <OfficerAvatar officer={lpm} colorClass="bg-amber-500" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-gray-900 dark:text-white truncate uppercase">{lpm.name}</p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400 font-extrabold uppercase tracking-wider mt-0.5">{lpm.role}</p>
+                  </div>
+                </div>
+                <div className="mt-3 space-y-1.5">
                   {lpm.nip && lpm.nip !== '-' && (
-                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-1">NIP/ID. {lpm.nip}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono">NIP/ID. {lpm.nip}</p>
+                  )}
+                  {(lpm.nik || lpm.residentId) && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><IdCard className="w-3.5 h-3.5 text-amber-500" /> NIK. {lpm.nik || lpm.residentId}</p>
+                  )}
+                  {lpm.gender && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><User className="w-3.5 h-3.5 text-amber-500" /> {lpm.gender}{lpm.birthPlace ? ` • ${lpm.birthPlace}` : ''}{lpm.birthDate ? `, ${formatDateID(lpm.birthDate)}` : ''}</p>
+                  )}
+                  {(lpm.address || lpm.rtRw) && (
+                    <p className="flex items-start gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><MapPin className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" /> {[lpm.rtRw, lpm.address].filter(Boolean).join(' • ')}</p>
+                  )}
+                  {(lpm.status || lpm.period) && (
+                    <p className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-slate-300"><BadgeCheck className="w-3.5 h-3.5 text-amber-500" /> {[lpm.status, lpm.period].filter(Boolean).join(' • ')}</p>
+                  )}
+                  {toWaLink(lpm.phone) && (
+                    <a
+                      href={toWaLink(lpm.phone)!}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-bold text-green-600 dark:text-green-400 hover:underline mt-1"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" /> Chat WhatsApp
+                    </a>
                   )}
                 </div>
                 <div className="absolute top-4 right-4 flex flex-col gap-1 sm:flex-row opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
@@ -656,7 +902,7 @@ export default function AdminAparatur() {
       {/* UNIFIED OFFICER MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 {modalCategory === 'bpd' && <ShieldCheck className="w-5 h-5 text-indigo-600" />}
@@ -666,16 +912,123 @@ export default function AdminAparatur() {
               </h3>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600"><X size={20}/></button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              {/* Nama Lengkap — Hybrid Search dari Data Penduduk */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nama Lengkap</label>
-                <input 
-                  type="text" 
-                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
-                  value={officerForm.name} 
-                  onChange={e => setOfficerForm({...officerForm, name: e.target.value})} 
-                  placeholder="Nama pejabat / pengurus" 
-                />
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nama Lengkap</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = !manualEntry;
+                      setManualEntry(next);
+                      if (next) {
+                        setOfficerForm(prev => ({
+                          ...prev,
+                          name: (residentSearch.trim() || prev.name || '').toUpperCase(),
+                        }));
+                        resetResidentAutoFill();
+                      } else {
+                        setResidentSearch(officerForm.name);
+                      }
+                    }}
+                    className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-colors ${manualEntry ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-slate-300'}`}
+                  >
+                    {manualEntry ? '✏️ Ketik Manual' : '🔎 Cari Warga'}
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <div className="flex items-center gap-2">
+                    {!manualEntry && (
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          ref={searchInputRef}
+                          type="text"
+                          className="w-full pl-9 pr-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500"
+                          value={residentSearch}
+                          onChange={e => {
+                            const v = e.target.value;
+                            setResidentSearch(v);
+                            runResidentSearch(v);
+                          }}
+                          onFocus={() => { if (residentSearch.trim().length >= 2) setResidentSearchOpen(true); }}
+                          placeholder="Cari warga berdasarkan Nama / NIK..."
+                        />
+                      </div>
+                    )}
+                    {!manualEntry && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOfficerForm(prev => ({ ...prev, name: (residentSearch.trim() || prev.name || '').toUpperCase() }));
+                          setManualEntry(true);
+                          resetResidentAutoFill();
+                        }}
+                        className="shrink-0 text-[10px] font-bold px-2.5 py-2.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-300 hover:bg-gray-200"
+                        title="Lewati pencarian, ketik nama manual"
+                      >
+                        Skip
+                      </button>
+                    )}
+                    {manualEntry && (
+                      <input
+                        type="text"
+                        className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500"
+                        value={officerForm.name}
+                        onChange={e => setOfficerForm({ ...officerForm, name: e.target.value.toUpperCase() })}
+                        placeholder="Nama pejabat / pengurus"
+                      />
+                    )}
+                  </div>
+
+                  {residentSearchOpen && !manualEntry && (
+                    <div className="absolute z-20 mt-1.5 w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+                      {residentSearching ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
+                          <RefreshCw size={14} className="animate-spin" /> Mencari warga...
+                        </div>
+                      ) : residentResults.length === 0 ? (
+                        <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400">
+                          Tidak ada warga yang cocok. <button type="button" onClick={() => { setManualEntry(true); resetResidentAutoFill(); }} className="text-emerald-600 font-bold hover:underline">Ketik manual</button>
+                        </div>
+                      ) : (
+                        <ul className="max-h-56 overflow-y-auto custom-scrollbar">
+                          {residentResults.map((r, i) => (
+                            <li key={r.nik || i}>
+                              <button
+                                type="button"
+                                onClick={() => applyResidentToForm(r)}
+                                className="w-full text-left px-4 py-2.5 hover:bg-emerald-50 dark:hover:bg-slate-700 flex items-center gap-3 transition-colors"
+                              >
+                                <span className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-extrabold shrink-0">
+                                  {getInitials(r.name)}
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                  <span className="block text-sm font-bold text-gray-900 dark:text-white truncate uppercase">{r.name}</span>
+                                  <span className="block text-[11px] text-gray-500 dark:text-slate-400 truncate">
+                                    NIK. {r.nik} • {r.gender || '-'}{r.rt_rw ? ` • RT/RW ${r.rt_rw}` : ''}
+                                  </span>
+                                </span>
+                                <span className="text-[10px] text-emerald-600 font-bold shrink-0">Pilih</span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {!manualEntry && officerForm.residentId && (
+                  <p className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">
+                    <Check size={12} /> Data terisi otomatis dari warga terdaftar. Gunakan mode "✏️ Ketik Manual" untuk mengubah.
+                  </p>
+                )}
+                <p className="text-[11px] text-gray-400 dark:text-slate-500">
+                  {!manualEntry ? 'Ketik minimal 2 karakter untuk mencari nama atau NIK warga. Data profil akan terisi otomatis.' : 'Mode manual aktif — masukkan data secara manual.'}
+                </p>
               </div>
 
               <div className="space-y-1.5">
@@ -684,7 +1037,7 @@ export default function AdminAparatur() {
                   type="text" 
                   className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500 mb-2" 
                   value={officerForm.role} 
-                  onChange={e => setOfficerForm({...officerForm, role: e.target.value})} 
+                  onChange={e => setOfficerForm({ ...officerForm, role: e.target.value })} 
                   placeholder="Ketik jabatan atau pilih opsi di bawah" 
                 />
                 <div className="flex flex-wrap gap-1.5">
@@ -701,15 +1054,118 @@ export default function AdminAparatur() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIK</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.nik || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, nik: e.target.value })} 
+                    placeholder="Terisi otomatis" 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIP / ID</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.nip || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, nip: e.target.value })} 
+                    placeholder="Kosongkan jika tidak ada" 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">No. WhatsApp</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.phone || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, phone: e.target.value })} 
+                    placeholder="081234567890" 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Jenis Kelamin</label>
+                  <select
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500"
+                    value={officerForm.gender || ''}
+                    onChange={e => setOfficerForm({ ...officerForm, gender: e.target.value })}
+                  >
+                    <option value="">- Pilih -</option>
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Tanggal Lahir</label>
+                  <input 
+                    type="date" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.birthDate || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, birthDate: e.target.value })} 
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">NIP / ID Anggota (Opsional)</label>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Tempat Lahir</label>
                 <input 
                   type="text" 
                   className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
-                  value={officerForm.nip} 
-                  onChange={e => setOfficerForm({...officerForm, nip: e.target.value})} 
-                  placeholder="Kosongkan atau isi '-' jika tidak ada" 
+                  value={officerForm.birthPlace || ''} 
+                  onChange={e => setOfficerForm({ ...officerForm, birthPlace: e.target.value })} 
+                  placeholder="Kota / Kabupaten lahir" 
                 />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Alamat</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.address || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, address: e.target.value })} 
+                    placeholder="Alamat lengkap tempat tinggal" 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">RT/RW</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.rtRw || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, rtRw: e.target.value })} 
+                    placeholder="01 / 01" 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Status</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.status || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, status: e.target.value })} 
+                    placeholder="Contoh: Aktif / Purna Tugas" 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Periode / Masa Jabatan</label>
+                  <input 
+                    type="text" 
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.period || ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, period: e.target.value })} 
+                    placeholder="Contoh: 2021 - 2027" 
+                  />
+                </div>
               </div>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
@@ -759,7 +1215,7 @@ export default function AdminAparatur() {
                       <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
                       <td className="border border-black px-3 py-1.5 font-bold uppercase">{off.name}</td>
                       <td className="border border-black px-3 py-1.5">{off.role}</td>
-                      <td className="border border-black px-3 py-1.5 font-mono">{off.nip || '-'}</td>
+                      <td className="border border-black px-3 py-1.5 font-mono">{off.nik || off.nip || '-'}</td>
                     </tr>
                   ))
                 ) : (
@@ -792,7 +1248,7 @@ export default function AdminAparatur() {
                       <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
                       <td className="border border-black px-3 py-1.5 font-bold uppercase">{bpd.name}</td>
                       <td className="border border-black px-3 py-1.5">{bpd.role}</td>
-                      <td className="border border-black px-3 py-1.5 font-mono">{bpd.nip || '-'}</td>
+                      <td className="border border-black px-3 py-1.5 font-mono">{bpd.nik || bpd.nip || '-'}</td>
                     </tr>
                   ))
                 ) : (
@@ -825,7 +1281,7 @@ export default function AdminAparatur() {
                       <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
                       <td className="border border-black px-3 py-1.5 font-bold uppercase">{lpm.name}</td>
                       <td className="border border-black px-3 py-1.5">{lpm.role}</td>
-                      <td className="border border-black px-3 py-1.5 font-mono">{lpm.nip || '-'}</td>
+                      <td className="border border-black px-3 py-1.5 font-mono">{lpm.nik || lpm.nip || '-'}</td>
                     </tr>
                   ))
                 ) : (
