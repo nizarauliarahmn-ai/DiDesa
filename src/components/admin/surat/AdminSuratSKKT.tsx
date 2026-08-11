@@ -60,7 +60,7 @@ export default function AdminSuratSKKT({
   };
 
   const handleManualSequenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const seq = e.target.value;
+    const seq = e.target.value.toUpperCase();
     setManualSequence(seq);
     if (isBackdate) {
       setFormData(prev => ({ ...prev, nomorSurat: seq.trim() ? `${kodeKlasifikasiSKKT}/${seq.trim()}/WHi-SKKT/${tahunDariTanggalSurat}`.toUpperCase() : '' }));
@@ -803,31 +803,37 @@ export default function AdminSuratSKKT({
                 </p>
               </div>
 
-              <div className="w-full overflow-x-auto">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Nomor Surat {isBackdate && <span className="text-red-500">*</span>}
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  Nomor Urut Sisipan <span className="text-red-500">*</span>
                 </label>
                 {isBackdate ? (
                   <>
-                    <div className="flex flex-nowrap items-center h-10 px-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500 transition-all overflow-x-auto">
-                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm select-none whitespace-nowrap shrink-0">{kodeKlasifikasiSKKT} /</span>
-                      <input
-                        type="text"
-                        value={manualSequence}
-                        onChange={handleManualSequenceChange}
-                        placeholder="045.A"
-                        className="w-20 text-center font-bold text-sm px-1.5 py-0.5 mx-1 border border-emerald-500 rounded bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-emerald-500 shrink-0"
-                        required
-                      />
-                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm select-none whitespace-nowrap shrink-0">/ WHi-SKKT / {tahunDariTanggalSurat}</span>
-                    </div>
+                    <input
+                      type="text"
+                      value={manualSequence}
+                      onChange={handleManualSequenceChange}
+                      placeholder="Contoh: 045.A"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                      required
+                    />
+
                     {isFetchingHint ? (
-                      <p className="mt-1 text-[11px] text-slate-500 font-medium">Memuat nomor terakhir...</p>
+                      <p className="mt-1.5 text-xs text-slate-500 font-medium">Memuat nomor terakhir...</p>
                     ) : lastSequenceHint ? (
-                      <p className="mt-1 text-[11px] text-blue-600 font-medium">
+                      <p className="mt-1.5 text-xs text-blue-600 font-medium">
                         💡 Terakhir: <b>{lastSequenceHint}</b> (Saran: <b>{lastSequenceHint}.A</b>)
                       </p>
                     ) : null}
+
+                    <div className="mt-4 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-600 rounded-lg text-center shadow-inner">
+                      <span className="text-[10px] text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-1 font-semibold">
+                        Pratinjau Nomor Surat:
+                      </span>
+                      <span className="font-bold text-gray-900 dark:text-white text-sm sm:text-base tracking-wide break-all">
+                        {kodeKlasifikasiSKKT} / <span className="text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-200">{manualSequence || '___'}</span> / WHi-SKKT / {tahunDariTanggalSurat}
+                      </span>
+                    </div>
                   </>
                 ) : (
                   <input
