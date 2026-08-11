@@ -351,6 +351,45 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
     setShowConfirmModal(true);
   };
 
+  // Auto-set "Hubungan Keluarga" to "Anak" whenever a father/mother is chosen,
+  // whether from the same-KK dropdown or typed manually.
+  const handleFatherNameChange = (val: string) => {
+    setFatherName(val);
+    if (val && val.trim()) setFamilyRelation('Anak');
+  };
+
+  const handleMotherNameChange = (val: string) => {
+    setMotherName(val);
+    if (val && val.trim()) setFamilyRelation('Anak');
+  };
+
+  // If the selected mother is a same-KK member whose husband is "Kepala Keluarga",
+  // keep the mother's relation in this KK consistent as "Istri".
+  const syncMotherAsWifeIfNeeded = async () => {
+    try {
+      const fatherMember = kkMembers.find((m: any) =>
+        String(m.name || '').trim().toLowerCase() === String(fatherName || '').trim().toLowerCase()
+      );
+      const motherMember = kkMembers.find((m: any) =>
+        String(m.name || '').trim().toLowerCase() === String(motherName || '').trim().toLowerCase()
+      );
+      if (!fatherMember || !motherMember) return;
+      const isFatherKepala = String(fatherMember.familyRelation || '').toLowerCase().includes('kepala');
+      if (!isFatherKepala) return;
+      if (String(motherMember.nik || '') === String(nik || '')) return;
+      const currentMotherRel = String(motherMember.familyRelation || '').toLowerCase();
+      if (currentMotherRel === 'istri') return;
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) return;
+      await supabase.from('residents')
+        .update({ family_relation: 'Istri' })
+        .eq('nik', motherMember.nik)
+        .eq('tenant_id', tenantId);
+    } catch (e) {
+      console.warn('Gagal sinkronisasi status Ibu menjadi Istri:', e);
+    }
+  };
+
   const executeSave = async () => {
 
     // Determine age from birthDate
@@ -417,6 +456,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       }
     } else {
       if (onSave) {
+        await syncMotherAsWifeIfNeeded();
         onSave(savedResident);
       } else {
         showToast('Data berhasil disimpan!', 'success');
@@ -652,7 +692,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 label="Nama Ayah Kandung"
                 members={kkMembers}
                 value={fatherName}
-                onChange={setFatherName}
+                onChange={handleFatherNameChange}
                 onToggleManual={setFatherManual}
                 isManual={fatherManual}
                 genderFilter="Laki-laki"
@@ -663,7 +703,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 label="Nama Ibu Kandung"
                 members={kkMembers}
                 value={motherName}
-                onChange={setMotherName}
+                onChange={handleMotherNameChange}
                 onToggleManual={setMotherManual}
                 isManual={motherManual}
                 genderFilter="Perempuan"
