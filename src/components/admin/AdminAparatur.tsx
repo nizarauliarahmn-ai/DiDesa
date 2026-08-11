@@ -1163,9 +1163,6 @@ export default function AdminAparatur() {
             <h2 className="font-sans text-[14pt] font-bold uppercase tracking-wider">
               DATA APARATUR & LEMBAGA DESA
             </h2>
-            <p className="font-sans text-[11pt] font-bold mt-1 uppercase">
-              DESA {(localStorage.getItem('kop_desa') || 'WASAH HILIR').replace(/desa|kelurahan/gi, '').trim()} • KECAMATAN {(localStorage.getItem('kop_kecamatan') || 'SIMPUR').replace(/^kecamatan\s+/i, '').trim()}
-            </p>
           </div>
 
           {/* 1. TABLE PERANGKAT DESA */}
