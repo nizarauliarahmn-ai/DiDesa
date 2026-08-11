@@ -1,7 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Mail, Phone, Globe, Instagram, Music, ChevronUp, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin } from 'lucide-react';
+import { Mail, Phone, Globe, Instagram, Music, ChevronUp, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin, MapPin, LifeBuoy, PlayCircle, ScrollText, ShieldCheck } from 'lucide-react';
 import { addFeedback } from '../../utils/feedbackData';
+
+// App-wide settings (placeholder, siap disambungkan ke useAppConfig / Supabase settings table).
+// Angka default disimpan di localStorage: 'global_app_settings'
+const defaultAppSettings = {
+  officeAddress: 'Jl. Keramat RT.002 RW.001 No. 1, Desa Wasah Hilir, Kecamatan Simpur, Kabupaten Hulu Sungai Selatan, Kalimantan Selatan 71261',
+  termsUrl: '/syarat-ketentuan',
+  privacyUrl: '/kebijakan-privasi',
+  helpCenterUrl: '/pusat-bantuan',
+  tutorialUrl: '/video-panduan',
+  appVersion: 'v1.2.4',
+};
+
+const loadAppSettings = () => {
+  try {
+    const stored = localStorage.getItem('global_app_settings');
+    if (!stored) return defaultAppSettings;
+    return { ...defaultAppSettings, ...JSON.parse(stored) };
+  } catch {
+    return defaultAppSettings;
+  }
+};
 
 export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const footerRef = useRef<HTMLElement>(null);
@@ -32,6 +53,9 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const [globalFooterSocial2Icon, setGlobalFooterSocial2Icon] = useState(() => localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
   const [globalFooterSocial2Link, setGlobalFooterSocial2Link] = useState(() => localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
   const [globalFooterCopyright, setGlobalFooterCopyright] = useState(() => localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
+
+  // App settings (dinamis, via 'global_app_settings' di localStorage / nanti Supabase settings)
+  const [appSettings, setAppSettings] = useState(loadAppSettings);
 
   const renderSocialIcon = (iconUrl: string) => {
     if (!iconUrl) return <Globe className="w-4 h-4" />;
@@ -127,6 +151,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
       setGlobalFooterSocial2Icon(localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
       setGlobalFooterSocial2Link(localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
       setGlobalFooterCopyright(localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
+      setAppSettings(loadAppSettings());
     };
 
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
@@ -207,6 +232,13 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                 {globalFooterDesc}
               </p>
             )}
+            {/* Alamat Fisik */}
+            {appSettings.officeAddress && (
+              <div className="flex items-start justify-center sm:justify-start gap-2 text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed mt-2">
+                <MapPin className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" />
+                <span className="text-center sm:text-left">{appSettings.officeAddress}</span>
+              </div>
+            )}
           </div>
 
           {/* Contact Section */}
@@ -231,6 +263,23 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                 <span>Kirim Saran Fitur</span>
               </button>
             </div>
+
+            {/* Bantuan Cepat */}
+            {(appSettings.helpCenterUrl || appSettings.tutorialUrl) && (
+              <div className="w-full flex flex-col gap-1 items-center sm:items-start mt-2.5 pt-2.5 border-t border-white/20">
+                <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Bantuan Cepat</h4>
+                {appSettings.helpCenterUrl && (
+                  <a href={appSettings.helpCenterUrl} className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 transition-colors font-bold">
+                    <LifeBuoy className="w-3 h-3 text-emerald-600" /> Pusat Bantuan
+                  </a>
+                )}
+                {appSettings.tutorialUrl && (
+                  <a href={appSettings.tutorialUrl} className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 transition-colors font-bold">
+                    <PlayCircle className="w-3 h-3 text-emerald-600" /> Video Panduan
+                  </a>
+                )}
+              </div>
+            )}
 
             {/* Saran Fitur Modal */}
             {isModalOpen && createPortal(
@@ -364,6 +413,26 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
               <a href={globalFooterSocial2Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none overflow-hidden">
                 {renderSocialIcon(globalFooterSocial2Icon)}
               </a>
+            )}
+          </div>
+
+          {/* Bottom Bar: Legalitas & Versi */}
+          <div className="mt-5 pt-3 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-1 text-[8px] sm:text-[10px] font-bold text-slate-500 dark:text-slate-400">
+              {globalFooterCopyright && <span className="uppercase tracking-wider">{globalFooterCopyright}</span>}
+              {appSettings.termsUrl && (
+                <a href={appSettings.termsUrl} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                  <ScrollText className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Syarat &amp; Ketentuan
+                </a>
+              )}
+              {appSettings.privacyUrl && (
+                <a href={appSettings.privacyUrl} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5">
+                  <ShieldCheck className="w-3 h-3 text-slate-300 dark:text-slate-600" /> Kebijakan Privasi
+                </a>
+              )}
+            </div>
+            {appSettings.appVersion && (
+              <span className="text-[9px] tracking-wide text-gray-300 dark:text-slate-600 pr-16 md:pr-20">Versi {appSettings.appVersion}</span>
             )}
           </div>
 
