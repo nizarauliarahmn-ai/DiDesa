@@ -155,6 +155,20 @@ export default function AdminAparatur() {
                 page-break-inside: avoid;
                 page-break-after: auto;
               }
+              /* Tabel detail kependudukan (8 kolom) — rapat & muat di A4 */
+              table.aparatur-detail {
+                width: 100%;
+                table-layout: fixed;
+                border-collapse: collapse;
+                font-size: 10px;
+                line-height: 1.25;
+              }
+              table.aparatur-detail th,
+              table.aparatur-detail td {
+                padding: 3px 4px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+              }
               .saas-global-footer {
                 position: fixed !important;
                 bottom: 10mm !important;
@@ -492,6 +506,18 @@ export default function AdminAparatur() {
     if (!digits) return null;
     if (digits.startsWith('0')) digits = '62' + digits.slice(1);
     return `https://wa.me/${digits}?text=${encodeURIComponent('Assalamualaikum, saya menghubungi melalui aplikasi Desa.')}`;
+  };
+
+  const genderShort = (gender?: string) => {
+    const g = String(gender || '').toLowerCase();
+    if (g === 'perempuan' || g === 'wanita' || g === 'p') return 'P';
+    if (g === 'laki-laki' || g === 'pria' || g === 'l') return 'L';
+    return '-';
+  };
+
+  const printVal = (value: any) => {
+    const v = String(value ?? '').trim();
+    return v && v !== '-' ? v : '-';
   };
 
   const OfficerAvatar = ({ officer, colorClass }: { officer: Officer; colorClass: string }) => {
@@ -1147,28 +1173,36 @@ export default function AdminAparatur() {
             <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
               I. PEMERINTAH & PERANGKAT DESA
             </h3>
-            <table className="w-full border-collapse border border-black text-[10pt]">
+            <table className="aparatur-detail w-full border-collapse border border-black">
               <thead>
                 <tr className="bg-gray-100 font-bold">
-                  <th className="border border-black px-2 py-1.5 text-center w-10">NO</th>
-                  <th className="border border-black px-3 py-1.5 text-left">NAMA LENGKAP</th>
-                  <th className="border border-black px-3 py-1.5 text-left">JABATAN</th>
-                  <th className="border border-black px-3 py-1.5 text-left">NIP / NIK</th>
+                  <th className="border border-black text-center" style={{ width: '4%' }}>NO</th>
+                  <th className="border border-black text-left" style={{ width: '21%' }}>NAMA LENGKAP</th>
+                  <th className="border border-black text-left" style={{ width: '18%' }}>JABATAN</th>
+                  <th className="border border-black text-left" style={{ width: '16%' }}>NIK / NIP</th>
+                  <th className="border border-black text-center" style={{ width: '5%' }}>L/P</th>
+                  <th className="border border-black text-center" style={{ width: '8%' }}>RT / RW</th>
+                  <th className="border border-black text-left" style={{ width: '18%' }}>ALAMAT LENGKAP</th>
+                  <th className="border border-black text-left" style={{ width: '10%' }}>NO. HP / WA</th>
                 </tr>
               </thead>
               <tbody>
                 {officers.length > 0 ? (
                   officers.map((off, idx) => (
                     <tr key={idx}>
-                      <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
-                      <td className="border border-black px-3 py-1.5 font-bold uppercase">{off.name}</td>
-                      <td className="border border-black px-3 py-1.5">{off.role}</td>
-                      <td className="border border-black px-3 py-1.5 font-mono">{off.nik || off.nip || '-'}</td>
+                      <td className="border border-black text-center font-bold">{idx + 1}</td>
+                      <td className="border border-black font-bold uppercase">{off.name}</td>
+                      <td className="border border-black">{off.role}</td>
+                      <td className="border border-black font-mono">{printVal(off.nik || off.nip)}</td>
+                      <td className="border border-black text-center">{genderShort(off.gender)}</td>
+                      <td className="border border-black text-center">{printVal(off.rtRw)}</td>
+                      <td className="border border-black">{printVal(off.address)}</td>
+                      <td className="border border-black font-mono">{printVal(off.phone)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data perangkat desa</td>
+                    <td colSpan={8} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data perangkat desa</td>
                   </tr>
                 )}
               </tbody>
@@ -1180,28 +1214,36 @@ export default function AdminAparatur() {
             <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
               II. BADAN PERMUSYAWARATAN DESA (BPD)
             </h3>
-            <table className="w-full border-collapse border border-black text-[10pt]">
+            <table className="aparatur-detail w-full border-collapse border border-black">
               <thead>
                 <tr className="bg-gray-100 font-bold">
-                  <th className="border border-black px-2 py-1.5 text-center w-10">NO</th>
-                  <th className="border border-black px-3 py-1.5 text-left">NAMA LENGKAP</th>
-                  <th className="border border-black px-3 py-1.5 text-left">JABATAN BPD</th>
-                  <th className="border border-black px-3 py-1.5 text-left">NIP / KETERANGAN</th>
+                  <th className="border border-black text-center" style={{ width: '4%' }}>NO</th>
+                  <th className="border border-black text-left" style={{ width: '21%' }}>NAMA LENGKAP</th>
+                  <th className="border border-black text-left" style={{ width: '18%' }}>JABATAN BPD</th>
+                  <th className="border border-black text-left" style={{ width: '16%' }}>NIK / NIP</th>
+                  <th className="border border-black text-center" style={{ width: '5%' }}>L/P</th>
+                  <th className="border border-black text-center" style={{ width: '8%' }}>RT / RW</th>
+                  <th className="border border-black text-left" style={{ width: '18%' }}>ALAMAT LENGKAP</th>
+                  <th className="border border-black text-left" style={{ width: '10%' }}>NO. HP / WA</th>
                 </tr>
               </thead>
               <tbody>
                 {bpdList.length > 0 ? (
                   bpdList.map((bpd, idx) => (
                     <tr key={idx}>
-                      <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
-                      <td className="border border-black px-3 py-1.5 font-bold uppercase">{bpd.name}</td>
-                      <td className="border border-black px-3 py-1.5">{bpd.role}</td>
-                      <td className="border border-black px-3 py-1.5 font-mono">{bpd.nik || bpd.nip || '-'}</td>
+                      <td className="border border-black text-center font-bold">{idx + 1}</td>
+                      <td className="border border-black font-bold uppercase">{bpd.name}</td>
+                      <td className="border border-black">{bpd.role}</td>
+                      <td className="border border-black font-mono">{printVal(bpd.nik || bpd.nip)}</td>
+                      <td className="border border-black text-center">{genderShort(bpd.gender)}</td>
+                      <td className="border border-black text-center">{printVal(bpd.rtRw)}</td>
+                      <td className="border border-black">{printVal(bpd.address)}</td>
+                      <td className="border border-black font-mono">{printVal(bpd.phone)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data pengurus BPD</td>
+                    <td colSpan={8} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data pengurus BPD</td>
                   </tr>
                 )}
               </tbody>
@@ -1213,28 +1255,36 @@ export default function AdminAparatur() {
             <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
               III. LEMBAGA PEMBERDAYAAN MASYARAKAT (LPM)
             </h3>
-            <table className="w-full border-collapse border border-black text-[10pt]">
+            <table className="aparatur-detail w-full border-collapse border border-black">
               <thead>
                 <tr className="bg-gray-100 font-bold">
-                  <th className="border border-black px-2 py-1.5 text-center w-10">NO</th>
-                  <th className="border border-black px-3 py-1.5 text-left">NAMA LENGKAP</th>
-                  <th className="border border-black px-3 py-1.5 text-left">JABATAN LPM</th>
-                  <th className="border border-black px-3 py-1.5 text-left">NIP / KETERANGAN</th>
+                  <th className="border border-black text-center" style={{ width: '4%' }}>NO</th>
+                  <th className="border border-black text-left" style={{ width: '21%' }}>NAMA LENGKAP</th>
+                  <th className="border border-black text-left" style={{ width: '18%' }}>JABATAN LPM</th>
+                  <th className="border border-black text-left" style={{ width: '16%' }}>NIK / NIP</th>
+                  <th className="border border-black text-center" style={{ width: '5%' }}>L/P</th>
+                  <th className="border border-black text-center" style={{ width: '8%' }}>RT / RW</th>
+                  <th className="border border-black text-left" style={{ width: '18%' }}>ALAMAT LENGKAP</th>
+                  <th className="border border-black text-left" style={{ width: '10%' }}>NO. HP / WA</th>
                 </tr>
               </thead>
               <tbody>
                 {lpmList.length > 0 ? (
                   lpmList.map((lpm, idx) => (
                     <tr key={idx}>
-                      <td className="border border-black px-2 py-1.5 text-center font-bold">{idx + 1}</td>
-                      <td className="border border-black px-3 py-1.5 font-bold uppercase">{lpm.name}</td>
-                      <td className="border border-black px-3 py-1.5">{lpm.role}</td>
-                      <td className="border border-black px-3 py-1.5 font-mono">{lpm.nik || lpm.nip || '-'}</td>
+                      <td className="border border-black text-center font-bold">{idx + 1}</td>
+                      <td className="border border-black font-bold uppercase">{lpm.name}</td>
+                      <td className="border border-black">{lpm.role}</td>
+                      <td className="border border-black font-mono">{printVal(lpm.nik || lpm.nip)}</td>
+                      <td className="border border-black text-center">{genderShort(lpm.gender)}</td>
+                      <td className="border border-black text-center">{printVal(lpm.rtRw)}</td>
+                      <td className="border border-black">{printVal(lpm.address)}</td>
+                      <td className="border border-black font-mono">{printVal(lpm.phone)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data pengurus LPM</td>
+                    <td colSpan={8} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data pengurus LPM</td>
                   </tr>
                 )}
               </tbody>
@@ -1242,29 +1292,41 @@ export default function AdminAparatur() {
           </div>
 
           {/* 4. TABLE RT & RW */}
-          <div className="mb-8 font-sans grid grid-cols-2 gap-4 break-inside-avoid">
-            <div>
-              <h3 className="font-bold text-[10.5pt] uppercase mb-2 border-b border-black pb-1">
+          <div className="mb-8 font-sans break-inside-avoid">
+            <div className="mb-6">
+              <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
                 IV. DAFTAR KETUA RT
               </h3>
-              <table className="w-full border-collapse border border-black text-[9.5pt]">
+              <table className="aparatur-detail w-full border-collapse border border-black">
                 <thead>
                   <tr className="bg-gray-100 font-bold">
-                    <th className="border border-black px-2 py-1 text-center w-16">NO. RT</th>
-                    <th className="border border-black px-3 py-1 text-left">NAMA KETUA RT</th>
+                    <th className="border border-black text-center" style={{ width: '4%' }}>NO</th>
+                    <th className="border border-black text-left" style={{ width: '21%' }}>NAMA LENGKAP</th>
+                    <th className="border border-black text-left" style={{ width: '18%' }}>JABATAN</th>
+                    <th className="border border-black text-left" style={{ width: '16%' }}>NIK / NIP</th>
+                    <th className="border border-black text-center" style={{ width: '5%' }}>L/P</th>
+                    <th className="border border-black text-center" style={{ width: '8%' }}>RT / RW</th>
+                    <th className="border border-black text-left" style={{ width: '18%' }}>ALAMAT LENGKAP</th>
+                    <th className="border border-black text-left" style={{ width: '10%' }}>NO. HP / WA</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rtList.length > 0 ? (
                     rtList.map((rt, idx) => (
                       <tr key={idx}>
-                        <td className="border border-black px-2 py-1 text-center font-bold">RT.{rt.no}</td>
-                        <td className="border border-black px-3 py-1 font-semibold">{rt.name}</td>
+                        <td className="border border-black text-center font-bold">{idx + 1}</td>
+                        <td className="border border-black font-bold uppercase">{rt.name}</td>
+                        <td className="border border-black">{rt.role || 'Ketua RT'}</td>
+                        <td className="border border-black font-mono">{printVal(rt.nik || rt.nip)}</td>
+                        <td className="border border-black text-center">{genderShort(rt.gender)}</td>
+                        <td className="border border-black text-center">{printVal(rt.no ? `RT.${rt.no}` : rt.rtRw)}</td>
+                        <td className="border border-black">{printVal(rt.address)}</td>
+                        <td className="border border-black font-mono">{printVal(rt.phone)}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={2} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data RT</td>
+                      <td colSpan={8} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data RT</td>
                     </tr>
                   )}
                 </tbody>
@@ -1272,27 +1334,39 @@ export default function AdminAparatur() {
             </div>
 
             <div>
-              <h3 className="font-bold text-[10.5pt] uppercase mb-2 border-b border-black pb-1">
+              <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
                 V. DAFTAR KETUA RW
               </h3>
-              <table className="w-full border-collapse border border-black text-[9.5pt]">
+              <table className="aparatur-detail w-full border-collapse border border-black">
                 <thead>
                   <tr className="bg-gray-100 font-bold">
-                    <th className="border border-black px-2 py-1 text-center w-16">NO. RW</th>
-                    <th className="border border-black px-3 py-1 text-left">NAMA KETUA RW</th>
+                    <th className="border border-black text-center" style={{ width: '4%' }}>NO</th>
+                    <th className="border border-black text-left" style={{ width: '21%' }}>NAMA LENGKAP</th>
+                    <th className="border border-black text-left" style={{ width: '18%' }}>JABATAN</th>
+                    <th className="border border-black text-left" style={{ width: '16%' }}>NIK / NIP</th>
+                    <th className="border border-black text-center" style={{ width: '5%' }}>L/P</th>
+                    <th className="border border-black text-center" style={{ width: '8%' }}>RT / RW</th>
+                    <th className="border border-black text-left" style={{ width: '18%' }}>ALAMAT LENGKAP</th>
+                    <th className="border border-black text-left" style={{ width: '10%' }}>NO. HP / WA</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rwList.length > 0 ? (
                     rwList.map((rw, idx) => (
                       <tr key={idx}>
-                        <td className="border border-black px-2 py-1 text-center font-bold">RW.{rw.no}</td>
-                        <td className="border border-black px-3 py-1 font-semibold">{rw.name}</td>
+                        <td className="border border-black text-center font-bold">{idx + 1}</td>
+                        <td className="border border-black font-bold uppercase">{rw.name}</td>
+                        <td className="border border-black">{rw.role || 'Ketua RW'}</td>
+                        <td className="border border-black font-mono">{printVal(rw.nik || rw.nip)}</td>
+                        <td className="border border-black text-center">{genderShort(rw.gender)}</td>
+                        <td className="border border-black text-center">{printVal(rw.no ? `RW.${rw.no}` : rw.rtRw)}</td>
+                        <td className="border border-black">{printVal(rw.address)}</td>
+                        <td className="border border-black font-mono">{printVal(rw.phone)}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={2} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data RW</td>
+                      <td colSpan={8} className="border border-black px-3 py-2 text-center text-gray-500 italic">Belum ada data RW</td>
                     </tr>
                   )}
                 </tbody>
