@@ -354,7 +354,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
 
           {/* Social Icons */}
-          <div className="lg:col-span-2 flex justify-center lg:justify-end gap-2">
+          <div className="lg:col-span-2 flex justify-center lg:justify-end gap-2 pr-16 md:pr-20">
             {globalFooterSocial1Link && (
               <a href={globalFooterSocial1Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none overflow-hidden">
                 {renderSocialIcon(globalFooterSocial1Icon)}
