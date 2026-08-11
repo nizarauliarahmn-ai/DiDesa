@@ -88,27 +88,31 @@ export default function AdminPenduduk({
       let page = 0;
       const pageSize = 1000;
 
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from('residents')
-          .select('*')
-          .eq('tenant_id', resolvedTenant)
-          .order('created_at', { ascending: false })
-          .range(page * pageSize, (page + 1) * pageSize - 1);
-          
-        if (error) {
-          console.error("Error fetching residents from Supabase:", error);
-          hasMore = false;
-        } else if (data) {
-          allData = [...allData, ...data];
-          if (data.length < pageSize) {
+      try {
+        while (hasMore) {
+          const { data, error } = await supabase
+            .from('residents')
+            .select('*')
+            .eq('tenant_id', resolvedTenant)
+            .order('nik', { ascending: false })
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+
+          if (error) {
+            console.error('Error fetching residents:', error);
             hasMore = false;
+          } else if (data) {
+            allData = [...allData, ...data];
+            if (data.length < pageSize) {
+              hasMore = false;
+            } else {
+              page++;
+            }
           } else {
-            page++;
+            hasMore = false;
           }
-        } else {
-          hasMore = false;
         }
+      } catch (e) {
+        console.error('Error fetching residents:', e);
       }
 
       if (allData.length > 0) {
