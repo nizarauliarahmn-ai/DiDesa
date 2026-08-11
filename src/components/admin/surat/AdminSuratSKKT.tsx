@@ -675,6 +675,77 @@ export default function AdminSuratSKKT({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Form Input Side */}
         <div className="lg:col-span-6 space-y-6">
+          {/* Section 0: Meta Surat — Tanggal & Nomor Surat */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-4">
+            <h3 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-emerald-600" /> Pengaturan Tanggal & Nomor Surat
+            </h3>
+
+            <label className="flex items-start gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isBackdate}
+                onChange={(e) => setIsBackdate(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-emerald-600"
+              />
+              <div>
+                <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Buat Surat Sisipan (Tanggal Mundur)</span>
+                <span className="block text-[10px] text-slate-500 mt-0.5">Aktifkan untuk menyisipkan surat lama. Nomor surat wajib diisi manual.</span>
+              </div>
+            </label>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                  Tanggal Surat {isBackdate ? '(Backdate)' : '(Hari Ini)'}
+                </label>
+                <input
+                  type="date"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                  value={tanggalSurat}
+                  disabled={!isBackdate}
+                  max={isBackdate ? new Date().toISOString().split('T')[0] : undefined}
+                  onChange={(e) => setTanggalSurat(e.target.value)}
+                />
+                <p className="text-[10px] text-slate-500">
+                  {isBackdate
+                    ? 'Pilih tanggal surat (maksimal hari ini). Nomor surat diisi manual di bawah.'
+                    : 'Tanggal terkunci ke hari ini. Aktifkan toggle di atas untuk membuat surat sisipan.'}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Nomor Surat {isBackdate && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  type="text"
+                  placeholder={isBackdate ? '251/SKKT/VII/2026.1' : '251/SKKT/VII/2026'}
+                  value={formData.nomorSurat}
+                  disabled={!isBackdate}
+                  onChange={e => setFormData({ ...formData, nomorSurat: e.target.value })}
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            {isBackdate && (
+              <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg flex gap-3 items-start">
+                <div className="mt-0.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Surat Sisipan Aktif</p>
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
+                    Nomor surat wajib diisi manual, contoh: 251/SKKT/VII/2026.1
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <hr className="my-6 border-gray-200 dark:border-slate-700" />
+
           {/* Section 1: Pemohon / Pemilik Tanah */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
@@ -755,76 +826,8 @@ export default function AdminSuratSKKT({
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Di pergunakan</label>
                 <input type="text" placeholder="Pribadi" value={formData.diPergunakan} onChange={e => setFormData({ ...formData, diPergunakan: e.target.value })} className="w-full p-2 border rounded-lg" />
               </div>
-              <div>
-                
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4 mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-800 dark:text-slate-200">Pengaturan Tanggal & Nomor Surat</h3>
-              </div>
-
-              <label className="flex items-start gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isBackdate}
-                  onChange={(e) => setIsBackdate(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 accent-emerald-600"
-                />
-                <div>
-                  <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Buat Surat Sisipan (Tanggal Mundur)</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">Aktifkan untuk menyisipkan surat lama. Nomor surat wajib diisi manual.</span>
-                </div>
-              </label>
-
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                  Tanggal Surat {isBackdate ? '(Backdate)' : '(Hari Ini)'}
-                </label>
-                <input
-                  type="date"
-                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
-                  value={tanggalSurat}
-                  disabled={!isBackdate}
-                  max={isBackdate ? new Date().toISOString().split('T')[0] : undefined}
-                  onChange={(e) => setTanggalSurat(e.target.value)}
-                />
-                <p className="mt-1 text-[10px] text-slate-500">
-                  {isBackdate
-                    ? 'Pilih tanggal surat (maksimal hari ini). Nomor surat diisi manual di bawah.'
-                    : 'Tanggal terkunci ke hari ini. Aktifkan toggle di atas untuk membuat surat sisipan.'}
-                </p>
-              </div>
-
-              {isBackdate && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg flex gap-3 items-start">
-                  <div className="mt-0.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Surat Sisipan Aktif</p>
-                    <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
-                      Nomor surat wajib diisi manual, contoh: 251/SKKT/VII/2026.1
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
-            <div>
-              <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">
-                Nomor Surat {isBackdate && <span className="text-red-500">*</span>}
-              </label>
-              <input
-                type="text"
-                placeholder={isBackdate ? '251/SKKT/VII/2026.1' : '251/SKKT/VII/2026'}
-                value={formData.nomorSurat}
-                disabled={!isBackdate}
-                onChange={e => setFormData({ ...formData, nomorSurat: e.target.value })}
-                className="w-full p-2 border rounded-lg disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed dark:disabled:bg-slate-800"
-              />
-            </div>
-            </div>
-            </div>
 
             <div className="text-xs">
               <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Asal Perolehan Tanah</label>
