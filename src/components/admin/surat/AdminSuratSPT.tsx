@@ -1,10 +1,11 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
+import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached, invalidateResidentsCache } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Printer, Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw, Calendar, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Printer, Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw } from 'lucide-react';
 import {
   getLetterClassifications, incrementSequenceNumber, generateLetterNumber
 } from '../../../utils/letterClassifications';
@@ -87,14 +88,14 @@ export default function AdminSuratSPT({
   onBack: () => void; editData?: any; editLetterId?: string | null;
 }) {
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
-  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SPT') || { klasifikasi: 'SPT', kodeKlasifikasi: '400' };
-  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SPT') || { klasifikasi: 'SPT', kodeKlasifikasi: '474' };
+  const kodeKlasifikasiSPT = backdateKlas.kodeKlasifikasi || '474';
+  const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const [manualSequence, setManualSequence] = useState('');
 
-  useEffect(() => {
-    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-    }
-  }, [customNomorSurat, isBackdate, editData]);
+  const handleCustomNomorSurat = (nomor: string) => {
+    setFormData((prev: any) => ({ ...prev, nomorSurat: nomor }));
+  };
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
@@ -163,7 +164,7 @@ export default function AdminSuratSPT({
     if (!editData) {
       const configs = getLetterClassifications();
       const sptConfig = configs.find(c => c.klasifikasi === 'SPT') || { klasifikasi: 'SPT', kodeKlasifikasi: '474', noUrutTerakhir: 0 };
-      setFormData(p => ({ ...p, nomorSurat: generateLetterNumber(sptConfig.klasifikasi, sptConfig.kodeKlasifikasi || '474', isBackdate ? customNomorSurat : undefined, isBackdate ? new Date(tanggalSurat) : undefined) }));
+      setFormData(p => ({ ...p, nomorSurat: generateLetterNumber(sptConfig.klasifikasi, sptConfig.kodeKlasifikasi || '474') }));
     }
   }, []);
 
@@ -368,6 +369,10 @@ export default function AdminSuratSPT({
     }
     if (activeHeirs.length === 0) {
       showToast('Minimal 1 ahli waris harus dipilih.', 'error');
+      return;
+    }
+    if (isBackdate && !(manualSequence || '').trim()) {
+      showToast('Mohon isi nomor urut surat sisipan.', 'error');
       return;
     }
     setLoading(true);
@@ -731,6 +736,20 @@ export default function AdminSuratSPT({
         {/* ═══════ LEFT: FORM ═══════ */}
         <div className="space-y-4 max-h-[88vh] overflow-y-auto pr-2 pb-10">
 
+          {/* Backdate Config - Paling Atas Form */}
+          <BackdateConfig
+            prefix={kodeKlasifikasiSPT}
+            suffix="WHi-SPT"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={setTanggalSurat}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={formData.nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
+
           {/* ─ 1. Pencarian Pewaris ─ */}
           <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -814,47 +833,6 @@ export default function AdminSuratSPT({
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Jam</label>
                 <input type="time" className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={formData.jamMeninggal} onChange={e => setFormData(p => ({...p, jamMeninggal: e.target.value}))} />
-              </div>
-              <div className="space-y-1">
-                
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4 mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-800 dark:text-slate-200">Pengaturan Tanggal & Nomor Surat</h3>
-              </div>
-              
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Surat (Opsional/Backdate)</label>
-                <input 
-                  type="date"
-                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100"
-                  value={tanggalSurat}
-                  onChange={(e) => setTanggalSurat(e.target.value)}
-                />
-                <p className="mt-1 text-[10px] text-slate-500">Ubah ke tanggal mundur untuk mengaktifkan penomoran sisipan otomatis.</p>
-              </div>
-              
-              {isBackdate && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg flex gap-3 items-start">
-                  <div className="mt-0.5">
-                    {isBackdateLoading ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Backdate Aktif</p>
-                    <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
-                      Sistem otomatis melacak arsip pada {new Date(tanggalSurat).toLocaleDateString('id-ID')} dan menyisipkan sub-nomor berikutnya.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-<label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</label>
-                <input type="text" className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" value={formData.nomorSurat} onChange={e => setFormData(p => ({...p, nomorSurat: e.target.value}))} />
               </div>
               <div className="space-y-1 col-span-2">
                 <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Tempat Wafat</label>

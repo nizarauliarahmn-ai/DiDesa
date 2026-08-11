@@ -7,6 +7,7 @@ import {
   ArrowUp, ArrowDown, GripVertical
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
+import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -72,7 +73,13 @@ export default function AdminSuratUndangan({
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [tanggalSurat, setTanggalSurat] = useState(editData?.tanggal || new Date().toISOString().split('T')[0]);
   const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'UND') || { klasifikasi: 'UND', kodeKlasifikasi: '005' };
-  const { customNomorSurat, isBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const kodeKlasifikasiUND = backdateKlas.kodeKlasifikasi || '005';
+  const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const [manualSequence, setManualSequence] = useState('');
+
+  const handleCustomNomorSurat = (nomor: string) => {
+    setNomorSurat(nomor);
+  };
 
   const [nomorSurat, setNomorSurat] = useState(editData?.nomor || '');
   const [sifat, setSifat] = useState(editData?.sifat || 'Penting');
@@ -204,12 +211,12 @@ export default function AdminSuratUndangan({
     loadResidents();
   }, []);
 
-  // Auto Numbering effect
+  // Auto-generate nomor surat saat membuat undangan baru (mode normal)
   useEffect(() => {
-    if (!editData && customNomorSurat) {
-      setNomorSurat(customNomorSurat);
+    if (!editData && !nomorSurat) {
+      setNomorSurat(generateLetterNumber('UND', kodeKlasifikasiUND || '005'));
     }
-  }, [customNomorSurat, editData]);
+  }, []);
 
   // Recipient Attachment Logic (>3 recipients auto-attaches to Lampiran Page 2)
   const isAttached = forceAttachment || recipients.length > 3;
@@ -400,6 +407,10 @@ export default function AdminSuratUndangan({
       showToast('Harap tambahkan minimal 1 penerima undangan', 'info');
       return;
     }
+    if (isBackdate && !(manualSequence || '').trim()) {
+      showToast('Mohon isi nomor urut surat sisipan.', 'error');
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -447,7 +458,7 @@ export default function AdminSuratUndangan({
           data: fullDataPayload
         });
         if (added) letterId = added.id;
-        incrementSequenceNumber('UND');
+        if (!isBackdate) incrementSequenceNumber('UND');
       }
 
       setSavedLetterId(letterId || 'UND_' + Date.now());
@@ -489,7 +500,21 @@ export default function AdminSuratUndangan({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Input Form Controls (lg:col-span-7) */}
         <div className="lg:col-span-7 space-y-6">
-          
+
+          {/* Backdate Config - Paling Atas Form */}
+          <BackdateConfig
+            prefix={kodeKlasifikasiUND}
+            suffix="WHi-UND"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={setTanggalSurat}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
+
           {/* Card 1: Header & Naskah Surat */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
             <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2 border-b pb-3 dark:border-slate-800">
@@ -498,26 +523,6 @@ export default function AdminSuratUndangan({
             </h3>
 
             <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tanggal Dibuat Surat</label>
-                <input 
-                  type="date"
-                  value={tanggalSurat}
-                  onChange={(e) => setTanggalSurat(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Nomor Surat Undangan</label>
-                <input 
-                  type="text"
-                  value={nomorSurat}
-                  onChange={(e) => setNomorSurat(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono font-bold"
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Sifat Surat</label>

@@ -1,12 +1,11 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
+import BackdateConfig from './BackdateConfig';
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature, Calendar } from 'lucide-react';
+import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { getLetterClassifications, generateLetterNumber, incrementSequenceNumber } from '../../../utils/letterClassifications';
-import { supabase } from '../../../utils/supabase';
-import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
@@ -47,8 +46,6 @@ export default function AdminSuratSKKT({
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const { isBackdate, setIsBackdate } = useBackdateNumber();
   const [manualSequence, setManualSequence] = useState('');
-  const [lastSequenceHint, setLastSequenceHint] = useState('');
-  const [isFetchingHint, setIsFetchingHint] = useState(false);
 
   const skktConfig = getLetterClassifications().find(c => c.klasifikasi === 'SKKT') || { klasifikasi: 'SKKT', kodeKlasifikasi: '593', noUrutTerakhir: 0 };
   const kodeKlasifikasiSKKT = skktConfig.kodeKlasifikasi || '593';
@@ -59,12 +56,8 @@ export default function AdminSuratSKKT({
     return seq ? `${kodeKlasifikasiSKKT}/${seq}/WHi-SKKT/${tahunDariTanggalSurat}`.toUpperCase() : '';
   };
 
-  const handleManualSequenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const seq = e.target.value.toUpperCase();
-    setManualSequence(seq);
-    if (isBackdate) {
-      setFormData(prev => ({ ...prev, nomorSurat: seq.trim() ? `${kodeKlasifikasiSKKT}/${seq.trim()}/WHi-SKKT/${tahunDariTanggalSurat}`.toUpperCase() : '' }));
-    }
+  const handleCustomNomorSurat = (nomor: string) => {
+    setFormData(prev => ({ ...prev, nomorSurat: nomor }));
   };
 
   const [loading, setLoading] = useState(false);
@@ -157,73 +150,13 @@ export default function AdminSuratSKKT({
   useEffect(() => {
     if (editData) return;
 
-    if (isBackdate) {
-      setFormData(prev => ({ ...prev, nomorSurat: '' }));
-      setManualSequence('');
-      setLastSequenceHint('');
-      return;
-    }
-
-    const configs = getLetterClassifications();
-    const skkt = configs.find(c => c.klasifikasi === 'SKKT') || { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
-    setFormData(prev => ({ ...prev, nomorSurat: generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251') }));
-    setTanggalSurat(new Date().toISOString().split('T')[0]);
-  }, [isBackdate, editData]);
-
-  useEffect(() => {
     if (!isBackdate) {
-      setLastSequenceHint('');
-      setIsFetchingHint(false);
-      return;
+      const configs = getLetterClassifications();
+      const skkt = configs.find(c => c.klasifikasi === 'SKKT') || { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
+      setFormData(prev => ({ ...prev, nomorSurat: generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251') }));
+      setTanggalSurat(new Date().toISOString().split('T')[0]);
     }
-
-    let cancelled = false;
-
-    async function fetchLastNumberHint() {
-      setIsFetchingHint(true);
-      try {
-        const tenantId = await resolveCurrentTenant();
-        if (!tenantId || cancelled) return;
-
-        const endOfDay = new Date(tanggalSurat);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const { data, error } = await supabase
-          .from('surat')
-          .select('nomor')
-          .eq('tenant_id', tenantId)
-          .lte('created_at', endOfDay.toISOString())
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (error) throw error;
-
-        let seq = '';
-        if (data && data[0]?.nomor) {
-          const parts = String(data[0].nomor).split('/').map(p => p.trim()).filter(Boolean);
-          if (parts.length >= 2 && /^\d+(?:\.\d+)?$/.test(parts[1])) {
-            seq = parts[1].split('.')[0];
-          } else {
-            for (const p of parts) {
-              if (/^\d{2,4}$/.test(p) && p !== kodeKlasifikasiSKKT) {
-                seq = p;
-                break;
-              }
-            }
-          }
-        }
-        if (!cancelled) setLastSequenceHint(seq);
-      } catch (e) {
-        console.error('Gagal mengambil hint nomor surat terakhir:', e);
-        if (!cancelled) setLastSequenceHint('');
-      } finally {
-        if (!cancelled) setIsFetchingHint(false);
-      }
-    }
-
-    fetchLastNumberHint();
-    return () => { cancelled = true; };
-  }, [isBackdate, tanggalSurat]);
+  }, [isBackdate, editData]);
 
     useEffect(() => {
       fetchResidentsCached()
@@ -762,90 +695,18 @@ export default function AdminSuratSKKT({
         {/* Form Input Side */}
         <div className="lg:col-span-6 space-y-6">
           {/* Section 0: Meta Surat — Tanggal & Nomor Surat */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-4">
-            <h3 className="font-bold text-sm text-gray-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-emerald-600" /> Pengaturan Tanggal & Nomor Surat
-            </h3>
-
-            <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800/50">
-              <div>
-                <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Buat Surat Sisipan (Tanggal Mundur)</span>
-                <span className="block text-[10px] text-slate-500 mt-0.5">Aktifkan untuk menyisipkan surat lama. Nomor surat wajib diisi manual.</span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
-                <input
-                  type="checkbox"
-                  checked={isBackdate}
-                  onChange={(e) => setIsBackdate(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-              </label>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                  Tanggal Surat {isBackdate ? '(Backdate)' : '(Hari Ini)'}
-                </label>
-                <input
-                  type="date"
-                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
-                  value={tanggalSurat}
-                  disabled={!isBackdate}
-                  max={isBackdate ? new Date().toISOString().split('T')[0] : undefined}
-                  onChange={(e) => setTanggalSurat(e.target.value)}
-                />
-                <p className="text-[10px] text-slate-500">
-                  {isBackdate
-                    ? 'Pilih tanggal surat (maksimal hari ini). Nomor surat diisi manual di bawah.'
-                    : 'Tanggal terkunci ke hari ini. Aktifkan toggle di atas untuk membuat surat sisipan.'}
-                </p>
-              </div>
-
-              <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  Nomor Urut Sisipan <span className="text-red-500">*</span>
-                </label>
-                {isBackdate ? (
-                  <>
-                    <input
-                      type="text"
-                      value={manualSequence}
-                      onChange={handleManualSequenceChange}
-                      placeholder="Contoh: 045.A"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                      required
-                    />
-
-                    {isFetchingHint ? (
-                      <p className="mt-1.5 text-xs text-slate-500 font-medium">Memuat nomor terakhir...</p>
-                    ) : lastSequenceHint ? (
-                      <p className="mt-1.5 text-xs text-blue-600 font-medium">
-                        💡 Terakhir: <b>{lastSequenceHint}</b> (Saran: <b>{lastSequenceHint}.A</b>)
-                      </p>
-                    ) : null}
-
-                    <div className="mt-2.5 p-2 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-600 rounded-md text-center shadow-inner overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                      <span className="text-[9px] text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-0.5 font-bold">
-                        Pratinjau Nomor:
-                      </span>
-                      <div className="font-bold text-gray-700 dark:text-slate-200 text-[11px] tracking-wide whitespace-nowrap">
-                        {kodeKlasifikasiSKKT} / <span className="text-emerald-600 dark:text-emerald-400 border-b border-emerald-300 px-0.5">{manualSequence || '___'}</span> / WHi-SKKT / {tahunDariTanggalSurat}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <input
-                    type="text"
-                    value={formData.nomorSurat}
-                    disabled
-                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
+          <BackdateConfig
+            prefix={kodeKlasifikasiSKKT}
+            suffix="WHi-SKKT"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={setTanggalSurat}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={formData.nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
 
           <hr className="my-6 border-gray-200 dark:border-slate-700" />
 

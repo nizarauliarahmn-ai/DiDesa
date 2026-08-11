@@ -1,4 +1,5 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
+import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
@@ -6,7 +7,7 @@ import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Save, Printer, Download, Upload, Trash2, History, Heart, ZoomIn, ZoomOut, CheckCircle2, FileText, Calendar } from 'lucide-react';
+import { ArrowLeft, Save, Printer, Download, Upload, Trash2, History, Heart, ZoomIn, ZoomOut, FileText } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -32,14 +33,19 @@ export default function AdminSuratNikah({
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
-  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKN') || { klasifikasi: 'SKN', kodeKlasifikasi: '400' };
-  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKN') || { klasifikasi: 'SKN', kodeKlasifikasi: '474' };
+  const kodeKlasifikasiSKN = backdateKlas.kodeKlasifikasi || '474';
+  const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const [manualSequence, setManualSequence] = useState('');
 
-  useEffect(() => {
-    if (customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-    }
-  }, [customNomorSurat, isBackdate, editData]);
+  const handleCustomNomorSurat = (nomor: string) => {
+    setFormData((prev: any) => ({ ...prev, nomorSurat: nomor }));
+  };
+
+  const handleTanggalSuratChange = (val: string) => {
+    setTanggalSurat(val);
+    setFormData((prev: any) => ({ ...prev, tanggalSurat: val }));
+  };
 
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(1);
@@ -58,6 +64,13 @@ export default function AdminSuratNikah({
   useEffect(() => {
     if (editData) {
       setFormData(prev => ({ ...prev, ...editData }));
+    }
+  }, [editData]);
+
+  // Auto-generate nomor surat saat membuat surat baru (mode normal)
+  useEffect(() => {
+    if (!editData && !formData.nomorSurat) {
+      setFormData(prev => ({ ...prev, nomorSurat: generateLetterNumber(backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi || '474') }));
     }
   }, [editData]);
 
@@ -359,6 +372,10 @@ export default function AdminSuratNikah({
   const handlePrint = async () => {
     if ((!formData.namaSuami || !formData.namaSuami.trim()) && (!formData.namaIstri || !formData.namaIstri.trim())) {
       showToast("Mohon lengkapi setidaknya salah satu Nama Calon Suami/Istri terlebih dahulu sebelum mencetak surat.", 'error');
+      return;
+    }
+    if (isBackdate && !(manualSequence || '').trim()) {
+      showToast('Mohon isi nomor urut surat sisipan.', 'error');
       return;
     }
     // Increment sequence number for SKN
@@ -1020,6 +1037,21 @@ export default function AdminSuratNikah({
 
       {/* Form Area - Hidden on Print */}
       <div className="print:hidden px-8 max-w-5xl mx-auto">
+        {/* Backdate Config - Paling Atas Form */}
+        <div className="mb-6">
+          <BackdateConfig
+            prefix={kodeKlasifikasiSKN}
+            suffix="WHi-SKN"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={handleTanggalSuratChange}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={formData.nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
+        </div>
         {step === 1 && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none">
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">1. Pilih Mempelai (Warga Desa)</h2>
@@ -1113,50 +1145,6 @@ export default function AdminSuratNikah({
               )}
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div className="space-y-1">
-                  
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4 mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-bold text-slate-800 dark:text-slate-200">Pengaturan Tanggal & Nomor Surat</h3>
-              </div>
-              
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Surat (Opsional/Backdate)</label>
-                <input 
-                  type="date"
-                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100"
-                  value={tanggalSurat}
-                  onChange={(e) => setTanggalSurat(e.target.value)}
-                />
-                <p className="mt-1 text-[10px] text-slate-500">Ubah ke tanggal mundur untuk mengaktifkan penomoran sisipan otomatis.</p>
-              </div>
-              
-              {isBackdate && (
-                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg flex gap-3 items-start">
-                  <div className="mt-0.5">
-                    {isBackdateLoading ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
-                    ) : (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Backdate Aktif</p>
-                    <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
-                      Sistem otomatis melacak arsip pada {new Date(tanggalSurat).toLocaleDateString('id-ID')} dan menyisipkan sub-nomor berikutnya.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-<label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nomor Surat</label>
-                  <input type="text" name="nomorSurat" value={formData.nomorSurat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" placeholder="SKN/.../..." />
-                  <p className="text-[10px] text-emerald-700 font-medium">* Nomor surat otomatis terisi oleh SistemDiDesa</p>
-                </div>
-                <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tanggal Surat</label><input type="date" name="tanggalSurat" value={formData.tanggalSurat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" /></div>
-                
                 <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tanggal Menikah</label><input type="date" name="tanggalMenikah" value={formData.tanggalMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" /></div>
                 <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jam Menikah</label><input type="time" name="jamMenikah" value={formData.jamMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" /></div>
                 <div className="col-span-2 space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Akad</label><input type="text" name="tempatMenikah" value={formData.tempatMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-900" placeholder="Rumah / KUA / Lokasi Lainnya" /></div>

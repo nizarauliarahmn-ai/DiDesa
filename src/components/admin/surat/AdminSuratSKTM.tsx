@@ -2,6 +2,7 @@ import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import SuratEditorHeader from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
+import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
@@ -52,13 +53,13 @@ export default function AdminSuratSKTM({
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKTM') || { klasifikasi: 'SKTM', kodeKlasifikasi: '400' };
-  const { customNomorSurat, isBackdate, isLoading: isBackdateLoading } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const kodeKlasifikasiSKTM = backdateKlas.kodeKlasifikasi || '400';
+  const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const [manualSequence, setManualSequence] = useState('');
 
-  useEffect(() => {
-    if (isBackdate && customNomorSurat && typeof editData !== 'undefined' && !editData) {
-      setFormData((prev: any) => ({ ...prev, nomorSurat: customNomorSurat }));
-    }
-  }, [customNomorSurat, isBackdate, editData]);
+  const handleCustomNomorSurat = (nomor: string) => {
+    setFormData((prev: any) => ({ ...prev, nomorSurat: nomor }));
+  };
 
   React.useEffect(() => {
     if (presetResident) {
@@ -254,6 +255,10 @@ export default function AdminSuratSKTM({
   const handlePrint = async () => {
     if (!formData.nama || !formData.nama.trim()) {
       showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
+      return;
+    }
+    if (isBackdate && !(manualSequence || '').trim()) {
+      showToast('Mohon isi nomor urut surat sisipan.', 'error');
       return;
     }
     setLoading(true);
@@ -565,36 +570,25 @@ export default function AdminSuratSKTM({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Column */}
         <div className="lg:col-span-7 space-y-6">
+
+          {/* Backdate Config - Paling Atas Form */}
+          <BackdateConfig
+            prefix={kodeKlasifikasiSKTM}
+            suffix="WHi-SKTM"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={setTanggalSurat}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={formData.nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
           
           
 
           {/* Form Detail */}
           <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
-            {/* Informasi Surat */}
-            <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100">Informasi Surat</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    Nomor Surat
-                  </label>
-                  <input 
-                    type="text"
-                    placeholder="Contoh: SKTM/064/WHi/2026"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
-                    value={formData.nomorSurat}
-                    onChange={(e) => setFormData({...formData, nomorSurat: e.target.value})}
-                  />
-                  <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Format: [Kode]/[No]/[Tahun]. Dapat diubah manual jika perlu.</p>
-                </div>
-              </div>
-            </div>
-
             {/* Data Penduduk */}
             <div>
               <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
