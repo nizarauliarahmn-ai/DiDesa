@@ -826,13 +826,13 @@ export default function AdminSuratSKKT({
                       </p>
                     ) : null}
 
-                    <div className="mt-4 p-3 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-600 rounded-lg text-center shadow-inner">
-                      <span className="text-[10px] text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-1 font-semibold">
-                        Pratinjau Nomor Surat:
+                    <div className="mt-2.5 p-2 bg-gray-50 dark:bg-slate-800/60 border border-gray-200 dark:border-slate-600 rounded-md text-center shadow-inner overflow-x-auto">
+                      <span className="text-[9px] text-gray-500 dark:text-slate-400 uppercase tracking-wider block mb-0.5 font-bold">
+                        Pratinjau Nomor:
                       </span>
-                      <span className="font-bold text-gray-900 dark:text-white text-sm sm:text-base tracking-wide break-all">
-                        {kodeKlasifikasiSKKT} / <span className="text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-200">{manualSequence || '___'}</span> / WHi-SKKT / {tahunDariTanggalSurat}
-                      </span>
+                      <div className="font-bold text-gray-700 dark:text-slate-200 text-xs sm:text-sm tracking-wide whitespace-nowrap">
+                        {kodeKlasifikasiSKKT} / <span className="text-emerald-600 dark:text-emerald-400 border-b border-emerald-300 px-0.5">{manualSequence || '___'}</span> / WHi-SKKT / {tahunDariTanggalSurat}
+                      </div>
                     </div>
                   </>
                 ) : (
