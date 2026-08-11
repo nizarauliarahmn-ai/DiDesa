@@ -5,6 +5,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { getLetterClassifications, generateLetterNumber, incrementSequenceNumber } from '../../../utils/letterClassifications';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
@@ -44,6 +46,26 @@ export default function AdminSuratSKKT({
 }) {
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const { isBackdate, setIsBackdate } = useBackdateNumber();
+  const [manualSequence, setManualSequence] = useState('');
+  const [lastSequenceHint, setLastSequenceHint] = useState('');
+  const [isFetchingHint, setIsFetchingHint] = useState(false);
+
+  const skktConfig = getLetterClassifications().find(c => c.klasifikasi === 'SKKT') || { klasifikasi: 'SKKT', kodeKlasifikasi: '593', noUrutTerakhir: 0 };
+  const kodeKlasifikasiSKKT = skktConfig.kodeKlasifikasi || '593';
+  const tahunDariTanggalSurat = tanggalSurat ? new Date(tanggalSurat).getFullYear() : new Date().getFullYear();
+
+  const buildInsertNomorSurat = () => {
+    const seq = (manualSequence || '').trim();
+    return seq ? `${kodeKlasifikasiSKKT}/${seq}/WHi-SKKT/${tahunDariTanggalSurat}`.toUpperCase() : '';
+  };
+
+  const handleManualSequenceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const seq = e.target.value;
+    setManualSequence(seq);
+    if (isBackdate) {
+      setFormData(prev => ({ ...prev, nomorSurat: seq.trim() ? `${kodeKlasifikasiSKKT}/${seq.trim()}/WHi-SKKT/${tahunDariTanggalSurat}`.toUpperCase() : '' }));
+    }
+  };
 
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
@@ -137,6 +159,8 @@ export default function AdminSuratSKKT({
 
     if (isBackdate) {
       setFormData(prev => ({ ...prev, nomorSurat: '' }));
+      setManualSequence('');
+      setLastSequenceHint('');
       return;
     }
 
@@ -145,6 +169,52 @@ export default function AdminSuratSKKT({
     setFormData(prev => ({ ...prev, nomorSurat: generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251') }));
     setTanggalSurat(new Date().toISOString().split('T')[0]);
   }, [isBackdate, editData]);
+
+  useEffect(() => {
+    if (!isBackdate) {
+      setLastSequenceHint('');
+      setIsFetchingHint(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchLastNumberHint() {
+      setIsFetchingHint(true);
+      try {
+        const tenantId = await resolveCurrentTenant();
+        if (!tenantId || cancelled) return;
+
+        const endOfDay = new Date(tanggalSurat);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const { data, error } = await supabase
+          .from('surat')
+          .select('nomor')
+          .eq('tenant_id', tenantId)
+          .lte('created_at', endOfDay.toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error) throw error;
+
+        let seq = '';
+        if (data && data[0]?.nomor) {
+          const m = String(data[0].nomor).match(/(?:^|\/|-)(\d{3,})(?:\.\d+)?(?=\/|-|$)/);
+          if (m && m[1]) seq = m[1];
+        }
+        if (!cancelled) setLastSequenceHint(seq);
+      } catch (e) {
+        console.error('Gagal mengambil hint nomor surat terakhir:', e);
+        if (!cancelled) setLastSequenceHint('');
+      } finally {
+        if (!cancelled) setIsFetchingHint(false);
+      }
+    }
+
+    fetchLastNumberHint();
+    return () => { cancelled = true; };
+  }, [isBackdate, tanggalSurat]);
 
     useEffect(() => {
       fetchResidentsCached()
@@ -543,10 +613,17 @@ export default function AdminSuratSKKT({
       showToast('Mohon lengkapi nama pemohon, NIK, dan luas tanah.', 'error');
       return;
     }
+    if (isBackdate && !(manualSequence || '').trim()) {
+      showToast('Mohon isi nomor urut surat sisipan.', 'error');
+      return;
+    }
     setLoading(true);
 
+    const insertNomor = buildInsertNomorSurat();
+    const finalNomorSurat = isBackdate && insertNomor ? insertNomor : (formData.nomorSurat || `251/SKKT/${new Date().getFullYear()}`);
+
     const letterData = {
-      nomor: formData.nomorSurat || `251/SKKT/${new Date().getFullYear()}`,
+      nomor: finalNomorSurat,
       jenis: 'Surat Pernyataan Penguasaan Fisik Bidang Tanah (SKKT)',
       nik: formData.nik,
       nama: formData.nama,
@@ -718,14 +795,36 @@ export default function AdminSuratSKKT({
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Nomor Surat {isBackdate && <span className="text-red-500">*</span>}
                 </label>
-                <input
-                  type="text"
-                  placeholder={isBackdate ? '251/SKKT/VII/2026.1' : '251/SKKT/VII/2026'}
-                  value={formData.nomorSurat}
-                  disabled={!isBackdate}
-                  onChange={e => setFormData({ ...formData, nomorSurat: e.target.value })}
-                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
-                />
+                {isBackdate ? (
+                  <>
+                    <div className="flex items-center border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-gray-50 dark:bg-slate-800">
+                      <span className="text-gray-600 dark:text-slate-300 font-medium whitespace-nowrap">{kodeKlasifikasiSKKT} / </span>
+                      <input
+                        type="text"
+                        value={manualSequence}
+                        onChange={handleManualSequenceChange}
+                        placeholder="045"
+                        required
+                        className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 mx-2 px-2 py-1 text-center font-bold text-gray-800 dark:text-slate-100 outline-none rounded"
+                      />
+                      <span className="text-gray-600 dark:text-slate-300 font-medium whitespace-nowrap"> / WHi-SKKT / {tahunDariTanggalSurat}</span>
+                    </div>
+                    {isFetchingHint ? (
+                      <p className="mt-1 text-xs text-slate-500">Memuat nomor terakhir...</p>
+                    ) : lastSequenceHint ? (
+                      <div className="mt-1 text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-100">
+                        💡 Terakhir: <b>{lastSequenceHint}</b> (Saran: <b>{lastSequenceHint}.A</b>)
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <input
+                    type="text"
+                    value={formData.nomorSurat}
+                    disabled
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none text-slate-800 dark:text-slate-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                  />
+                )}
               </div>
             </div>
 
@@ -737,7 +836,7 @@ export default function AdminSuratSKKT({
                 <div>
                   <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Surat Sisipan Aktif</p>
                   <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
-                    Nomor surat wajib diisi manual, contoh: 251/SKKT/VII/2026.1
+                    Ketik nomor urut di tengah (contoh: 045) → menjadi {kodeKlasifikasiSKKT}/045/WHi-SKKT/{tahunDariTanggalSurat}
                   </p>
                 </div>
               </div>
