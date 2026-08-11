@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server, MapPin, KeyRound, Copy, X, Mail, AlertCircle } from 'lucide-react';
+import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server, MapPin, KeyRound, X, Mail, Phone, AlertCircle, Loader2 } from 'lucide-react';
 import { showToast } from '../utils/toast';
 import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
@@ -35,8 +35,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [currentTenant, setCurrentTenant] = useState<any>(null);
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotCopied, setForgotCopied] = useState(false);
-  const saasContactEmail = 'admin@sistemdidesa.id';
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotPhone, setForgotPhone] = useState('');
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 
   useEffect(() => {
     const initializeTenantAndBranding = async () => {
@@ -229,6 +232,94 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     }
   };
 
+  const openForgotPassword = () => {
+    setForgotEmail('');
+    setForgotPhone('');
+    setForgotError('');
+    setForgotSuccess(false);
+    setShowForgotPassword(true);
+  };
+
+  const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError('');
+
+    const email = forgotEmail.trim();
+    const phone = forgotPhone.trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const phoneValid = /^(08|62|8)\d{8,13}$/.test(phone.replace(/[\s-]/g, ''));
+
+    if (!emailValid) {
+      setForgotError('Masukkan email terdaftar yang valid.');
+      return;
+    }
+    if (!phoneValid) {
+      setForgotError('Masukkan nomor WhatsApp aktif yang valid, contoh: 08xxxxxxxxxx.');
+      return;
+    }
+
+    setForgotSubmitting(true);
+    try {
+      let saved = false;
+
+      // Simpan ke tabel dedicated (jika sudah dibuat di Supabase)
+      try {
+        const { error } = await supabase.from('password_reset_requests').insert([{
+          email,
+          no_whatsapp: phone,
+          status: 'pending',
+          timestamp: new Date().toISOString(),
+        }]);
+        if (error) {
+          console.warn('Insert ke password_reset_requests gagal:', error.message);
+        } else {
+          saved = true;
+        }
+      } catch (e) {
+        console.warn('Kesalahan insert ke password_reset_requests:', e);
+      }
+
+      // Fallback: simpan ke saas_settings agar permintaan tidak hilang
+      if (!saved) {
+        try {
+          const masterTenantId = '11111111-1111-1111-1111-111111111111';
+          const { data: existing } = await supabase
+            .from('saas_settings')
+            .select('value')
+            .eq('key', 'saas_password_reset_requests')
+            .limit(1)
+            .maybeSingle();
+          const list = existing?.value ? JSON.parse(existing.value) : [];
+          list.unshift({
+            id: 'reset-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+            email,
+            no_whatsapp: phone,
+            status: 'pending',
+            timestamp: new Date().toISOString(),
+          });
+          const jsonStr = JSON.stringify(list);
+          if (existing) {
+            await supabase.from('saas_settings').update({ value: jsonStr }).eq('key', 'saas_password_reset_requests');
+          } else {
+            await supabase.from('saas_settings').insert({ tenant_id: masterTenantId, key: 'saas_password_reset_requests', value: jsonStr });
+          }
+          saved = true;
+        } catch (e) {
+          console.warn('Fallback ke saas_settings gagal:', e);
+        }
+      }
+
+      if (!saved) {
+        setForgotError('Gagal mengirim permintaan. Periksa koneksi Anda lalu coba lagi.');
+        return;
+      }
+
+      setForgotSuccess(true);
+    } finally {
+      setForgotSubmitting(false);
+    }
+  };
+
 
   const welcomeBannerUrl = localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000';
 
@@ -412,7 +503,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               </label>
               <button
                 type="button"
-                onClick={() => setShowForgotPassword(true)}
+                onClick={openForgotPassword}
                 className="text-[10px] font-extrabold text-emerald-700 hover:underline"
               >
                 Lupa Sandi?
@@ -496,52 +587,84 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
-              <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl p-3">
-                <AlertCircle size={15} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                <p className="text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
-                  Akun desa dikelola terpusat oleh Pengelola Platform. Kata sandi tidak dapat direset secara mandiri demi keamanan data.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Hubungi Pengelola Platform</label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
-                    <Mail size={15} className="text-slate-400 flex-shrink-0" />
-                    <span className="text-sm font-mono font-bold text-slate-800 dark:text-slate-100">{saasContactEmail}</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(saasContactEmail);
-                      setForgotCopied(true);
-                      showToast('Alamat email pengelola disalin!', 'success');
-                      setTimeout(() => setForgotCopied(false), 2000);
-                    }}
-                    className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors"
-                    title="Salin email"
-                  >
-                    {forgotCopied ? <CheckCircle2 size={15} className="text-emerald-600" /> : <Copy size={15} />}
-                  </button>
+            {forgotSuccess ? (
+              <div className="px-6 py-8 space-y-4 text-center">
+                <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+                  <CheckCircle2 size={28} />
                 </div>
-              </div>
-
-              <div className="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl p-3">
-                <CheckCircle2 size={15} className="text-emerald-600 mt-0.5 flex-shrink-0" />
-                <p className="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed">
-                  Sampaikan nama desa &amp; akun Anda (Admin / Super Admin). Pengelola akan membuatkan kata sandi baru yang aman dan mengirimkannya kepada Anda.
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  ✅ Permintaan Berhasil Dikirim! Tim Pengelola Platform akan memeriksa data Anda dan menghubungi via WhatsApp untuk proses reset kata sandi.
                 </p>
+                <button
+                  onClick={() => setShowForgotPassword(false)}
+                  className="w-full px-5 py-3 bg-emerald-600 text-white font-bold text-sm rounded-xl hover:bg-emerald-700 transition-colors"
+                >
+                  Mengerti, Tutup
+                </button>
               </div>
-            </div>
+            ) : (
+              <form onSubmit={handleForgotPasswordSubmit} className="px-6 py-5 space-y-4">
+                <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl p-3">
+                  <AlertCircle size={15} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
+                    Kata sandi dikelola terpusat oleh Pengelola Platform. Isi data berikut, tim kami akan menghubungi Anda setelah permintaan diverifikasi.
+                  </p>
+                </div>
 
-            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-              <button
-                onClick={() => setShowForgotPassword(false)}
-                className="px-5 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 transition-colors"
-              >
-                Mengerti, Tutup
-              </button>
-            </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Email Terdaftar</label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="email"
+                      required
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      placeholder="admin@desaanda.id"
+                      className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Nomor WhatsApp Aktif</label>
+                  <div className="relative">
+                    <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      required
+                      value={forgotPhone}
+                      onChange={(e) => setForgotPhone(e.target.value)}
+                      placeholder="08xxxxxxxxxx"
+                      className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">Gunakan format nomor Indonesia, contoh: 08123456789</p>
+                </div>
+
+                {forgotError && (
+                  <div className="bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs font-semibold rounded-xl px-3 py-2.5">
+                    {forgotError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={forgotSubmitting}
+                  className="w-full px-5 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-2"
+                >
+                  {forgotSubmitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Mengirim...
+                    </>
+                  ) : (
+                    'Kirim Permintaan Reset'
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}
