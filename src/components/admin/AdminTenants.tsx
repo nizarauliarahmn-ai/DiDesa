@@ -5,7 +5,7 @@ import {
   Database, Plus, Search, Server, Activity, Users, MoreVertical, 
   Globe, ShieldCheck, X, Megaphone, Building2, MessageSquare, 
   Trash2, CheckCircle, ExternalLink, Edit2, Key, Copy, Check, 
-  Lock, Mail, Eye, EyeOff, CheckCircle2, AlertTriangle, Printer
+  Lock, Mail, Eye, EyeOff, CheckCircle2, AlertTriangle, Printer, RefreshCw
 } from 'lucide-react';
 import AdminGlobalUpdates from './AdminGlobalUpdates';
 import { getFeedbacks, updateFeedbackStatus, deleteFeedback, Feedback } from '../../utils/feedbackData';
@@ -54,6 +54,13 @@ export default function AdminTenants() {
   const [showRowPasswords, setShowRowPasswords] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+
+  // Reset password state
+  const [resetTenant, setResetTenant] = useState<any>(null);
+  const [resetAccount, setResetAccount] = useState<'kades' | 'admin'>('admin');
+  const [resetPassword, setResetPassword] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(true);
+  const [resetCopied, setResetCopied] = useState(false);
 
   const handleLoginAs = (tenant: any) => {
     if (!authUser) return;
@@ -363,6 +370,86 @@ export default function AdminTenants() {
     setCopiedId(id);
     showToast('Kredensial disalin ke clipboard!', 'success');
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const generateSecurePassword = () => {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    const cryptoObj = window.crypto || (window as any).msCrypto;
+    const getRand = () => {
+      if (cryptoObj && cryptoObj.getRandomValues) {
+        const buf = new Uint32Array(1);
+        cryptoObj.getRandomValues(buf);
+        return buf[0] / 4294967296;
+      }
+      return Math.random();
+    };
+    let pass = '';
+    for (let i = 0; i < 12; i++) {
+      pass += chars[Math.floor(getRand() * chars.length)];
+    }
+    return pass;
+  };
+
+  const openResetModal = (tenant: any) => {
+    setResetTenant(tenant);
+    setResetAccount('admin');
+    setResetPassword(generateSecurePassword());
+    setShowResetPassword(true);
+    setResetCopied(false);
+    setActiveDropdownId(null);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetTenant || !resetPassword.trim()) return;
+
+    if (!authUser || authUser.role !== 'saas_admin' || (authUser as any).isImpersonated) {
+      showToast('Akses ditolak: hanya Pengelola Platform (SaaS Admin) yang dapat mereset kata sandi.', 'error');
+      return;
+    }
+
+    const accountLabel = resetAccount === 'kades' ? 'Super Admin' : 'Admin';
+    setIsSubmitting(true);
+    try {
+      const updates = resetAccount === 'kades'
+        ? { kades_password: resetPassword }
+        : { admin_password: resetPassword };
+
+      const { error } = await supabase
+        .from('tenants')
+        .update(updates)
+        .eq('id', resetTenant.id);
+
+      if (error) {
+        showToast(`Gagal mereset kata sandi: ${error.message}`, 'error');
+        setIsSubmitting(false);
+        return;
+      }
+
+      setResetTenant(null);
+      showToast(`Kata sandi ${accountLabel} ${resetTenant.nama_desa} berhasil diganti!`, 'success');
+      fetchTenants();
+
+      addSaaSLog({
+        admin: authUser?.name || 'SaaS Admin',
+        aksi: 'Reset Kata Sandi',
+        target: `${resetTenant.nama_desa} (${accountLabel})`,
+        status: 'Berhasil'
+      });
+    } catch (err) {
+      console.error("Error resetting password", err);
+      showToast('Terjadi kesalahan saat mereset kata sandi', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCopyResetPassword = () => {
+    if (!resetPassword) return;
+    navigator.clipboard.writeText(resetPassword);
+    setResetCopied(true);
+    showToast('Kata sandi baru disalin ke clipboard!', 'success');
+    setTimeout(() => setResetCopied(false), 2000);
   };
 
   const filteredTenants = tenants.filter(tenant => {
@@ -873,6 +960,14 @@ export default function AdminTenants() {
                                   </button>
                                   <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
                                   <button
+                                    onClick={() => openResetModal(tenant)}
+                                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-rose-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
+                                  >
+                                    <Key size={13} className="text-gray-400" />
+                                    <span>Reset Sandi</span>
+                                  </button>
+                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
+                                  <button
                                     onClick={() => handleDeleteTenant(tenant)}
                                     className="px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
@@ -1139,6 +1234,116 @@ export default function AdminTenants() {
                 <button type="button" onClick={() => setIsEditModalOpen(false)} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl hover:bg-gray-200 transition-colors">Batal</button>
                 <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 transition-colors">
                   {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan Kredensial'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RESET PASSWORD MODAL */}
+      {resetTenant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
+              <div>
+                <h3 className="font-extrabold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                  <Key className="text-rose-600" />
+                  Reset Kata Sandi
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">{resetTenant.nama_desa} &mdash; setel ulang kata sandi akses portal desa</p>
+              </div>
+              <button onClick={() => setResetTenant(null)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleResetPassword} className="p-6 space-y-5">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Akun yang Direset</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setResetAccount('admin')}
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
+                      resetAccount === 'admin'
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700'
+                        : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-500'
+                    }`}
+                  >
+                    <span className="block text-[10px] font-black uppercase tracking-wider mb-0.5">Admin</span>
+                    <span className="block text-[11px] font-mono truncate">{resetTenant.admin_email || `admin@${resetTenant.domain || 'desa.id'}`}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResetAccount('kades')}
+                    className={`px-3 py-2.5 rounded-xl border text-left transition-all ${
+                      resetAccount === 'kades'
+                        ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-700'
+                        : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-500'
+                    }`}
+                  >
+                    <span className="block text-[10px] font-black uppercase tracking-wider mb-0.5">Super Admin</span>
+                    <span className="block text-[11px] font-mono truncate">{resetTenant.kades_email || `kades@${resetTenant.domain || 'desa.id'}`}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-bold text-gray-500 dark:text-slate-400">Kata Sandi Baru</label>
+                  <button
+                    type="button"
+                    onClick={() => { setResetPassword(generateSecurePassword()); setResetCopied(false); }}
+                    className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                  >
+                    <RefreshCw size={11} />
+                    Acak Ulang
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      required
+                      type={showResetPassword ? 'text' : 'password'}
+                      value={resetPassword}
+                      onChange={e => setResetPassword(e.target.value)}
+                      className="w-full px-3.5 pr-10 py-2.5 text-sm font-mono border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowResetPassword(!showResetPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      title={showResetPassword ? 'Sembunyikan' : 'Tampilkan'}
+                    >
+                      {showResetPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyResetPassword}
+                    className="px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors"
+                    title="Salin kata sandi"
+                  >
+                    {resetCopied ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1.5">
+                  Kata sandi otomatis dibuat dengan kombinasi huruf, angka, dan simbol. Bagikan kata sandi baru ini secara aman kepada petugas desa.
+                </p>
+              </div>
+
+              <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 rounded-xl p-3">
+                <AlertTriangle size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                  Mereset kata sandi akan segera menonaktifkan kata sandi lama. Pastikan Anda mengirimkan kata sandi baru kepada {resetAccount === 'admin' ? 'Admin' : 'Super Admin'} {resetTenant.nama_desa} melalui saluran yang aman.
+                </p>
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button type="button" onClick={() => setResetTenant(null)} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold text-xs rounded-xl hover:bg-gray-200 transition-colors">Batal</button>
+                <button type="submit" disabled={isSubmitting} className="flex-1 px-4 py-2 bg-rose-600 text-white font-bold text-xs rounded-xl hover:bg-rose-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed">
+                  {isSubmitting ? 'Mereset...' : 'Konfirmasi Reset'}
                 </button>
               </div>
             </form>

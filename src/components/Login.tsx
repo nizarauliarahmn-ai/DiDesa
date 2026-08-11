@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server, MapPin } from 'lucide-react';
+import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server, MapPin, KeyRound, Copy, X, Mail, AlertCircle } from 'lucide-react';
 import { showToast } from '../utils/toast';
 import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
@@ -33,6 +33,10 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
 
   const [currentTenant, setCurrentTenant] = useState<any>(null);
+
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotCopied, setForgotCopied] = useState(false);
+  const saasContactEmail = 'admin@sistemdidesa.id';
 
   useEffect(() => {
     const initializeTenantAndBranding = async () => {
@@ -386,9 +390,13 @@ export default function Login({ onLoginSuccess }: LoginProps) {
               <label className="block text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                 Kata Sandi
               </label>
-              <a href="#" className="text-[10px] font-extrabold text-emerald-700 hover:underline">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-[10px] font-extrabold text-emerald-700 hover:underline"
+              >
                 Lupa Sandi?
-              </a>
+              </button>
             </div>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -453,6 +461,70 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           <span>Layanan Digital Mandiri</span>
         </div>
       </div>
+
+      {/* Lupa Sandi Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center">
+              <h3 className="font-extrabold text-slate-900 dark:text-white text-lg flex items-center gap-2">
+                <KeyRound className="text-emerald-600" />
+                Lupa Kata Sandi?
+              </h3>
+              <button onClick={() => setShowForgotPassword(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4">
+              <div className="flex items-start gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl p-3">
+                <AlertCircle size={15} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                <p className="text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
+                  Akun desa dikelola terpusat oleh Pengelola Platform. Kata sandi tidak dapat direset secara mandiri demi keamanan data.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Hubungi Pengelola Platform</label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <Mail size={15} className="text-slate-400 flex-shrink-0" />
+                    <span className="text-sm font-mono font-bold text-slate-800 dark:text-slate-100">{saasContactEmail}</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(saasContactEmail);
+                      setForgotCopied(true);
+                      showToast('Alamat email pengelola disalin!', 'success');
+                      setTimeout(() => setForgotCopied(false), 2000);
+                    }}
+                    className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-emerald-600 hover:border-emerald-300 transition-colors"
+                    title="Salin email"
+                  >
+                    {forgotCopied ? <CheckCircle2 size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 rounded-xl p-3">
+                <CheckCircle2 size={15} className="text-emerald-600 mt-0.5 flex-shrink-0" />
+                <p className="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed">
+                  Sampaikan nama desa &amp; akun Anda (Admin / Super Admin). Pengelola akan membuatkan kata sandi baru yang aman dan mengirimkannya kepada Anda.
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+              <button
+                onClick={() => setShowForgotPassword(false)}
+                className="px-5 py-2.5 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700 transition-colors"
+              >
+                Mengerti, Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
