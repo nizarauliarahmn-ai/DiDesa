@@ -1,6 +1,6 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature, Calendar, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature, Calendar } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useLetterKode } from '../../../hooks/useLetterKode';
@@ -200,8 +200,17 @@ export default function AdminSuratSKKT({
 
         let seq = '';
         if (data && data[0]?.nomor) {
-          const m = String(data[0].nomor).match(/(?:^|\/|-)(\d{3,})(?:\.\d+)?(?=\/|-|$)/);
-          if (m && m[1]) seq = m[1];
+          const parts = String(data[0].nomor).split('/').map(p => p.trim()).filter(Boolean);
+          if (parts.length >= 2 && /^\d+(?:\.\d+)?$/.test(parts[1])) {
+            seq = parts[1].split('.')[0];
+          } else {
+            for (const p of parts) {
+              if (/^\d{2,4}$/.test(p) && p !== kodeKlasifikasiSKKT) {
+                seq = p;
+                break;
+              }
+            }
+          }
         }
         if (!cancelled) setLastSequenceHint(seq);
       } catch (e) {
@@ -758,18 +767,21 @@ export default function AdminSuratSKKT({
               <Calendar className="w-4 h-4 text-emerald-600" /> Pengaturan Tanggal & Nomor Surat
             </h3>
 
-            <label className="flex items-start gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isBackdate}
-                onChange={(e) => setIsBackdate(e.target.checked)}
-                className="mt-0.5 w-4 h-4 accent-emerald-600"
-              />
+            <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800/50">
               <div>
                 <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Buat Surat Sisipan (Tanggal Mundur)</span>
                 <span className="block text-[10px] text-slate-500 mt-0.5">Aktifkan untuk menyisipkan surat lama. Nomor surat wajib diisi manual.</span>
               </div>
-            </label>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
+                <input
+                  type="checkbox"
+                  checked={isBackdate}
+                  onChange={(e) => setIsBackdate(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+              </label>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
@@ -797,17 +809,17 @@ export default function AdminSuratSKKT({
                 </label>
                 {isBackdate ? (
                   <>
-                    <div className="flex items-center border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-gray-50 dark:bg-slate-800">
-                      <span className="text-gray-600 dark:text-slate-300 font-medium whitespace-nowrap">{kodeKlasifikasiSKKT} / </span>
+                    <div className="flex items-center justify-center border border-gray-300 dark:border-slate-600 rounded-lg p-2 bg-gray-50 dark:bg-slate-800 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500 transition-all">
+                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm sm:text-base select-none">{kodeKlasifikasiSKKT} /</span>
                       <input
                         type="text"
                         value={manualSequence}
                         onChange={handleManualSequenceChange}
-                        placeholder="045"
+                        placeholder="045.A"
+                        className="w-28 min-w-[110px] mx-1.5 px-2 py-1 text-center font-bold text-gray-900 dark:text-slate-100 text-sm sm:text-base bg-white dark:bg-slate-900 border border-emerald-400 rounded-md shadow-sm outline-none focus:ring-1 focus:ring-emerald-500"
                         required
-                        className="w-full bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 mx-2 px-2 py-1 text-center font-bold text-gray-800 dark:text-slate-100 outline-none rounded"
                       />
-                      <span className="text-gray-600 dark:text-slate-300 font-medium whitespace-nowrap"> / WHi-SKKT / {tahunDariTanggalSurat}</span>
+                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm sm:text-base select-none">/ WHi-SKKT / {tahunDariTanggalSurat}</span>
                     </div>
                     {isFetchingHint ? (
                       <p className="mt-1 text-xs text-slate-500">Memuat nomor terakhir...</p>
@@ -827,20 +839,6 @@ export default function AdminSuratSKKT({
                 )}
               </div>
             </div>
-
-            {isBackdate && (
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-lg flex gap-3 items-start">
-                <div className="mt-0.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-emerald-800 dark:text-emerald-400">Mode Surat Sisipan Aktif</p>
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-relaxed">
-                    Ketik nomor urut di tengah (contoh: 045) → menjadi {kodeKlasifikasiSKKT}/045/WHi-SKKT/{tahunDariTanggalSurat}
-                  </p>
-                </div>
-              </div>
-            )}
           </div>
 
           <hr className="my-6 border-gray-200 dark:border-slate-700" />
