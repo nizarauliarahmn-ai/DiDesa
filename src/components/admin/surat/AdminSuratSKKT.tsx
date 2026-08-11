@@ -803,30 +803,30 @@ export default function AdminSuratSKKT({
                 </p>
               </div>
 
-              <div>
+              <div className="w-full overflow-x-auto">
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Nomor Surat {isBackdate && <span className="text-red-500">*</span>}
                 </label>
                 {isBackdate ? (
                   <>
-                    <div className="flex items-center justify-center border border-gray-300 dark:border-slate-600 rounded-lg p-2 bg-gray-50 dark:bg-slate-800 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500 transition-all">
-                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm sm:text-base select-none">{kodeKlasifikasiSKKT} /</span>
+                    <div className="flex flex-nowrap items-center h-10 px-3 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-lg focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500 transition-all overflow-x-auto">
+                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm select-none whitespace-nowrap shrink-0">{kodeKlasifikasiSKKT} /</span>
                       <input
                         type="text"
                         value={manualSequence}
                         onChange={handleManualSequenceChange}
                         placeholder="045.A"
-                        className="w-28 min-w-[110px] mx-1.5 px-2 py-1 text-center font-bold text-gray-900 dark:text-slate-100 text-sm sm:text-base bg-white dark:bg-slate-900 border border-emerald-400 rounded-md shadow-sm outline-none focus:ring-1 focus:ring-emerald-500"
+                        className="w-20 text-center font-bold text-sm px-1.5 py-0.5 mx-1 border border-emerald-500 rounded bg-white dark:bg-slate-900 outline-none focus:ring-1 focus:ring-emerald-500 shrink-0"
                         required
                       />
-                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm sm:text-base select-none">/ WHi-SKKT / {tahunDariTanggalSurat}</span>
+                      <span className="text-gray-600 dark:text-slate-300 font-semibold text-sm select-none whitespace-nowrap shrink-0">/ WHi-SKKT / {tahunDariTanggalSurat}</span>
                     </div>
                     {isFetchingHint ? (
-                      <p className="mt-1 text-xs text-slate-500">Memuat nomor terakhir...</p>
+                      <p className="mt-1 text-[11px] text-slate-500 font-medium">Memuat nomor terakhir...</p>
                     ) : lastSequenceHint ? (
-                      <div className="mt-1 text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-100">
+                      <p className="mt-1 text-[11px] text-blue-600 font-medium">
                         💡 Terakhir: <b>{lastSequenceHint}</b> (Saran: <b>{lastSequenceHint}.A</b>)
-                      </div>
+                      </p>
                     ) : null}
                   </>
                 ) : (
