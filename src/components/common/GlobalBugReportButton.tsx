@@ -68,6 +68,21 @@ export const GlobalBugReportButton: React.FC = () => {
     });
   }, []);
 
+  const ticketsRef = useRef<BugReport[]>([]);
+
+  const hasUnreadResponse = useCallback((t: BugReport): boolean => {
+    const msgs = t.messages || [];
+    const last = msgs[msgs.length - 1];
+    return !!last && last.role === 'SaaS Admin' && Date.parse(last.timestamp) > (getReadState()[t.id] || 0);
+  }, []);
+
+  const markTicketRead = useCallback((id: string) => {
+    const read = getReadState();
+    read[id] = Date.now();
+    localStorage.setItem(READ_KEY, JSON.stringify(read));
+    setUnreadCount(computeUnread(ticketsRef.current));
+  }, []);
+
   const decideInitialView = useCallback((list: BugReport[]) => {
     const replied = list.filter(t => {
       const msgs = t.messages || [];
@@ -83,13 +98,15 @@ export const GlobalBugReportButton: React.FC = () => {
       )[0];
       setSelectedTicket(target);
       setViewMode('chat');
+      markTicketRead(target.id);
     } else {
       setViewMode('list');
     }
-  }, []);
+  }, [markTicketRead]);
 
   const applyTickets = useCallback((data: BugReport[], markRead: boolean) => {
     const retained = filterRetainedTickets(data);
+    ticketsRef.current = retained;
     setTickets(retained);
     if (markRead) {
       const read = getReadState();
@@ -110,7 +127,7 @@ export const GlobalBugReportButton: React.FC = () => {
     if (isOpen) {
       (async () => {
         const data = await fetchVillageBugReportsOnline();
-        applyTickets(data, true);
+        applyTickets(data, false);
         decideInitialView(filterRetainedTickets(data));
       })();
     }
@@ -254,8 +271,8 @@ export const GlobalBugReportButton: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-[90] flex items-center gap-2">
         <button
           onClick={handleOpen}
-          className={`group relative flex items-center justify-center w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-full font-bold shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300 ease-in-out active:scale-95 cursor-pointer border border-emerald-400/30 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
-          title="Hubungi Pusat Bantuan / Laporkan Kendala"
+          className="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-full font-bold shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300 ease-in-out active:scale-95 cursor-pointer border border-emerald-400/30"
+          title={isOpen ? 'Tutup Pusat Bantuan' : 'Hubungi Pusat Bantuan / Laporkan Kendala'}
         >
           {unreadCount > 0 && (
             <>
@@ -265,7 +282,33 @@ export const GlobalBugReportButton: React.FC = () => {
               </span>
             </>
           )}
-          <MessageSquare size={24} className="shrink-0" />
+          <div className="relative w-6 h-6 shrink-0">
+            <AnimatePresence initial={false}>
+              {isOpen ? (
+                <motion.div
+                  key="close"
+                  className="absolute inset-0 flex items-center justify-center"
+                  initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                >
+                  <X size={24} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="chat"
+                  className="absolute inset-0 flex items-center justify-center"
+                  initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                >
+                  <MessageSquare size={24} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </button>
       </div>
 
@@ -337,13 +380,18 @@ export const GlobalBugReportButton: React.FC = () => {
                 ) : (
                   <div className="space-y-2">
                     {tickets.map(ticket => (
-                      <div 
-                        key={ticket.id} 
-                        onClick={() => { setSelectedTicket(ticket); setViewMode('chat'); }}
+<div
+                        key={ticket.id}
+                        onClick={() => { markTicketRead(ticket.id); setSelectedTicket(ticket); setViewMode('chat'); }}
                         className="bg-white dark:bg-slate-800 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-400 dark:hover:border-emerald-500 cursor-pointer transition-all shadow-sm group"
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-sm text-slate-800 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{ticket.title}</h4>
+                        <div className="flex justify-between items-start gap-2 mb-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <h4 className="font-bold text-sm text-slate-800 dark:text-white line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{ticket.title}</h4>
+                            {hasUnreadResponse(ticket) && (
+                              <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shrink-0" title="Ada balasan baru belum dibaca" />
+                            )}
+                          </div>
                           <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${
                             ticket.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' :
                             ticket.status === 'Diproses' ? 'bg-amber-100 text-amber-700' :
