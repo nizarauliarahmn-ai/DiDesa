@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin } from 'lucide-react';
 import Footer from './common/Footer';
 import { supabase } from '../utils/supabase';
-import Avatar from './common/Avatar';
+import UserPlaceholder from './common/UserPlaceholder';
 
 function getKabupatenName(tenant: any): string {
   let raw = tenant.kabupaten || tenant.nama_kabupaten || tenant.kab_kota || tenant.city || tenant.regency;
@@ -218,7 +218,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
               <div className="flex -space-x-3">
                 {[1,2,3,4].map((i) => (
                   <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                     <Avatar name={String(i)} backgroundColor="gray" alt="Avatar" className="w-full h-full object-cover" />
+                     <UserPlaceholder className="w-full h-full" iconClassName="w-1/2 h-1/2 text-slate-500 dark:text-slate-300" />
                   </div>
                 ))}
               </div>

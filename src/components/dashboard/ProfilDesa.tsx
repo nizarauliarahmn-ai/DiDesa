@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, MapPin, Building, ShieldCheck, FileText, ChevronRight, X } from 'lucide-react';
-import Avatar from '../common/Avatar';
+import UserPlaceholder from '../common/UserPlaceholder';
 
 export default function ProfilDesa() {
   const [selectedLembaga, setSelectedLembaga] = useState<typeof lembagaDesa[0] | null>(null);
@@ -70,7 +70,7 @@ export default function ProfilDesa() {
             </div>
             <div className="relative z-10 flex flex-col items-center text-center space-y-4">
               <div className="w-32 h-32 rounded-full border-4 border-emerald-500/30 overflow-hidden bg-white/10 p-1">
-                <Avatar name={perangkatDesa[0].name} className="w-full h-full object-cover rounded-full" />
+                <UserPlaceholder className="w-full h-full rounded-full bg-slate-100 dark:bg-slate-800" iconClassName="w-2/5 h-2/5 text-slate-500 dark:text-slate-400" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold">{perangkatDesa[0].name}</h3>
@@ -141,7 +141,7 @@ export default function ProfilDesa() {
               whileHover={{ y: -5 }}
               className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center group transition-colors hover:bg-emerald-50 hover:border-emerald-100"
             >
-              <Avatar name={person.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm dark:shadow-none mb-3 group-hover:border-emerald-200 transition-colors" />
+              <UserPlaceholder className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white shadow-sm dark:shadow-none mb-3 group-hover:border-emerald-200 transition-colors" iconClassName="w-2/5 h-2/5 text-slate-500 dark:text-slate-400" />
               <h4 className="font-bold text-gray-900 dark:text-white text-sm">{person.name}</h4>
               <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{person.role}</p>
             </motion.div>
