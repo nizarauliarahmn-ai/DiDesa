@@ -98,3 +98,44 @@ export function getActiveTenantId(): string {
   }
   return 'sukamakmur';
 }
+
+export interface ParseInvitationResult {
+  nomorSuratUndangan?: string;
+  maksudPerjalanan?: string;
+  tempatTujuan?: string;
+  tanggalBerangkat?: string;
+  tanggalKembali?: string;
+  instansiPengundang?: string;
+  model?: string;
+  fileName?: string;
+}
+
+/**
+ * Kirim PDF surat undangan ke endpoint khusus /api/ai/parse-invitation.
+ * Server yang memegang Gemini API key membaca dokumen lalu mengembalikan data SPPD.
+ */
+export async function parseInvitationPdf(
+  file: File,
+  opts: { tenantId?: string } = {}
+): Promise<ParseInvitationResult> {
+  const arrayBuffer = await file.arrayBuffer();
+  const uint8Array = new Uint8Array(arrayBuffer);
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  const base64Data = btoa(binary);
+
+  const res = await fetch('/api/ai/parse-invitation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      tenantId: opts.tenantId || '',
+      fileName: file.name,
+      fileData: base64Data,
+      mimeType: file.type || 'application/pdf',
+      apiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
+    }),
+  });
+  return parseResponse<ParseInvitationResult>(res);
+}

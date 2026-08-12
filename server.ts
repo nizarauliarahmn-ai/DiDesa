@@ -176,6 +176,143 @@ app.post("/api/parse-profile-document", async (req, res) => {
   }
 });
 
+// POST parse PDF surat undangan => data SPPD (Auto-Fill) via Gemini
+// API key di-resolve di server: env GEMINI_API_KEY -> global_settings.master_gemini_api_key -> key dari klien.
+app.post("/api/ai/parse-invitation", async (req, res) => {
+  try {
+    const { fileData, mimeType, fileName, apiKey, tenantId } = req.body || {};
+
+    if (!fileData || typeof fileData !== "string" || !fileData.trim()) {
+      return res.status(400).json({ error: "fileData wajib diisi (base64 PDF surat undangan)" });
+    }
+    const normalizedMime = String(mimeType || "").toLowerCase();
+    if (normalizedMime !== "application/pdf" && normalizedMime !== "application/x-pdf") {
+      return res.status(400).json({ error: "Hanya file PDF yang didukung untuk surat undangan." });
+    }
+
+    // Kuota harian per desa — sama dengan /api/ai/chat
+    if (tenantId && typeof tenantId === "string" && tenantId.trim()) {
+      const quota = await getAiUsageInfo(tenantId);
+      if (!quota.hasQuota) {
+        return res.status(429).json({
+          error: `Kuota AI harian desa ini telah habis (${quota.usedQuota}/${quota.totalQuota}). Kuota direset otomatis besok.`,
+          code: "QUOTA_EXCEEDED",
+          usage: quota,
+        });
+      }
+    }
+
+    // Resolve API key
+    let resolvedKey = (process.env.GEMINI_API_KEY || "").trim();
+    if (!resolvedKey) {
+      try {
+        const settings = await getGlobalSettings();
+        resolvedKey = (settings["master_gemini_api_key"] || "").trim();
+      } catch {
+        resolvedKey = "";
+      }
+    }
+    if (!resolvedKey && typeof apiKey === "string" && apiKey.trim()) {
+      resolvedKey = apiKey.trim();
+    }
+    if (!resolvedKey) {
+      return res.status(500).json({
+        error: "GEMINI_API_KEY belum dikonfigurasi di server. Hubungi administrator DiDesa.",
+      });
+    }
+
+    let cleanBase64 = fileData;
+    if (fileData.includes(";base64,")) {
+      cleanBase64 = fileData.split(";base64,")[1];
+    }
+
+    const documentPart = {
+      inlineData: {
+        mimeType: "application/pdf",
+        data: cleanBase64,
+      },
+    };
+
+    const systemPrompt = `Anda adalah asisten administrasi pemerintah desa yang andal.
+Baca seluruh isi PDF surat undangan di atas dan ekstrak data untuk mengisi formulir Surat Perjalanan Dinas (SPPD).
+Balas HANYA dengan satu objek JSON valid. Jangan sertakan teks pembuka, markdown, atau backtick.
+Wajib gunakan struktur persis ini dan jangan mengubah nama key:
+{
+  "nomorSuratUndangan": "nomor surat undangan, kosongkan jika tidak ada",
+  "maksudPerjalanan": "tujuan/agenda/maksud kegiatan yang diundang, ringkas dan jelas",
+  "tempatTujuan": "lokasi/tempat kegiatan (nama gedung dan kota), kosongkan jika tidak ada",
+  "tanggalBerangkat": "tanggal mulai kegiatan dalam format YYYY-MM-DD",
+  "tanggalKembali": "tanggal selesai kegiatan dalam format YYYY-MM-DD (sama dengan tanggalBerangkat jika kegiatan satu hari)",
+  "instansiPengundang": "nama instansi/lembaga pengirim undangan"
+}
+Isi sebanyak mungkin field; jika informasi tidak ditemukan gunakan string kosong ("").
+Pastikan setiap tanggal valid dengan format YYYY-MM-DD.`;
+
+    const models = Array.from(new Set([
+      (process.env.AI_MODEL || "").trim(),
+      "gemini-2.0-flash",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-1.5-flash",
+    ].filter(Boolean)));
+
+    const ai = new GoogleGenAI({ apiKey: resolvedKey });
+    let reply = "";
+    let usedModel = "";
+    const allErrors: string[] = [];
+
+    for (const model of models) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: {
+            parts: [documentPart, { text: systemPrompt }],
+          },
+          config: {
+            temperature: 0.2,
+            maxOutputTokens: 4096,
+            responseMimeType: "application/json",
+          },
+        });
+        reply = (response.text || "").trim();
+        usedModel = model;
+        if (reply) break;
+      } catch (err: any) {
+        allErrors.push(`[${model}] ${(err && err.message) || err}`);
+      }
+    }
+
+    if (!reply) {
+      return res.status(500).json({
+        error: `DiDesa AI gagal membaca isi PDF.${
+          allErrors.length ? "\n" + allErrors.slice(0, 3).join("\n") : ""
+        }`,
+      });
+    }
+
+    const jsonMatch = reply.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return res.status(500).json({ error: "Respons AI tidak valid.", raw: reply.slice(0, 500) });
+    }
+
+    let parsed: any;
+    try {
+      parsed = JSON.parse(jsonMatch[0]);
+    } catch (err) {
+      return res.status(500).json({ error: "Respons AI tidak valid.", raw: reply.slice(0, 500) });
+    }
+
+    if (tenantId && typeof tenantId === "string" && tenantId.trim()) {
+      await incrementAiUsage(tenantId, getTodayDate());
+    }
+
+    res.json({ ...parsed, model: usedModel, fileName: fileName || "" });
+  } catch (err: any) {
+    console.error("[/api/ai/parse-invitation] error:", err);
+    res.status(500).json({ error: err.message || "Gagal membaca dokumen PDF" });
+  }
+});
+
 // GET remaining AI daily quota for a tenant (server-side truth)
 app.get("/api/ai/usage", async (req, res) => {
   try {

@@ -4,7 +4,7 @@ import BackdateConfig from './BackdateConfig';
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
-import { sendAiChat, getActiveTenantId } from '../../../utils/aiChat';
+import { parseInvitationPdf, getActiveTenantId } from '../../../utils/aiChat';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
@@ -321,66 +321,33 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
     setPdfFileName(file.name);
     setPdfAnalyzing(true);
-    showToast('DiDesa AI sedang menganalisa isi surat undangan...', 'info');
+    showToast('DiDesa AI sedang membaca dokumen PDF surat undangan...', 'info');
 
     try {
-      // Convert PDF to base64
-      const arrayBuffer = await file.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-      let binary = '';
-      for (let i = 0; i < uint8Array.length; i++) {
-        binary += String.fromCharCode(uint8Array[i]);
+      // Kirim ke endpoint khusus /api/ai/parse-invitation — Gemini membaca PDF di server
+      const parsed = await parseInvitationPdf(file, { tenantId });
+
+      const dataKeys = ['nomorSuratUndangan', 'maksudPerjalanan', 'tempatTujuan', 'tanggalBerangkat', 'tanggalKembali', 'instansiPengundang'];
+      const hasData = dataKeys.some(k => (parsed as any)[k] && String((parsed as any)[k]).trim());
+      if (!hasData) {
+        showToast('Tidak ada data SPPD yang dapat diekstrak dari PDF ini. Pastikan file adalah surat undangan yang jelas.', 'error');
+        return;
       }
-      const base64Data = btoa(binary);
 
-      const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
-      const prompt = `Anda adalah asisten administrasi pemerintah desa. Analisis surat undangan/disposisi ini dan ekstrak informasi untuk mengisi formulir SPPD (Surat Perjalanan Dinas) desa.
-
-Desa pengirim SPPD: ${activeDesa}
-
-Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kode blok, tanpa penjelasan lain):
-{
-  "nomorUndangan": "nomor surat undangan jika ada, kosongkan jika tidak ada",
-  "tanggalUndangan": "tanggal surat dalam format YYYY-MM-DD jika ada, kosongkan jika tidak ada",
-  "maksudPerjalanan": "tujuan/agenda/maksud kegiatan yang harus dihadiri, ringkas dan jelas",
-  "tempatTujuan": "lokasi/tempat kegiatan berlangsung (nama gedung, kota, instansi)",
-  "tanggalBerangkat": "tanggal pelaksanaan kegiatan dalam format YYYY-MM-DD",
-  "tanggalKembali": "tanggal selesai kegiatan dalam format YYYY-MM-DD (sama jika 1 hari)",
-  "instansiPengirim": "nama instansi/lembaga pengirim undangan",
-  "kepadaYth": "jabatan/nama yang dituju dalam surat undangan"
-}`;
-
-      // Panggil AI lewat server DiDesa (/api/ai/chat) — API key aman di server,
-      // kuota harian per desa diterapkan otomatis.
-      const result = await sendAiChat(tenantId, [{ role: 'user', content: '' }], {
-        systemPrompt: prompt,
-        fileData: base64Data,
-        mimeType: 'application/pdf',
-        requireJson: true,
-      });
-
-      const rawText = result.reply;
-      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Format respons tidak valid dari AI');
-
-      const parsed = JSON.parse(jsonMatch[0]);
-
-      if (parsed.nomorUndangan) {
-        setDasarNo(parsed.nomorUndangan);
+      if (parsed.nomorSuratUndangan) {
+        setDasarNo(parsed.nomorSuratUndangan);
         setIsDasarManual(false);
       }
-      if (parsed.tanggalUndangan) setDasarTgl(parsed.tanggalUndangan);
       if (parsed.maksudPerjalanan) setMaksudPerjalanan(parsed.maksudPerjalanan);
       if (parsed.tempatTujuan) setTempatTujuan(parsed.tempatTujuan);
       if (parsed.tanggalBerangkat) setTanggalBerangkat(parsed.tanggalBerangkat);
       if (parsed.tanggalKembali) setTanggalKembali(parsed.tanggalKembali);
-      if (parsed.kepadaYth) setKepadaYth(parsed.kepadaYth);
 
       setShowPdfUpload(false);
-      showToast('✅ DiDesa AI berhasil mengisi form SPPD dari surat undangan! Silakan periksa dan sesuaikan data.', 'success');
+      showToast('Data SPPD berhasil diisi otomatis dari Surat Undangan!', 'success');
     } catch (err: any) {
       console.error('AI PDF Error:', err);
-      showToast(`Gagal menganalisa PDF: ${err.message || 'Coba lagi'}`, 'error');
+      showToast(`Gagal membaca PDF: ${err.message || 'Coba lagi'}`, 'error');
     } finally {
       setPdfAnalyzing(false);
     }
@@ -895,8 +862,8 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
                   <div className="flex items-center gap-3 py-2">
                     <Loader2 className="w-5 h-5 animate-spin text-white" />
                     <div>
-                      <p className="font-semibold text-sm">Menganalisa: {pdfFileName}</p>
-                      <p className="text-xs text-white/70">Gemini AI sedang membaca dan mengekstrak data surat undangan...</p>
+                      <p className="font-semibold text-sm">Membaca Dokumen PDF: {pdfFileName}</p>
+                      <p className="text-xs text-white/70">DiDesa AI sedang mengekstrak data dari surat undangan...</p>
                     </div>
                   </div>
                 ) : (
