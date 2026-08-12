@@ -3,6 +3,23 @@ import { createPortal } from 'react-dom';
 import { Mail, Phone, Globe, Instagram, Music, ChevronUp, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin } from 'lucide-react';
 import { addFeedback } from '../../utils/feedbackData';
 
+// App-wide settings (placeholder, siap disambungkan ke useAppConfig / Supabase settings table).
+// Nilai dapat di-override via localStorage: 'global_app_settings'
+const defaultAppSettings = {
+  termsUrl: '/syarat-ketentuan',
+  privacyUrl: '/kebijakan-privasi',
+};
+
+const loadAppSettings = () => {
+  try {
+    const stored = localStorage.getItem('global_app_settings');
+    if (!stored) return defaultAppSettings;
+    return { ...defaultAppSettings, ...JSON.parse(stored) };
+  } catch {
+    return defaultAppSettings;
+  }
+};
+
 export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const footerRef = useRef<HTMLElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
@@ -32,6 +49,9 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const [globalFooterSocial2Icon, setGlobalFooterSocial2Icon] = useState(() => localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
   const [globalFooterSocial2Link, setGlobalFooterSocial2Link] = useState(() => localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
   const [globalFooterCopyright, setGlobalFooterCopyright] = useState(() => localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
+
+  // App settings (dinamis, via 'global_app_settings' di localStorage / nanti Supabase settings)
+  const [appSettings, setAppSettings] = useState(loadAppSettings);
 
   const renderSocialIcon = (iconUrl: string) => {
     if (!iconUrl) return <Globe className="w-4 h-4" />;
@@ -127,6 +147,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
       setGlobalFooterSocial2Icon(localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
       setGlobalFooterSocial2Link(localStorage.getItem('global_footer_social2_link') ?? 'https://tiktok.com/@didesa.id');
       setGlobalFooterCopyright(localStorage.getItem('global_footer_copyright') ?? '© 2026 • HAK CIPTA DILINDUNGI');
+      setAppSettings(loadAppSettings());
     };
 
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
@@ -367,6 +388,26 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
             )}
           </div>
 
+        </div>
+
+        {/* Divider */}
+        <hr className="mt-8 mb-4 border-gray-100 dark:border-slate-800" />
+
+        {/* Bottom Bar: Legal Links */}
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-[11px] sm:text-xs text-gray-500 dark:text-slate-400 pb-2">
+          {appSettings.termsUrl && (
+            <a href={appSettings.termsUrl} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5 whitespace-nowrap">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              Syarat &amp; Ketentuan
+            </a>
+          )}
+          <span className="hidden sm:inline text-gray-300 dark:text-slate-600">•</span>
+          {appSettings.privacyUrl && (
+            <a href={appSettings.privacyUrl} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5 whitespace-nowrap">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              Kebijakan Privasi
+            </a>
+          )}
         </div>
       </div>
     </footer>
