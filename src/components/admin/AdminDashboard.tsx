@@ -480,7 +480,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   }
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6 pb-24 px-2 sm:px-4">
+    <div className="space-y-6 pb-24">
       {/* Large Village Admin Hero Banner */}
       <div className="relative rounded-3xl sm:rounded-[32px] overflow-hidden bg-gradient-to-r from-emerald-950 via-emerald-900 to-teal-950 p-6 sm:p-8 md:p-10 lg:p-12 shadow-xl border border-emerald-800/30 text-white group">
         {/* Background Image with Overlay */}
@@ -592,7 +592,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
         </div>
 
         {/* Top Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 gap-4">
           <div onClick={() => setActiveTab?.('surat')} className="standard-card p-6 border-l-4 border-primary cursor-pointer hover:shadow-md transition-all">
             <div className="flex justify-between items-start mb-4">
               <div className="w-10 h-10 bg-primary-container/10 rounded-lg flex items-center justify-center text-primary">

@@ -544,7 +544,7 @@ export default function AdminAparatur() {
   }
 
   return (
-    <div className="pt-6 pb-24 px-4 md:px-8 max-w-7xl mx-auto animate-in fade-in duration-300">
+    <div className="pt-6 pb-24 animate-in fade-in duration-300">
       {/* HEADER BAR */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
         <div>

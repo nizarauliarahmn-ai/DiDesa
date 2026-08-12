@@ -676,7 +676,7 @@ export default function AdminPenduduk({
   }
 
   return (
-    <div className="max-w-7xl mx-auto pb-24 space-y-4">
+    <div className="pb-24 space-y-4">
       {/* Page Header */}
       <div className="sticky top-16 z-40 bg-slate-50 dark:bg-slate-800 pb-6 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>

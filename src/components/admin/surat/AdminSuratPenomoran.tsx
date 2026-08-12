@@ -382,7 +382,7 @@ const authUser = JSON.parse(localStorage.getItem("didesa_auth_user") || "{}");
 const isSuperAdmin = authUser?.role === "kades" || authUser?.isImpersonated;
 
 return (
-  <div className="max-w-5xl mx-auto space-y-6">
+  <div className="space-y-6">
     {/* Header */}
     <div className="sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>

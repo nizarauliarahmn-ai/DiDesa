@@ -149,7 +149,7 @@ export default function AdminSaaSLogs() {
   };
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Log Aktivitas SaaS</h2>

@@ -561,7 +561,7 @@ export default function AdminSuratSKD({
   const letterKode = activeClassification.kodeKlasifikasi || templateKode || '145';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-20">
+    <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
           title={`Buat ${activeClassification.klasifikasi}`}

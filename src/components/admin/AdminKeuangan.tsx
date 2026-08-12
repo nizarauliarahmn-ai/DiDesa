@@ -220,7 +220,7 @@ export default function AdminKeuangan() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-24 font-sans">
+    <div className="space-y-6 pb-24 font-sans">
 
       {/* Header Info & Actions */}
       <div className="sticky top-16 z-30 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl pb-4 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col md:flex-row md:items-center justify-between gap-4">

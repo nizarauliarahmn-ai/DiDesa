@@ -486,7 +486,7 @@ export default function AdminSuratUndangan({
   ).slice(0, 5);
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6 pb-24">
+    <div className="space-y-6 pb-24">
       {/* Top Bar (Reusable Standard Header) */}
       <SuratEditorHeader 
         title="Pembuat Surat Undangan Resmi"

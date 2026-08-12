@@ -123,7 +123,7 @@ export default function AdminSurat({
   }, [onClearPresetResident]);
 
   return (
-    <div className="max-w-6xl mx-auto pb-24 space-y-6">
+    <div className="pb-24 space-y-6">
       {/* Sub Navigation */}
       <div className="flex overflow-x-auto border-b border-gray-200 dark:border-slate-700 no-print">
         <button 

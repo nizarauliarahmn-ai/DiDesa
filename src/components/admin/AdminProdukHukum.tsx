@@ -6,7 +6,7 @@ export default function AdminProdukHukum() {
   const [activeTab, setActiveTab] = useState<'sk' | 'perdes'>('sk');
 
   return (
-    <div className="max-w-6xl mx-auto pb-24 space-y-6">
+    <div className="pb-24 space-y-6">
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Produk Hukum & SK</h2>

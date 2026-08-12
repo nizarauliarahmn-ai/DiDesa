@@ -235,7 +235,7 @@ export default function AdminAspirasi({
 
   return (
     <>
-    <div className="max-w-6xl mx-auto pb-24 space-y-6">
+    <div className="pb-24 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Aspirasi Warga</h2>

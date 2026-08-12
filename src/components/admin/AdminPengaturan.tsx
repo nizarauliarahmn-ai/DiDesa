@@ -237,7 +237,7 @@ export default function AdminPengaturan() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
           <h2 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">

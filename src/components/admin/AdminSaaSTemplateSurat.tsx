@@ -352,7 +352,7 @@ export default function AdminSaaSTemplateSurat() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto pb-24 space-y-6">
+    <div className="pb-24 space-y-6">
       <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm dark:shadow-none border border-slate-100 dark:border-slate-800 relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-5">
           <FileText size={120} />

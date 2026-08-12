@@ -712,7 +712,7 @@ export default function AdminSuratSPT({
 
   // ===================== RENDER =====================
   return (
-    <div className="max-w-7xl mx-auto space-y-5 pb-20">
+    <div className="space-y-5 pb-20">
       {/* 📜 Header 📜 */}
       <SuratEditorHeader 
         title="Buat SPT"

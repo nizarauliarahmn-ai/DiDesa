@@ -594,7 +594,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   };
 
   return (
-    <div className="max-w-6xl mx-auto pb-24 space-y-8">
+    <div className="pb-24 space-y-8">
       {/* Header section instead of Stepper */}
       <div className="bg-gradient-to-r from-emerald-800 to-emerald-950 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden mb-6">
         <div className="absolute right-0 bottom-0 opacity-10 translate-y-1/3 translate-x-1/6 pointer-events-none">

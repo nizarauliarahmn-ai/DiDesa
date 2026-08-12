@@ -36,7 +36,7 @@ export default function AdminPanduan() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-24 print:p-0 print:m-0">
+    <div className="space-y-6 pb-24 print:p-0 print:m-0">
       
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden print:hidden">
