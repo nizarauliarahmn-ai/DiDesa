@@ -347,7 +347,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       showToast('Data SPPD berhasil diisi otomatis dari Surat Undangan!', 'success');
     } catch (err: any) {
       console.error('AI PDF Error:', err);
-      showToast(`Gagal membaca PDF: ${err.message || 'Coba lagi'}`, 'error');
+      if (err && err.code === 'API_KEY_MISSING') {
+        showToast('⚠️ Fitur AI Belum Aktif: API Key Google AI belum dimasukkan di Pengaturan SaaS. Silakan hubungi Admin untuk mengaktifkannya.', 'info');
+      } else if (err && (err.code === 'API_KEY_INVALID' || err.code === 'QUOTA_EXCEEDED')) {
+        showToast('❌ Fitur AI Tidak Dapat Digunakan: API Key tidak valid atau batas kuota harian telah tercapai.', 'error');
+      } else {
+        showToast('❌ Gagal Membaca Dokumen: Pastikan file yang diunggah berupa PDF Surat Undangan yang jelas.', 'error');
+      }
     } finally {
       setPdfAnalyzing(false);
     }

@@ -187,7 +187,11 @@ app.post("/api/ai/parse-invitation", async (req, res) => {
     }
     const normalizedMime = String(mimeType || "").toLowerCase();
     if (normalizedMime !== "application/pdf" && normalizedMime !== "application/x-pdf") {
-      return res.status(400).json({ error: "Hanya file PDF yang didukung untuk surat undangan." });
+      return res.status(400).json({
+        success: false,
+        code: "INVALID_FILE",
+        message: "Hanya file PDF yang didukung untuk surat undangan.",
+      });
     }
 
     // Kuota harian per desa — sama dengan /api/ai/chat
@@ -195,6 +199,7 @@ app.post("/api/ai/parse-invitation", async (req, res) => {
       const quota = await getAiUsageInfo(tenantId);
       if (!quota.hasQuota) {
         return res.status(429).json({
+          success: false,
           error: `Kuota AI harian desa ini telah habis (${quota.usedQuota}/${quota.totalQuota}). Kuota direset otomatis besok.`,
           code: "QUOTA_EXCEEDED",
           usage: quota,
@@ -216,8 +221,10 @@ app.post("/api/ai/parse-invitation", async (req, res) => {
       resolvedKey = apiKey.trim();
     }
     if (!resolvedKey) {
-      return res.status(500).json({
-        error: "GEMINI_API_KEY belum dikonfigurasi di server. Hubungi administrator DiDesa.",
+      return res.status(422).json({
+        success: false,
+        code: "API_KEY_MISSING",
+        message: "API Key AI belum dikonfigurasi oleh Admin.",
       });
     }
 
@@ -259,7 +266,13 @@ Pastikan setiap tanggal valid dengan format YYYY-MM-DD.`;
     const ai = new GoogleGenAI({ apiKey: resolvedKey });
     let reply = "";
     let usedModel = "";
+    let authOrQuotaError = false;
     const allErrors: string[] = [];
+
+    const isGeminiAuthOrQuotaError = (err: any): boolean => {
+      const raw = String((err && err.message) || err || "");
+      return /api key|invalid key|401|403|429|permission denied|unauthori|unauthenticated|quota|daily limit|resource exhausted|rate limit/i.test(raw);
+    };
 
     for (const model of models) {
       try {
@@ -278,38 +291,62 @@ Pastikan setiap tanggal valid dengan format YYYY-MM-DD.`;
         usedModel = model;
         if (reply) break;
       } catch (err: any) {
+        if (isGeminiAuthOrQuotaError(err)) authOrQuotaError = true;
         allErrors.push(`[${model}] ${(err && err.message) || err}`);
       }
     }
 
     if (!reply) {
+      if (authOrQuotaError) {
+        return res.status(403).json({
+          success: false,
+          code: "API_KEY_INVALID",
+          message: "API Key AI tidak valid atau kuota Google AI telah habis.",
+        });
+      }
       return res.status(500).json({
-        error: `DiDesa AI gagal membaca isi PDF.${
-          allErrors.length ? "\n" + allErrors.slice(0, 3).join("\n") : ""
-        }`,
+        success: false,
+        code: "PARSE_ERROR",
+        message: "DiDesa AI gagal membaca isi PDF. Pastikan file adalah surat undangan yang jelas.",
+        detail: allErrors.slice(0, 3).join("\n"),
       });
     }
 
     const jsonMatch = reply.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return res.status(500).json({ error: "Respons AI tidak valid.", raw: reply.slice(0, 500) });
+      return res.status(500).json({
+        success: false,
+        code: "PARSE_ERROR",
+        message: "DiDesa AI tidak dapat membaca isi dokumen. Pastikan file adalah surat undangan PDF yang jelas.",
+        raw: reply.slice(0, 500),
+      });
     }
 
     let parsed: any;
     try {
       parsed = JSON.parse(jsonMatch[0]);
     } catch (err) {
-      return res.status(500).json({ error: "Respons AI tidak valid.", raw: reply.slice(0, 500) });
+      return res.status(500).json({
+        success: false,
+        code: "PARSE_ERROR",
+        message: "DiDesa AI tidak dapat membaca isi dokumen. Pastikan file adalah surat undangan PDF yang jelas.",
+        raw: reply.slice(0, 500),
+      });
     }
 
     if (tenantId && typeof tenantId === "string" && tenantId.trim()) {
       await incrementAiUsage(tenantId, getTodayDate());
     }
 
-    res.json({ ...parsed, model: usedModel, fileName: fileName || "" });
+    res.json({ success: true, ...parsed, model: usedModel, fileName: fileName || "" });
   } catch (err: any) {
     console.error("[/api/ai/parse-invitation] error:", err);
-    res.status(500).json({ error: err.message || "Gagal membaca dokumen PDF" });
+    res.status(500).json({
+      success: false,
+      code: "PARSE_ERROR",
+      message: "Terjadi kesalahan saat membaca dokumen PDF.",
+      detail: err.message || "",
+    });
   }
 });
 

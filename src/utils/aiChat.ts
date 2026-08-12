@@ -26,10 +26,23 @@ export interface AiChatOptions {
 
 export class QuotaExceededError extends Error {
   usage: AiUsage | null;
+  code: string;
   constructor(message: string, usage: AiUsage | null = null) {
     super(message);
     this.name = 'QuotaExceededError';
+    this.code = 'QUOTA_EXCEEDED';
     this.usage = usage;
+  }
+}
+
+export class AiApiError extends Error {
+  code: string;
+  status: number;
+  constructor(message: string, code: string, status: number) {
+    super(message);
+    this.name = 'AiApiError';
+    this.code = code;
+    this.status = status;
   }
 }
 
@@ -41,12 +54,21 @@ async function parseResponse<T>(res: Response): Promise<T> {
     data = {};
   }
 
-  if (res.status === 429 && (data.code === 'QUOTA_EXCEEDED' || !res.ok)) {
-    throw new QuotaExceededError(data.error || 'Kuota AI harian telah habis.', data.usage || null);
-  }
-
   if (!res.ok) {
-    throw new Error(data.error || `Terjadi kesalahan pada server (HTTP ${res.status}).`);
+    if (res.status === 429 && data.code === 'QUOTA_EXCEEDED') {
+      throw new QuotaExceededError(
+        data.message || data.error || 'Kuota AI harian telah habis.',
+        data.usage || null
+      );
+    }
+    if (data.code) {
+      throw new AiApiError(
+        data.message || data.error || `Terjadi kesalahan pada server (HTTP ${res.status}).`,
+        data.code,
+        res.status
+      );
+    }
+    throw new Error(data.error || data.message || `Terjadi kesalahan pada server (HTTP ${res.status}).`);
   }
 
   return data as T;
