@@ -21,7 +21,8 @@ interface FormalAvatarProps {
 
 export default function FormalAvatar({ name, src, backgroundColor, alt, className }: FormalAvatarProps) {
   const [failed, setFailed] = useState(false);
-  const url = src || formalAvatarUrl(name, backgroundColor);
+  const isDicebear = !!src && src.includes('dicebear.com');
+  const url = (src && !isDicebear) ? src : formalAvatarUrl(name, backgroundColor);
 
   if (failed) {
     return (

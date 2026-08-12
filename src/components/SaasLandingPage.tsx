@@ -218,7 +218,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
               <div className="flex -space-x-3">
                 {[1,2,3,4].map((i) => (
                   <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                     <FormalAvatar name={String(i)} backgroundColor="d1d5db" alt="Avatar" className="w-full h-full object-cover" />
+                     <FormalAvatar name={String(i)} alt="Avatar" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>

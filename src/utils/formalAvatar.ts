@@ -1,16 +1,16 @@
-// Helper avatar ilustrasi gaya formal & profesional.
-// Memakai Dicebear Avataaars (v9) alih-alih gaya kasual (micah/notionists):
-// - Warna rambut pakai kode hex natural (hitam, coklat, coklat tua, abu-abu).
-//   Catatan: API Dicebear v9 tidak menerima nama warna (mis. "black"), hanya kode hex/[transparent].
-// - Potongan rambut pendek & rapi (hanya nilai `top` yang terverifikasi valid di API v9).
-// - Pakaian formal berkerah (blazer + kemeja / kemeja / collar + sweater) warna netral.
-// - Ekspresi wajah profesional (tersenyum natural).
+// Helper avatar ilustrasi gaya formal, seragam, & profesional.
+// Memakai Dicebear Avataaars (v9):
+// - Latar belakang: lingkaran solid pirus/teal (senada tema utama aplikasi).
+// - Rambut: warna natural (hitam / coklat tua) dengan potongan rapi & tertata, tanpa warna terang/neon.
+// - Pakaian: berkerah navy gelap profesional (blazer + kemeja putih) sehingga detail kerah putih tampak di dalam.
+// - Ekspresi: senyum ramah yang tenang & berwibawa.
+// Catatan API v9: hairColor/clothingColor wajib kode hex atau "transparent", bukan nama warna.
 
-const HAIR_COLORS = ['2B2B2B', '6B4423', '3E2C20', '9CA3AF'];
-const NEAT_SHORT_HAIR = ['shortFlat', 'shortRound', 'shortCurly', 'shortWaved'];
-const FORMAL_CLOTHING_TYPES = ['blazerAndShirt', 'blazerAndSweater', 'collarAndSweater'];
-const NEUTRAL_CLOTHING_COLORS = ['2C3E50', '34495E', '4A5568', '5D6D7E', '1F2937', '374151', '3B4252', '7F8C8D'];
-const PROFESSIONAL_MOUTHS = ['default', 'smile'];
+const DEFAULT_BACKGROUND = '14B8A6'; // pirus/teal
+const HAIR_COLORS = ['1C1917', '26201C', '2E2723', '3B2F23']; // hitam & coklat tua natural
+const NEAT_SHORT_HAIR = ['shortFlat', 'shortRound', 'shortCurly', 'shortWaved']; // terverifikasi valid di API v9
+const NAVY_CLOTHING_COLORS = ['1E3A8A', '172554', '1E3A5F', '16324F', '0B2447'];
+const PROFESSIONAL_MOUTHS = ['smile'];
 
 function seedHash(seed: string): number {
   let h = 0;
@@ -34,12 +34,11 @@ export function formalAvatarUrl(seed: string, backgroundColor?: string): string 
     ['hairColor', pick(HAIR_COLORS, h, 2)],
     ['facialHairType', 'blank'],
     ['facialHairColor', pick(HAIR_COLORS, h, 2)],
-    ['clothingType', pick(FORMAL_CLOTHING_TYPES, h, 3)],
-    ['clothingColor', pick(NEUTRAL_CLOTHING_COLORS, h, 4)],
-    ['mouthType', pick(PROFESSIONAL_MOUTHS, h, 5)],
+    ['clothingType', 'blazerAndShirt'],
+    ['clothingColor', pick(NAVY_CLOTHING_COLORS, h, 3)],
+    ['mouthType', 'smile'],
+    ['backgroundColor', backgroundColor || DEFAULT_BACKGROUND],
   ];
-
-  if (backgroundColor) params.push(['backgroundColor', backgroundColor]);
 
   const qs = params.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
   return `https://api.dicebear.com/9.x/avataaars/svg?${qs}`;
