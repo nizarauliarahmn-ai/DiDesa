@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   LifeBuoy, Bug, X, Send, AlertTriangle, CheckCircle2, 
   HelpCircle, Sparkles, MessageSquare, Info, ShieldAlert, Monitor, Clock, ChevronLeft, Plus
 } from 'lucide-react';
-import { submitBugReportOnline, fetchVillageBugReportsOnline, replyToBugReportOnline, BugReport } from '../../utils/bugReportService';
+import { AnimatePresence, motion } from 'motion/react';
+import { submitBugReportOnline, fetchVillageBugReportsOnline, replyToBugReportOnline, BugReport, SETTINGS_KEY } from '../../utils/bugReportService';
+import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 
 export const GlobalBugReportButton: React.FC = () => {
@@ -34,24 +36,98 @@ export const GlobalBugReportButton: React.FC = () => {
     urgency: 'Sedang' as 'Rendah' | 'Sedang' | 'Tinggi' | 'Mendesak'
   });
 
-  const fetchTickets = async () => {
-    const data = await fetchVillageBugReportsOnline();
-    setTickets(data);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const lastRefreshRef = useRef(0);
+
+  const READ_KEY = 'saas_help_read_state';
+  const getReadState = (): Record<string, number> => {
+    try {
+      return JSON.parse(localStorage.getItem(READ_KEY) || '{}');
+    } catch {
+      return {};
+    }
   };
+  const computeUnread = (list: BugReport[]): number => {
+    const read = getReadState();
+    return list.filter(t => {
+      const msgs = t.messages || [];
+      const last = msgs[msgs.length - 1];
+      return !!last && last.role === 'SaaS Admin' && Date.parse(last.timestamp) > (read[t.id] || 0);
+    }).length;
+  };
+
+  const applyTickets = useCallback((data: BugReport[], markRead: boolean) => {
+    setTickets(data);
+    if (markRead) {
+      const read = getReadState();
+      data.forEach(t => { read[t.id] = Date.now(); });
+      localStorage.setItem(READ_KEY, JSON.stringify(read));
+      setUnreadCount(0);
+    } else {
+      setUnreadCount(computeUnread(data));
+    }
+  }, []);
+
+  const fetchTickets = useCallback(async (markRead = false) => {
+    const data = await fetchVillageBugReportsOnline();
+    applyTickets(data, markRead);
+  }, [applyTickets]);
 
   useEffect(() => {
     if (isOpen) {
-      fetchTickets();
+      fetchTickets(true);
     }
+  }, [isOpen, fetchTickets]);
+
+  // Polling berkala untuk badge notifikasi (tidak perlu refresh halaman)
+  useEffect(() => {
+    fetchTickets(false);
+    const id = setInterval(() => fetchTickets(false), 20000);
+    return () => clearInterval(id);
+  }, [fetchTickets]);
+
+  // Realtime Supabase (best-effort; jika tidak aktif, polling tetap jalan)
+  useEffect(() => {
+    let channel: any = null;
+    try {
+      channel = supabase
+        .channel('saas-bantuan-live')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'saas_settings', filter: `key=eq.${SETTINGS_KEY}` }, async () => {
+          const now = Date.now();
+          if (now - lastRefreshRef.current < 3000) return;
+          lastRefreshRef.current = now;
+          await fetchTickets(false);
+        })
+        .subscribe();
+    } catch (e) {
+      console.warn('Realtime bantuan SaaS tidak tersedia:', e);
+    }
+    return () => {
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch {}
+      }
+    };
+  }, [fetchTickets]);
+
+  // Tutup dengan tombol Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, [isOpen]);
 
   useEffect(() => {
     const handleUpdate = () => {
-      if (isOpen) fetchTickets();
+      fetchTickets(false);
     };
     window.addEventListener('bug_reports_updated', handleUpdate);
     return () => window.removeEventListener('bug_reports_updated', handleUpdate);
-  }, [isOpen]);
+  }, [fetchTickets]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -142,15 +218,39 @@ export const GlobalBugReportButton: React.FC = () => {
           className="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-full font-bold shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300 active:scale-95 cursor-pointer border border-emerald-400/30"
           title="Hubungi Pusat Bantuan / Laporkan Kendala"
         >
-          <div className="w-3 h-3 rounded-full bg-rose-400 animate-ping absolute top-0 right-0" />
+          {unreadCount > 0 && (
+            <>
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-rose-400 animate-ping" />
+              <span className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center ring-2 ring-white shadow-md shadow-rose-500/40 z-10">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            </>
+          )}
           <MessageSquare size={24} className="shrink-0" />
         </button>
       </div>
 
       {/* MODAL FORM LAPORAN BUG / KENDALA */}
-      {isOpen && (
-        <div className="fixed bottom-24 right-6 z-[110] flex items-end justify-end p-0">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl w-[380px] sm:w-[420px] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[75vh] min-h-[500px] overflow-hidden origin-bottom-right animate-in zoom-in-95 duration-200 shadow-emerald-900/20">
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop transparan: klik di luar untuk menutup */}
+            <motion.div
+              className="fixed inset-0 z-[100]"
+              onClick={() => setIsOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+            <motion.div
+              className="fixed bottom-24 right-6 z-[110] flex items-end justify-end p-0 origin-bottom-right"
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
+              <div className="bg-white dark:bg-slate-900 rounded-3xl w-[380px] sm:w-[420px] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[75vh] min-h-[500px] overflow-hidden shadow-emerald-900/20">
             
             {/* Header */}
             <div className="p-5 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 text-white flex items-center justify-between relative overflow-hidden shrink-0">
@@ -316,8 +416,10 @@ export const GlobalBugReportButton: React.FC = () => {
             )}
 
           </div>
-        </div>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };

@@ -22,7 +22,7 @@ export interface BugReport {
   page_url?: string;
 }
 
-const SETTINGS_KEY = 'saas_global_bug_reports';
+export const SETTINGS_KEY = 'saas_global_bug_reports';
 const GLOBAL_TENANT_ID = '00000000-0000-0000-0000-000000000000';
 
 /**
