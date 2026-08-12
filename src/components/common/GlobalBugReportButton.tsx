@@ -8,6 +8,9 @@ import { submitBugReportOnline, fetchVillageBugReportsOnline, replyToBugReportOn
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 
+// Batas waktu penyimpanan tiket berstatus 'Selesai' sebelum otomatis diarsipkan dari daftar.
+const COMPLETED_TICKET_EXPIRY_DAYS = 7;
+
 export const GlobalBugReportButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,17 +59,47 @@ export const GlobalBugReportButton: React.FC = () => {
     }).length;
   };
 
+  const filterRetainedTickets = useCallback((list: BugReport[]): BugReport[] => {
+    const cutoff = Date.now() - COMPLETED_TICKET_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+    return list.filter(t => {
+      if (t.status !== 'Selesai') return true;
+      const doneAt = Date.parse(t.updated_at || t.created_at) || 0;
+      return doneAt >= cutoff;
+    });
+  }, []);
+
+  const decideInitialView = useCallback((list: BugReport[]) => {
+    const replied = list.filter(t => {
+      const msgs = t.messages || [];
+      const last = msgs[msgs.length - 1];
+      return !!last && last.role === 'SaaS Admin';
+    });
+    const candidates = replied.length
+      ? replied
+      : list.filter(t => t.status === 'Menunggu' || t.status === 'Diproses');
+    if (candidates.length) {
+      const target = [...candidates].sort(
+        (a, b) => Date.parse(b.updated_at || b.created_at) - Date.parse(a.updated_at || a.created_at)
+      )[0];
+      setSelectedTicket(target);
+      setViewMode('chat');
+    } else {
+      setViewMode('list');
+    }
+  }, []);
+
   const applyTickets = useCallback((data: BugReport[], markRead: boolean) => {
-    setTickets(data);
+    const retained = filterRetainedTickets(data);
+    setTickets(retained);
     if (markRead) {
       const read = getReadState();
-      data.forEach(t => { read[t.id] = Date.now(); });
+      retained.forEach(t => { read[t.id] = Date.now(); });
       localStorage.setItem(READ_KEY, JSON.stringify(read));
       setUnreadCount(0);
     } else {
-      setUnreadCount(computeUnread(data));
+      setUnreadCount(computeUnread(retained));
     }
-  }, []);
+  }, [filterRetainedTickets]);
 
   const fetchTickets = useCallback(async (markRead = false) => {
     const data = await fetchVillageBugReportsOnline();
@@ -75,9 +108,13 @@ export const GlobalBugReportButton: React.FC = () => {
 
   useEffect(() => {
     if (isOpen) {
-      fetchTickets(true);
+      (async () => {
+        const data = await fetchVillageBugReportsOnline();
+        applyTickets(data, true);
+        decideInitialView(filterRetainedTickets(data));
+      })();
     }
-  }, [isOpen, fetchTickets]);
+  }, [isOpen, applyTickets, decideInitialView, filterRetainedTickets]);
 
   // Polling berkala untuk badge notifikasi (tidak perlu refresh halaman)
   useEffect(() => {
@@ -131,7 +168,9 @@ export const GlobalBugReportButton: React.FC = () => {
 
   const handleOpen = () => {
     setIsOpen(true);
-    setViewMode('list');
+    if (tickets.length) {
+      decideInitialView(tickets);
+    }
   };
 
   const handleNewTicket = () => {
@@ -215,7 +254,7 @@ export const GlobalBugReportButton: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-[90] flex items-center gap-2">
         <button
           onClick={handleOpen}
-          className="group relative flex items-center justify-center w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-full font-bold shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300 active:scale-95 cursor-pointer border border-emerald-400/30"
+          className={`group relative flex items-center justify-center w-14 h-14 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-full font-bold shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all duration-300 ease-in-out active:scale-95 cursor-pointer border border-emerald-400/30 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
           title="Hubungi Pusat Bantuan / Laporkan Kendala"
         >
           {unreadCount > 0 && (
