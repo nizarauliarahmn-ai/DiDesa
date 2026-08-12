@@ -3,7 +3,6 @@ import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, 
 import { showToast } from '../utils/toast';
 import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
-import { formalAvatarUrl } from '../utils/formalAvatar';
 
 interface LoginProps {
   onLoginSuccess: (user: { email: string; role: 'admin' | 'kades' | 'saas_admin' | 'public'; name: string; avatar: string }) => void;
@@ -115,7 +114,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           email: email,
           role: 'saas_admin' as const,
           name: 'Pemilik Platform (SaaS)',
-          avatar: formalAvatarUrl('SaaS')
+          avatar: ''
         };
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
         onLoginSuccess(loggedUser);
@@ -161,7 +160,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           role: 'kades' as const,
           name: `Super Admin ${matchingTenantKades.nama_desa}`,
           tenantId: matchingTenantKades.id,
-          avatar: formalAvatarUrl('Kades')
+          avatar: ''
         };
         localStorage.setItem('kop_desa', matchingTenantKades.nama_desa);
         localStorage.setItem('village_name', matchingTenantKades.nama_desa);
@@ -199,7 +198,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           role: 'admin' as const,
           name: `Admin ${matchingTenantAdmin.nama_desa}`,
           tenantId: matchingTenantAdmin.id,
-          avatar: formalAvatarUrl('Admin')
+          avatar: ''
         };
         localStorage.setItem('kop_desa', matchingTenantAdmin.nama_desa);
         localStorage.setItem('village_name', matchingTenantAdmin.nama_desa);

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, MapPin, Building, ShieldCheck, FileText, ChevronRight, X } from 'lucide-react';
-import { formalAvatarUrl } from '../../utils/formalAvatar';
-import FormalAvatar from '../common/FormalAvatar';
+import Avatar from '../common/Avatar';
 
 export default function ProfilDesa() {
   const [selectedLembaga, setSelectedLembaga] = useState<typeof lembagaDesa[0] | null>(null);
@@ -21,7 +20,7 @@ export default function ProfilDesa() {
   };
 
   const [perangkatDesa, setPerangkatDesa] = useState([
-    { name: 'Belum Diatur', role: 'Kepala Desa', photo: formalAvatarUrl('BelumDiatur') }
+    { name: 'Belum Diatur', role: 'Kepala Desa' }
   ]);
 
   useEffect(() => {
@@ -32,8 +31,7 @@ export default function ProfilDesa() {
         if (Array.isArray(officers) && officers.length > 0) {
           // Filter to only include actual Perangkat Desa (not BPD, LPM, etc. which usually have 'Ketua' or specific keywords, or just use all for now since they are managed centrally)
           const mapped = officers.map((officer: any) => ({
-            ...officer,
-            photo: formalAvatarUrl(officer.name)
+            ...officer
           }));
           setPerangkatDesa(mapped);
         }
@@ -72,7 +70,7 @@ export default function ProfilDesa() {
             </div>
             <div className="relative z-10 flex flex-col items-center text-center space-y-4">
               <div className="w-32 h-32 rounded-full border-4 border-emerald-500/30 overflow-hidden bg-white/10 p-1">
-                <FormalAvatar name={perangkatDesa[0].name} src={perangkatDesa[0].photo} className="w-full h-full object-cover rounded-full" />
+                <Avatar name={perangkatDesa[0].name} className="w-full h-full object-cover rounded-full" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold">{perangkatDesa[0].name}</h3>
@@ -143,7 +141,7 @@ export default function ProfilDesa() {
               whileHover={{ y: -5 }}
               className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center group transition-colors hover:bg-emerald-50 hover:border-emerald-100"
             >
-              <FormalAvatar name={person.name} src={person.photo} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm dark:shadow-none mb-3 group-hover:border-emerald-200 transition-colors" />
+              <Avatar name={person.name} className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm dark:shadow-none mb-3 group-hover:border-emerald-200 transition-colors" />
               <h4 className="font-bold text-gray-900 dark:text-white text-sm">{person.name}</h4>
               <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{person.role}</p>
             </motion.div>

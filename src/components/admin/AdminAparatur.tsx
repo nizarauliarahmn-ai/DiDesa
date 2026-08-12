@@ -6,7 +6,7 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { generateKopSuratHTML } from '../../utils/letterFormat';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 import ResidentSearchInput from './ResidentSearchInput';
-import FormalAvatar from '../common/FormalAvatar';
+import Avatar from '../common/Avatar';
 
 interface Officer {
   name: string;
@@ -521,16 +521,13 @@ export default function AdminAparatur() {
     return v && v !== '-' ? v : '-';
   };
 
-  const OfficerAvatar = ({ officer, colorClass }: { officer: Officer; colorClass: string }) => {
-    if (officer.photo) {
-      return (
-        <FormalAvatar name={officer.name} src={officer.photo} className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm shrink-0" />
-      );
-    }
+  const OfficerAvatar = ({ officer }: { officer: Officer }) => {
     return (
-      <div className={`w-14 h-14 rounded-full ${colorClass} flex items-center justify-center text-white font-extrabold text-base shrink-0 shadow-sm`}>
-        {getInitials(officer.name)}
-      </div>
+      <Avatar
+        name={officer.name}
+        src={officer.photo}
+        className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm shrink-0"
+      />
     );
   };
 
@@ -609,7 +606,7 @@ export default function AdminAparatur() {
             {officers.map((officer, index) => (
               <div key={index} className="p-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-emerald-200 transition-all group relative">
                 <div className="pr-12 flex items-start gap-3">
-                  <OfficerAvatar officer={officer} colorClass="bg-emerald-500" />
+                  <OfficerAvatar officer={officer} />
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-sm text-gray-900 dark:text-white truncate uppercase">{officer.name}</p>
                     <p className="text-xs text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-wider mt-0.5">{officer.role}</p>
@@ -694,7 +691,7 @@ export default function AdminAparatur() {
             {bpdList.map((bpd, index) => (
               <div key={index} className="p-4 bg-indigo-50/50 dark:bg-slate-800/60 rounded-xl border border-indigo-100 dark:border-slate-800 hover:border-indigo-300 transition-all group relative">
                 <div className="pr-12 flex items-start gap-3">
-                  <OfficerAvatar officer={bpd} colorClass="bg-indigo-500" />
+                  <OfficerAvatar officer={bpd} />
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-sm text-gray-900 dark:text-white truncate uppercase">{bpd.name}</p>
                     <p className="text-xs text-indigo-700 dark:text-indigo-400 font-extrabold uppercase tracking-wider mt-0.5">{bpd.role}</p>
@@ -767,7 +764,7 @@ export default function AdminAparatur() {
             {lpmList.map((lpm, index) => (
               <div key={index} className="p-4 bg-amber-50/40 dark:bg-slate-800/60 rounded-xl border border-amber-100 dark:border-slate-800 hover:border-amber-300 transition-all group relative">
                 <div className="pr-12 flex items-start gap-3">
-                  <OfficerAvatar officer={lpm} colorClass="bg-amber-500" />
+                  <OfficerAvatar officer={lpm} />
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-sm text-gray-900 dark:text-white truncate uppercase">{lpm.name}</p>
                     <p className="text-xs text-amber-700 dark:text-amber-400 font-extrabold uppercase tracking-wider mt-0.5">{lpm.role}</p>
