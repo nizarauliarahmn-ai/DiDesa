@@ -38,6 +38,8 @@ import TenantNotFound from './components/TenantNotFound';
 import TenantPending from './components/TenantPending';
 import AdminPendingApprovals from './components/admin/AdminPendingApprovals';
 import Footer from './components/common/Footer';
+import SyaratKetentuanPage from './pages/SyaratKetentuan';
+import KebijakanPrivasiPage from './pages/KebijakanPrivasi';
 import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant, clearTenantCache } from './utils/tenantResolver';
@@ -440,6 +442,14 @@ export default function App() {
   }
   if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
     return <><PublicVerifikasiSurat /><ToastContainer /></>;
+  }
+
+  // Halaman dokumen legal publik (Syarat & Ketentuan / Kebijakan Privasi)
+  if (window.location.pathname.includes('/syarat-ketentuan')) {
+    return <><SyaratKetentuanPage /><Footer /><ToastContainer /></>;
+  }
+  if (window.location.pathname.includes('/kebijakan-privasi')) {
+    return <><KebijakanPrivasiPage /><Footer /><ToastContainer /></>;
   }
 
   if (tenantValid === false) {

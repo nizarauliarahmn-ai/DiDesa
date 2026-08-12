@@ -2,23 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Mail, Phone, Globe, Instagram, Music, ChevronUp, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin } from 'lucide-react';
 import { addFeedback } from '../../utils/feedbackData';
-
-// App-wide settings (placeholder, siap disambungkan ke useAppConfig / Supabase settings table).
-// Nilai dapat di-override via localStorage: 'global_app_settings'
-const defaultAppSettings = {
-  termsUrl: '/syarat-ketentuan',
-  privacyUrl: '/kebijakan-privasi',
-};
-
-const loadAppSettings = () => {
-  try {
-    const stored = localStorage.getItem('global_app_settings');
-    if (!stored) return defaultAppSettings;
-    return { ...defaultAppSettings, ...JSON.parse(stored) };
-  } catch {
-    return defaultAppSettings;
-  }
-};
+import { loadAppSettings } from '../../utils/appSettings';
 
 export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const footerRef = useRef<HTMLElement>(null);
