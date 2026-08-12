@@ -1,23 +1,45 @@
 import React, { useState } from 'react';
-import { Bot, Sparkles, Send, User } from 'lucide-react';
+import { Bot, Sparkles, Send, User, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { sendAiChat, getActiveTenantId, AiChatMessage } from '../../utils/aiChat';
 
 export default function AiAssistant() {
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<AiChatMessage[]>([
     { role: 'ai', content: 'Halo! Saya Asisten Pintar DiDesa. Ada yang bisa saya bantu terkait informasi desa, layanan, atau kependudukan hari ini?' }
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    
-    setMessages(prev => [...prev, { role: 'user', content: input }]);
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
+    const newMessages = [...messages, { role: 'user' as const, content: userMessage }];
+    setMessages(newMessages);
     setInput('');
-    
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'ai', content: 'Terima kasih atas pertanyaannya. Fitur AI Generatif saat ini sedang dalam pengembangan lebih lanjut untuk memberikan jawaban yang lebih akurat dari database desa.' }]);
-    }, 1000);
+    setIsLoading(true);
+
+    try {
+      const systemPrompt = `Kamu adalah Asisten Pintar "DiDesa", asisten digital portal desa Indonesia.
+Tugasmu membantu warga dan pengunjung portal desa: menjelaskan layanan desa, prosedur pembuatan surat, informasi umum kependudukan, serta panduan menggunakan fitur portal.
+Selalu gunakan bahasa Indonesia yang sopan, ramah, dan mudah dipahami.
+Jika tidak tahu jawabannya, katakan dengan jujur dan sarankan menghubungi kantor desa. Jangan mengarang data.
+Format jawaban: ringkas, gunakan poin bila perlu.`;
+
+      const result = await sendAiChat(getActiveTenantId(), newMessages, { systemPrompt });
+      setMessages(prev => [...prev, { role: 'ai', content: result.reply }]);
+    } catch (error: any) {
+      console.error(error);
+      setMessages(prev => [...prev, {
+        role: 'ai',
+        content: error && error.name === 'QuotaExceededError'
+          ? `⚠️ **Kuota AI Harian Telah Habis**\n\n${error.message}`
+          : `Maaf, terjadi kesalahan: ${error?.message || 'Terjadi kesalahan tak terduga.'}`
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -32,9 +54,6 @@ export default function AiAssistant() {
             <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded-full border border-indigo-200 uppercase tracking-wider flex items-center gap-1">
               <Sparkles size={10} /> Unggulan
             </span>
-            <span className="bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-white shadow-sm dark:shadow-none">
-              DEV
-            </span>
           </h2>
           <p className="text-gray-500 dark:text-slate-400 text-sm font-medium">Tanya informasi layanan, statistik, atau panduan secara instan.</p>
         </div>
@@ -43,10 +62,10 @@ export default function AiAssistant() {
       <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden flex flex-col">
         <div className="flex-1 p-6 overflow-y-auto flex flex-col gap-4">
           {messages.map((msg, i) => (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              key={i} 
+              key={i}
               className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-gray-100 dark:bg-slate-800' : 'bg-indigo-100 text-indigo-600'}`}>
@@ -57,22 +76,38 @@ export default function AiAssistant() {
               </div>
             </motion.div>
           ))}
+          {isLoading && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex gap-3 max-w-[85%]"
+            >
+              <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-indigo-100 text-indigo-600">
+                <Bot size={14} />
+              </div>
+              <div className="p-4 rounded-2xl text-sm font-medium bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300 rounded-tl-sm border border-gray-100 dark:border-slate-800 flex items-center gap-2">
+                <Loader2 size={14} className="animate-spin text-indigo-500" />
+                <span className="text-gray-500">Sedang memikirkan jawaban...</span>
+              </div>
+            </motion.div>
+          )}
         </div>
         <div className="p-4 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800">
           <form onSubmit={handleSend} className="relative">
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Tanyakan sesuatu..."
-              className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none"
+              className="w-full pl-4 pr-12 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm outline-none disabled:bg-gray-100 disabled:text-gray-400 dark:bg-slate-900 dark:text-white"
+              disabled={isLoading}
             />
-            <button 
-              type="submit" 
-              disabled={!input.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white rounded-lg transition-colors"
+            <button
+              type="submit"
+              disabled={!input.trim() || isLoading}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-lg transition-colors"
             >
-              <Send size={16} />
+              {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
             </button>
           </form>
         </div>

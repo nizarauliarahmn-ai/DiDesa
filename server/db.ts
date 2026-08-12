@@ -48,6 +48,12 @@ export const globalUpdatesTable = pgTable("global_updates", {
   isActive: integer("is_active").default(1),
 });
 
+export const aiUsageTable = pgTable("ai_usage", {
+  tenantId: text("tenant_id"),
+  usageDate: text("usage_date"),
+  usedCount: integer("used_count").default(0),
+});
+
 // Default initial/fallback data for residents
 export let memoryResidents = [
   // --- KELUARGA 1: 11 ANGGOTA (noKk: "1111111111111111") ---
@@ -173,6 +179,13 @@ if (databaseUrl) {
         admin_password TEXT,
         kades_email TEXT,
         kades_password TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS ai_usage (
+        tenant_id TEXT NOT NULL,
+        usage_date TEXT NOT NULL,
+        used_count INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (tenant_id, usage_date)
       );
 
       ALTER TABLE tenants ADD COLUMN IF NOT EXISTS admin_email TEXT;
@@ -1107,5 +1120,113 @@ export async function saveGlobalSetting(key: string, value: string): Promise<voi
       console.warn("Supabase saveGlobalSetting failed:", err.message || err);
     }
   }
+}
+
+// ─── AI Usage / Daily Quota Tracking ───
+// Pelacakan pemakaian AI per desa (tenant) per hari, disimpan di server.
+// Sumber data berjenjang: Drizzle (PostgreSQL) → Supabase → Memory (in-memory).
+
+export const DEFAULT_DAILY_AI_QUOTA = 50;
+
+export let memoryAiUsage: Record<string, number> = {};
+let aiUsageSupabaseWarned = false;
+
+const aiUsageKey = (tenantId: string, usageDate: string) => `${tenantId}::${usageDate}`;
+
+export function getTodayDate(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+export async function getAiUsage(tenantId: string, usageDate: string): Promise<number> {
+  if (drizzleDb) {
+    try {
+      const res = await pgPool.query(
+        "SELECT used_count FROM ai_usage WHERE tenant_id = $1 AND usage_date = $2",
+        [tenantId, usageDate]
+      );
+      if (res.rows && res.rows[0]) return res.rows[0].used_count || 0;
+      return 0;
+    } catch (err: any) {
+      console.warn("Drizzle getAiUsage failed:", err.message || err);
+    }
+  }
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("ai_usage")
+        .select("used_count")
+        .eq("tenant_id", tenantId)
+        .eq("usage_date", usageDate)
+        .single();
+      if (error) throw error;
+      if (data && data.used_count != null) return Number(data.used_count) || 0;
+      return 0;
+    } catch (err: any) {
+      if (!aiUsageSupabaseWarned) {
+        aiUsageSupabaseWarned = true;
+        console.warn("Supabase getAiUsage failed (tabel ai_usage mungkin belum dibuat). Gunakan memory fallback. SQL untuk membuat tabel tersedia di catatan migrasi.", err.message || err);
+      }
+    }
+  }
+
+  return memoryAiUsage[aiUsageKey(tenantId, usageDate)] || 0;
+}
+
+export async function incrementAiUsage(tenantId: string, usageDate: string): Promise<number> {
+  const current = await getAiUsage(tenantId, usageDate);
+  const next = current + 1;
+
+  if (drizzleDb) {
+    try {
+      await pgPool.query(
+        `INSERT INTO ai_usage (tenant_id, usage_date, used_count) VALUES ($1, $2, $3)
+         ON CONFLICT (tenant_id, usage_date) DO UPDATE SET used_count = EXCLUDED.used_count`,
+        [tenantId, usageDate, next]
+      );
+    } catch (err: any) {
+      console.warn("Drizzle incrementAiUsage failed:", err.message || err);
+    }
+  }
+
+  if (supabase) {
+    try {
+      await supabase
+        .from("ai_usage")
+        .upsert({ tenant_id: tenantId, usage_date: usageDate, used_count: next });
+    } catch (err: any) {
+      console.warn("Supabase incrementAiUsage failed:", err.message || err);
+    }
+  }
+
+  memoryAiUsage[aiUsageKey(tenantId, usageDate)] = next;
+  return next;
+}
+
+// Batas harian per desa. Default 50, bisa di-override via global_settings key 'ai_daily_quota'.
+export async function getDailyAiQuota(): Promise<number> {
+  const settings = await getGlobalSettings();
+  const configured = settings["ai_daily_quota"];
+  if (configured && !isNaN(Number(configured))) return Number(configured);
+  const envQuota = process.env.AI_DAILY_QUOTA;
+  if (envQuota && !isNaN(Number(envQuota))) return Number(envQuota);
+  return DEFAULT_DAILY_AI_QUOTA;
+}
+
+export async function getAiUsageInfo(tenantId: string): Promise<{ usedQuota: number; totalQuota: number; remainingQuota: number; hasQuota: boolean }> {
+  const date = getTodayDate();
+  const used = await getAiUsage(tenantId, date);
+  const total = await getDailyAiQuota();
+  const remaining = Math.max(0, total - used);
+  return {
+    usedQuota: used,
+    totalQuota: total,
+    remainingQuota: remaining,
+    hasQuota: remaining > 0,
+  };
 }
 

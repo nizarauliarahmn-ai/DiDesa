@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, MapPin, Building, ShieldCheck, FileText, ChevronRight, X } from 'lucide-react';
+import { formalAvatarUrl } from '../../utils/formalAvatar';
 
 export default function ProfilDesa() {
   const [selectedLembaga, setSelectedLembaga] = useState<typeof lembagaDesa[0] | null>(null);
@@ -19,7 +20,7 @@ export default function ProfilDesa() {
   };
 
   const [perangkatDesa, setPerangkatDesa] = useState([
-    { name: 'Belum Diatur', role: 'Kepala Desa', photo: 'https://api.dicebear.com/9.x/micah/svg?seed=BelumDiatur' }
+    { name: 'Belum Diatur', role: 'Kepala Desa', photo: formalAvatarUrl('BelumDiatur') }
   ]);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function ProfilDesa() {
           // Filter to only include actual Perangkat Desa (not BPD, LPM, etc. which usually have 'Ketua' or specific keywords, or just use all for now since they are managed centrally)
           const mapped = officers.map((officer: any) => ({
             ...officer,
-            photo: `https://api.dicebear.com/9.x/micah/svg?seed=${encodeURIComponent(officer.name)}`
+            photo: formalAvatarUrl(officer.name)
           }));
           setPerangkatDesa(mapped);
         }

@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { getFeedbacks } from '../../utils/feedbackData';
 import { fetchBugReportsOnline } from '../../utils/bugReportService';
 import { fetchSaaSTenantRequests } from '../../utils/saasLeads';
+import { formalAvatarUrl } from '../../utils/formalAvatar';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 
@@ -290,7 +291,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         <div className="flex items-center gap-3 px-1">
           <div className="relative shrink-0 group cursor-pointer">
             <label className="cursor-pointer block relative">
-              <img src={authUser?.avatar || `https://api.dicebear.com/9.x/micah/svg?seed=${authUser?.name || 'Admin'}`} alt="Admin" className={`w-11 h-11 rounded-full border-2 border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none object-cover ${isUploadingAvatar ? 'opacity-50' : 'group-hover:opacity-80'} transition-opacity`} />
+              <img src={authUser?.avatar || formalAvatarUrl(authUser?.name || 'Admin')} alt="Admin" className={`w-11 h-11 rounded-full border-2 border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none object-cover ${isUploadingAvatar ? 'opacity-50' : 'group-hover:opacity-80'} transition-opacity`} />
               <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                  <Camera size={14} className="text-white" />
               </div>

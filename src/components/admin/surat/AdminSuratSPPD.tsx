@@ -4,7 +4,7 @@ import BackdateConfig from './BackdateConfig';
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
-import { resolveAiKeyAndQuota } from '../../../utils/aiQuotaTracker';
+import { sendAiChat, getActiveTenantId } from '../../../utils/aiChat';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
@@ -316,21 +316,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       return;
     }
 
-    // Ambil API key dari localStorage — pola sama dengan AdminAiAssistant
-    const authUserStr = localStorage.getItem('didesa_auth_user');
-    let tenantId = 'sukamakmur'; // default sama dengan AdminAiAssistant.tsx
-    try {
-      const authUser = authUserStr ? JSON.parse(authUserStr) : null;
-      if (authUser?.tenantId) tenantId = authUser.tenantId;
-    } catch (e) {}
-    
-    const quotaInfo = await resolveAiKeyAndQuota(tenantId);
-    const apiKey = quotaInfo.apiKey;
-
-    if (!apiKey) {
-      showToast('API Key Gemini belum diatur. Buka menu Asisten AI (Desi) untuk mengaturnya terlebih dahulu.', 'error');
-      return;
-    }
+    // Ambil tenant aktif — pola sama dengan komponen AI lain
+    const tenantId = getActiveTenantId();
 
     setPdfFileName(file.name);
     setPdfAnalyzing(true);
@@ -363,68 +350,16 @@ Ekstrak dan kembalikan dalam format JSON berikut SAJA (tanpa markdown, tanpa kod
   "kepadaYth": "jabatan/nama yang dituju dalam surat undangan"
 }`;
 
-      // Gunakan fetch langsung seperti AdminAiAssistant — kompatibel dengan semua API key
-      const GEMINI_ENDPOINTS = [
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-002:generateContent',
-        'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-001:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent',
-      ];
+      // Panggil AI lewat server DiDesa (/api/ai/chat) — API key aman di server,
+      // kuota harian per desa diterapkan otomatis.
+      const result = await sendAiChat(tenantId, [{ role: 'user', content: '' }], {
+        systemPrompt: prompt,
+        fileData: base64Data,
+        mimeType: 'application/pdf',
+        requireJson: true,
+      });
 
-      const payload = {
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inline_data: { mime_type: 'application/pdf', data: base64Data } }
-          ]
-        }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 1024 }
-      };
-
-      let rawText = '';
-      let success = false;
-      let allErrors: string[] = [];
-      for (const endpoint of GEMINI_ENDPOINTS) {
-        const modelName = endpoint.split('/models/')[1].split(':')[0];
-        try {
-          console.log(`[AdminSuratSPPD] Mencoba endpoint: ${endpoint}`);
-          const res = await fetch(`${endpoint}?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          if (!res.ok) {
-            allErrors.push(`[${modelName}] ${data.error?.code || res.status}: ${data.error?.message || 'Unknown'}`);
-            continue;
-          }
-          rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          success = true;
-          console.log('[SPPD AI] Berhasil dengan:', modelName);
-          break;
-        } catch (err: any) {
-          console.warn('[SPPD AI] Endpoint gagal:', endpoint, err);
-          allErrors.push(`[${modelName}] Exception: ${err.message}`);
-        }
-      }
-
-      if (!success || !rawText) {
-        let availableModels = '';
-        try {
-          const mRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-          const mData = await mRes.json();
-          if (mData.models && Array.isArray(mData.models)) {
-            const names = mData.models.filter((m: any) => m.name.includes('gemini')).map((m: any) => m.name.replace('models/', '')).join(', ');
-            availableModels = `\n\n📌 Model yang diizinkan untuk API Key ini:\n${names || 'Tidak ada model Gemini yang tersedia'}`;
-          }
-        } catch (e) {}
-        throw new Error(`Ekstraksi gagal. Semua model tidak tersedia.${availableModels}\n\nLog Error Detail:\n${allErrors.join('\n')}`);
-      }
-
+      const rawText = result.reply;
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('Format respons tidak valid dari AI');
 

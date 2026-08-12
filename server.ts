@@ -51,7 +51,10 @@ import {
   getGlobalUpdates,
   addGlobalUpdate,
   getGlobalSettings,
-  saveGlobalSetting
+  saveGlobalSetting,
+  getAiUsageInfo,
+  incrementAiUsage,
+  getTodayDate
 } from "./server/db";
 
 // API Routes
@@ -170,6 +173,138 @@ app.post("/api/parse-profile-document", async (req, res) => {
   } catch (err: any) {
     console.error("Error parsing document with Gemini:", err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// GET remaining AI daily quota for a tenant (server-side truth)
+app.get("/api/ai/usage", async (req, res) => {
+  try {
+    const tenantId = (req.query.tenantId as string) || "";
+    if (!tenantId) {
+      return res.status(400).json({ error: "tenantId wajib diisi" });
+    }
+    const info = await getAiUsageInfo(tenantId);
+    res.json(info);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST AI chat — semua panggilan Gemini di-proxy lewat server agar API key aman.
+// Menerapkan kuota harian per desa (tenant_id + usage_date) sebelum memanggil Gemini.
+app.post("/api/ai/chat", async (req, res) => {
+  try {
+    const { tenantId, messages, systemPrompt, apiKey, fileData, mimeType, requireJson } = req.body || {};
+
+    if (!tenantId || typeof tenantId !== "string" || !tenantId.trim()) {
+      return res.status(400).json({ error: "tenantId wajib diisi" });
+    }
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: "messages wajib diisi (array riwayat percakapan)" });
+    }
+
+    // 1. Cek kuota harian per desa — tolak jika habis (dicek sebelum resolve key)
+    const quota = await getAiUsageInfo(tenantId);
+    if (!quota.hasQuota) {
+      return res.status(429).json({
+        error: `Kuota AI harian desa ini telah habis (${quota.usedQuota}/${quota.totalQuota} chat). Kuota akan direset otomatis besok.`,
+        code: "QUOTA_EXCEEDED",
+        usage: quota,
+      });
+    }
+
+    // 2. Resolve API key di server: env -> global_settings -> (opsional) custom key dari klien
+    let resolvedKey = (process.env.GEMINI_API_KEY || "").trim();
+    if (!resolvedKey) {
+      try {
+        const settings = await getGlobalSettings();
+        resolvedKey = (settings["master_gemini_api_key"] || "").trim();
+      } catch {
+        resolvedKey = "";
+      }
+    }
+    if (!resolvedKey && typeof apiKey === "string" && apiKey.trim()) {
+      resolvedKey = apiKey.trim();
+    }
+    if (!resolvedKey) {
+      return res.status(500).json({
+        error: "GEMINI_API_KEY belum dikonfigurasi di server. Hubungi administrator DiDesa.",
+      });
+    }
+
+    // 3. Siapkan payload; role 'ai'/'assistant' dipetakan ke 'model' untuk Gemini
+    const geminiMessages: Array<{ role: string; parts: any[] }> = (messages as Array<{ role: string; content: string }>).map((m) => ({
+      role: m.role === "ai" || m.role === "assistant" ? "model" : "user",
+      parts: m.content && m.content.trim() ? [{ text: m.content }] : [],
+    }));
+
+    // Dukungan multimodal (PDF/gambar) untuk autofill surat — disisipkan ke pesan user terakhir
+    if (fileData && mimeType && geminiMessages.length > 0) {
+      geminiMessages[geminiMessages.length - 1].parts.push({
+        inlineData: {
+          mimeType,
+          data: String(fileData).replace(/^data:[^;]+;base64,/, ""),
+        },
+      });
+    }
+
+    const config: any = {
+      temperature: 0.7,
+      maxOutputTokens: 1024,
+    };
+    if (requireJson) {
+      config.responseMimeType = "application/json";
+    }
+
+    const models = Array.from(new Set([
+      (process.env.AI_MODEL || "").trim(),
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-1.5-flash",
+    ].filter(Boolean)));
+
+    const ai = new GoogleGenAI({ apiKey: resolvedKey });
+    let reply = "";
+    let usedModel = "";
+    const allErrors: string[] = [];
+
+    for (const model of models) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: geminiMessages,
+          config: {
+            ...config,
+            ...(systemPrompt && systemPrompt.trim()
+              ? { systemInstruction: { parts: [{ text: systemPrompt }] } }
+              : {}),
+          },
+        });
+        reply = (response.text || "").trim();
+        usedModel = model;
+        if (reply) break;
+      } catch (err: any) {
+        allErrors.push(`[${model}] ${(err && err.message) || err}`);
+      }
+    }
+
+    if (!reply) {
+      return res.status(500).json({
+        error: `Semua model AI gagal merespons.${
+          allErrors.length ? "\n" + allErrors.slice(0, 3).join("\n") : ""
+        }`,
+      });
+    }
+
+    // 4. Catat pemakaian dan kembalikan sisa kuota terbaru
+    await incrementAiUsage(tenantId, getTodayDate());
+    const updatedUsage = await getAiUsageInfo(tenantId);
+
+    res.json({ reply, model: usedModel, usage: updatedUsage });
+  } catch (err: any) {
+    console.error("[/api/ai/chat] error:", err);
+    res.status(500).json({ error: err.message || "Terjadi kesalahan pada AI chat" });
   }
 });
 
