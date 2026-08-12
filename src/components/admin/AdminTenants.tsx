@@ -8,7 +8,7 @@ import {
   Lock, Mail, Eye, EyeOff, CheckCircle2, AlertTriangle, Printer, RefreshCw
 } from 'lucide-react';
 import AdminGlobalUpdates from './AdminGlobalUpdates';
-import { getFeedbacks, updateFeedbackStatus, deleteFeedback, Feedback } from '../../utils/feedbackData';
+import { getFeedbacks, fetchFeedbacksAsync, markFeedbacksAsRead, updateFeedbackStatus, deleteFeedback, Feedback } from '../../utils/feedbackData';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { showToast } from '../../utils/toast';
 
@@ -120,6 +120,10 @@ export default function AdminTenants() {
     handleFeedbackUpdate();
     window.addEventListener('feedback_updated', handleFeedbackUpdate);
     return () => window.removeEventListener('feedback_updated', handleFeedbackUpdate);
+  }, []);
+
+  useEffect(() => {
+    fetchFeedbacksAsync().then(list => markFeedbacksAsRead((list || []).map(f => f.id)));
   }, []);
 
   useEffect(() => {

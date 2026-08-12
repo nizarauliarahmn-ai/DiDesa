@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Loader2, CheckCircle2, XCircle, Phone, Clock, FileSpreadsheet, Plus } from 'lucide-react';
-import { fetchSaaSTenantRequests, SaaSTenantRequest, updateSaaSTenantRequestStatus } from '../../utils/saasLeads';
+import { fetchSaaSTenantRequests, SaaSTenantRequest, updateSaaSTenantRequestStatus, markLeadsAsRead } from '../../utils/saasLeads';
 import { supabase } from '../../utils/supabase';
 
 interface AdminSaaSLeadsProps {
@@ -17,6 +17,7 @@ export default function AdminSaaSLeads({ onSetActiveTab }: AdminSaaSLeadsProps) 
     setLoading(true);
     const data = await fetchSaaSTenantRequests();
     setRequests(data);
+    markLeadsAsRead(data.map(r => r.id));
     setLoading(false);
   };
 
@@ -27,6 +28,7 @@ export default function AdminSaaSLeads({ onSetActiveTab }: AdminSaaSLeadsProps) 
     channel.on('broadcast', { event: 'new_tenant_request' }, (payload: any) => {
       if (payload?.payload?.requests) {
         setRequests(payload.payload.requests);
+        markLeadsAsRead(payload.payload.requests.map((r: SaaSTenantRequest) => r.id));
       }
     }).subscribe();
 

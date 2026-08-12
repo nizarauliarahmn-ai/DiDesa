@@ -107,7 +107,43 @@ export const updateSaaSTenantRequestStatus = async (id: string, newStatus: SaaST
         }).then(() => supabase.removeChannel(broadcastChannel));
       }
     });
-  } catch (e) {
+      } catch (e) {
     console.error('Error updating SaaS tenant request status:', e);
   }
+};
+
+const LEADS_READ_KEY = 'saas_leads_read';
+
+export const getLeadReadState = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(LEADS_READ_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+export const markLeadsAsRead = (ids: string[]) => {
+  if (!ids || ids.length === 0) return;
+  const seen = new Set(getLeadReadState());
+  ids.forEach(id => seen.add(id));
+  localStorage.setItem(LEADS_READ_KEY, JSON.stringify(Array.from(seen)));
+  window.dispatchEvent(new Event('tenant_requests_updated'));
+};
+
+const APPROVALS_READ_KEY = 'saas_approvals_read';
+
+export const getApprovalReadState = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(APPROVALS_READ_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+export const markApprovalsAsRead = (ids: string[]) => {
+  if (!ids || ids.length === 0) return;
+  const seen = new Set(getApprovalReadState());
+  ids.forEach(id => seen.add(id));
+  localStorage.setItem(APPROVALS_READ_KEY, JSON.stringify(Array.from(seen)));
+  window.dispatchEvent(new Event('tenant_approvals_updated'));
 };

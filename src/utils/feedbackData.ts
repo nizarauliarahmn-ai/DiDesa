@@ -86,6 +86,24 @@ export const deleteFeedbackAsync = async (id: string) => {
   }
 };
 
+const FEEDBACK_READ_KEY = 'saas_feedbacks_read';
+
+export const getFeedbackReadState = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(FEEDBACK_READ_KEY) || '[]');
+  } catch {
+    return [];
+  }
+};
+
+export const markFeedbacksAsRead = (ids: string[]) => {
+  if (!ids || ids.length === 0) return;
+  const seen = new Set(getFeedbackReadState());
+  ids.forEach(id => seen.add(id));
+  localStorage.setItem(FEEDBACK_READ_KEY, JSON.stringify(Array.from(seen)));
+  window.dispatchEvent(new Event('feedback_updated'));
+};
+
 // DEPRECATED implementations to prevent build crashes during transition
 export const getFeedbacks = (): Feedback[] => [];
 export const addFeedback = (f: any) => {};

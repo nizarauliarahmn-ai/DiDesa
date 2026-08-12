@@ -9,6 +9,7 @@ import {
   fetchBugReportsOnline, 
   updateBugReportStatusOnline,
   replyToBugReportOnline,
+  markBugReportsAsRead,
   BugReport 
 } from '../../utils/bugReportService';
 import { showToast } from '../../utils/toast';
@@ -32,6 +33,7 @@ export const AdminSaaSBugReports: React.FC = () => {
       setLoading(true);
       const data = await fetchBugReportsOnline();
       setReports(data || []);
+      markBugReportsAsRead((data || []).map(r => r.id));
       setIsRealtimeConnected(true);
     } catch (err: any) {
       console.error('Error fetching bug reports:', err);
@@ -71,6 +73,7 @@ export const AdminSaaSBugReports: React.FC = () => {
   const handleOpenDetail = (report: BugReport) => {
     setSelectedReport(report);
     setAdminReplyInput(report.admin_reply || '');
+    markBugReportsAsRead([report.id]);
   };
 
   // Keep selected report in sync with realtime updates
@@ -475,7 +478,7 @@ export const AdminSaaSBugReports: React.FC = () => {
                     <div className={`p-3.5 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
                       msg.role === 'SaaS Admin' 
                         ? 'bg-indigo-600 text-white rounded-tr-sm shadow-md shadow-indigo-600/20' 
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm border border-slate-200 dark:border-slate-700'
+                        : 'bg-amber-400 text-slate-900 rounded-tl-sm border border-amber-300/70 shadow-sm'
                     }`}>
                       {msg.text}
                     </div>

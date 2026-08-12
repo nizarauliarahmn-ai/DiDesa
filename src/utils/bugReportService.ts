@@ -23,6 +23,29 @@ export interface BugReport {
 }
 
 export const SETTINGS_KEY = 'saas_global_bug_reports';
+
+export const UNREAD_TICKETS_KEY = 'saas_unread_tickets';
+
+export const getBugReportReadState = (): Record<string, number> => {
+  try {
+    return JSON.parse(localStorage.getItem(UNREAD_TICKETS_KEY) || '{}');
+  } catch {
+    return {};
+  }
+};
+
+export const markBugReportsAsRead = (reportIds: string[]) => {
+  try {
+    if (!reportIds || reportIds.length === 0) return;
+    const read = getBugReportReadState();
+    reportIds.forEach(id => { read[id] = Date.now(); });
+    localStorage.setItem(UNREAD_TICKETS_KEY, JSON.stringify(read));
+    window.dispatchEvent(new Event('bug_reports_read'));
+  } catch (e) {
+    console.error('Gagal menandai laporan bug terbaca:', e);
+  }
+};
+
 const GLOBAL_TENANT_ID = '00000000-0000-0000-0000-000000000000';
 
 /**

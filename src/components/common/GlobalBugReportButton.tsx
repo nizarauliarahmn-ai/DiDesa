@@ -431,7 +431,7 @@ export const GlobalBugReportButton: React.FC = () => {
                         </div>
                         <div className={`p-3 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
                           isSelf 
-                            ? 'bg-emerald-600 text-white rounded-tr-sm shadow-md shadow-emerald-600/20' 
+                            ? 'bg-amber-400 text-slate-900 rounded-tr-sm shadow-md shadow-amber-400/40' 
                             : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm border border-slate-200 dark:border-slate-700 shadow-sm'
                         }`}>
                           {msg.text}

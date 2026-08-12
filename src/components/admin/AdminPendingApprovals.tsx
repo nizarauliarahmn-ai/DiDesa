@@ -3,7 +3,7 @@ import { Search, Loader2, CheckCircle2, XCircle, Phone, Clock, MapPin, Mail, Shi
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 import { addSaaSLog } from '../../utils/saasLogs';
-import { fetchSaaSTenantRequests, updateSaaSTenantRequestStatus } from '../../utils/saasLeads';
+import { fetchSaaSTenantRequests, updateSaaSTenantRequestStatus, markApprovalsAsRead } from '../../utils/saasLeads';
 
 const toWaNumber = (p: string) => {
   let digits = (p || '').replace(/[^\d]/g, '');
@@ -49,6 +49,7 @@ export default function AdminPendingApprovals() {
       .order('created_at', { ascending: false });
     if (error) console.error('Error fetching pending approvals:', error);
     setPending(data || []);
+    markApprovalsAsRead((data || []).map(t => t.id));
     setLoading(false);
     window.dispatchEvent(new Event('tenant_approvals_updated'));
   };
