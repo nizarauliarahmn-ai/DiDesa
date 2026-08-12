@@ -6,6 +6,7 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { generateKopSuratHTML } from '../../utils/letterFormat';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 import ResidentSearchInput from './ResidentSearchInput';
+import FormalAvatar from '../common/FormalAvatar';
 
 interface Officer {
   name: string;
@@ -523,7 +524,7 @@ export default function AdminAparatur() {
   const OfficerAvatar = ({ officer, colorClass }: { officer: Officer; colorClass: string }) => {
     if (officer.photo) {
       return (
-        <img src={officer.photo} alt={officer.name} className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm shrink-0" />
+        <FormalAvatar name={officer.name} src={officer.photo} className="w-14 h-14 rounded-full object-cover border-2 border-white dark:border-slate-700 shadow-sm shrink-0" />
       );
     }
     return (

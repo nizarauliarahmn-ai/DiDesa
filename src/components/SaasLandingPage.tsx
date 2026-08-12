@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin } from 'lucide-react';
 import Footer from './common/Footer';
 import { supabase } from '../utils/supabase';
-import { formalAvatarUrl } from '../utils/formalAvatar';
+import FormalAvatar from './common/FormalAvatar';
 
 function getKabupatenName(tenant: any): string {
   let raw = tenant.kabupaten || tenant.nama_kabupaten || tenant.kab_kota || tenant.city || tenant.regency;
@@ -218,7 +218,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
               <div className="flex -space-x-3">
                 {[1,2,3,4].map((i) => (
                   <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                     <img src={formalAvatarUrl(String(i), 'd1d5db')} alt="Avatar" className="w-full h-full object-cover" />
+                     <FormalAvatar name={String(i)} backgroundColor="d1d5db" alt="Avatar" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>

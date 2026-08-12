@@ -2,7 +2,7 @@ import React from 'react';
 import { Home, LayoutDashboard, PieChart, Newspaper, Map, ShieldCheck, Building2, LogOut, MessageSquareText, Sparkles, Bot } from 'lucide-react';
 
 import { X } from 'lucide-react';
-import { formalAvatarUrl } from '../../utils/formalAvatar';
+import FormalAvatar from '../common/FormalAvatar';
 
 export default function Sidebar({ 
   onLogout,
@@ -136,7 +136,7 @@ export default function Sidebar({
       {/* Profile */}
       <div className="p-4 border-t border-gray-100 dark:border-slate-800 m-4 rounded-xl bg-gray-50 dark:bg-slate-800 flex flex-col gap-3">
         <div className="flex items-center gap-3">
-          <img src={authUser?.avatar || formalAvatarUrl(authUser?.name || 'Warga')} alt="Profile" className="w-10 h-10 rounded-full border-2 border-emerald-100 object-cover" />
+          <FormalAvatar name={authUser?.name || 'Warga'} src={authUser?.avatar} alt="Profile" className="w-10 h-10 rounded-full border-2 border-emerald-100 object-cover" />
           <div className="overflow-hidden flex-1">
             <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{authUser?.name || "Akses Publik"}</p>
             <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate font-semibold">{authUser?.email || "warga@sukamakmur.desa.id"}</p>
