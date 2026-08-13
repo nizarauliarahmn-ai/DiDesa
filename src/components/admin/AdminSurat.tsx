@@ -38,6 +38,9 @@ export default function AdminSurat({
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
   const [localPresetResident, setLocalPresetResident] = useState<any>(null);
+  const [returnTab, setReturnTab] = useState<'buat' | 'dashboard' | 'inbox'>('buat');
+
+  const formTabs = new Set(['nikah', 'sktm', 'skbm', 'skh', 'skl', 'skm', 'sku', 'skph', 'skd', 'skp', 'sdu', 'spt', 'sppd', 'skkt', 'undangan']);
 
   const changeTab = (tab: any) => {
     setEditData(null);
@@ -45,6 +48,9 @@ export default function AdminSurat({
     setLocalPresetResident(null);
     if (onClearPresetResident && tab !== 'buat') {
       onClearPresetResident();
+    }
+    if (!formTabs.has(tab)) {
+      setReturnTab(tab === 'inbox' ? 'inbox' : tab === 'buat' ? 'buat' : 'dashboard');
     }
     setActiveTab(tab);
   };
@@ -216,7 +222,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'nikah' && (
@@ -224,7 +230,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'sktm' && (
@@ -232,7 +238,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'skbm' && (
@@ -240,7 +246,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'skh' && (
@@ -248,14 +254,14 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'skl' && (
           <AdminSuratSKL 
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'skm' && (
@@ -263,7 +269,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'sku' && (
@@ -271,7 +277,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'skph' && (
@@ -279,7 +285,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'skd' && (
@@ -287,7 +293,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'skp' && (
@@ -295,7 +301,7 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'sdu' && (
@@ -303,28 +309,28 @@ export default function AdminSurat({
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'spt' && (
           <AdminSuratSPT 
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'sppd' && (
           <AdminSuratSPPD 
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'undangan' && (
           <AdminSuratUndangan 
             editData={editData}
             editLetterId={editLetterId}
-            onBack={() => changeTab('dashboard')} 
+            onBack={() => changeTab(returnTab)} 
           />
         )}
         {activeTab === 'penomoran' && <AdminSuratPenomoran />}
