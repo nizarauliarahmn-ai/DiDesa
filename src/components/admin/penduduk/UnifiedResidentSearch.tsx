@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ResidentStatusBadge } from './ResidentStatusBadge';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
-import { UserPlus } from 'lucide-react';
+import { Scan, UserPlus } from 'lucide-react';
+import KTPScannerModal from '../surat/KTPScannerModal';
+import { KtpOcrResult } from '../../../utils/ktpOcr';
+import { showToast } from '../../../utils/toast';
 
 interface UnifiedResidentSearchProps {
   formData: any;
@@ -13,6 +16,7 @@ interface UnifiedResidentSearchProps {
 export function UnifiedResidentSearch({ formData, setFormData, residents, onOpenQuickAdd }: UnifiedResidentSearchProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeField, setActiveField] = useState<'nama' | 'nik' | null>(null);
+  const [showKtpScanner, setShowKtpScanner] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,6 +49,34 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
     }));
     setShowDropdown(false);
     setActiveField(null);
+  };
+
+  // KTP OCR: isi formData dari hasil scan & cocokkan dengan database warga
+  const handleKtpOcrResult = (result: KtpOcrResult) => {
+    setShowKtpScanner(false);
+    const found = residents.find((r: any) => String(r.nik) === result.nik);
+    if (found) {
+      handleSelectResident(found);
+      showToast(`✓ Data ${found.name} Ditemukan!`, 'success');
+    } else {
+      const rtRw = result.rtRw || '001/001';
+      const [rt, rw] = rtRw.split('/');
+      setFormData((prev: any) => ({
+        ...prev,
+        nama: result.nama || prev?.nama || '',
+        nik: result.nik || prev?.nik || '',
+        tempatLahir: result.tempatLahir || prev?.tempatLahir || '',
+        tanggalLahir: result.tanggalLahir || prev?.tanggalLahir || '',
+        jenisKelamin: result.jenisKelamin || prev?.jenisKelamin || 'Laki-Laki',
+        agama: result.agama || prev?.agama || 'Islam',
+        pekerjaan: result.pekerjaan || prev?.pekerjaan || 'Wiraswasta',
+        alamat: result.alamat || prev?.alamat || '',
+        rt: rt || prev?.rt || '001',
+        rw: rw || prev?.rw || '001',
+      }));
+      showToast(`NIK ${result.nik} tidak ditemukan di database. Data OCR terisi, silakan daftarkan sebagai warga baru.`, 'info');
+      onOpenQuickAdd(result.nik, result.nama);
+    }
   };
 
   const getFilteredResidents = () => {
@@ -137,7 +169,17 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
       </div>
 
       <div className="space-y-2 relative" ref={activeField === 'nik' ? dropdownRef : null}>
-        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+        <div className="flex items-center justify-between gap-2">
+          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+          <button
+            type="button"
+            onClick={() => setShowKtpScanner(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+            title="Scan KTP / KK untuk isi data otomatis"
+          >
+            <Scan className="w-3.5 h-3.5" /> Scan KTP / KK
+          </button>
+        </div>
         <input 
           type="text"
           className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
@@ -161,6 +203,13 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
           onOpenQuickAdd={() => onOpenQuickAdd()}
         />
       </div>
+
+      {/* Modal Scanner KTP */}
+      <KTPScannerModal
+        open={showKtpScanner}
+        onClose={() => setShowKtpScanner(false)}
+        onResult={handleKtpOcrResult}
+      />
     </>
   );
 }
