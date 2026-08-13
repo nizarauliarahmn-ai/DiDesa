@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, FileText, Eye, Smartphone, ArrowRight, MessageSquare, Compass, Search, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { showToast } from '../../utils/toast';
+import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 
 export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: string) => void }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
@@ -114,7 +116,13 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
             </button>
 
             <button 
-              onClick={() => handleNav('ai_assistant')}
+              onClick={() => {
+                if (!ENABLE_AI_FEATURES) {
+                  showToast(AI_DEV_MESSAGE, 'info');
+                  return;
+                }
+                handleNav('ai_assistant');
+              }}
               className="bg-white/10 hover:bg-white/15 border border-white/15 text-white rounded-2xl px-5 py-3.5 font-bold text-xs sm:text-sm transition-all backdrop-blur-md active:scale-95 flex items-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-amber-400" />

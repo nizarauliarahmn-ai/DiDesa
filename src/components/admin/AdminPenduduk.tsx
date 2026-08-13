@@ -7,6 +7,7 @@ import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
 import AdminPendudukArchive from './penduduk/AdminPendudukArchive';
 import { showToast } from '../../utils/toast';
+import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -737,9 +738,16 @@ export default function AdminPenduduk({
             )}
           </div>
 
-          <button onClick={() => setShowAiAnalysis(true)} className="relative group overflow-hidden flex-1 md:flex-none justify-center flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-sm dark:shadow-none hover:from-indigo-700 hover:to-purple-700 transition-all whitespace-nowrap border border-indigo-500/50">
+          <button onClick={() => {
+            if (!ENABLE_AI_FEATURES) {
+              showToast(AI_DEV_MESSAGE, 'info');
+              return;
+            }
+            setShowAiAnalysis(true);
+          }} className="relative group overflow-hidden flex-1 md:flex-none justify-center flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-sm dark:shadow-none hover:from-indigo-700 hover:to-purple-700 transition-all whitespace-nowrap border border-indigo-500/50">
             <Sparkles className="w-4 h-4 text-purple-200 group-hover:animate-pulse" />
             <span>Analisis Data AI</span>
+            {!ENABLE_AI_FEATURES && <span className="bg-amber-300 text-amber-950 text-[9px] font-black px-1.5 py-0.5 rounded-full">[DEV]</span>}
             <span className="absolute top-0 right-0 flex w-3 h-3 mt-0.5 mr-0.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Bot, Sparkles, Send, User, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { sendAiChat, getActiveTenantId, AiChatMessage } from '../../utils/aiChat';
+import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 
 export default function AiAssistant() {
   const [messages, setMessages] = useState<AiChatMessage[]>([
@@ -41,6 +42,33 @@ Format jawaban: ringkas, gunakan poin bila perlu.`;
       setIsLoading(false);
     }
   };
+
+  if (!ENABLE_AI_FEATURES) {
+    return (
+      <div className="max-w-4xl mx-auto pb-24 h-[calc(100vh-80px)] flex flex-col px-4 sm:px-0">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner text-white">
+            <Bot size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              Asisten AI DiDesa
+              <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 text-[10px] font-black px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800 uppercase tracking-wider">
+                [DEV]
+              </span>
+            </h2>
+          </div>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center text-center bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-10">
+          <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-amber-500 mb-4">
+            <Sparkles size={28} />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Fitur Dalam Pengembangan [DEV]</h3>
+          <p className="text-sm text-gray-500 dark:text-slate-400 max-w-md">{AI_DEV_MESSAGE}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto pb-24 h-[calc(100vh-80px)] flex flex-col px-4 sm:px-0">

@@ -367,7 +367,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
 
             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-purple-600 mb-4 font-black">AI</div>
-              <h3 className="font-bold text-lg mb-2">Asisten AI Desa</h3>
+              <h3 className="font-bold text-lg mb-2">Asisten AI Desa <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 text-[9px] font-black px-1.5 py-0.5 rounded-md align-middle">[DEV]</span></h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Kecerdasan Buatan bawaan untuk membantu analisa APBDes dan pembuatan dokumen.</p>
             </div>
           </div>

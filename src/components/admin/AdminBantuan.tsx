@@ -1001,7 +1001,7 @@ const MONTHS_LIST = [
                           : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100'
                       }`}
                     >
-                      ✨ {showRecommendations ? 'Tutup Rekomendasi' : 'Rekomendasi AI'}
+                      ✨ {showRecommendations ? 'Tutup Rekomendasi' : 'Rekomendasi AI'} <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[8px] font-black px-1 py-px rounded">[DEV]</span>
                     </button>
                   </div>
                   <div className="relative group">

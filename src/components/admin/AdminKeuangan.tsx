@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import NumberCounter from '../common/NumberCounter';
 import { showToast } from '../../utils/toast';
+import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
@@ -286,7 +287,13 @@ export default function AdminKeuangan() {
         </button>
 
         <button
-          onClick={() => setActiveTab('import')}
+          onClick={() => {
+            if (!ENABLE_AI_FEATURES) {
+              showToast(AI_DEV_MESSAGE, 'info');
+              return;
+            }
+            setActiveTab('import');
+          }}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
             activeTab === 'import'
               ? 'bg-white dark:bg-slate-900 text-emerald-800 dark:text-emerald-300 shadow-sm'
@@ -295,6 +302,7 @@ export default function AdminKeuangan() {
         >
           <UploadCloud className="w-4 h-4 text-indigo-600" />
           Impor AI Siskeudes
+          {!ENABLE_AI_FEATURES && <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[9px] font-black px-1.5 py-0.5 rounded-md">[DEV]</span>}
         </button>
       </div>
 

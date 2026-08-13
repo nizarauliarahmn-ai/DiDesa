@@ -1,4 +1,4 @@
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';

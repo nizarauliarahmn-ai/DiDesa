@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { showToast } from '../../utils/toast';
+import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -285,6 +286,12 @@ export default function AdminPengaturan() {
                 />
                 <label 
                   htmlFor="ai-doc-import"
+                  onClick={(e) => {
+                    if (!ENABLE_AI_FEATURES) {
+                      e.preventDefault();
+                      showToast(AI_DEV_MESSAGE, 'info');
+                    }
+                  }}
                   className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 border border-indigo-100 shadow-sm dark:shadow-none"
                 >
                   {isImporting ? (
@@ -293,6 +300,7 @@ export default function AdminPengaturan() {
                     <Bot className="w-3.5 h-3.5" />
                   )}
                   {isImporting ? 'Memproses AI...' : 'Auto-Isi dengan AI'}
+                  {!ENABLE_AI_FEATURES && <span className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[9px] font-black px-1.5 py-0.5 rounded-md">[DEV]</span>}
                 </label>
               </div>
             </div>

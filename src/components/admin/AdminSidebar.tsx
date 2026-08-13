@@ -6,6 +6,7 @@ import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugRep
 import { fetchSaaSTenantRequests, getLeadReadState, getApprovalReadState } from '../../utils/saasLeads';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
+import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 
 const compressImage = (file: File): Promise<Blob> => {
   return new Promise((resolve, reject) => {
@@ -268,7 +269,14 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         
         <div className="pt-4 mt-6 border-t border-gray-100 dark:border-slate-800">
           <button 
-            onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('ai_assistant'); }}
+            onClick={() => {
+              setIsMobileMenuOpen?.(false);
+              if (!ENABLE_AI_FEATURES) {
+                showToast(AI_DEV_MESSAGE, 'info');
+                return;
+              }
+              setActiveTab('ai_assistant');
+            }}
             className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all relative overflow-hidden group ${activeTab === 'ai_assistant' ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50 dark:hover:bg-slate-800 border border-transparent'}`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -283,6 +291,11 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
               <div className="flex flex-col items-start">
                 <div className="flex items-center gap-1.5">
                   <span className={`text-sm font-bold ${activeTab === 'ai_assistant' ? 'text-indigo-900' : 'text-gray-700 dark:text-slate-300'}`}>Asisten AI</span>
+                  {!ENABLE_AI_FEATURES && (
+                    <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[9px] font-black rounded-md border border-amber-200 dark:border-amber-800">
+                      [DEV]
+                    </span>
+                  )}
                 </div>
                 <span className="text-[9px] text-indigo-500 font-bold tracking-wider uppercase flex items-center gap-1">
                   <Sparkles size={8} /> Pintar
