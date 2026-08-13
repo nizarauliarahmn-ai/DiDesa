@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, Bell, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
@@ -60,6 +60,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   const [pendingBugsCount, setPendingBugsCount] = useState(0);
   const [pendingLeadsCount, setPendingLeadsCount] = useState(0);
   const [pendingApprovalsCount, setPendingApprovalsCount] = useState(0);
+  const [pendingAffiliatesCount, setPendingAffiliatesCount] = useState(0);
   
   // Global Branding
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
@@ -173,6 +174,20 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
     };
     handleApprovalsUpdate();
 
+    const handleAffiliatesUpdate = async () => {
+      try {
+        const { count } = await supabase
+          .from('affiliates')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'pending');
+        setPendingAffiliatesCount(count || 0);
+      } catch (e) {
+        setPendingAffiliatesCount(0);
+      }
+    };
+    handleAffiliatesUpdate();
+
+    window.addEventListener('affiliates_updated', handleAffiliatesUpdate);
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
     window.addEventListener('feedback_updated', handleFeedbackUpdate);
@@ -189,6 +204,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       window.removeEventListener('bug_reports_read', handleBugsUpdate);
       window.removeEventListener('tenant_requests_updated', handleLeadsUpdate);
       window.removeEventListener('tenant_approvals_updated', handleApprovalsUpdate);
+      window.removeEventListener('affiliates_updated', handleAffiliatesUpdate);
     };
   }, []);
 
@@ -258,6 +274,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem icon={<Building2 size={18} className="text-blue-600" />} label="Manajemen Klien" active={activeTab === 'tenants'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('tenants'); }} badgeCount={activeTab === 'tenants' ? 0 : unreadFeedbacks} />
             <NavItem icon={<Users size={18} className="text-orange-500" />} label="Prospek & Pengajuan" active={activeTab === 'saas_leads'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_leads'); }} badgeCount={activeTab === 'saas_leads' ? 0 : pendingLeadsCount} />
             <NavItem icon={<ShieldCheck size={18} className="text-emerald-600" />} label="Persetujuan Desa" active={activeTab === 'pending_approvals'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pending_approvals'); }} badgeCount={activeTab === 'pending_approvals' ? 0 : pendingApprovalsCount} />
+            <NavItem icon={<Handshake size={18} className="text-emerald-700" />} label="Manajemen Afiliator" active={activeTab === 'saas_affiliates'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_affiliates'); }} badgeCount={activeTab === 'saas_affiliates' ? 0 : pendingAffiliatesCount} />
             <NavItem icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
             <NavItem icon={<Sparkles size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
             <NavItem icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={activeTab === 'saas_bugs' ? 0 : pendingBugsCount} />

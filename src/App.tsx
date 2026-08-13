@@ -37,6 +37,7 @@ import Login from './components/Login';
 import TenantNotFound from './components/TenantNotFound';
 import TenantPending from './components/TenantPending';
 import AdminPendingApprovals from './components/admin/AdminPendingApprovals';
+import SaaSAffiliateManager from './components/admin/saas/SaaSAffiliateManager';
 import Footer from './components/common/Footer';
 import SyaratKetentuanPage from './pages/SyaratKetentuan';
 import KebijakanPrivasiPage from './pages/KebijakanPrivasi';
@@ -564,6 +565,7 @@ export default function App() {
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
                 {adminTab === 'saas_leads' && user.role === 'saas_admin' && <AdminSaaSLeads onSetActiveTab={setAdminTab} />}
                 {adminTab === 'pending_approvals' && user.role === 'saas_admin' && <AdminPendingApprovals />}
+                {adminTab === 'saas_affiliates' && user.role === 'saas_admin' && <SaaSAffiliateManager />}
                 {adminTab === 'log_aktivitas' && user.role === 'saas_admin' && <AdminSaaSLogs />}
                 {adminTab === 'log_pembaruan' && user.role === 'saas_admin' && <AdminSaaSGlobalUpdates />}
                 {adminTab === 'saas_bugs' && user.role === 'saas_admin' && <AdminSaaSBugReports />}

@@ -128,6 +128,7 @@ export default function AffiliateDashboard() {
 
   useEffect(() => {
     let mounted = true;
+    const affiliateIdRef: { current: string | null } = { current: null };
 
     const init = async () => {
       const authStr = localStorage.getItem('didesa_auth_user');
@@ -177,6 +178,7 @@ export default function AffiliateDashboard() {
 
       if (mounted) {
         if (affiliateData) {
+          affiliateIdRef.current = affiliateData.id;
           setAffiliate(affiliateData);
           setVoucherCode(affiliateData.custom_voucher_code || '');
           const auth: AuthUser = {};
@@ -198,9 +200,25 @@ export default function AffiliateDashboard() {
     };
     window.addEventListener('global_branding_updated', handleBranding);
 
+    // Realtime: sinkronkan otomatis saat admin SaaS memperbarui status / payout
+    const channel = supabase.channel('affiliate_dashboard_realtime_' + (affiliateIdRef.current || 'anon'));
+    channel
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'affiliates' }, (payload) => {
+        const row = payload.new as Affiliate;
+        if (row && row.id && row.id === affiliateIdRef.current) setAffiliate(row);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'affiliate_referrals' }, () => {
+        if (affiliateIdRef.current) loadData(affiliateIdRef.current);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'affiliate_payouts' }, () => {
+        if (affiliateIdRef.current) loadData(affiliateIdRef.current);
+      })
+      .subscribe();
+
     return () => {
       mounted = false;
       window.removeEventListener('global_branding_updated', handleBranding);
+      supabase.removeChannel(channel);
     };
   }, [loadData]);
 
