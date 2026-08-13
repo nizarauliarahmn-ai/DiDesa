@@ -26,12 +26,54 @@ const MILESTONES = [
 const formatRupiah = (value: number) =>
   'Rp ' + Math.round(value).toLocaleString('id-ID');
 
+const formatIDR = (value: number) =>
+  new Intl.NumberFormat('id-ID').format(Math.round(value));
+
 function getTier(n: number) {
   return TIERS.find(t => n >= t.min && n <= t.max) || TIERS[TIERS.length - 1];
 }
 
 function getMilestoneBonus(n: number) {
   return MILESTONES.filter(m => n >= m.desa).reduce((sum, m) => sum + m.bonus, 0);
+}
+
+function SliderRow({
+  label, value, onChange, min, max, badge
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  badge?: string;
+}) {
+  const pct = ((value - min) / (max - min)) * 100;
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3 gap-3">
+        <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+          {label}
+        </label>
+        <span className="bg-emerald-50 text-emerald-700 font-bold px-3 py-1 rounded-xl text-lg border border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800/60 shrink-0">
+          {badge ?? value}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="affiliate-range w-full appearance-none"
+        style={{ '--val': pct + '%' } as React.CSSProperties}
+        aria-label={label}
+      />
+      <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1.5">
+        <span>{min} desa</span>
+        <span>{max} desa</span>
+      </div>
+    </div>
+  );
 }
 
 function generateReferralCode(): string {
@@ -69,10 +111,12 @@ export default function AffiliateLandingPage() {
   const activeTier = getTier(jumlahDesa);
   const commissionPerDesa = activeTier.perDesa;
   const renewalRate = activeTier.perpanjangan;
+  const renewalPctLabel = `${(renewalRate * 100).toLocaleString('id-ID')}%`;
   const newVillageCommission = jumlahDesa * commissionPerDesa;
   const renewalCommission = jumlahPerpanjangan * renewalRate * annualFee;
   const estimatedYear1 = newVillageCommission + renewalCommission;
   const milestoneBonus = getMilestoneBonus(jumlahDesa);
+  const nextMilestone = MILESTONES.find(m => jumlahDesa < m.desa) || null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,6 +180,46 @@ export default function AffiliateLandingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-sans">
+      <style>{`
+        .affiliate-range {
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          height: 12px;
+          border-radius: 9999px;
+          background: linear-gradient(to right, #059669 0%, #059669 var(--val, 0%), #e2e8f0 var(--val, 0%), #e2e8f0 100%);
+          box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.08);
+          outline: none;
+          cursor: grab;
+        }
+        .affiliate-range:active { cursor: grabbing; }
+        .affiliate-range::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 9999px;
+          background: #ffffff;
+          border: 2px solid #059669;
+          box-shadow: 0 4px 14px rgba(4, 120, 87, 0.3);
+          cursor: grab;
+          transition: transform 0.15s ease;
+        }
+        .affiliate-range::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        .affiliate-range:active::-webkit-slider-thumb { transform: scale(1.05); cursor: grabbing; }
+        .affiliate-range::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 9999px;
+          background: #ffffff;
+          border: 2px solid #059669;
+          box-shadow: 0 4px 14px rgba(4, 120, 87, 0.3);
+          cursor: grab;
+          transition: transform 0.15s ease;
+        }
+        .affiliate-range::-moz-range-thumb:hover { transform: scale(1.1); }
+        .affiliate-range:active::-moz-range-thumb { transform: scale(1.05); cursor: grabbing; }
+      `}</style>
       {/* Navbar */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/60 dark:border-slate-800/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -291,55 +375,41 @@ export default function AffiliateLandingPage() {
               </p>
 
               <div className="mt-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 sm:p-8">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Desa Baru (Tahun ke-1)</label>
-                  <span className="text-2xl font-black bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 rounded-xl px-3 py-0.5">
-                    {jumlahDesa}
-                  </span>
-                </div>
-                <input
-                  type="range"
+                <SliderRow
+                  label="Desa Baru (Tahun ke-1)"
+                  value={jumlahDesa}
+                  onChange={setJumlahDesa}
                   min={RANGE_MIN}
                   max={RANGE_MAX}
-                  value={jumlahDesa}
-                  onChange={e => setJumlahDesa(Number(e.target.value))}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer accent-emerald-600"
-                  aria-label="Jumlah desa baru"
+                  badge={`${jumlahDesa} desa`}
                 />
-                <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
-                  <span>{RANGE_MIN} desa</span>
-                  <span>{RANGE_MAX} desa</span>
-                </div>
 
-                <div className="flex items-center justify-between mb-2 mt-6">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Desa Perpanjangan (Tahunan)</label>
-                  <span className="text-2xl font-black bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 rounded-xl px-3 py-0.5">
-                    {jumlahPerpanjangan}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={RANGE_MAX}
-                  value={jumlahPerpanjangan}
-                  onChange={e => setJumlahPerpanjangan(Number(e.target.value))}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer accent-emerald-600"
-                  aria-label="Jumlah desa perpanjangan"
-                />
-                <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
-                  <span>0 desa</span>
-                  <span>{RANGE_MAX} desa</span>
+                <div className="mt-6">
+                  <SliderRow
+                    label="Desa Perpanjangan (Tahunan)"
+                    value={jumlahPerpanjangan}
+                    onChange={setJumlahPerpanjangan}
+                    min={0}
+                    max={RANGE_MAX}
+                    badge={`${jumlahPerpanjangan} desa`}
+                  />
                 </div>
 
                 <div className="mt-6 space-y-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Biaya Langganan Tahunan per Desa (APBDesa)</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Biaya Langganan Tahunan per Desa (APBDesa)</label>
+                    <span className="text-[10px] font-bold text-emerald-600">/ tahun</span>
+                  </div>
                   <input
-                    type="number"
-                    min={0}
-                    step={500000}
-                    value={annualFee}
-                    onChange={e => setAnnualFee(Math.max(0, Number(e.target.value)))}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    type="text"
+                    inputMode="numeric"
+                    value={`Rp ${formatIDR(annualFee)} / tahun`}
+                    onChange={e => {
+                      const digits = e.target.value.replace(/\D/g, '');
+                      setAnnualFee(digits ? parseInt(digits, 10) : 0);
+                    }}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-extrabold outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all"
+                    aria-label="Biaya langganan tahunan"
                   />
                 </div>
 
@@ -354,19 +424,36 @@ export default function AffiliateLandingPage() {
                   </div>
                 </div>
 
-                <div className="mt-3 rounded-2xl bg-emerald-700 border border-emerald-700 text-white p-4">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Total Estimasi Komisi Tahun Pertama</p>
-                  <p className="text-2xl font-black mt-1">{formatRupiah(estimatedYear1)}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mt-3">
-                  <div className="rounded-2xl p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi Desa Baru</p>
-                    <p className="text-lg font-black text-slate-700 dark:text-slate-200 mt-1">{formatRupiah(newVillageCommission)}</p>
+                {/* Kartu Total Estimasi Komisi */}
+                <div className="relative overflow-hidden mt-3 rounded-3xl bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-600 text-white p-5 shadow-xl shadow-emerald-900/25">
+                  <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+                  <div className="relative flex items-end justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Total Estimasi Komisi</p>
+                      <p className="text-3xl sm:text-4xl font-black mt-1 tracking-tight">{formatRupiah(estimatedYear1)}</p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-emerald-100/80 shrink-0 mb-1" />
                   </div>
-                  <div className="rounded-2xl p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi Perpanjangan ({renewalRate * 100}%)</p>
-                    <p className="text-lg font-black text-slate-700 dark:text-slate-200 mt-1">{formatRupiah(renewalCommission)}</p>
+                  <div className="relative mt-4 border-t border-white/15 pt-3 space-y-1.5 text-[12px] font-semibold text-emerald-50">
+                    <p>
+                      Komisi Desa Baru ({jumlahDesa} Desa × {formatRupiah(commissionPerDesa)}) →{' '}
+                      <strong className="text-white">{formatRupiah(newVillageCommission)}</strong>
+                    </p>
+                    <p>
+                      Komisi Perpanjangan ({jumlahPerpanjangan} Desa × {renewalPctLabel} × Biaya Tahunan) →{' '}
+                      <strong className="text-white">{formatRupiah(renewalCommission)}</strong>
+                    </p>
+                    {milestoneBonus > 0 ? (
+                      <p className="flex items-center gap-1.5">
+                        Bonus Pencapaian → <strong className="text-white">+{formatRupiah(milestoneBonus)}</strong>
+                        <span className="inline-block px-1.5 py-0.5 rounded-md bg-emerald-900/30 text-emerald-100 text-[9px] font-black uppercase tracking-wider">{jumlahDesa} desa</span>
+                      </p>
+                    ) : nextMilestone ? (
+                      <p>
+                        Bonus Pencapaian → raih {nextMilestone.desa} desa baru untuk{' '}
+                        <strong className="text-white">+{formatRupiah(nextMilestone.bonus)}</strong>
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
