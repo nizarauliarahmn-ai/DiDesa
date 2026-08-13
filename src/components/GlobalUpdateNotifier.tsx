@@ -15,9 +15,11 @@ interface GlobalUpdate {
 
 interface Props {
   isBusy?: boolean;
+  /** Scope guard: hanya aktif di Dashboard Admin / Super Admin Desa (mode admin & sudah login). */
+  enabled?: boolean;
 }
 
-export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false }) => {
+export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled = false }) => {
   const [latestUpdate, setLatestUpdate] = useState<GlobalUpdate | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [pendingReload, setPendingReload] = useState(false);
@@ -39,6 +41,17 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false }) => {
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
     window.addEventListener('force_reload_requested', handleForceReload);
 
+    return () => {
+      window.removeEventListener('global_branding_updated', handleBrandingUpdate);
+      window.removeEventListener('force_reload_requested', handleForceReload);
+    };
+  }, []);
+
+  // Pengumuman "Apa Yang Baru": hanya aktif di Dashboard Admin / Super Admin Desa.
+  useEffect(() => {
+    // Scope guard: modal pengumuman hanya dipicu di Dashboard Admin / Super Admin Desa.
+    if (!enabled) return;
+
     const fetchUpdates = async () => {
       try {
         const { data, error } = await supabase
@@ -49,9 +62,11 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false }) => {
         
         if (!error && data && data.length > 0) {
           const latest = data[0];
-          const lastSeenVersion = localStorage.getItem('didesa_last_seen_version');
+          // Tampil 1 kali per versi: kunci unik id + versi.
+          const storageKey = `didesa_seen_announcement_${latest.id}_${latest.version}`;
+          const alreadySeen = localStorage.getItem(storageKey) === 'true';
           
-          if (lastSeenVersion !== latest.version) {
+          if (!alreadySeen) {
             setLatestUpdate(latest);
             setTimeout(() => setIsVisible(true), 1500);
           }
@@ -74,12 +89,10 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false }) => {
       .subscribe();
 
     return () => {
-      window.removeEventListener('global_branding_updated', handleBrandingUpdate);
-      window.removeEventListener('force_reload_requested', handleForceReload);
       window.removeEventListener('global_updates_updated', fetchUpdates);
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [enabled]);
 
   // Graceful reload observer
   useEffect(() => {
@@ -93,7 +106,8 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false }) => {
 
   const handleClose = () => {
     if (latestUpdate) {
-      localStorage.setItem('didesa_last_seen_version', latestUpdate.version);
+      const storageKey = `didesa_seen_announcement_${latestUpdate.id}_${latestUpdate.version}`;
+      localStorage.setItem(storageKey, 'true');
     }
     setIsVisible(false);
   };

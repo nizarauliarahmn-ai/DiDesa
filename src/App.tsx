@@ -610,7 +610,7 @@ export default function App() {
         </div>
         <IntroductionTour role={user.role} />
         <ToastContainer />
-        <GlobalUpdateNotifier isBusy={isBusy} />
+        <GlobalUpdateNotifier isBusy={isBusy} enabled />
         {user.role !== 'saas_admin' && <GlobalBugReportButton />}
       </div>
     );
