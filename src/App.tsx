@@ -40,6 +40,8 @@ import AdminPendingApprovals from './components/admin/AdminPendingApprovals';
 import Footer from './components/common/Footer';
 import SyaratKetentuanPage from './pages/SyaratKetentuan';
 import KebijakanPrivasiPage from './pages/KebijakanPrivasi';
+import AffiliateLandingPage from './pages/AffiliateLandingPage';
+import AffiliateDashboard from './pages/AffiliateDashboard';
 import { syncGlobalBrandingFromSupabase, subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant, clearTenantCache } from './utils/tenantResolver';
@@ -450,6 +452,14 @@ export default function App() {
   }
   if (window.location.pathname.includes('/kebijakan-privasi')) {
     return <><KebijakanPrivasiPage /><Footer /><ToastContainer /></>;
+  }
+
+  // Program Affiliator DiDesa
+  if (window.location.pathname.includes('/afiliasi') && !window.location.pathname.includes('/affiliate/dashboard')) {
+    return <><AffiliateLandingPage /><ToastContainer /></>;
+  }
+  if (window.location.pathname.includes('/affiliate/dashboard')) {
+    return <AffiliateDashboard />;
   }
 
   if (tenantValid === false) {
