@@ -1,8 +1,8 @@
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { 
-  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban
+import {
+  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown
 } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync, getLetterFullData } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
@@ -52,6 +52,8 @@ const getFullLetterName = (jenis: string): string => {
 interface AdminSuratDashboardProps {
   onBuatSurat: () => void;
   onEditLetter?: (letter: LetterHistory) => void;
+  onOpenTambahTamu?: () => void;
+  onOpenTambahPermohonan?: () => void;
   searchQuery?: string;
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
@@ -60,6 +62,8 @@ interface AdminSuratDashboardProps {
 export default function AdminSuratDashboard({ 
   onBuatSurat,
   onEditLetter,
+  onOpenTambahTamu,
+  onOpenTambahPermohonan,
   searchQuery: externalSearchQuery,
   setSearchQuery: externalSetSearchQuery,
   debouncedSearchQuery: externalDebouncedSearchQuery
@@ -97,6 +101,8 @@ export default function AdminSuratDashboard({
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [printStartDate, setPrintStartDate] = useState('');
   const [printEndDate, setPrintEndDate] = useState('');
+  const [showQuickActions, setShowQuickActions] = useState(false);
+  const quickActionRef = useRef<HTMLDivElement>(null);
 
   // Kop Surat Settings State for dynamic printing header
   const [kopSettings, setKopSettings] = useState(() => ({
@@ -148,6 +154,20 @@ export default function AdminSuratDashboard({
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
     };
   }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (quickActionRef.current && !quickActionRef.current.contains(event.target as Node)) {
+        setShowQuickActions(false);
+      }
+    }
+    if (showQuickActions) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showQuickActions]);
 
   const handlePrintAll = () => {
     setShowPrintModal(false);
@@ -1066,13 +1086,51 @@ export default function AdminSuratDashboard({
             <Printer className="w-4 h-4" />
             Cetak Daftar
           </button>
-          <button 
-            onClick={onBuatSurat}
-            className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Buat Surat Baru
-          </button>
+          <div className="relative" ref={quickActionRef}>
+            <button 
+              onClick={() => setShowQuickActions(!showQuickActions)}
+              className="bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Buat / Input Baru
+              <ChevronDown className={`w-4 h-4 transition-transform ${showQuickActions ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showQuickActions && (
+              <div className="absolute right-0 top-full mt-2 w-72 shadow-lg border border-slate-100 rounded-xl bg-white p-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                <button
+                  onClick={() => { setShowQuickActions(false); onBuatSurat(); }}
+                  className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-emerald-50/60 transition-colors text-left"
+                >
+                  <span className="text-lg leading-none mt-0.5">📄</span>
+                  <span>
+                    <span className="block text-sm font-bold text-gray-800">Buat Surat Langsung</span>
+                    <span className="block text-[11px] text-gray-500 mt-0.5">Buka katalog template surat resmi</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => { setShowQuickActions(false); onOpenTambahPermohonan?.(); }}
+                  className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-emerald-50/60 transition-colors text-left"
+                >
+                  <span className="text-lg leading-none mt-0.5">📥</span>
+                  <span>
+                    <span className="block text-sm font-bold text-gray-800">Tambah Permohonan (Bantuan Admin)</span>
+                    <span className="block text-[11px] text-gray-500 mt-0.5">Input permohonan warga ke Inbox / Kiosk</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => { setShowQuickActions(false); onOpenTambahTamu?.(); }}
+                  className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-emerald-50/60 transition-colors text-left"
+                >
+                  <span className="text-lg leading-none mt-0.5">📖</span>
+                  <span>
+                    <span className="block text-sm font-bold text-gray-800">Catat Buku Tamu</span>
+                    <span className="block text-[11px] text-gray-500 mt-0.5">Input entri kehadiran tamu baru</span>
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

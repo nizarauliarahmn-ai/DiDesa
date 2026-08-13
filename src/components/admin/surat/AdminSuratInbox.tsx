@@ -1,15 +1,16 @@
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, CheckCircle, Clock, Monitor, BadgeCheck } from 'lucide-react';
+import { Search, FileText, CheckCircle, Clock, Monitor, BadgeCheck, Plus } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, updateLetterHistoryAsync } from '../../../utils/letterHistory';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 
 interface AdminSuratInboxProps {
   onEditLetter?: (letter: LetterHistory) => void;
+  onOpenTambahPermohonan?: () => void;
 }
 
-export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) {
+export default function AdminSuratInbox({ onEditLetter, onOpenTambahPermohonan }: AdminSuratInboxProps) {
   const [suratList, setSuratList] = useState<LetterHistory[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -93,6 +94,15 @@ export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) 
             Daftar permohonan surat dari Layanan Mandiri yang perlu di-review dan disetujui.
           </p>
         </div>
+        {onOpenTambahPermohonan && (
+          <button 
+            onClick={onOpenTambahPermohonan}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-sm hover:bg-indigo-700 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Tambah Permohonan
+          </button>
+        )}
       </div>
 
       <div className="flex gap-4 items-center">

@@ -20,7 +20,6 @@ import AdminSuratSKKT from './surat/AdminSuratSKKT';
 import AdminSuratUndangan from './surat/AdminSuratUndangan';
 import { getLetterFullData } from '../../utils/letterHistory';
 import { fetchResidentsCached } from '../../utils/apiCache';
-import { Plus, BookOpen, FilePlus } from 'lucide-react';
 import { TambahTamuModal, TambahPermohonanModal } from './surat/AdminSuratQuickActions';
 
 export default function AdminSurat({ 
@@ -162,23 +161,6 @@ export default function AdminSurat({
         >
           Pengaturan Surat
         </button>
-        <div className="flex-1"></div>
-        <div className="flex flex-wrap items-center gap-2 py-2 pr-1 shrink-0">
-          <button
-            onClick={() => setShowTambahTamu(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl shadow-sm dark:shadow-none hover:bg-gray-50 dark:hover:bg-slate-800 hover:border-emerald-300 transition-all"
-          >
-            <BookOpen className="w-4 h-4 text-emerald-600" />
-            Tambah Tamu
-          </button>
-          <button
-            onClick={() => setShowTambahPermohonan(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-xl shadow-sm hover:bg-indigo-700 transition-all"
-          >
-            <FilePlus className="w-4 h-4" />
-            Tambah Permohonan
-          </button>
-        </div>
       </div>
 
       {showTambahTamu && (
@@ -218,6 +200,8 @@ export default function AdminSurat({
           <AdminSuratDashboard 
             onBuatSurat={() => changeTab('buat')} 
             onEditLetter={handleEditLetter}
+            onOpenTambahTamu={() => setShowTambahTamu(true)}
+            onOpenTambahPermohonan={() => setShowTambahPermohonan(true)}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             debouncedSearchQuery={debouncedSearchQuery}
@@ -226,6 +210,7 @@ export default function AdminSurat({
         {activeTab === 'inbox' && (
           <AdminSuratInbox 
             onEditLetter={handleEditLetter}
+            onOpenTambahPermohonan={() => setShowTambahPermohonan(true)}
           />
         )}
         {activeTab === 'buat' && (
