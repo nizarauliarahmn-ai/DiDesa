@@ -1,15 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Bug, LifeBuoy, AlertTriangle, CheckCircle2, Clock, 
   Search, RefreshCw, Eye, MessageSquare, ShieldAlert,
   Send, User, Building2, Monitor, ArrowRight, Filter,
   Check, X, Sparkles, HelpCircle, Tag, Info, FileText, Download
 } from 'lucide-react';
+
+// Kunci penyimpanan state "sudah dibaca admin SaaS" (tiket id -> timestamp)
+const SAAS_ADMIN_READ_KEY = 'saas_admin_read_state';
+
+const getAdminReadState = (): Record<string, number> => {
+  try {
+    return JSON.parse(localStorage.getItem(SAAS_ADMIN_READ_KEY) || '{}');
+  } catch {
+    return {};
+  }
+};
 import { 
   fetchBugReportsOnline, 
   updateBugReportStatusOnline,
   replyToBugReportOnline,
   markBugReportsAsRead,
+  markBugReportReadByAdmin,
+  hasUnreadUserReply,
+  lastUserReplyTime,
   BugReport 
 } from '../../utils/bugReportService';
 import { showToast } from '../../utils/toast';
@@ -27,6 +41,19 @@ export const AdminSaaSBugReports: React.FC = () => {
   const [selectedReport, setSelectedReport] = useState<BugReport | null>(null);
   const [adminReplyInput, setAdminReplyInput] = useState('');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const chatBodyRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll chat ke bagian paling bawah saat tiket dibuka / pesan baru masuk
+  useEffect(() => {
+    if (selectedReport && chatBodyRef.current) {
+      requestAnimationFrame(() => {
+        if (chatBodyRef.current) {
+          chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+      });
+    }
+  }, [selectedReport?.id, selectedReport?.messages?.length]);
 
   const fetchReports = async () => {
     try {
@@ -74,6 +101,12 @@ export const AdminSaaSBugReports: React.FC = () => {
     setSelectedReport(report);
     setAdminReplyInput(report.admin_reply || '');
     markBugReportsAsRead([report.id]);
+    // Tandai terbaca di Supabase agar badge merah hilang dan tidak muncul lagi
+    if (hasUnreadUserReply(report)) {
+      markBugReportReadByAdmin(report.id);
+      const now = new Date().toISOString();
+      setReports(prev => prev.map(r => r.id === report.id ? { ...r, admin_read_at: now } : r));
+    }
   };
 
   // Keep selected report in sync with realtime updates
@@ -360,11 +393,14 @@ export const AdminSaaSBugReports: React.FC = () => {
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredReports.map((item) => (
+          {filteredReports.map((item) => {
+            const unread = hasUnreadUserReply(item);
+            const lastReply = lastUserReplyTime(item);
+            return (
             <div 
               key={item.id}
               onClick={() => handleOpenDetail(item)}
-              className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all shadow-xs hover:shadow-md cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+              className={`bg-white dark:bg-slate-900 rounded-2xl p-5 border transition-all shadow-xs hover:shadow-md cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 group ${unread ? 'border-rose-300 dark:border-rose-700/60 ring-2 ring-rose-300/40 dark:ring-rose-700/30' : 'border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500'}`}
             >
               <div className="space-y-2 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -374,6 +410,12 @@ export const AdminSaaSBugReports: React.FC = () => {
                   {getStatusBadge(item.status)}
                   {getUrgencyBadge(item.urgency)}
                   
+                  {unread && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-white bg-rose-500 px-2.5 py-1 rounded-full shadow-md shadow-rose-500/30 animate-pulse">
+                      💬 Balasan Baru
+                    </span>
+                  )}
+
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
                     <Building2 size={12} /> {item.tenant_name}
                   </span>
@@ -396,19 +438,28 @@ export const AdminSaaSBugReports: React.FC = () => {
                   <span>Modul: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{item.module}</strong></span>
                   <span>•</span>
                   <span>{new Date(item.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                  {lastReply && (
+                    <>
+                      <span>•</span>
+                      <span className={unread ? 'text-rose-600 dark:text-rose-400 font-bold' : ''}>
+                        Balasan terakhir: {new Date(lastReply).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="shrink-0 flex items-center gap-2 justify-end">
                 <button
                   onClick={(e) => { e.stopPropagation(); handleOpenDetail(item); }}
-                  className="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 rounded-xl text-xs font-bold transition-all border border-indigo-200 dark:border-indigo-800 flex items-center gap-1.5"
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${unread ? 'bg-rose-500 hover:bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-500/30' : 'bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'}`}
                 >
                   <Eye size={14} /> Detail Tiket
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -438,7 +489,7 @@ export const AdminSaaSBugReports: React.FC = () => {
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div ref={chatBodyRef} className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Reporter Information Card */}
               <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4 text-xs">
                 <div>
@@ -468,32 +519,44 @@ export const AdminSaaSBugReports: React.FC = () => {
               </div>
 
               {/* Detail Message as Chat History */}
-              <div className="space-y-4">
-                {selectedReport.messages?.map((msg, idx) => (
-                  <div key={idx} className={`flex flex-col ${msg.role === 'SaaS Admin' ? 'items-end' : 'items-start'}`}>
+              <div className="space-y-4" id={`chat-history-${selectedReport.id}`}>
+                {selectedReport.messages?.map((msg, idx) => {
+                  const isAdmin = msg.role === 'SaaS Admin';
+                  const isLatestUserMsg = !isAdmin && idx === (selectedReport.messages?.length || 0) - 1;
+                  const url = msg.attachment_url || '';
+                  const isImageAttach = !!url && (msg.attachment_type === 'image' || /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(url));
+                  const isDocAttach = !!url && !isImageAttach && (msg.attachment_type === 'document' || true);
+                  return (
+                  <div key={idx} className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'} ${isLatestUserMsg ? 'animate-[bounce_0.6s_ease-in-out_1]' : ''}`}>
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[10px] font-bold text-slate-500">{msg.sender} ({msg.role})</span>
                       <span className="text-[9px] text-slate-400">{new Date(msg.timestamp).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <div className={`p-3.5 rounded-2xl max-w-[85%] text-xs leading-relaxed ${
-                      msg.role === 'SaaS Admin' 
+                      isAdmin 
                         ? 'bg-indigo-600 text-white rounded-tr-sm shadow-md shadow-indigo-600/20' 
-                        : 'bg-amber-400 text-slate-900 rounded-tl-sm border border-amber-300/70 shadow-sm'
+                        : isLatestUserMsg
+                          ? 'bg-amber-400 text-slate-900 rounded-tl-sm border-2 border-amber-500 shadow-lg shadow-amber-400/40 ring-2 ring-amber-300/60'
+                          : 'bg-amber-400 text-slate-900 rounded-tl-sm border border-amber-300/70 shadow-sm'
                     }`}>
                       {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
-                      {msg.attachment_url && msg.attachment_type === 'image' && (
-                        <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="mt-2 block max-w-[200px]">
+                      {isImageAttach && (
+                        <button
+                          type="button"
+                          onClick={() => setLightboxUrl(url)}
+                          className="mt-2 block rounded-xl shadow-sm my-1 border border-slate-200 cursor-pointer hover:opacity-95 transition-opacity overflow-hidden max-w-[240px]"
+                        >
                           <img
-                            src={msg.attachment_url}
+                            src={url}
                             alt={msg.file_name || 'Lampiran gambar'}
-                            className="rounded-xl max-w-[200px] cursor-pointer hover:opacity-90 border border-black/10 transition-all"
+                            className="w-full rounded-xl max-w-[240px]"
                             loading="lazy"
                           />
-                        </a>
+                        </button>
                       )}
-                      {msg.attachment_url && msg.attachment_type === 'document' && (
+                      {isDocAttach && (
                         <a
-                          href={msg.attachment_url}
+                          href={url}
                           target="_blank"
                           rel="noopener noreferrer"
                           download={msg.file_name || 'lampiran'}
@@ -506,7 +569,8 @@ export const AdminSaaSBugReports: React.FC = () => {
                       )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Status Update Quick Action Buttons */}
@@ -601,6 +665,28 @@ export const AdminSaaSBugReports: React.FC = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Lightbox Preview Gambar */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-[140] bg-black/85 backdrop-blur-sm flex items-center justify-center p-6"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            onClick={() => setLightboxUrl(null)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer"
+            aria-label="Tutup preview"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Preview lampiran"
+            className="max-h-[85vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

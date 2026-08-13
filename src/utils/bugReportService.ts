@@ -30,6 +30,7 @@ export interface BugReport {
   created_at: string;
   updated_at?: string;
   page_url?: string;
+  admin_read_at?: string;
 }
 
 export const SETTINGS_KEY = 'saas_global_bug_reports';
@@ -310,6 +311,65 @@ export const replyToBugReportOnline = async (
     console.error('Error replying to bug report online:', e);
     return false;
   }
+};
+
+/**
+ * Tandai tiket sebagai sudah dibaca oleh SaaS Admin
+ * (menghilangkan badge "Balasan Baru" via admin_read_at)
+ */
+export const markBugReportReadByAdmin = async (
+  reportId: string
+): Promise<boolean> => {
+  try {
+    const currentReports = await fetchBugReportsOnline();
+    const index = currentReports.findIndex(r => r.id === reportId);
+    if (index === -1) return false;
+
+    const report = currentReports[index];
+    const lastMsg = (report.messages || [])[(report.messages || []).length - 1];
+    if (lastMsg && lastMsg.role === 'SaaS Admin') return true;
+
+    currentReports[index] = {
+      ...report,
+      admin_read_at: new Date().toISOString(),
+      updated_at: report.updated_at || report.created_at
+    };
+
+    const stringified = JSON.stringify(currentReports);
+    await supabase
+      .from('saas_settings')
+      .update({ value: stringified, updated_at: new Date().toISOString() })
+      .eq('key', SETTINGS_KEY)
+      .eq('tenant_id', GLOBAL_TENANT_ID);
+
+    localStorage.setItem(SETTINGS_KEY, stringified);
+    window.dispatchEvent(new Event('bug_reports_updated'));
+    return true;
+  } catch (e) {
+    console.error('Error marking bug report read by admin:', e);
+    return false;
+  }
+};
+
+/**
+ * Cek apakah tiket memiliki balasan baru dari warga/desa yang belum dibaca admin.
+ * true = ada pesan user terakhir setelah admin_read_at.
+ */
+export const hasUnreadUserReply = (t: BugReport): boolean => {
+  const msgs = t.messages || [];
+  const last = msgs[msgs.length - 1];
+  if (!last || last.role === 'SaaS Admin') return false;
+  const readAt = Date.parse(t.admin_read_at || '') || 0;
+  return Date.parse(last.timestamp) > readAt;
+};
+
+/** Waktu balasan terakhir (pesan user terakhir) dari sebuah tiket */
+export const lastUserReplyTime = (t: BugReport): string | null => {
+  const msgs = t.messages || [];
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role !== 'SaaS Admin') return msgs[i].timestamp;
+  }
+  return null;
 };
 
 // ---------------------------------------------------------------------------
