@@ -2,7 +2,14 @@
 -- Skema Database Program Affiliator DiDesa
 -- Tabel: affiliates, affiliate_referrals, affiliate_payouts
 -- Jalankan di Supabase SQL Editor (berurutan dari atas ke bawah)
+-- Catatan: skrip ini idempotent — tabel lama akan di-drop dulu
+-- agar aman dijalankan ulang.
 -- ============================================================
+
+-- Bersihkan tabel lama (jika sudah pernah dibuat)
+drop table if exists public.affiliate_payouts;
+drop table if exists public.affiliate_referrals;
+drop table if exists public.affiliates;
 
 -- 1) Tabel Affiliates (affiliator)
 create table public.affiliates (
@@ -27,7 +34,7 @@ create table public.affiliates (
 create table public.affiliate_referrals (
   id uuid default gen_random_uuid() primary key,
   affiliate_id uuid not null references public.affiliates(id) on delete cascade,
-  village_id text not null references public.tenants(id) on delete cascade,
+  village_id uuid not null references public.tenants(id) on delete cascade,
   village_name text,
   status text not null default 'trial', -- trial | active
   commission_amount numeric default 0 not null,
