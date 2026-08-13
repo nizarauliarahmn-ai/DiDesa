@@ -2,7 +2,7 @@ import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
-  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown
+  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen
 } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync, getLetterFullData } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
@@ -1100,32 +1100,38 @@ export default function AdminSuratDashboard({
               <div className="absolute right-0 top-full mt-2 w-72 shadow-lg border border-slate-100 rounded-xl bg-white p-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                 <button
                   onClick={() => { setShowQuickActions(false); onBuatSurat(); }}
-                  className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-emerald-50/60 transition-colors text-left"
+                  className="w-full p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-3 cursor-pointer text-left"
                 >
-                  <span className="text-lg leading-none mt-0.5">📄</span>
+                  <span className="p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+                    <FileText className="w-5 h-5 text-emerald-600" />
+                  </span>
                   <span>
-                    <span className="block text-sm font-bold text-gray-800">Buat Surat Langsung</span>
-                    <span className="block text-[11px] text-gray-500 mt-0.5">Buka katalog template surat resmi</span>
+                    <span className="block text-sm font-medium text-slate-800">Buat Surat Langsung</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">Buka katalog template surat resmi</span>
                   </span>
                 </button>
                 <button
                   onClick={() => { setShowQuickActions(false); onOpenTambahPermohonan?.(); }}
-                  className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-emerald-50/60 transition-colors text-left"
+                  className="w-full p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-3 cursor-pointer text-left"
                 >
-                  <span className="text-lg leading-none mt-0.5">📥</span>
+                  <span className="p-2 rounded-lg bg-blue-50 border border-blue-100">
+                    <Inbox className="w-5 h-5 text-blue-600" />
+                  </span>
                   <span>
-                    <span className="block text-sm font-bold text-gray-800">Tambah Permohonan (Bantuan Admin)</span>
-                    <span className="block text-[11px] text-gray-500 mt-0.5">Input permohonan warga ke Inbox / Kiosk</span>
+                    <span className="block text-sm font-medium text-slate-800">Tambah Permohonan (Bantuan Admin)</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">Input permohonan warga ke Inbox / Kiosk</span>
                   </span>
                 </button>
                 <button
                   onClick={() => { setShowQuickActions(false); onOpenTambahTamu?.(); }}
-                  className="w-full flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-emerald-50/60 transition-colors text-left"
+                  className="w-full p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-3 cursor-pointer text-left"
                 >
-                  <span className="text-lg leading-none mt-0.5">📖</span>
+                  <span className="p-2 rounded-lg bg-purple-50 border border-purple-100">
+                    <BookOpen className="w-5 h-5 text-purple-600" />
+                  </span>
                   <span>
-                    <span className="block text-sm font-bold text-gray-800">Catat Buku Tamu</span>
-                    <span className="block text-[11px] text-gray-500 mt-0.5">Input entri kehadiran tamu baru</span>
+                    <span className="block text-sm font-medium text-slate-800">Catat Buku Tamu</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">Input entri kehadiran tamu baru</span>
                   </span>
                 </button>
               </div>
