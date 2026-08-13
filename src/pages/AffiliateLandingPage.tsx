@@ -56,6 +56,8 @@ export default function AffiliateLandingPage() {
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
 
   const [jumlahDesa, setJumlahDesa] = useState(5);
+  const [jumlahPerpanjangan, setJumlahPerpanjangan] = useState(1);
+  const [annualFee, setAnnualFee] = useState(7500000);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
@@ -66,8 +68,10 @@ export default function AffiliateLandingPage() {
 
   const activeTier = getTier(jumlahDesa);
   const commissionPerDesa = activeTier.perDesa;
-  const estimatedMonthly = jumlahDesa * commissionPerDesa;
-  const estimatedYearly = estimatedMonthly * 12;
+  const renewalRate = activeTier.perpanjangan;
+  const newVillageCommission = jumlahDesa * commissionPerDesa;
+  const renewalCommission = jumlahPerpanjangan * renewalRate * annualFee;
+  const estimatedYear1 = newVillageCommission + renewalCommission;
   const milestoneBonus = getMilestoneBonus(jumlahDesa);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -181,12 +185,13 @@ export default function AffiliateLandingPage() {
             <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
               Komisi Nyata
             </span>{' '}
-            Setiap Bulan
+            dari Setiap Desa
           </h1>
           <p className="mt-6 text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
             Jadilah <strong>Affiliator DiDesa</strong> dan pendamping desa untuk memulai digitalisasi administrasi.
-            Untuk setiap desa yang aktif menggunakan DiDesa melalui referensi Anda, Anda berhak atas komisi{' '}
-            <strong className="text-emerald-700 dark:text-emerald-400">Rp 750.000 / bulan</strong>.
+            Untuk setiap desa baru yang berlangganan paket tahunan melalui referensi Anda, Anda berhak atas komisi transaksi{' '}
+            <strong className="text-emerald-700 dark:text-emerald-400">mulai Rp 750.000</strong>,
+            diikuti komisi perpanjangan tahunan setiap kali desa memperpanjang layanan.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a href="#daftar" className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-black uppercase tracking-widest shadow-xl shadow-emerald-600/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
@@ -199,8 +204,8 @@ export default function AffiliateLandingPage() {
 
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {[
-              { icon: Wallet, value: 'Mulai Rp 750rb', label: 'Komisi per Desa / Bulan' },
-              { icon: CalendarCheck, value: 'Bulanan', label: 'Pembayaran Rutin' },
+              { icon: Wallet, value: 'Mulai Rp 750rb', label: 'Komisi per Desa Baru' },
+              { icon: CalendarCheck, value: 'Tahunan', label: 'Berlangganan APBDesa' },
               { icon: TrendingUp, value: 'Tanpa Batas', label: 'Jumlah Desa Referensi' }
             ].map((item, i) => (
               <div key={i} className="rounded-2xl bg-white/80 dark:bg-slate-800/70 backdrop-blur border border-slate-200/70 dark:border-slate-700/60 p-5 flex items-center gap-4 text-left shadow-sm">
@@ -280,13 +285,14 @@ export default function AffiliateLandingPage() {
                 Berapa Penghasilan Anda <br className="hidden sm:block" /> Sebagai Affiliator?
               </h2>
               <p className="mt-4 text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                Geser slider untuk memperkirakan penghasilan Anda. Komisi dihitung otomatis sesuai{' '}
-                <strong>Tier {activeTier.name}</strong> Anda saat ini ({formatRupiah(commissionPerDesa)}/desa/bulan).
+                Geser slider untuk memperkirakan potensi komisi Anda pada tahun pertama. Komisi desa baru dihitung sesuai{' '}
+                <strong>Tier {activeTier.name}</strong> Anda ({formatRupiah(commissionPerDesa)}/desa baru), dan komisi
+                perpanjangan tahunan sebesar {renewalRate * 100}% dari biaya langganan.
               </p>
 
               <div className="mt-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Jumlah Desa</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Desa Baru (Tahun ke-1)</label>
                   <span className="text-2xl font-black bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 rounded-xl px-3 py-0.5">
                     {jumlahDesa}
                   </span>
@@ -298,11 +304,43 @@ export default function AffiliateLandingPage() {
                   value={jumlahDesa}
                   onChange={e => setJumlahDesa(Number(e.target.value))}
                   className="w-full h-2 rounded-full appearance-none cursor-pointer accent-emerald-600"
-                  aria-label="Jumlah desa"
+                  aria-label="Jumlah desa baru"
                 />
                 <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
                   <span>{RANGE_MIN} desa</span>
                   <span>{RANGE_MAX} desa</span>
+                </div>
+
+                <div className="flex items-center justify-between mb-2 mt-6">
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Desa Perpanjangan (Tahunan)</label>
+                  <span className="text-2xl font-black bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 rounded-xl px-3 py-0.5">
+                    {jumlahPerpanjangan}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={RANGE_MAX}
+                  value={jumlahPerpanjangan}
+                  onChange={e => setJumlahPerpanjangan(Number(e.target.value))}
+                  className="w-full h-2 rounded-full appearance-none cursor-pointer accent-emerald-600"
+                  aria-label="Jumlah desa perpanjangan"
+                />
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
+                  <span>0 desa</span>
+                  <span>{RANGE_MAX} desa</span>
+                </div>
+
+                <div className="mt-6 space-y-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Biaya Langganan Tahunan per Desa (APBDesa)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    step={500000}
+                    value={annualFee}
+                    onChange={e => setAnnualFee(Math.max(0, Number(e.target.value)))}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                  />
                 </div>
 
                 <div className="mt-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between">
@@ -311,21 +349,25 @@ export default function AffiliateLandingPage() {
                     <p className="text-lg font-black text-emerald-700 dark:text-emerald-400">{activeTier.name}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi / Desa / Bulan</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi / Desa Baru</p>
                     <p className="text-lg font-black">{formatRupiah(commissionPerDesa)}</p>
                   </div>
                 </div>
 
+                <div className="mt-3 rounded-2xl bg-emerald-700 border border-emerald-700 text-white p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-emerald-100">Total Estimasi Komisi Tahun Pertama</p>
+                  <p className="text-2xl font-black mt-1">{formatRupiah(estimatedYear1)}</p>
+                </div>
+
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  {([
-                    { label: 'Per Bulan', value: formatRupiah(estimatedMonthly) },
-                    { label: 'Per Tahun', value: formatRupiah(estimatedYearly) }
-                  ] as const).map((row, i) => (
-                    <div key={i} className={`rounded-2xl p-4 border ${i === 0 ? 'bg-emerald-700 border-emerald-700 text-white' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700'}`}>
-                      <p className={`text-[10px] font-black uppercase tracking-widest ${i === 0 ? 'text-emerald-100' : 'text-slate-400'}`}>{row.label}</p>
-                      <p className={`text-xl sm:text-2xl font-black mt-1 ${i === 1 ? 'text-slate-700 dark:text-slate-200' : ''}`}>{row.value}</p>
-                    </div>
-                  ))}
+                  <div className="rounded-2xl p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi Desa Baru</p>
+                    <p className="text-lg font-black text-slate-700 dark:text-slate-200 mt-1">{formatRupiah(newVillageCommission)}</p>
+                  </div>
+                  <div className="rounded-2xl p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi Perpanjangan ({renewalRate * 100}%)</p>
+                    <p className="text-lg font-black text-slate-700 dark:text-slate-200 mt-1">{formatRupiah(renewalCommission)}</p>
+                  </div>
                 </div>
 
                 {/* Banner Bonus Milestone */}
@@ -352,7 +394,7 @@ export default function AffiliateLandingPage() {
                 </div>
 
                 <p className="mt-4 text-[11px] text-slate-400 dark:text-slate-500 font-medium leading-relaxed">
-                  * Estimasi bruto. Bonus milestone merupakan insentif sekali terima saat mencapai jumlah desa aktif. Rincian komisi final ditentukan dalam perjanjian kemitraan dan kebijakan program.
+                  * Perhitungan: (jumlah desa baru × komisi tier) + (jumlah desa perpanjangan × % perpanjangan × biaya langganan tahunan). Langganan desa bersifat tahunan (APBDesa); bonus milestone merupakan insentif sekali terima. Rincian final mengikuti perjanjian kemitraan dan kebijakan program.
                 </p>
               </div>
             </div>
@@ -391,7 +433,7 @@ export default function AffiliateLandingPage() {
             {[
               { icon: UserPlus, step: '01', title: 'Daftar Gratis', desc: 'Isi formulir pendaftaran. Tim kami akan memverifikasi dan mengaktifkan akun affiliator Anda.' },
               { icon: Copy, step: '02', title: 'Bagikan Referensi', desc: 'Gunakan link referral dan kode voucher dari dashboard untuk merekomendasikan DiDesa ke desa-desa.' },
-              { icon: Wallet, step: '03', title: 'Raup Komisi', desc: 'Setiap desa aktif dari referensi Anda menghasilkan komisi mulai Rp 750.000 hingga Rp 1.250.000 per bulan sesuai tier, plus bonus pencapaian. Ajukan payout kapan saja.' }
+              { icon: Wallet, step: '03', title: 'Raup Komisi', desc: 'Setiap desa baru yang berlangganan menghasilkan komisi transaksi mulai Rp 750.000 hingga Rp 1.250.000 sesuai tier, ditambah bonus pencapaian. Desa yang memperpanjang memberikan komisi % tahunan. Ajukan payout kapan saja.' }
             ].map((item, i) => (
               <div key={i} className="relative rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-7 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
                 <span className="absolute top-5 right-6 text-5xl font-black text-slate-100 dark:text-slate-700 select-none">{item.step}</span>
@@ -516,7 +558,7 @@ export default function AffiliateLandingPage() {
               {
                 icon: Timer,
                 title: 'Atribusi & Masa Cookie 60 Hari',
-                desc: 'Referensi dihitung berdasarkan penggunaan link referral / kode voucher Anda saat desa melakukan pendaftaran. Masa atribusi berlaku 60 hari sejak klik pertama. Desa yang sudah berhasil terhubung tercatat sebagai referensi Anda secara permanen.'
+                desc: 'Langganan desa bersifat tahunan (APBDesa): komisi awal dibayarkan saat desa baru mendaftar melalui link referral / kode voucher Anda, diikuti komisi perpanjangan tahunan setiap desa memperpanjang layanan. Masa atribusi berlaku 60 hari sejak klik pertama. Desa yang sudah terhubung tercatat sebagai referensi Anda secara permanen.'
               },
               {
                 icon: Wallet,

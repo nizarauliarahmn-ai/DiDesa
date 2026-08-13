@@ -105,7 +105,7 @@ export default function AffiliateDashboard() {
 
   const activeCount = referrals.filter(r => r.status === 'active').length;
   const commissionRate = affiliate?.commission_rate || 0;
-  const estimatedMonthly = activeCount * commissionRate;
+  const totalEarned = referrals.reduce((sum, r) => sum + (r.commission_amount || 0), 0);
   const pendingPayout = payouts.filter(p => p.status === 'pending').reduce((sum, p) => sum + (p.amount || 0), 0);
   const totalPaidOut = payouts.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0);
 
@@ -324,8 +324,8 @@ export default function AffiliateDashboard() {
   const statCards = [
     { icon: Users, label: 'Total Referensi', value: String(referrals.length), sub: 'Desa' },
     { icon: BadgeCheck, label: 'Desa Aktif', value: String(activeCount), sub: 'Berjalan' },
-    { icon: TrendingUp, label: 'Estimasi Komisi / Bulan', value: formatRupiah(estimatedMonthly), sub: `${activeCount} x ${formatRupiah(commissionRate)}` },
-    { icon: Wallet, label: 'Payout Menunggu', value: formatRupiah(pendingPayout), sub: 'Belum dicairkan' }
+    { icon: TrendingUp, label: 'Total Komisi Terkumpul', value: formatRupiah(totalEarned), sub: `${referrals.length} referensi` },
+    { icon: Wallet, label: 'Komisi Siap Cair', value: formatRupiah(Math.max(0, totalEarned - totalPaidOut)), sub: 'Setelah payout terbayar' }
   ];
 
   return (
@@ -667,7 +667,7 @@ export default function AffiliateDashboard() {
                         <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-8 -mt-8" />
                         <p className="text-[9px] font-black uppercase tracking-widest text-emerald-100">DiDesa Digitalisasi Desa</p>
                         <p className="mt-2 text-2xl font-black tracking-tight leading-tight">Bantu Desa. <br /> Raih Komisi.</p>
-                        <p className="mt-2 text-[10px] font-bold text-emerald-100/90">Affiliator Program • Mulai Rp 750rb / desa / bulan</p>
+                        <p className="mt-2 text-[10px] font-bold text-emerald-100/90">Affiliator Program • Mulai Rp 750rb / desa baru</p>
                       </div>
                     </div>
                     <button
@@ -716,7 +716,7 @@ export default function AffiliateDashboard() {
                         <tr className="border-b border-slate-100 dark:border-slate-700/60">
                           <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Tier</th>
                           <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Jumlah Desa</th>
-                          <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi / Desa / Bulan</th>
+                          <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi / Desa Baru</th>
                           <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Bonus Perpanjangan</th>
                           <th className="py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Bonus Pencapaian</th>
                         </tr>
@@ -761,7 +761,7 @@ export default function AffiliateDashboard() {
                       {
                         icon: Timer,
                         title: 'Atribusi & Masa Cookie 60 Hari',
-                        desc: 'Referensi dihitung dari penggunaan link referral / kode voucher Anda, berlaku 60 hari sejak klik pertama. Desa yang sudah terhubung tercatat permanen sebagai referensi Anda.'
+                        desc: 'Langganan desa bersifat tahunan (APBDesa): komisi awal dibayarkan saat desa baru mendaftar melalui link referral / kode voucher Anda, diikuti komisi perpanjangan tahunan setiap desa memperpanjang layanan. Atribusi berlaku 60 hari sejak klik pertama. Desa yang sudah terhubung tercatat permanen sebagai referensi Anda.'
                       },
                       {
                         icon: Wallet,
