@@ -455,11 +455,15 @@ export default function App() {
   }
 
   // Program Affiliator DiDesa
-  if (window.location.pathname.includes('/afiliasi') && !window.location.pathname.includes('/affiliate/dashboard')) {
-    return <><AffiliateLandingPage /><ToastContainer /></>;
-  }
   if (window.location.pathname.includes('/affiliate/dashboard')) {
     return <AffiliateDashboard />;
+  }
+  if (
+    window.location.pathname.includes('/afiliasi') ||
+    window.location.pathname.includes('/affiliator') ||
+    window.location.pathname.includes('/affiliate')
+  ) {
+    return <><AffiliateLandingPage /><ToastContainer /></>;
   }
 
   if (tenantValid === false) {
