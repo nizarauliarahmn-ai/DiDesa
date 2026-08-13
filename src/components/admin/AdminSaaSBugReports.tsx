@@ -3,7 +3,7 @@ import {
   Bug, LifeBuoy, AlertTriangle, CheckCircle2, Clock, 
   Search, RefreshCw, Eye, MessageSquare, ShieldAlert,
   Send, User, Building2, Monitor, ArrowRight, Filter,
-  Check, X, Sparkles, HelpCircle, Tag, Info
+  Check, X, Sparkles, HelpCircle, Tag, Info, FileText, Download
 } from 'lucide-react';
 import { 
   fetchBugReportsOnline, 
@@ -480,7 +480,30 @@ export const AdminSaaSBugReports: React.FC = () => {
                         ? 'bg-indigo-600 text-white rounded-tr-sm shadow-md shadow-indigo-600/20' 
                         : 'bg-amber-400 text-slate-900 rounded-tl-sm border border-amber-300/70 shadow-sm'
                     }`}>
-                      {msg.text}
+                      {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
+                      {msg.attachment_url && msg.attachment_type === 'image' && (
+                        <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" className="mt-2 block max-w-[200px]">
+                          <img
+                            src={msg.attachment_url}
+                            alt={msg.file_name || 'Lampiran gambar'}
+                            className="rounded-xl max-w-[200px] cursor-pointer hover:opacity-90 border border-black/10 transition-all"
+                            loading="lazy"
+                          />
+                        </a>
+                      )}
+                      {msg.attachment_url && msg.attachment_type === 'document' && (
+                        <a
+                          href={msg.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download={msg.file_name || 'lampiran'}
+                          className="mt-2 flex items-center gap-2 p-2 bg-white/15 dark:bg-slate-900/60 rounded-lg text-xs font-medium hover:bg-white/25 transition-colors"
+                        >
+                          <FileText size={16} className="shrink-0" />
+                          <span className="truncate flex-1 text-left">{msg.file_name || 'Dokumen lampiran'}</span>
+                          <Download size={14} className="shrink-0 opacity-70" />
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}

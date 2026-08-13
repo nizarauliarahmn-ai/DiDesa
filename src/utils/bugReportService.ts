@@ -2,6 +2,16 @@ import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { addSaaSLog } from './saasLogs';
 
+export interface BugReportMessage {
+  sender: string;
+  role: string;
+  text: string;
+  timestamp: string;
+  attachment_url?: string;
+  attachment_type?: 'image' | 'document';
+  file_name?: string;
+}
+
 export interface BugReport {
   id: string;
   tenant_id: string;
@@ -16,7 +26,7 @@ export interface BugReport {
   urgency: 'Rendah' | 'Sedang' | 'Tinggi' | 'Mendesak';
   status: 'Menunggu' | 'Diproses' | 'Selesai';
   admin_reply?: string;
-  messages?: { sender: string; role: string; text: string; timestamp: string }[];
+  messages?: BugReportMessage[];
   created_at: string;
   updated_at?: string;
   page_url?: string;
@@ -237,7 +247,7 @@ export const updateBugReportStatusOnline = async (
  */
 export const replyToBugReportOnline = async (
   reportId: string,
-  reply: { sender: string; role: string; text: string }
+  reply: { sender: string; role: string; text: string; attachment_url?: string; attachment_type?: string; file_name?: string }
 ): Promise<boolean> => {
   try {
     const currentReports = await fetchBugReportsOnline();
@@ -300,4 +310,100 @@ export const replyToBugReportOnline = async (
     console.error('Error replying to bug report online:', e);
     return false;
   }
+};
+
+// ---------------------------------------------------------------------------
+// Lampiran Chat (Upload & Kompresi Client-Side)
+// ---------------------------------------------------------------------------
+
+export const CHAT_ATTACHMENT_BUCKET = 'chat-attachments';
+
+const MAX_IMAGE_DIMENSION = 1200;
+const IMAGE_COMPRESS_QUALITY = 0.68;
+export const MAX_DOCUMENT_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const loadImageFromFile = (file: File): Promise<HTMLImageElement> => {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Gagal memuat gambar')); };
+    img.src = url;
+  });
+};
+
+/**
+ * Kompresi gambar client-side via Canvas -> WebP/JPEG (max 1200px, quality ~0.68).
+ * Menjaga aspek rasio. Hasil diharapkan di bawah 200 KB.
+ */
+export const compressImage = async (file: File): Promise<Blob> => {
+  const img = await loadImageFromFile(file);
+
+  let { width, height } = img;
+  if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+    const scale = MAX_IMAGE_DIMENSION / Math.max(width, height);
+    width = Math.round(width * scale);
+    height = Math.round(height * scale);
+  }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return file;
+
+  ctx.drawImage(img, 0, 0, width, height);
+
+  // Coba WebP dulu; fallback ke JPEG bila tidak didukung.
+  const webpBlob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/webp', IMAGE_COMPRESS_QUALITY));
+  if (webpBlob) return webpBlob;
+
+  const jpegBlob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/jpeg', IMAGE_COMPRESS_QUALITY));
+  return jpegBlob || file;
+};
+
+export const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+/**
+ * Upload lampiran (gambar sudah dikompres) ke Supabase Storage bucket chat-attachments
+ * dengan path: chat_files/{ticket_id}/{timestamp}_{filename}
+ */
+export const uploadChatAttachment = async (
+  ticketId: string,
+  file: File
+): Promise<{ url: string; type: 'image' | 'document'; name: string }> => {
+  const isImage = file.type.startsWith('image/');
+
+  let blob: Blob = file;
+  let contentType: string = file.type || 'application/octet-stream';
+
+  if (isImage) {
+    blob = await compressImage(file);
+    contentType = blob.type || 'image/webp';
+  } else if (file.size > MAX_DOCUMENT_SIZE) {
+    throw new Error('Ukuran dokumen maksimal 5 MB agar sistem tetap ringan.');
+  }
+
+  const timestamp = Date.now();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `chat_files/${ticketId}/${timestamp}_${safeName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(CHAT_ATTACHMENT_BUCKET)
+    .upload(path, blob, { contentType, upsert: false });
+
+  if (uploadError) {
+    throw new Error(uploadError.message || 'Gagal mengunggah lampiran');
+  }
+
+  const { data } = supabase.storage.from(CHAT_ATTACHMENT_BUCKET).getPublicUrl(path);
+  return {
+    url: data.publicUrl,
+    type: isImage ? 'image' : 'document',
+    name: file.name
+  };
 };

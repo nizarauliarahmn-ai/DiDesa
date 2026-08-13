@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   LifeBuoy, Bug, X, Send, AlertTriangle, CheckCircle2, 
-  HelpCircle, Sparkles, MessageSquare, Info, ShieldAlert, Monitor, Clock, ChevronLeft, Plus
+  HelpCircle, Sparkles, MessageSquare, Info, ShieldAlert, Monitor, Clock, ChevronLeft, Plus,
+  Paperclip, FileText, Download, Loader2
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { submitBugReportOnline, fetchVillageBugReportsOnline, replyToBugReportOnline, BugReport, SETTINGS_KEY } from '../../utils/bugReportService';
+import { submitBugReportOnline, fetchVillageBugReportsOnline, replyToBugReportOnline, BugReport, SETTINGS_KEY, uploadChatAttachment, compressImage, formatFileSize, MAX_DOCUMENT_SIZE } from '../../utils/bugReportService';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 
@@ -19,6 +20,15 @@ export const GlobalBugReportButton: React.FC = () => {
   const [tickets, setTickets] = useState<BugReport[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<BugReport | null>(null);
   const [replyText, setReplyText] = useState('');
+
+  // Attachment state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
+  const [attachmentCompressedSize, setAttachmentCompressedSize] = useState<number | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   // Auth User & Context
   const authUser = JSON.parse(localStorage.getItem('didesa_auth_user') || '{}');
@@ -239,18 +249,30 @@ export const GlobalBugReportButton: React.FC = () => {
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!replyText.trim() || !selectedTicket) return;
+    if ((!replyText.trim() && !attachment) || !selectedTicket) return;
 
     setIsSubmitting(true);
     try {
+      let uploaded: { url: string; type: 'image' | 'document'; name: string } | null = null;
+      if (attachment) {
+        setIsUploading(true);
+        uploaded = await uploadChatAttachment(selectedTicket.id, attachment);
+      }
+
       const success = await replyToBugReportOnline(selectedTicket.id, {
         sender: authUser.name || 'Admin',
         role: authUser.role === 'kades' ? 'Super Admin' : 'Admin Desa',
-        text: replyText
+        text: replyText,
+        attachment_url: uploaded?.url,
+        attachment_type: uploaded?.type,
+        file_name: uploaded?.name
       });
 
       if (success) {
         setReplyText('');
+        setAttachment(null);
+        setAttachmentPreview(null);
+        setAttachmentCompressedSize(null);
         const updated = await fetchVillageBugReportsOnline();
         setTickets(updated);
         const newSelected = updated.find(t => t.id === selectedTicket.id);
@@ -262,8 +284,51 @@ export const GlobalBugReportButton: React.FC = () => {
       showToast(err.message, 'error');
     } finally {
       setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
+
+  const handleAttachmentChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const isImage = file.type.startsWith('image/');
+    if (!isImage && file.size > MAX_DOCUMENT_SIZE) {
+      showToast('Ukuran dokumen maksimal 5 MB agar sistem tetap ringan.', 'error');
+      return;
+    }
+
+    setAttachment(file);
+    setAttachmentPreview(null);
+    setAttachmentCompressedSize(null);
+
+    if (isImage) {
+      setIsCompressing(true);
+      try {
+        const compressed = await compressImage(file);
+        setAttachmentCompressedSize(compressed.size);
+        setAttachmentPreview(URL.createObjectURL(compressed));
+      } catch {
+        setAttachmentPreview(URL.createObjectURL(file));
+      } finally {
+        setIsCompressing(false);
+      }
+    } else {
+      setAttachmentPreview(null);
+    }
+  };
+
+  const clearAttachment = () => {
+    setAttachment(null);
+    setAttachmentPreview(null);
+    setAttachmentCompressedSize(null);
+  };
+
+  useEffect(() => {
+    if (!attachmentPreview) return;
+    return () => URL.revokeObjectURL(attachmentPreview);
+  }, [attachmentPreview]);
 
   return (
     <>
@@ -434,14 +499,95 @@ export const GlobalBugReportButton: React.FC = () => {
                             ? 'bg-amber-400 text-slate-900 rounded-tr-sm shadow-md shadow-amber-400/40' 
                             : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-sm border border-slate-200 dark:border-slate-700 shadow-sm'
                         }`}>
-                          {msg.text}
+                          {msg.text && <p className="whitespace-pre-wrap break-words">{msg.text}</p>}
+                          {msg.attachment_url && msg.attachment_type === 'image' && (
+                            <button
+                              type="button"
+                              onClick={() => setLightboxUrl(msg.attachment_url!)}
+                              className="mt-2 block max-w-[200px] cursor-pointer group"
+                            >
+                              <img
+                                src={msg.attachment_url}
+                                alt={msg.file_name || 'Lampiran gambar'}
+                                className="rounded-xl max-w-[200px] cursor-pointer hover:opacity-90 border border-black/10 group-hover:ring-2 group-hover:ring-emerald-500/30 transition-all"
+                                loading="lazy"
+                              />
+                            </button>
+                          )}
+                          {msg.attachment_url && msg.attachment_type === 'document' && (
+                            <a
+                              href={msg.attachment_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download={msg.file_name || 'lampiran'}
+                              className="mt-2 flex items-center gap-2 p-2 bg-slate-100 dark:bg-slate-900/60 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                            >
+                              <FileText size={16} className="text-emerald-600 shrink-0" />
+                              <span className="truncate flex-1 text-left">{msg.file_name || 'Dokumen lampiran'}</span>
+                              <Download size={14} className="text-slate-400 shrink-0" />
+                            </a>
+                          )}
                         </div>
                       </div>
                     );
                   })}
                 </div>
                 <form onSubmit={handleReply} className="p-3 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 shrink-0">
+                  {attachment && (
+                    <div className="mb-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-2.5">
+                      {attachment.type.startsWith('image/') ? (
+                        attachmentPreview ? (
+                          <img src={attachmentPreview} alt="Preview" className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-600 shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                            <Loader2 size={16} className="text-emerald-600 animate-spin" />
+                          </div>
+                        )
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                          <FileText size={16} className="text-blue-600" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 truncate">{attachment.name}</p>
+                        <p className="text-[9px] text-slate-400 font-medium">
+                          {isCompressing
+                            ? 'Mengompresi gambar...'
+                            : attachmentCompressedSize !== null
+                              ? `${formatFileSize(attachment.size)} → ${formatFileSize(attachmentCompressedSize)}`
+                              : formatFileSize(attachment.size)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={clearAttachment}
+                        disabled={isUploading}
+                        className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shrink-0 cursor-pointer disabled:opacity-50"
+                        aria-label="Hapus lampiran"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
                   <div className="flex items-end gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg, image/png, image/webp, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.ms-excel"
+                      className="hidden"
+                      onChange={handleAttachmentChange}
+                      disabled={isUploading}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploading || isCompressing}
+                      className="p-2.5 rounded-xl text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors shrink-0 cursor-pointer disabled:opacity-40"
+                      aria-label="Lampirkan file"
+                      title="Lampirkan gambar / dokumen"
+                    >
+                      {isCompressing ? <Loader2 size={16} className="animate-spin" /> : <Paperclip size={16} />}
+                    </button>
                     <textarea 
                       rows={2}
                       value={replyText}
@@ -451,10 +597,10 @@ export const GlobalBugReportButton: React.FC = () => {
                     />
                     <button 
                       type="submit" 
-                      disabled={!replyText.trim() || isSubmitting}
+                      disabled={(!replyText.trim() && !attachment) || isSubmitting || isUploading || isCompressing}
                       className="p-3 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors shrink-0 cursor-pointer"
                     >
-                      <Send size={16} />
+                      {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                     </button>
                   </div>
                 </form>
@@ -505,6 +651,38 @@ export const GlobalBugReportButton: React.FC = () => {
           </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Lightbox Preview Gambar */}
+      <AnimatePresence>
+        {lightboxUrl && (
+          <motion.div
+            className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+            onClick={() => setLightboxUrl(null)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <button
+              onClick={() => setLightboxUrl(null)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer"
+              aria-label="Tutup preview"
+            >
+              <X size={20} />
+            </button>
+            <motion.img
+              src={lightboxUrl}
+              alt="Preview lampiran"
+              className="max-h-[85vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </>
