@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Search, Bell, Menu, Database, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon, Sun } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 import { showToast } from '../../utils/toast';
@@ -25,7 +25,21 @@ export default function AdminHeader({
   const [dbStatus, setDbStatus] = useState<{ engine: string } | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [kioskNotifs, setKioskNotifs] = useState<any[]>([]);
   const [appTheme, setAppTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
+
+  const notificationsRoleAllowed = useMemo(() => {
+    const authUserStr = localStorage.getItem('didesa_auth_user');
+    const role = authUserStr ? (JSON.parse(authUserStr).role || '') : '';
+    return ['admin', 'kades', 'saas_admin'].includes(role);
+  }, []);
+
+  const mergedNotifs = useMemo(() => {
+    const byTs = (a: any, b: any) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime();
+    return [...kioskNotifs, ...notifications].sort(byTs);
+  }, [kioskNotifs, notifications]);
+
+  const kioskUnread = kioskNotifs.filter((n: any) => !n.isRead).length;
 
   useEffect(() => {
     const syncTheme = () => setAppTheme(localStorage.getItem('app_theme') || 'light');
@@ -286,6 +300,69 @@ export default function AdminHeader({
     };
   }, []);
 
+  // Realtime listeners for kiosk/village activity (permohonan surat, buku tamu, aspirasi)
+  useEffect(() => {
+    if (!notificationsRoleAllowed) return;
+
+    const pushKioskNotif = (notif: any) => {
+      setKioskNotifs(prev => {
+        if (prev.some(n => n.id === notif.id)) return prev;
+        return [notif, ...prev];
+      });
+    };
+
+    const activityChannel = supabase
+      .channel('kiosk_activity_realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'surat' }, (payload) => {
+        const row: any = payload.new;
+        if (row && row.status === 'pending') {
+          pushKioskNotif({
+            id: `permohonan-surat-${row.id}`,
+            type: 'PERMOHONAN_SURAT',
+            title: 'Permohonan Surat Baru',
+            message: `${row.nama || 'Penduduk'} mengajukan ${row.jenis_surat || 'surat'} via kiosk. Silakan proses di menu Surat.`,
+            category: 'Services',
+            time: 'Baru saja',
+            timestamp: row.created_at || new Date().toISOString(),
+            isRead: false
+          });
+        }
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'guest_book' }, (payload) => {
+        const row: any = payload.new;
+        pushKioskNotif({
+          id: `buku-tamu-${row.id}`,
+          type: 'BUKU_TAMU',
+          title: 'Tamu Baru di Kantor Desa',
+          message: `${row.nama || 'Tamu'} (${
+            (row as any).keperluan || (row as any).tujuan || row.purpose || 'berkunjung'
+          }) tercatat via kiosk.`,
+          category: 'Residents',
+          time: 'Baru saja',
+          timestamp: row.created_at || new Date().toISOString(),
+          isRead: false
+        });
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'aspirasi' }, (payload) => {
+        const row: any = payload.new;
+        pushKioskNotif({
+          id: `aspirasi-${row.id}`,
+          type: 'ASPIRASI',
+          title: 'Aspirasi Warga Baru',
+          message: `${row.nama || 'Warga'} menyampaikan aspirasi: ${row.judul || row.kategori || 'aspirasi'}.`,
+          category: 'Residents',
+          time: 'Baru saja',
+          timestamp: row.created_at || new Date().toISOString(),
+          isRead: false
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(activityChannel);
+    };
+  }, [notificationsRoleAllowed]);
+
   const handleMarkAllAsRead = async () => {
     try {
       const allIds = notifications.map(n => n.id);
@@ -299,6 +376,7 @@ export default function AdminHeader({
       localStorage.setItem(storageKey, JSON.stringify(newReadIds));
       
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setKioskNotifs(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
 
       const tenantId = await resolveCurrentTenant();
@@ -397,11 +475,33 @@ export default function AdminHeader({
   }, [showNotifDropdown]);
 
   const handleNotificationClick = (item: any) => {
-    // Mark as read
+    // Mark as read (kiosk notifications are local-only)
     if (!item.isRead) {
-      handleToggleRead(item.id);
+      if (item.type) {
+        setKioskNotifs(prev => prev.map(n => n.id === item.id ? { ...n, isRead: true } : n));
+      } else {
+        handleToggleRead(item.id);
+      }
     }
-    
+
+    // Deep-link kiosk notifications to the relevant admin tab
+    if (item.type === 'PERMOHONAN_SURAT') {
+      if (setActiveTab) setActiveTab('surat');
+      setShowNotifDropdown(false);
+      window.dispatchEvent(new CustomEvent('set_admin_surat_tab', { detail: 'inbox' }));
+      return;
+    }
+    if (item.type === 'BUKU_TAMU') {
+      if (setActiveTab) setActiveTab('buku_tamu');
+      setShowNotifDropdown(false);
+      return;
+    }
+    if (item.type === 'ASPIRASI') {
+      if (setActiveTab) setActiveTab('aspirasi');
+      setShowNotifDropdown(false);
+      return;
+    }
+
     // Navigation logic
     const title = (item.title || '').toLowerCase();
     const msg = (item.message || '').toLowerCase();
@@ -600,10 +700,10 @@ export default function AdminHeader({
             className="relative p-2 text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-full transition-colors"
             title="Buka Notifikasi Pusat"
           >
-            <Bell size={20} className={unreadCount > 0 ? "text-emerald-700" : ""} />
-            {unreadCount > 0 && (
+            <Bell size={20} className={(unreadCount + kioskUnread) > 0 ? "text-emerald-700" : ""} />
+            {(unreadCount + kioskUnread) > 0 && (
               <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center px-1 border border-white">
-                {unreadCount}
+                {unreadCount + kioskUnread}
               </span>
             )}
           </button>
@@ -616,7 +716,7 @@ export default function AdminHeader({
                   <Bell className="w-4 h-4 text-emerald-700" />
                   Notifikasi Baru
                 </h3>
-                {unreadCount > 0 && (
+                {(unreadCount + kioskUnread) > 0 && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -631,13 +731,13 @@ export default function AdminHeader({
               </div>
 
               <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
-                {notifications.length === 0 ? (
+                {mergedNotifs.length === 0 ? (
                   <div className="p-8 text-center text-gray-400 flex flex-col items-center justify-center">
                     <BellOff className="w-8 h-8 text-gray-300 mb-2" />
                     <p className="text-xs">Tidak ada notifikasi baru</p>
                   </div>
                 ) : (
-                  notifications.map((item) => {
+                  mergedNotifs.map((item) => {
                     const meta = getCategoryMeta(item.category);
                     return (
                       <div 

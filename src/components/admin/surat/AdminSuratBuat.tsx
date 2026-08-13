@@ -602,9 +602,11 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
         </div>
         <div className="relative z-10 max-w-2xl">
           <h2 className="text-2xl font-bold tracking-tight">Buat Surat Administrasi Desa</h2>
-          <p className="text-emerald-100 text-sm mt-2 leading-relaxed">
-            Silakan pilih salah satu dari template surat resmi di bawah. Proses pengisian data penduduk dan penulisan surat dilakukan dalam satu halaman dengan pratinjau cetak langsung (Live Preview) yang responsif.
-          </p>
+          <ul className="text-emerald-100 text-sm mt-2 leading-relaxed space-y-1.5">
+            <li>1. Pilih template surat di bawah untuk mulai membuat surat resmi. Ukuran kertas standar pratinjau dan cetak adalah <strong className="text-white">A4</strong>.</li>
+            <li>2. Pastikan warga telah mengisi <strong className="text-white">Buku Tamu Digital</strong> dan permohonan surat telah disetujui di tab <strong className="text-white">Inbox</strong>.</li>
+            <li>3. <strong className="text-white">Catatan Kiosk Mandiri:</strong> Warga yang menggunakan Kiosk cukup mengisi dan menandatangani Form Permohonan Surat (tidak perlu mengisi Buku Tamu secara terpisah).</li>
+          </ul>
         </div>
       </div>
 
