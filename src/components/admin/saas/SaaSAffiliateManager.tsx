@@ -3,7 +3,7 @@ import {
   Users, Wallet, BadgePercent, Handshake, Building2, Search, Loader2,
   CheckCircle2, XCircle, RefreshCw, Upload, ExternalLink, Phone,
   MessageSquare, X, Banknote, FileText, TrendingUp, Clock, Eye, UserCheck,
-  UserX, Landmark, Download, Copy
+  UserX, Landmark, Download, Copy, Check, MapPin
 } from 'lucide-react';
 import { supabase } from '../../../utils/supabase';
 import { showToast } from '../../../utils/toast';
@@ -37,6 +37,29 @@ const isKalselDomisili = (daerah?: string) => {
   const t = (daerah || '').toLowerCase();
   if (!t) return false;
   return KALSEL_KEYWORDS.some(k => t.includes(k));
+};
+
+const toTitleCase = (s?: string) =>
+  (s || '').replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+
+const formatWilayah = (daerah?: string) => {
+  const t = (daerah || '').trim();
+  if (!t) return '-';
+  return t
+    .replace(/^kabupaten\s+/i, 'Kab. ')
+    .replace(/^kab\.?\s+/i, 'Kab. ')
+    .replace(/^kota\s+/i, 'Kota ')
+    .replace(/^kecamatan\s+/i, 'Kec. ')
+    .replace(/^kec\.?\s+/i, 'Kec. ')
+    .replace(/^desa\s+/i, 'Desa ')
+    .replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+};
+
+const ACCOUNT_STATUS_LABEL: Record<string, string> = {
+  pending: 'Pending',
+  active: 'Aktif',
+  suspended: 'Dinonaktifkan',
+  rejected: 'Ditolak'
 };
 
 function getTier(n: number) {
@@ -114,9 +137,35 @@ export default function SaaSAffiliateManager() {
   // Modal state
   const [detailAffiliate, setDetailAffiliate] = useState<Affiliate | null>(null);
   const [tierRate, setTierRate] = useState<number>(750000);
+  const [tierRateText, setTierRateText] = useState<string>('');
   const [isSavingTier, setIsSavingTier] = useState(false);
+  const [copiedReferral, setCopiedReferral] = useState(false);
   const [processingPayout, setProcessingPayout] = useState<Payout | null>(null);
   const [isUploadingReceipt, setIsUploadingReceipt] = useState(false);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (_) {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(el);
+      return ok;
+    }
+  };
+
+  const handleCopyReferral = async () => {
+    if (!detailAffiliate?.referral_code) return;
+    const ok = await copyToClipboard(detailAffiliate.referral_code);
+    if (ok) {
+      setCopiedReferral(true);
+      setTimeout(() => setCopiedReferral(false), 2000);
+    }
+  };
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -211,22 +260,24 @@ export default function SaaSAffiliateManager() {
     loadData();
   };
 
-  const handleSaveTier = async () => {
+  const handleSaveTier = async (opts?: { approve?: boolean }) => {
     if (!detailAffiliate) return;
     setIsSavingTier(true);
+    const payload: Record<string, unknown> = { commission_rate: tierRate };
+    if (opts?.approve && detailAffiliate.status !== 'active') payload.status = 'active';
     const { error } = await supabase
       .from('affiliates')
-      .update({ commission_rate: tierRate })
+      .update(payload)
       .eq('id', detailAffiliate.id);
     setIsSavingTier(false);
     if (error) {
       showToast('Gagal menyimpan komisi khusus.', 'error');
       return;
     }
-    showToast('Komisi khusus berhasil disimpan.', 'success');
+    showToast(opts?.approve && detailAffiliate.status !== 'active' ? 'Afiliator disetujui & komisi khusus tersimpan.' : 'Komisi khusus berhasil disimpan.', 'success');
     await addSaaSLog({
       admin: 'SaaS Admin',
-      aksi: 'Mengubah komisi afiliator',
+      aksi: opts?.approve && detailAffiliate.status !== 'active' ? 'Menyetujui afiliator & mengubah komisi' : 'Mengubah komisi afiliator',
       target: detailAffiliate.nama || detailAffiliate.email || detailAffiliate.id,
       status: 'Berhasil',
       category: 'SaaS Admin'
@@ -537,7 +588,13 @@ export default function SaaSAffiliateManager() {
                                 </>
                               )}
                               <button
-                                onClick={() => { setDetailAffiliate(aff); setTierRate(aff.commission_rate || 750000); }}
+                                onClick={() => {
+                                  const rate = aff.commission_rate || 750000;
+                                  setDetailAffiliate(aff);
+                                  setTierRate(rate);
+                                  setTierRateText(rate.toString());
+                                  setCopiedReferral(false);
+                                }}
                                 title="Detail & Edit Tier"
                                 className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
                               >
@@ -716,94 +773,190 @@ export default function SaaSAffiliateManager() {
       {/* Modal Detail & Edit Tier */}
       {detailAffiliate && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
-            <div className="p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-3 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                    <Users className="w-6 h-6" />
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 dark:border-slate-700/60 animate-in fade-in zoom-in duration-300">
+            {/* Header */}
+            <div className="relative bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-800 px-6 sm:px-8 py-7 text-white">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-16 -mt-16" />
+              <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-white/5 rounded-full -mb-16" />
+              <div className="flex items-start justify-between gap-4 relative z-10">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-300 to-orange-500 text-slate-900 flex items-center justify-center text-3xl font-black shadow-lg ring-4 ring-white/20 shrink-0"
+                  >
+                    {(detailAffiliate.nama || 'A').charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="text-xl font-black">Detail Afiliator</h3>
-                    <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Detail &amp; Edit Komisi</p>
+                    <h3 className="text-2xl font-black tracking-tight leading-tight">
+                      {toTitleCase(detailAffiliate.nama) || 'Afiliator'}
+                    </h3>
+                    <p className="text-emerald-100 text-sm font-medium mt-0.5">{detailAffiliate.email || '-'}</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                      {/* Badge Status Akun */}
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border backdrop-blur-sm ${
+                          detailAffiliate.status === 'active'
+                            ? 'bg-emerald-500/20 border-emerald-300/40 text-emerald-50'
+                            : detailAffiliate.status === 'rejected' || detailAffiliate.status === 'suspended'
+                              ? 'bg-red-500/20 border-red-300/40 text-red-50'
+                              : 'bg-amber-400/20 border-amber-300/40 text-amber-50'
+                        }`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${detailAffiliate.status === 'active' ? 'bg-emerald-300' : detailAffiliate.status === 'rejected' || detailAffiliate.status === 'suspended' ? 'bg-red-300' : 'bg-amber-300'}`} />
+                        {ACCOUNT_STATUS_LABEL[detailAffiliate.status || 'pending'] || (detailAffiliate.status || 'Pending')}
+                      </span>
+                      {/* Badge Deteksi Wilayah */}
+                      {isKalselDomisili(detailAffiliate.daerah_kerja) ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border bg-emerald-500/20 border-emerald-300/40 text-emerald-50">
+                          📍 Kalimantan Selatan (Prioritas)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border bg-orange-500/20 border-orange-300/40 text-orange-50">
+                          🌐 Luar Kalsel (Waitlist)
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <button onClick={() => setDetailAffiliate(null)} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <button onClick={() => setDetailAffiliate(null)} className="p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors shrink-0">
                   <X className="w-5 h-5" />
                 </button>
               </div>
+            </div>
 
-              <div className="space-y-3 text-sm">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Nama</p>
-                    <p className="font-bold mt-1">{detailAffiliate.nama || '-'}</p>
+            {/* Body */}
+            <div className="p-6 sm:p-8">
+              {/* Grid 2 Kolom */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+                {/* KOLOM KIRI: Kontak & Wilayah */}
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">No. WhatsApp</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-bold text-sm">{detailAffiliate.no_wa || '-'}</p>
+                      {detailAffiliate.no_wa && (
+                        <a
+                          href={`https://wa.me/${toWaNumber(detailAffiliate.no_wa)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-colors shrink-0"
+                        >
+                          💬 Chat WA
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</p>
-                    <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${AFF_STATUS_BADGE[detailAffiliate.status || 'pending']}`}>
-                      {detailAffiliate.status || 'pending'}
-                    </span>
-                  </div>
-                </div>
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email</p>
-                  <p className="font-semibold mt-1">{detailAffiliate.email || '-'}</p>
-                </div>
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">No. WhatsApp</p>
-                  <p className="font-semibold mt-1">{detailAffiliate.no_wa || '-'}</p>
-                </div>
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Wilayah Kerja</p>
-                  <p className="font-semibold mt-1">{detailAffiliate.daerah_kerja || '-'}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Kode Referral</p>
-                    <p className="font-black tracking-wider text-emerald-700 dark:text-emerald-400 mt-1">{detailAffiliate.referral_code || '-'}</p>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Desa</p>
-                    <p className="font-black mt-1">{referralCountByAffiliate(detailAffiliate.id)} desa</p>
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Wilayah Kerja</p>
+                    <div className="flex items-start gap-2">
+                      <MapPin size={16} className="text-slate-400 shrink-0 mt-0.5" />
+                      <p className="font-bold text-sm">{formatWilayah(detailAffiliate.daerah_kerja)}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Data Bank (untuk payout)</p>
-                  <p className="font-semibold mt-1">
-                    {detailAffiliate.bank_name ? `${detailAffiliate.bank_name} • ${detailAffiliate.bank_account_no || '-'}${detailAffiliate.bank_account_holder ? ' • ' + detailAffiliate.bank_account_holder : ''}` : 'Belum melengkapi data bank'}
-                  </p>
+
+                {/* KOLOM KANAN: Performa & Bank */}
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Kode Referral</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-mono font-black text-sm tracking-widest text-emerald-700 dark:text-emerald-400">{detailAffiliate.referral_code || '-'}</p>
+                      <button
+                        onClick={handleCopyReferral}
+                        className={`p-1.5 rounded-lg transition-colors shrink-0 ${copiedReferral ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 text-slate-500 hover:text-emerald-600'}`}
+                        title="Salin Kode Referral"
+                      >
+                        {copiedReferral ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Total Desa Terhubung</p>
+                    <div className="flex items-center gap-2">
+                      <Building2 size={16} className="text-slate-400" />
+                      <p className="font-black text-sm">{referralCountByAffiliate(detailAffiliate.id)}</p>
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Desa</span>
+                    </div>
+                  </div>
+                  <div
+                    className={`rounded-xl border p-4 ${
+                      detailAffiliate.bank_name
+                        ? 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                        : 'bg-slate-100 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1.5">Rekening Bank Payout</p>
+                    {detailAffiliate.bank_name ? (
+                      <div className="space-y-0.5">
+                        <p className="font-bold text-sm flex items-center gap-1.5"><Landmark size={14} className="text-emerald-600" /> {detailAffiliate.bank_name}</p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{detailAffiliate.bank_account_no || '-'}</p>
+                        {detailAffiliate.bank_account_holder && (
+                          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Atas nama {detailAffiliate.bank_account_holder}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        ⚠️ Belum mengisi data bank
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-6 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 p-4">
-                <p className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-1.5">
-                  <BadgePercent size={14} /> Komisi Khusus per Desa
+              {/* Section Setting Komisi Khusus */}
+              <div className="mt-4 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/60 p-4">
+                <p className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-3 flex items-center gap-1.5">
+                  ⚙️ Pengaturan Komisi Khusus Per Desa
                 </p>
                 <div className="flex items-center gap-2">
+                  <span className="text-sm font-black text-amber-700 dark:text-amber-400">Rp</span>
                   <input
-                    type="number"
-                    value={tierRate}
-                    min={0}
-                    step={25000}
-                    onChange={e => setTierRate(Number(e.target.value))}
-                    className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:border-amber-500"
+                    type="text"
+                    inputMode="numeric"
+                    value={tierRateText}
+                    onChange={e => {
+                      const digits = e.target.value.replace(/[^\d]/g, '').slice(0, 12);
+                      setTierRateText(digits);
+                      setTierRate(Number(digits));
+                    }}
+                    placeholder="750000"
+                    className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 rounded-xl text-sm font-black outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
                   />
-                  <span className="text-sm font-bold text-amber-700 dark:text-amber-400">/desa</span>
+                  <span className="text-sm font-black text-amber-700 dark:text-amber-400 whitespace-nowrap">/ desa</span>
                 </div>
-                <p className="mt-2 text-[11px] font-semibold text-amber-700/80 dark:text-amber-300/80">
-                  Default tier: {getTier(referralCountByAffiliate(detailAffiliate.id)).name} ({formatRupiah(getTier(referralCountByAffiliate(detailAffiliate.id)).perDesa)}/desa). Set nilai di atas untuk komisi khusus.
+                <p className="mt-1.5 text-xs font-bold text-amber-800 dark:text-amber-300">
+                  = {formatRupiah(Number(tierRateText) || 0)}
+                </p>
+                <p className="mt-2 text-[11px] font-semibold text-amber-700/80 dark:text-amber-300/70 leading-relaxed">
+                  Secara bawaan mengikuti Tier {getTier(referralCountByAffiliate(detailAffiliate.id)).name} ({formatRupiah(getTier(referralCountByAffiliate(detailAffiliate.id)).perDesa)}). Ubah angka di atas jika ingin memberikan rate khusus untuk afiliator ini.
                 </p>
               </div>
 
-              <button
-                onClick={handleSaveTier}
-                disabled={isSavingTier}
-                className="w-full mt-6 py-3.5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-200 dark:shadow-emerald-900/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-              >
-                {isSavingTier ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-                {isSavingTier ? 'Menyimpan...' : 'Simpan Komisi Khusus'}
-              </button>
+              {/* Footer Buttons */}
+              <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-700/60 pt-5">
+                <button
+                  onClick={() => setDetailAffiliate(null)}
+                  className="px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
+                  Batal / Tutup
+                </button>
+                <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
+                  <button
+                    onClick={() => { handleApproval(detailAffiliate, 'rejected'); setDetailAffiliate(null); }}
+                    className="px-5 py-3 rounded-xl border-2 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-black capitalize hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2"
+                  >
+                    ✖ Tolak
+                  </button>
+                  <button
+                    onClick={() => handleSaveTier({ approve: true })}
+                    disabled={isSavingTier}
+                    className="px-5 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white text-sm font-black shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    {isSavingTier ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                    ✓
+                    <span>{detailAffiliate.status === 'active' ? 'Simpan Komisi Khusus' : 'Setujui & Aktifkan Afiliator'}</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
