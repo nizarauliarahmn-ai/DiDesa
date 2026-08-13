@@ -6,7 +6,7 @@ import PrintSuccessDialog from './PrintSuccessDialog';
 import { 
   Home, Store, Frown, FileText, Users, PlusCircle, Search, 
   ArrowLeft, Check, Printer, Archive, ZoomIn, ZoomOut, Maximize,
-  Mail, Heart, Landmark, FileCheck, MapPin, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2
+  Mail, Heart, Landmark, FileCheck, MapPin, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2, Monitor
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
@@ -602,11 +602,23 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
         </div>
         <div className="relative z-10 max-w-2xl">
           <h2 className="text-2xl font-bold tracking-tight">Buat Surat Administrasi Desa</h2>
-          <ul className="text-emerald-100 text-sm mt-2 leading-relaxed space-y-1.5">
-            <li>1. Pilih template surat di bawah untuk mulai membuat surat resmi. Ukuran kertas standar pratinjau dan cetak adalah <strong className="text-white">A4</strong>.</li>
-            <li>2. Pastikan warga telah mengisi <strong className="text-white">Buku Tamu Digital</strong> dan permohonan surat telah disetujui di tab <strong className="text-white">Inbox</strong>.</li>
-            <li>3. <strong className="text-white">Catatan Kiosk Mandiri:</strong> Warga yang menggunakan Kiosk cukup mengisi dan menandatangani Form Permohonan Surat (tidak perlu mengisi Buku Tamu secara terpisah).</li>
-          </ul>
+          <p className="text-emerald-100 text-sm mt-2 leading-relaxed">
+            Pilih template surat di bawah untuk mulai membuat dokumen resmi desa.
+          </p>
+          <div className="flex flex-wrap gap-2.5 mt-3">
+            <span className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg px-3 py-2 text-xs font-medium flex items-center gap-2">
+              <Printer className="w-4 h-4" />
+              Format Kertas: <strong>A4</strong>
+            </span>
+            <span className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg px-3 py-2 text-xs font-medium flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              Syarat: <strong>Buku Tamu Digital &amp; Persetujuan Inbox</strong>
+            </span>
+            <span className="bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-lg px-3 py-2 text-xs font-medium flex items-center gap-2">
+              <Monitor className="w-4 h-4" />
+              Kiosk Mandiri: <strong>Cukup Isi &amp; TTD Form Permohonan</strong>
+            </span>
+          </div>
         </div>
       </div>
 
