@@ -8,6 +8,7 @@ import { addLetterHistory } from '../utils/letterHistory';
 import { fetchResidentsCached } from '../utils/apiCache';
 import { showToast } from '../utils/toast';
 import { supabase } from '../utils/supabase';
+import { savePermohonanWithGuestRecord } from '../utils/kioskSubmissions';
 
 export default function PublicKiosSurat() {
   const [step, setStep] = useState(1);
@@ -179,17 +180,17 @@ export default function PublicKiosSurat() {
 
     try {
       
-      // 1. Insert into surat
-      await supabase.from('surat').insert([{
-        tenant_id: tenantId,
-        jenis_surat: selectedLetter.jenis,
+      // 1. Insert into surat (Record A: Permohonan) + auto-record buku tamu (Record B)
+      await savePermohonanWithGuestRecord({
+        tenantId,
+        jenisSurat: selectedLetter.jenis,
         keterangan: formattedKeperluan,
-        status: 'pending',
         nomor: finalNumber,
         nik: verifiedResident.nik,
         nama: verifiedResident.name,
-        data: selectedLetter.fields ? formData : null
-      }]);
+        data: selectedLetter.fields ? formData : null,
+        signatureUrl: null
+      });
 
       // 2. Insert into notifications
       const { error: notifErr } = await supabase.from('notifications').insert([{
@@ -264,12 +265,11 @@ export default function PublicKiosSurat() {
       const klas = getLetterClassifications().find(c => c.klasifikasi === assistSession.klasifikasi || c.jenis === assistSession.jenis);
       const finalNumber = generateLetterNumber(assistSession.klasifikasi || 'SU', assistSession.kodeKlasifikasi || '140');
 
-      // Simpan permohonan ke tabel surat dengan status pending + data flagged kiosk_signed
-      await supabase.from('surat').insert([{
-        tenant_id: tenantId,
-        jenis_surat: assistSession.jenis,
+      // Simpan permohonan (Record A) + auto-record buku tamu (Record B) via kioskSubmissions
+      await savePermohonanWithGuestRecord({
+        tenantId,
+        jenisSurat: assistSession.jenis,
         keterangan: assistSession.keperluan,
-        status: 'pending',
         nomor: finalNumber,
         nik: assistSession.nik || null,
         nama: assistSession.nama,
@@ -277,11 +277,11 @@ export default function PublicKiosSurat() {
           source: 'admin_assist',
           via_kiosk: true,
           kiosk_signed: true,
-          kiosk_session_id: assistSession.sessionId,
-          signature_url: signatureUrl,
-          signed_at: new Date().toISOString()
-        }
-      }]);
+          kiosk_session_id: assistSession.sessionId
+        },
+        signatureUrl,
+        signedAt: new Date().toISOString()
+      });
 
       // Notifikasi admin
       await supabase.from('notifications').insert([{
