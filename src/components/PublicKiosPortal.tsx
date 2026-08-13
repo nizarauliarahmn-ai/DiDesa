@@ -3,6 +3,7 @@ import { BookOpen, FileText, Megaphone, ArrowRight, ShieldCheck, Zap } from 'luc
 import { motion } from 'motion/react';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { supabase } from '../utils/supabase';
+import KioskKtpRealtimeListener from './KioskKtpRealtimeListener';
 
 export default function PublicKiosPortal() {
   const [desaName, setDesaName] = useState('');
@@ -57,7 +58,10 @@ export default function PublicKiosPortal() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] flex flex-col font-sans select-none overflow-hidden relative text-slate-200">
+    <>
+      {/* Realtime listener untuk Remote KTP Scanner dari Admin */}
+      <KioskKtpRealtimeListener />
+      <div className="min-h-screen bg-[#0f172a] flex flex-col font-sans select-none overflow-hidden relative text-slate-200">
       
       {isTenantValid === false && (
         <div className="absolute inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-8 backdrop-blur-md">
@@ -220,6 +224,7 @@ export default function PublicKiosPortal() {
         </button>
         <p className="tracking-wider text-sm">&copy; {new Date().getFullYear()} DiDesa. Sistem Pemerintahan Desa Modern.</p>
       </motion.footer>
-    </div>
+      </div>
+    </>
   );
 }

@@ -61,6 +61,7 @@ import PrintQRKiosk from './components/admin/PrintQRKiosk';
 import PublicKiosPortal from './components/PublicKiosPortal';
 import PublicKiosSurat from './components/PublicKiosSurat';
 import PublicKiosAspirasi from './components/PublicKiosAspirasi';
+import KioskKtpScanner from './components/KioskKtpScanner';
 import SaasLandingPage from './components/SaasLandingPage';
 
 function useUrlSync<T extends string>(
@@ -429,6 +430,11 @@ export default function App() {
 
   if (urlParams.get('print') === 'qr_kiosk') {
     return <PrintQRKiosk />;
+  }
+
+  // Remote KTP Scanner (Tablet Desa) — route /kiosk/scan
+  if (window.location.pathname.includes('/kiosk/scan')) {
+    return <><KioskKtpScanner /><ToastContainer /></>;
   }
   
   if (tabParam === 'kios') {
