@@ -397,6 +397,17 @@ export const uploadChatAttachment = async (
     .upload(path, blob, { contentType, upsert: false });
 
   if (uploadError) {
+    const message = (uploadError.message || '').toLowerCase();
+    if (message.includes('bucket not found') || message.includes('not found') || message.includes('does not exist')) {
+      throw new Error(
+        'Bucket penyimpanan lampiran belum dikonfigurasi. Silakan jalankan skrip SQL pembuatan bucket "chat-attachments" di Supabase Editor, lalu coba lagi.'
+      );
+    }
+    if (message.includes('permission') || message.includes('denied') || message.includes('policy')) {
+      throw new Error(
+        'Akses penyimpanan lampiran ditolak. Pastikan RLS policy pada bucket "chat-attachments" sudah aktif.'
+      );
+    }
     throw new Error(uploadError.message || 'Gagal mengunggah lampiran');
   }
 
