@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   Copy, Check, Link2, TicketPercent, Share2, Download, Users, Wallet,
   BadgeCheck, TrendingUp, CircleDollarSign, Plus, Search, ExternalLink,
-  RefreshCw, ArrowLeft, Landmark, ClipboardList, LogOut, Megaphone
+  RefreshCw, ArrowLeft, Landmark, ClipboardList, LogOut, Megaphone,
+  ShieldAlert, Timer, ClipboardCheck, BookOpenCheck
 } from 'lucide-react';
 import { supabase } from '../utils/supabase';
 
@@ -96,6 +97,7 @@ export default function AffiliateDashboard() {
   const [addingMessage, setAddingMessage] = useState('');
 
   const [copiedKey, setCopiedKey] = useState('');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'panduan'>('dashboard');
 
   const referralLink = affiliate?.referral_code
     ? `${window.location.origin}/afiliasi?ref=${affiliate.referral_code}`
@@ -365,7 +367,7 @@ export default function AffiliateDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-7">
           <div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Halo, {authUser?.name || 'Afiliator'} 👋
+              Halo, {authUser?.name || 'Afiliator'}
             </h1>
             <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
               Pantau performa referensi dan komisi Anda di sini.
@@ -389,6 +391,26 @@ export default function AffiliateDashboard() {
           </div>
         </div>
 
+        {/* Tab navigasi */}
+        <div className="mb-7 inline-flex rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-1 shadow-sm">
+          {([
+            { key: 'dashboard', label: 'Ringkasan', icon: TrendingUp },
+            { key: 'panduan', label: 'Panduan & Ketentuan', icon: BookOpenCheck }
+          ] as const).map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                activeTab === tab.key
+                  ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-600/20'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-emerald-700'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" /> {tab.label}
+            </button>
+          ))}
+        </div>
+
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600"></div>
@@ -396,7 +418,9 @@ export default function AffiliateDashboard() {
           </div>
         ) : (
           <>
-            {/* Status Akun */}
+            {activeTab === 'dashboard' && (
+              <>
+                {/* Status Akun */}
             <div className="mb-7 rounded-2xl border p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-emerald-700 to-teal-600 border-emerald-600/30 text-white shadow-lg shadow-emerald-900/10">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center">
@@ -551,8 +575,8 @@ export default function AffiliateDashboard() {
                       {isAddingVillage ? 'Memeriksa...' : 'Daftarkan'}
                     </button>
                   </div>
-                  {addError && <p className="mt-3 text-sm font-semibold text-red-600 dark:text-red-400">⚠️ {addError}</p>}
-                  {addingMessage && <p className="mt-3 text-sm font-semibold text-emerald-600">✅ {addingMessage}</p>}
+                  {addError && <p className="mt-3 text-sm font-semibold text-red-600 dark:text-red-400">{addError}</p>}
+                  {addingMessage && <p className="mt-3 text-sm font-semibold text-emerald-600">{addingMessage}</p>}
                 </div>
 
                 {/* Riwayat Referensi */}
@@ -643,7 +667,7 @@ export default function AffiliateDashboard() {
                         <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-8 -mt-8" />
                         <p className="text-[9px] font-black uppercase tracking-widest text-emerald-100">DiDesa Digitalisasi Desa</p>
                         <p className="mt-2 text-2xl font-black tracking-tight leading-tight">Bantu Desa. <br /> Raih Komisi.</p>
-                        <p className="mt-2 text-[10px] font-bold text-emerald-100/90">Affiliator Program • Rp 750.000 / desa / bulan</p>
+                        <p className="mt-2 text-[10px] font-bold text-emerald-100/90">Affiliator Program • Mulai Rp 750rb / desa / bulan</p>
                       </div>
                     </div>
                     <button
@@ -673,6 +697,101 @@ export default function AffiliateDashboard() {
                 </div>
               </div>
             </div>
+              </>
+            )}
+
+            {activeTab === 'panduan' && (
+              <>
+                {/* Skema Komisi */}
+                <div className="rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm p-6 sm:p-8 mb-6">
+                  <h2 className="font-black text-lg flex items-center gap-2 mb-1">
+                    <TrendingUp className="w-5 h-5 text-emerald-600" /> Skema Komisi Anda
+                  </h2>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-5">
+                    Komisi dihitung sesuai jumlah desa aktif referensi Anda. Lebih banyak desa, lebih besar komisi per desa.
+                  </p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left min-w-[640px]">
+                      <thead>
+                        <tr className="border-b border-slate-100 dark:border-slate-700/60">
+                          <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Tier</th>
+                          <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Jumlah Desa</th>
+                          <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi / Desa / Bulan</th>
+                          <th className="py-3 pr-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Bonus Perpanjangan</th>
+                          <th className="py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Bonus Pencapaian</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { tier: 'Perintis', range: '1–4 Desa', perDesa: 'Rp 750.000', ext: '10%', bonus: '-' },
+                          { tier: 'Pro', range: '5–19 Desa', perDesa: 'Rp 1.000.000', ext: '12,5%', bonus: 'Rp 1 Jt (5 desa)' },
+                          { tier: 'VIP', range: '≥ 20 Desa', perDesa: 'Rp 1.250.000', ext: '15%', bonus: 'Rp 3,5 Jt (15) • Rp 8 Jt (30)' }
+                        ].map((row, i) => (
+                          <tr key={i} className="border-b border-slate-50 dark:border-slate-800 last:border-0">
+                            <td className="py-3.5 pr-4 font-black text-sm">{row.tier}</td>
+                            <td className="py-3.5 pr-4 font-semibold text-sm text-slate-500 dark:text-slate-400">{row.range}</td>
+                            <td className="py-3.5 pr-4 font-bold text-sm text-emerald-700 dark:text-emerald-400">{row.perDesa}</td>
+                            <td className="py-3.5 pr-4 font-semibold text-sm">{row.ext}</td>
+                            <td className="py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400">{row.bonus}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-5 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 p-4">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1">Bonus Pencapaian (Sekali Terima)</p>
+                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 leading-relaxed">
+                      Bonus Rp 1.000.000 saat mencapai 5 desa, Rp 3.500.000 saat mencapai 15 desa, dan Rp 8.000.000 saat mencapai 30 desa aktif.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Aturan Program */}
+                <div className="rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm p-6 sm:p-8">
+                  <h2 className="font-black text-lg flex items-center gap-2 mb-5">
+                    <BookOpenCheck className="w-5 h-5 text-emerald-600" /> Syarat &amp; Ketentuan Program
+                  </h2>
+                  <div className="space-y-3">
+                    {[
+                      {
+                        icon: ClipboardCheck,
+                        title: 'Syarat Pendaftaran',
+                        desc: 'Pendaftaran gratis untuk WNI minimal 18 tahun. Akun aktif setelah verifikasi data oleh tim DiDesa.'
+                      },
+                      {
+                        icon: Timer,
+                        title: 'Atribusi & Masa Cookie 60 Hari',
+                        desc: 'Referensi dihitung dari penggunaan link referral / kode voucher Anda, berlaku 60 hari sejak klik pertama. Desa yang sudah terhubung tercatat permanen sebagai referensi Anda.'
+                      },
+                      {
+                        icon: Wallet,
+                        title: 'Ketentuan Pencairan',
+                        desc: 'Payout minimal Rp 500.000 dan diproses maksimal H+7 hari kerja setelah pengajuan diverifikasi oleh tim.'
+                      },
+                      {
+                        icon: ShieldAlert,
+                        title: 'Kode Etik & Larangan',
+                        desc: 'Dilarang spam, penggunaan nama/logo DiDesa tanpa izin, dan pendaftaran desa fiktif (fraud). Pelanggaran dapat membekukan komisi hingga menonaktifkan akun.'
+                      }
+                    ].map((item, i) => (
+                      <div key={i} className="flex gap-4 items-start rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                          <item.icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-black text-sm">{item.title}</p>
+                          <p className="mt-1 text-[13px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed">{item.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                    Ringkasan aturan ini dapat berubah sewaktu-waktu. Ketentuan lengkap mengacu pada{' '}
+                    <a href="/syarat-ketentuan" className="text-emerald-600 hover:underline">Syarat &amp; Ketentuan</a> DiDesa dan perjanjian kemitraan Anda.
+                  </p>
+                </div>
+              </>
+            )}
           </>
         )}
       </main>

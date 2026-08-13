@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowRight, CheckCircle2, Wallet, CalendarCheck, Landmark, UserPlus,
-  Copy, Users, BadgeCheck, TrendingUp, Smartphone, MessagesSquare
+  Copy, Users, BadgeCheck, TrendingUp, Smartphone, MessagesSquare,
+  ChevronDown, ShieldAlert, ClipboardCheck, Timer
 } from 'lucide-react';
 import { supabase } from '../utils/supabase';
 
@@ -10,8 +11,28 @@ const PER_DESA_COMMISSION = 750000;
 const RANGE_MIN = 1;
 const RANGE_MAX = 50;
 
+const TIERS = [
+  { name: 'Perintis', min: 1, max: 4, perDesa: 750000, perpanjangan: 0.10, tag: 'BARU MULAI' },
+  { name: 'Pro', min: 5, max: 19, perDesa: 1000000, perpanjangan: 0.125, tag: 'TUMBUH' },
+  { name: 'VIP', min: 20, max: 50, perDesa: 1250000, perpanjangan: 0.15, tag: 'MAKSIMAL' }
+];
+
+const MILESTONES = [
+  { desa: 5, bonus: 1000000 },
+  { desa: 15, bonus: 3500000 },
+  { desa: 30, bonus: 8000000 }
+];
+
 const formatRupiah = (value: number) =>
   'Rp ' + Math.round(value).toLocaleString('id-ID');
+
+function getTier(n: number) {
+  return TIERS.find(t => n >= t.min && n <= t.max) || TIERS[TIERS.length - 1];
+}
+
+function getMilestoneBonus(n: number) {
+  return MILESTONES.filter(m => n >= m.desa).reduce((sum, m) => sum + m.bonus, 0);
+}
 
 function generateReferralCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -41,9 +62,13 @@ export default function AffiliateLandingPage() {
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [registeredName, setRegisteredName] = useState('');
   const [form, setForm] = useState<AffiliateForm>({ nama: '', email: '', no_wa: '', daerah: '' });
+  const [openTerms, setOpenTerms] = useState<number | null>(0);
 
-  const estimatedMonthly = jumlahDesa * PER_DESA_COMMISSION;
+  const activeTier = getTier(jumlahDesa);
+  const commissionPerDesa = activeTier.perDesa;
+  const estimatedMonthly = jumlahDesa * commissionPerDesa;
   const estimatedYearly = estimatedMonthly * 12;
+  const milestoneBonus = getMilestoneBonus(jumlahDesa);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,7 +199,7 @@ export default function AffiliateLandingPage() {
 
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
             {[
-              { icon: Wallet, value: 'Rp 750rb', label: 'Komisi per Desa / Bulan' },
+              { icon: Wallet, value: 'Mulai Rp 750rb', label: 'Komisi per Desa / Bulan' },
               { icon: CalendarCheck, value: 'Bulanan', label: 'Pembayaran Rutin' },
               { icon: TrendingUp, value: 'Tanpa Batas', label: 'Jumlah Desa Referensi' }
             ].map((item, i) => (
@@ -192,6 +217,56 @@ export default function AffiliateLandingPage() {
         </div>
       </section>
 
+      {/* Skema Komisi Transparan */}
+      <section id="skema-komisi" className="py-14 lg:py-20 bg-white dark:bg-slate-800/40 border-b border-slate-200/60 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-2">Skema Komisi Transparan</p>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">Makin Banyak Referensi, Makin Besar Komisi Anda</h2>
+            <p className="mt-3 text-slate-600 dark:text-slate-300 font-medium">
+              Komisi naik bertingkat berdasarkan jumlah desa aktif Anda, plus persentase bonus perpanjangan langganan.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {TIERS.map((tier, i) => {
+              const isActive = activeTier.name === tier.name;
+              return (
+                <div
+                  key={tier.name}
+                  className={`relative rounded-3xl border p-7 transition-all ${
+                    isActive
+                      ? 'bg-emerald-700 border-emerald-700 text-white shadow-xl shadow-emerald-900/20 scale-[1.02]'
+                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg ${isActive ? 'bg-white/15 text-emerald-100' : 'bg-emerald-600/10 text-emerald-700 dark:text-emerald-400'}`}>
+                      {tier.tag}
+                    </span>
+                    <span className={`text-xs font-black ${isActive ? 'text-emerald-100' : 'text-slate-400'}`}>
+                      Tier {i + 1}
+                    </span>
+                  </div>
+                  <h3 className={`mt-4 text-2xl font-black ${isActive ? '' : 'text-slate-800 dark:text-slate-100'}`}>{tier.name}</h3>
+                  <p className={`mt-1 text-[11px] font-bold uppercase tracking-widest ${isActive ? 'text-emerald-100/90' : 'text-slate-400'}`}>
+                    {tier.min}–{tier.max} Desa
+                  </p>
+                  <div className={`mt-5 h-px ${isActive ? 'bg-white/15' : 'bg-slate-100 dark:bg-slate-700'}`} />
+                  <p className="mt-5 text-sm font-bold flex items-baseline gap-1">
+                    <span className={`text-3xl font-black ${isActive ? '' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatRupiah(tier.perDesa)}</span>
+                    <span className={isActive ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}>/ desa / bulan</span>
+                  </p>
+                  <p className={`mt-3 text-sm font-bold flex items-center gap-2 ${isActive ? 'text-emerald-50' : 'text-slate-600 dark:text-slate-300'}`}>
+                    <TrendingUp className="w-4 h-4" /> +{Math.round(tier.perpanjangan * 100).toFixed(tier.perpanjangan * 100 % 1 === 0 ? 0 : 1).replace('.', ',')}% perpanjangan
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Kalkulator Komisi */}
       <section id="kalkulator" className="py-14 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -202,8 +277,8 @@ export default function AffiliateLandingPage() {
                 Berapa Penghasilan Anda <br className="hidden sm:block" /> Sebagai Affiliator?
               </h2>
               <p className="mt-4 text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                Geser slider untuk memperkirakan berapa desa yang akan Anda bantu digitalisasi.
-                Komisi Rp 750.000 diberikan untuk setiap desa <strong>aktif</strong> setiap bulan.
+                Geser slider untuk memperkirakan penghasilan Anda. Komisi dihitung otomatis sesuai{' '}
+                <strong>Tier {activeTier.name}</strong> Anda saat ini ({formatRupiah(commissionPerDesa)}/desa/bulan).
               </p>
 
               <div className="mt-8 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 sm:p-8">
@@ -227,7 +302,18 @@ export default function AffiliateLandingPage() {
                   <span>{RANGE_MAX} desa</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mt-6">
+                <div className="mt-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tier Aktif</p>
+                    <p className="text-lg font-black text-emerald-700 dark:text-emerald-400">{activeTier.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Komisi / Desa / Bulan</p>
+                    <p className="text-lg font-black">{formatRupiah(commissionPerDesa)}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mt-3">
                   {([
                     { label: 'Per Bulan', value: formatRupiah(estimatedMonthly) },
                     { label: 'Per Tahun', value: formatRupiah(estimatedYearly) }
@@ -238,8 +324,32 @@ export default function AffiliateLandingPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Banner Bonus Milestone */}
+                <div className={`mt-3 rounded-2xl p-4 border transition-all ${milestoneBonus > 0 ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-700/60' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700'}`}>
+                  <div className="flex items-center justify-between">
+                    <p className={`text-[10px] font-black uppercase tracking-widest ${milestoneBonus > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>
+                      Bonus Pencapaian (Sekali Terima)
+                    </p>
+                    <p className={`text-lg font-black ${milestoneBonus > 0 ? 'text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>
+                      {formatRupiah(milestoneBonus)}
+                    </p>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {MILESTONES.map(m => {
+                      const reached = jumlahDesa >= m.desa;
+                      return (
+                        <div key={m.desa} className={`rounded-xl px-2 py-1.5 text-center border ${reached ? 'bg-amber-100/70 dark:bg-amber-800/40 border-amber-300 dark:border-amber-700' : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700'}`}>
+                          <p className={`text-[10px] font-black ${reached ? 'text-amber-800 dark:text-amber-300' : 'text-slate-400'}`}>+{formatRupiah(m.bonus)}</p>
+                          <p className={`text-[9px] font-bold ${reached ? 'text-amber-700 dark:text-amber-400' : 'text-slate-400'}`}>di {m.desa} desa</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <p className="mt-4 text-[11px] text-slate-400 dark:text-slate-500 font-medium leading-relaxed">
-                  * Estimasi bruto. Rincian komisi final ditentukan dalam perjanjian kemitraan dan kebijakan program.
+                  * Estimasi bruto. Bonus milestone merupakan insentif sekali terima saat mencapai jumlah desa aktif. Rincian komisi final ditentukan dalam perjanjian kemitraan dan kebijakan program.
                 </p>
               </div>
             </div>
@@ -278,7 +388,7 @@ export default function AffiliateLandingPage() {
             {[
               { icon: UserPlus, step: '01', title: 'Daftar Gratis', desc: 'Isi formulir pendaftaran. Tim kami akan memverifikasi dan mengaktifkan akun affiliator Anda.' },
               { icon: Copy, step: '02', title: 'Bagikan Referensi', desc: 'Gunakan link referral dan kode voucher dari dashboard untuk merekomendasikan DiDesa ke desa-desa.' },
-              { icon: Wallet, step: '03', title: 'Raup Komisi', desc: 'Setiap desa aktif dari referensi Anda menghasilkan komisi Rp 750.000 per bulan. Ajukan payout kapan saja.' }
+              { icon: Wallet, step: '03', title: 'Raup Komisi', desc: 'Setiap desa aktif dari referensi Anda menghasilkan komisi mulai Rp 750.000 hingga Rp 1.250.000 per bulan sesuai tier, plus bonus pencapaian. Ajukan payout kapan saja.' }
             ].map((item, i) => (
               <div key={i} className="relative rounded-3xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-7 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all">
                 <span className="absolute top-5 right-6 text-5xl font-black text-slate-100 dark:text-slate-700 select-none">{item.step}</span>
@@ -379,6 +489,75 @@ export default function AffiliateLandingPage() {
               <a href="/kebijakan-privasi" className="text-emerald-600 hover:underline">Kebijakan Privasi</a> DiDesa.
             </p>
           </form>
+        </div>
+      </section>
+
+      {/* Syarat & Ketentuan Program Afiliasi */}
+      <section id="syarat-ketentuan" className="py-14 lg:py-20 bg-white dark:bg-slate-800/40 border-y border-slate-200/60 dark:border-slate-800">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto">
+            <p className="text-[11px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest mb-2">Transparansi Program</p>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">Syarat &amp; Ketentuan Program Afiliasi</h2>
+            <p className="mt-3 text-slate-600 dark:text-slate-300 font-medium">
+              Kami ingin kemitraan yang adil dan jelas. Berikut aturan yang mengikat seluruh affiliator DiDesa.
+            </p>
+          </div>
+
+          <div className="mt-10 space-y-3">
+            {[
+              {
+                icon: ClipboardCheck,
+                title: 'Syarat Pendaftaran',
+                desc: 'Pendaftaran affiliator 100% gratis. Terbuka untuk Warga Negara Indonesia berusia minimal 18 tahun. Akun affiliator aktif setelah data Anda diverifikasi oleh tim DiDesa.'
+              },
+              {
+                icon: Timer,
+                title: 'Atribusi & Masa Cookie 60 Hari',
+                desc: 'Referensi dihitung berdasarkan penggunaan link referral / kode voucher Anda saat desa melakukan pendaftaran. Masa atribusi berlaku 60 hari sejak klik pertama. Desa yang sudah berhasil terhubung tercatat sebagai referensi Anda secara permanen.'
+              },
+              {
+                icon: Wallet,
+                title: 'Ketentuan Pencairan',
+                desc: 'Payout hanya dapat diajukan jika komisi yang terkumpul minimal Rp 500.000. Pengajuan diverifikasi oleh tim dan proses pencairan dilakukan maksimal H+7 hari kerja setelah pengajuan disetujui.'
+              },
+              {
+                icon: ShieldAlert,
+                title: 'Kode Etik & Larangan',
+                desc: 'Dilarang melakukan spam atau promosi agresif, menggunakan nama dan logo DiDesa tanpa izin tertulis, serta mendaftarkan desa fiktif atau data palsu (fraud). Pelanggaran dapat mengakibatkan pembekuan komisi hingga penonaktifan akun affiliator.'
+              }
+            ].map((item, i) => {
+              const isOpen = openTerms === i;
+              return (
+                <div key={i} className={`rounded-2xl border transition-all ${isOpen ? 'bg-white dark:bg-slate-800 border-emerald-300 dark:border-emerald-700/60 shadow-lg shadow-emerald-600/5' : 'bg-white/70 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'}`}>
+                  <button
+                    onClick={() => setOpenTerms(isOpen ? null : i)}
+                    className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-4 text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-600/10 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <item.icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-black text-sm sm:text-base">{item.title}</p>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Poin {i + 1}</p>
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-emerald-600' : ''}`} />
+                  </button>
+                  <div className={`px-5 sm:px-6 pb-5 overflow-hidden transition-all duration-300 ${isOpen ? 'block' : 'hidden'}`}>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mt-6 text-center text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+            Skema ini merupakan ringkasan. Ketentuan lengkap mengacu pada{' '}
+            <a href="/syarat-ketentuan" className="text-emerald-600 hover:underline">Syarat &amp; Ketentuan</a> DiDesa dan perjanjian kemitraan.
+          </p>
         </div>
       </section>
 
