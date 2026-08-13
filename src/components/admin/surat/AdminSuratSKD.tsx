@@ -5,11 +5,10 @@ import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { FileText, ArrowLeft, Printer, Save, Search, User, 
+import { FileText, ArrowLeft, Printer, Save, Search, User, Home, 
   MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
   ZoomIn, ZoomOut
 } from 'lucide-react';
@@ -70,7 +69,6 @@ export default function AdminSuratSKD({
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
-  const templateDesc = useLetterDescription('SKD', 'Surat Keterangan Domisili Perorangan');
   const templateKode = useLetterKode('SKD');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
@@ -564,8 +562,8 @@ export default function AdminSuratSKD({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title={`Buat ${activeClassification.klasifikasi}`}
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SKD', { kode: '145', jenis: 'Surat Keterangan Domisili', deskripsi: 'Surat Keterangan Domisili Perorangan (SKD)' })}
+          icon={<Home className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"

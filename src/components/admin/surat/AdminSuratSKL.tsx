@@ -1,12 +1,11 @@
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
+import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -54,8 +53,6 @@ export default function AdminSuratSKL({
 
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
-  const templateDesc = useLetterDescription('SKL', 'Surat Keterangan Kelahiran');
-  const templateKode = useLetterKode('SKL');
   const [success, setSuccess] = useState(false);
   
   const [residents, setResidents] = useState<Resident[]>([]);
@@ -547,8 +544,8 @@ export default function AdminSuratSKL({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat SK Lahir"
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SKL', { kode: '474.1', jenis: 'Surat Keterangan Kelahiran', deskripsi: 'Surat Keterangan Kelahiran (SKL)' })}
+          icon={<Baby className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"

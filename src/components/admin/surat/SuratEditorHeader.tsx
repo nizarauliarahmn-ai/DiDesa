@@ -1,10 +1,18 @@
 import React from 'react';
 import { ArrowLeft, Printer, Save, Loader2 } from 'lucide-react';
+import { getLetterClassifications } from '../../../utils/letterClassifications';
+
+export interface SuratEditorTemplate {
+  title: string;
+  description?: string;
+  kode?: string;
+  classificationCode?: string;
+  sequenceNo?: string;
+}
 
 interface SuratEditorHeaderProps {
-  title: string;
-  templateKode?: string;
-  templateDesc?: string;
+  template: SuratEditorTemplate;
+  icon?: React.ReactNode;
   isSaving?: boolean;
   onBack: () => void;
   onPrint?: () => void;
@@ -14,10 +22,40 @@ interface SuratEditorHeaderProps {
   children?: React.ReactNode;
 }
 
+const toTitleCase = (s: string) =>
+  s
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) =>
+      /^[a-z]{2,4}$/.test(w)
+        ? w.toUpperCase()
+        : w.charAt(0).toUpperCase() + w.slice(1)
+    )
+    .join(' ');
+
+export function getLetterHeaderTemplate(
+  klasifikasi: string,
+  fallback: { kode?: string; jenis?: string; deskripsi?: string } = {}
+): SuratEditorTemplate {
+  let t;
+  try {
+    t = getLetterClassifications().find((c) => c.klasifikasi === klasifikasi);
+  } catch {
+    t = undefined;
+  }
+  const jenis = fallback.jenis || (t?.jenis ? toTitleCase(t.jenis) : 'Surat');
+  return {
+    title: `Buat ${jenis}`,
+    description: t?.deskripsi || fallback.deskripsi || '',
+    kode: klasifikasi,
+    classificationCode: t?.kodeKlasifikasi || fallback.kode || '',
+    sequenceNo: t?.noUrutTerakhir ? String(t.noUrutTerakhir).padStart(3, '0') : '',
+  };
+}
+
 export default function SuratEditorHeader({
-  title,
-  templateKode,
-  templateDesc,
+  template,
+  icon,
   isSaving = false,
   onBack,
   onPrint,
@@ -26,37 +64,54 @@ export default function SuratEditorHeader({
   saveLabel = "Simpan",
   children
 }: SuratEditorHeaderProps) {
+  const { title, description, kode, classificationCode, sequenceNo } = template;
   return (
     <div className="sticky top-20 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none mb-6">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={onBack} 
-          className="p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl transition-all"
+      <div className="flex items-center gap-4 min-w-0">
+        <button
+          onClick={onBack}
+          className="p-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-2xl transition-all shrink-0"
+          aria-label="Kembali"
         >
           <ArrowLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
         </button>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+
+        {icon && (
+          <div className="w-11 h-11 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            {icon}
+          </div>
+        )}
+
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5 mb-1">
+            {kode && (
+              <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold rounded">
+                {kode}
+              </span>
+            )}
+            {classificationCode && (
+              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-semibold font-mono rounded border border-slate-200/60 dark:border-slate-700/60">
+                Kode: {classificationCode}
+              </span>
+            )}
+            {sequenceNo && (
+              <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[11px] font-semibold font-mono rounded">
+                No: {sequenceNo}
+              </span>
+            )}
+          </div>
+          <h1 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white leading-snug truncate">
             {title}
           </h1>
-          {(templateKode || templateDesc) && (
-            <div className="flex items-center mt-1.5 gap-2">
-              {templateKode && (
-                <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-bold font-mono rounded-md border border-slate-200 dark:border-slate-700 tracking-wide">
-                  Kode: {templateKode}
-                </span>
-              )}
-              {templateDesc && (
-                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  {templateDesc}
-                </span>
-              )}
-            </div>
+          {description && (
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+              {description}
+            </p>
           )}
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 shrink-0">
         {onSave && (
           <button
             onClick={onSave}
@@ -67,7 +122,7 @@ export default function SuratEditorHeader({
             <span>{saveLabel}</span>
           </button>
         )}
-        
+
         {onPrint && (
           <button
             onClick={() => onPrint()}
@@ -77,7 +132,7 @@ export default function SuratEditorHeader({
             <span>{printLabel}</span>
           </button>
         )}
-        
+
         {children}
       </div>
     </div>

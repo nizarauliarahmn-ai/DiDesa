@@ -1,8 +1,8 @@
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import React, { useState, useEffect, useRef, Component } from 'react';
-import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2, Plane } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { parseInvitationPdf, getActiveTenantId } from '../../../utils/aiChat';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
@@ -801,8 +801,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat Surat"
-          templateKode={kodeKlasifikasi}
+          template={getLetterHeaderTemplate('SPPD', { kode: '094', jenis: 'Surat Perjalanan Dinas', deskripsi: 'Surat Perintah & Perjalanan Dinas (SPPD)' })}
+          icon={<Plane className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           onSave={handleRecord}

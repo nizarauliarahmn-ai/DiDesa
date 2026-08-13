@@ -1,17 +1,15 @@
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { FileText, ArrowLeft, Printer, Search, User, 
+import { FileText, ArrowLeft, Printer, Search, User, Frown, 
   MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
   ZoomIn, ZoomOut, ChevronDown
 } from 'lucide-react';
@@ -69,8 +67,7 @@ export default function AdminSuratSKTM({
 
   const [loading, setLoading] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
-  const templateDesc = useLetterDescription('SKTM', 'Surat Keterangan Tidak Mampu (Siswa / Sekolah)');
-  const templateKode = useLetterKode('SKTM');
+  const kodeKlasifikasiSKTM = backdateKlas.kodeKlasifikasi || '400';
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -512,8 +509,8 @@ export default function AdminSuratSKTM({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat SKTM"
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SKTM', { kode: '400', jenis: 'Surat Keterangan Tidak Mampu', deskripsi: 'Surat Keterangan Tidak Mampu (Siswa / Sekolah)' })}
+          icon={<Frown className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"

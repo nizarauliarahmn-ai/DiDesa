@@ -1,12 +1,10 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature } from 'lucide-react';
+import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useLetterKode } from '../../../hooks/useLetterKode';
 import { getLetterClassifications, generateLetterNumber, incrementSequenceNumber } from '../../../utils/letterClassifications';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
@@ -14,7 +12,7 @@ import { useDragScroll } from '../../../hooks/useDragScroll';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
@@ -62,8 +60,6 @@ export default function AdminSuratSKKT({
 
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
-  const templateKode = useLetterKode('SKKT');
-  const templateDesc = useLetterDescription('SKKT', 'Surat Keterangan Kepemilikan Tanah');
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -683,8 +679,8 @@ export default function AdminSuratSKKT({
 
       {/* Header Bar */}
       <SuratEditorHeader 
-          title="Surat Keterangan Kepemilikan Tanah (SKKT)"
-          templateDesc="Surat Pernyataan Penguasaan Fisik Bidang Tanah & Gambar Situasi Kasar Tanah"
+          template={getLetterHeaderTemplate('SKKT', { kode: '593', jenis: 'Surat Keterangan Kepemilikan Tanah', deskripsi: 'Surat Pernyataan Penguasaan Fisik Bidang Tanah & Gambar Situasi Kasar Tanah' })}
+          icon={<Landmark className="w-5 h-5" />}
           onBack={onBack}
           onSave={handleSave}
           isSaving={loading}

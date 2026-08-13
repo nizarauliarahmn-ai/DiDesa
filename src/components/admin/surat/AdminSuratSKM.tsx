@@ -1,11 +1,9 @@
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -74,8 +72,6 @@ export default function AdminSuratSKM({
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
-  const templateDesc = useLetterDescription('SKM', 'Surat Keterangan Kematian / Miskin');
-  const templateKode = useLetterKode('SKM');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -528,8 +524,8 @@ export default function AdminSuratSKM({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat SKM"
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SKM', { kode: '400', jenis: 'Surat Keterangan Kematian', deskripsi: 'Surat Keterangan Kematian (SKM)' })}
+          icon={<Heart className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"

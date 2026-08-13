@@ -1,11 +1,9 @@
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -96,8 +94,6 @@ export default function AdminSuratSKU({
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
-  const templateDesc = useLetterDescription('SKU', 'Surat Keterangan Usaha Mikro / Menengah');
-  const templateKode = useLetterKode('SKU');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -551,8 +547,8 @@ export default function AdminSuratSKU({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat SKU"
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SKU', { kode: '400', jenis: 'Surat Keterangan Usaha', deskripsi: 'Surat Keterangan Usaha Mikro / Menengah (SKU)' })}
+          icon={<Store className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"

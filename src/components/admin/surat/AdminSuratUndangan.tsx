@@ -4,12 +4,11 @@ import {
   ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, 
   Loader2, RefreshCw, Calendar, CheckCircle2, Users, FileSpreadsheet,
   ToggleLeft, ToggleRight, Trash2, MapPin, Building2, ChevronRight,
-  ArrowUp, ArrowDown, GripVertical
+  ArrowUp, ArrowDown, GripVertical, Mail
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import TTESignatureBox from './TTESignatureBox';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
@@ -19,7 +18,7 @@ import { showToast } from '../../../utils/toast';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { capitalizeWords, capitalizeResidentFields } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useReactToPrint } from 'react-to-print';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
@@ -489,8 +488,8 @@ export default function AdminSuratUndangan({
     <div className="space-y-6 pb-24">
       {/* Top Bar (Reusable Standard Header) */}
       <SuratEditorHeader 
-        title="Pembuat Surat Undangan Resmi"
-        templateKode="005 / UND"
+        template={getLetterHeaderTemplate('UND', { kode: '005', jenis: 'Surat Undangan', deskripsi: 'Undangan Pertemuan Koordinasi / Permohonan Resmi' })}
+        icon={<Mail className="w-5 h-5" />}
         onBack={onBack}
         onPrint={handlePrint}
         printLabel="Cetak / Download PDF"

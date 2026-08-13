@@ -1,15 +1,13 @@
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { FileText, ArrowLeft, Printer, Save, Search, User, 
+import { FileText, ArrowLeft, Printer, Save, Search, User, Store, 
   MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
   ZoomIn, ZoomOut, ChevronRight, X
 } from 'lucide-react';
@@ -82,8 +80,6 @@ export default function AdminSuratSDU({
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
-  const templateDesc = useLetterDescription('SDU', 'Surat Keterangan Domisili Usaha');
-  const templateKode = useLetterKode('SDU');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -577,8 +573,8 @@ export default function AdminSuratSDU({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat SDU"
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SDU', { kode: '400', jenis: 'Surat Keterangan Domisili Usaha', deskripsi: 'Surat Keterangan Domisili Usaha (SDU)' })}
+          icon={<Store className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"

@@ -1,11 +1,9 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached, invalidateResidentsCache } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Printer, Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Printer, Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 import {
   getLetterClassifications, incrementSequenceNumber, generateLetterNumber
 } from '../../../utils/letterClassifications';
@@ -14,7 +12,7 @@ import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
@@ -113,8 +111,6 @@ export default function AdminSuratSPT({
   // ─── State ───
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
-  const templateDesc = useLetterDescription('SPT', 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk');
-  const templateKode = useLetterKode('SPT');
   const [success, setSuccess] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [allResidents, setAllResidents] = useState<FullResident[]>([]);
@@ -715,9 +711,8 @@ export default function AdminSuratSPT({
     <div className="space-y-5 pb-20">
       {/* 📜 Header 📜 */}
       <SuratEditorHeader 
-        title="Buat SPT"
-        templateKode={templateKode}
-        templateDesc={templateDesc}
+        template={getLetterHeaderTemplate('SPT', { kode: '474', jenis: 'Surat Pernyataan Taspen', deskripsi: 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk' })}
+        icon={<ShieldCheck className="w-5 h-5" />}
         onBack={onBack}
         onPrint={handlePrint}
         printLabel="Cetak Surat"

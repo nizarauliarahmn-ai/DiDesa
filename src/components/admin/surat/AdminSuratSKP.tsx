@@ -1,17 +1,15 @@
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { FileText, ArrowLeft, Printer, Save, Search, User, 
+import { FileText, ArrowLeft, Printer, Save, Search, User, FileCheck, 
   MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
   ZoomIn, ZoomOut, ArrowRight
 } from 'lucide-react';
@@ -83,8 +81,6 @@ export default function AdminSuratSKP({
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
-  const templateDesc = useLetterDescription('SKP', 'Surat Keterangan Pindah (Warga Keluar)');
-  const templateKode = useLetterKode('SKP');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -805,8 +801,8 @@ export default function AdminSuratSKP({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat SKP"
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SKP', { kode: '400', jenis: 'Surat Keterangan Pindah', deskripsi: 'Surat Pengantar Keterangan Pindah' })}
+          icon={<FileCheck className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"

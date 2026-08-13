@@ -1,15 +1,13 @@
-import SuratEditorHeader from './SuratEditorHeader';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { FileText, ArrowLeft, Printer, Save, Search, User, 
+import { FileText, ArrowLeft, Printer, Save, Search, User, Award, 
   MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
   ZoomIn, ZoomOut
 } from 'lucide-react';
@@ -75,8 +73,6 @@ export default function AdminSuratSKBM({
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
-  const templateDesc = useLetterDescription('SKBM', 'Surat Keterangan Belum Pernah Menikah / Miskin');
-  const templateKode = useLetterKode('SKBM');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -508,8 +504,8 @@ export default function AdminSuratSKBM({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          title="Buat SKBM"
-          templateKode={templateKode}
+          template={getLetterHeaderTemplate('SKBM', { kode: '400', jenis: 'Surat Keterangan Belum Menikah', deskripsi: 'Surat Keterangan Belum Pernah Menikah (SKBM)' })}
+          icon={<Award className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
           printLabel="Cetak Surat"
