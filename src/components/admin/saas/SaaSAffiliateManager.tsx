@@ -773,9 +773,9 @@ export default function SaaSAffiliateManager() {
       {/* Modal Detail & Edit Tier */}
       {detailAffiliate && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 dark:border-slate-700/60 animate-in fade-in zoom-in duration-300">
-            {/* Header */}
-            <div className="relative bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-800 px-6 sm:px-8 py-7 text-white">
+          <div className="max-h-[88vh] w-full max-w-2xl mx-4 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-700/60 animate-in fade-in zoom-in duration-300">
+            {/* Header (Sticky) */}
+            <div className="flex-shrink-0 relative bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-800 px-5 sm:px-6 py-5 text-white border-b border-white/10 z-10">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-16 -mt-16" />
               <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-white/5 rounded-full -mb-16" />
               <div className="flex items-start justify-between gap-4 relative z-10">
@@ -823,10 +823,10 @@ export default function SaaSAffiliateManager() {
               </div>
             </div>
 
-            {/* Body */}
-            <div className="p-6 sm:p-8">
+            {/* Body (Scrollable) */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
               {/* Grid 2 Kolom */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* KOLOM KIRI: Kontak & Wilayah */}
                 <div className="space-y-4">
                   <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4">
@@ -903,7 +903,7 @@ export default function SaaSAffiliateManager() {
               </div>
 
               {/* Section Setting Komisi Khusus */}
-              <div className="mt-4 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/60 p-4">
+              <div className="rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700/60 p-4">
                 <p className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-3 flex items-center gap-1.5">
                   ⚙️ Pengaturan Komisi Khusus Per Desa
                 </p>
@@ -930,32 +930,32 @@ export default function SaaSAffiliateManager() {
                   Secara bawaan mengikuti Tier {getTier(referralCountByAffiliate(detailAffiliate.id)).name} ({formatRupiah(getTier(referralCountByAffiliate(detailAffiliate.id)).perDesa)}). Ubah angka di atas jika ingin memberikan rate khusus untuk afiliator ini.
                 </p>
               </div>
+            </div>
 
-              {/* Footer Buttons */}
-              <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-slate-100 dark:border-slate-700/60 pt-5">
+            {/* Footer (Sticky) */}
+            <div className="flex-shrink-0 border-t border-slate-100 dark:border-slate-700/60 p-4 bg-slate-50 dark:bg-slate-800 flex items-center justify-between gap-3 z-10">
+              <button
+                onClick={() => setDetailAffiliate(null)}
+                className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap"
+              >
+                Batal / Tutup
+              </button>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
                 <button
-                  onClick={() => setDetailAffiliate(null)}
-                  className="px-5 py-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  onClick={() => { handleApproval(detailAffiliate, 'rejected'); setDetailAffiliate(null); }}
+                  className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl border-2 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-black capitalize hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                 >
-                  Batal / Tutup
+                  ✖ Tolak
                 </button>
-                <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
-                  <button
-                    onClick={() => { handleApproval(detailAffiliate, 'rejected'); setDetailAffiliate(null); }}
-                    className="px-5 py-3 rounded-xl border-2 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm font-black capitalize hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2"
-                  >
-                    ✖ Tolak
-                  </button>
-                  <button
-                    onClick={() => handleSaveTier({ approve: true })}
-                    disabled={isSavingTier}
-                    className="px-5 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white text-sm font-black shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                  >
-                    {isSavingTier ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                    ✓
-                    <span>{detailAffiliate.status === 'active' ? 'Simpan Komisi Khusus' : 'Setujui & Aktifkan Afiliator'}</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleSaveTier({ approve: true })}
+                  disabled={isSavingTier}
+                  className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white text-sm font-black shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                >
+                  {isSavingTier ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  ✓
+                  <span className="hidden xs:inline sm:inline">{detailAffiliate.status === 'active' ? 'Simpan Komisi Khusus' : 'Setujui & Aktifkan Afiliator'}</span>
+                </button>
               </div>
             </div>
           </div>
@@ -965,9 +965,10 @@ export default function SaaSAffiliateManager() {
       {/* Modal Proses Payout */}
       {processingPayout && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
-            <div className="p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-3 mb-6">
+          <div className="max-h-[88vh] w-full max-w-md mx-4 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
+            {/* Header (Sticky) */}
+            <div className="flex-shrink-0 border-b border-slate-100 dark:border-slate-700/60 p-4 sm:p-5 bg-white dark:bg-slate-900 z-10">
+              <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
                     <Banknote className="w-6 h-6" />
@@ -977,18 +978,21 @@ export default function SaaSAffiliateManager() {
                     <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Konfirmasi Pembayaran</p>
                   </div>
                 </div>
-                <button onClick={() => setProcessingPayout(null)} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <button onClick={() => setProcessingPayout(null)} className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
                   <X className="w-5 h-5" />
                 </button>
               </div>
+            </div>
 
-              <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 p-5 text-center mb-5">
+            {/* Body (Scrollable) */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+              <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 p-5 text-center">
                 <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">Nominal Komisi</p>
                 <p className="text-3xl font-black text-emerald-700 dark:text-emerald-400 mt-1">{formatRupiah(processingPayout.amount || 0)}</p>
                 <p className="mt-1 text-xs font-semibold text-emerald-700/80 dark:text-emerald-300/80">kepada {processingPayout.affiliates?.nama || 'Afiliator'}</p>
               </div>
 
-              <div className="space-y-3 text-sm mb-6">
+              <div className="space-y-3 text-sm">
                 <div className="rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 flex items-center gap-2">
                   <Landmark className="w-4 h-4 text-slate-400 shrink-0" />
                   <p className="font-semibold">
@@ -1002,7 +1006,7 @@ export default function SaaSAffiliateManager() {
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 p-4 mb-6">
+              <div className="rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/60 p-4">
                 <p className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1">Langkah</p>
                 <ol className="text-[12px] font-semibold text-amber-800 dark:text-amber-300 space-y-1.5 leading-relaxed">
                   <li>1. Lakukan transfer ke rekening afiliator di atas sesuai nominal komisi.</li>
@@ -1026,15 +1030,24 @@ export default function SaaSAffiliateManager() {
                   </>
                 )}
               </label>
+            </div>
 
+            {/* Footer (Sticky) */}
+            <div className="flex-shrink-0 border-t border-slate-100 dark:border-slate-700/60 p-4 bg-slate-50 dark:bg-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 z-10">
+              <button
+                onClick={() => setProcessingPayout(null)}
+                className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors whitespace-nowrap"
+              >
+                Batal
+              </button>
               {processingPayout.affiliates?.no_wa && (
                 <a
                   href={`https://wa.me/${toWaNumber(processingPayout.affiliates.no_wa)}?text=${waPayoutMessage(processingPayout)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full mt-4 py-3 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-sm font-black uppercase tracking-wider hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2"
+                  className="px-4 py-2.5 sm:px-5 sm:py-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-sm font-black uppercase tracking-wider hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2"
                 >
-                  <MessageSquare className="w-4 h-4" /> Kirim Notifikasi WhatsApp
+                  <MessageSquare className="w-4 h-4" /> Notifikasi WhatsApp
                 </a>
               )}
             </div>

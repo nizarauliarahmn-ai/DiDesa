@@ -823,8 +823,8 @@ export default function AffiliateLandingPage() {
       {/* Modal Antrean Prioritas Wilayah */}
       {isWaitlistOpen && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
-            <div className="p-8">
+          <div className="max-h-[88vh] w-full max-w-lg mx-4 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8">
               <div className="flex items-center justify-between mb-1">
                 <h3 className="text-xl font-black">Antrean Prioritas Ekspansi</h3>
                 <button
@@ -935,9 +935,9 @@ export default function AffiliateLandingPage() {
 
       {/* Modal Sukses */}
       {isSuccessModalOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
-            <div className="p-8 text-center flex flex-col items-center">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="max-h-[88vh] w-full max-w-md mx-4 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 text-center flex flex-col items-center">
               <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mb-6">
                 <CheckCircle2 className="w-9 h-9 text-emerald-600 dark:text-emerald-400" />
               </div>
