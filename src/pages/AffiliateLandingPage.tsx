@@ -255,7 +255,7 @@ export default function AffiliateLandingPage() {
                   <div className={`mt-5 h-px ${isActive ? 'bg-white/15' : 'bg-slate-100 dark:bg-slate-700'}`} />
                   <p className="mt-5 text-sm font-bold flex items-baseline gap-1">
                     <span className={`text-3xl font-black ${isActive ? '' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatRupiah(tier.perDesa)}</span>
-                    <span className={isActive ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}>/ desa / bulan</span>
+                    <span className={isActive ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}>/ desa baru</span>
                   </p>
                   <p className={`mt-3 text-sm font-bold flex items-center gap-2 ${isActive ? 'text-emerald-50' : 'text-slate-600 dark:text-slate-300'}`}>
                     <TrendingUp className="w-4 h-4" /> +{Math.round(tier.perpanjangan * 100).toFixed(tier.perpanjangan * 100 % 1 === 0 ? 0 : 1).replace('.', ',')}% perpanjangan
@@ -264,6 +264,9 @@ export default function AffiliateLandingPage() {
               );
             })}
           </div>
+          <p className="text-xs text-slate-500 text-center mt-4">
+            *Komisi transaksi dibayarkan 1x saat desa pertama kali berlangganan paket tahunan, dan komisi % perpanjangan dibayarkan setiap tahun saat desa memperpanjang layanan.
+          </p>
         </div>
       </section>
 
