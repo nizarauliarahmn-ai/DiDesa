@@ -37,6 +37,21 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   // App settings (dinamis, via 'global_app_settings' di localStorage / nanti Supabase settings)
   const [appSettings, setAppSettings] = useState(loadAppSettings);
 
+  // Deteksi domain utama agar navigasi GABUNG presisi:
+  // - di sistemdidesa.id (main domain) -> client-side navigation ke /affiliator
+  // - di subdomain desa -> arahkan ke URL mutlak sistemdidesa.id/affiliator
+  const isMainDomain =
+    ['sistemdidesa.id', 'www.sistemdidesa.id', 'localhost'].includes(window.location.hostname.toLowerCase());
+
+  const handleJoinAffiliate = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isMainDomain) {
+      window.location.href = '/affiliator';
+    } else {
+      window.location.href = 'https://sistemdidesa.id/affiliator';
+    }
+  };
+
   const renderSocialIcon = (iconUrl: string) => {
     if (!iconUrl) return <Globe className="w-4 h-4" />;
     if (iconUrl.startsWith('http') || iconUrl.startsWith('data:')) {
@@ -346,10 +361,11 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                 </div>
                 {globalFooterAffiliateLink && (
                   <a 
-                    href={globalFooterAffiliateLink} 
-                    target="_blank" 
+                    href={isMainDomain ? '/affiliator' : 'https://sistemdidesa.id/affiliator'}
+                    onClick={handleJoinAffiliate}
+                    target={isMainDomain ? undefined : '_blank'}
                     rel="noopener noreferrer"
-                    className="whitespace-nowrap px-4 py-1.5 bg-white dark:bg-slate-900 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 transition-all shadow-sm dark:shadow-none active:scale-95 relative z-10"
+                    className="whitespace-nowrap px-4 py-1.5 bg-white dark:bg-slate-900 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-sm dark:shadow-none relative z-10"
                   >
                     GABUNG
                   </a>
