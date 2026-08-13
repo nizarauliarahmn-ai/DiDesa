@@ -344,9 +344,9 @@ export default function AdminPendudukDetail({
   const isFemale = data?.gender === 'Perempuan';
 
   return (
-    <div className="max-w-4xl mx-auto pb-24 relative">
+    <div className="w-full space-y-6 pb-12 relative">
       {isPending && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm dark:shadow-none animate-pulse mb-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4 shadow-sm dark:shadow-none animate-pulse">
           <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
             <ShieldAlert className="w-5 h-5" />
           </div>
@@ -359,169 +359,186 @@ export default function AdminPendudukDetail({
         </div>
       )}
 
-      {/* STICKY HEADER PROFILE - STATIC DI ATAS */}
-      <div className="sticky top-16 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-100 dark:border-slate-800 shadow-sm rounded-2xl p-4 mb-6 transition-all duration-300">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={onBack}
-              className="w-10 h-10 flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-600 dark:text-slate-400"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+      {/* STICKY HEADER PROFILE — Top-Bar Lebar Penuh */}
+      <div className="sticky top-16 z-40 w-full bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        {/* Sisi Kiri: Back + Avatar + Nama + Badges */}
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+          <button 
+            onClick={onBack}
+            className="w-11 h-11 flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-700"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
 
-            <div className="relative shrink-0">
-              {data?.photo ? (
-                <img src={data.photo} alt={data.name} className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" />
-              ) : (
-                <div className={`w-12 h-12 rounded-full border-2 border-white shadow-sm flex items-center justify-center text-white ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'}`}>
-                  <User className="w-6 h-6" fill="currentColor" />
+          <div className="relative shrink-0">
+            {data?.photo ? (
+              <img src={data.photo} alt={data.name} className="w-16 h-16 rounded-2xl border-2 border-white shadow-md object-cover" />
+            ) : (
+              <div className={`w-16 h-16 rounded-2xl border-2 border-white shadow-md flex items-center justify-center text-white ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'}`}>
+                <User className="w-8 h-8" fill="currentColor" />
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight uppercase truncate">
+              {data?.name || "Nama Penduduk"}
+            </h2>
+            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+              {(() => {
+                const s = (data?.status || 'Aktif').trim().toLowerCase();
+                if (s.includes('meninggal') || s === 'mati' || s === 'wafat') {
+                  return (
+                    <span className="bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                      Meninggal
+                    </span>
+                  );
+                }
+                if (s.includes('pindah') || s.includes('mutasi') || s === 'pindah domisili') {
+                  return (
+                    <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                      Pindah
+                    </span>
+                  );
+                }
+                if (s === 'pending_approval' || s === 'pending') {
+                  return (
+                    <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                      Pending
+                    </span>
+                  );
+                }
+                return (
+                  <span className="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    {s === 'aktif' || s === 'hidup' || s.includes('hidup') ? 'Hidup' : (data?.status || 'Hidup')}
+                  </span>
+                );
+              })()}
+              {data?.maritalStatus && (
+                <span className="bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm">
+                  {data.maritalStatus}
+                </span>
+              )}
+              {data?.familyRelation && (
+                <span className="bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm">
+                  {data.familyRelation}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mt-1.5">
+              <p className="font-mono text-gray-500 dark:text-slate-400 text-xs">
+                NIK: {data?.nik || "-"}
+              </p>
+              {data?.nik && (
+                <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center group relative cursor-help">
+                  <QRCodeSVG value={data.nik} size={20} />
+                  {/* Tooltip on hover */}
+                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-2 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                    <p className="text-[10px] font-bold text-gray-500 text-center mb-1 whitespace-nowrap">Scan Kunjungan Tamu</p>
+                    <QRCodeSVG value={data.nik} size={120} />
+                  </div>
                 </div>
               )}
             </div>
-
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight flex items-center gap-2 uppercase">
-                {data?.name || "Nama Penduduk"}
-                {(() => {
-                  const s = (data?.status || 'Aktif').trim().toLowerCase();
-                  if (s.includes('meninggal') || s === 'mati' || s === 'wafat') {
-                    return (
-                      <span className="bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                        Meninggal
-                      </span>
-                    );
-                  }
-                  if (s.includes('pindah') || s.includes('mutasi') || s === 'pindah domisili') {
-                    return (
-                      <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                        Pindah
-                      </span>
-                    );
-                  }
-                  if (s === 'pending_approval' || s === 'pending') {
-                    return (
-                      <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
-                        Pending
-                      </span>
-                    );
-                  }
-                  return (
-                    <span className="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                      {s === 'aktif' || s === 'hidup' || s.includes('hidup') ? 'Hidup' : (data?.status || 'Hidup')}
-                    </span>
-                  );
-                })()}
-                {data?.maritalStatus && (
-                  <span className="bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-black shadow-sm">
-                    {data.maritalStatus}
-                  </span>
-                )}
-              </h2>
-              <div className="flex items-center gap-3 mt-1">
-                <p className="font-mono text-gray-500 dark:text-slate-400 text-xs">
-                  NIK: {data?.nik || "-"} • {data?.familyRelation || "Kepala Keluarga"}
-                </p>
-                {data?.nik && (
-                  <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center group relative cursor-help">
-                    <QRCodeSVG value={data.nik} size={20} />
-                    {/* Tooltip on hover */}
-                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-2 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                      <p className="text-[10px] font-bold text-gray-500 text-center mb-1 whitespace-nowrap">Scan Kunjungan Tamu</p>
-                      <QRCodeSVG value={data.nik} size={120} />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2 md:pl-4 md:border-l border-gray-100 dark:border-slate-800">
-            <button 
-              onClick={() => {
-                if (onSetPresetResident && onNavigateToTab) {
-                  onSetPresetResident(data);
-                  onNavigateToTab('surat');
-                }
-              }}
-              className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 transition-colors flex items-center justify-center"
-              title="Buat Surat"
-            >
-              <FileText className="w-4 h-4" />
+        {/* Sisi Kanan: Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button 
+            onClick={() => setIsPrinting(true)}
+            className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 transition-colors flex items-center gap-2 text-xs font-bold border border-emerald-100 dark:border-emerald-800"
+            title="Cetak Profil"
+          >
+            <Printer className="w-4 h-4" />
+            Cetak
+          </button>
+          {!isPending ? (
+            <>
+              <button 
+                onClick={() => {
+                  if (onSetPresetResident && onNavigateToTab) {
+                    onSetPresetResident(data);
+                    onNavigateToTab('surat');
+                  }
+                }}
+                className="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 transition-colors flex items-center gap-2 text-xs font-bold border border-blue-100 dark:border-blue-800"
+                title="Buat Surat"
+              >
+                <FileText className="w-4 h-4" />
+                Surat
+              </button>
+              <button onClick={onEdit} className="px-3.5 py-2 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors flex items-center gap-2 text-xs shadow-sm cursor-pointer">
+                <Edit2 className="w-4 h-4" />
+                Edit Data
+              </button>
+              <button onClick={handleMoveResident} className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-400 transition-colors flex items-center gap-2 text-xs font-bold border border-amber-100 dark:border-amber-800" title="Mutasi Warga">
+                <ArrowRightLeft className="w-4 h-4" />
+                Mutasi
+              </button>
+              <button onClick={handleDeleteResident} className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 transition-colors flex items-center gap-2 text-xs font-bold border border-rose-100 dark:border-rose-800" title="Pindah ke Tong Sampah">
+                <Trash2 className="w-4 h-4" />
+                Hapus
+              </button>
+            </>
+          ) : (
+            <button onClick={onEdit} className="px-3.5 py-2 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors flex items-center gap-2 text-xs shadow-sm cursor-pointer">
+              <Edit2 className="w-4 h-4" />
+              Edit Data
             </button>
-            <button 
-              onClick={() => setIsPrinting(true)}
-              className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors flex items-center justify-center"
-              title="Cetak Profil"
-            >
-              <Printer className="w-4 h-4" />
-            </button>
-            {!isPending && (
-              <>
-                <button onClick={onEdit} className="px-4 py-2 rounded-lg bg-emerald-700 text-white font-bold hover:bg-emerald-800 transition-colors flex items-center gap-2 text-xs shadow-sm">
-                  <Edit2 className="w-3.5 h-3.5" />
-                  Edit Data
-                </button>
-                <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-1"></div>
-                <button onClick={handleMoveResident} className="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 transition-colors flex items-center justify-center" title="Mutasi Warga">
-                  <ArrowRightLeft className="w-4 h-4" />
-                </button>
-                <div className="w-[1px] h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                <button onClick={handleDeleteResident} className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 transition-colors flex items-center justify-center border border-rose-100" title="Pindah ke Tong Sampah">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </>
-            )}
-          </div>
+          )}
         </div>
       </div>
 
-      <div className="space-y-6">
-        {/* Format Tampilan Switcher Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-400 flex items-center justify-center shrink-0">
-              <CreditCard className="w-5 h-5" />
+      {/* LAYOUT GRID 2 KOLOM: KIRI (8) + KANAN (4) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+        {/* ===================== KOLOM KIRI UTAMA ===================== */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Format Tampilan Switcher Header */}
+          <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-white text-base">Format Identitas Penduduk</h3>
+                <p className="text-xs text-gray-500 dark:text-slate-400">Pilih antara format Kartu e-KTP Digital atau Ringkasan Atribut</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-gray-900 dark:text-white text-base">Format Identitas Penduduk</h3>
-              <p className="text-xs text-gray-500 dark:text-slate-400">Pilih antara format Kartu e-KTP Digital atau Ringkasan Atribut</p>
+            <div className="flex items-center bg-gray-100 dark:bg-slate-800 p-1 rounded-xl border border-gray-200 dark:border-slate-700 self-start sm:self-auto">
+              <button
+                onClick={() => setViewMode('ektp')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === 'ektp'
+                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <CreditCard className="w-4 h-4" />
+                Tampilan Kartu e-KTP
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                  viewMode === 'grid'
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Grid className="w-4 h-4" />
+                Tampilan Atribut
+              </button>
             </div>
           </div>
-          <div className="flex items-center bg-gray-100 dark:bg-slate-800 p-1 rounded-xl border border-gray-200 dark:border-slate-700 self-start sm:self-auto">
-            <button
-              onClick={() => setViewMode('ektp')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                viewMode === 'ektp'
-                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <CreditCard className="w-4 h-4" />
-              Tampilan Kartu e-KTP
-            </button>
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                viewMode === 'grid'
-                  ? 'bg-emerald-700 text-white shadow-sm'
-                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-              }`}
-            >
-              <Grid className="w-4 h-4" />
-              Tampilan Atribut
-            </button>
-          </div>
-        </div>
 
         {viewMode === 'ektp' ? (
-          /* Ultra-Modern Compact Digital e-KTP Card View */
-          <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-sky-100 to-indigo-100 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 rounded-3xl p-5 sm:p-6 border-2 border-sky-300 dark:border-cyan-500/40 shadow-xl space-y-4 text-gray-900 dark:text-white">
+          /* Kartu e-KTP Digital — di atas latar biru lembut */
+          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
+            <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-sky-100 to-indigo-100 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 rounded-2xl p-5 sm:p-6 border-2 border-sky-300 dark:border-cyan-500/40 shadow-sm space-y-4 text-gray-900 dark:text-white">
             {/* Sleek Minimalist Top Header (Kop Removed as requested) */}
             <div className="flex items-center justify-between pb-3 border-b border-sky-900/15 dark:border-cyan-500/20">
               <div className="flex items-center gap-2">
@@ -643,6 +660,7 @@ export default function AdminPendudukDetail({
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         ) : (
@@ -837,7 +855,7 @@ export default function AdminPendudukDetail({
 
           return (
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                     <Users className="w-5 h-5 text-emerald-700" />
@@ -852,11 +870,8 @@ export default function AdminPendudukDetail({
                 </span>
               </div>
               
-              <div className="space-y-3 relative pl-6 pb-2">
-                {/* Vertical line connector - adjusted */}
-                <div className="absolute left-[38px] top-8 bottom-8 w-0.5 bg-gray-200 dark:bg-slate-700 z-0"></div>
-                
-                {familyMembers.map((member: any, index: number) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                {familyMembers.map((member: any) => {
                   const isCurrent = member.nik === data?.nik;
                   const isKepalaKeluarga = (member.familyRelation || '').toLowerCase().includes('kepala');
                   const memberIsFemale = member.gender === 'Perempuan';
@@ -870,51 +885,53 @@ export default function AdminPendudukDetail({
                           onSelectResident(member);
                         }
                       }}
-                      className={`flex items-center gap-4 relative z-10 p-4 rounded-xl border transition-all duration-200 ${
+                      className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 ${
                         isCurrent 
                           ? 'bg-emerald-50/40 border-emerald-200 dark:border-emerald-800/50 shadow-sm dark:shadow-none cursor-default ring-1 ring-emerald-500/20' 
                           : 'bg-white dark:bg-slate-900 hover:bg-emerald-50/20 border-gray-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800/50 hover:shadow-sm cursor-pointer group'
-                      } ${index > 0 ? 'ml-6' : ''}`}
+                      }`}
                     >
-                      {/* Horizontal connection line for child nodes */}
-                      {index > 0 && (
-                        <div className="absolute -left-[24px] top-1/2 w-[24px] h-0.5 bg-gray-200 dark:bg-slate-700"></div>
-                      )}
-                      
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 border-white shadow-sm dark:shadow-none shrink-0 ${
+                      <div className={`w-11 h-11 rounded-full flex items-center justify-center border-2 border-white shadow-sm dark:shadow-none shrink-0 ${
                         memberIsFemale 
                           ? 'bg-gradient-to-br from-pink-400 to-pink-500 text-white' 
                           : 'bg-gradient-to-br from-blue-400 to-blue-500 text-white'
                       }`}>
-                        <User className="w-6 h-6" fill="currentColor" />
+                        {member.photo ? (
+                          <img src={member.photo} alt={member.name} className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <User className="w-5 h-5" fill="currentColor" />
+                        )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <p className={`font-bold text-[15px] truncate ${isCurrent ? 'text-emerald-800 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors'}`}>
+                        <p className={`font-bold text-[14px] truncate ${isCurrent ? 'text-emerald-800 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors'}`}>
                           {member.name}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium truncate flex items-center gap-1.5">
-                          <span className={`${isCurrent ? 'text-emerald-700 dark:text-emerald-500 font-bold' : ''}`}>{member.familyRelation || 'Anggota'}</span>
-                          <span className="opacity-50">•</span> 
-                          <span className="font-mono">{member.nik}</span>
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5 font-medium truncate font-mono">
+                          {member.nik}
                         </p>
                       </div>
 
-                      {isCurrent ? (
-                        <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-emerald-200 dark:border-emerald-800">
-                          Sedang Dilihat
-                        </span>
-                      ) : isKepalaKeluarga ? (
-                        <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-blue-100 dark:border-blue-800 group-hover:hidden">
-                          Kepala Keluarga
-                        </span>
-                      ) : null}
-
-                      {!isCurrent && (
-                        <span className={`${isKepalaKeluarga ? 'hidden group-hover:inline-block' : 'inline-block opacity-0 group-hover:opacity-100'} text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 transition-all duration-200 translate-x-2 group-hover:translate-x-0`}>
-                          Lihat Profil →
-                        </span>
-                      )}
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        {isCurrent ? (
+                          <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[9px] font-bold rounded-md uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
+                            Sedang Dilihat
+                          </span>
+                        ) : isKepalaKeluarga ? (
+                          <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[9px] font-bold rounded-md uppercase tracking-wider border border-blue-100 dark:border-blue-800">
+                            Kepala Keluarga
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-[9px] font-bold rounded-md uppercase tracking-wider border border-violet-100 dark:border-violet-800">
+                            {member.familyRelation || 'Anggota'}
+                          </span>
+                        )}
+                        {!isCurrent && (
+                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                            Lihat Profil →
+                          </span>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -923,14 +940,82 @@ export default function AdminPendudukDetail({
           );
         })()}
 
-        {/* Riwayat Administrasi */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-emerald-700" />
+        </div>
+
+        {/* ===================== KOLOM KANAN SIDEBAR ===================== */}
+        <div className="lg:col-span-4 space-y-6">
+
+          {/* Card Status Bantuan & Kesejahteraan */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
+                  <HandHeart className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">Bantuan & Kesejahteraan</h4>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Status penerimaan bantuan sosial</p>
+                </div>
               </div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-lg">Riwayat Administrasi</h4>
+              <button 
+                onClick={() => {
+                  setAidError("");
+                  setShowAidModal(true);
+                }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-[11px] transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Kelola
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {data?.activeAids && (data.activeAids as string[]).filter((a: string) => !a.startsWith("STOPPED:")).length > 0 ? (
+                (data.activeAids as string[]).filter((a: string) => !a.startsWith("STOPPED:")).map((aid: string, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10">
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate">{aid}</p>
+                      <p className="text-[10px] text-emerald-700 dark:text-emerald-500 font-medium">Penerima aktif</p>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider shrink-0">AKTIF</span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-center gap-2.5 p-3 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
+                  <CreditCard className="w-4 h-4 text-gray-400 shrink-0" />
+                  <p className="text-xs text-gray-500 dark:text-slate-400 italic">Belum terdaftar sebagai penerima bantuan aktif.</p>
+                </div>
+              )}
+
+              <div className="pt-1">
+                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold text-gray-900 dark:text-white">BPJS / JKN</p>
+                    <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">{data?.bpjsNumber || data?.bpjs || "Belum ada nomor"}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shrink-0 ${
+                    (data?.bpjsNumber || data?.bpjs)
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
+                  }`}>
+                    {(data?.bpjsNumber || data?.bpjs) ? 'TERDAFTAR' : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Panel Akses Cepat Surat */}
+          <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-2xl p-5 text-white shadow-lg dark:shadow-none shadow-emerald-900/20 relative overflow-hidden">
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm">Akses Cepat Surat</h4>
+                <p className="text-[11px] text-emerald-100/80">Terbitkan surat untuk warga ini</p>
+              </div>
             </div>
             <button 
               onClick={() => {
@@ -939,114 +1024,58 @@ export default function AdminPendudukDetail({
                   onNavigateToTab('surat');
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition-colors"
+              className="w-full mt-3 px-4 py-3 rounded-xl bg-white text-emerald-800 font-black text-sm hover:bg-emerald-50 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md"
             >
-              <Plus className="w-3.5 h-3.5" />
-              Buat Surat
+              <Plus className="w-4 h-4" />
+              Buatkan Surat untuk Warga Ini
             </button>
+            {data?.nik && (
+              <p className="text-[10px] text-emerald-100/70 mt-2.5 text-center font-mono">NIK warga akan terisi otomatis • NIK: {data.nik}</p>
+            )}
           </div>
-          
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-slate-800">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 dark:bg-slate-800/50">
-                <tr>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Layanan</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                {residentLetters.length > 0 ? (
-                  residentLetters.map((letter) => (
-                    <tr key={letter.id} className="hover:bg-gray-50/50 dark:bg-slate-800/30 transition-colors">
-                      <td className="px-4 py-4 text-sm font-medium text-gray-600 dark:text-slate-400">{letter.tanggal}</td>
-                      <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">{letter.jenis}</td>
-                      <td className="px-4 py-4 text-sm text-gray-600 dark:text-slate-400">{letter.keperluan}</td>
-                      <td className="px-4 py-4 text-right">
-                        <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+
+          {/* Riwayat Layanan Surat */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <History className="w-5 h-5 text-emerald-700" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">Riwayat Layanan Surat</h4>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400">{residentLetters.length} surat diterbitkan</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 max-h-[320px] overflow-y-auto pr-0.5">
+              {residentLetters.length > 0 ? (
+                residentLetters.map((letter) => (
+                  <div key={letter.id} className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-gray-50/60 dark:hover:bg-slate-800/60 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+                        {letter.jenis}
+                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border shrink-0 ${
                           letter.status === 'Selesai' 
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800'
                             : 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:border-amber-800'
                         }`}>{letter.status}</span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-sm text-gray-400 text-center italic bg-gray-50/30 dark:bg-slate-900/30">
-                      Belum ada riwayat penerbitan surat untuk warga ini.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Riwayat Bantuan */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-amber-600" />
-              </div>
-              <h4 className="font-bold text-gray-900 dark:text-white text-lg">Riwayat Bantuan Sosial</h4>
+                      </p>
+                      <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5 truncate">{letter.keperluan || "-"}</p>
+                      <p className="text-[10px] text-gray-400 dark:text-slate-500 font-mono mt-1">{letter.tanggal}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40 text-center">
+                  <History className="w-5 h-5 text-gray-300 mx-auto mb-1.5" />
+                  <p className="text-xs text-gray-400 italic">Belum ada riwayat surat untuk warga ini.</p>
+                </div>
+              )}
             </div>
-            <button 
-              onClick={() => {
-                setAidError("");
-                setShowAidModal(true);
-              }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-xs transition-colors"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Kelola Bantuan
-            </button>
           </div>
-          
-          <div className="overflow-x-auto rounded-xl border border-gray-100 dark:border-slate-800">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 dark:bg-slate-800/50">
-                <tr>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Bantuan</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</th>
-                  <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-right">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
-                {data?.activeAids && data.activeAids.length > 0 ? (
-                  data.activeAids.map((aid: string, idx: number) => {
-                    const isStopped = aid.startsWith("STOPPED:");
-                    const displayAid = isStopped ? aid.split("|")[0].replace("STOPPED:", "").trim() : aid;
-                    const reason = isStopped && aid.includes("| Alasan:") ? aid.split("| Alasan:")[1].trim() : (isStopped ? "Dihentikan" : "Terdaftar sebagai penerima aktif");
-                    
-                    return (
-                      <tr key={idx} className="hover:bg-gray-50/50 dark:bg-slate-800/30 transition-colors">
-                        <td className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400">{isStopped ? "Selesai/Stop" : "Aktif"}</td>
-                        <td className="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white">{displayAid}</td>
-                        <td className="px-4 py-4 text-sm text-gray-600 dark:text-slate-400">{reason}</td>
-                        <td className="px-4 py-4 text-right">
-                          {isStopped ? (
-                            <span className="px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 text-[10px] font-bold uppercase tracking-wider border border-rose-100 dark:bg-rose-900/30 dark:border-rose-800">BERHENTI</span>
-                          ) : (
-                            <span className="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800">AKTIF</span>
-                          )}
-                        </td>
-                      </tr>
-                    )
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-4 text-sm font-medium text-gray-500 dark:text-slate-400 text-center">-</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
 
+        </div>
       </div>
 
       {showAidModal && (
