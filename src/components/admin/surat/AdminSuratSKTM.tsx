@@ -67,7 +67,6 @@ export default function AdminSuratSKTM({
 
   const [loading, setLoading] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
-  const kodeKlasifikasiSKTM = backdateKlas.kodeKlasifikasi || '400';
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
