@@ -36,6 +36,12 @@ export default function PublicKiosPortal() {
           p.set('tab', 'buku_tamu');
           window.location.search = p.toString();
         })
+        .on('broadcast', { event: 'incoming-permohonan' }, ({ payload }) => {
+          localStorage.setItem('kiosk_incoming_permohonan', JSON.stringify(payload));
+          const p = new URLSearchParams(window.location.search);
+          p.set('tab', 'kios_surat');
+          window.location.search = p.toString();
+        })
         .subscribe();
       
       return () => {

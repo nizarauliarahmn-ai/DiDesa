@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft } from 'lucide-react';
+import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft, Monitor, FileSignature, X } from 'lucide-react';
+import SignatureCanvas from 'react-signature-canvas';
 import { getLetterClassifications, LetterClassification, generateLetterNumber } from '../utils/letterClassifications';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { addLetterHistory } from '../utils/letterHistory';
@@ -22,6 +23,12 @@ export default function PublicKiosSurat() {
   const [isTenantValid, setIsTenantValid] = useState<boolean | null>(null);
   const [isDisclaimerChecked, setIsDisclaimerChecked] = useState(false);
 
+  // Assistive Kiosk Sign session (sent by Admin via "Tambah Permohonan")
+  const [assistSession, setAssistSession] = useState<any>(null);
+  const [assistSigned, setAssistSigned] = useState(false);
+  const [isAssistSigning, setIsAssistSigning] = useState(false);
+  const signatureRef = React.useRef<any>(null);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tenantParam = urlParams.get('tenant');
@@ -38,7 +45,42 @@ export default function PublicKiosSurat() {
     
     const storedDesa = localStorage.getItem('kop_desa') || localStorage.getItem('village_name');
     if (storedDesa) setDesaName(storedDesa);
+
+    // Pick up persisted incoming-permohonan session (from kiosk portal redirect)
+    const incomingStr = localStorage.getItem('kiosk_incoming_permohonan');
+    if (incomingStr) {
+      try {
+        const payload = JSON.parse(incomingStr);
+        if (payload && payload.type === 'permohonan') {
+          setAssistSession(payload);
+          setStep(4);
+          localStorage.removeItem('kiosk_incoming_permohonan');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
   }, []);
+
+  // Realtime listener: Admin "Tambah Permohonan" -> show verification + TTD screen
+  useEffect(() => {
+    if (!isTenantValid) return;
+    resolveCurrentTenant().then(tenantId => {
+      if (!tenantId) return;
+      const channel = supabase.channel(`kiosk-notif-${tenantId}`)
+        .on('broadcast', { event: 'incoming-permohonan' }, ({ payload }) => {
+          if (!payload || payload.type !== 'permohonan') return;
+          setAssistSigned(false);
+          setAssistSession(payload);
+          setStep(4);
+          showToast('Permohonan diterima dari Admin. Silakan periksa data dan beri tanda tangan.', 'info');
+        })
+        .subscribe();
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    });
+  }, [isTenantValid]);
 
   const handleVerifyNik = async () => {
     const query = nik.trim();
@@ -177,6 +219,103 @@ export default function PublicKiosSurat() {
       const t = p.get('tenant') || p.get('t_id');
       window.location.search = t ? `?tenant=${t}&tab=kios` : '?tab=kios';
     }, 10000);
+  };
+
+  const handleAssistSign = async () => {
+    if (!assistSession) return;
+    if (!isDisclaimerChecked) {
+      showToast('Harap centang pernyataan tanggung jawab terlebih dahulu.', 'error');
+      return;
+    }
+    if (signatureRef.current?.isEmpty()) {
+      showToast('Harap bubuhkan tanda tangan Anda di atas.', 'error');
+      return;
+    }
+
+    setIsAssistSigning(true);
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) {
+      setIsAssistSigning(false);
+      showToast('Gagal memproses, Tenant ID tidak ditemukan.', 'error');
+      return;
+    }
+
+    try {
+      // Upload TTD ke storage signatures
+      let signatureUrl = null;
+      try {
+        const dataUrl = signatureRef.current.getTrimmedCanvas().toDataURL('image/png');
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const fileName = `${tenantId}/${Date.now()}-permohonan-ttd.png`;
+        const { error: uploadError } = await supabase.storage
+          .from('signatures')
+          .upload(fileName, blob, { contentType: 'image/png', cacheControl: '3600' });
+        if (uploadError) {
+          console.error('Failed to upload signature', uploadError);
+        } else {
+          const { data: publicUrlData } = supabase.storage.from('signatures').getPublicUrl(fileName);
+          signatureUrl = publicUrlData.publicUrl;
+        }
+      } catch (e) {
+        console.error('Error processing signature', e);
+      }
+
+      const klas = getLetterClassifications().find(c => c.klasifikasi === assistSession.klasifikasi || c.jenis === assistSession.jenis);
+      const finalNumber = generateLetterNumber(assistSession.klasifikasi || 'SU', assistSession.kodeKlasifikasi || '140');
+
+      // Simpan permohonan ke tabel surat dengan status pending + data flagged kiosk_signed
+      await supabase.from('surat').insert([{
+        tenant_id: tenantId,
+        jenis_surat: assistSession.jenis,
+        keterangan: assistSession.keperluan,
+        status: 'pending',
+        nomor: finalNumber,
+        nik: assistSession.nik || null,
+        nama: assistSession.nama,
+        data: {
+          source: 'admin_assist',
+          via_kiosk: true,
+          kiosk_signed: true,
+          kiosk_session_id: assistSession.sessionId,
+          signature_url: signatureUrl,
+          signed_at: new Date().toISOString()
+        }
+      }]);
+
+      // Notifikasi admin
+      await supabase.from('notifications').insert([{
+        id: `notif-${Date.now()}`,
+        tenant_id: tenantId,
+        title: 'Permohonan Siap Diterbitkan',
+        message: `${assistSession.nama} telah menandatangani ${assistSession.jenis} di Kios.`,
+        category: 'Services',
+        is_read: false,
+        timestamp: new Date().toISOString()
+      }]);
+      window.dispatchEvent(new Event('didesa_notification_created'));
+      window.dispatchEvent(new Event('didesa_permohonan_updated'));
+
+      // Konfirmasi balik ke Admin lewat broadcast channel
+      const replyChannel = supabase.channel(`kiosk-notif-${tenantId}`);
+      replyChannel.subscribe((status: string) => {
+        if (status === 'SUBSCRIBED') {
+          replyChannel.send({
+            type: 'broadcast',
+            event: 'permohonan-signed',
+            payload: { sessionId: assistSession.sessionId, nama: assistSession.nama, jenis: assistSession.jenis }
+          });
+          setTimeout(() => supabase.removeChannel(replyChannel), 1500);
+        }
+      });
+
+      setAssistSigned(true);
+      setIsAssistSigning(false);
+    } catch (error) {
+      console.error("Gagal menyimpan permohonan:", error);
+      setIsAssistSigning(false);
+      showToast('Gagal menyimpan permohonan. Mohon coba lagi.', 'error');
+    }
   };
 
   const renderDynamicForm = () => {
@@ -510,8 +649,103 @@ export default function PublicKiosSurat() {
             </motion.div>
           )}
 
+          {/* STEP 4: Assistive Kiosk Sign (Admin "Tambah Permohonan") */}
+          {step === 4 && assistSession && !assistSigned && (
+            <motion.div 
+              key="assist-sign"
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-3xl bg-white p-10 rounded-3xl shadow-xl"
+            >
+              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
+                <div className="p-3 bg-indigo-50 rounded-2xl">
+                  <Monitor className="w-8 h-8 text-indigo-600" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-black text-slate-800">Verifikasi & Tanda Tangan</h2>
+                  <p className="text-slate-500 text-lg">Permohonan dibantu oleh Petugas Admin</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 rounded-2xl p-6 mb-6 border border-slate-200">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Nama Lengkap</p>
+                    <p className="text-2xl font-black text-slate-800">{assistSession.nama || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">NIK</p>
+                    <p className="text-xl font-medium text-slate-700 font-mono tracking-widest">{assistSession.nik || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Jenis Surat</p>
+                    <p className="text-xl font-bold text-slate-800">{assistSession.jenis || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Keperluan</p>
+                    <p className="text-lg font-medium text-slate-700">{assistSession.keperluan || '-'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="text-sm font-bold text-slate-600 mb-2 block flex items-center gap-2">
+                  <FileSignature className="w-5 h-5 text-indigo-600" />
+                  Tanda Tangan Digital <span className="text-red-500">*</span>
+                </label>
+                <div className="border-2 border-gray-200 rounded-2xl bg-gray-50 h-40 relative overflow-hidden">
+                  <SignatureCanvas 
+                    ref={signatureRef}
+                    clearOnResize={false}
+                    canvasProps={{ className: 'w-full h-40 cursor-crosshair' }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => signatureRef.current?.clear()}
+                    className="absolute top-2 right-2 text-[10px] font-bold bg-white text-gray-500 px-2 py-1 rounded shadow border hover:text-red-500"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="flex items-start gap-4 p-5 bg-rose-50 rounded-2xl border border-rose-100 cursor-pointer hover:bg-rose-100 transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={isDisclaimerChecked}
+                    onChange={(e) => setIsDisclaimerChecked(e.target.checked)}
+                    className="mt-1 w-6 h-6 text-emerald-600 rounded-md border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <span className="text-lg font-medium text-rose-900 leading-snug">
+                    Saya menyatakan bahwa data yang tercantum di atas adalah benar dan saya bertanggung jawab penuh atas permohonan ini.
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => { setAssistSession(null); setStep(1); }}
+                  className="w-1/3 py-5 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xl font-bold rounded-2xl transition-colors"
+                >
+                  Bukan Saya
+                </button>
+                <button 
+                  onClick={handleAssistSign}
+                  disabled={isAssistSigning}
+                  className={`w-2/3 py-5 text-white text-xl font-bold rounded-2xl transition-colors shadow-lg flex items-center justify-center gap-2 ${isAssistSigning ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/30'}`}
+                >
+                  {isAssistSigning ? (
+                    <><FileText className="w-6 h-6 animate-pulse" /> Menyimpan...</>
+                  ) : (
+                    <><CheckCircle2 className="w-6 h-6" /> Setuju & Tanda Tangan</>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )}
+
           {/* STEP 4: Success */}
-          {step === 4 && (
+          {step === 4 && (!assistSession || assistSigned) && (
             <motion.div 
               key="step4"
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
@@ -525,7 +759,7 @@ export default function PublicKiosSurat() {
               </motion.div>
               <h2 className="text-4xl font-black text-slate-800 mb-4">Terima Kasih!</h2>
               <p className="text-2xl text-slate-600 mb-8 leading-relaxed">
-                Permohonan <strong className="text-slate-800">{selectedLetter?.jenis}</strong> Anda telah masuk ke sistem.
+                Permohonan <strong className="text-slate-800">{assistSigned && assistSession ? assistSession.jenis : selectedLetter?.jenis}</strong> Anda telah ditandatangani & masuk ke sistem.
               </p>
               <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-left max-w-md mx-auto mb-8">
                 <p className="text-slate-500 text-lg text-center font-medium">Silakan menunggu panggilan dari petugas loket untuk pencetakan dan pengambilan surat.</p>

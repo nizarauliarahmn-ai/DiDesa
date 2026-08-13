@@ -1,7 +1,9 @@
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import React, { useState, useEffect } from 'react';
-import { Search, FileText, CheckCircle, Clock } from 'lucide-react';
+import { Search, FileText, CheckCircle, Clock, Monitor, BadgeCheck } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, updateLetterHistoryAsync } from '../../../utils/letterHistory';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 
 interface AdminSuratInboxProps {
   onEditLetter?: (letter: LetterHistory) => void;
@@ -20,13 +22,41 @@ export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) 
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  useEffect(() => {
+  const loadInbox = () => {
     fetchLetterHistoryAsync().then(data => {
       // Filter hanya yang berstatus pending/Menunggu, hilangkan 'Proses'
       const pending = data.filter(s => s.status === 'pending' || (s.status as string) === 'Menunggu');
       setSuratList(pending);
       setIsLoading(false);
     });
+  };
+
+  useEffect(() => {
+    loadInbox();
+  }, []);
+
+  // Realtime refresh: permohonan yang ditandatangani di Kios otomatis muncul di Inbox
+  useEffect(() => {
+    let channel: any = null;
+    resolveCurrentTenant().then(tenantId => {
+      if (!tenantId) return;
+      channel = supabase.channel('admin-surat-inbox-changes')
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'surat',
+          filter: `tenant_id=eq.${tenantId}`
+        }, () => {
+          loadInbox();
+        })
+        .subscribe();
+    });
+    const handleCustom = () => loadInbox();
+    window.addEventListener('didesa_permohonan_updated', handleCustom);
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+      window.removeEventListener('didesa_permohonan_updated', handleCustom);
+    };
   }, []);
 
   const handleReview = async (s: LetterHistory) => {
@@ -113,6 +143,17 @@ export default function AdminSuratInbox({ onEditLetter }: AdminSuratInboxProps) 
                         <span className="text-sm font-bold text-emerald-700 dark:text-emerald-500">
                           {surat.jenis}
                         </span>
+                        {(surat as any).data?.kiosk_signed ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-[10px] font-bold border border-blue-200 dark:border-blue-800">
+                            <BadgeCheck className="w-3 h-3" />
+                            Siap Diterbitkan
+                          </span>
+                        ) : (surat as any).data?.via_kiosk ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full text-[10px] font-bold border border-indigo-200 dark:border-indigo-800">
+                            <Monitor className="w-3 h-3" />
+                            TTD Kiosk
+                          </span>
+                        ) : null}
                       </div>
                       <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 max-w-xs">
                         Keperluan: {surat.keperluan}
