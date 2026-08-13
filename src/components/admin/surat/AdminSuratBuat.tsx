@@ -6,7 +6,8 @@ import PrintSuccessDialog from './PrintSuccessDialog';
 import { 
   Home, Store, Frown, FileText, Users, PlusCircle, Search, 
   ArrowLeft, Check, Printer, Archive, ZoomIn, ZoomOut, Maximize,
-  Mail, Heart, Landmark, FileCheck, MapPin, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2, Monitor
+  Mail, Heart, Landmark, FileCheck, MapPin, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2, Monitor,
+  Scan, MessageCircle, Timer, Save
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
@@ -16,6 +17,13 @@ import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { formatRupiahWithTerbilang, RupiahInput } from '../../../utils/numberToTerbilang';
+import KTPScannerModal from './KTPScannerModal';
+import { KtpOcrResult } from '../../../utils/ktpOcr';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
+import { invalidateResidentsCache } from '../../../utils/apiCache';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const BUSINESS_CATEGORIES = [
   "Perdagangan Sembako / Kelontong",
@@ -66,6 +74,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [selectedResident, setSelectedResident] = useState<any>(presetResident || null);
   const [nomorSurat, setNomorSurat] = useState('');
   const [keperluan, setKeperluan] = useState('');
+
+  // KTP OCR Scanner states
+  const [showKtpScanner, setShowKtpScanner] = useState(false);
+  const [ocrScanned, setOcrScanned] = useState(false);
   
   // SKU specific states
   const [usahaName, setUsahaName] = useState('');
@@ -542,6 +554,174 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     setStep(prev => Math.min(prev + 1, 4));
   };
 
+  // KTP OCR: cari warga di database berdasarkan NIK hasil scan
+  const handleKtpOcrResult = async (result: KtpOcrResult) => {
+    setOcrScanned(false);
+    try {
+      const found = residents.find(r => String(r.nik) === result.nik);
+      if (found) {
+        setSelectedResident(found);
+        if (found.job) setPenghasilanSumber(found.job);
+        showToast(`✓ Data ${found.name} Ditemukan!`, 'success');
+      } else {
+        // Simpan sebagai penduduk baru via Supabase + fallback
+        const tenantId = await resolveCurrentTenant();
+        const calculateAge = (dob: string) => {
+          if (!dob) return 0;
+          const birth = new Date(dob.replace(/(\d{2})-(\d{2})-(\d{4})/, '$3-$2-$1'));
+          const today = new Date();
+          let age = today.getFullYear() - birth.getFullYear();
+          const m = today.getMonth() - birth.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+          return age > 0 ? age : 0;
+        };
+
+        const dbPayload: any = {
+          tenant_id: tenantId,
+          nik: result.nik,
+          name: result.nama || 'Warga Baru (OCR)',
+          gender: result.jenisKelamin || 'Laki-Laki',
+          birth_place: result.tempatLahir || '-',
+          birth_date: result.tanggalLahir || '1990-01-01',
+          age: calculateAge(result.tanggalLahir),
+          religion: result.agama || 'Islam',
+          education: 'SLTA/SEDERAJAT',
+          job: result.pekerjaan || 'Wiraswasta',
+          address: result.alamat || '-',
+          rt_rw: result.rtRw || '001/001',
+          rt: (result.rtRw || '001/001').split('/')[0] || '001',
+          rw: (result.rtRw || '001/001').split('/')[1] || '001',
+          desa: desaName,
+          status: 'Aktif',
+          domicile_status: 'Tetap',
+          family_relation: 'Kepala Keluarga',
+          father_name: '-',
+          mother_name: '-',
+          active_aids: '[]',
+          gender_color: 'blue',
+          status_color: 'emerald',
+          marital_status: result.statusPerkawinan || 'Belum Kawin'
+        };
+
+        let insertPayload = { ...dbPayload };
+        let insertError: any = null;
+        if (tenantId && supabase) {
+          let { error } = await supabase.from('residents').insert([insertPayload]);
+          let retries = 0;
+          while (error && error.message?.includes('Could not find the') && error.message?.includes('column') && retries < 5) {
+            const m2 = error.message.match(/'([^']+)' column/);
+            if (m2 && m2[1]) {
+              delete insertPayload[m2[1]];
+              const retry = await supabase.from('residents').insert([insertPayload]);
+              error = retry.error;
+              retries++;
+            } else break;
+          }
+          insertError = error;
+        }
+        if (insertError) {
+          console.error('Gagal simpan penduduk OCR:', insertError);
+        } else {
+          invalidateResidentsCache();
+        }
+
+        const newRes = {
+          name: dbPayload.name,
+          nik: result.nik,
+          gender: dbPayload.gender,
+          birthPlace: result.tempatLahir,
+          birthDate: result.tanggalLahir,
+          religion: dbPayload.religion,
+          job: dbPayload.job,
+          address: result.alamat,
+          rt_rw: result.rtRw || '001/001'
+        };
+        setSelectedResident(newRes);
+        if (newRes.job) setPenghasilanSumber(newRes.job);
+        showToast(`NIK tidak ditemukan. Data ${result.nama || 'warga'} tersimpan sebagai penduduk baru.`, 'info');
+      }
+      setOcrScanned(true);
+    } catch (e) {
+      console.error('OCR result processing error:', e);
+      showToast('Gagal memproses hasil OCR.', 'error');
+    }
+  };
+
+  // Kirim PDF surat ke WhatsApp warga (jspdf + html2canvas)
+  const handleSendPdfWhatsApp = async () => {
+    if (!selectedResident && !keperluan) {
+      showToast("Mohon pilih pemohon atau lengkapi data surat terlebih dahulu sebelum kirim.", 'error');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const node = componentRef.current;
+      if (!node) { showToast('Preview surat belum siap.', 'error'); setIsSaving(false); return; }
+
+      // Render ulang A4 tanpa transform zoom agar PDF proporsional
+      const canvas = await html2canvas(node, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false
+      });
+      const imgData = canvas.toDataURL('image/png');
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgH = (canvas.height * pageW) / canvas.width;
+      if (imgH <= pageH) {
+        pdf.addImage(imgData, 'PNG', 0, 0, pageW, imgH);
+      } else {
+        // Surat lebih dari 1 halaman: potong per halaman A4
+        let heightLeft = imgH;
+        let position = 0;
+        pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
+        heightLeft -= pageH;
+        while (heightLeft > 0) {
+          position -= pageH;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, pageW, imgH);
+          heightLeft -= pageH;
+        }
+      }
+
+      const pdfBlob = pdf.output('blob');
+      const fileName = `Surat_${nomorSurat.replace(/[\\/:*?"<>|]/g, '_') || 'Resmi'}.pdf`;
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      // Nomor WA warga (kolom no_wa / phone jika ada), fallback ke kontak kantor
+      let waPhone = '';
+      const rawPhone = selectedResident?.no_wa || selectedResident?.phone || selectedResident?.no_whatsapp || selectedResident?.kontak || kontakKantor.split(',')[0].trim();
+      if (rawPhone) {
+        let digits = String(rawPhone).replace(/[^\d]/g, '');
+        if (digits.startsWith('0')) digits = '62' + digits.slice(1);
+        if (digits.length >= 9) waPhone = digits;
+      }
+
+      // Buka unduhan PDF + WA dengan pesan berisi nama file
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 5000);
+
+      const message = `Assalamualaikum, berikut surat resmi ${desaName} untuk Bapak/Ibu ${selectedResident?.name || 'Warga'}\n\nNomor: ${nomorSurat}\nJenis: ${classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate)?.jenis || 'Surat Resmi'}\n\nFile PDF (${fileName}) sudah terunduh. Silakan diunggah/diteruskan sesuai keperluan. Terima kasih.`;
+      const waHref = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+      window.open(waHref, '_blank');
+
+      showToast('PDF surat dibuat & WhatsApp dibuka. Lampirkan file yang terunduh.', 'success');
+    } catch (e) {
+      console.error('PDF/WA error:', e);
+      showToast('Gagal membuat PDF surat.', 'error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handlePrevStep = () => {
     setStep(prev => Math.max(prev - 1, 1));
   };
@@ -934,6 +1114,24 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
                 <p className="mt-2 text-[10px] text-emerald-600 font-medium">* Pencarian otomatis melengkapi biodata, alamat, KK, pendidikan, dan pekerjaan warga desa terpilih</p>
+              </div>
+
+              {/* Aksi Cepat: Scan KTP / KK */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={() => setShowKtpScanner(true)}
+                  className="group flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-lg shadow-emerald-500/20 hover:from-emerald-700 hover:to-teal-700 active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <Scan className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                  Scan KTP / KK Warga
+                  <Sparkles className="w-3.5 h-3.5 opacity-80" />
+                </button>
+                {selectedResident && (
+                  <div className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
+                    <CheckCircle2 className="w-4 h-4" />
+                    {ocrScanned ? 'Data hasil OCR telah dipakai' : `${selectedResident.name || 'Warga terpilih'} dipilih`}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
@@ -1343,6 +1541,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                 <div>
                   <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Keperluan / Keterangan Tambahan</label>
                   <textarea 
+                    id="keperluan-field"
                     rows={4} 
                     value={keperluan}
                     onChange={(e) => setKeperluan(e.target.value)}
@@ -1695,6 +1894,50 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
              </div>
           </div>
         )}
+
+      {/* Sticky Footer Quick Actions */}
+      {step >= 2 && (
+        <div className="sticky bottom-0 z-30 px-4 md:px-8 pb-4">
+          <div className="max-w-[1400px] mx-auto bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 rounded-2xl shadow-2xl shadow-emerald-900/10 dark:shadow-black/40 backdrop-blur-xl px-4 md:px-6 py-3 flex items-center gap-3 flex-wrap">
+            <div className="hidden sm:flex items-center gap-2 pr-3 border-r border-slate-200 dark:border-slate-700">
+              <Timer className="w-4 h-4 text-emerald-600" />
+              <div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Perkiraan Selesai</p>
+                <p className="text-xs font-black text-slate-800 dark:text-slate-100">± 22 detik</p>
+              </div>
+            </div>
+            <button
+              onClick={() => { document.getElementById('keperluan-field')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}
+              className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Cek Data Warga
+            </button>
+            <div className="flex-1 flex items-center justify-end gap-3 flex-wrap">
+              <button
+                onClick={handleSendPdfWhatsApp}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-4 md:px-5 py-3 rounded-xl text-xs md:text-sm font-black text-emerald-700 border-2 border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+              >
+                <MessageCircle className="w-4 h-4" /> Kirim PDF ke WhatsApp Warga
+              </button>
+              <button
+                onClick={handlePrint}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-5 md:px-7 py-3 rounded-xl text-sm md:text-base font-black text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Printer className="w-4 h-4" /> Cetak Surat A4
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Scanner KTP */}
+      <KTPScannerModal
+        open={showKtpScanner}
+        onClose={() => setShowKtpScanner(false)}
+        onResult={(result) => { setShowKtpScanner(false); handleKtpOcrResult(result); }}
+      />
 </div>
       {/* Hidden Iframe for high-resolution printing without default headers/footers */}
       <iframe 
