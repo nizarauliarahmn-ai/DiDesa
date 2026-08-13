@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   ArrowRight, CheckCircle2, Wallet, CalendarCheck, Landmark, UserPlus,
   Copy, Users, BadgeCheck, TrendingUp, Smartphone, MessagesSquare,
-  ChevronDown, ShieldAlert, ClipboardCheck, Timer
+  ChevronDown, ShieldAlert, ClipboardCheck, Timer, MapPin, Zap, X
 } from 'lucide-react';
 import { supabase } from '../utils/supabase';
 
@@ -21,6 +21,21 @@ const MILESTONES = [
   { desa: 5, bonus: 1000000 },
   { desa: 15, bonus: 3500000 },
   { desa: 30, bonus: 8000000 }
+];
+
+const PROVINCE_KALSEL = 'Kalimantan Selatan';
+
+const PROVINCE_OPTIONS = [
+  { value: 'Kalimantan Selatan', label: 'Kalimantan Selatan', status: 'AKTIF' },
+  { value: 'Kalimantan Timur', label: 'Kalimantan Timur', status: 'WAITLIST' },
+  { value: 'Kalimantan Tengah', label: 'Kalimantan Tengah', status: 'WAITLIST' },
+  { value: 'Kalimantan Barat', label: 'Kalimantan Barat', status: 'WAITLIST' },
+  { value: 'Kalimantan Utara', label: 'Kalimantan Utara', status: 'WAITLIST' },
+  { value: 'Sumatera', label: 'Sumatera', status: 'WAITLIST' },
+  { value: 'Jawa', label: 'Jawa', status: 'WAITLIST' },
+  { value: 'Bali & Nusa Tenggara', label: 'Bali & Nusa Tenggara', status: 'WAITLIST' },
+  { value: 'Sulawesi', label: 'Sulawesi', status: 'WAITLIST' },
+  { value: 'Maluku & Papua', label: 'Maluku & Papua', status: 'WAITLIST' }
 ];
 
 const formatRupiah = (value: number) =>
@@ -89,6 +104,7 @@ type AffiliateForm = {
   nama: string;
   email: string;
   no_wa: string;
+  provinsi: string;
   daerah: string;
 };
 
@@ -105,8 +121,20 @@ export default function AffiliateLandingPage() {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const [registeredName, setRegisteredName] = useState('');
-  const [form, setForm] = useState<AffiliateForm>({ nama: '', email: '', no_wa: '', daerah: '' });
+  const [form, setForm] = useState<AffiliateForm>({ nama: '', email: '', no_wa: '', provinsi: PROVINCE_KALSEL, daerah: '' });
   const [openTerms, setOpenTerms] = useState<number | null>(0);
+
+  const [isWaitlistOpen, setIsWaitlistOpen] = useState(false);
+  const [wlNama, setWlNama] = useState('');
+  const [wlWa, setWlWa] = useState('');
+  const [wlProvinsi, setWlProvinsi] = useState(PROVINCE_KALSEL);
+  const [wlKabupaten, setWlKabupaten] = useState('');
+  const [wlDesa, setWlDesa] = useState('');
+  const [isWlSubmitting, setIsWlSubmitting] = useState(false);
+  const [wlError, setWlError] = useState('');
+  const [wlSuccess, setWlSuccess] = useState(false);
+
+  const isKalsel = form.provinsi === PROVINCE_KALSEL;
 
   const activeTier = getTier(jumlahDesa);
   const commissionPerDesa = activeTier.perDesa;
@@ -121,6 +149,17 @@ export default function AffiliateLandingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nama || !form.email || !form.no_wa) return;
+
+    // Pendaftar di luar Kalimantan Selatan masuk antrean prioritas ekspansi
+    if (!isKalsel) {
+      setWlNama(form.nama);
+      setWlWa(form.no_wa);
+      setWlProvinsi(form.provinsi);
+      setWlKabupaten(form.daerah);
+      setIsWaitlistOpen(true);
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError('');
 
@@ -173,9 +212,35 @@ export default function AffiliateLandingPage() {
 
       setRegisteredEmail(form.email.trim());
       setRegisteredName(form.nama.trim());
-      setForm({ nama: '', email: '', no_wa: '', daerah: '' });
+      setForm({ nama: '', email: '', no_wa: '', provinsi: PROVINCE_KALSEL, daerah: '' });
       setIsSuccessModalOpen(true);
     }, 800);
+  };
+
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!wlNama || !wlWa || !wlKabupaten) return;
+    setIsWlSubmitting(true);
+    setWlError('');
+    setWlSuccess(false);
+
+    const { error } = await supabase
+      .from('waitlist_expansions')
+      .insert([{
+        name: wlNama.trim(),
+        whatsapp: wlWa.trim(),
+        province: wlProvinsi,
+        regency: wlKabupaten.trim(),
+        village_name: wlDesa.trim() || null,
+        role: 'affiliate'
+      }]);
+
+    setIsWlSubmitting(false);
+    if (error) {
+      setWlError('Gagal mengirim usulan antrean. Silakan coba lagi.');
+      return;
+    }
+    setWlSuccess(true);
   };
 
   return (
@@ -252,6 +317,18 @@ export default function AffiliateLandingPage() {
           </div>
         </div>
       </header>
+
+      {/* Banner Fokus Wilayah */}
+      <div className="bg-gradient-to-r from-emerald-800 to-teal-700 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-start sm:items-center gap-3">
+          <MapPin className="w-4 h-4 shrink-0 mt-0.5 sm:mt-0 text-emerald-200" />
+          <p className="text-[11px] sm:text-xs font-bold leading-relaxed">
+            Fokus Layanan: Saat ini DiDesa memprioritaskan digitalisasi desa di wilayah{' '}
+            <strong className="text-emerald-100">Kalimantan Selatan</strong>. Untuk desa &amp; afiliator di luar Kalsel,
+            silakan mendaftar antrean prioritas ekspansi.
+          </p>
+        </div>
+      </div>
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -584,15 +661,32 @@ export default function AffiliateLandingPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Daerah / Wilayah Kerja (Opsional)</label>
-                <input
-                  type="text"
-                  value={form.daerah}
-                  onChange={e => setForm({ ...form, daerah: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all"
-                  placeholder="cth: Kabupaten Bogor"
-                />
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Provinsi</label>
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${isKalsel ? 'text-emerald-600' : 'text-amber-600 dark:text-amber-400'}`}>
+                    {isKalsel ? 'AKTIF' : 'WAITLIST'}
+                  </span>
+                </div>
+                <select
+                  value={form.provinsi}
+                  onChange={e => setForm({ ...form, provinsi: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all text-sm font-bold"
+                >
+                  {PROVINCE_OPTIONS.map(p => (
+                    <option key={p.value} value={p.value}>{p.label} — {p.status}</option>
+                  ))}
+                </select>
               </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Kabupaten / Wilayah Kerja (Opsional)</label>
+              <input
+                type="text"
+                value={form.daerah}
+                onChange={e => setForm({ ...form, daerah: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/5 transition-all"
+                placeholder="cth: Kabupaten Banjar"
+              />
             </div>
 
             {submitError && (
@@ -601,21 +695,37 @@ export default function AffiliateLandingPage() {
               </div>
             )}
 
-            <button
-              disabled={isSubmitting}
-              className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Mengirim Pendaftaran...
-                </>
-              ) : (
-                <>
-                  <UserPlus className="w-5 h-5" /> Daftar Sekarang
-                </>
-              )}
-            </button>
+            {isKalsel ? (
+              <button
+                disabled={isSubmitting}
+                className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Mengirim Pendaftaran...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-5 h-5" /> Daftar Sekarang
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setWlNama(form.nama);
+                  setWlWa(form.no_wa);
+                  setWlProvinsi(form.provinsi);
+                  setWlKabupaten(form.daerah);
+                  setIsWaitlistOpen(true);
+                }}
+                className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              >
+                <Zap className="w-5 h-5" /> Masuk Antrean Prioritas Wilayah
+              </button>
+            )}
             <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 font-medium">
               Dengan mendaftar, Anda menyetujui <a href="/syarat-ketentuan" className="text-emerald-600 hover:underline">Syarat &amp; Ketentuan</a> dan{' '}
               <a href="/kebijakan-privasi" className="text-emerald-600 hover:underline">Kebijakan Privasi</a> DiDesa.
@@ -709,6 +819,119 @@ export default function AffiliateLandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Modal Antrean Prioritas Wilayah */}
+      {isWaitlistOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-xl font-black">Antrean Prioritas Ekspansi</h3>
+                <button
+                  onClick={() => setIsWaitlistOpen(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  aria-label="Tutup"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                Wilayah <strong>{wlProvinsi}</strong> belum dibuka untuk program afiliator. Daftarkan usulan Anda untuk
+                mendapat prioritas saat {globalName} berekspansi ke wilayah Anda.
+              </p>
+
+              {wlSuccess ? (
+                <div className="mt-8 text-center flex flex-col items-center">
+                  <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center mb-6">
+                    <Zap className="w-9 h-9 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <h4 className="text-lg font-black mb-2">Usulan Terkirim!</h4>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                    Terima kasih, {wlNama.trim()}. Tim kami akan menghubungi Anda melalui WhatsApp saat program dibuka di wilayah Anda.
+                  </p>
+                  <button
+                    onClick={() => setIsWaitlistOpen(false)}
+                    className="w-full mt-8 py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-200 dark:shadow-emerald-900/40 transition-all active:scale-[0.98]"
+                  >
+                    Selesai
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleWaitlistSubmit} className="mt-6 space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama Lengkap</label>
+                    <input
+                      required
+                      type="text"
+                      value={wlNama}
+                      onChange={e => setWlNama(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 transition-all"
+                      placeholder="Nama Anda..."
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">No. WhatsApp</label>
+                      <input
+                        required
+                        type="tel"
+                        value={wlWa}
+                        onChange={e => setWlWa(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 transition-all"
+                        placeholder="08xxxxxxxxxx"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Kabupaten</label>
+                      <input
+                        required
+                        type="text"
+                        value={wlKabupaten}
+                        onChange={e => setWlKabupaten(e.target.value)}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 transition-all"
+                        placeholder="cth: Kabupaten Banjar"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama Desa (Opsional)</label>
+                    <input
+                      type="text"
+                      value={wlDesa}
+                      onChange={e => setWlDesa(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 transition-all"
+                      placeholder="Desa yang ingin Anda kelola..."
+                    />
+                  </div>
+
+                  {wlError && (
+                    <div className="rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 px-4 py-3 text-sm font-semibold text-red-600 dark:text-red-400">
+                      {wlError}
+                    </div>
+                  )}
+
+                  <button
+                    disabled={isWlSubmitting}
+                    className="w-full py-4 bg-amber-500 hover:bg-amber-600 disabled:opacity-60 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                  >
+                    {isWlSubmitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Mengirim Usulan...
+                      </>
+                    ) : (
+                      <>
+                        <Zap className="w-5 h-5" /> Kirim Usulan Antrean
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Modal Sukses */}
       {isSuccessModalOpen && createPortal(

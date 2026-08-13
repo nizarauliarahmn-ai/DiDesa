@@ -27,7 +27,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   const [globalFooterPhone, setGlobalFooterPhone] = useState(() => localStorage.getItem('global_footer_phone') ?? '+62 813-4686-7519');
   const [globalFooterAffiliateTitle, setGlobalFooterAffiliateTitle] = useState(() => localStorage.getItem('global_footer_affiliate_title') ?? 'AFFILIATOR');
   const [globalFooterAffiliateSubtitle, setGlobalFooterAffiliateSubtitle] = useState(() => localStorage.getItem('global_footer_affiliate_subtitle') ?? 'Mendigitalisasi desa & raih komisi nyata.');
-  const [globalFooterAffiliateLink, setGlobalFooterAffiliateLink] = useState(() => localStorage.getItem('global_footer_affiliate_link') ?? '/afiliasi');
+  const [globalFooterAffiliateLink, setGlobalFooterAffiliateLink] = useState(() => localStorage.getItem('global_footer_affiliate_link') ?? '/affiliator');
   const [globalFooterSocial1Icon, setGlobalFooterSocial1Icon] = useState(() => localStorage.getItem('global_footer_social1_icon') ?? 'instagram');
   const [globalFooterSocial1Link, setGlobalFooterSocial1Link] = useState(() => localStorage.getItem('global_footer_social1_link') ?? 'https://instagram.com/didesa.id');
   const [globalFooterSocial2Icon, setGlobalFooterSocial2Icon] = useState(() => localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');
@@ -125,7 +125,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
       setGlobalFooterPhone(localStorage.getItem('global_footer_phone') ?? '+62 813-4686-7519');
       setGlobalFooterAffiliateTitle(localStorage.getItem('global_footer_affiliate_title') ?? 'AFFILIATOR');
       setGlobalFooterAffiliateSubtitle(localStorage.getItem('global_footer_affiliate_subtitle') ?? 'Mendigitalisasi desa & raih komisi nyata.');
-      setGlobalFooterAffiliateLink(localStorage.getItem('global_footer_affiliate_link') ?? '/afiliasi');
+      setGlobalFooterAffiliateLink(localStorage.getItem('global_footer_affiliate_link') ?? '/affiliator');
       setGlobalFooterSocial1Icon(localStorage.getItem('global_footer_social1_icon') ?? 'instagram');
       setGlobalFooterSocial1Link(localStorage.getItem('global_footer_social1_link') ?? 'https://instagram.com/didesa.id');
       setGlobalFooterSocial2Icon(localStorage.getItem('global_footer_social2_icon') ?? 'tiktok');

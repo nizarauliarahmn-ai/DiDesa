@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin } from 'lucide-react';
+import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin, Zap, Wallet, Layers, LineChart } from 'lucide-react';
 import Footer from './common/Footer';
 import { supabase } from '../utils/supabase';
 import UserPlaceholder from './common/UserPlaceholder';
@@ -150,6 +150,10 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             <a href="#keunggulan" className="hover:text-emerald-600 transition-colors">Keunggulan</a>
             <a href="#desa-terdaftar" className="hover:text-emerald-600 transition-colors">Desa Terdaftar</a>
             <a href="#integrasi" className="hover:text-emerald-600 transition-colors">Integrasi</a>
+            <a href="/affiliator" className="hover:text-emerald-600 transition-colors flex items-center gap-1.5 relative">
+              Program Afiliasi
+              <span className="text-[9px] font-black uppercase tracking-wider bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded-full">Komisi</span>
+            </a>
           </div>
 
           <div className="flex items-center gap-4">
@@ -495,10 +499,66 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
         </div>
       </section>
 
+      {/* Program Afiliasi CTA Section */}
+      <section id="program-afiliasi" className="py-16 relative overflow-hidden bg-slate-100/50 dark:bg-slate-800/40">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
+        </div>
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl p-8 md:p-12 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-amber-400/10 rounded-full -mr-10 -mt-10" />
+            <div className="flex flex-col lg:flex-row lg:items-center gap-8">
+              <div className="flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-black mb-5">
+                  <Zap size={14} /> PROGRAM KEMITRAAN
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+                  Raih Komisi Nyata dengan Mendigitalisasi Desa
+                </h2>
+                <p className="mt-4 text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                  Khusus wilayah <strong className="text-emerald-700 dark:text-emerald-400">Kalimantan Selatan</strong>. Bantu desa di sekitar Anda
+                  beralih ke sistem administrasi modern dan dapatkan komisi hingga{' '}
+                  <strong className="text-emerald-700 dark:text-emerald-400">Rp 1.250.000 per desa</strong>.
+                </p>
+                <div className="mt-6 space-y-3">
+                  {[
+                    { icon: <Wallet size={18} />, text: 'Komisi Transaksi & Perpanjangan Tahunan' },
+                    { icon: <Layers size={18} />, text: 'Toolkit Marketing & Proposal Siap Pakai' },
+                    { icon: <LineChart size={18} />, text: 'Dashboard Pantau Real-Time' }
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm font-bold text-slate-700 dark:text-slate-200">
+                      <span className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        {item.icon}
+                      </span>
+                      {item.text}
+                    </div>
+                  ))}
+                </div>
+                <a
+                  href="/affiliator"
+                  className="mt-8 inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-2xl font-bold shadow-xl shadow-emerald-500/30 transition-all hover:scale-105 active:scale-95"
+                >
+                  Gabung Program Afiliasi <ArrowRight size={18} />
+                </a>
+              </div>
+              <div className="shrink-0 text-center lg:text-right">
+                <div className="bg-gradient-to-br from-emerald-700 to-teal-600 text-white rounded-3xl p-8 shadow-2xl shadow-emerald-900/20 max-w-xs mx-auto">
+                  <p className="text-3xl drop-shadow-sm">💰</p>
+                  <p className="text-4xl font-black mt-3">Rp 1.250.000</p>
+                  <p className="text-sm font-bold text-emerald-100 mt-1">Komisi maksimal per desa</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer is already full width in the component, just render it */}
       <div className="bg-white dark:bg-slate-900 pt-10 border-t border-gray-200 dark:border-slate-800">
          <div className="max-w-7xl mx-auto px-6 text-center text-sm text-slate-500 pb-10">
-            &copy; {new Date().getFullYear()} Hak Cipta Dilindungi. <strong className="text-slate-700 dark:text-slate-300">DiDesa</strong> — Solusi Administrasi & Digitalisasi Desa Modern Indonesia.
+            &copy; {new Date().getFullYear()} Hak Cipta Dilindungi. <strong className="text-slate-700 dark:text-slate-300">DiDesa</strong> — Solusi Administrasi & Digitalisasi Desa Modern Indonesia.{' '}
+            <a href="/affiliator" className="text-emerald-600 hover:underline font-semibold">Program Afiliasi</a>
          </div>
       </div>
 
