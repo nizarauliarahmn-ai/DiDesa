@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { 
-
-  ArrowLeft, Camera, Info, MapPin, Users, User, 
-  Check, Save, Briefcase, GraduationCap, Home, Heart, Trash2, 
-  ChevronDown, Search, PenLine, UserCheck, ListFilter
+  ArrowLeft, Info, MapPin, Users, User, 
+  Check, Save, GraduationCap, Heart, Trash2, 
+  ChevronDown, Search, PenLine, UserCheck, ListFilter,
+  FileText, HandHeart, Phone, BookOpen, X, ShieldCheck, Eye
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords, parseAddressString } from '../../../utils/textUtils';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
+import { fetchResidentLettersAsync, getLetterFullData } from '../../../utils/letterHistory';
 
 interface AdminPendudukEditProps {
   onBack: () => void;
@@ -32,6 +33,16 @@ const PEKERJAAN_OPTIONS = [
   'Petani / Pekebun',
   'Nelayan / Perikanan',
   'Lainnya'
+];
+
+const PENDIDIKAN_OPTIONS = [
+  'Tidak/Belum Sekolah',
+  'SD / Sederajat',
+  'SMP / Sederajat',
+  'SMA / Sederajat',
+  'Diploma (D1/D2/D3)',
+  'Sarjana (S1)',
+  'Pascasarjana (S2/S3)'
 ];
 
 // Searchable dropdown to pick a family member (parent) from the same KK
@@ -206,7 +217,23 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   const [job, setJob] = useState(data?.job || 'Wiraswasta');
   const [fatherName, setFatherName] = useState((data?.fatherName || '').toUpperCase());
   const [motherName, setMotherName] = useState((data?.motherName || '').toUpperCase());
-  
+
+  // Kontak & Identitas Lain
+  const [gelarDepan, setGelarDepan] = useState(data?.gelarDepan || '');
+  const [gelarBelakang, setGelarBelakang] = useState(data?.gelarBelakang || '');
+  const [noWhatsapp, setNoWhatsapp] = useState(data?.noWhatsapp || '');
+  const [dusun, setDusun] = useState(data?.dusun || '');
+
+  // Pendidikan & Sipil
+  const [noAktaKelahiran, setNoAktaKelahiran] = useState(data?.noAktaKelahiran || '');
+  const [noAktaNikah, setNoAktaNikah] = useState(data?.noAktaNikah || '');
+
+  // Kesejahteraan & Dokumen
+  const [noBpjs, setNoBpjs] = useState(data?.noBpjs || '');
+  const [statusDtks, setStatusDtks] = useState(data?.statusDtks || 'Tidak Terdaftar DTKS');
+  const [disabilitas, setDisabilitas] = useState(data?.disabilitas || 'Tidak Ada');
+  const [noPaspor, setNoPaspor] = useState(data?.noPaspor || '');
+
   // Same-KK family members used for parent dropdowns
   const [kkMembers, setKkMembers] = useState<any[]>([]);
   const [kkLoading, setKkLoading] = useState(false);
@@ -232,6 +259,21 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   // Errors state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Active tab state
+  const [activeTab, setActiveTab] = useState(0);
+
+  // Letter history state (Tab 4)
+  const [residentLetters, setResidentLetters] = useState<any[]>([]);
+  const [viewLetter, setViewLetter] = useState<any>(null);
+
+  useEffect(() => {
+    if (data?.nik) {
+      fetchResidentLettersAsync(data.nik, data.name || "").then(setResidentLetters);
+    } else {
+      setResidentLetters([]);
+    }
+  }, [data]);
 
   // Load family members sharing the same KK (for parent dropdowns)
   useEffect(() => {
@@ -401,11 +443,13 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
     const genderColor = gender === 'Perempuan' ? 'pink' : 'blue';
     const statusColor = residentStatus === 'Aktif' ? 'emerald' : 'gray';
 
+    const fullName = [gelarDepan.trim(), (name || '').trim(), gelarBelakang.trim()].filter(Boolean).join(' ');
+
     const savedResident = {
       ...data,
       nik,
       noKk,
-      name: (name || '').trim().toUpperCase(),
+      name: fullName.toUpperCase(),
       age,
       gender,
       genderColor,
@@ -413,7 +457,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       status: residentStatus,
       maritalStatus,
       statusColor,
-      initials: name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
+      initials: fullName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
       birthPlace,
       birthDate,
       bloodType,
@@ -423,9 +467,19 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       rt,
       rw,
       desa,
+      dusun,
       domicileStatus,
       familyRelation,
       education,
+      gelarDepan: gelarDepan.trim(),
+      gelarBelakang: gelarBelakang.trim(),
+      noAktaKelahiran,
+      noAktaNikah,
+      noBpjs,
+      statusDtks,
+      disabilitas,
+      noWhatsapp,
+      noPaspor,
       fatherName: (fatherName || '').trim().toUpperCase(),
       motherName: (motherName || '').trim().toUpperCase(),
       activeAids,
@@ -464,6 +518,36 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       }
     }
   };
+
+  // Parse bansos history from activeAids (Tab 5)
+  const bansosHistory = useMemo(() => {
+    const entries: { program: string; periode: string; status: string; nominal: string }[] = [];
+    const aids = Array.isArray(activeAids) ? activeAids : [];
+    aids.forEach((aid: string) => {
+      const isStopped = aid.startsWith('STOPPED:');
+      const raw = isStopped ? aid.replace(/^STOPPED:\s*/, '') : aid;
+      const match = raw.match(/^(.*?)\s*\((\d{4})\)/);
+      const program = match ? match[1].trim() : raw.split('|')[0].trim();
+      const periode = match ? match[2] : '-';
+      const nominal = program.toLowerCase().includes('blt')
+        ? 'Rp 300.000'
+        : program.toLowerCase().includes('pkh')
+          ? 'Rp 600.000'
+          : program.toLowerCase().includes('non-tunai')
+            ? 'Rp 200.000'
+            : '-';
+      entries.push({ program, periode, status: isStopped ? 'Dihentikan' : 'Aktif', nominal });
+    });
+    return entries;
+  }, [activeAids]);
+
+  const TABS = [
+    { id: 0, label: 'Identitas & Kontak', icon: User },
+    { id: 1, label: 'Keluarga & Pendidikan', icon: GraduationCap },
+    { id: 2, label: 'Kesejahteraan & Dokumen', icon: Heart },
+    { id: 3, label: 'Riwayat Dokumen', icon: FileText },
+    { id: 4, label: 'Riwayat Bantuan Sosial', icon: HandHeart },
+  ];
 
   return (
     <div className="pt-6 pb-12 animate-in fade-in duration-300">
@@ -504,342 +588,695 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Columns: Form Fields */}
+      {/* 5-Tab Navigation */}
+      <div className="sticky top-[132px] z-30 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl pb-2 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 pt-4 border-b border-slate-200/50 dark:border-slate-700/50 overflow-x-auto">
+        <div className="flex gap-1.5 min-w-max">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  isActive
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+        {/* Left Columns: Tab Content */}
         <div className="lg:col-span-8 space-y-8">
-          
-          {/* Section 1: Biodata Diri */}
-          <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
-                <User className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Biodata Diri</h3>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Nama Lengkap Sesuai KTP <span className="text-red-500 font-bold ml-1">*</span>
-                </label>
-                <input 
-                  type="text"
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value.toUpperCase());
-                    if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
-                  }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
-                    errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                  }`}
-                  placeholder="Masukkan nama lengkap..."
-                />
-                {errors.name && <p className="text-xs text-red-500 font-semibold">{errors.name}</p>}
-              </div>
-
-              {/* NIK Field */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  NIK (Nomor Induk Kependudukan) <span className="text-red-500 font-bold ml-1">*</span>
-                </label>
-                <input 
-                  type="text"
-                  maxLength={16}
-                  value={nik}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    setNik(val);
-                    if (errors.nik) setErrors(prev => ({ ...prev, nik: '' }));
-                  }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
-                    errors.nik ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                  }`}
-                  placeholder="Masukkan 16 digit NIK..."
-                />
-                {errors.nik && <p className="text-xs text-red-500 font-semibold">{errors.nik}</p>}
-              </div>
-
-              {/* Nomor KK Field */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  No. KK (Kartu Keluarga) <span className="text-red-500 font-bold ml-1">*</span>
-                </label>
-                <input 
-                  type="text"
-                  maxLength={16}
-                  value={noKk}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    setNoKk(val);
-                    if (errors.noKk) setErrors(prev => ({ ...prev, noKk: '' }));
-                  }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
-                    errors.noKk ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                  }`}
-                  placeholder="Masukkan 16 digit No. KK..."
-                />
-                {errors.noKk && <p className="text-xs text-red-500 font-semibold">{errors.noKk}</p>}
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Jenis Kelamin <span className="text-red-500 font-bold ml-1">*</span>
-                </label>
-                <select 
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
-                >
-                  <option value="Laki-laki">Laki-laki</option>
-                  <option value="Perempuan">Perempuan</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Tempat Lahir <span className="text-red-500 font-bold ml-1">*</span>
-                </label>
-                <input 
-                  type="text"
-                  value={birthPlace}
-                  onChange={(e) => {
-                    setBirthPlace(capitalizeWords(e.target.value));
-                    if (errors.birthPlace) setErrors(prev => ({ ...prev, birthPlace: '' }));
-                  }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
-                    errors.birthPlace ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                  }`}
-                  placeholder="Contoh: Jakarta"
-                />
-                {errors.birthPlace && <p className="text-xs text-red-500 font-semibold">{errors.birthPlace}</p>}
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Tanggal Lahir <span className="text-red-500 font-bold ml-1">*</span>
-                </label>
-                <input 
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => {
-                    setBirthDate(e.target.value);
-                    if (errors.birthDate) setErrors(prev => ({ ...prev, birthDate: '' }));
-                  }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 ${
-                    errors.birthDate ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                  }`}
-                />
-                {errors.birthDate && <p className="text-xs text-red-500 font-semibold">{errors.birthDate}</p>}
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Golongan Darah</label>
-                <select 
-                  value={bloodType}
-                  onChange={(e) => setBloodType(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
-                >
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="AB">AB</option>
-                  <option value="O">O</option>
-                  <option value="Tidak Tahu">Tidak Tahu</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Agama</label>
-                <select 
-                  value={religion}
-                  onChange={(e) => setReligion(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
-                >
-                  <option value="Islam">Islam</option>
-                  <option value="Kristen Protestan">Kristen Protestan</option>
-                  <option value="Kristen Katolik">Kristen Katolik</option>
-                  <option value="Hindu">Hindu</option>
-                  <option value="Budha">Budha</option>
-                  <option value="Khonghucu">Khonghucu</option>
-                </select>
-              </div>
-
-              {/* Pekerjaan Dropdown selection */}
-              <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pekerjaan</label>
-                <select 
-                  value={job}
-                  onChange={(e) => setJob(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
-                >
-                  {PEKERJAAN_OPTIONS.map((opt) => (
-                    <option key={opt} value={opt}>{opt}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Father and Mother Names (Linked to Same-KK Members) */}
-              <div className="md:col-span-2 flex items-center gap-2 text-[10px] text-gray-400 mb-1">
-                {kkLoading ? (
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /> Memuat anggota KK...</span>
-                ) : kkMembers.length > 0 ? (
-                  <span className="flex items-center gap-1.5"><ListFilter className="w-3.5 h-3.5" /> {kkMembers.length} anggota ditemukan dalam KK {noKk || '-'}</span>
-                ) : (
-                  <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> Tidak ada anggota KK ditemukan — gunakan "Ketik Manual"</span>
-                )}
-              </div>
-
-              <KkParentCombobox
-                label="Nama Ayah Kandung"
-                members={kkMembers}
-                value={fatherName}
-                onChange={handleFatherNameChange}
-                onToggleManual={setFatherManual}
-                isManual={fatherManual}
-                genderFilter="Laki-laki"
-                placeholder="Pilih ayah dari anggota KK..."
-              />
-
-              <KkParentCombobox
-                label="Nama Ibu Kandung"
-                members={kkMembers}
-                value={motherName}
-                onChange={handleMotherNameChange}
-                onToggleManual={setMotherManual}
-                isManual={motherManual}
-                genderFilter="Perempuan"
-                placeholder="Pilih ibu dari anggota KK..."
-              />
-            </div>
-          </section>
-
-          {/* Section 2: Alamat & Domisili */}
-          <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Alamat & Domisili</h3>
-            </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
-                <div className="md:col-span-6 space-y-1">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                      Alamat Lengkap <span className="text-red-500 font-bold ml-1">*</span>
-                    </label>
-                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Smart Autofill RT/RW Aktif</span>
+          {/* ===== TAB 1: Identitas & Kontak ===== */}
+          {activeTab === 0 && (
+            <>
+              {/* Biodata & Kontak */}
+              <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+                <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+                    <User className="w-5 h-5" />
                   </div>
-                  <textarea 
-                    rows={2}
-                    value={address}
-                    onChange={(e) => {
-                      const rawVal = e.target.value;
-                      if (/\b(RT|RW)\b/i.test(rawVal)) {
-                        const parsed = parseAddressString(rawVal, rt, rw);
-                        setAddress(parsed.address);
-                        if (parsed.rt) handleRtChange(parsed.rt);
-                        if (parsed.rw) setRw(parsed.rw);
-                        showToast(`Otomatis mengekstrak RT: ${parsed.rt}, RW: ${parsed.rw}`, 'info');
-                      } else {
-                        setAddress(capitalizeWords(rawVal));
-                      }
-                      if (errors.address) setErrors(prev => ({ ...prev, address: '' }));
-                    }}
-                    className={`w-full px-4 py-3 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none ${
-                      errors.address ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                    }`}
-                    placeholder="Nama jalan, nomor rumah... (Jika ditempel dengan RT/RW, sistem otomatis memisahkan RT & RW!)"
-                  ></textarea>
-                  {errors.address && <p className="text-xs text-red-500 font-semibold">{errors.address}</p>}
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Identitas & Kontak</h3>
                 </div>
 
-              {/* RT Dropdown select list */}
-              <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  RT <span className="text-red-500 font-bold ml-1">*</span>
-                </label>
-                <select 
-                  value={rt}
-                  onChange={(e) => handleRtChange(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer font-mono"
-                >
-                  <option value="01">01</option>
-                  <option value="02">02</option>
-                  <option value="03">03</option>
-                  <option value="04">04</option>
-                </select>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      Nama Lengkap Sesuai KTP <span className="text-red-500 font-bold ml-1">*</span>
+                    </label>
+                    <input 
+                      type="text"
+                      value={name}
+                      onChange={(e) => {
+                        setName(e.target.value.toUpperCase());
+                        if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+                      }}
+                      className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
+                        errors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                      }`}
+                      placeholder="Masukkan nama lengkap..."
+                    />
+                    {errors.name && <p className="text-xs text-red-500 font-semibold">{errors.name}</p>}
+                  </div>
 
-              {/* RW input (auto-populated and disabled based on the rule) */}
-              <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">RW (Otomatis)</label>
-                <input 
-                  type="text"
-                  maxLength={3}
-                  disabled
-                  value={rw}
-                  className="w-full h-11 px-4 border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-xl text-sm outline-none font-mono cursor-not-allowed"
-                  placeholder="Terisi otomatis..."
-                />
-              </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Gelar Depan</label>
+                    <input 
+                      type="text"
+                      value={gelarDepan}
+                      onChange={(e) => setGelarDepan(e.target.value.toUpperCase())}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                      placeholder="Contoh: Dr., Ir., H."
+                    />
+                  </div>
 
-              <div className="md:col-span-2 space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Desa/Kelurahan</label>
-                <input 
-                  type="text"
-                  value={desa}
-                  onChange={(e) => {
-                    setDesa(e.target.value);
-                    if (errors.desa) setErrors(prev => ({ ...prev, desa: '' }));
-                  }}
-                  className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 ${
-                    errors.desa ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
-                  }`}
-                  placeholder="Nama Desa/Kelurahan..."
-                />
-                {errors.desa && <p className="text-xs text-red-500 font-semibold">{errors.desa}</p>}
-              </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Gelar Belakang</label>
+                    <input 
+                      type="text"
+                      value={gelarBelakang}
+                      onChange={(e) => setGelarBelakang(e.target.value.toUpperCase())}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                      placeholder="Contoh: S.E., S.H., M.M."
+                    />
+                  </div>
 
-              <div className="md:col-span-6 space-y-2">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Domisili</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <button 
-                    type="button"
-                    onClick={() => setDomicileStatus('Sesuai KTP')}
-                    className={`flex items-center gap-3 p-3.5 border-2 rounded-xl transition-all ${
-                      domicileStatus === 'Sesuai KTP' 
-                        ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 font-bold' 
-                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      domicileStatus === 'Sesuai KTP' ? 'border-emerald-600' : 'border-gray-300 dark:border-slate-600'
-                    }`}>
-                      {domicileStatus === 'Sesuai KTP' && <div className="w-2 h-2 bg-emerald-600 rounded-full" />}
+                  {/* NIK Field */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      NIK (Nomor Induk Kependudukan) <span className="text-red-500 font-bold ml-1">*</span>
+                    </label>
+                    <input 
+                      type="text"
+                      maxLength={16}
+                      value={nik}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setNik(val);
+                        if (errors.nik) setErrors(prev => ({ ...prev, nik: '' }));
+                      }}
+                      className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
+                        errors.nik ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                      }`}
+                      placeholder="Masukkan 16 digit NIK..."
+                    />
+                    {errors.nik && <p className="text-xs text-red-500 font-semibold">{errors.nik}</p>}
+                  </div>
+
+                  {/* Nomor KK Field */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      No. KK (Kartu Keluarga) <span className="text-red-500 font-bold ml-1">*</span>
+                    </label>
+                    <input 
+                      type="text"
+                      maxLength={16}
+                      value={noKk}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        setNoKk(val);
+                        if (errors.noKk) setErrors(prev => ({ ...prev, noKk: '' }));
+                      }}
+                      className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
+                        errors.noKk ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                      }`}
+                      placeholder="Masukkan 16 digit No. KK..."
+                    />
+                    {errors.noKk && <p className="text-xs text-red-500 font-semibold">{errors.noKk}</p>}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      No. WhatsApp
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input 
+                        type="text"
+                        value={noWhatsapp}
+                        onChange={(e) => setNoWhatsapp(e.target.value.replace(/[^\d]/g, ''))}
+                        className="w-full h-11 pl-10 pr-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
+                        placeholder="Contoh: 081234567890"
+                      />
                     </div>
-                    <span className="text-sm">Sesuai KTP</span>
-                  </button>
+                  </div>
 
-                  <button 
-                    type="button"
-                    onClick={() => setDomicileStatus('Pendatang / Domisili Sementara')}
-                    className={`flex items-center gap-3 p-3.5 border-2 rounded-xl transition-all ${
-                      domicileStatus === 'Pendatang / Domisili Sementara' 
-                        ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 font-bold' 
-                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      domicileStatus === 'Pendatang / Domisili Sementara' ? 'border-emerald-600' : 'border-gray-300 dark:border-slate-600'
-                    }`}>
-                      {domicileStatus === 'Pendatang / Domisili Sementara' && <div className="w-2 h-2 bg-emerald-600 rounded-full" />}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      Jenis Kelamin <span className="text-red-500 font-bold ml-1">*</span>
+                    </label>
+                    <select 
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                    >
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      Tempat Lahir <span className="text-red-500 font-bold ml-1">*</span>
+                    </label>
+                    <input 
+                      type="text"
+                      value={birthPlace}
+                      onChange={(e) => {
+                        setBirthPlace(capitalizeWords(e.target.value));
+                        if (errors.birthPlace) setErrors(prev => ({ ...prev, birthPlace: '' }));
+                      }}
+                      className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all ${
+                        errors.birthPlace ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                      }`}
+                      placeholder="Contoh: Jakarta"
+                    />
+                    {errors.birthPlace && <p className="text-xs text-red-500 font-semibold">{errors.birthPlace}</p>}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      Tanggal Lahir <span className="text-red-500 font-bold ml-1">*</span>
+                    </label>
+                    <input 
+                      type="date"
+                      value={birthDate}
+                      onChange={(e) => {
+                        setBirthDate(e.target.value);
+                        if (errors.birthDate) setErrors(prev => ({ ...prev, birthDate: '' }));
+                      }}
+                      className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 ${
+                        errors.birthDate ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                      }`}
+                    />
+                    {errors.birthDate && <p className="text-xs text-red-500 font-semibold">{errors.birthDate}</p>}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Agama</label>
+                    <select 
+                      value={religion}
+                      onChange={(e) => setReligion(e.target.value)}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                    >
+                      <option value="Islam">Islam</option>
+                      <option value="Kristen Protestan">Kristen Protestan</option>
+                      <option value="Kristen Katolik">Kristen Katolik</option>
+                      <option value="Hindu">Hindu</option>
+                      <option value="Budha">Budha</option>
+                      <option value="Khonghucu">Khonghucu</option>
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              {/* Alamat & Domisili */}
+              <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+                <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Alamat & Domisili</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-5">
+                  <div className="md:col-span-6 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                        Alamat Lengkap <span className="text-red-500 font-bold ml-1">*</span>
+                      </label>
+                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Smart Autofill RT/RW Aktif</span>
                     </div>
-                    <span className="text-sm">Pendatang / Domisili Sementara</span>
-                  </button>
+                    <textarea 
+                      rows={2}
+                      value={address}
+                      onChange={(e) => {
+                        const rawVal = e.target.value;
+                        if (/\b(RT|RW)\b/i.test(rawVal)) {
+                          const parsed = parseAddressString(rawVal, rt, rw);
+                          setAddress(parsed.address);
+                          if (parsed.rt) handleRtChange(parsed.rt);
+                          if (parsed.rw) setRw(parsed.rw);
+                          showToast(`Otomatis mengekstrak RT: ${parsed.rt}, RW: ${parsed.rw}`, 'info');
+                        } else {
+                          setAddress(capitalizeWords(rawVal));
+                        }
+                        if (errors.address) setErrors(prev => ({ ...prev, address: '' }));
+                      }}
+                      className={`w-full px-4 py-3 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all resize-none ${
+                        errors.address ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                      }`}
+                      placeholder="Nama jalan, nomor rumah... (Jika ditempel dengan RT/RW, sistem otomatis memisahkan RT & RW!)"
+                    ></textarea>
+                    {errors.address && <p className="text-xs text-red-500 font-semibold">{errors.address}</p>}
+                  </div>
+
+                  {/* RT Dropdown select list */}
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
+                      RT <span className="text-red-500 font-bold ml-1">*</span>
+                    </label>
+                    <select 
+                      value={rt}
+                      onChange={(e) => handleRtChange(e.target.value)}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer font-mono"
+                    >
+                      <option value="01">01</option>
+                      <option value="02">02</option>
+                      <option value="03">03</option>
+                      <option value="04">04</option>
+                    </select>
+                  </div>
+
+                  {/* RW input (auto-populated and disabled based on the rule) */}
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">RW (Otomatis)</label>
+                    <input 
+                      type="text"
+                      maxLength={3}
+                      disabled
+                      value={rw}
+                      className="w-full h-11 px-4 border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-slate-400 rounded-xl text-sm outline-none font-mono cursor-not-allowed"
+                      placeholder="Terisi otomatis..."
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Dusun / Kampung</label>
+                    <input 
+                      type="text"
+                      value={dusun}
+                      onChange={(e) => setDusun(capitalizeWords(e.target.value))}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                      placeholder="Contoh: Dusun Krajan"
+                    />
+                  </div>
+
+                  <div className="md:col-span-3 space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Desa/Kelurahan</label>
+                    <input 
+                      type="text"
+                      value={desa}
+                      onChange={(e) => {
+                        setDesa(e.target.value);
+                        if (errors.desa) setErrors(prev => ({ ...prev, desa: '' }));
+                      }}
+                      className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 ${
+                        errors.desa ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
+                      }`}
+                      placeholder="Nama Desa/Kelurahan..."
+                    />
+                    {errors.desa && <p className="text-xs text-red-500 font-semibold">{errors.desa}</p>}
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* ===== TAB 2: Keluarga & Pendidikan ===== */}
+          {activeTab === 1 && (
+            <>
+              <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+                <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Status Perkawinan & Hubungan Keluarga</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Perkawinan</label>
+                    <select 
+                      value={maritalStatus}
+                      onChange={(e) => setMaritalStatus(e.target.value)}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                    >
+                      <option value="Belum Kawin">Belum Kawin</option>
+                      <option value="Kawin">Kawin</option>
+                      <option value="Cerai Hidup">Cerai Hidup</option>
+                      <option value="Cerai Mati">Cerai Mati</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan Keluarga</label>
+                    <select 
+                      value={familyRelation}
+                      onChange={(e) => setFamilyRelation(e.target.value)}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                    >
+                      <option value="Kepala Keluarga">Kepala Keluarga</option>
+                      <option value="Istri">Istri</option>
+                      <option value="Anak">Anak</option>
+                      <option value="Orang Tua">Orang Tua</option>
+                      <option value="Lainnya">Lainnya</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pendidikan Terakhir</label>
+                    <select 
+                      value={education}
+                      onChange={(e) => setEducation(e.target.value)}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                    >
+                      {PENDIDIKAN_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Pekerjaan Dropdown selection */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pekerjaan</label>
+                    <select 
+                      value={job}
+                      onChange={(e) => setJob(e.target.value)}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                    >
+                      {PEKERJAAN_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </section>
+
+              {/* Orang Tua & Dokumen Sipil */}
+              <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+                <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Orang Tua & Dokumen Sipil</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* Father and Mother Names (Linked to Same-KK Members) */}
+                  <div className="md:col-span-2 flex items-center gap-2 text-[10px] text-gray-400 mb-1">
+                    {kkLoading ? (
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" /> Memuat anggota KK...</span>
+                    ) : kkMembers.length > 0 ? (
+                      <span className="flex items-center gap-1.5"><ListFilter className="w-3.5 h-3.5" /> {kkMembers.length} anggota ditemukan dalam KK {noKk || '-'}</span>
+                    ) : (
+                      <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> Tidak ada anggota KK ditemukan — gunakan "Ketik Manual"</span>
+                    )}
+                  </div>
+
+                  <KkParentCombobox
+                    label="Nama Ayah Kandung"
+                    members={kkMembers}
+                    value={fatherName}
+                    onChange={handleFatherNameChange}
+                    onToggleManual={setFatherManual}
+                    isManual={fatherManual}
+                    genderFilter="Laki-laki"
+                    placeholder="Pilih ayah dari anggota KK..."
+                  />
+
+                  <KkParentCombobox
+                    label="Nama Ibu Kandung"
+                    members={kkMembers}
+                    value={motherName}
+                    onChange={handleMotherNameChange}
+                    onToggleManual={setMotherManual}
+                    isManual={motherManual}
+                    genderFilter="Perempuan"
+                    placeholder="Pilih ibu dari anggota KK..."
+                  />
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. Akta Kelahiran</label>
+                    <input 
+                      type="text"
+                      value={noAktaKelahiran}
+                      onChange={(e) => setNoAktaKelahiran(e.target.value.toUpperCase())}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
+                      placeholder="Contoh: 3520-LT-2024-1234"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. Akta Nikah</label>
+                    <input 
+                      type="text"
+                      value={noAktaNikah}
+                      onChange={(e) => setNoAktaNikah(e.target.value.toUpperCase())}
+                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
+                      placeholder="Contoh: 3520-NK-2024-5678"
+                    />
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
+
+          {/* ===== TAB 3: Kesejahteraan & Dokumen ===== */}
+          {activeTab === 2 && (
+            <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+              <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+                  <Heart className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Kesejahteraan & Dokumen</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. BPJS / KIS</label>
+                  <input 
+                    type="text"
+                    value={noBpjs}
+                    onChange={(e) => setNoBpjs(e.target.value.replace(/[^\d]/g, ''))}
+                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
+                    placeholder="Contoh: 0001234567890"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status DTKS / Bansos</label>
+                  <select 
+                    value={statusDtks}
+                    onChange={(e) => setStatusDtks(e.target.value)}
+                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                  >
+                    <option value="Terdaftar DTKS">Terdaftar DTKS</option>
+                    <option value="Tidak Terdaftar DTKS">Tidak Terdaftar DTKS</option>
+                    <option value="Usulan Baru">Usulan Baru</option>
+                    <option value="Tidak Tahu">Tidak Tahu</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Disabilitas</label>
+                  <select 
+                    value={disabilitas}
+                    onChange={(e) => setDisabilitas(e.target.value)}
+                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                  >
+                    <option value="Tidak Ada">Tidak Ada</option>
+                    <option value="Disabilitas Fisik">Disabilitas Fisik</option>
+                    <option value="Disabilitas Netra">Disabilitas Netra</option>
+                    <option value="Disabilitas Rungu/Wicara">Disabilitas Rungu/Wicara</option>
+                    <option value="Disabilitas Mental">Disabilitas Mental</option>
+                    <option value="Disabilitas Ganda">Disabilitas Ganda</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. Paspor / KITAS</label>
+                  <input 
+                    type="text"
+                    value={noPaspor}
+                    onChange={(e) => setNoPaspor(e.target.value.toUpperCase())}
+                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
+                    placeholder="Contoh: B1234567"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Golongan Darah</label>
+                  <select 
+                    value={bloodType}
+                    onChange={(e) => setBloodType(e.target.value)}
+                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+                  >
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="AB">AB</option>
+                    <option value="O">O</option>
+                    <option value="Tidak Tahu">Tidak Tahu</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status Domisili</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button 
+                      type="button"
+                      onClick={() => setDomicileStatus('Sesuai KTP')}
+                      className={`flex items-center gap-3 p-3.5 border-2 rounded-xl transition-all ${
+                        domicileStatus === 'Sesuai KTP' 
+                          ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 font-bold' 
+                          : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        domicileStatus === 'Sesuai KTP' ? 'border-emerald-600' : 'border-gray-300 dark:border-slate-600'
+                      }`}>
+                        {domicileStatus === 'Sesuai KTP' && <div className="w-2 h-2 bg-emerald-600 rounded-full" />}
+                      </div>
+                      <span className="text-sm">Sesuai KTP</span>
+                    </button>
+
+                    <button 
+                      type="button"
+                      onClick={() => setDomicileStatus('Pendatang / Domisili Sementara')}
+                      className={`flex items-center gap-3 p-3.5 border-2 rounded-xl transition-all ${
+                        domicileStatus === 'Pendatang / Domisili Sementara' 
+                          ? 'border-emerald-600 bg-emerald-50/50 text-emerald-900 font-bold' 
+                          : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        domicileStatus === 'Pendatang / Domisili Sementara' ? 'border-emerald-600' : 'border-gray-300 dark:border-slate-600'
+                      }`}>
+                        {domicileStatus === 'Pendatang / Domisili Sementara' && <div className="w-2 h-2 bg-emerald-600 rounded-full" />}
+                      </div>
+                      <span className="text-sm">Pendatang / Domisili Sementara</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
+
+          {/* ===== TAB 4: Riwayat Dokumen (Surat) ===== */}
+          {activeTab === 3 && (
+            <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+              <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Riwayat Dokumen (Surat)</h3>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{residentLetters.length} surat pernah diterbitkan untuk warga ini</p>
+                </div>
+              </div>
+
+              {residentLetters.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead>
+                      <tr className="border-b border-gray-100 dark:border-slate-800 text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                        <th className="px-3 py-2.5 font-bold">Nomor Surat</th>
+                        <th className="px-3 py-2.5 font-bold">Jenis Surat</th>
+                        <th className="px-3 py-2.5 font-bold">Tgl Terbit</th>
+                        <th className="px-3 py-2.5 font-bold">Status</th>
+                        <th className="px-3 py-2.5 font-bold text-right">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {residentLetters.map((letter: any) => (
+                        <tr key={letter.id} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="px-3 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white">{letter.nomor || '-'}</td>
+                          <td className="px-3 py-3 text-xs text-gray-700 dark:text-slate-300">{letter.jenis}</td>
+                          <td className="px-3 py-3 text-xs text-gray-500 dark:text-slate-400">{letter.tanggal}</td>
+                          <td className="px-3 py-3">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${
+                              letter.status === 'Selesai' 
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800'
+                                : 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:border-amber-800'
+                            }`}>{letter.status}</span>
+                          </td>
+                          <td className="px-3 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const fullData = await getLetterFullData(letter);
+                                setViewLetter({ ...letter, fullData });
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              Lihat
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40 text-center">
+                  <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400 italic">Belum ada riwayat surat untuk warga ini.</p>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ===== TAB 5: Riwayat Bantuan Sosial ===== */}
+          {activeTab === 4 && (
+            <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+              <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
+                  <HandHeart className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Riwayat Bantuan Sosial</h3>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{bansosHistory.length} catatan bantuan sosial untuk warga ini</p>
+                </div>
+              </div>
+
+              {bansosHistory.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead>
+                      <tr className="border-b border-gray-100 dark:border-slate-800 text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                        <th className="px-3 py-2.5 font-bold">Jenis Program</th>
+                        <th className="px-3 py-2.5 font-bold">Periode</th>
+                        <th className="px-3 py-2.5 font-bold">Nominal</th>
+                        <th className="px-3 py-2.5 font-bold">Status Penyaluran</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bansosHistory.map((entry, idx) => (
+                        <tr key={idx} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="px-3 py-3 text-xs font-bold text-gray-900 dark:text-white">{entry.program}</td>
+                          <td className="px-3 py-3 text-xs text-gray-500 dark:text-slate-400">{entry.periode}</td>
+                          <td className="px-3 py-3 font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{entry.nominal}</td>
+                          <td className="px-3 py-3">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${
+                              entry.status === 'Aktif'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800'
+                                : 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:border-rose-800'
+                            }`}>{entry.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40 text-center">
+                  <HandHeart className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400 italic">Belum ada catatan bantuan sosial untuk warga ini.</p>
+                </div>
+              )}
+            </section>
+          )}
         </div>
 
         {/* Right Columns: Sidebar Upload and Dropdowns */}
@@ -904,89 +1341,31 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
             </p>
           </section>
 
-          {/* Section 3: Status & Hubungan */}
+          {/* Status Keberadaan */}
           <section className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
             <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-700">
-                <Users className="w-5 h-5" />
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Status</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Status Keberadaan</h3>
             </div>
 
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Hubungan Keluarga</label>
-                <select 
-                  value={familyRelation}
-                  onChange={(e) => setFamilyRelation(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
+            <div className="space-y-2">
+              {['Aktif', 'Pindah', 'Meninggal', 'Ganda'].map((status) => (
+                <button
+                  key={status}
+                  type="button"
+                  onClick={() => setResidentStatus(status)}
+                  className={`w-full flex items-center justify-between gap-2 py-2.5 px-4 rounded-xl border-2 text-xs font-bold transition-all ${
+                    residentStatus === status
+                      ? 'border-emerald-600 bg-emerald-50/50 text-emerald-700'
+                      : 'border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50/60'
+                  }`}
                 >
-                  <option value="Kepala Keluarga">Kepala Keluarga</option>
-                  <option value="Istri">Istri</option>
-                  <option value="Anak">Anak</option>
-                  <option value="Orang Tua">Orang Tua</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pendidikan Terakhir</label>
-                <select 
-                  value={education}
-                  onChange={(e) => setEducation(e.target.value)}
-                  className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"
-                >
-                  <option value="Tidak/Belum Sekolah">Tidak/Belum Sekolah</option>
-                  <option value="SD / Sederajat">SD / Sederajat</option>
-                  <option value="SMP / Sederajat">SMP / Sederajat</option>
-                  <option value="SMA / Sederajat">SMA / Sederajat</option>
-                  <option value="Diploma (D1/D2/D3)">Diploma (D1/D2/D3)</option>
-                  <option value="Sarjana (S1)">Sarjana (S1)</option>
-                  <option value="Pascasarjana (S2/S3)">Pascasarjana (S2/S3)</option>
-                </select>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider block">Status Perkawinan</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'].map((status) => (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => setMaritalStatus(status)}
-                      className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
-                        maritalStatus === status
-                          ? 'border-emerald-600 bg-emerald-50/50 text-emerald-700'
-                          : 'border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50/60'
-                      }`}
-                    >
-                      {maritalStatus === status && <Check className="w-3.5 h-3.5" />}
-                      {status}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider block">Status Keberadaan (Kependudukan)</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['Aktif', 'Pindah', 'Meninggal', 'Ganda'].map((status) => (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => setResidentStatus(status)}
-                      className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-xs font-bold transition-all ${
-                        residentStatus === status
-                          ? 'border-emerald-600 bg-emerald-50/50 text-emerald-700'
-                          : 'border-gray-100 dark:border-slate-800 text-gray-500 dark:text-slate-400 hover:bg-gray-50/60'
-                      }`}
-                    >
-                      {residentStatus === status && <Check className="w-3.5 h-3.5" />}
-                      {status}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                  {status}
+                  {residentStatus === status && <Check className="w-3.5 h-3.5" />}
+                </button>
+              ))}
             </div>
           </section>
 
@@ -1087,6 +1466,68 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   <Save className="w-4 h-4" />
                   Ya, Simpan Data
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Letter Detail Modal */}
+      <AnimatePresence>
+        {viewLetter && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" 
+              onClick={() => setViewLetter(null)} 
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-6 w-full max-w-md border border-gray-100 dark:border-slate-800"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Detail Surat</h3>
+                </div>
+                <button 
+                  onClick={() => setViewLetter(null)}
+                  className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700 p-1.5 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-2.5">
+                  <span className="text-gray-500 dark:text-slate-400">Nomor Surat</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right font-mono">{viewLetter.nomor || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-2.5">
+                  <span className="text-gray-500 dark:text-slate-400">Jenis Surat</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right">{viewLetter.jenis || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-2.5">
+                  <span className="text-gray-500 dark:text-slate-400">Tgl Terbit</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right">{viewLetter.tanggal || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-2.5">
+                  <span className="text-gray-500 dark:text-slate-400">Status</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right">{viewLetter.status || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-2.5">
+                  <span className="text-gray-500 dark:text-slate-400">Keperluan</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right">{viewLetter.keperluan || '-'}</span>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <span className="text-gray-500 dark:text-slate-400">NIK</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right font-mono">{viewLetter.nik || '-'}</span>
+                </div>
               </div>
             </motion.div>
           </div>
