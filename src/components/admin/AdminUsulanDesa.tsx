@@ -83,7 +83,7 @@ const compressImage = (file: File): Promise<{ blob: Blob; originalSize: number; 
 function DropdownItem({ icon: Icon, label, color, onClick }: { icon: any; label: string; color: string; onClick: () => void }) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
       className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
     >
       <Icon className={`w-4 h-4 ${color}`} />
@@ -759,11 +759,11 @@ ${rowsHtml}
 
       {/* Spreadsheet Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[1200px]">
+        <div className="w-full overflow-x-auto rounded-2xl border border-slate-200/80 shadow-sm bg-white">
+          <table className="w-full text-left min-w-[1408px]">
             <thead>
               <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/40">
-                <th className="px-4 py-3.5 w-10">
+                <th className="w-12 px-4 py-4 text-center shrink-0">
                   <input
                     ref={masterCheckRef}
                     type="checkbox"
@@ -773,14 +773,14 @@ ${rowsHtml}
                     title="Pilih semua baris terfilter"
                   />
                 </th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID Usulan</th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan/Foto</th>
-                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
+                <th className="min-w-[150px] px-4 py-4 whitespace-nowrap shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID Usulan</th>
+                <th className="min-w-[340px] max-w-[550px] px-6 py-4 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
+                <th className="min-w-[140px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
+                <th className="min-w-[180px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
+                <th className="min-w-[180px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
+                <th className="min-w-[100px] px-4 py-4 whitespace-nowrap text-center text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
+                <th className="min-w-[150px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan/Foto</th>
+                <th className="min-w-[120px] px-4 py-4 whitespace-nowrap text-right shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -804,8 +804,13 @@ ${rowsHtml}
               ) : filtered.map(u => {
                 const isSelected = selectedIds.has(u.id);
                 return (
-                  <tr key={u.id} className={`border-b border-gray-50 dark:border-slate-800/60 transition-colors ${isSelected ? 'bg-emerald-50/60 dark:bg-emerald-950/20' : 'hover:bg-gray-50/40 dark:hover:bg-slate-800/30'}`}>
-                    <td className="px-4 py-3.5">
+                  <tr
+                    key={u.id}
+                    onClick={() => setDetailTarget(u)}
+                    className={`border-b border-gray-50 dark:border-slate-800/60 transition-colors cursor-pointer hover:bg-slate-50/80 group ${isSelected ? 'bg-emerald-50/60 dark:bg-emerald-950/20' : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}
+                    title="Klik untuk lihat detail usulan"
+                  >
+                    <td className="w-12 px-4 py-4 text-center shrink-0">
                       <input
                         type="checkbox"
                         checked={isSelected}
@@ -815,20 +820,19 @@ ${rowsHtml}
                         title="Pilih usulan"
                       />
                     </td>
-                    <td className="px-4 py-3.5">
-                      <span className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-300">{u.kode_usulan}</span>
+                    <td className="min-w-[150px] px-4 py-4 whitespace-nowrap shrink-0">
+                      <span className="whitespace-nowrap inline-block text-emerald-700 dark:text-emerald-300 text-xs font-mono font-semibold">{u.kode_usulan}</span>
                       <span className="block text-[10px] text-gray-400 mt-0.5">{new Date(u.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </td>
-                    <td className="px-4 py-3.5 min-w-[280px]">
+                    <td className="min-w-[340px] max-w-[550px] px-6 py-4">
                       <p
-                        onClick={() => setDetailTarget(u)}
-                        className="text-sm font-bold text-gray-800 dark:text-slate-100 leading-snug cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                        className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
                         title="Klik untuk lihat detail usulan"
                       >
                         {u.uraian_usulan}
                       </p>
                       {u.lokasi_rt_rw && (
-                        <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
                           <MapPin className="w-3 h-3" /> {u.lokasi_rt_rw}
                         </p>
                       )}
@@ -847,10 +851,10 @@ ${rowsHtml}
                         </button>
                       )}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="min-w-[140px] px-4 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${kodeSektorColor(u.kategori)}`}>{u.kategori}</span>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="min-w-[180px] px-4 py-4 whitespace-nowrap">
                       {(u.diteruskan_tags || []).length === 0 ? (
                         <span className="text-xs text-gray-400">—</span>
                       ) : (
@@ -863,15 +867,15 @@ ${rowsHtml}
                         </div>
                       )}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="min-w-[180px] px-4 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${statusTerakomodirBadge(u.status_terakomodir)}`}>
                         {u.status_terakomodir === 'Belum' ? <AlertTriangle className="w-3 h-3" /> : u.status_terakomodir === 'Ditolak' ? <Ban className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
                         {u.status_terakomodir}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="min-w-[100px] px-4 py-4 whitespace-nowrap text-center">
                       {u.skala_prioritas ? (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center justify-center gap-1">
                           <span className="text-sm font-black text-amber-600 dark:text-amber-400">{u.skala_prioritas}</span>
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map(n => (
@@ -883,10 +887,16 @@ ${rowsHtml}
                         <span className="text-xs text-gray-400">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="min-w-[150px] px-4 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         {u.foto_url ? (
-                          <img src={u.foto_url} alt="Dokumentasi lokasi" className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-slate-700 cursor-pointer" onClick={() => setDetailTarget(u)} title="Lihat foto" />
+                          <img
+                            src={u.foto_url}
+                            alt="Dokumentasi lokasi"
+                            className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-slate-700 cursor-pointer"
+                            onClick={(e) => { e.stopPropagation(); setDetailTarget(u); }}
+                            title="Lihat foto"
+                          />
                         ) : (
                           <span className="w-12 h-12 rounded-lg bg-gray-50 dark:bg-slate-800 border border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center">
                             <ImageIcon className="w-4 h-4 text-gray-300 dark:text-slate-600" />
@@ -900,7 +910,7 @@ ${rowsHtml}
                           )}
                           {u.google_drive_file_id && (
                             <button
-                              onClick={() => window.open(u.google_drive_view_url || u.google_drive_download_url || undefined, '_blank')}
+                              onClick={(e) => { e.stopPropagation(); window.open(u.google_drive_view_url || u.google_drive_download_url || undefined, '_blank'); }}
                               className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[9px] font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
                               title="Buka lampiran di Google Drive"
                             >
@@ -910,17 +920,17 @@ ${rowsHtml}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-0.5">
+                    <td className="min-w-[120px] px-4 py-4 whitespace-nowrap text-right shrink-0">
+                      <div className="flex items-center justify-end gap-0.5">
                         <button
-                          onClick={() => setDetailTarget(u)}
+                          onClick={(e) => { e.stopPropagation(); setDetailTarget(u); }}
                           title="Lihat detail"
                           className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 hover:text-sky-700 transition-colors cursor-pointer"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => openEditModal(u)}
+                          onClick={(e) => { e.stopPropagation(); openEditModal(u); }}
                           title="Edit"
                           className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 transition-colors cursor-pointer"
                         >
@@ -928,7 +938,7 @@ ${rowsHtml}
                         </button>
                         <div className="relative">
                           <button
-                            onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
+                            onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === u.id ? null : u.id); }}
                             title="Aksi lainnya"
                             className={`p-2 rounded-lg transition-colors cursor-pointer ${openMenuId === u.id ? 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                           >
@@ -936,8 +946,8 @@ ${rowsHtml}
                           </button>
                           {openMenuId === u.id && (
                             <>
-                              <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
-                              <div className="absolute right-0 top-full z-50 mt-1 w-56 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5">
+                              <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }} />
+                              <div className="absolute right-0 top-full z-50 mt-1 w-56 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5" onClick={(e) => e.stopPropagation()}>
                                 <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="Tarik ke RKPDes" onClick={() => { setOpenMenuId(null); openPipeline(u, 'rkpdes'); }} />
                                 <DropdownItem icon={Star} color="text-blue-600 dark:text-blue-400" label="Usulkan ke Musrenbang" onClick={() => { setOpenMenuId(null); openPipeline(u, 'musrenbang'); }} />
                                 <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Ubah Status Terakomodir" onClick={() => { setOpenMenuId(null); openPipeline(u, 'status'); }} />
