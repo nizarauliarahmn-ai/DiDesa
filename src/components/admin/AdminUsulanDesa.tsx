@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, Image as ImageIcon, FolderOpen,
   ListChecks, AlertTriangle, Layers, Upload, X, Loader2, Link2, MapPin, User,
-  CircleDollarSign, HeartHandshake, CheckCircle2, Ban, Send, Printer, Download, Star
+  CircleDollarSign, HeartHandshake, CheckCircle2, Ban, Send, Printer, Download, Star,
+  Eye, MoreVertical, Tags
 } from 'lucide-react';
 import { utils } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -10,6 +11,8 @@ import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { uploadToVillageGoogleDrive, getVillageGoogleDriveFolderId } from '../../utils/googleDriveUpload';
 import ImportUsulanWizard from './ImportUsulanWizard';
+import UsulanDetailModal from './UsulanDetailModal';
+import { findSimilarUsulan, tokenOverlapSimilarity, SIMILARITY_THRESHOLD } from '../../utils/similarity';
 
 export interface UsulanDesa {
   id: string;
@@ -77,6 +80,18 @@ const compressImage = (file: File): Promise<{ blob: Blob; originalSize: number; 
   });
 };
 
+function DropdownItem({ icon: Icon, label, color, onClick }: { icon: any; label: string; color: string; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+    >
+      <Icon className={`w-4 h-4 ${color}`} />
+      {label}
+    </button>
+  );
+}
+
 export default function AdminUsulanDesa() {
   const [list, setList] = useState<UsulanDesa[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +114,15 @@ export default function AdminUsulanDesa() {
 
   // Import state
   const [showImportModal, setShowImportModal] = useState(false);
+
+  // Bulk selection & detail/similarity state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [detailTarget, setDetailTarget] = useState<UsulanDesa | null>(null);
+  const [similarTarget, setSimilarTarget] = useState<UsulanDesa | null>(null);
+  const [bulkStatusOpen, setBulkStatusOpen] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const masterCheckRef = useRef<HTMLInputElement>(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -162,6 +186,31 @@ export default function AdminUsulanDesa() {
       return true;
     });
   }, [list, searchQuery, filterTahun, filterKategori, filterStatus]);
+
+  const allSelected = filtered.length > 0 && filtered.every(u => selectedIds.has(u.id));
+  const someSelected = selectedIds.size > 0 && !allSelected;
+
+  useEffect(() => {
+    if (masterCheckRef.current) {
+      masterCheckRef.current.indeterminate = someSelected;
+    }
+  }, [someSelected]);
+
+  // ── Deteksi usulan serupa (pairwise) ──
+  const similarMap = useMemo(() => {
+    const map: Record<string, UsulanDesa[]> = {};
+    for (let i = 0; i < list.length; i++) {
+      for (let j = i + 1; j < list.length; j++) {
+        const a = list[i];
+        const b = list[j];
+        if (tokenOverlapSimilarity(a.uraian_usulan, b.uraian_usulan) >= SIMILARITY_THRESHOLD) {
+          (map[a.id] = map[a.id] || []).push(b);
+          (map[b.id] = map[b.id] || []).push(a);
+        }
+      }
+    }
+    return map;
+  }, [list]);
 
   // ── Metrics ──
   const metricTotal = list.length;
@@ -235,15 +284,27 @@ export default function AdminUsulanDesa() {
     setShowModal(true);
   };
 
+  // ── Auto ID Generator: sekuensial per tahun, dicek langsung ke database ──
   const generateKodeUsulan = async (tahun: string): Promise<string> => {
     const prefix = `U-${tahun}-`;
-    const matches = list
-      .map(u => u.kode_usulan)
-      .filter(k => (k || '').startsWith(prefix))
-      .map(k => parseInt((k || '').slice(prefix.length), 10))
-      .filter(n => !isNaN(n));
-    const next = (matches.length > 0 ? Math.max(...matches) : 0) + 1;
-    return `${prefix}${String(next).padStart(3, '0')}`;
+    let max = 0;
+    const bump = (k: string | null | undefined) => {
+      if (k && k.startsWith(prefix)) {
+        const n = parseInt(k.slice(prefix.length), 10);
+        if (!isNaN(n)) max = Math.max(max, n);
+      }
+    };
+    list.forEach(u => bump(u.kode_usulan));
+    try {
+      const tenantId = await resolveCurrentTenant();
+      let builder = supabase.from('usulan_desas').select('kode_usulan').like('kode_usulan', `${prefix}%`);
+      if (tenantId) builder = builder.eq('tenant_id', tenantId);
+      const { data } = await builder;
+      (data || []).forEach(r => bump(r.kode_usulan));
+    } catch {
+      // fallback ke list lokal jika kueri gagal
+    }
+    return `${prefix}${String(max + 1).padStart(3, '0')}`;
   };
 
   const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -329,6 +390,16 @@ export default function AdminUsulanDesa() {
         if (error) throw error;
         showToast(`Usulan baru ${kode} berhasil disimpan.`, 'success');
       }
+
+      // Deteksi usulan serupa saat menambah/mengedit
+      const similar = findSimilarUsulan(
+        list.filter(u => !editing || u.id !== editing.id),
+        { uraian_usulan: form.uraian_usulan } as UsulanDesa
+      );
+      if (similar.length > 0) {
+        showToast(`Perhatian: ${similar.length} usulan lain berpotensi serupa (mis. ${similar[0].kode_usulan}).`, 'info');
+      }
+
       setShowModal(false);
       loadData();
     } catch (e: any) {
@@ -402,6 +473,71 @@ export default function AdminUsulanDesa() {
       showToast(e?.message || 'Gagal menyimpan aksi pipeline.', 'error');
     } finally {
       setPipelineSaving(false);
+    }
+  };
+
+  // ── Bulk Selection ──
+  const toggleAll = () => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (allSelected) {
+        filtered.forEach(u => next.delete(u.id));
+      } else {
+        filtered.forEach(u => next.add(u.id));
+      }
+      return next;
+    });
+  };
+
+  const toggleOne = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!window.confirm(`Hapus ${ids.length} usulan terpilih secara massal? Tindakan ini tidak dapat dibatalkan.`)) return;
+    setBulkBusy(true);
+    try {
+      const { error } = await supabase.from('usulan_desas').delete().in('id', ids);
+      if (error) throw error;
+      showToast(`${ids.length} usulan berhasil dihapus.`, 'success');
+      setSelectedIds(new Set());
+      loadData();
+    } catch (e: any) {
+      showToast(e?.message || 'Gagal menghapus usulan masal.', 'error');
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkSetTags = async (tag: string) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkBusy(true);
+    try {
+      const { data, error } = await supabase.from('usulan_desas').select('*').in('id', ids);
+      if (error) throw error;
+      for (const item of (data || []) as UsulanDesa[]) {
+        const tags = [...(item.diteruskan_tags || [])];
+        if (!tags.some(t => (t || '').toLowerCase() === tag.toLowerCase())) tags.push(tag);
+        const { error: uErr } = await supabase.from('usulan_desas').update({ diteruskan_tags: tags }).eq('id', item.id);
+        if (uErr) throw uErr;
+      }
+      showToast(`${ids.length} usulan ditandai "${tag}".`, 'success');
+      setBulkStatusOpen(false);
+      setSelectedIds(new Set());
+      loadData();
+    } catch (e: any) {
+      console.error('Bulk set tags error:', e);
+      showToast(e?.message || 'Gagal mengubah status masal.', 'error');
+    } finally {
+      setBulkBusy(false);
     }
   };
 
@@ -624,30 +760,40 @@ ${rowsHtml}
       {/* Spreadsheet Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left min-w-[1100px]">
+          <table className="w-full text-left min-w-[1200px]">
             <thead>
               <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/40">
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID Usulan</th>
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan/Foto</th>
-                <th className="px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
+                <th className="px-4 py-3.5 w-10">
+                  <input
+                    ref={masterCheckRef}
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                    title="Pilih semua baris terfilter"
+                  />
+                </th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID Usulan</th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan/Foto</th>
+                <th className="px-4 py-3.5 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center">
+                  <td colSpan={9} className="px-4 py-16 text-center">
                     <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
                     <p className="text-sm text-gray-500 mt-3 font-semibold">Memuat data usulan...</p>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-16 text-center">
+                  <td colSpan={9} className="px-4 py-16 text-center">
                     <div className="w-14 h-14 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
                       <FolderOpen className="w-7 h-7 text-gray-400" />
                     </div>
@@ -655,160 +801,196 @@ ${rowsHtml}
                     <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Klik tombol "Tambah Usulan Baru" untuk mulai merekam usulan pembangunan desa.</p>
                   </td>
                 </tr>
-              ) : filtered.map(u => (
-                <tr key={u.id} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/40 dark:hover:bg-slate-800/30 transition-colors">
-                  <td className="px-4 py-3">
-                    <span className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-300">{u.kode_usulan}</span>
-                    <span className="block text-[10px] text-gray-400 mt-0.5">{new Date(u.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                  </td>
-                  <td className="px-4 py-3 min-w-[280px]">
-                    <p className="text-sm font-bold text-gray-800 dark:text-slate-100 leading-snug">{u.uraian_usulan}</p>
-                    {u.lokasi_rt_rw && (
-                      <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                        <MapPin className="w-3 h-3" /> {u.lokasi_rt_rw}
+              ) : filtered.map(u => {
+                const isSelected = selectedIds.has(u.id);
+                return (
+                  <tr key={u.id} className={`border-b border-gray-50 dark:border-slate-800/60 transition-colors ${isSelected ? 'bg-emerald-50/60 dark:bg-emerald-950/20' : 'hover:bg-gray-50/40 dark:hover:bg-slate-800/30'}`}>
+                    <td className="px-4 py-3.5">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleOne(u.id)}
+                        onClick={e => e.stopPropagation()}
+                        className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                        title="Pilih usulan"
+                      />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-300">{u.kode_usulan}</span>
+                      <span className="block text-[10px] text-gray-400 mt-0.5">{new Date(u.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    </td>
+                    <td className="px-4 py-3.5 min-w-[280px]">
+                      <p
+                        onClick={() => setDetailTarget(u)}
+                        className="text-sm font-bold text-gray-800 dark:text-slate-100 leading-snug cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                        title="Klik untuk lihat detail usulan"
+                      >
+                        {u.uraian_usulan}
                       </p>
-                    )}
-                    {u.pengusul && (
-                      <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
-                        <User className="w-3 h-3" /> {u.pengusul}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${kodeSektorColor(u.kategori)}`}>{u.kategori}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {(u.diteruskan_tags || []).length === 0 ? (
-                      <span className="text-xs text-gray-400">—</span>
-                    ) : (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(u.diteruskan_tags || []).map((tag, i) => (
-                          <span key={i} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black border ${tagColor(tag)}`}>
-                            <Link2 className="w-3 h-3" /> {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${statusTerakomodirBadge(u.status_terakomodir)}`}>
-                      {u.status_terakomodir === 'Belum' ? <AlertTriangle className="w-3 h-3" /> : u.status_terakomodir === 'Ditolak' ? <Ban className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
-                      {u.status_terakomodir}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    {u.skala_prioritas ? (
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm font-black text-amber-600 dark:text-amber-400">{u.skala_prioritas}</span>
-                        <div className="flex gap-0.5">
-                          {[1, 2, 3, 4, 5].map(n => (
-                            <span key={n} className={`w-1.5 h-4 rounded-sm ${n <= u.skala_prioritas ? 'bg-amber-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
+                      {u.lokasi_rt_rw && (
+                        <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                          <MapPin className="w-3 h-3" /> {u.lokasi_rt_rw}
+                        </p>
+                      )}
+                      {u.pengusul && (
+                        <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5 flex items-center gap-1">
+                          <User className="w-3 h-3" /> {u.pengusul}
+                        </p>
+                      )}
+                      {similarMap[u.id] && similarMap[u.id].length > 0 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setSimilarTarget(u); }}
+                          className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800 text-[10px] font-black hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors cursor-pointer"
+                          title="Klik untuk melihat daftar usulan serupa"
+                        >
+                          <AlertTriangle className="w-3 h-3" /> {similarMap[u.id].length} Usulan Serupa
+                        </button>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${kodeSektorColor(u.kategori)}`}>{u.kategori}</span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {(u.diteruskan_tags || []).length === 0 ? (
+                        <span className="text-xs text-gray-400">—</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          {(u.diteruskan_tags || []).map((tag, i) => (
+                            <span key={i} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black border ${tagColor(tag)}`}>
+                              <Link2 className="w-3 h-3" /> {tag}
+                            </span>
                           ))}
                         </div>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-gray-400">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {u.foto_url ? (
-                        <img src={u.foto_url} alt="Dokumentasi lokasi" className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-slate-700 cursor-pointer" onClick={() => window.open(u.google_drive_view_url || u.foto_url, '_blank')} title="Lihat foto" />
-                      ) : (
-                        <span className="w-12 h-12 rounded-lg bg-gray-50 dark:bg-slate-800 border border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center">
-                          <ImageIcon className="w-4 h-4 text-gray-300 dark:text-slate-600" />
-                        </span>
                       )}
-                      <div className="min-w-0">
-                        {u.keterangan ? (
-                          <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-2 max-w-[160px]">{u.keterangan}</p>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${statusTerakomodirBadge(u.status_terakomodir)}`}>
+                        {u.status_terakomodir === 'Belum' ? <AlertTriangle className="w-3 h-3" /> : u.status_terakomodir === 'Ditolak' ? <Ban className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
+                        {u.status_terakomodir}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {u.skala_prioritas ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-black text-amber-600 dark:text-amber-400">{u.skala_prioritas}</span>
+                          <div className="flex gap-0.5">
+                            {[1, 2, 3, 4, 5].map(n => (
+                              <span key={n} className={`w-1.5 h-4 rounded-sm ${n <= u.skala_prioritas ? 'bg-amber-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-2">
+                        {u.foto_url ? (
+                          <img src={u.foto_url} alt="Dokumentasi lokasi" className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-slate-700 cursor-pointer" onClick={() => setDetailTarget(u)} title="Lihat foto" />
                         ) : (
-                          <span className="text-[11px] text-gray-300 dark:text-slate-600">Tidak ada</span>
+                          <span className="w-12 h-12 rounded-lg bg-gray-50 dark:bg-slate-800 border border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center">
+                            <ImageIcon className="w-4 h-4 text-gray-300 dark:text-slate-600" />
+                          </span>
                         )}
-                        {u.google_drive_file_id && (
-                          <button
-                            onClick={() => window.open(u.google_drive_view_url || u.google_drive_download_url || undefined, '_blank')}
-                            className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[9px] font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
-                            title="Buka lampiran di Google Drive"
-                          >
-                            <FolderOpen className="w-2.5 h-2.5" /> Google Drive Desa
-                          </button>
-                        )}
+                        <div className="min-w-0">
+                          {u.keterangan ? (
+                            <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-2 max-w-[160px]">{u.keterangan}</p>
+                          ) : (
+                            <span className="text-[11px] text-gray-300 dark:text-slate-600">Tidak ada</span>
+                          )}
+                          {u.google_drive_file_id && (
+                            <button
+                              onClick={() => window.open(u.google_drive_view_url || u.google_drive_download_url || undefined, '_blank')}
+                              className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[9px] font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
+                              title="Buka lampiran di Google Drive"
+                            >
+                              <FolderOpen className="w-2.5 h-2.5" /> Google Drive Desa
+                            </button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-1.5">
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-0.5">
                         <button
-                          onClick={() => openPipeline(u, 'rkpdes')}
-                          title="Tarik ke RKPDes"
-                          className="p-1.5 rounded-lg text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors cursor-pointer"
+                          onClick={() => setDetailTarget(u)}
+                          title="Lihat detail"
+                          className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 hover:text-sky-700 transition-colors cursor-pointer"
                         >
-                          <Send className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openPipeline(u, 'musrenbang')}
-                          title="Usulkan ke Musrenbang"
-                          className="p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
-                        >
-                          <Star className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => openPipeline(u, 'status')}
-                          title="Ubah Status Terakomodir"
-                          className="p-1.5 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors cursor-pointer"
-                        >
-                          <CircleDollarSign className="w-4 h-4" />
+                          <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openEditModal(u)}
                           title="Edit"
-                          className="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 transition-colors cursor-pointer"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button
-                          onClick={() => handleDelete(u)}
-                          title="Hapus"
-                          className="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 hover:text-rose-700 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="relative">
+                          <button
+                            onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
+                            title="Aksi lainnya"
+                            className={`p-2 rounded-lg transition-colors cursor-pointer ${openMenuId === u.id ? 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                          {openMenuId === u.id && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setOpenMenuId(null)} />
+                              <div className="absolute right-0 top-full z-50 mt-1 w-56 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5">
+                                <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="Tarik ke RKPDes" onClick={() => { setOpenMenuId(null); openPipeline(u, 'rkpdes'); }} />
+                                <DropdownItem icon={Star} color="text-blue-600 dark:text-blue-400" label="Usulkan ke Musrenbang" onClick={() => { setOpenMenuId(null); openPipeline(u, 'musrenbang'); }} />
+                                <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Ubah Status Terakomodir" onClick={() => { setOpenMenuId(null); openPipeline(u, 'status'); }} />
+                                <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
+                                <DropdownItem icon={Trash2} color="text-rose-600 dark:text-rose-400" label="Hapus Usulan" onClick={() => { setOpenMenuId(null); handleDelete(u); }} />
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-1">
-                        <button
-                          onClick={() => openPipeline(u, 'rkpdes')}
-                          className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 transition-colors cursor-pointer"
-                        >
-                          Tarik RKPDes
-                        </button>
-                        <button
-                          onClick={() => openPipeline(u, 'musrenbang')}
-                          className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 transition-colors cursor-pointer"
-                        >
-                          Musrenbang
-                        </button>
-                        <button
-                          onClick={() => openPipeline(u, 'status')}
-                          className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100 transition-colors cursor-pointer"
-                        >
-                          Status
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
         {!loading && filtered.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-xs text-gray-500 dark:text-slate-400 font-semibold">
-            Menampilkan {filtered.length} dari {list.length} usulan
+            Menampilkan {filtered.length} dari {list.length} usulan{selectedIds.size > 0 && <span className="text-emerald-600 dark:text-emerald-400"> · {selectedIds.size} terpilih</span>}
           </div>
         )}
       </div>
+
+      {/* Floating Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9990] w-[95vw] max-w-2xl">
+          <div className="flex items-center gap-2 flex-wrap justify-center rounded-2xl bg-slate-900/95 dark:bg-black/90 backdrop-blur border border-white/10 shadow-2xl px-4 py-3">
+            <span className="text-sm font-black text-white whitespace-nowrap">{selectedIds.size} Usulan Terpilih</span>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkBusy}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-white bg-rose-600 hover:bg-rose-700 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {bulkBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '🗑️'} Hapus Masal ({selectedIds.size})
+            </button>
+            <button
+              onClick={() => setBulkStatusOpen(true)}
+              disabled={bulkBusy}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-white bg-sky-600 hover:bg-sky-700 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              🏷️ Ubah Status Masal
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="p-2 rounded-xl text-gray-300 hover:bg-white/10 transition-colors cursor-pointer"
+              title="Batalkan pilihan"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Modal */}
       {showModal && (
@@ -1099,12 +1281,101 @@ ${rowsHtml}
         </div>
       )}
 
+      {/* Bulk Status Modal */}
+      {bulkStatusOpen && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <Tags className="w-5 h-5 text-sky-600 dark:text-sky-400" /> Ubah Status Masal
+              </h3>
+              <button onClick={() => setBulkStatusOpen(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-3">
+              <p className="text-xs font-bold text-gray-500 dark:text-slate-400">
+                Terapkan label Diteruskan pada <span className="font-black text-gray-900 dark:text-white">{selectedIds.size} usulan</span> terpilih secara bersamaan:
+              </p>
+              <div className="flex flex-col gap-2">
+                {TAG_OPTIONS.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => handleBulkSetTags(tag)}
+                    disabled={bulkBusy}
+                    className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold border transition-all cursor-pointer disabled:opacity-50 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 border-gray-200 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950/30"
+                  >
+                    <span className="flex items-center gap-2"><Tags className="w-4 h-4 text-sky-600 dark:text-sky-400" /> {tag}</span>
+                    {bulkBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end px-6 py-4 border-t border-gray-100 dark:border-slate-800">
+              <button
+                onClick={() => setBulkStatusOpen(false)}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Similar Usulan Modal */}
+      {similarTarget && similarMap[similarTarget.id] && similarMap[similarTarget.id].length > 0 && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-orange-500" /> Usulan Serupa
+              </h3>
+              <button onClick={() => setSimilarTarget(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <p className="text-sm text-gray-600 dark:text-slate-300">
+                Usulan yang diperiksa: <span className="font-black text-gray-900 dark:text-white">{similarTarget.uraian_usulan}</span>
+              </p>
+              <div className="space-y-2">
+                {similarMap[similarTarget.id].map(s => (
+                  <button
+                    key={s.id}
+                    onClick={() => { setSimilarTarget(null); setDetailTarget(s); }}
+                    className="w-full text-left bg-gray-50 dark:bg-slate-800 rounded-xl px-4 py-3 border border-gray-100 dark:border-slate-700 hover:border-orange-300 transition-colors cursor-pointer"
+                  >
+                    <p className="text-[10px] font-mono font-black text-emerald-700 dark:text-emerald-300">{s.kode_usulan}</p>
+                    <p className="text-sm font-bold text-gray-800 dark:text-slate-100 mt-0.5">{s.uraian_usulan}</p>
+                    <p className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {s.lokasi_rt_rw || '—'} · Kemiripan {Math.round(tokenOverlapSimilarity(similarTarget.uraian_usulan, s.uraian_usulan) * 100)}%
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {detailTarget && (
+        <UsulanDetailModal
+          usulan={detailTarget}
+          allUsulan={list}
+          onClose={() => setDetailTarget(null)}
+          onEdit={(u) => { setDetailTarget(null); openEditModal(u); }}
+        />
+      )}
+
       {/* Import Wizard */}
       <ImportUsulanWizard
         open={showImportModal}
         onClose={() => setShowImportModal(false)}
         onImported={loadData}
         existingKodes={list.map(u => u.kode_usulan)}
+        existingItems={list}
       />
     </div>
   );

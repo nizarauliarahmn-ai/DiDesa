@@ -7,6 +7,7 @@ import { read, utils } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { normalizeText } from '../../utils/similarity';
 
 export type ImportFieldKey =
   | 'kode_usulan'
@@ -146,15 +147,24 @@ interface Props {
   onClose: () => void;
   onImported: () => void;
   existingKodes: string[];
+  existingItems?: ExistingUsulan[];
 }
 
-export default function ImportUsulanWizard({ open, onClose, onImported, existingKodes }: Props) {
+interface ExistingUsulan {
+  id: string;
+  kode_usulan: string;
+  uraian_usulan: string;
+}
+
+export default function ImportUsulanWizard({ open, onClose, onImported, existingKodes, existingItems }: Props) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [parsed, setParsed] = useState<ParsedFile | null>(null);
   const [mapping, setMapping] = useState<Mapping>({ ...EMPTY_MAPPING });
   const [reading, setReading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [showDupDialog, setShowDupDialog] = useState(false);
+  const [dupMode, setDupMode] = useState<'skip' | 'overwrite' | 'keep'>('skip');
 
   const handleFile = async (file: File) => {
     const name = file.name.toLowerCase();
@@ -213,11 +223,24 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
     return parsed.rows.map(mapRow).filter((r): r is PreviewRow => r !== null);
   }, [parsed, mapping]);
 
+  // Deteksi duplikat terhadap data yang sudah ada di database (kode / judul usulan)
+  const dupRows = useMemo(() => {
+    if (!parsed) return [];
+    const items = existingItems || [];
+    const kodeSet = new Set(items.map(i => i.kode_usulan).filter(Boolean));
+    const uraianSet = new Set(items.map(i => normalizeText(i.uraian_usulan)).filter(Boolean));
+    return validRows.filter(r => {
+      const kodeDup = !!r.kode_usulan && kodeSet.has(r.kode_usulan);
+      const uraianDup = uraianSet.has(normalizeText(r.uraian_usulan));
+      return kodeDup || uraianDup;
+    });
+  }, [parsed, mapping, existingItems, validRows]);
+
   const mappedCount = Object.values(mapping).filter(v => v >= 0).length;
   const confirmed = mapping.uraian_usulan >= 0 ? 'uraian' : null;
   const canConfirm = confirmed !== null && validRows.length > 0;
 
-  const handleConfirm = async () => {
+  const doImport = async (mode: 'skip' | 'overwrite' | 'keep') => {
     if (!parsed || !canConfirm) return;
     setImporting(true);
     try {
@@ -229,11 +252,44 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
         const m = k.match(/U-(\d{4})-(\d{3})/);
         if (m && m[1] === year) next = Math.max(next, parseInt(m[2], 10) + 1);
       });
+      const items = existingItems || [];
+      const byKode = new Map<string, ExistingUsulan>();
+      const byUraian = new Map<string, ExistingUsulan>();
+      items.forEach(i => {
+        if (i.kode_usulan) byKode.set(i.kode_usulan, i);
+        byUraian.set(normalizeText(i.uraian_usulan), i);
+      });
+
       const inserts: any[] = [];
-      let imported = 0;
+      const updates: any[] = [];
+      let inserted = 0;
+      let updated = 0;
+      let skipped = 0;
+
       for (const row of parsed.rows) {
         const obj = mapRow(row);
         if (!obj) continue;
+        const existing = (obj.kode_usulan && byKode.get(obj.kode_usulan)) || byUraian.get(normalizeText(obj.uraian_usulan));
+        if (existing) {
+          if (mode === 'skip') {
+            skipped += 1;
+            continue;
+          }
+          if (mode === 'overwrite') {
+            updates.push({
+              id: existing.id,
+              uraian_usulan: obj.uraian_usulan,
+              lokasi_rt_rw: obj.lokasi_rt_rw || null,
+              diteruskan_tags: obj.diteruskan_tags,
+              status_terakomodir: obj.status_terakomodir,
+              skala_prioritas: obj.skala_prioritas,
+              keterangan: obj.keterangan || null,
+            });
+            updated += 1;
+            continue;
+          }
+          // mode 'keep' → jatuh ke insert sebagai usulan baru
+        }
         let kode = obj.kode_usulan;
         if (!kode || taken.has(kode)) {
           let candidate = `U-${year}-${String(next).padStart(3, '0')}`;
@@ -257,15 +313,28 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
           keterangan: obj.keterangan || null,
           foto_url: null,
         });
-        imported += 1;
+        inserted += 1;
       }
-      if (imported === 0) {
+
+      if (inserted === 0 && updated === 0) {
         showToast('Tidak ada baris valid untuk diimpor.', 'error');
         return;
       }
-      const { error } = await supabase.from('usulan_desas').insert(inserts);
-      if (error) throw error;
-      showToast(`✓ Berhasil mengimpor ${imported} data usulan desa!`, 'success');
+
+      if (updates.length > 0) {
+        const { error } = await supabase.from('usulan_desas').upsert(updates, { onConflict: 'id' });
+        if (error) throw error;
+      }
+      if (inserts.length > 0) {
+        const { error } = await supabase.from('usulan_desas').insert(inserts);
+        if (error) throw error;
+      }
+
+      const parts: string[] = [];
+      if (inserted > 0) parts.push(`${inserted} baru`);
+      if (updated > 0) parts.push(`${updated} diperbarui`);
+      if (skipped > 0) parts.push(`${skipped} dilewati`);
+      showToast(`✓ Impor selesai: ${parts.join(', ')}.`, 'success');
       setStep(1);
       setParsed(null);
       setMapping({ ...EMPTY_MAPPING });
@@ -276,6 +345,14 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
       showToast(e?.message || 'Gagal menyimpan data impor.', 'error');
     } finally {
       setImporting(false);
+    }
+  };
+
+  const handleConfirmClick = () => {
+    if (dupRows.length > 0) {
+      setShowDupDialog(true);
+    } else {
+      doImport('skip');
     }
   };
 
@@ -305,6 +382,7 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
   );
 
   return (
+    <>
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col">
         {/* Header */}
@@ -489,6 +567,20 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
                 </div>
               </div>
 
+              {dupRows.length > 0 && (
+                <div className="rounded-xl border border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/40 px-4 py-3 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-black text-orange-800 dark:text-orange-300">
+                      {dupRows.length} baris terdeteksi duplikat dengan data yang sudah ada di database.
+                    </p>
+                    <p className="text-[11px] text-orange-700 dark:text-orange-400 mt-0.5">
+                      Duplikat dideteksi dari kode usulan atau judul usulan yang sama. Klik tombol impor untuk memilih cara penanganan.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">
@@ -535,7 +627,7 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
             <div className="flex items-center gap-3">
               {confirmed && (
                 <button
-                  onClick={handleConfirm}
+                  onClick={handleConfirmClick}
                   disabled={importing || !canConfirm}
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-50 cursor-pointer"
                 >
@@ -548,5 +640,63 @@ export default function ImportUsulanWizard({ open, onClose, onImported, existing
         </div>
       </div>
     </div>
+
+    {/* Dialog Konfirmasi Penanganan Duplikat */}
+    {showDupDialog && (
+      <div className="fixed inset-0 z-[10001] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+            <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-orange-500" /> Data Duplikat Ditemukan
+            </h3>
+            <button onClick={() => setShowDupDialog(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="px-6 py-5 space-y-4">
+            <p className="text-sm text-gray-600 dark:text-slate-300">
+              Sebanyak <span className="font-black text-gray-900 dark:text-white">{dupRows.length} baris</span> dari file terdeteksi
+              sudah pernah diimpor (kode/judul usulan sama dengan data di database). Pilih cara penanganan:
+            </p>
+            <div className="max-h-40 overflow-y-auto rounded-xl border border-gray-100 dark:border-slate-800 divide-y divide-gray-50 dark:divide-slate-800">
+              {dupRows.slice(0, 10).map((r, i) => (
+                <div key={i} className="px-3 py-2">
+                  <p className="text-[10px] font-mono font-black text-emerald-700 dark:text-emerald-300">{r.kode_usulan || 'auto'}</p>
+                  <p className="text-xs font-bold text-gray-700 dark:text-slate-300 truncate">{r.uraian_usulan}</p>
+                </div>
+              ))}
+              {dupRows.length > 10 && (
+                <p className="px-3 py-2 text-[11px] text-gray-400 font-semibold">... dan {dupRows.length - 10} baris lainnya</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => { setDupMode('skip'); setShowDupDialog(false); doImport('skip'); }}
+                disabled={importing}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-black border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <span>⏩ Lewati Data Duplikat (Skip)</span>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-slate-900 px-1.5 py-0.5 rounded">DEFAULT</span>
+              </button>
+              <button
+                onClick={() => { setDupMode('overwrite'); setShowDupDialog(false); doImport('overwrite'); }}
+                disabled={importing}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-950/40 text-sky-800 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <span>🔄 Timpa Data Lama (Update/Overwrite)</span>
+              </button>
+              <button
+                onClick={() => { setDupMode('keep'); setShowDupDialog(false); doImport('keep'); }}
+                disabled={importing}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <span>➕ Tetap Simpan Sebagai Usulan Baru</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
