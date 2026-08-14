@@ -8,6 +8,7 @@ import { utils } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { uploadToVillageGoogleDrive, getVillageGoogleDriveFolderId } from '../../utils/googleDriveUpload';
 import ImportUsulanWizard from './ImportUsulanWizard';
 
 export interface UsulanDesa {
@@ -23,6 +24,9 @@ export interface UsulanDesa {
   skala_prioritas?: number | null;
   keterangan?: string | null;
   foto_url?: string | null;
+  google_drive_file_id?: string | null;
+  google_drive_view_url?: string | null;
+  google_drive_download_url?: string | null;
   created_at: string;
 }
 
@@ -108,6 +112,9 @@ export default function AdminUsulanDesa() {
     skala_prioritas: '' as string,
     keterangan: '',
     foto_url: '',
+    google_drive_file_id: '',
+    google_drive_view_url: '',
+    google_drive_download_url: '',
   });
 
   const loadData = async () => {
@@ -201,6 +208,9 @@ export default function AdminUsulanDesa() {
       skala_prioritas: '',
       keterangan: '',
       foto_url: '',
+      google_drive_file_id: '',
+      google_drive_view_url: '',
+      google_drive_download_url: '',
     });
     setShowModal(true);
   };
@@ -218,6 +228,9 @@ export default function AdminUsulanDesa() {
       skala_prioritas: u.skala_prioritas != null ? String(u.skala_prioritas) : '',
       keterangan: u.keterangan || '',
       foto_url: u.foto_url || '',
+      google_drive_file_id: u.google_drive_file_id || '',
+      google_drive_view_url: u.google_drive_view_url || '',
+      google_drive_download_url: u.google_drive_download_url || '',
     });
     setShowModal(true);
   };
@@ -240,13 +253,37 @@ export default function AdminUsulanDesa() {
       const file = e.target.files[0];
       const { blob: compressedBlob } = await compressImage(file);
       const fileName = `usulan-${Date.now()}-${Math.floor(Math.random() * 10000)}.jpg`;
+
+      // Coba unggah ke Google Drive desa jika sudah dikonfigurasi
+      let gdriveFileId = '';
+      let gdriveViewUrl = '';
+      let gdriveDownloadUrl = '';
+      try {
+        const folderId = await getVillageGoogleDriveFolderId();
+        if (folderId) {
+          const driveResult = await uploadToVillageGoogleDrive(new File([compressedBlob], fileName, { type: 'image/jpeg' }), folderId);
+          gdriveFileId = driveResult.fileId;
+          gdriveViewUrl = driveResult.viewUrl;
+          gdriveDownloadUrl = driveResult.downloadUrl;
+        }
+      } catch (driveErr: any) {
+        console.warn('Google Drive upload skipped:', driveErr?.message);
+      }
+
+      // Fallback tetap unggah ke storage Supabase agar preview tersedia di semua kondisi
       const { error: uploadError } = await supabase.storage
         .from('public-assets')
         .upload(fileName, compressedBlob, { contentType: 'image/jpeg' });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from('public-assets').getPublicUrl(fileName);
-      setForm(prev => ({ ...prev, foto_url: publicUrl }));
-      showToast('Foto lokasi berhasil diunggah.', 'success');
+      setForm(prev => ({
+        ...prev,
+        foto_url: publicUrl,
+        google_drive_file_id: gdriveFileId,
+        google_drive_view_url: gdriveViewUrl,
+        google_drive_download_url: gdriveDownloadUrl,
+      }));
+      showToast(gdriveViewUrl ? 'Foto berhasil diunggah ke Google Drive Desa ✓' : 'Foto berhasil diunggah (Google Drive belum dikonfigurasi).', 'success');
       e.target.value = '';
     } catch (error: any) {
       console.error('Error uploading photo:', error);
@@ -278,6 +315,9 @@ export default function AdminUsulanDesa() {
         skala_prioritas: form.skala_prioritas ? parseInt(form.skala_prioritas, 10) : null,
         keterangan: form.keterangan.trim() || null,
         foto_url: form.foto_url || null,
+        google_drive_file_id: form.google_drive_file_id || null,
+        google_drive_view_url: form.google_drive_view_url || null,
+        google_drive_download_url: form.google_drive_download_url || null,
       };
 
       if (editing) {
@@ -673,7 +713,7 @@ ${rowsHtml}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       {u.foto_url ? (
-                        <img src={u.foto_url} alt="Dokumentasi lokasi" className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-slate-700 cursor-pointer" onClick={() => window.open(u.foto_url, '_blank')} title="Lihat foto" />
+                        <img src={u.foto_url} alt="Dokumentasi lokasi" className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-slate-700 cursor-pointer" onClick={() => window.open(u.google_drive_view_url || u.foto_url, '_blank')} title="Lihat foto" />
                       ) : (
                         <span className="w-12 h-12 rounded-lg bg-gray-50 dark:bg-slate-800 border border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center">
                           <ImageIcon className="w-4 h-4 text-gray-300 dark:text-slate-600" />
@@ -684,6 +724,15 @@ ${rowsHtml}
                           <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-2 max-w-[160px]">{u.keterangan}</p>
                         ) : (
                           <span className="text-[11px] text-gray-300 dark:text-slate-600">Tidak ada</span>
+                        )}
+                        {u.google_drive_file_id && (
+                          <button
+                            onClick={() => window.open(u.google_drive_view_url || u.google_drive_download_url || undefined, '_blank')}
+                            className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[9px] font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
+                            title="Buka lampiran di Google Drive"
+                          >
+                            <FolderOpen className="w-2.5 h-2.5" /> Google Drive Desa
+                          </button>
                         )}
                       </div>
                     </div>
@@ -878,13 +927,25 @@ ${rowsHtml}
                 {form.foto_url ? (
                   <div className="flex items-center gap-3">
                     <img src={form.foto_url} alt="Foto lokasi" className="w-24 h-24 rounded-xl object-cover border border-gray-200 dark:border-slate-700" />
-                    <button
-                      type="button"
-                      onClick={() => setForm(prev => ({ ...prev, foto_url: '' }))}
-                      className="px-3 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer"
-                    >
-                      Hapus Foto
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      {form.google_drive_view_url && (
+                        <a
+                          href={form.google_drive_view_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
+                        >
+                          <FolderOpen className="w-3.5 h-3.5" /> Lihat di Google Drive
+                        </a>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setForm(prev => ({ ...prev, foto_url: '', google_drive_file_id: '', google_drive_view_url: '', google_drive_download_url: '' }))}
+                        className="px-3 py-2 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 transition-colors cursor-pointer"
+                      >
+                        Hapus Foto
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <label className="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/30 dark:hover:bg-emerald-950/20 transition-all block">

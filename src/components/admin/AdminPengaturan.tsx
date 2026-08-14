@@ -6,10 +6,11 @@ import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { 
   Building2, MapPin, Save, Image as ImageIcon, Check, Bot, Layout, Upload, Map,
-  Palette, Smartphone, Compass, Settings, FileText, Cloud
+  Palette, Smartphone, Compass, Settings, FileText, Cloud, FolderOpen, Link2, Loader2
 } from 'lucide-react';
 import VillageMapModal from '../common/VillageMapModal';
 import VillageMapPreview from '../common/VillageMapPreview';
+import { testGoogleDriveFolder } from '../../utils/googleDriveUpload';
 
 export default function AdminPengaturan() {
   const [tenantId, setTenantId] = useState<string | null>(null);
@@ -33,6 +34,10 @@ export default function AdminPengaturan() {
 
   const [appTheme, setAppTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
   const [letterFont, setLetterFont] = useState(() => localStorage.getItem('village_letter_font') || 'Arial, sans-serif');
+
+  const [googleDriveFolderId, setGoogleDriveFolderId] = useState(() => localStorage.getItem('google_drive_folder_id') || '');
+  const [gdriveTesting, setGdriveTesting] = useState(false);
+  const [gdriveTestResult, setGdriveTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   // Fetch settings from Supabase on mount to keep device-agnostic sync
   useEffect(() => {
@@ -69,6 +74,7 @@ export default function AdminPengaturan() {
           set('village_aspirasi_banner_zoom', setAspirasiBannerZoom);
           set('app_theme', setAppTheme);
           set('village_letter_font', setLetterFont);
+          set('google_drive_folder_id', setGoogleDriveFolderId);
           if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
           if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
           window.dispatchEvent(new Event('village_settings_updated'));
@@ -158,6 +164,7 @@ export default function AdminPengaturan() {
       village_lng: villageLng.toString(),
       app_theme: appTheme,
       village_letter_font: letterFont,
+      google_drive_folder_id: googleDriveFolderId,
     };
     Object.entries(localMap).forEach(([key, value]) => localStorage.setItem(key, value));
 
@@ -212,6 +219,21 @@ export default function AdminPengaturan() {
     window.dispatchEvent(new Event('letter_font_updated'));
 
     setIsSaving(false);
+  };
+
+  const handleTestGoogleDrive = async () => {
+    setGdriveTesting(true);
+    setGdriveTestResult(null);
+    try {
+      const result = await testGoogleDriveFolder(googleDriveFolderId.trim());
+      setGdriveTestResult(result);
+      showToast(result.message, result.ok ? 'success' : 'error');
+    } catch (e: any) {
+      setGdriveTestResult({ ok: false, message: e?.message || 'Gagal menguji koneksi Google Drive.' });
+      showToast('Gagal menguji koneksi Google Drive.', 'error');
+    } finally {
+      setGdriveTesting(false);
+    }
   };
 
   const handleImportDocument = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -483,6 +505,56 @@ export default function AdminPengaturan() {
                   <input type="number" step="any" value={villageLng} onChange={(e) => setVillageLng(parseFloat(e.target.value))} className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-xs font-mono outline-none" />
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Google Drive Desa */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
+              <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                <Cloud className="w-5 h-5 text-emerald-600" />
+                Google Drive Desa
+              </h3>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <FolderOpen className="w-3 h-3" /> ID Folder Google Drive
+                </label>
+                <input
+                  type="text"
+                  value={googleDriveFolderId}
+                  onChange={(e) => setGoogleDriveFolderId(e.target.value)}
+                  placeholder="Contoh: 1AbCdEfGhIjKlMnOpQrStUv"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono text-gray-900 dark:text-white transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
+                />
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
+                  Masukkan ID Folder Google Drive Desa untuk menampung file lampiran foto usulan &amp; dokumen.
+                </p>
+              </div>
+              <button
+                onClick={handleTestGoogleDrive}
+                disabled={gdriveTesting}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors disabled:opacity-60 cursor-pointer"
+              >
+                {gdriveTesting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Menguji Koneksi...
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="w-4 h-4" /> Uji Koneksi Google Drive
+                  </>
+                )}
+              </button>
+              {gdriveTestResult && (
+                <p className={`text-[11px] font-bold px-3 py-2 rounded-xl border ${gdriveTestResult.ok
+                  ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                  : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
+                }`}>
+                  {gdriveTestResult.message}
+                </p>
+              )}
             </div>
           </div>
 
