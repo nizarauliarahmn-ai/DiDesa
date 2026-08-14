@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   X, Search, Upload, Camera, Database, CheckCircle2, AlertTriangle, Loader2,
-  FileSpreadsheet, FileText, Scan, UserPlus, Trash2, RefreshCw, Zap, QrCode
+  FileSpreadsheet, FileText, Scan, UserPlus, Trash2, RefreshCw, Zap, QrCode, Calendar
 } from 'lucide-react';
 import { read, utils } from 'xlsx';
 import { supabase } from '../../../utils/supabase';
@@ -583,13 +583,33 @@ export default function AdminBantuanTambahPenerima({
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between gap-3">
-          <div className="text-xs text-gray-500 dark:text-slate-400 font-semibold">
-            {tab === 'manual' && <span>Terpilih: <strong className="text-emerald-700">{manualRegistered}</strong> penerima</span>}
-            {tab === 'import' && <span>Siap diproses: <strong className="text-emerald-700">{parsedRegistered}</strong> penerima</span>}
-            {tab === 'scan' && <span>Hasil scan: <strong className="text-emerald-700">{scannedRegistered}</strong> penerima</span>}
+        <div className="p-6 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-xs text-gray-500 dark:text-slate-400 font-semibold">
+              {tab === 'manual' && <span>Terpilih: <strong className="text-emerald-700">{manualRegistered}</strong> penerima</span>}
+              {tab === 'import' && <span>Siap diproses: <strong className="text-emerald-700">{parsedRegistered}</strong> penerima</span>}
+              {tab === 'scan' && <span>Hasil scan: <strong className="text-emerald-700">{scannedRegistered}</strong> penerima</span>}
+            </div>
+
+            {/* Konfirmasi Tahun Penyaluran sebelum disimpan */}
+            <div className="flex items-center gap-2 p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-emerald-200 dark:border-emerald-800/60">
+              <Calendar className="w-4 h-4 text-emerald-700 dark:text-emerald-400 flex-shrink-0" />
+              <span className="text-[11px] font-extrabold text-gray-700 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap">
+                Simpan sebagai penerima tahun
+              </span>
+              <select
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-black text-emerald-800 dark:text-emerald-300 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+              >
+                {[new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1].map(y => (
+                  <option key={y} value={y.toString()}>{y}</option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className="flex gap-3">
+
+          <div className="flex justify-end gap-3">
             <button onClick={onClose} className="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
               Batal
             </button>
@@ -604,9 +624,9 @@ export default function AdminBantuanTambahPenerima({
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {saving ? "Menyimpan..." : (
-                tab === 'import' ? `🚀 Proses Impor [${parsedRegistered}] Penerima` :
-                tab === 'scan' ? `Simpan [${scannedRegistered}] Hasil Scan` :
-                `Simpan [${manualRegistered}] Penerima`
+                tab === 'import' ? `🚀 Proses Impor [${parsedRegistered}] Penerima — ${year}` :
+                tab === 'scan' ? `Simpan [${scannedRegistered}] Hasil Scan — Tahun ${year}` :
+                `Simpan [${manualRegistered}] Penerima — Tahun ${year}`
               )}
             </button>
           </div>
