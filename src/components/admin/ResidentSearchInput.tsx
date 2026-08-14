@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { Search, RefreshCw, Check } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { useUsbScanner } from '../../utils/usbScanner';
+import { searchResidentByNIK } from '../../utils/residentSearch';
 
 // Kolom yang sah (valid) pada tabel `residents` — hanya kolom ini yang dipakai
 // untuk query search agar tidak pernah memuat kolom yang tidak ada.
@@ -124,6 +126,23 @@ export default function ResidentSearchInput({
     onSelect(resident);
   };
 
+  // USB Barcode / QR Scanner: NIK 16 digit terdeteksi → auto-cari tanpa tombol cari
+  const { handleKeyDown: handleScannerKeyDown } = useUsbScanner({
+    onScan: async (code) => {
+      const nik = code.replace(/\D/g, '');
+      const result = await searchResidentByNIK(nik);
+      if (result.found && result.resident) {
+        handleSelect(result.resident);
+        console.log(`${logLabel} scanner auto-select:`, result.resident.name);
+      } else {
+        setSearchQuery(nik);
+        setResults([]);
+        setOpen(false);
+        console.log(`${logLabel} scanner: NIK ${nik} tidak ditemukan`);
+      }
+    },
+  });
+
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
@@ -152,6 +171,7 @@ export default function ResidentSearchInput({
                     setSearchQuery(v);
                     runSearch(v);
                   }}
+                  onKeyDown={handleScannerKeyDown}
                   onFocus={() => { if (searchQuery.trim().length >= 2) setOpen(true); }}
                   placeholder="Cari warga berdasarkan Nama / NIK..."
                 />

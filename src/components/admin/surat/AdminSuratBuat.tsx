@@ -19,6 +19,8 @@ import { getReactSignaturePreview } from '../../../utils/signature';
 import { formatRupiahWithTerbilang, RupiahInput } from '../../../utils/numberToTerbilang';
 import KTPScannerModal from './KTPScannerModal';
 import { KtpOcrResult } from '../../../utils/ktpOcr';
+import { useUsbScanner } from '../../../utils/usbScanner';
+import { searchResidentByNIK } from '../../../utils/residentSearch';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { invalidateResidentsCache } from '../../../utils/apiCache';
@@ -78,6 +80,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   // KTP OCR Scanner states
   const [showKtpScanner, setShowKtpScanner] = useState(false);
   const [ocrScanned, setOcrScanned] = useState(false);
+  const [scannerInitialImage, setScannerInitialImage] = useState<Blob | null>(null);
   
   // SKU specific states
   const [usahaName, setUsahaName] = useState('');
@@ -647,6 +650,42 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     }
   };
 
+  // Global Paste (Ctrl + V) — terima gambar dari scanner fisik & langsung OCR
+  useEffect(() => {
+    if (showKtpScanner) return;
+    const onPaste = (e: ClipboardEvent) => {
+      const files = e.clipboardData?.files;
+      if (!files || files.length === 0) return;
+      const file = Array.from(files).find(f => f.type.startsWith('image/'));
+      if (!file) return;
+      e.preventDefault();
+      showToast('✓ Gambar dari Scanner Fisik Berhasil Diterima!', 'success');
+      setScannerInitialImage(file);
+      setShowKtpScanner(true);
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [showKtpScanner]);
+
+  // USB Barcode / QR Scanner: NIK 16 digit terdeteksi → auto-cari warga tanpa tombol cari
+  const { handleKeyDown: handleNIKScannerKeyDown } = useUsbScanner({
+    onScan: async (code) => {
+      const nik = code.replace(/\D/g, '');
+      const result = await searchResidentByNIK(nik);
+      if (result.found && result.resident) {
+        const r = result.resident;
+        setSearchQuery(r.name || nik);
+        setSelectedResident(r);
+        if (r.job) setPenghasilanSumber(r.job); else setPenghasilanSumber('');
+        showToast(`✓ Warga ${r.name} Ditemukan via Scanner!`, 'success');
+      } else {
+        setSearchQuery(nik);
+        setSelectedResident(null);
+        showToast('NIK dari scanner tidak ditemukan di data penduduk.', 'info');
+      }
+    },
+  });
+
   // Kirim PDF surat ke WhatsApp warga (jspdf + html2canvas)
   const handleSendPdfWhatsApp = async () => {
     if (!selectedResident && !keperluan) {
@@ -1108,6 +1147,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     type="text" 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleNIKScannerKeyDown}
                     placeholder="Masukkan NIK atau nama warga..."
                     className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all outline-none font-semibold text-gray-800 dark:text-slate-100"
                   />
@@ -1935,8 +1975,9 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       {/* Modal Scanner KTP */}
       <KTPScannerModal
         open={showKtpScanner}
-        onClose={() => setShowKtpScanner(false)}
-        onResult={(result) => { setShowKtpScanner(false); handleKtpOcrResult(result); }}
+        onClose={() => { setShowKtpScanner(false); setScannerInitialImage(null); }}
+        onResult={(result) => { setShowKtpScanner(false); setScannerInitialImage(null); handleKtpOcrResult(result); }}
+        initialImageBlob={scannerInitialImage}
       />
 </div>
       {/* Hidden Iframe for high-resolution printing without default headers/footers */}

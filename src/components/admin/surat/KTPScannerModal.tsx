@@ -21,16 +21,19 @@ interface KTPScannerModalProps {
   variant?: 'admin' | 'tablet';
   /** Hanya dipakai saat variant='tablet': id sesi scan yang sedang ditangani. */
   sessionId?: string;
+  /** Gambar hasil paste dari scanner fisik — langsung diproses OCR saat modal terbuka. */
+  initialImageBlob?: Blob | null;
 }
 
 type ScanMode = 'select' | 'local' | 'remote';
 
-export default function KTPScannerModal({ open, onClose, onResult, variant = 'admin', sessionId }: KTPScannerModalProps) {
+export default function KTPScannerModal({ open, onClose, onResult, variant = 'admin', sessionId, initialImageBlob }: KTPScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const pendingObjectUrlRef = useRef<string | null>(null);
+  const initialBlobHandledRef = useRef<string | null>(null);
 
   const [mode, setMode] = useState<ScanMode>('select');
   const [cameraOn, setCameraOn] = useState(false);
@@ -40,6 +43,7 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
 
   // Remote pairing states
   const [villageId, setVillageId] = useState<string | null>(null);
@@ -304,6 +308,60 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
     processImage(file, file.name);
   }, [processImage, cleanupPreview]);
 
+  // Terima gambar dari scanner fisik (paste / drag-drop)
+  const acceptScannedImage = useCallback((file: File | Blob, label: string) => {
+    if (!file.type.startsWith('image/')) {
+      showToast('File harus berupa gambar (JPG/PNG/WebP).', 'error');
+      return;
+    }
+    showToast('✓ Gambar dari Scanner Fisik Berhasil Diterima!', 'success');
+    if (variant === 'admin' && mode !== 'local') setMode('local');
+    stopCamera();
+    cleanupPreview();
+    pendingObjectUrlRef.current = URL.createObjectURL(file);
+    setPreviewUrl(pendingObjectUrlRef.current);
+    processImage(file, label);
+  }, [variant, mode, processImage, stopCamera, cleanupPreview]);
+
+  // Global Paste (Ctrl + V) saat modal terbuka — screenshot / copy dari software scanner fisik
+  useEffect(() => {
+    if (!open) return;
+    const onPaste = (e: ClipboardEvent) => {
+      const files = e.clipboardData?.files;
+      if (!files || files.length === 0) return;
+      const file = Array.from(files).find(f => f.type.startsWith('image/'));
+      if (!file) return;
+      e.preventDefault();
+      acceptScannedImage(file, 'scanner_paste.jpg');
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [open, acceptScannedImage]);
+
+  // Global Drag & Drop saat modal terbuka (mencegah browser membuka file, terima drop di mana saja)
+  useEffect(() => {
+    if (!open) return;
+    const prevent = (e: DragEvent) => e.preventDefault();
+    window.addEventListener('dragover', prevent);
+    window.addEventListener('drop', prevent);
+    return () => {
+      window.removeEventListener('dragover', prevent);
+      window.removeEventListener('drop', prevent);
+    };
+  }, [open]);
+
+  // Gambar hasil paste dari Form Surat (diteruskan via prop initialImageBlob)
+  useEffect(() => {
+    if (open && initialImageBlob && initialBlobHandledRef.current !== 'pending') {
+      initialBlobHandledRef.current = 'pending';
+      acceptScannedImage(initialImageBlob, 'surat_form_paste.jpg');
+    }
+    if (!open) {
+      initialBlobHandledRef.current = null;
+      setDragActive(false);
+    }
+  }, [open, initialImageBlob, acceptScannedImage]);
+
   if (!open) return null;
 
   const qrUrl = remoteSession ? buildKioskScanUrl(remoteSession, villageId || undefined) : '';
@@ -458,7 +516,34 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
 
       {/* Action Bar (local + tablet) */}
       {mode === 'local' && (
-        <div className="px-5 py-5 bg-slate-900/90 border-t border-slate-800 z-20 flex items-center justify-center gap-3 flex-wrap">
+        <div className="px-5 py-5 bg-slate-900/90 border-t border-slate-800 z-20 space-y-4">
+          {/* Dropzone Scanner Fisik */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setDragActive(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) acceptScannedImage(file, 'scanner_drop.jpg');
+            }}
+            className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+              dragActive
+                ? 'border-emerald-300 bg-emerald-400/20'
+                : 'border-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20'
+            }`}
+          >
+            <p className="text-white text-sm font-bold flex items-center justify-center gap-2">
+              <Upload className="w-4 h-4 text-emerald-400" />
+              Tarik & Lepas File Hasil Scan di Sini atau Tekan Ctrl + V
+            </p>
+            <p className="text-slate-400 text-[10px] font-semibold mt-1">Format: .jpg, .png, .webp</p>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 flex-wrap">
           {cameraOn && (
             <button
               onClick={toggleTorch}
@@ -509,6 +594,7 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
               <QrCode className="w-4 h-4" /> Ganti Mode
             </button>
           )}
+          </div>
         </div>
       )}
     </div>,

@@ -5,6 +5,8 @@ import { showToast } from '../../../utils/toast';
 import { generateLetterNumber, incrementSequenceNumber, getLetterClassifications, LetterClassification } from '../../../utils/letterClassifications';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { capitalizeWords } from '../../../utils/textUtils';
+import { useUsbScanner } from '../../../utils/usbScanner';
+import { searchResidentByNIK } from '../../../utils/residentSearch';
 import {
   X, Send, BookOpen, Monitor, Inbox, FileText, Search, CheckCircle2, Loader2, User
 } from 'lucide-react';
@@ -75,6 +77,22 @@ export function TambahTamuModal({ onClose, onSuccess }: { onClose: () => void; o
     setLookupQuery('');
   };
 
+  // USB Barcode / QR Scanner: NIK 16 digit terdeteksi → auto-isi data tamu dari warga
+  const { handleKeyDown: handleLookupScannerKeyDown } = useUsbScanner({
+    onScan: async (code) => {
+      const nik = code.replace(/\D/g, '');
+      const result = await searchResidentByNIK(nik);
+      if (result.found && result.resident) {
+        pickResident(result.resident);
+        showToast(`✓ ${result.resident.name} terisi otomatis via Scanner!`, 'success');
+      } else {
+        setForm(prev => ({ ...prev, nik }));
+        setLookupQuery('');
+        showToast('NIK dari scanner tidak ditemukan di data penduduk.', 'info');
+      }
+    },
+  });
+
   const handleSend = () => {
     if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
     if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
@@ -138,6 +156,7 @@ export function TambahTamuModal({ onClose, onSuccess }: { onClose: () => void; o
                 type="text"
                 value={lookupQuery}
                 onChange={(e) => { setLookupQuery(e.target.value); searchResidents(e.target.value); }}
+                onKeyDown={handleLookupScannerKeyDown}
                 placeholder="Ketik NIK atau nama warga..."
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
               />

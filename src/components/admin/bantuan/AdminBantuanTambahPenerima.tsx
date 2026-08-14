@@ -8,6 +8,7 @@ import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { showToast } from '../../../utils/toast';
 import { runKtpOcr, isKtpResultValid } from '../../../utils/ktpOcr';
+import { useUsbScanner } from '../../../utils/usbScanner';
 
 interface RecipientRow {
   nik: string;
@@ -112,11 +113,27 @@ export default function AdminBantuanTambahPenerima({
     return existingResidents.find(r => r.nik === nik && r.is_deleted !== 1) || null;
   }, [existingResidents]);
 
+  // USB Barcode / QR Scanner: NIK 16 digit terdeteksi → auto-pilih warga tanpa tombol cari
+  const { handleKeyDown: handleManualScannerKeyDown } = useUsbScanner({
+    onScan: (code) => {
+      const nik = code.replace(/\D/g, '');
+      if (selectedNiks.some(r => r.nik === nik)) {
+        showToast('NIK ini sudah dipilih.', 'info');
+        return;
+      }
+      const found = lookupResident(nik);
+      if (found) {
+        setSelectedNiks(prev => [...prev, { nik, name: found.name, registered: true }]);
+        setManualQuery("");
+        showToast(`✓ ${found.name} dipilih via Scanner!`, 'success');
+      } else {
+        showToast('NIK dari scanner tidak ditemukan di data penduduk. Gunakan tab Import/Scan untuk warga baru.', 'info');
+      }
+    },
+  });
+
   // ── File parsing (Excel / CSV / PDF) ──
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
+  const parseImportFile = async (file: File) => {
     setParsing(true);
     setParsedRows([]);
     setFileName(file.name);
@@ -181,6 +198,54 @@ export default function AdminBantuanTambahPenerima({
       setParsing(false);
     }
   };
+
+  // Terima file dari paste (Ctrl + V) / drag-drop scanner fisik
+  const handleScannedFile = useCallback(async (file: File) => {
+    if (file.type.startsWith('image/')) {
+      setParsing(true);
+      setFileName(file.name);
+      try {
+        const result = await runKtpOcr(file);
+        if (!isKtpResultValid(result)) {
+          showToast("NIK (16 digit) tidak terdeteksi dari gambar. Coba posisikan KTP lebih jelas & datar.", "error");
+          return;
+        }
+        const nik = result.nik;
+        setParsedRows(prev => prev.some(r => r.nik === nik) ? prev : [...prev, {
+          nik,
+          name: result.nama || 'NIK Tidak Dikenali',
+          registered: !!lookupResident(nik)
+        }]);
+        showToast('✓ Gambar dari Scanner Fisik Berhasil Diterima!', 'success');
+      } catch (e) {
+        showToast("Gagal membaca gambar. Silakan coba lagi.", "error");
+      } finally {
+        setParsing(false);
+      }
+      return;
+    }
+    parseImportFile(file);
+  }, [lookupResident]);
+
+  // Global Paste (Ctrl + V) saat modal terbuka
+  const [dragActive, setDragActive] = useState(false);
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const files = e.clipboardData?.files;
+      if (!files || files.length === 0) return;
+      const file = Array.from(files).find(f => f.type.startsWith('image/') ||
+        f.name.toLowerCase().endsWith('.pdf') ||
+        f.name.toLowerCase().endsWith('.xlsx') || f.name.toLowerCase().endsWith('.xls') || f.name.toLowerCase().endsWith('.csv'));
+      if (!file) return;
+      e.preventDefault();
+      if (file.type.startsWith('image/')) {
+        showToast('✓ Gambar dari Scanner Fisik Berhasil Diterima!', 'success');
+      }
+      handleScannedFile(file);
+    };
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [handleScannedFile]);
 
   // ── OCR Camera Scan ──
   const handleCapture = useCallback(async () => {
@@ -529,6 +594,7 @@ export default function AdminBantuanTambahPenerima({
                   placeholder="Cari nama atau NIK warga..."
                   value={manualQuery}
                   onChange={(e) => setManualQuery(e.target.value)}
+                  onKeyDown={handleManualScannerKeyDown}
                   className="w-full pl-11 pr-4 py-3 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all text-sm font-semibold bg-white dark:bg-slate-900"
                 />
               </div>
@@ -561,11 +627,30 @@ export default function AdminBantuanTambahPenerima({
           {/* ─── TAB 2: IMPORT ─── */}
           {tab === 'import' && (
             <>
-              <div className="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-2xl p-8 text-center hover:bg-emerald-50/30 dark:hover:bg-slate-800/40 transition-colors relative cursor-pointer bg-white dark:bg-slate-900">
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDragActive(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file) {
+                    showToast('✓ Gambar dari Scanner Fisik Berhasil Diterima!', 'success');
+                    handleScannedFile(file);
+                  }
+                }}
+                className={`border-2 border-dashed border-emerald-300 ${dragActive ? 'bg-emerald-100/50' : 'bg-emerald-50/50'} hover:bg-emerald-100/50 rounded-2xl p-8 text-center cursor-pointer transition-all relative`}
+              >
                 <input
                   type="file"
-                  accept=".xlsx,.xls,.csv,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/pdf,text/csv"
-                  onChange={handleFileUpload}
+                  accept=".xlsx,.xls,.csv,.pdf,image/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,application/pdf,text/csv,image/jpeg,image/png,image/webp"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (file) handleScannedFile(file);
+                  }}
                   disabled={parsing}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
@@ -579,9 +664,9 @@ export default function AdminBantuanTambahPenerima({
                     <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-3">
                       <Upload className="w-7 h-7" />
                     </div>
-                    <h4 className="text-base font-bold text-gray-800 dark:text-white mb-1">Klik atau Tarik File Kesini</h4>
+                    <h4 className="text-base font-bold text-gray-800 dark:text-white mb-1">Tarik & Lepas File Hasil Scan di Sini atau Tekan Ctrl + V</h4>
                     <p className="text-xs text-gray-500 dark:text-slate-400 max-w-md mx-auto">
-                      Format <strong>.xlsx / .xls / .csv / .pdf</strong>. Baris pertama harus berisi kolom <strong>NIK</strong> dan <strong>Nama</strong> (untuk PDF: NIK 16 digit diekstrak otomatis).
+                      Format <strong>.xlsx / .xls / .csv / .pdf / .jpg / .png / .webp</strong>. Baris pertama harus berisi kolom <strong>NIK</strong> dan <strong>Nama</strong> (untuk PDF: NIK 16 digit diekstrak otomatis; untuk gambar: dibaca via OCR).
                     </p>
                   </>
                 )}
