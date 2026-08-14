@@ -41,6 +41,7 @@ export default function AdminBantuanTambahPenerima({
   const [program, setProgram] = useState(initialProgram);
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [saving, setSaving] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   // ── Tab 1: Manual ──
   const [manualQuery, setManualQuery] = useState("");
@@ -253,28 +254,52 @@ export default function AdminBantuanTambahPenerima({
 
   // ── Save ──
   const saveRows = async (rows: RecipientRow[], source: string) => {
-    const valid = rows.filter(r => r.registered);
-    if (valid.length === 0) {
-      showToast("Tidak ada NIK terdaftar di database penduduk yang bisa diproses.", "error");
+    if (rows.length === 0) {
+      showToast("Tidak ada data yang bisa diproses.", "error");
       return;
     }
     setSaving(true);
     let added = 0;
+    let created = 0;
     let skipped = 0;
     try {
       const tenantId = await resolveCurrentTenant();
       if (!tenantId) throw new Error("Gagal mengidentifikasi tenant.");
 
-      for (const row of valid) {
+      for (const row of rows) {
         try {
-          const currentAids = await getCurrentAids(row.nik);
-          if (!currentAids.includes(aidTag)) {
-            await supabase
+          const existing = existingResidents.find(r => r.nik === row.nik && r.is_deleted !== 1);
+          let currentAids: string[] = [];
+
+          if (existing) {
+            // Sudah ada di data penduduk → cukup daftarkan sebagai penerima
+            currentAids = Array.isArray(existing.activeAids) ? existing.activeAids : [];
+            if (!currentAids.includes(aidTag)) {
+              await supabase
+                .from('residents')
+                .update({ active_aids: [...currentAids, aidTag] })
+                .eq('nik', row.nik)
+                .eq('tenant_id', tenantId);
+            }
+          } else {
+            // Belum ada di data penduduk → otomatis tambahkan sebagai penduduk baru
+            const newResidentRecord = {
+              tenant_id: tenantId,
+              nik: row.nik,
+              name: row.name || 'Warga Baru',
+              gender: 'Laki-laki',
+              active_aids: [aidTag],
+              is_deleted: 0
+            };
+            const { data: inserted, error: insertErr } = await supabase
               .from('residents')
-              .update({ active_aids: [...currentAids, aidTag] })
-              .eq('nik', row.nik)
-              .eq('tenant_id', tenantId);
+              .insert([newResidentRecord])
+              .select()
+              .maybeSingle();
+            if (insertErr) throw insertErr;
+            if (inserted) created++;
           }
+
           await supabase.from('bansos_recipients').insert({
             tenant_id: tenantId,
             program_id: program,
@@ -292,7 +317,7 @@ export default function AdminBantuanTambahPenerima({
       }
 
       showToast(
-        `Berhasil menambahkan ${added} penerima ke program ${program} (${year}).${skipped > 0 ? ` ${skipped} gagal.` : ''}`,
+        `Berhasil menambahkan ${added} penerima ke program ${program} (${year}).${created > 0 ? ` ${created} penduduk baru otomatis ditambahkan ke data penduduk.` : ''}${skipped > 0 ? ` ${skipped} gagal.` : ''}`,
         added > 0 ? 'success' : 'error'
       );
       onRefresh();
@@ -305,26 +330,30 @@ export default function AdminBantuanTambahPenerima({
   };
 
   const getCurrentAids = async (nik: string): Promise<string[]> => {
-    const resident = existingResidents.find(r => r.nik === nik);
+    const resident = existingResidents.find(r => r.nik === nik && r.is_deleted !== 1);
     if (resident) {
       return Array.isArray(resident.activeAids) ? resident.activeAids : [];
     }
-    const { data } = await supabase.from('residents').select('active_aids').eq('nik', nik).maybeSingle();
-    const raw = data?.active_aids;
-    return typeof raw === 'string' ? JSON.parse(raw || '[]') : (raw || []);
+    return [];
   };
 
   const manualRegistered = selectedNiks.filter(r => r.registered).length;
   const parsedRegistered = parsedRows.filter(r => r.registered).length;
   const scannedRegistered = scannedRows.filter(r => r.registered).length;
 
+  // Rows aktif sesuai tab (untuk konfirmasi & simpan)
+  const pendingRows: RecipientRow[] =
+    tab === 'manual' ? selectedNiks : tab === 'import' ? parsedRows : scannedRows;
+  const pendingExisting = pendingRows.filter(r => r.registered);
+  const pendingNew = pendingRows.filter(r => !r.registered);
+
   const renderBadge = (row: RecipientRow) => row.registered ? (
     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 whitespace-nowrap">
-      <CheckCircle2 className="w-3.5 h-3.5" /> Terdaftar di DB Desa
+      <CheckCircle2 className="w-3.5 h-3.5" /> Ada di DB Penduduk
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-red-100 text-red-700 border border-red-200 whitespace-nowrap">
-      <AlertTriangle className="w-3.5 h-3.5" /> NIK Belum Terdaftar
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap">
+      <UserPlus className="w-3.5 h-3.5" /> Baru — akan ditambahkan ke data penduduk
     </span>
   );
 
@@ -402,6 +431,85 @@ export default function AdminBantuanTambahPenerima({
           </div>
         </div>
 
+        {/* ─── VIEW KONFIRMASI SEBELUM SIMPAN ─── */}
+          {confirming ? (
+            <div className="px-6 pb-6 space-y-4 max-h-[55vh] overflow-y-auto">
+              <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/60 rounded-2xl flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-extrabold text-emerald-800 dark:text-emerald-200 text-sm">Konfirmasi Data Sebelum Disimpan</p>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-1">
+                    Data di bawah akan didaftarkan sebagai penerima <strong>{program}</strong> tahun {year}. Pastikan nama dan NIK sudah benar.
+                  </p>
+                </div>
+              </div>
+
+              {/* Sudah ada di data penduduk → hanya didaftarkan */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <CheckCircle2 className="w-4 h-4" /> {pendingExisting.length} Sudah Terdaftar — Hanya Didaftarkan sebagai Penerima
+                  </span>
+                </div>
+                <div className="border border-gray-100 dark:border-slate-800 rounded-xl overflow-hidden max-h-40 overflow-y-auto divide-y divide-gray-50 dark:divide-slate-800">
+                  {pendingExisting.length === 0 ? (
+                    <p className="p-4 text-center text-xs text-gray-400">Tidak ada.</p>
+                  ) : pendingExisting.map(row => (
+                    <div key={row.nik} className="flex items-center justify-between gap-3 px-4 py-2.5 bg-white dark:bg-slate-900">
+                      <div className="min-w-0">
+                        <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100 truncate">{row.name}</p>
+                        <p className="text-[11px] font-mono font-bold text-gray-500 dark:text-slate-400">NIK: {row.nik}</p>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg whitespace-nowrap">✓ Terdaftar</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Baru → ditambahkan ke data penduduk */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                    <UserPlus className="w-4 h-4" /> {pendingNew.length} Baru — Akan Ditambahkan ke Data Penduduk & Didaftarkan
+                  </span>
+                </div>
+                <div className="border border-gray-100 dark:border-slate-800 rounded-xl overflow-hidden max-h-40 overflow-y-auto divide-y divide-gray-50 dark:divide-slate-800">
+                  {pendingNew.length === 0 ? (
+                    <p className="p-4 text-center text-xs text-gray-400">Tidak ada.</p>
+                  ) : pendingNew.map(row => (
+                    <div key={row.nik} className="flex items-center justify-between gap-3 px-4 py-2.5 bg-white dark:bg-slate-900">
+                      <div className="min-w-0">
+                        <p className="text-sm font-extrabold text-gray-800 dark:text-slate-100 truncate">{row.name}</p>
+                        <p className="text-[11px] font-mono font-bold text-gray-500 dark:text-slate-400">NIK: {row.nik}</p>
+                      </div>
+                      <span className="text-[10px] font-bold text-amber-700 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg whitespace-nowrap">➕ Baru</span>
+                    </div>
+                  ))}
+                </div>
+                {pendingNew.length > 0 && (
+                  <p className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2 font-semibold mt-2">
+                    Warga baru di atas akan otomatis masuk ke <strong>Data Penduduk Desa</strong> sekaligus didaftarkan sebagai penerima {program} tahun {year}.
+                  </p>
+                )}
+              </div>
+
+              {/* Ringkasan Tahun Penyaluran */}
+              <div className="flex items-center gap-2 p-3 bg-white dark:bg-slate-900 rounded-xl border border-emerald-200 dark:border-emerald-800/60">
+                <Calendar className="w-4 h-4 text-emerald-700 dark:text-emerald-400 flex-shrink-0" />
+                <span className="text-[11px] font-extrabold text-gray-700 dark:text-slate-300 uppercase tracking-wider whitespace-nowrap">Didaftarkan sebagai penerima tahun</span>
+                <select
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-black text-emerald-800 dark:text-emerald-300 outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  {[new Date().getFullYear() - 1, new Date().getFullYear(), new Date().getFullYear() + 1].map(y => (
+                    <option key={y} value={y.toString()}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ) : (
+          <>
         {/* Tabs */}
         <div className="p-6 pb-3 flex gap-2.5">
           <TabButton id="manual" label="Pilih Manual" icon={<Search className="w-4 h-4" />} />
@@ -493,16 +601,16 @@ export default function AdminBantuanTambahPenerima({
                 <>
                   <div className="flex flex-wrap gap-2">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      <CheckCircle2 className="w-4 h-4" /> ✓ {parsedRegistered} NIK Terdaftar di DB Desa
+                      <CheckCircle2 className="w-4 h-4" /> ✓ {parsedRegistered} Ada di Data Penduduk
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-red-50 text-red-700 border border-red-200">
-                      <AlertTriangle className="w-4 h-4" /> ⚠️ {parsedRows.length - parsedRegistered} NIK Belum Terdaftar
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                      <UserPlus className="w-4 h-4" /> ➕ {parsedRows.length - parsedRegistered} Baru (akan ditambahkan ke Data Penduduk)
                     </span>
                   </div>
                   {renderRowList(parsedRows, nik => setParsedRows(prev => prev.filter(r => r.nik !== nik)))}
                   {parsedRows.length > parsedRegistered && (
                     <p className="text-[11px] text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2 font-semibold">
-                      {parsedRows.length - parsedRegistered} NIK belum terdaftar di database penduduk dan akan dilewati. Daftarkan warga di Modul Penduduk terlebih dahulu.
+                      {parsedRows.length - parsedRegistered} warga belum terdaftar di database penduduk dan akan <strong>otomatis ditambahkan sebagai penduduk baru</strong> sekaligus didaftarkan sebagai penerima {program} tahun {year}.
                     </p>
                   )}
                 </>
@@ -567,12 +675,12 @@ export default function AdminBantuanTambahPenerima({
 
               {scannedRows.length > 0 && (
                 <>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      <CheckCircle2 className="w-4 h-4" /> {scannedRegistered} Terdaftar
+                      <CheckCircle2 className="w-4 h-4" /> {scannedRegistered} Ada di Data Penduduk
                     </span>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-red-50 text-red-700 border border-red-200">
-                      <AlertTriangle className="w-4 h-4" /> {scannedRows.length - scannedRegistered} Belum Terdaftar
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-amber-50 text-amber-800 border border-amber-200">
+                      <UserPlus className="w-4 h-4" /> {scannedRows.length - scannedRegistered} Baru (akan ditambahkan ke Data Penduduk)
                     </span>
                   </div>
                   {renderRowList(scannedRows, nik => setScannedRows(prev => prev.filter(r => r.nik !== nik)))}
@@ -580,7 +688,9 @@ export default function AdminBantuanTambahPenerima({
               )}
             </>
           )}
-        </div>
+          </div>
+        </>
+        )}
 
         {/* Footer */}
         <div className="p-6 bg-gray-50/50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 space-y-4">
@@ -610,25 +720,47 @@ export default function AdminBantuanTambahPenerima({
           </div>
 
           <div className="flex justify-end gap-3">
-            <button onClick={onClose} className="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
-              Batal
-            </button>
-            <button
-              onClick={() => {
-                if (tab === 'manual') saveRows(selectedNiks, 'manual');
-                if (tab === 'import') saveRows(parsedRows, 'import');
-                if (tab === 'scan') saveRows(scannedRows, 'scan');
-              }}
-              disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-40"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
-              {saving ? "Menyimpan..." : (
-                tab === 'import' ? `🚀 Proses Impor [${parsedRegistered}] Penerima — ${year}` :
-                tab === 'scan' ? `Simpan [${scannedRegistered}] Hasil Scan — Tahun ${year}` :
-                `Simpan [${manualRegistered}] Penerima — Tahun ${year}`
-              )}
-            </button>
+            {confirming ? (
+              <>
+                <button
+                  onClick={() => setConfirming(false)}
+                  disabled={saving}
+                  className="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer disabled:opacity-40"
+                >
+                  Kembali
+                </button>
+                <button
+                  onClick={() => {
+                    if (tab === 'manual') saveRows(selectedNiks, 'manual');
+                    if (tab === 'import') saveRows(parsedRows, 'import');
+                    if (tab === 'scan') saveRows(scannedRows, 'scan');
+                  }}
+                  disabled={saving || pendingRows.length === 0}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-40"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  {saving ? "Menyimpan..." : `Konfirmasi & Simpan [${pendingRows.length}] — Tahun ${year}`}
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={onClose} className="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+                  Batal
+                </button>
+                <button
+                  onClick={() => setConfirming(true)}
+                  disabled={pendingRows.length === 0}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all active:scale-95 cursor-pointer disabled:opacity-40"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
+                  {saving ? "Menyimpan..." : (
+                    tab === 'import' ? `🚀 Tinjau & Proses Impor [${pendingRows.length}] — ${year}` :
+                    tab === 'scan' ? `Tinjau & Simpan [${pendingRows.length}] Hasil Scan — Tahun ${year}` :
+                    `Tinjau & Simpan [${pendingRows.length}] Penerima — Tahun ${year}`
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
