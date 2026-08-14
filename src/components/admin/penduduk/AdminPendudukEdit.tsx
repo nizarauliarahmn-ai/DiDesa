@@ -520,7 +520,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2 space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Nama Lengkap Sesuai KTP <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib Diisi)</span>
+                  Nama Lengkap Sesuai KTP <span className="text-red-500 font-bold ml-1">*</span>
                 </label>
                 <input 
                   type="text"
@@ -540,7 +540,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               {/* NIK Field */}
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  NIK (Nomor Induk Kependudukan) <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib 16 Digit)</span>
+                  NIK (Nomor Induk Kependudukan) <span className="text-red-500 font-bold ml-1">*</span>
                 </label>
                 <input 
                   type="text"
@@ -554,7 +554,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
                     errors.nik ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
-                  placeholder="16 digit NIK..."
+                  placeholder="Masukkan 16 digit NIK..."
                 />
                 {errors.nik && <p className="text-xs text-red-500 font-semibold">{errors.nik}</p>}
               </div>
@@ -562,7 +562,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               {/* Nomor KK Field */}
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  No. KK (Kartu Keluarga) <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib 16 Digit)</span>
+                  No. KK (Kartu Keluarga) <span className="text-red-500 font-bold ml-1">*</span>
                 </label>
                 <input 
                   type="text"
@@ -576,14 +576,14 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                   className={`w-full h-11 px-4 border rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all font-mono ${
                     errors.noKk ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-200 dark:border-slate-700'
                   }`}
-                  placeholder="16 digit No. KK..."
+                  placeholder="Masukkan 16 digit No. KK..."
                 />
                 {errors.noKk && <p className="text-xs text-red-500 font-semibold">{errors.noKk}</p>}
               </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Jenis Kelamin <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                  Jenis Kelamin <span className="text-red-500 font-bold ml-1">*</span>
                 </label>
                 <select 
                   value={gender}
@@ -597,7 +597,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Tempat Lahir <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                  Tempat Lahir <span className="text-red-500 font-bold ml-1">*</span>
                 </label>
                 <input 
                   type="text"
@@ -616,7 +616,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  Tanggal Lahir <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                  Tanggal Lahir <span className="text-red-500 font-bold ml-1">*</span>
                 </label>
                 <input 
                   type="date"
@@ -725,7 +725,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                 <div className="md:col-span-6 space-y-1">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                      Alamat Lengkap <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                      Alamat Lengkap <span className="text-red-500 font-bold ml-1">*</span>
                     </label>
                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">✨ Smart Autofill RT/RW Aktif</span>
                   </div>
@@ -756,7 +756,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               {/* RT Dropdown select list */}
               <div className="md:col-span-2 space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">
-                  RT <span className="text-rose-500 font-bold text-[10px] lowercase tracking-normal ml-1.5">* (Wajib)</span>
+                  RT <span className="text-red-500 font-bold ml-1">*</span>
                 </label>
                 <select 
                   value={rt}
