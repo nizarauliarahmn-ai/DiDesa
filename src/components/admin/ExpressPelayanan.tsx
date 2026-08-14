@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Search, Zap, User, BookOpen, HandCoins, UserPlus, TabletSmartphone, Printer,
   MessageCircle, X, Loader2, ArrowLeft, Clock, Camera, CheckCircle2, Phone,
@@ -10,6 +10,7 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { searchResidentByNIK } from '../../utils/residentSearch';
 import { getFormattedDate } from '../../utils/dateHelper';
 import KTPScannerModal from './surat/KTPScannerModal';
+import { useSuratTemplates, getSuratFormTab } from '../../hooks/useSuratTemplates';
 import {
   subscribeKtpScanChannel, sendKtpRequestScanWhenReady, buildKioskScanUrl,
   type ScanCompletePayload
@@ -41,17 +42,6 @@ interface ExpressResident {
   created_at?: string | null;
 }
 
-const LETTER_QUICK_ACTIONS = [
-  { tab: 'sktm', label: 'SK Tidak Mampu', desc: 'Keterangan miskin' },
-  { tab: 'skbm', label: 'SK Belum Menikah', desc: 'Jejaka/Perawan' },
-  { tab: 'sku', label: 'SK Usaha', desc: 'Keterangan usaha' },
-  { tab: 'skd', label: 'SK Domisili', desc: 'Domisili perorangan' },
-  { tab: 'skm', label: 'SK Kematian', desc: 'Ahli waris' },
-  { tab: 'skl', label: 'SK Kelahiran', desc: 'Kelahiran bayi' },
-  { tab: 'skh', label: 'SK Kehilangan', desc: 'Kehilangan dokumen' },
-  { tab: 'nikah', label: 'Pengantar Nikah', desc: 'S1-S6' },
-];
-
 const toWaNumber = (p?: string | null) => {
   if (!p) return '';
   const d = String(p).replace(/\D/g, '');
@@ -80,6 +70,20 @@ export default function ExpressPelayanan() {
   const kioskChannel = useRef<any>(null);
   const kioskSessionRef = useRef(`express-${Date.now()}`);
   const [kioskStatus, setKioskStatus] = useState('');
+
+  // Template Surat Dinamis (Master Template Aktif dari Database)
+  const { templates: letterTemplates, loading: templateLoading } = useSuratTemplates();
+  const [templateQuery, setTemplateQuery] = useState('');
+  const filteredTemplates = useMemo(() => {
+    const q = templateQuery.trim().toLowerCase();
+    if (!q) return letterTemplates;
+    return letterTemplates.filter((t) =>
+      (t.jenis || '').toLowerCase().includes(q) ||
+      (t.klasifikasi || '').toLowerCase().includes(q) ||
+      (t.kodeKlasifikasi || '').toLowerCase().includes(q) ||
+      (t.deskripsi || '').toLowerCase().includes(q)
+    );
+  }, [letterTemplates, templateQuery]);
 
   // ── Init ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -360,10 +364,13 @@ export default function ExpressPelayanan() {
     }
   };
 
-  const launchLetter = (tab: string) => {
+  const launchLetter = (template: any) => {
     if (!activeResident) return;
+    const tab = getSuratFormTab(template.klasifikasi);
     localStorage.setItem('express_preset_resident', JSON.stringify(activeResident));
     localStorage.setItem('express_letter_tab', tab);
+    localStorage.setItem('express_letter_klasifikasi', template.klasifikasi);
+    localStorage.setItem('express_letter_nama', template.jenis || template.klasifikasi);
     window.location.href = '/?mode=admin&admin_tab=surat';
   };
 
@@ -615,7 +622,7 @@ export default function ExpressPelayanan() {
       )}
 
       {modal === 'letter' && (
-        <Modal onClose={closeModal} title="⚡ Buat Surat Cepat">
+        <Modal onClose={closeModal} title="⚡ Buat Surat Cepat" wide>
           <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 flex items-center gap-4">
             {activeResident?.photo ? (
               <img src={activeResident.photo} alt="" className="w-14 h-14 rounded-xl object-cover" />
@@ -628,18 +635,49 @@ export default function ExpressPelayanan() {
               {activeResident?.address && <p className="text-[11px] text-gray-500 mt-0.5 truncate max-w-xs">{activeResident.address}</p>}
             </div>
           </div>
+
           <p className="text-xs font-bold text-gray-500 mt-5 mb-3 uppercase tracking-wider">Pilih Jenis Surat:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {LETTER_QUICK_ACTIONS.map((l) => (
-              <button key={l.tab} onClick={() => launchLetter(l.tab)} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer text-left">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><FileText className="w-4 h-4" /></div>
-                <div className="min-w-0">
-                  <p className="text-sm font-bold">{l.label}</p>
-                  <p className="text-[10px] text-gray-400">{l.desc}</p>
-                </div>
-              </button>
-            ))}
+
+          <div className="relative mb-3">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={templateQuery}
+              onChange={(e) => setTemplateQuery(e.target.value)}
+              placeholder="🔍 Cari nama surat (contoh: Domisili, Keterangan Usaha...)"
+              className="w-full pl-11 pr-4 py-3 rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+            />
           </div>
+
+          {templateLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto pr-1">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-[74px] rounded-2xl bg-gray-100 dark:bg-slate-800 animate-pulse" />
+              ))}
+            </div>
+          ) : filteredTemplates.length === 0 ? (
+            <div className="text-center text-gray-400 py-10">
+              <FileText className="w-10 h-10 mx-auto text-gray-300 mb-2" />
+              <p className="text-sm font-bold">Template tidak ditemukan</p>
+              <p className="text-[11px] mt-1">Coba kata kunci lain atau aktifkan template di Pengaturan Surat.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto pr-1">
+              {filteredTemplates.map((t) => (
+                <button key={t.id} onClick={() => launchLetter(t)} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-gray-200 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700/60 transition-colors cursor-pointer text-left">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0"><FileText className="w-4 h-4" /></div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold truncate">{t.jenis || t.klasifikasi}</p>
+                    <p className="text-[10px] text-gray-400 truncate">
+                      <span className="font-mono font-bold text-emerald-600">{t.klasifikasi}</span>
+                      {t.kodeKlasifikasi ? ` • Kode: ${t.kodeKlasifikasi}` : ''}
+                      {t.deskripsi ? ` • ${t.deskripsi}` : ''}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </Modal>
       )}
 
@@ -787,10 +825,10 @@ export default function ExpressPelayanan() {
 }
 
 // ── UI helpers ───────────────────────────────────────────────────────────
-function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
+function Modal({ title, children, onClose, wide }: { title: string; children: React.ReactNode; onClose: () => void; wide?: boolean }) {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+      <div className={`bg-white dark:bg-slate-800 ${wide ? 'w-full max-w-3xl' : 'w-full max-w-lg'} rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200`}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 rounded-t-3xl">
           <h3 className="font-black text-sm">{title}</h3>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"><X className="w-4 h-4" /></button>

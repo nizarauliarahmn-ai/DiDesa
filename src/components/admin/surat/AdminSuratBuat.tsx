@@ -265,6 +265,22 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     }
     setClassifications(cls);
     
+    // Bridge dari Express Desk: auto-pilih template surat & lompat ke step pemohon
+    try {
+      const presetKlas = localStorage.getItem('express_letter_klasifikasi');
+      if (presetKlas) {
+        const match = cls.find(c => c.klasifikasi === presetKlas);
+        if (match) {
+          setSelectedTemplate(match.klasifikasi);
+          setStep(2);
+        }
+        localStorage.removeItem('express_letter_klasifikasi');
+        localStorage.removeItem('express_letter_nama');
+      }
+    } catch (e) {
+      console.error('Express template bridge error:', e);
+    }
+    
     // Fetch residents for Step 2 search
     fetchResidentsCached()
       .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })

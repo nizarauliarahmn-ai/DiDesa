@@ -235,7 +235,7 @@ export default function AdminSurat({
         )}
         {activeTab === 'buat' && (
           <AdminSuratBuat 
-            presetResident={presetResident}
+            presetResident={localPresetResident || presetResident}
             onBack={() => changeTab('dashboard')} 
             onOpenNikah={() => changeTab('nikah')}
             onOpenSKTM={() => changeTab('sktm')}
