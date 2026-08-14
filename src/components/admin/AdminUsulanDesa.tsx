@@ -2,12 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, Image as ImageIcon, FolderOpen,
   ListChecks, AlertTriangle, Layers, Upload, X, Loader2, Link2, MapPin, User,
-  CircleDollarSign, HeartHandshake, CheckCircle2, Ban, Send, Printer, FileSpreadsheet, Download, Star
+  CircleDollarSign, HeartHandshake, CheckCircle2, Ban, Send, Printer, Download, Star
 } from 'lucide-react';
-import { read, utils } from 'xlsx';
+import { utils } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import ImportUsulanWizard from './ImportUsulanWizard';
 
 export interface UsulanDesa {
   id: string;
@@ -23,17 +24,6 @@ export interface UsulanDesa {
   keterangan?: string | null;
   foto_url?: string | null;
   created_at: string;
-}
-
-interface ImportRow {
-  uraian_usulan: string;
-  kategori: string;
-  lokasi_rt_rw: string;
-  pengusul: string;
-  diteruskan_tags: string[];
-  status_terakomodir: string;
-  skala_prioritas: number | null;
-  keterangan: string;
 }
 
 const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
@@ -105,11 +95,6 @@ export default function AdminUsulanDesa() {
 
   // Import state
   const [showImportModal, setShowImportModal] = useState(false);
-  const [importParsing, setImportParsing] = useState(false);
-  const [importPreview, setImportPreview] = useState<ImportRow[] | null>(null);
-  const [importSaving, setImportSaving] = useState(false);
-  const [importFileName, setImportFileName] = useState('');
-  const [importDragging, setImportDragging] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -377,118 +362,6 @@ export default function AdminUsulanDesa() {
       showToast(e?.message || 'Gagal menyimpan aksi pipeline.', 'error');
     } finally {
       setPipelineSaving(false);
-    }
-  };
-
-  // ── Import from Excel / CSV ──
-  const handleImportFile = async (file: File) => {
-    const name = file.name.toLowerCase();
-    if (!name.endsWith('.xlsx') && !name.endsWith('.xls') && !name.endsWith('.csv')) {
-      showToast('Format file harus .xlsx, .xls, atau .csv.', 'error');
-      return;
-    }
-    setImportParsing(true);
-    setImportFileName(file.name);
-    try {
-      const buffer = await file.arrayBuffer();
-      const wb = read(buffer);
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const rows: any[] = utils.sheet_to_json(sheet, { defval: '' });
-
-      const normKey = (k: string) => String(k).toLowerCase().replace(/[^a-z0-9]/g, '');
-      const get = (row: any, keys: string[], fallback = '') => {
-        for (const k of Object.keys(row)) {
-          if (keys.some(ek => normKey(k).includes(ek))) return String(row[k]).trim() || fallback;
-        }
-        return fallback;
-      };
-
-      const parsed: ImportRow[] = rows.map(r => {
-        const rawTags = get(r, ['diteruskan', 'tag']);
-        const tags = rawTags
-          ? rawTags.split(/[;,]/).map(t => t.trim()).filter(Boolean)
-          : [];
-        const normalizedTags = tags.map(t => {
-          const tl = t.toLowerCase();
-          const yearMatch = t.match(/\d{4}/);
-          const year = yearMatch ? yearMatch[0] : String(new Date().getFullYear());
-          if (tl.includes('musrenbang')) return `Musrenbang ${year}`;
-          if (tl.includes('rkpdes')) return `RKPDes ${year}`;
-          return t;
-        });
-        const rawStatus = get(r, ['terakomodir', 'status']);
-        let status = 'Belum';
-        if (/ditolak|tolak/i.test(rawStatus)) status = 'Ditolak';
-        else if (/kab/i.test(rawStatus)) status = 'Kab ' + String(new Date().getFullYear());
-        else if (/desa|apbdes/i.test(rawStatus)) status = 'Desa ' + String(new Date().getFullYear());
-        const rawPri = get(r, ['prioritas']);
-        const pri = parseInt(String(rawPri).replace(/\D/g, ''), 10);
-        return {
-          uraian_usulan: get(r, ['uraian', 'usulan', 'kegiatan', 'judul']),
-          kategori: get(r, ['kategori', 'sektor'], 'Infrastruktur'),
-          lokasi_rt_rw: get(r, ['lokasi']),
-          pengusul: get(r, ['pengusul', 'pengusaha']),
-          diteruskan_tags: normalizedTags,
-          status_terakomodir: status,
-          skala_prioritas: !isNaN(pri) && pri >= 1 && pri <= 5 ? pri : null,
-          keterangan: get(r, ['keterangan', 'catatan']),
-        };
-      }).filter(x => x.uraian_usulan.length > 0);
-
-      if (parsed.length === 0) {
-        showToast('Tidak ada baris valid ditemukan. Pastikan ada kolom berisi uraian usulan.', 'error');
-        return;
-      }
-      setImportPreview(parsed);
-      showToast(`${parsed.length} baris terbaca, siap diimpor.`, 'info');
-    } catch (e: any) {
-      console.error('Import parse error:', e);
-      showToast('Gagal membaca file. Periksa format file.', 'error');
-    } finally {
-      setImportParsing(false);
-    }
-  };
-
-  const handleImportDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setImportDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) handleImportFile(file);
-  };
-
-  const saveImport = async () => {
-    if (!importPreview || importPreview.length === 0) return;
-    setImportSaving(true);
-    try {
-      const tenantId = await resolveCurrentTenant();
-      const tahun = String(new Date().getFullYear());
-      const finalRows = await Promise.all(importPreview.map(async (row) => {
-        const kode = await generateKodeUsulan(tahun);
-        return {
-          tenant_id: tenantId,
-          kode_usulan: kode,
-          uraian_usulan: row.uraian_usulan,
-          kategori: row.kategori || 'Infrastruktur',
-          lokasi_rt_rw: row.lokasi_rt_rw || null,
-          pengusul: row.pengusul || null,
-          diteruskan_tags: row.diteruskan_tags,
-          status_terakomodir: row.status_terakomodir,
-          skala_prioritas: row.skala_prioritas,
-          keterangan: row.keterangan || null,
-        };
-      }));
-      const { data, error } = await supabase.from('usulan_desas').insert(finalRows);
-      if (error) throw error;
-      showToast(`${finalRows.length} usulan berhasil diimpor.`, 'success');
-      setShowImportModal(false);
-      setImportPreview(null);
-      setImportFileName('');
-      loadData();
-    } catch (e: any) {
-      console.error('Import save error:', e);
-      showToast(e?.message || 'Gagal menyimpan data impor.', 'error');
-    } finally {
-      setImportSaving(false);
     }
   };
 
@@ -1165,126 +1038,13 @@ ${rowsHtml}
         </div>
       )}
 
-      {/* Import Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
-              <h3 className="text-lg font-black text-gray-900 dark:text-white">Impor Usulan dari Excel/CSV</h3>
-              <button onClick={() => { setShowImportModal(false); setImportPreview(null); }} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="px-6 py-5 space-y-4">
-              <div
-                onDragOver={e => { e.preventDefault(); setImportDragging(true); }}
-                onDragLeave={() => setImportDragging(false)}
-                onDrop={handleImportDrop}
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
-                  importDragging
-                    ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/40'
-                    : 'border-gray-300 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50/30 dark:hover:bg-sky-950/20'
-                }`}
-              >
-                <input
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  className="hidden"
-                  id="usulan-import-input"
-                  onChange={e => { const f = e.target.files?.[0]; if (f) handleImportFile(f); e.target.value = ''; }}
-                />
-                <label htmlFor="usulan-import-input" className="block cursor-pointer">
-                  {importParsing ? (
-                    <div className="flex items-center justify-center gap-2 text-sm font-bold text-sky-700">
-                      <Loader2 className="w-5 h-5 animate-spin" /> Membaca file...
-                    </div>
-                  ) : (
-                    <div className="text-gray-400 dark:text-slate-500">
-                      <FileSpreadsheet className="w-10 h-10 mx-auto mb-2" />
-                      <p className="text-sm font-bold">Seret file ke sini atau klik untuk memilih</p>
-                      <p className="text-[11px] mt-1">Format .xlsx, .xls, .csv — baris pertama harus berisi header kolom</p>
-                    </div>
-                  )}
-                </label>
-              </div>
-
-              {importPreview && !importParsing && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-gray-700 dark:text-slate-300">
-                      <span className="text-sky-600 dark:text-sky-400">{importPreview.length}</span> baris siap diimpor
-                      {importFileName && <span className="text-gray-400 font-semibold"> — {importFileName}</span>}
-                    </p>
-                    <button
-                      onClick={() => setImportPreview(null)}
-                      className="text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors cursor-pointer"
-                    >
-                      Batal pilih file
-                    </button>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto rounded-xl border border-gray-100 dark:border-slate-800">
-                    <table className="w-full text-left text-xs">
-                      <thead className="sticky top-0 bg-gray-50 dark:bg-slate-800">
-                        <tr>
-                          <th className="px-3 py-2 font-extrabold text-gray-500 dark:text-slate-400">No</th>
-                          <th className="px-3 py-2 font-extrabold text-gray-500 dark:text-slate-400">Uraian Usulan</th>
-                          <th className="px-3 py-2 font-extrabold text-gray-500 dark:text-slate-400">Kategori</th>
-                          <th className="px-3 py-2 font-extrabold text-gray-500 dark:text-slate-400">Diteruskan</th>
-                          <th className="px-3 py-2 font-extrabold text-gray-500 dark:text-slate-400">Status</th>
-                          <th className="px-3 py-2 font-extrabold text-gray-500 dark:text-slate-400">Prioritas</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {importPreview.slice(0, 50).map((row, i) => (
-                          <tr key={i} className="border-t border-gray-50 dark:border-slate-800/60">
-                            <td className="px-3 py-2 text-gray-400">{i + 1}</td>
-                            <td className="px-3 py-2 font-semibold text-gray-800 dark:text-slate-200">{row.uraian_usulan}</td>
-                            <td className="px-3 py-2 text-gray-600 dark:text-slate-400">{row.kategori}</td>
-                            <td className="px-3 py-2">
-                              {row.diteruskan_tags.length ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {row.diteruskan_tags.map((t, ti) => (
-                                    <span key={ti} className={`px-1.5 py-0.5 rounded text-[9px] font-black border ${tagColor(t)}`}>{t}</span>
-                                  ))}
-                                </div>
-                              ) : <span className="text-gray-400">—</span>}
-                            </td>
-                            <td className="px-3 py-2">
-                              <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border ${statusTerakomodirBadge(row.status_terakomodir)}`}>{row.status_terakomodir}</span>
-                            </td>
-                            <td className="px-3 py-2 text-gray-600 dark:text-slate-400">{row.skala_prioritas ?? '—'}</td>
-                          </tr>
-                        ))}
-                        {importPreview.length > 50 && (
-                          <tr>
-                            <td colSpan={6} className="px-3 py-2 text-center text-gray-400 font-semibold">+{importPreview.length - 50} baris lainnya</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </div>
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-800">
-              <button
-                onClick={() => { setShowImportModal(false); setImportPreview(null); }}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-              >
-                Batal
-              </button>
-              <button
-                onClick={saveImport}
-                disabled={importSaving || !importPreview || importPreview.length === 0}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-sky-700 hover:bg-sky-800 transition-colors disabled:opacity-50 cursor-pointer"
-              >
-                {importSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Simpan {importPreview ? `${importPreview.length} Usulan` : ''}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Import Wizard */}
+      <ImportUsulanWizard
+        open={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImported={loadData}
+        existingKodes={list.map(u => u.kode_usulan)}
+      />
     </div>
   );
 }
