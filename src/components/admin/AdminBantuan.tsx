@@ -38,6 +38,7 @@ import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminBantuanImport from './bantuan/AdminBantuanImport';
+import AdminBantuanTambahPenerima from './bantuan/AdminBantuanTambahPenerima';
 
 // Helper to auto capitalize first letter of each word
 const toTitleCase = (str: string) => {
@@ -105,6 +106,7 @@ export default function AdminBantuan({
   // Modal states
   const [showModal, setShowModal] = useState(false);
   const [showBaModal, setShowBaModal] = useState(false);
+  const [showTambahPenerima, setShowTambahPenerima] = useState(false);
 const MONTHS_LIST = [
   { id: 'Jan', label: 'Jan', fullName: 'Januari' },
   { id: 'Feb', label: 'Feb', fullName: 'Februari' },
@@ -1687,23 +1689,7 @@ const MONTHS_LIST = [
         </div>
         <button 
           onClick={() => {
-            setSelectedResidentNik("");
-            setSearchResidentQuery("");
-            setFormProgram(selectedProgram);
-            if (selectedProgram === "BLT Dana Desa") {
-              setFormAmount("300000");
-              setFormFunding("Dana Desa");
-            } else if (selectedProgram === "Bantuan Pangan Non-Tunai") {
-              setFormAmount("200000");
-              setFormFunding("APBN");
-            } else if (selectedProgram === "Program Keluarga Harapan (PKH)") {
-              setFormAmount("600000");
-              setFormFunding("APBN");
-            } else {
-              setFormAmount("300000");
-              setFormFunding("APBN");
-            }
-            setShowAddView(true);
+            setShowTambahPenerima(true);
           }}
           className="flex items-center justify-center gap-2 bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-800 active:scale-95 transition-all shadow-sm dark:shadow-none"
         >
@@ -2653,6 +2639,16 @@ const MONTHS_LIST = [
           onClose={() => setShowImport(false)} 
           onRefresh={fetchData} 
           existingResidents={residents} 
+        />
+      )}
+
+      {/* 3-Tab Tambah Penerima (Manual / Import File / Scan Kamera) */}
+      {showTambahPenerima && (
+        <AdminBantuanTambahPenerima
+          onClose={() => setShowTambahPenerima(false)}
+          onRefresh={fetchData}
+          existingResidents={residents}
+          initialProgram={selectedProgram}
         />
       )}
 
