@@ -64,6 +64,7 @@ import PublicKiosSurat from './components/PublicKiosSurat';
 import PublicKiosAspirasi from './components/PublicKiosAspirasi';
 import KioskKtpScanner from './components/KioskKtpScanner';
 import SaasLandingPage from './components/SaasLandingPage';
+import ExpressPelayanan from './components/admin/ExpressPelayanan';
 
 function useUrlSync<T extends string>(
   key: string, 
@@ -506,6 +507,12 @@ export default function App() {
         <GlobalUpdateNotifier isBusy={false} />
       </>
     );
+  }
+
+  // Express Desk (Mode Pelayanan Cepat) — fullscreen tanpa sidebar, untuk petugas meja layanan
+  const isExpressMode = urlParams.get('mode') === 'express' || window.location.pathname.includes('/admin/express');
+  if (isExpressMode && user && (user.role === 'admin' || user.role === 'kades' || user.role === 'saas_admin')) {
+    return <><ExpressPelayanan /><ToastContainer /></>;
   }
 
   // Jika kita di domain utama dan di mode publik, tampilkan SaaS Landing Page (Portal Pusat PT)

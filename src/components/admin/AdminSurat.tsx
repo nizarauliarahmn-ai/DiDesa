@@ -20,6 +20,7 @@ import AdminSuratSKKT from './surat/AdminSuratSKKT';
 import AdminSuratUndangan from './surat/AdminSuratUndangan';
 import { getLetterFullData } from '../../utils/letterHistory';
 import { fetchResidentsCached } from '../../utils/apiCache';
+import { showToast } from '../../utils/toast';
 import { TambahTamuModal, TambahPermohonanModal } from './surat/AdminSuratQuickActions';
 
 export default function AdminSurat({ 
@@ -130,6 +131,25 @@ export default function AdminSurat({
       window.removeEventListener('set_admin_surat_tab', handleSetTab);
     };
   }, [onClearPresetResident]);
+
+  // Bridge dari Express Desk: presetResident + tab surat dibawa via localStorage
+  useEffect(() => {
+    try {
+      const presetRaw = localStorage.getItem('express_preset_resident');
+      const tab = localStorage.getItem('express_letter_tab');
+      if (presetRaw && tab) {
+        const resident = JSON.parse(presetRaw);
+        setLocalPresetResident(resident);
+        setReturnTab('buat');
+        setActiveTab(tab as any);
+        localStorage.removeItem('express_preset_resident');
+        localStorage.removeItem('express_letter_tab');
+        showToast('Data warga dari Express Desk dimuat ✓', 'success');
+      }
+    } catch (e) {
+      console.error('Express bridge error:', e);
+    }
+  }, []);
 
   return (
     <div className="pb-24 space-y-6">
