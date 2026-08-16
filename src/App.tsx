@@ -643,7 +643,7 @@ export default function App() {
           onAdminLogin={() => setView('admin')}
           onLogout={handleLogout}
         />
-        <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scroll-smooth">
+        <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scroll-smooth transition-all duration-300 ease-in-out">
           <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-72 lg:pb-80 flex flex-col min-h-full">
             
             <div className="flex-1 w-full">
