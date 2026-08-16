@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
@@ -68,6 +68,16 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   const [globalDesiLogo, setGlobalDesiLogo] = React.useState(() => localStorage.getItem('global_desi_logo') || '');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('sidebar_collapsed') === 'true');
+
+  const toggleSidebar = () => {
+    setIsCollapsed(prev => {
+      const next = !prev;
+      localStorage.setItem('sidebar_collapsed', String(next));
+      return next;
+    });
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -213,7 +223,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setIsMobileMenuOpen?.(false)} />
       )}
-      <aside className={`print:hidden fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 flex-col h-full shadow-sm dark:shadow-none transition-transform duration-300 lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex`}>
+      <aside className={`print:hidden fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 flex-col h-full shadow-sm dark:shadow-none transition-all duration-300 ease-in-out lg:relative lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
         {isMobileMenuOpen && (
           <button onClick={() => setIsMobileMenuOpen?.(false)} className="absolute top-4 right-4 p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg lg:hidden">
             <X size={18} />
@@ -221,7 +231,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         )}
 
       {/* Brand */}
-      <div className="p-6 flex items-center gap-4 mb-4">
+      <div className={`${isCollapsed ? 'p-4 flex flex-col items-center gap-3' : 'p-6 flex items-center gap-4'} mb-4`}>
         <div 
           className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner shrink-0 overflow-hidden"
           style={{ backgroundColor: globalColor }}
@@ -232,56 +242,65 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <Building2 className="text-white w-6 h-6" />
           )}
         </div>
-        <div>
-          <div className="flex items-center gap-1.5">
-            <h1 className="text-xl font-bold tracking-tight leading-none" style={{ color: globalColor }}>{globalName}</h1>
-            <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v5.0</span>
+        {!isCollapsed && (
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-xl font-bold tracking-tight leading-none truncate" style={{ color: globalColor }}>{globalName}</h1>
+              <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v5.0</span>
+            </div>
+            <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1 truncate">
+              {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
+            </p>
           </div>
-          <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1">
-            {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
-          </p>
-        </div>
+        )}
+        <button
+          onClick={toggleSidebar}
+          title={isCollapsed ? 'Perluas Sidebar' : 'Lipat Sidebar'}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50/80 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-emerald-200/60 dark:hover:border-emerald-500/30 active:scale-95"
+        >
+          {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+        </button>
       </div>
 
       {/* Nav Links */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {authUser?.role !== 'saas_admin' ? (
           <>
-            <NavItem id="tour-dashboard" icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
+            <NavItem id="tour-dashboard" collapsed={isCollapsed} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
             
-            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pemerintahan</p>
-            <NavItem id="tour-penduduk" icon={<Users size={18} />} label="Penduduk" active={activeTab === 'penduduk'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('penduduk'); }} />
-            {authUser?.role === 'kades' && <NavItem icon={<Building2 size={18} />} label="Aparatur Desa" active={activeTab === 'aparatur'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aparatur'); }} />}
+            {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pemerintahan</p>}
+            <NavItem id="tour-penduduk" collapsed={isCollapsed} icon={<Users size={18} />} label="Penduduk" active={activeTab === 'penduduk'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('penduduk'); }} />
+            {authUser?.role === 'kades' && <NavItem collapsed={isCollapsed} icon={<Building2 size={18} />} label="Aparatur Desa" active={activeTab === 'aparatur'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aparatur'); }} />}
             
-            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Kesejahteraan</p>
-            <NavItem icon={<Gift size={18} />} label="Bantuan Sosial" active={activeTab === 'bantuan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('bantuan'); }} />
+            {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Kesejahteraan</p>}
+            <NavItem collapsed={isCollapsed} icon={<Gift size={18} />} label="Bantuan Sosial" active={activeTab === 'bantuan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('bantuan'); }} />
             
-            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Produk Hukum</p>
-            <NavItem icon={<FileText size={18} />} label="Penomoran SK & Perdes" active={activeTab === 'produk_hukum'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('produk_hukum'); }} />
+            {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Produk Hukum</p>}
+            <NavItem collapsed={isCollapsed} icon={<FileText size={18} />} label="Penomoran SK & Perdes" active={activeTab === 'produk_hukum'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('produk_hukum'); }} />
             
-            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pelayanan Publik</p>
-            <NavItem id="tour-surat" icon={<FileText size={18} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
-            <NavItem icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} />
-            <NavItem icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
-              <NavItem icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); }} />
-            <NavItem icon={<ListChecks size={18} />} label="Usulan Desa" active={activeTab === 'usulan_desa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('usulan_desa'); }} />
-            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Lainnya</p>
-            <NavItem icon={<BookOpen size={18} className="text-emerald-600" />} label="Panduan & Tutorial" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
-            {authUser?.role === 'kades' && <NavItem icon={<Settings size={18} />} label="Pengaturan" active={activeTab === 'pengaturan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pengaturan'); }} />}
+            {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pelayanan Publik</p>}
+            <NavItem id="tour-surat" collapsed={isCollapsed} icon={<FileText size={18} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
+            <NavItem collapsed={isCollapsed} icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
+              <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); }} />
+            <NavItem collapsed={isCollapsed} icon={<ListChecks size={18} />} label="Usulan Desa" active={activeTab === 'usulan_desa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('usulan_desa'); }} />
+            {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Lainnya</p>}
+            <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} className="text-emerald-600" />} label="Panduan & Tutorial" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
+            {authUser?.role === 'kades' && <NavItem collapsed={isCollapsed} icon={<Settings size={18} />} label="Pengaturan" active={activeTab === 'pengaturan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pengaturan'); }} />}
           </>
         ) : (
           <>
-            <NavItem icon={<LayoutDashboard size={18} />} label="SaaS Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
-            <NavItem icon={<Building2 size={18} className="text-blue-600" />} label="Manajemen Klien" active={activeTab === 'tenants'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('tenants'); }} badgeCount={activeTab === 'tenants' ? 0 : unreadFeedbacks} />
-            <NavItem icon={<Users size={18} className="text-orange-500" />} label="Prospek & Pengajuan" active={activeTab === 'saas_leads'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_leads'); }} badgeCount={activeTab === 'saas_leads' ? 0 : pendingLeadsCount} />
-            <NavItem icon={<ShieldCheck size={18} className="text-emerald-600" />} label="Persetujuan Desa" active={activeTab === 'pending_approvals'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pending_approvals'); }} badgeCount={activeTab === 'pending_approvals' ? 0 : pendingApprovalsCount} />
-            <NavItem icon={<Handshake size={18} className="text-emerald-700" />} label="Manajemen Afiliator" active={activeTab === 'saas_affiliates'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_affiliates'); }} badgeCount={activeTab === 'saas_affiliates' ? 0 : pendingAffiliatesCount} />
-            <NavItem icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
-            <NavItem icon={<Sparkles size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
-            <NavItem icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={activeTab === 'saas_bugs' ? 0 : pendingBugsCount} />
-            <NavItem icon={<FileText size={18} className="text-emerald-600" />} label="Template Surat Global" active={activeTab === 'template_surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('template_surat'); }} />
-            <NavItem icon={<BookOpen size={18} className="text-teal-600" />} label="Panduan & Documentation" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
-            <NavItem icon={<Settings size={18} />} label="Branding Platform" active={activeTab === 'global_branding'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('global_branding'); }} />
+            <NavItem collapsed={isCollapsed} icon={<LayoutDashboard size={18} />} label="SaaS Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Building2 size={18} className="text-blue-600" />} label="Manajemen Klien" active={activeTab === 'tenants'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('tenants'); }} badgeCount={activeTab === 'tenants' ? 0 : unreadFeedbacks} />
+            <NavItem collapsed={isCollapsed} icon={<Users size={18} className="text-orange-500" />} label="Prospek & Pengajuan" active={activeTab === 'saas_leads'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_leads'); }} badgeCount={activeTab === 'saas_leads' ? 0 : pendingLeadsCount} />
+            <NavItem collapsed={isCollapsed} icon={<ShieldCheck size={18} className="text-emerald-600" />} label="Persetujuan Desa" active={activeTab === 'pending_approvals'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pending_approvals'); }} badgeCount={activeTab === 'pending_approvals' ? 0 : pendingApprovalsCount} />
+            <NavItem collapsed={isCollapsed} icon={<Handshake size={18} className="text-emerald-700" />} label="Manajemen Afiliator" active={activeTab === 'saas_affiliates'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_affiliates'); }} badgeCount={activeTab === 'saas_affiliates' ? 0 : pendingAffiliatesCount} />
+            <NavItem collapsed={isCollapsed} icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Sparkles size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={activeTab === 'saas_bugs' ? 0 : pendingBugsCount} />
+            <NavItem collapsed={isCollapsed} icon={<FileText size={18} className="text-emerald-600" />} label="Template Surat Global" active={activeTab === 'template_surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('template_surat'); }} />
+            <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} className="text-teal-600" />} label="Panduan & Documentation" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Settings size={18} />} label="Branding Platform" active={activeTab === 'global_branding'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('global_branding'); }} />
           </>
         )}
         
@@ -295,7 +314,8 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
               }
               setActiveTab('ai_assistant');
             }}
-            className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all relative overflow-hidden group ${activeTab === 'ai_assistant' ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50 dark:hover:bg-slate-800 border border-transparent'}`}
+            className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all relative overflow-hidden group ${isCollapsed ? 'justify-center px-2' : ''} ${activeTab === 'ai_assistant' ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50 dark:hover:bg-slate-800 border border-transparent'}`}
+            title={isCollapsed ? 'Asisten AI' : undefined}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="flex items-center gap-3 relative z-10">
@@ -306,6 +326,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
                   <Bot size={16} />
                 )}
               </div>
+              {!isCollapsed && (
               <div className="flex flex-col items-start">
                 <div className="flex items-center gap-1.5">
                   <span className={`text-sm font-bold ${activeTab === 'ai_assistant' ? 'text-indigo-900' : 'text-gray-700 dark:text-slate-300'}`}>Asisten AI</span>
@@ -319,8 +340,9 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
                   <Sparkles size={8} /> Pintar
                 </span>
               </div>
+              )}
             </div>
-            {activeTab === 'ai_assistant' && (
+            {activeTab === 'ai_assistant' && !isCollapsed && (
               <div className="w-1.5 h-6 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
             )}
           </button>
@@ -329,7 +351,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
       {/* Profile */}
       <div className="p-4 border-t border-gray-100 dark:border-slate-800 flex flex-col gap-3 mt-auto bg-white dark:bg-slate-900">
-        <div className="flex items-center gap-3 px-1">
+        <div className={`${isCollapsed ? 'flex justify-center' : 'flex items-center gap-3 px-1'}`}>
           <div className="relative shrink-0 group cursor-pointer">
             <label className="cursor-pointer block relative">
               <img src={authUser?.avatar || `https://api.dicebear.com/9.x/micah/svg?seed=${authUser?.name || 'Admin'}`} alt="Admin" className={`w-11 h-11 rounded-full border-2 border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none object-cover ${isUploadingAvatar ? 'opacity-50' : 'group-hover:opacity-80'} transition-opacity`} />
@@ -348,6 +370,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
               )}
             </div>
           </div>
+          {!isCollapsed && (
           <div className="flex-1">
             <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-1">{authUser?.name || "Admin Desa"}</p>
             <div className="flex items-center gap-1.5">
@@ -360,15 +383,17 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
               </span>
             </div>
           </div>
+          )}
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className={`${isCollapsed ? 'flex flex-col items-center gap-2' : 'flex items-center gap-2'}`}>
           <button 
             onClick={() => setView('public')}
-            className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-50 dark:bg-slate-800 hover:bg-emerald-50 border border-gray-100 dark:border-slate-800 hover:border-emerald-100 rounded-xl text-xs font-bold text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors shadow-sm dark:shadow-none"
+            title={isCollapsed ? 'Portal Publik' : undefined}
+            className={`${isCollapsed ? 'w-9 h-9 flex items-center justify-center' : 'flex-1 flex items-center justify-center gap-2'} py-2 bg-gray-50 dark:bg-slate-800 hover:bg-emerald-50 border border-gray-100 dark:border-slate-800 hover:border-emerald-100 rounded-xl text-xs font-bold text-gray-600 dark:text-slate-400 hover:text-emerald-700 transition-colors shadow-sm dark:shadow-none`}
           >
             <LayoutDashboard size={14} />
-            <span>Portal Publik</span>
+            {!isCollapsed && <span>Portal Publik</span>}
           </button>
           <button 
             onClick={onLogout}
@@ -384,13 +409,16 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   );
 }
 
-function NavItem({ icon, label, active = false, onClick, badgeCount = 0, id }: { icon: React.ReactNode, label: string, active?: boolean, onClick?: () => void, badgeCount?: number, id?: string }) {
+function NavItem({ icon, label, active = false, onClick, badgeCount = 0, id, collapsed = false }: { icon: React.ReactNode, label: string, active?: boolean, onClick?: () => void, badgeCount?: number, id?: string, collapsed?: boolean }) {
   return (
     <a
       id={id}
       href="#"
+      title={collapsed ? label : undefined}
       onClick={(e) => { e.preventDefault(); onClick && onClick(); }}
       className={`flex items-center justify-between px-3.5 py-2 rounded-xl transition-all duration-200 font-semibold text-[13px] relative overflow-hidden group ${
+        collapsed ? 'justify-center px-2' : ''
+      } ${
         active
           ? 'bg-emerald-50/80 text-emerald-700'
           : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900'
@@ -399,10 +427,15 @@ function NavItem({ icon, label, active = false, onClick, badgeCount = 0, id }: {
       <div className="flex items-center gap-2.5">
         {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-600 rounded-r-md"></div>}
         <span className={`${active ? 'text-emerald-600' : 'text-gray-400 group-hover:text-gray-600'}`}>{icon}</span>
-        <span>{label}</span>
+        {!collapsed && <span>{label}</span>}
       </div>
-      {badgeCount > 0 && (
+      {!collapsed && badgeCount > 0 && (
         <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center justify-center animate-pulse">
+          {badgeCount}
+        </span>
+      )}
+      {collapsed && badgeCount > 0 && (
+        <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center justify-center animate-pulse">
           {badgeCount}
         </span>
       )}
