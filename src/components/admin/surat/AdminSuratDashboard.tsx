@@ -1,7 +1,7 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
-  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen
+  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen, MessageCircle
 } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, cancelLetterHistoryAsync } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
@@ -9,6 +9,8 @@ import { getReactSignaturePreview } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import TTESignatureBox from './TTESignatureBox';
+import WANumberInputModal from '../../common/WANumberInputModal';
+import { buildSuratSelesaiMessage, getResidentWaPhone, openFreeWhatsAppMessage } from '../../../utils/waFreeEngine';
 
 const getFullLetterName = (jenis: string): string => {
   const mapping: Record<string, string> = {
@@ -92,6 +94,9 @@ export default function AdminSuratDashboard({
   const [selectedSurat, setSelectedSurat] = useState<LetterHistory | null>(null);
   const [suratToDelete, setSuratToDelete] = useState<LetterHistory | null>(null);
   const [suratToCancel, setSuratToCancel] = useState<LetterHistory | null>(null);
+  const [waTargetSurat, setWaTargetSurat] = useState<LetterHistory | null>(null);
+  const [waInputOpen, setWaInputOpen] = useState(false);
+  const [waInputMessage, setWaInputMessage] = useState('');
   const [selectedSuratIds, setSelectedSuratIds] = useState<string[]>([]);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [useEsignature, setUseEsignature] = useState<boolean>(true);
@@ -244,6 +249,26 @@ export default function AdminSuratDashboard({
       (r.name && (r.name || '').toLowerCase() === (selectedSurat.nama || '').toLowerCase())
     );
   }, [selectedSurat, residents]);
+
+  const handleSendWaToPemohon = (surat: LetterHistory) => {
+    const resident = residents.find(r => 
+      (r.nik && r.nik === surat.nik) || 
+      (r.name && (r.name || '').toLowerCase() === (surat.nama || '').toLowerCase())
+    );
+    const waMessage = buildSuratSelesaiMessage({
+      nama: surat.nama || 'Warga',
+      jenisSurat: getFullLetterName(surat.jenis),
+      noSurat: surat.nomor
+    });
+    const phone = resident ? getResidentWaPhone(resident) : '';
+    if (phone) {
+      openFreeWhatsAppMessage({ phone, message: waMessage });
+    } else {
+      setWaTargetSurat(surat);
+      setWaInputMessage(waMessage);
+      setWaInputOpen(true);
+    }
+  };
 
   const filteredSurat = useMemo(() => {
     return suratList.filter((surat) => {
@@ -1360,6 +1385,13 @@ export default function AdminSuratDashboard({
                     <td className="px-6 py-4 print:hidden text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button 
+                          onClick={() => handleSendWaToPemohon(surat)}
+                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800 dark:hover:bg-emerald-950/40 rounded-lg transition-colors" 
+                          title="Kirim Notifikasi WhatsApp ke Pemohon"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </button>
+                        <button 
                           onClick={() => setSelectedSurat(surat)}
                           className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:hover:bg-blue-950/40 rounded-lg transition-colors" 
                           title="Lihat Hasil Cetak Pratinjau Surat"
@@ -1688,6 +1720,15 @@ export default function AdminSuratDashboard({
           />
         </div>
       )}
+
+      {/* Modal Input No. WA On-The-Fly dari Kolom Aksi */}
+      <WANumberInputModal
+        open={waInputOpen}
+        onClose={() => setWaInputOpen(false)}
+        residentName={waTargetSurat?.nama}
+        residentNik={waTargetSurat?.nik}
+        message={waInputMessage}
+      />
 
     </div>
   );

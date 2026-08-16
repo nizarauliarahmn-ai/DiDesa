@@ -1,6 +1,8 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useEffect } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
+import SuratSuccessModal from './SuratSuccessModal';
+import WANumberInputModal from '../../common/WANumberInputModal';
 import { 
   Home, Store, Frown, FileText, Users, Search, Printer, Archive, ZoomIn, ZoomOut,
   Mail, Heart, Landmark, FileCheck, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2, Monitor,
@@ -21,7 +23,7 @@ import { searchResidentByNIK } from '../../../utils/residentSearch';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { invalidateResidentsCache } from '../../../utils/apiCache';
-import { buildSuratSelesaiMessage, getResidentWaPhone, requestWaNotification } from '../../../utils/waFreeEngine';
+import { buildSuratSelesaiMessage, getResidentWaPhone, openFreeWhatsAppMessage } from '../../../utils/waFreeEngine';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -102,6 +104,9 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [showPrintWarning, setShowPrintWarning] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showSuratSuccessModal, setShowSuratSuccessModal] = useState(false);
+  const [waInputOpen, setWaInputOpen] = useState(false);
+  const [waInputMessage, setWaInputMessage] = useState('');
 
   // Favorite & Usage States
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -532,25 +537,8 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     recordLetterToHistory();
     setIsSaving(true);
 
-    // Notifikasi WA gratis (Rp 0): kirim notifikasi surat selesai ke warga
-    const selectedClass = classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate);
-    if (selectedResident?.name || selectedResident?.nik) {
-      const waMessage = buildSuratSelesaiMessage({
-        nama: selectedResident.name || 'Warga',
-        jenisSurat: selectedClass ? selectedClass.jenis : 'Surat Resmi',
-        noSurat: nomorSurat
-      });
-      requestWaNotification({
-        message: waMessage,
-        resident: {
-          name: selectedResident.name,
-          nik: selectedResident.nik,
-          phone: getResidentWaPhone(selectedResident)
-        }
-      });
-    }
-
     // Increment sequence number for the selected classification
+    const selectedClass = classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate);
     if (selectedClass) {
       // Track usage
       const updatedUsage = { ...usageCounts, [selectedClass.klasifikasi]: (usageCounts[selectedClass.klasifikasi] || 0) + 1 };
@@ -565,8 +553,26 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       }
 
       showToast("Surat resmi baru berhasil diterbitkan dan diarsipkan!", "success");
-      onBack();
+      // Tampilkan modal sukses pasca-terbit dengan aksi Cetak & Kirim WA
+      setShowSuratSuccessModal(true);
     }, 1500);
+  };
+
+  // Kirim notifikasi WA ke pemohon (cek nomor; jika kosong buka modal input cepat)
+  const handleSendWaToPemohon = () => {
+    const selectedClass = classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate);
+    const waMessage = buildSuratSelesaiMessage({
+      nama: selectedResident?.name || 'Warga',
+      jenisSurat: selectedClass ? selectedClass.jenis : 'Surat Resmi',
+      noSurat: nomorSurat
+    });
+    const phone = selectedResident ? getResidentWaPhone(selectedResident) : '';
+    if (phone) {
+      openFreeWhatsAppMessage({ phone, message: waMessage });
+    } else {
+      setWaInputMessage(waMessage);
+      setWaInputOpen(true);
+    }
   };
   
   const handleNextStep = () => {
@@ -1977,6 +1983,13 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                 <MessageCircle className="w-4 h-4" /> Kirim PDF ke WhatsApp Warga
               </button>
               <button
+                onClick={handleSendWaToPemohon}
+                disabled={isSaving}
+                className="flex items-center gap-2 px-4 md:px-5 py-3 rounded-xl text-xs md:text-sm font-black text-emerald-700 border-2 border-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+              >
+                <MessageCircle className="w-4 h-4" /> Kirim WA ke Pemohon
+              </button>
+              <button
                 onClick={handlePrint}
                 disabled={isSaving}
                 className="flex items-center gap-2 px-5 md:px-7 py-3 rounded-xl text-sm md:text-base font-black text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-500/25 active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
@@ -2018,6 +2031,27 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
         namaWarga={selectedResident?.name || 'Umum'}
         jenisSurat="Surat Resmi"
         onBackToTemplates={onBack}
+      />
+
+      {/* Pop-up Modal Sukses Pasca-Terbit: Cetak PDF / Kirim WA */}
+      <SuratSuccessModal
+        isOpen={showSuratSuccessModal}
+        onClose={() => setShowSuratSuccessModal(false)}
+        nomorSurat={nomorSurat}
+        namaWarga={selectedResident?.name || 'Umum'}
+        jenisSurat={classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate)?.jenis || 'Surat Resmi'}
+        waPhone={selectedResident ? getResidentWaPhone(selectedResident) : ''}
+        onPrint={() => handlePrint()}
+        onSendWa={handleSendWaToPemohon}
+      />
+
+      {/* Modal Input No. WA On-The-Fly (jika nomor pemohon kosong) */}
+      <WANumberInputModal
+        open={waInputOpen}
+        onClose={() => setWaInputOpen(false)}
+        residentName={selectedResident?.name}
+        residentNik={selectedResident?.nik}
+        message={waInputMessage}
       />
     </div>
   );
