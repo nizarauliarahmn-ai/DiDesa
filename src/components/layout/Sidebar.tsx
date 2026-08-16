@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, PieChart, Newspaper, Map, ShieldCheck, Building2, LogOut, MessageSquareText, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LayoutDashboard, PieChart, Newspaper, Map, ShieldCheck, Building2, LogOut, MessageSquareText, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { X } from 'lucide-react';
 
@@ -74,8 +74,17 @@ export default function Sidebar({
           </button>
         )}
 
+        {/* Floating Edge Toggle (Border Edge Floating Button) */}
+        <button
+          onClick={toggleSidebar}
+          className="hidden lg:flex absolute -right-3 top-5 z-50 w-6 h-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-full shadow-md flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:scale-110 transition-all cursor-pointer"
+          title={isCollapsed ? 'Buka Sidebar' : 'Lipat Sidebar'}
+        >
+          {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+        </button>
+
       {/* Brand */}
-      <div className="flex items-center justify-between px-3 py-2 mb-1 w-full border-b border-slate-100 dark:border-slate-800">
+      <div className="flex items-center px-3 py-2 mb-1 w-full border-b border-slate-100 dark:border-slate-800">
         {/* Sisi Kiri: Logo + Detail Nama */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div 
@@ -102,15 +111,6 @@ export default function Sidebar({
           </div>
           )}
         </div>
-
-        {/* Sisi Kanan: Toggle Button Minimalis */}
-        <button
-          onClick={toggleSidebar}
-          title={isCollapsed ? 'Buka Sidebar' : 'Lipat Sidebar'}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-all shrink-0"
-        >
-          {isCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-        </button>
       </div>
 
       <nav className="flex-1 px-4 py-2 space-y-1 mt-2">
