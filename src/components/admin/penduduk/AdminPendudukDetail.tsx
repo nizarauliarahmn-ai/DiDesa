@@ -416,8 +416,8 @@ export default function AdminPendudukDetail({
             </h2>
             <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
               {(() => {
-                const s = (data?.status || 'Aktif').trim().toLowerCase();
-                if (s.includes('meninggal') || s === 'mati' || s === 'wafat') {
+                const keberadaan = (data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').trim().toLowerCase();
+                if (keberadaan.includes('meninggal') || keberadaan === 'mati' || keberadaan === 'wafat') {
                   return (
                     <span className="bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
@@ -425,15 +425,15 @@ export default function AdminPendudukDetail({
                     </span>
                   );
                 }
-                if (s.includes('pindah') || s.includes('mutasi') || s === 'pindah domisili') {
+                if (keberadaan.includes('pindah') || keberadaan.includes('mutasi')) {
                   return (
                     <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                      Pindah
+                      {keberadaan.includes('mutasi') ? 'Mutasi' : 'Pindah'}
                     </span>
                   );
                 }
-                if (s === 'pending_approval' || s === 'pending') {
+                if (keberadaan === 'pending_approval' || keberadaan === 'pending') {
                   return (
                     <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
@@ -444,7 +444,7 @@ export default function AdminPendudukDetail({
                 return (
                   <span className="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    {s === 'aktif' || s === 'hidup' || s.includes('hidup') ? 'Hidup' : (data?.status || 'Hidup')}
+                    Tetap
                   </span>
                 );
               })()}
@@ -525,7 +525,7 @@ export default function AdminPendudukDetail({
       </div>
 
       {/* 5-Tab Navigation */}
-      <div className="sticky top-[132px] z-30 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-xl pb-2 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 pt-4 border-b border-slate-200/50 dark:border-slate-700/50 overflow-x-auto">
+      <div className="sticky top-0 z-30 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md py-3 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 transition-all overflow-x-auto">
         <div className="flex gap-1.5 min-w-max">
           {DETAIL_TABS.map((tab) => {
             const Icon = tab.icon;
@@ -932,18 +932,6 @@ export default function AdminPendudukDetail({
                   <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{data?.noWhatsapp || '-'}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Dusun / Kampung</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{data?.dusun || '-'}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Gelar Depan</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{data?.gelarDepan || '-'}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Gelar Belakang</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{data?.gelarBelakang || '-'}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Status Domisili</span>
                   <span className="text-xs font-bold text-gray-900 dark:text-white">{data?.domicileStatus || '-'}</span>
                 </div>
@@ -1121,21 +1109,6 @@ export default function AdminPendudukDetail({
                     </p>
                   </div>
                 </div>
-
-                <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 flex items-center justify-center shrink-0 mt-0.5">
-                    <FileText className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1 text-xs">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Akta Kelahiran / Nikah</p>
-                    <p className="text-gray-700 dark:text-slate-300 mt-0.5 font-medium truncate">
-                      Lahir: <strong className="text-gray-900 dark:text-white font-mono">{data?.noAktaKelahiran || "-"}</strong>
-                    </p>
-                    <p className="text-gray-700 dark:text-slate-300 font-medium truncate">
-                      Nikah: <strong className="text-gray-900 dark:text-white font-mono">{data?.noAktaNikah || "-"}</strong>
-                    </p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -1215,17 +1188,7 @@ export default function AdminPendudukDetail({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
-                    <CreditCard className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">No. BPJS / KIS</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 font-mono">{data?.noBpjs || data?.bpjsNumber || data?.bpjs || "-"}</p>
-                  </div>
-                </div>
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
                   <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
                     <CheckCircle2 className="w-4 h-4" />
@@ -1243,16 +1206,6 @@ export default function AdminPendudukDetail({
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Disabilitas</p>
                     <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{data?.disabilitas || "-"}</p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0 mt-0.5">
-                    <BookOpen className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">No. Paspor / KITAS</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 font-mono">{data?.noPaspor || "-"}</p>
                   </div>
                 </div>
 
