@@ -75,36 +75,41 @@ export default function Sidebar({
         )}
 
       {/* Brand */}
-      <div className="flex items-center justify-between px-4 py-3 mb-2 min-w-0">
+      <div className="flex items-center justify-between px-3 py-2 mb-1 w-full border-b border-slate-100 dark:border-slate-800">
+        {/* Sisi Kiri: Logo + Detail Nama */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div 
-            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-inner shrink-0 overflow-hidden"
-            style={{ backgroundColor: globalColor }}
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 overflow-hidden"
+            style={{ backgroundColor: globalColor || '#047857' }}
           >
             {globalLogo ? (
-              <img src={globalLogo} alt={globalName} className="w-6 h-6 object-contain" />
+              <img src={globalLogo} alt={globalName} className="w-5 h-5 object-contain" />
             ) : (
-              <Building2 className="text-white w-6 h-6" />
+              <Building2 className="w-5 h-5 text-white" />
             )}
           </div>
+
+          {/* Teks Judul + Version + Subtitle */}
           {!isCollapsed && (
-          <div className="min-w-0">
+          <div className="flex flex-col min-w-0 leading-none">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-bold text-slate-800 dark:text-white text-lg whitespace-nowrap">{globalName}</h1>
-              <span className="text-[10px] font-semibold bg-emerald-100 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full shrink-0">v5.3</span>
+              <span className="font-bold text-slate-800 dark:text-white text-base whitespace-nowrap">{globalName}</span>
+              <span className="text-[10px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full shrink-0">v5.3</span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium tracking-wider block">
+            <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-1">
               {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
-            </p>
+            </span>
           </div>
           )}
         </div>
+
+        {/* Sisi Kanan: Toggle Button Minimalis */}
         <button
           onClick={toggleSidebar}
-          title={isCollapsed ? 'Perluas Sidebar' : 'Lipat Sidebar'}
-          className="shrink-0 ml-1 p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50/80 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-emerald-200/60 dark:hover:border-emerald-500/30 active:scale-95"
+          title={isCollapsed ? 'Buka Sidebar' : 'Lipat Sidebar'}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-all shrink-0"
         >
-          {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+          {isCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
         </button>
       </div>
 
