@@ -62,7 +62,7 @@ export default function ExpressPelayanan() {
   const [activeResident, setActiveResident] = useState<ExpressResident | null>(null);
   const [modal, setModal] = useState<'none' | 'letter' | 'ktp' | 'warga' | 'tamu' | 'bansos' | 'penduduk' | 'kiosk'>('none');
   const [ktpModalOpen, setKtpModalOpen] = useState(false);
-  const [quickLetterMode, setQuickLetterMode] = useState(false);
+  const [residentSearchOpen, setResidentSearchOpen] = useState(false);
   const [stream, setStream] = useState<any[]>([]);
   const [streamLoading, setStreamLoading] = useState(false);
 
@@ -188,8 +188,7 @@ export default function ExpressPelayanan() {
         if (res.found && res.resident) {
           setActiveResident(res.resident);
           setShowResults(false);
-          setModal(quickLetterMode ? 'letter' : 'warga');
-          setQuickLetterMode(false);
+          setModal('warga');
           setQ(res.resident.nik || '');
         }
       });
@@ -206,8 +205,7 @@ export default function ExpressPelayanan() {
   const openResident = (r: ExpressResident) => {
     setActiveResident(r);
     setShowResults(false);
-    setModal(quickLetterMode ? 'letter' : 'warga');
-    setQuickLetterMode(false);
+    setModal('warga');
   };
 
   const getResidentPhone = useCallback(async (nik: string) => {
@@ -814,9 +812,17 @@ export default function ExpressPelayanan() {
         open={ktpModalOpen}
         onClose={() => setKtpModalOpen(false)}
         onResult={handleKtpResult}
-        onManualSearch={() => {
-          setQuickLetterMode(true);
-          setTimeout(() => { setQ(''); searchRef.current?.focus(); }, 80);
+        onManualSearch={() => setResidentSearchOpen(true)}
+      />
+
+      <ResidentSearchModal
+        open={residentSearchOpen}
+        tenantId={tenantId}
+        onClose={() => setResidentSearchOpen(false)}
+        onPick={(r) => {
+          setActiveResident(r);
+          setResidentSearchOpen(false);
+          setModal('letter');
         }}
       />
 
@@ -915,5 +921,88 @@ function ResidentDetail({ r, aids, onBuatSurat, onBansos, onWhatsApp, onCopyNik 
         <button onClick={onWhatsApp} className="flex flex-col items-center gap-1 px-2 py-3.5 rounded-2xl bg-emerald-600 text-white text-[11px] font-black transition-colors hover:bg-emerald-700 cursor-pointer"><Phone className="w-4 h-4" /> WhatsApp</button>
       </div>
     </div>
+  );
+}
+
+// ── Modal Pencarian Warga Manual (NIK / Nama) ──────────────────────────────
+function ResidentSearchModal({ open, tenantId, onClose, onPick }: {
+  open: boolean;
+  tenantId: string | null;
+  onClose: () => void;
+  onPick: (r: ExpressResident) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<ExpressResident[]>([]);
+  const [searching, setSearching] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setQuery('');
+      setResults([]);
+      setTimeout(() => inputRef.current?.focus(), 80);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !tenantId) return;
+    const val = query.trim();
+    if (!val) { setResults([]); return; }
+    setSearching(true);
+    const isNik = /^\d+$/.test(val);
+    (async () => {
+      try {
+        let builder: any = supabase.from('residents').select('*').eq('tenant_id', tenantId);
+        builder = isNik ? builder.ilike('nik', `%${val}%`) : builder.or(`name.ilike.%${val}%,nik.ilike.%${val}%`);
+        const { data, error } = await builder.limit(8);
+        if (error) throw error;
+        setResults(data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setSearching(false);
+      }
+    })();
+  }, [query, open, tenantId]);
+
+  return (
+    <Modal title="🔍 Cari Warga Manual (NIK / Nama)" onClose={onClose}>
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-600" />
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Ketik NIK atau Nama warga di sini..."
+          className="w-full p-4 pl-12 rounded-2xl border-2 border-emerald-500 bg-gray-50 dark:bg-slate-900 text-sm outline-none focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-900/40 focus:border-emerald-600 transition-all"
+        />
+        {searching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 animate-spin text-emerald-600" />}
+      </div>
+
+      <div className="mt-4 space-y-2 max-h-[45vh] overflow-y-auto">
+        {query.trim() && results.length === 0 && !searching && (
+          <p className="text-center text-xs font-semibold text-gray-400 py-8">Warga tidak ditemukan. Periksa kembali NIK / nama.</p>
+        )}
+        {results.map((r) => (
+          <button
+            key={r.nik}
+            onClick={() => onPick(r)}
+            className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          >
+            {r.photo ? (
+              <img src={r.photo} alt="" className="w-10 h-10 rounded-xl object-cover bg-gray-100" />
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center"><User className="w-5 h-5" /></div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm truncate">{r.name}</p>
+              <p className="text-xs text-gray-500 font-mono">{r.nik}</p>
+            </div>
+            <span className="text-[10px] text-gray-400 shrink-0">{r.rt_rw || r.dusun || 'RT/RW -'}</span>
+          </button>
+        ))}
+      </div>
+    </Modal>
   );
 }
