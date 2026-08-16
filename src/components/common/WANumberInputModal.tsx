@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Phone, Save, CheckCircle } from 'lucide-react';
+import { X, Phone, MessageCircle, CheckCircle } from 'lucide-react';
 import { openFreeWhatsAppMessage, saveResidentWaPhone } from '../../utils/waFreeEngine';
 import { showToast } from '../../utils/toast';
 
@@ -129,16 +129,17 @@ export default function WANumberInputModal({
               <button
                 onClick={handleSubmit}
                 disabled={saving}
-                className="w-full mt-5 py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all shadow-lg shadow-emerald-600/20 dark:shadow-none focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-4 rounded-xl flex items-center justify-center transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {saving ? (
                   <span className="inline-flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 animate-pulse" /> Menyimpan...
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-2">
-                    <Save className="w-4 h-4" /> 📱 Simpan &amp; Buka WhatsApp
-                  </span>
+                  <>
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Simpan &amp; Kirim WhatsApp
+                  </>
                 )}
               </button>
             </div>

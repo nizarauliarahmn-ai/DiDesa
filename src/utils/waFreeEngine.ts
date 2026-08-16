@@ -47,16 +47,30 @@ export function openFreeWhatsAppMessage({ phone, message }: { phone: string; mes
 // Template Pesan
 // ----------------------------------------------------------------------------
 
+/** Ambil nama desa dinamis (Sukamakmur/Wasah Hilir/dll) dari pengaturan kop surat. */
+export function getVillageName(): string {
+  const rawDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
+  return rawDesa.replace(/^(desa|kelurahan)\s+/i, '').trim() || 'Wasah Hilir';
+}
+
 /** Template A — Notifikasi Surat Selesai Diterbitkan. */
 export function buildSuratSelesaiMessage(opts: { nama: string; jenisSurat: string; noSurat: string }): string {
   const { nama, jenisSurat, noSurat } = opts;
-  return `Pemerintah Desa Wasah Hilir Notification:\n\nHalo Bpk/Ibu *${nama}*,\nSurat Keterangan *${jenisSurat}* Anda dengan Nomor: *${noSurat}* telah selesai diterbitkan.\n\nSilakan ambil fisik dokumen di Kantor Desa pada jam kerja.\nTerima kasih.`;
+  const namaWarga = (nama || '').trim() || 'Warga';
+  const desa = getVillageName();
+  const jenisSuratClean = String(jenisSurat || '').trim().replace(/^Surat Keterangan\s+/i, '');
+  const jenisSuratFinal = jenisSuratClean ? `Surat Keterangan ${jenisSuratClean}` : 'Surat Keterangan';
+
+  return `Pemerintah Desa ${desa}\n\nHalo Bpk/Ibu ${namaWarga},\n\n${jenisSuratFinal} Anda telah selesai diterbitkan.\n\nDetail Dokumen:\n• Jenis Surat: ${jenisSuratFinal}\n• Nomor Surat: ${noSurat}\n\nSilakan mengambil dokumen fisik di Kantor Desa ${desa} pada jam kerja pelayanan.\n\nTerima kasih.`;
 }
 
 /** Template B — Notifikasi Aspirasi Dikonversi Menjadi Usulan Desa. */
 export function buildAspirasiKeUsulanMessage(opts: { nama: string; judulAspirasi: string; kodeUsulan: string }): string {
   const { nama, judulAspirasi, kodeUsulan } = opts;
-  return `Pemerintah Desa Wasah Hilir Notification:\n\nHalo Bpk/Ibu *${nama}*,\nLaporan aspirasi Anda mengenai *'${judulAspirasi}'* telah resmi diangkat menjadi *Usulan Desa (Kode: ${kodeUsulan})* untuk dibahas dalam perencanaan RKPDes/Musrenbang.\n\nTerima kasih atas partisipasi Anda!`;
+  const namaWarga = (nama || '').trim() || 'Warga';
+  const desa = getVillageName();
+
+  return `Pemerintah Desa ${desa}\n\nHalo Bpk/Ibu ${namaWarga},\n\nLaporan aspirasi Anda "${judulAspirasi}" telah resmi diangkat menjadi Usulan Desa (Kode: ${kodeUsulan}) untuk dibahas dalam perencanaan RKPDes/Musrenbang.\n\nTerima kasih atas partisipasi Anda.`;
 }
 
 // ----------------------------------------------------------------------------
