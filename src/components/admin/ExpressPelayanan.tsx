@@ -965,6 +965,8 @@ function ResidentSearchModal({ open, tenantId, onClose, onPick }: {
     })();
   }, [query, open, tenantId]);
 
+  if (!open) return null;
+
   return (
     <Modal title="🔍 Cari Warga Manual (NIK / Nama)" onClose={onClose}>
       <div className="relative">
@@ -981,9 +983,11 @@ function ResidentSearchModal({ open, tenantId, onClose, onPick }: {
       </div>
 
       <div className="mt-4 space-y-2 max-h-[45vh] overflow-y-auto">
-        {query.trim() && results.length === 0 && !searching && (
+        {!query.trim() ? (
+          <p className="text-center text-xs font-semibold text-gray-400 py-8">Ketik NIK atau nama warga untuk mulai mencari.</p>
+        ) : results.length === 0 && !searching ? (
           <p className="text-center text-xs font-semibold text-gray-400 py-8">Warga tidak ditemukan. Periksa kembali NIK / nama.</p>
-        )}
+        ) : null}
         {results.map((r) => (
           <button
             key={r.nik}
@@ -998,8 +1002,8 @@ function ResidentSearchModal({ open, tenantId, onClose, onPick }: {
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm truncate">{r.name}</p>
               <p className="text-xs text-gray-500 font-mono">{r.nik}</p>
+              <p className="text-[11px] text-gray-400 truncate">{[r.address, r.rt_rw || [r.rt, r.rw].filter(Boolean).join('/'), r.dusun].filter(Boolean).join(' • ') || 'RT/RW -'}</p>
             </div>
-            <span className="text-[10px] text-gray-400 shrink-0">{r.rt_rw || r.dusun || 'RT/RW -'}</span>
           </button>
         ))}
       </div>
