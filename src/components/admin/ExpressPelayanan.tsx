@@ -62,6 +62,7 @@ export default function ExpressPelayanan() {
   const [activeResident, setActiveResident] = useState<ExpressResident | null>(null);
   const [modal, setModal] = useState<'none' | 'letter' | 'ktp' | 'warga' | 'tamu' | 'bansos' | 'penduduk' | 'kiosk'>('none');
   const [ktpModalOpen, setKtpModalOpen] = useState(false);
+  const [quickLetterMode, setQuickLetterMode] = useState(false);
   const [stream, setStream] = useState<any[]>([]);
   const [streamLoading, setStreamLoading] = useState(false);
 
@@ -187,7 +188,8 @@ export default function ExpressPelayanan() {
         if (res.found && res.resident) {
           setActiveResident(res.resident);
           setShowResults(false);
-          setModal('warga');
+          setModal(quickLetterMode ? 'letter' : 'warga');
+          setQuickLetterMode(false);
           setQ(res.resident.nik || '');
         }
       });
@@ -204,7 +206,8 @@ export default function ExpressPelayanan() {
   const openResident = (r: ExpressResident) => {
     setActiveResident(r);
     setShowResults(false);
-    setModal('warga');
+    setModal(quickLetterMode ? 'letter' : 'warga');
+    setQuickLetterMode(false);
   };
 
   const getResidentPhone = useCallback(async (nik: string) => {
@@ -811,6 +814,10 @@ export default function ExpressPelayanan() {
         open={ktpModalOpen}
         onClose={() => setKtpModalOpen(false)}
         onResult={handleKtpResult}
+        onManualSearch={() => {
+          setQuickLetterMode(true);
+          setTimeout(() => { setQ(''); searchRef.current?.focus(); }, 80);
+        }}
       />
 
       <button

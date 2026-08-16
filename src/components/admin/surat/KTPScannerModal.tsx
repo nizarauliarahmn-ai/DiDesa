@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, Upload, Zap, Loader2, Scan, RefreshCw, MonitorSmartphone, TabletSmartphone, QrCode, Radio, CheckCircle2 } from 'lucide-react';
+import { X, Camera, Upload, Zap, Loader2, Scan, RefreshCw, MonitorSmartphone, TabletSmartphone, QrCode, Radio, CheckCircle2, Search } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { runKtpOcr, KtpOcrResult, isKtpResultValid, emptyKtpResult } from '../../../utils/ktpOcr';
 import { showToast } from '../../../utils/toast';
@@ -23,11 +23,13 @@ interface KTPScannerModalProps {
   sessionId?: string;
   /** Gambar hasil paste dari scanner fisik — langsung diproses OCR saat modal terbuka. */
   initialImageBlob?: Blob | null;
+  /** Dipanggil saat admin memilih "Cari Manual (NIK / Nama)" — tanpa scan KTP. */
+  onManualSearch?: () => void;
 }
 
 type ScanMode = 'select' | 'local' | 'remote';
 
-export default function KTPScannerModal({ open, onClose, onResult, variant = 'admin', sessionId, initialImageBlob }: KTPScannerModalProps) {
+export default function KTPScannerModal({ open, onClose, onResult, variant = 'admin', sessionId, initialImageBlob, onManualSearch }: KTPScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -417,6 +419,18 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
             <div>
               <p className="font-black text-sm">📱 Panggil Tablet Scanner</p>
               <p className="text-xs text-slate-400 mt-0.5">Kamera belakang tablet desa — ideal untuk scan KTP tanpa repot.</p>
+            </div>
+          </button>
+          <button
+            onClick={() => { onClose(); onManualSearch?.(); }}
+            className="w-full max-w-md flex items-center gap-4 p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white transition-all cursor-pointer text-left group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-slate-700/60 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+              <Search className="w-6 h-6 text-slate-300" />
+            </div>
+            <div>
+              <p className="font-black text-sm">🔍 Cari Manual (NIK / Nama)</p>
+              <p className="text-xs text-slate-400 mt-0.5">Cari dari database warga jika KTP fisik tidak dibawa.</p>
             </div>
           </button>
         </div>
