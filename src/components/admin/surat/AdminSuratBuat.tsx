@@ -21,6 +21,7 @@ import { searchResidentByNIK } from '../../../utils/residentSearch';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { invalidateResidentsCache } from '../../../utils/apiCache';
+import { buildSuratSelesaiMessage, getResidentWaPhone, requestWaNotification } from '../../../utils/waFreeEngine';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -530,9 +531,26 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const handleSimpan = () => {
     recordLetterToHistory();
     setIsSaving(true);
-    
-    // Increment sequence number for the selected classification
+
+    // Notifikasi WA gratis (Rp 0): kirim notifikasi surat selesai ke warga
     const selectedClass = classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate);
+    if (selectedResident?.name || selectedResident?.nik) {
+      const waMessage = buildSuratSelesaiMessage({
+        nama: selectedResident.name || 'Warga',
+        jenisSurat: selectedClass ? selectedClass.jenis : 'Surat Resmi',
+        noSurat: nomorSurat
+      });
+      requestWaNotification({
+        message: waMessage,
+        resident: {
+          name: selectedResident.name,
+          nik: selectedResident.nik,
+          phone: getResidentWaPhone(selectedResident)
+        }
+      });
+    }
+
+    // Increment sequence number for the selected classification
     if (selectedClass) {
       // Track usage
       const updatedUsage = { ...usageCounts, [selectedClass.klasifikasi]: (usageCounts[selectedClass.klasifikasi] || 0) + 1 };

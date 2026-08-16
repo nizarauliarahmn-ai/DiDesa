@@ -3,6 +3,7 @@ import { Search, Filter, CheckCircle, Clock, AlertTriangle, X, MessageSquareText
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { buildAspirasiKeUsulanMessage, generateKodeUsulan, requestWaNotification } from '../../utils/waFreeEngine';
 
 export interface Aspirasi {
   id: string;
@@ -225,6 +226,25 @@ export default function AdminAspirasi({
       adminResponse: responseText ? { text: responseText, fileName: proofFile ? proofFile.name : null, date: new Date().toISOString() } : selectedAspirasi.adminResponse
     });
     setProofFile(null);
+
+    // Notifikasi WA gratis (Rp 0): kirim notifikasi aspirasi dikonversi menjadi usulan desa
+    if (newStatus === 'Selesai' && selectedAspirasi.sender) {
+      try {
+        const tahun = String(new Date().getFullYear());
+        const kodeUsulan = await generateKodeUsulan(tahun);
+        const waMessage = buildAspirasiKeUsulanMessage({
+          nama: selectedAspirasi.sender,
+          judulAspirasi: selectedAspirasi.subject,
+          kodeUsulan
+        });
+        requestWaNotification({
+          message: waMessage,
+          resident: { name: selectedAspirasi.sender, nik: undefined, phone: undefined }
+        });
+      } catch (e) {
+        console.error('WA aspirasi notification error:', e);
+      }
+    }
   };
 
   const filteredAspirasi = useMemo(() => aspirasiList.filter(a => {

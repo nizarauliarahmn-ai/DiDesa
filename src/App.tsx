@@ -30,6 +30,7 @@ import GlobalBugReportButton from './components/common/GlobalBugReportButton';
 import AdminSaaSTemplateSurat from './components/admin/AdminSaaSTemplateSurat';
 import AdminPanduan from './components/admin/AdminPanduan';
 import ToastContainer from './components/common/ToastContainer';
+import WaNotificationManager from './components/common/WaNotificationManager';
 import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
@@ -620,6 +621,7 @@ export default function App() {
         </div>
         <IntroductionTour role={user.role} />
         <ToastContainer />
+        <WaNotificationManager />
         <GlobalUpdateNotifier isBusy={isBusy} enabled />
         {user.role !== 'saas_admin' && <GlobalBugReportButton />}
       </div>
@@ -704,6 +706,7 @@ export default function App() {
         </nav>
       </div>
       <ToastContainer />
+      <WaNotificationManager />
       <GlobalUpdateNotifier isBusy={isBusy} />
       {user && user.role !== 'saas_admin' && <GlobalBugReportButton />}
     </div>
