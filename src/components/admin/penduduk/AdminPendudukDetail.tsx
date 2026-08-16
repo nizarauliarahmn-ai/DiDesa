@@ -525,7 +525,7 @@ export default function AdminPendudukDetail({
       </div>
 
       {/* 5-Tab Navigation */}
-      <div className="sticky top-0 z-30 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur-md py-3 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 transition-all overflow-x-auto">
+      <div className="sticky top-[132px] z-30 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible">
         <div className="flex gap-1.5 min-w-max">
           {DETAIL_TABS.map((tab) => {
             const Icon = tab.icon;
