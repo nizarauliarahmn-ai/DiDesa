@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, Upload, Zap, Loader2, Scan, RefreshCw, MonitorSmartphone, TabletSmartphone, QrCode, Radio, CheckCircle2 } from 'lucide-react';
+import { X, Camera, Upload, Zap, Scan, RefreshCw, MonitorSmartphone, TabletSmartphone, QrCode, Radio, CheckCircle2 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { runKtpOcr, KtpOcrResult, isKtpResultValid, emptyKtpResult } from '../../../utils/ktpOcr';
 import { showToast } from '../../../utils/toast';
@@ -11,7 +11,7 @@ import {
   RequestScanPayload, ScanCompletePayload
 } from '../../../utils/ktpRealtime';
 import type { RealtimeChannel } from '@supabase/supabase-js';
-import { playKtpRequestBeep, playKtpSuccessChime } from '../../../utils/sounds';
+import { playKtpSuccessChime } from '../../../utils/sounds';
 
 interface KTPScannerModalProps {
   open: boolean;

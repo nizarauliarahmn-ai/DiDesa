@@ -1,10 +1,9 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
-import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark } from 'lucide-react';
-import L from 'leaflet';
+import { useState, useEffect, useRef } from 'react';
+import { Search, MapPin, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
-import { getLetterClassifications, generateLetterNumber, generateLetterNumberAsync, incrementSequenceNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
@@ -14,8 +13,6 @@ import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
 
 interface Resident {
   nik: string;

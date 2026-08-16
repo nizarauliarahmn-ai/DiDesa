@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Bell, 
   BellOff, 
@@ -65,7 +65,7 @@ export default function AdminNotifikasi({
       const savedUser = savedUserStr ? JSON.parse(savedUserStr) : null;
       const isSaaSAdmin = savedUser?.role === 'saas_admin';
 
-      let query = supabase.from('notifications').select('*').order('timestamp', { ascending: false });
+      let query = supabase.from('notifications').select('id, title, message, category, time, timestamp, is_read').order('timestamp', { ascending: false });
 
       if (isSaaSAdmin) {
         query = query.is('tenant_id', null);

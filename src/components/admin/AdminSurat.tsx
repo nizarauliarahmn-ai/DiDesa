@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import AdminSuratDashboard from './surat/AdminSuratDashboard';
 import AdminSuratInbox from './surat/AdminSuratInbox';
 import AdminSuratBuat from './surat/AdminSuratBuat';

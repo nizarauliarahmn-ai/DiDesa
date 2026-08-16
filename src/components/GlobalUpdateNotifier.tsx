@@ -52,13 +52,16 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
     // Scope guard: modal pengumuman hanya dipicu di Dashboard Admin / Super Admin Desa.
     if (!enabled) return;
 
+    let showTimer: ReturnType<typeof setTimeout> | undefined;
+
     const fetchUpdates = async () => {
       try {
         const { data, error } = await supabase
           .from('global_updates')
-          .select('*')
+          .select('id, version, title, content, release_date, type')
           .eq('is_active', 1)
-          .order('release_date', { ascending: false });
+          .order('release_date', { ascending: false })
+          .limit(1);
         
         if (!error && data && data.length > 0) {
           const latest = data[0];
@@ -68,7 +71,8 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
           
           if (!alreadySeen) {
             setLatestUpdate(latest);
-            setTimeout(() => setIsVisible(true), 1500);
+            clearTimeout(showTimer);
+            showTimer = setTimeout(() => setIsVisible(true), 1500);
           }
         }
       } catch (err) {
@@ -91,6 +95,7 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
     return () => {
       window.removeEventListener('global_updates_updated', fetchUpdates);
       supabase.removeChannel(channel);
+      clearTimeout(showTimer);
     };
   }, [enabled]);
 

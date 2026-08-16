@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Megaphone, CheckCircle2, Home, User, ArrowLeft } from 'lucide-react';
 import { showToast } from '../utils/toast';

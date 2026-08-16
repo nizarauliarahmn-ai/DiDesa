@@ -1,25 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Map, 
-  Pin, 
-  Navigation, 
-  RefreshCw, 
-  ZoomIn, 
-  Info, 
   Activity, 
-  Landmark, 
-  Heart, 
-  Users, 
-  Plus, 
   Trash2, 
-  Search, 
-  CheckCircle2, 
   MapPin, 
-  Layers, 
   X, 
   Save, 
-  Gift, 
-  AlertCircle
+  Gift
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';

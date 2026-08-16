@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, FileText, Eye, Smartphone, ArrowRight, MessageSquare, Compass, Search, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Sparkles, FileText, Eye, Smartphone, ArrowRight, MessageSquare, Compass, Search, CheckCircle2 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 

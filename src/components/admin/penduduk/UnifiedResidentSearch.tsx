@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ResidentStatusBadge } from './ResidentStatusBadge';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { Scan, UserPlus } from 'lucide-react';

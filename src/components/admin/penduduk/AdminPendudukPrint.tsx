@@ -1,6 +1,4 @@
-import React, { useEffect } from 'react';
 import { ArrowLeft, Printer, User } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
 
 interface AdminPendudukPrintProps {
   onBack: () => void;

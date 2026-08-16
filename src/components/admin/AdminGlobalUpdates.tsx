@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Megaphone, Trash2, Rocket, ShieldCheck, Zap, Info, Clock, AlertCircle } from 'lucide-react';
+import { Plus, Megaphone, Trash2, Rocket, ShieldCheck, Zap, Info, Clock, AlertCircle } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 
 interface GlobalUpdate {

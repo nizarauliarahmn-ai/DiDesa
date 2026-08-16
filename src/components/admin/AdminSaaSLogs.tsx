@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Database, Search, Filter, Trash2, Download, AlertCircle, CheckCircle2, AlertTriangle, Clock, Printer } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Database, Search, Download, AlertCircle, CheckCircle2, AlertTriangle, Clock, Printer } from 'lucide-react';
 import { fetchSaaSLogs, SaaSLog, subscribeSaaSLogsRealtime } from '../../utils/saasLogs';
 
 export default function AdminSaaSLogs() {

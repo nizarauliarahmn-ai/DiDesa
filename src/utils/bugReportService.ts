@@ -256,10 +256,10 @@ export const replyToBugReportOnline = async (
     
     if (index !== -1) {
       const report = currentReports[index];
-      const newMessages = [...(report.messages || []), {
+      const newMessages: BugReportMessage[] = [...(report.messages || []), {
         ...reply,
         timestamp: new Date().toISOString()
-      }];
+      } as BugReportMessage];
 
       currentReports[index] = {
         ...report,

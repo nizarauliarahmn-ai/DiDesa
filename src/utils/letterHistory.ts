@@ -22,7 +22,7 @@ export async function fetchLetterHistoryAsync(): Promise<LetterHistory[]> {
   try {
     const { data, error } = await supabase
       .from('surat')
-      .select('*')
+      .select('id, nomor, jenis_surat, nik, nama, created_at, keterangan, status, data')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
       

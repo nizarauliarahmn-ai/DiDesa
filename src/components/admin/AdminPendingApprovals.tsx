@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Loader2, CheckCircle2, XCircle, Phone, Clock, MapPin, Mail, ShieldCheck, Building2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
@@ -151,7 +151,7 @@ export default function AdminPendingApprovals() {
     }
   };
 
-  const filtered = pending.filter(t => {
+  const filtered = useMemo(() => pending.filter(t => {
     const q = searchQuery.toLowerCase();
     return (
       (t.nama_desa || '').toLowerCase().includes(q) ||
@@ -160,7 +160,7 @@ export default function AdminPendingApprovals() {
       (t.kabupaten || '').toLowerCase().includes(q) ||
       (t.admin_email || '').toLowerCase().includes(q)
     );
-  });
+  }), [pending, searchQuery]);
 
   return (
     <div className="space-y-6">

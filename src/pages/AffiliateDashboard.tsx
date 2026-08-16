@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Copy, Check, Link2, TicketPercent, Share2, Download, Users, Wallet,
   BadgeCheck, TrendingUp, CircleDollarSign, Plus, Search, ExternalLink,

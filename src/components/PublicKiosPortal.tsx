@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen, FileText, Megaphone, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import { resolveCurrentTenant } from '../utils/tenantResolver';

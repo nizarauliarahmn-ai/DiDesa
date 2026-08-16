@@ -19,7 +19,7 @@ export const fetchFeedbacksAsync = async (): Promise<Feedback[]> => {
   
   const { data, error } = await supabase
     .from('feedback')
-    .select('*')
+    .select('id, nama, desa, email, pesan, created_at, status, kategori')
     .eq('tenant_id', tenantId)
     .order('created_at', { ascending: false });
     

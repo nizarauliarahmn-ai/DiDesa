@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { PieChart, TrendingUp, DollarSign, ArrowDownRight, ArrowUpRight, CheckCircle, Search, Calendar, FileText } from 'lucide-react';
+import { TrendingUp, ArrowDownRight, ArrowUpRight, CheckCircle, Search, Calendar } from 'lucide-react';
 
 interface BudgetLineItem {
   id: string;

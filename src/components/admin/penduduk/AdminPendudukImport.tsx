@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Upload, Download, Check, CheckCircle, AlertCircle, ArrowRight, FileText, Database, Loader2 } from 'lucide-react';
+import { X, Upload, Download, Check, CheckCircle, AlertCircle, ArrowRight, Database, Loader2 } from 'lucide-react';
 import { read, utils } from 'xlsx';
 import { showToast } from '../../../utils/toast';
 

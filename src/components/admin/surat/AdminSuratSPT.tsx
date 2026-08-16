@@ -1,23 +1,18 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached, invalidateResidentsCache } from '../../../utils/apiCache';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Printer, Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 import {
-  getLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync
+  getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync
 } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
-import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
-import { useDragScroll } from '../../../hooks/useDragScroll';
+import { capitalizeWords } from '../../../utils/textUtils';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
-
-
 // ===================== INTERFACES =====================
 interface FullResident {
   nik: string;

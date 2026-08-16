@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle2, FileText, ArrowLeft } from 'lucide-react';
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Loader2, CheckCircle2, XCircle, Phone, Clock, FileSpreadsheet, Plus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Loader2, XCircle, Phone, Clock, FileSpreadsheet, Plus } from 'lucide-react';
 import { fetchSaaSTenantRequests, SaaSTenantRequest, updateSaaSTenantRequestStatus, markLeadsAsRead } from '../../utils/saasLeads';
 import { supabase } from '../../utils/supabase';
 

@@ -5,7 +5,7 @@ import {
   CircleDollarSign, HeartHandshake, CheckCircle2, Ban, Send, Printer, Download, Star,
   Eye, MoreVertical, Tags
 } from 'lucide-react';
-import { utils } from 'xlsx';
+import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -557,7 +557,7 @@ export default function AdminUsulanDesa() {
     const ws = utils.json_to_sheet(rows);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'Usulan Desa');
-    utils.writeFile(wb, `usulan-desa-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    writeFile(wb, `usulan-desa-${new Date().toISOString().slice(0, 10)}.xlsx`);
     showToast('File Excel berhasil diunduh.', 'success');
   };
 

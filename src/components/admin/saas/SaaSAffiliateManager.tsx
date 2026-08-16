@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users, Wallet, BadgePercent, Handshake, Building2, Search, Loader2,
   CheckCircle2, XCircle, RefreshCw, Upload, ExternalLink, Phone,
-  MessageSquare, X, Banknote, FileText, TrendingUp, Clock, Eye, UserCheck,
-  UserX, Landmark, Download, Copy, Check, MapPin
+  MessageSquare, X, Banknote, Eye, UserCheck,
+  UserX, Landmark, Copy, Check, MapPin
 } from 'lucide-react';
 import { supabase } from '../../../utils/supabase';
 import { showToast } from '../../../utils/toast';

@@ -5,8 +5,8 @@ import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { 
-  Building2, MapPin, Save, Image as ImageIcon, Check, Bot, Layout, Upload, Map,
-  Palette, Smartphone, Compass, Settings, FileText, Cloud, FolderOpen, Link2, Loader2
+  Building2, MapPin, Save, Image as ImageIcon, Bot, Upload,
+  Palette, Settings, FileText, Cloud, FolderOpen, Link2, Loader2
 } from 'lucide-react';
 import VillageMapModal from '../common/VillageMapModal';
 import VillageMapPreview from '../common/VillageMapPreview';

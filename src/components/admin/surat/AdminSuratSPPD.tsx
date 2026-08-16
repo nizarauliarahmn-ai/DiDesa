@@ -2,23 +2,19 @@ import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader'
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import React, { useState, useEffect, useRef, Component } from 'react';
-import { ArrowLeft, Printer, Save, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Eye, Upload, Sparkles, X, Loader2, Plane } from 'lucide-react';
+import { Printer, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Upload, Sparkles, Loader2, Plane } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../../utils/featureFlags';
 import { parseInvitationPdf, getActiveTenantId } from '../../../utils/aiChat';
-import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
-import { getLetterClassifications, generateLetterNumber, getGlobalSequenceNumber, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { getLetterClassifications, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
-
 // Error Boundary to catch and display any rendering errors
 class SPPDErrorBoundary extends Component<{children: React.ReactNode, onBack: () => void}, {hasError: boolean, error: any}> {
   constructor(props: any) {

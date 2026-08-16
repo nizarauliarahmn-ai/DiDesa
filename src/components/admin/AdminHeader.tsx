@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Bell, Menu, Database, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon, Sun } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { Search, Bell, Menu, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon, Sun } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
@@ -111,24 +111,24 @@ export default function AdminHeader({
     { name: 'Pusat Notifikasi', tab: 'notifikasi', icon: <Bell className="w-4 h-4 text-emerald-600" /> },
   ];
 
-  const filteredQuickLinks = searchQuery.trim().length > 0 
+  const filteredQuickLinks = useMemo(() => searchQuery.trim().length > 0 
     ? quickLinks.filter(link => (link.name || '').toLowerCase().includes(searchQuery.toLowerCase()))
-    : [];
+    : [], [searchQuery, quickLinks]);
 
-  const filteredResidents = searchQuery.trim().length >= 2
+  const filteredResidents = useMemo(() => searchQuery.trim().length >= 2
     ? residents.filter(r => 
         (r.name && (r.name || '').toLowerCase().includes(searchQuery.toLowerCase())) ||
         (r.nik && r.nik.includes(searchQuery)) ||
         (r.noKk && r.noKk.includes(searchQuery))
       ).slice(0, 5)
-    : [];
+    : [], [searchQuery, residents]);
 
-  const filteredNotifications = searchQuery.trim().length >= 2
+  const filteredNotifications = useMemo(() => searchQuery.trim().length >= 2
     ? notifications.filter(n => 
         (n.title && n.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (n.message && n.message.toLowerCase().includes(searchQuery.toLowerCase()))
       ).slice(0, 3)
-    : [];
+    : [], [searchQuery, notifications]);
 
   const handleQuickLinkClick = (tab: string) => {
     if (setActiveTab) setActiveTab(tab);

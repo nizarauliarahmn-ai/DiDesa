@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { RefreshCw, Trash2, RotateCcw, AlertCircle, ArrowLeft } from 'lucide-react';
 import { showToast } from '../../../utils/toast';

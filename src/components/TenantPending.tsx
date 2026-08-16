@@ -1,4 +1,3 @@
-import React from 'react';
 import { Clock, ShieldAlert, Globe, Mail } from 'lucide-react';
 
 export default function TenantPending({ status }: { status: 'pending_approval' | 'inactive' }) {

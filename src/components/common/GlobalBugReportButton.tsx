@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  LifeBuoy, Bug, X, Send, AlertTriangle, CheckCircle2, 
-  HelpCircle, Sparkles, MessageSquare, Info, ShieldAlert, Monitor, Clock, ChevronLeft, Plus,
+  Bug, X, Send, 
+  HelpCircle, Sparkles, MessageSquare, Monitor, ChevronLeft, Plus,
   Paperclip, FileText, Download, Loader2
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';

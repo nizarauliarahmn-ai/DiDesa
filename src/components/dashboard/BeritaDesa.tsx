@@ -274,14 +274,14 @@ export default function BeritaDesa() {
 
   const categories = ['Semua', 'KEGIATAN DESA', 'PENGUMUMAN', 'PEMBANGUNAN', 'SOSIAL & BANTUAN'];
 
-  const filteredNews = processedNews.filter(item => {
+  const filteredNews = useMemo(() => processedNews.filter(item => {
     const matchesCategory = activeCategory === 'Semua' || item.tag === activeCategory;
     const matchesSearch = 
       (item.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.excerpt || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.fullContent || '').toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
-  });
+  }), [processedNews, activeCategory, searchQuery]);
 
   const toggleLike = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();

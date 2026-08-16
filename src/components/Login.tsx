@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, ShieldCheck, User, Lock, ArrowRight, Eye, EyeOff, Sparkles, CheckCircle2, Server, MapPin, KeyRound, X, Mail, Phone, AlertCircle, Loader2 } from 'lucide-react';
+import { Building2, User, Lock, ArrowRight, Eye, EyeOff, CheckCircle2, KeyRound, X, Mail, Phone, AlertCircle, Loader2 } from 'lucide-react';
 import { showToast } from '../utils/toast';
 import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';

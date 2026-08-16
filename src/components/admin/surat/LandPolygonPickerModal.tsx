@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { MapIcon, Layers, Compass, Navigation, MapPin, Trash2, Undo } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MapIcon, Layers, Compass, MapPin, Trash2, Undo } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { showToast } from '../../../utils/toast';

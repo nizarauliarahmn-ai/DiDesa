@@ -4,14 +4,13 @@ import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { FileText, ArrowLeft, Printer, Save, Search, User, Store, 
-  MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
-  ZoomIn, ZoomOut, ChevronRight, X
+import { User, Store, FileSignature, AlertCircle, History,
+  ZoomIn, ZoomOut
 } from 'lucide-react';
-import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -20,7 +19,7 @@ import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUt
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
+import { checkResidentExists } from '../../../utils/residentSync';
 
 const BUSINESS_CATEGORIES = [
   "Perdagangan Umum",

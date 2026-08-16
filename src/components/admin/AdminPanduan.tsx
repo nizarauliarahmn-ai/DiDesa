@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
-  BookOpen, Tablet, FileText, Gift, Building2, HelpCircle, 
-  Search, CheckCircle2, AlertTriangle, ArrowRight, ExternalLink, 
-  Printer, Sparkles, Send, ShieldCheck, QrCode, Monitor, Laptop,
+  Tablet, FileText, Gift, Building2, HelpCircle, 
+  Search, AlertTriangle, ExternalLink, 
+  Printer, Sparkles, ShieldCheck,
   ChevronDown, ChevronRight, Copy, Check, Users
 } from 'lucide-react';
 import { showToast } from '../../utils/toast';

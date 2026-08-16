@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, LayoutDashboard, PieChart, Newspaper, Map, ShieldCheck, Building2, LogOut, MessageSquareText, Sparkles, Bot } from 'lucide-react';
+import { LayoutDashboard, PieChart, Newspaper, Map, ShieldCheck, Building2, LogOut, MessageSquareText } from 'lucide-react';
 
 import { X } from 'lucide-react';
 

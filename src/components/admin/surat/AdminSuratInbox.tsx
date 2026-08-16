@@ -1,5 +1,4 @@
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, FileText, CheckCircle, Clock, Monitor, BadgeCheck, Plus } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, updateLetterHistoryAsync } from '../../../utils/letterHistory';
 import { supabase } from '../../../utils/supabase';

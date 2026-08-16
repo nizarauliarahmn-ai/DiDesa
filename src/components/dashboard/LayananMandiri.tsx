@@ -1,13 +1,13 @@
 import { fetchResidentsCached } from '../../utils/apiCache';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SAAS_CONFIG } from '../admin/surat/AdminSuratMasterTemplate';
 import { 
   ShieldCheck, FileText, Send, History, CheckCircle, Clock, AlertTriangle, 
-  Printer, X, Eye, ZoomIn, ZoomOut, Search, UserCheck, MessageSquare, AlertCircle
+  Printer, X, Eye, ZoomIn, ZoomOut, UserCheck, MessageSquare, AlertCircle
 } from 'lucide-react';
 import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHistory';
 import { showToast } from '../../utils/toast';
-import { getLetterClassifications, LetterClassification, generateLetterNumber, generateLetterNumberAsync } from '../../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, generateLetterNumberAsync } from '../../utils/letterClassifications';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { supabase } from '../../utils/supabase';
 

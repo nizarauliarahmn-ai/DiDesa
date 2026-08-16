@@ -3,11 +3,10 @@ import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { capitalizeWords } from '../utils/textUtils';
 import { showToast } from '../utils/toast';
-import { Scanner } from '@yudiel/react-qr-scanner';
 import SignatureCanvas from 'react-signature-canvas';
 import {
-  BookOpen, QrCode, User, MapPin, Briefcase, ChevronRight,
-  CheckCircle2, RefreshCw, Keyboard, ArrowLeft, Home, Search, FileSignature, X, AlertCircle
+  BookOpen, QrCode,
+  CheckCircle2, RefreshCw, Home, Search, X, AlertCircle
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -96,6 +95,8 @@ export default function PublicBukuTamu() {
   useEffect(() => {
     if (!tenantId) return;
 
+    let scrollTimer: ReturnType<typeof setTimeout> | undefined;
+
     const channel = supabase.channel(`kiosk-notif-${tenantId}`, { config: { broadcast: { ack: true } } })
       .on('broadcast', { event: 'incoming-guest' }, ({ payload }) => {
         setForm(payload);
@@ -103,7 +104,7 @@ export default function PublicBukuTamu() {
         showToast('Data diterima dari Admin. Silakan periksa dan berikan Tanda Tangan.', 'info');
         
         // Optional: you can automatically scroll to the signature field here
-        setTimeout(() => {
+        scrollTimer = setTimeout(() => {
           document.querySelector('.signatureCanvas')?.scrollIntoView({ behavior: 'smooth' });
         }, 300);
       })
@@ -113,6 +114,7 @@ export default function PublicBukuTamu() {
 
     return () => {
       supabase.removeChannel(channel);
+      clearTimeout(scrollTimer);
       setWsStatus('disconnected');
     };
   }, [tenantId]);

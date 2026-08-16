@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   UserPlus, 
   Banknote, 
@@ -6,7 +6,6 @@ import {
   ShoppingBasket, 
   AlertTriangle,
   Save,
-  Filter,
   Download,
   AlertCircle,
   ChevronLeft,
@@ -20,23 +19,17 @@ import {
   FileText,
   ArrowUpDown,
   CheckSquare,
-  Square,
   Calendar,
-  ArrowRight,
   Ban,
   RefreshCw,
-  SlidersHorizontal,
-  Layers,
   DollarSign,
   Award,
-  Printer,
-  QrCode
+  Printer
 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import ConfirmModal from '../common/ConfirmModal';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
-import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminBantuanImport from './bantuan/AdminBantuanImport';
 import AdminBantuanTambahPenerima from './bantuan/AdminBantuanTambahPenerima';
 

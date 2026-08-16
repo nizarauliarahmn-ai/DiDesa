@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Scan, Radio } from 'lucide-react';
+import { Radio } from 'lucide-react';
 import KTPScannerModal from './admin/surat/KTPScannerModal';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { subscribeKtpScanChannel, RequestScanPayload, ktpScanChannelName } from '../utils/ktpRealtime';

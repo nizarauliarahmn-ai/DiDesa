@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Printer, Edit2, BarChart2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, ShieldCheck, Phone, BookOpen, HandHeart, Eye } from 'lucide-react';
-import { Download, Mail, MoreVertical, Archive, History, AlertCircle, AlertTriangle } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, ShieldCheck, Phone, BookOpen, HandHeart, Eye } from 'lucide-react';
+import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
 import { fetchResidentLettersAsync, LetterHistory, getLetterFullData } from '../../../utils/letterHistory';

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin, Zap, Wallet, Layers, LineChart } from 'lucide-react';
-import Footer from './common/Footer';
 import { supabase } from '../utils/supabase';
 import UserPlaceholder from './common/UserPlaceholder';
 

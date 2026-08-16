@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Plus, Edit3, Trash2, Rocket, ShieldCheck, Zap, Info, 
-  Search, RefreshCw, Eye, CheckCircle2, Clock, Globe, AlertCircle,
-  FileText, Check, X, Tag, Calendar, Bold, Italic, Heading2, Heading3,
-  List, ListOrdered, Quote, Code, Minus, Wand2, LayoutTemplate, Strikethrough
+  Search, RefreshCw, Eye, CheckCircle2, Clock, Globe,
+  FileText, X, Tag, Calendar, Bold, Italic, Heading2, Heading3,
+  List, ListOrdered, Quote, Code, Minus, Wand2, Strikethrough
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase } from '../../utils/supabase';

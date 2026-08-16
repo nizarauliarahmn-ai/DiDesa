@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft, Monitor, FileSignature, X } from 'lucide-react';
+import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft, Monitor, FileSignature } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
-import { getLetterClassifications, LetterClassification, generateLetterNumber, generateLetterNumberAsync } from '../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, generateLetterNumberAsync } from '../utils/letterClassifications';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
-import { addLetterHistory } from '../utils/letterHistory';
 import { fetchResidentsCached } from '../utils/apiCache';
 import { showToast } from '../utils/toast';
 import { supabase } from '../utils/supabase';

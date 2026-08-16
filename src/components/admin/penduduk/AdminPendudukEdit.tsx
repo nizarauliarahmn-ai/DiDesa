@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { 
-  ArrowLeft, Info, MapPin, Users, User, 
+  Info, MapPin, Users, User, 
   Check, Save, GraduationCap, Heart, Trash2, 
   ChevronDown, Search, PenLine, UserCheck, ListFilter,
   FileText, HandHeart, Phone, BookOpen, X, ShieldCheck, Eye

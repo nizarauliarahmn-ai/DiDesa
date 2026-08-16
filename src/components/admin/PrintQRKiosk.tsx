@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { BookOpen } from 'lucide-react';
 

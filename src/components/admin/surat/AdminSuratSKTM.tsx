@@ -9,11 +9,10 @@ import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { FileText, ArrowLeft, Printer, Search, User, Frown, 
-  MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
-  ZoomIn, ZoomOut, ChevronDown
+import { User, Frown, FileSignature, AlertCircle, History,
+  ZoomIn, ZoomOut
 } from 'lucide-react';
-import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';

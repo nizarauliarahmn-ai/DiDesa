@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Filter, CheckCircle, Clock, AlertTriangle, Eye, X, MessageSquareText, UploadCloud, Edit2, MessageCircle, Printer, Calendar } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Filter, CheckCircle, Clock, AlertTriangle, X, MessageSquareText, UploadCloud, MessageCircle, Printer, Calendar } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -227,11 +227,11 @@ export default function AdminAspirasi({
     setProofFile(null);
   };
 
-  const filteredAspirasi = aspirasiList.filter(a => {
+  const filteredAspirasi = useMemo(() => aspirasiList.filter(a => {
     const matchesSearch = a.subject.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) || a.id.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
     const matchesFilter = filter === 'Semua' || a.status === filter;
     return matchesSearch && matchesFilter;
-  });
+  }), [aspirasiList, debouncedSearchQuery, filter]);
 
   return (
     <>

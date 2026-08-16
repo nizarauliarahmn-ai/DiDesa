@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import { SupabaseSync } from './components/SupabaseSync';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import './index.css';
 
 // Unregister any rogue Service Workers from previous PWA setups to prevent aggressive caching
@@ -194,8 +195,10 @@ if (
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SupabaseSync />
-    <App />
+    <ErrorBoundary>
+      <SupabaseSync />
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );
-window.addEventListener('error', e => alert('ERROR: ' + e.message + ' at ' + e.filename + ':' + e.lineno)); window.addEventListener('unhandledrejection', e => alert('PROMISE ERROR: ' + e.reason));
+window.addEventListener('error', e => console.error('Uncaught error:', e.error || e.message)); window.addEventListener('unhandledrejection', e => console.error('Unhandled promise rejection:', e.reason));

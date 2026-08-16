@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Edit2, Trash2, Calendar, MessageSquare, Heart, Image as ImageIcon, X, Upload, Newspaper, AlertTriangle, Star, Check } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Calendar, MessageSquare, Heart, Image as ImageIcon, X, Upload, Newspaper, AlertTriangle, Star } from 'lucide-react';
 import { showToast } from '../../utils/toast';
-import { getRelativeDateString } from '../../utils/dateHelper';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 

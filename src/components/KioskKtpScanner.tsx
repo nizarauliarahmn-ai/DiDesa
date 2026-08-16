@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Scan, Radio, X, Camera, Loader2, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Scan, Radio, Camera, Loader2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import KTPScannerModal from './admin/surat/KTPScannerModal';
 import { resolveCurrentTenant } from '../utils/tenantResolver';

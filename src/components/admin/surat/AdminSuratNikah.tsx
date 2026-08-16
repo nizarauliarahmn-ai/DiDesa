@@ -1,24 +1,20 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
-import { useLetterKode } from '../../../hooks/useLetterKode';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
-import { useLetterDescription } from '../../../hooks/useLetterDescription';
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Save, Printer, Download, Upload, Trash2, History, Heart, ZoomIn, ZoomOut, FileText } from 'lucide-react';
+import { ArrowLeft, Save, Printer, Trash2, ZoomIn, ZoomOut } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
-import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
-import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
+import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
+
 export default function AdminSuratNikah({ 
   onBack, 
   presetResident,

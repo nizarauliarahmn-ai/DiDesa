@@ -1,4 +1,3 @@
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../utils/supabase";
 import {
@@ -8,20 +7,13 @@ import {
   RefreshCw,
   Hash,
   FileText,
-  Plus,
-  Edit3,
-  Trash2,
   Search,
-  X,
-  Check,
-  Image,
-  Building,
+  X
 } from "lucide-react";
 import {
   getLetterClassifications,
   saveLetterClassifications,
-  LetterClassification,
-  getGlobalSequenceNumber,
+  LetterClassification
 } from "../../../utils/letterClassifications";
 import { showToast } from "../../../utils/toast";
 import ConfirmModal from "../../common/ConfirmModal";
@@ -355,6 +347,7 @@ const handleSaaSSubmit = (e: React.FormEvent) => {
             payload: { requests: updatedReqs }
           });
         }
+        setTimeout(() => { supabase.removeChannel(channel); }, 1000);
       });
       
       // Trigger SaaS Notification

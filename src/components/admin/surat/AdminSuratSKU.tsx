@@ -8,10 +8,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { 
-  Store, ArrowLeft, Printer, Search, User, MapPin, Calendar, 
-  FileSignature, AlertCircle, CheckCircle2, History, Trash2, ZoomIn, ZoomOut, FileText
+  Store, User, 
+  FileSignature, AlertCircle, History, ZoomIn, ZoomOut
 } from 'lucide-react';
-import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -21,7 +21,7 @@ import { useDragScroll } from '../../../hooks/useDragScroll';
 import { formatRupiahWithTerbilang, RupiahInput } from '../../../utils/numberToTerbilang';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { checkResidentExists, checkResidentDetailedStatus } from '../../../utils/residentSync';
+import { checkResidentExists } from '../../../utils/residentSync';
 
 interface Resident {
   nik: string;

@@ -9,19 +9,11 @@ import {
   TrendingUp, 
   TrendingDown, 
   PieChart, 
-  Info, 
   Save, 
   Edit3, 
-  Plus, 
   Calendar, 
   Printer, 
-  RefreshCw, 
-  Layers, 
-  Building2, 
-  ShieldAlert,
-  ArrowUpRight,
-  ArrowDownRight,
-  Check
+  Building2
 } from 'lucide-react';
 import NumberCounter from '../common/NumberCounter';
 import { showToast } from '../../utils/toast';

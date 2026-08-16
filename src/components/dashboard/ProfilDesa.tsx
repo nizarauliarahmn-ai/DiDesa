@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Users, MapPin, Building, ShieldCheck, FileText, ChevronRight, X } from 'lucide-react';
+import { Users, MapPin, Building, ShieldCheck, ChevronRight, X } from 'lucide-react';
 import UserPlaceholder from '../common/UserPlaceholder';
 
 export default function ProfilDesa() {

@@ -1,18 +1,15 @@
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { 
-  Home, Store, Frown, FileText, Users, PlusCircle, Search, 
-  ArrowLeft, Check, Printer, Archive, ZoomIn, ZoomOut, Maximize,
-  Mail, Heart, Landmark, FileCheck, MapPin, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2, Monitor,
-  Scan, MessageCircle, Timer, Save
+  Home, Store, Frown, FileText, Users, Search, Printer, Archive, ZoomIn, ZoomOut,
+  Mail, Heart, Landmark, FileCheck, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2, Monitor,
+  Scan, MessageCircle, Timer
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';

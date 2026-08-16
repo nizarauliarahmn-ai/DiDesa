@@ -1,8 +1,8 @@
 import NumberCounter from '../common/NumberCounter';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
-import React, { useState, useEffect } from 'react';
-import { Users, FileText, MessageSquare, TrendingUp, ChevronDown, UserPlus, PenTool, ExternalLink, Loader2, Building2, BarChart3, Clock, AlertTriangle, CheckCircle2, MessageCircle, Sparkles } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Users, FileText, MessageSquare, TrendingUp, PenTool, Loader2, Building2, BarChart3, Clock, CheckCircle2, MessageCircle, Sparkles } from 'lucide-react';
 import { getAspirasi } from '../../utils/aspirasiData';
 import { fetchFeedbacksAsync, Feedback } from '../../utils/feedbackData';
 import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
@@ -167,9 +167,9 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   const eduLainnya = Math.max(0, 100 - (sdPercent + smpPercent + smaPercent + sarjanaPercent));
 
   // Aspirasi Stats
-  const aspirasiBaru = aspirasiList.filter(a => a.status === 'Baru').length;
-  const aspirasiDiproses = aspirasiList.filter(a => a.status === 'Diproses').length;
-  const aspirasiSelesai = aspirasiList.filter(a => a.status === 'Selesai').length;
+  const aspirasiBaru = useMemo(() => aspirasiList.filter(a => a.status === 'Baru').length, [aspirasiList]);
+  const aspirasiDiproses = useMemo(() => aspirasiList.filter(a => a.status === 'Diproses').length, [aspirasiList]);
+  const aspirasiSelesai = useMemo(() => aspirasiList.filter(a => a.status === 'Selesai').length, [aspirasiList]);
 
   // Statistik surat riil per jenis (dari Supabase)
   const letterTypeCounts: Record<string, number> = {};

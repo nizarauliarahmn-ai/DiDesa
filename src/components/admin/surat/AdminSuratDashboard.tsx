@@ -1,10 +1,9 @@
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen
 } from 'lucide-react';
-import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, saveLetterHistory, cancelLetterHistoryAsync, getLetterFullData } from '../../../utils/letterHistory';
+import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, cancelLetterHistoryAsync } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';

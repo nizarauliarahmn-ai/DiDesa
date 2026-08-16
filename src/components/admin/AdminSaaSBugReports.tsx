@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Bug, LifeBuoy, AlertTriangle, CheckCircle2, Clock, 
-  Search, RefreshCw, Eye, MessageSquare, ShieldAlert,
-  Send, User, Building2, Monitor, ArrowRight, Filter,
-  Check, X, Sparkles, HelpCircle, Tag, Info, FileText, Download
+  Bug, LifeBuoy, CheckCircle2, Clock, 
+  Search, RefreshCw, Eye,
+  Send, User, Building2, X, Sparkles, HelpCircle, Info, FileText, Download
 } from 'lucide-react';
 
 // Kunci penyimpanan state "sudah dibaca admin SaaS" (tiket id -> timestamp)

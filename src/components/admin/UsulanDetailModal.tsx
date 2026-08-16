@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   X, MapPin, User, FolderOpen, AlertTriangle, CheckCircle2, Ban,
   Layers, Link2, CalendarDays, Edit2, FileText, Clock

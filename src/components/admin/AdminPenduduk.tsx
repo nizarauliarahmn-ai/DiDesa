@@ -1,7 +1,7 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Baby, Smile, User, Sparkles, Zap, Trash2, Clock, AlertCircle } from 'lucide-react';
+import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle } from 'lucide-react';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';

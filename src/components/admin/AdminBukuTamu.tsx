@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { showToast } from '../../utils/toast';
 import { capitalizeWords } from '../../utils/textUtils';
-import SignatureCanvas from 'react-signature-canvas';
 import ConfirmModal from '../common/ConfirmModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { useReactToPrint } from 'react-to-print';
 import {
-  BookOpen, Plus, QrCode, Search, Filter, Printer, Download,
-  LogIn, LogOut, Clock, User, MapPin, Building2, ChevronDown,
-  RefreshCw, CheckCircle2, X, Calendar, Trash2, Send
+  BookOpen, Plus, QrCode, Search, Printer, Download,
+  LogIn, Building2, CheckCircle2, X, Trash2, Send
 } from 'lucide-react';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 
@@ -109,6 +107,7 @@ export default function AdminBukuTamu() {
         if (status === 'SUBSCRIBED') {
           tempChannel.send({ type: 'broadcast', event: 'incoming-guest', payload });
         }
+        setTimeout(() => { supabase.removeChannel(tempChannel); }, 1000);
       });
     }
     

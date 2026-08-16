@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Settings, Save, Image, Palette, Globe, CheckCircle, AlertCircle, Trash2, FileText, UploadCloud, Type, Mail, Phone, Link, Share2 } from 'lucide-react';
+import { Save, Image, Palette, Globe, CheckCircle, AlertCircle, Trash2, FileText, UploadCloud, Type, Mail, Phone, Link, Share2 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { saveGlobalBrandingToSupabase, syncGlobalBrandingFromSupabase } from '../../utils/globalBrandingSync';

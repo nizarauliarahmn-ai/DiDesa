@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ShieldCheck, CheckCircle2, AlertTriangle, Building2, Calendar, FileText, User, Hash, ArrowLeft, Download, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ShieldCheck, CheckCircle2, AlertTriangle, Building2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../utils/supabase';
 
 export default function PublicVerifikasiSurat() {

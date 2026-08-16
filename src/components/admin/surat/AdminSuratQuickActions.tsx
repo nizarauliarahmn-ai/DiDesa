@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { showToast } from '../../../utils/toast';
-import { generateLetterNumber, generateLetterNumberAsync, incrementSequenceNumber, getLetterClassifications, LetterClassification } from '../../../utils/letterClassifications';
+import { generateLetterNumberAsync, incrementSequenceNumber, getLetterClassifications, LetterClassification } from '../../../utils/letterClassifications';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useUsbScanner } from '../../../utils/usbScanner';
@@ -123,6 +123,7 @@ export function TambahTamuModal({ onClose, onSuccess }: { onClose: () => void; o
         tempChannel.subscribe((status: string) => {
           if (status === 'SUBSCRIBED') {
             doBroadcast(tempChannel);
+            setTimeout(() => { supabase.removeChannel(tempChannel); }, 1500);
           }
         });
       });

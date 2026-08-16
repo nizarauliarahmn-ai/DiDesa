@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Joyride, STATUS, TooltipRenderProps } from 'react-joyride';
 import { X, ChevronRight, Check, Sparkles } from 'lucide-react';
 

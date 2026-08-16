@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, CheckCircle, Database, FileText, Loader2, AlertCircle } from 'lucide-react';
+import { X, Upload, CheckCircle, Database, Loader2, AlertCircle } from 'lucide-react';
 import { read, utils } from 'xlsx';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';

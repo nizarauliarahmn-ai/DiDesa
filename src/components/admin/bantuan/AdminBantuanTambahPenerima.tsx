@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
-  X, Search, Upload, Camera, Database, CheckCircle2, AlertTriangle, Loader2,
-  FileSpreadsheet, FileText, Scan, UserPlus, Trash2, RefreshCw, Zap, QrCode, Calendar
+  X, Search, Upload, Camera, Database, CheckCircle2, Loader2,
+  FileSpreadsheet, FileText, Scan, UserPlus, Trash2, RefreshCw, Calendar
 } from 'lucide-react';
 import { read, utils } from 'xlsx';
 import { supabase } from '../../../utils/supabase';
