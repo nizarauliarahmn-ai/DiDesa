@@ -24,6 +24,7 @@ import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { invalidateResidentsCache } from '../../../utils/apiCache';
 import { buildSuratSelesaiMessage, getResidentWaPhone, openFreeWhatsAppMessage } from '../../../utils/waFreeEngine';
+import { applyResidentMutationOnLetterPublish, getLetterMutationType, getMutationStatusLabel } from '../../../utils/mutasiPendudukEngine';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -107,6 +108,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [showSuratSuccessModal, setShowSuratSuccessModal] = useState(false);
   const [waInputOpen, setWaInputOpen] = useState(false);
   const [waInputMessage, setWaInputMessage] = useState('');
+  const [enableMutation, setEnableMutation] = useState(true);
 
   // Favorite & Usage States
   const [favorites, setFavorites] = useState<string[]>(() => {
@@ -555,6 +557,22 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       showToast("Surat resmi baru berhasil diterbitkan dan diarsipkan!", "success");
       // Tampilkan modal sukses pasca-terbit dengan aksi Cetak & Kirim WA
       setShowSuratSuccessModal(true);
+
+      // Otomasi Mutasi Kependudukan (SKP/SKM/SKN) jika checkbox pengaman dicentang
+      const mutationType = getLetterMutationType(selectedClass?.klasifikasi);
+      if (enableMutation && mutationType && selectedResident?.nik) {
+        applyResidentMutationOnLetterPublish({
+          residentId: selectedResident.nik,
+          letterTypeCode: selectedClass?.klasifikasi,
+          publishDate: currentDateFormatted(),
+        }).then(ok => {
+          if (ok) {
+            showToast(`✅ Surat diterbitkan & status kependudukan ${selectedResident.name} berhasil diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
+          } else {
+            showToast(`Status kependudukan ${selectedResident.name} gagal diperbarui otomatis.`, "error");
+          }
+        });
+      }
     }, 1500);
   };
 
@@ -1944,6 +1962,27 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           Pastikan data sudah benar sebelum mencetak atau menyimpan ke arsip digital.
                        </p>
                        <div className="space-y-3">
+                          {(() => {
+                            const mutationType = getLetterMutationType(
+                              classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate)?.klasifikasi
+                            );
+                            if (mutationType && selectedResident?.name) {
+                              return (
+                                <label className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl cursor-pointer select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={enableMutation}
+                                    onChange={(e) => setEnableMutation(e.target.checked)}
+                                    className="w-4 h-4 mt-0.5 accent-emerald-600"
+                                  />
+                                  <span className="text-xs font-semibold text-amber-800 dark:text-amber-300 leading-relaxed">
+                                    Otomatis perbarui status kependudukan <b>{selectedResident.name}</b> menjadi "<b>{getMutationStatusLabel(mutationType)}</b>"
+                                  </span>
+                                </label>
+                              );
+                            }
+                            return null;
+                          })()}
                           <button onClick={handlePrint} className="w-full flex items-center justify-center gap-2 bg-emerald-700 text-white py-3 rounded-xl font-bold shadow-sm dark:shadow-none hover:bg-emerald-800 transition-all">
                              <Printer className="w-5 h-5" /> Cetak PDF
                           </button>
