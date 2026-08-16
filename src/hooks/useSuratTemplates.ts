@@ -92,29 +92,3 @@ export function useSuratTemplates() {
 
   return { templates, loading, error, reload: loadFromDb };
 }
-
-/** Petakan kode klasifikasi -> tab AdminSurat (bila ada form khusus). Utk selain itu 'buat'. */
-export const SURAT_FORM_TAB: Record<string, string> = {
-  SKN: 'nikah',
-  UND: 'undangan',
-  '005': 'undangan',
-  SKTM: 'sktm',
-  SKBM: 'skbm',
-  SKU: 'sku',
-  SKPH: 'skph',
-  SKD: 'skd',
-  SKDPR: 'skd',
-  SDP: 'skd',
-  SDU: 'sdu',
-  SKM: 'skm',
-  SKH: 'skh',
-  SKL: 'skl',
-  SKP: 'skp',
-  SPT: 'spt',
-  SPPD: 'sppd',
-  SKKT: 'skkt',
-};
-
-export function getSuratFormTab(klasifikasi: string): string {
-  return SURAT_FORM_TAB[klasifikasi] || 'buat';
-}

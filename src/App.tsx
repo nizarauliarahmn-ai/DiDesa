@@ -64,7 +64,6 @@ import PublicKiosSurat from './components/PublicKiosSurat';
 import PublicKiosAspirasi from './components/PublicKiosAspirasi';
 import KioskKtpScanner from './components/KioskKtpScanner';
 import SaasLandingPage from './components/SaasLandingPage';
-import ExpressPelayanan from './components/admin/ExpressPelayanan';
 
 function useUrlSync<T extends string>(
   key: string, 
@@ -444,25 +443,6 @@ export default function App() {
     );
   }
 
-  // Route /admin/surat/buat (deep-link dari Express Desk) → mode admin + tab surat
-  if (window.location.pathname.includes('/admin/surat/buat') && !urlParams.get('admin_tab')) {
-    const rid = urlParams.get('resident_id') || '';
-    const tid = urlParams.get('template_id') || '';
-    const kls = urlParams.get('template_klasifikasi') || '';
-    const suratTab = urlParams.get('surat_tab') || '';
-    const qs = new URLSearchParams({ mode: 'admin', admin_tab: 'surat' });
-    if (rid) qs.set('resident_id', rid);
-    if (tid) qs.set('template_id', tid);
-    if (kls) qs.set('template_klasifikasi', kls);
-    if (suratTab) qs.set('surat_tab', suratTab);
-    window.location.replace(`/?${qs.toString()}`);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-      </div>
-    );
-  }
-
   // Remote KTP Scanner (Tablet Desa) — route /kiosk/scan
   if (window.location.pathname.includes('/kiosk/scan')) {
     return <><KioskKtpScanner /><ToastContainer /></>;
@@ -526,12 +506,6 @@ export default function App() {
         <GlobalUpdateNotifier isBusy={false} />
       </>
     );
-  }
-
-  // Express Desk (Mode Pelayanan Cepat) — fullscreen tanpa sidebar, untuk petugas meja layanan
-  const isExpressMode = urlParams.get('mode') === 'express' || window.location.pathname.includes('/admin/express');
-  if (isExpressMode && user && (user.role === 'admin' || user.role === 'kades' || user.role === 'saas_admin')) {
-    return <><ExpressPelayanan /><ToastContainer /></>;
   }
 
   // Jika kita di domain utama dan di mode publik, tampilkan SaaS Landing Page (Portal Pusat PT)

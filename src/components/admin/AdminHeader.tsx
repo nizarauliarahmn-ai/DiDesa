@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Bell, Menu, Database, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon, Sun, Zap } from 'lucide-react';
+import { Search, Bell, Menu, Database, ShieldAlert, CheckCircle, BellOff, CheckCheck, Clock, UserPlus, FileText, Gift, Info, Moon, Sun } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
@@ -684,16 +684,6 @@ export default function AdminHeader({
             )}
           </div>
         )}
-
-        {/* Mode Pelayanan Cepat */}
-        <button 
-          onClick={() => { window.location.href = '/admin/express'; }}
-          title="Buka Mode Pelayanan Cepat (Express Desk)"
-          className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-600/20 transition-colors cursor-pointer"
-        >
-          <Zap className="w-3.5 h-3.5" />
-          Mode Pelayanan Cepat
-        </button>
 
         {/* Dark Mode Toggle */}
         <button 
