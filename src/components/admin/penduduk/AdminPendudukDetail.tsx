@@ -407,8 +407,8 @@ export default function AdminPendudukDetail({
         </div>
       )}
 
-      {/* STICKY HEADER PROFILE — Top-Bar Lebar Penuh */}
-      <div className="sticky top-16 z-40 w-full bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      {/* HEADER PROFILE — Top-Bar Lebar Penuh */}
+      <div className="w-full bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
         {/* Sisi Kiri: Back + Avatar + Nama + Badges */}
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <button 
@@ -543,7 +543,7 @@ export default function AdminPendudukDetail({
       </div>
 
       {/* 5-Tab Navigation */}
-      <div className="sticky top-[132px] z-30 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible">
+      <div className="sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible">
         <div className="flex gap-1.5 min-w-max">
           {DETAIL_TABS.map((tab) => {
             const Icon = tab.icon;
