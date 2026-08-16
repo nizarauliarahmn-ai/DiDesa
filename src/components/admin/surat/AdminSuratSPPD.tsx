@@ -815,7 +815,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSPPD}
-            suffix="WHi-SPPD"
+            suffix="WHI-SPPD"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

@@ -277,7 +277,7 @@ export function getNextSequenceNumber(klasifikasi: string): number {
 
 // --- Penentuan nomor urut berbasis MAX ACTIVE NUMBER dari tabel `surat` ---
 // MAX(CAST(nomor_urut AS INTEGER)) FROM surat WHERE is_deleted=false AND format_surat=X AND tahun=Y
-// Karena `surat` menyimpan nomor terformat (mis. "140/061/WHi-SU/2025"), sequence diekstrak dari string nomor.
+// Karena `surat` menyimpan nomor terformat (mis. "140/061/WHI-SU/2025"), sequence diekstrak dari string nomor.
 // Fungsi ini menggantikan counter monotonik (auto-increment) yang terus naik meski surat dihapus.
 
 function parseNomorParts(nomor: string): string[] {
@@ -285,7 +285,7 @@ function parseNomorParts(nomor: string): string[] {
 }
 
 function getSequenceIndexFromFormat(): number {
-  const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]';
+  const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHI-[KODE]/[TAHUN]';
   const segs = formatTemplate.split('/');
   const idx = segs.findIndex(s => s.includes('[NO URUT SURAT]') || s.includes('[NO]'));
   return idx >= 0 ? idx : 1;
@@ -415,7 +415,7 @@ export function incrementSequenceNumber(klasifikasi: string) {
 }
 
 export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: string, nextNoVal?: number | string, customDate?: Date): string {
-  const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]';
+  const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHI-[KODE]/[TAHUN]';
   
   const date = customDate || new Date();
   const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
@@ -468,7 +468,7 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
     .replace(/\[DESA\]/g, desaInitial.toUpperCase());
   
   // Uppercase seluruh nomor surat kecuali angka, /, -, dan titik
-  // Ini memastikan bagian hardcode di template (mis. 'WHi') ikut jadi kapital
+  // Ini memastikan bagian hardcode di template (mis. 'WHI') ikut jadi kapital
   return raw.toUpperCase();
 }
 

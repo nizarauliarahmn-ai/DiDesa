@@ -1034,7 +1034,7 @@ export default function AdminTenants() {
                       value={formData.kode_desa} 
                       onChange={e => setFormData({...formData, kode_desa: e.target.value})} 
                       className="w-full px-3.5 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" 
-                      placeholder="Contoh: 1234WHi" 
+                      placeholder="Contoh: 1234WHI" 
                     />
                   </div>
                   <div>

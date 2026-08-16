@@ -502,7 +502,7 @@ export default function AdminSuratUndangan({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiUND}
-            suffix="WHi-UND"
+            suffix="WHI-UND"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

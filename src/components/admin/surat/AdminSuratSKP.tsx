@@ -900,7 +900,7 @@ export default function AdminSuratSKP({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSKP}
-            suffix="WHi-SKP"
+            suffix="WHI-SKP"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

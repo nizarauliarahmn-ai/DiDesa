@@ -731,7 +731,7 @@ export default function AdminSuratSPT({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSPT}
-            suffix="WHi-SPT"
+            suffix="WHI-SPT"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

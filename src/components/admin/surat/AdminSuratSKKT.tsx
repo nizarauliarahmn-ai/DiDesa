@@ -48,7 +48,7 @@ export default function AdminSuratSKKT({
 
   const buildInsertNomorSurat = () => {
     const seq = (manualSequence || '').trim();
-    return seq ? `${kodeKlasifikasiSKKT}/${seq}/WHi-SKKT/${tahunDariTanggalSurat}`.toUpperCase() : '';
+    return seq ? `${kodeKlasifikasiSKKT}/${seq}/WHI-SKKT/${tahunDariTanggalSurat}`.toUpperCase() : '';
   };
 
   const handleCustomNomorSurat = (nomor: string) => {
@@ -692,7 +692,7 @@ export default function AdminSuratSKKT({
           {/* Section 0: Meta Surat — Tanggal & Nomor Surat */}
           <BackdateConfig
             prefix={kodeKlasifikasiSKKT}
-            suffix="WHi-SKKT"
+            suffix="WHI-SKKT"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

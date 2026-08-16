@@ -570,7 +570,7 @@ export default function AdminSuratSKTM({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSKTM}
-            suffix="WHi-SKTM"
+            suffix="WHI-SKTM"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

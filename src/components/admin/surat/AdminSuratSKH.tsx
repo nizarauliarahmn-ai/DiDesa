@@ -581,7 +581,7 @@ export default function AdminSuratSKH({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSKH}
-            suffix="WHi-SKH"
+            suffix="WHI-SKH"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

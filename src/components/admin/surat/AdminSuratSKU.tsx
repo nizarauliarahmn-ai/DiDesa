@@ -611,7 +611,7 @@ export default function AdminSuratSKU({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSKU}
-            suffix="WHi-SKU"
+            suffix="WHI-SKU"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

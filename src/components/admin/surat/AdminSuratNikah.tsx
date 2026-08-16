@@ -1040,7 +1040,7 @@ export default function AdminSuratNikah({
         <div className="mb-6">
           <BackdateConfig
             prefix={kodeKlasifikasiSKN}
-            suffix="WHi-SKN"
+            suffix="WHI-SKN"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={handleTanggalSuratChange}
             isBackdate={isBackdate}

@@ -49,7 +49,7 @@ export default function AdminSuratSKD({
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
   const skdClassification = getLetterClassifications().find(c => c.id === '5' || c.klasifikasi === 'SDP' || c.klasifikasi === 'SKD' || c.klasifikasi === 'SKDPR') || { klasifikasi: 'SDP', kodeKlasifikasi: '145' };
   const kodeKlasifikasiSKD = skdClassification.kodeKlasifikasi || '145';
-  const suffixSKD = `WHi-${skdClassification.klasifikasi || 'SKD'}`;
+  const suffixSKD = `WHI-${skdClassification.klasifikasi || 'SKD'}`;
   const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, skdClassification.klasifikasi, kodeKlasifikasiSKD);
   const [manualSequence, setManualSequence] = useState('');
 

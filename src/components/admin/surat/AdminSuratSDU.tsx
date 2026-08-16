@@ -636,7 +636,7 @@ export default function AdminSuratSDU({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSDU}
-            suffix="WHi-SDU"
+            suffix="WHI-SDU"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}

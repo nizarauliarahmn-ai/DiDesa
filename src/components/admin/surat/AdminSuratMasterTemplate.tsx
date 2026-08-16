@@ -129,7 +129,7 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
           <!-- SURAT TITLE -->
           <div class="text-center my-6">
             <p class="font-extrabold text-[15px] uppercase tracking-wide border-b border-black inline-block px-4 pb-0.5">${tipeSurat}</p>
-            <p class="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-1">Nomor: 474/023/WHi-PEM/${currentYear}</p>
+            <p class="text-[11px] font-mono font-medium text-slate-600 dark:text-slate-400 mt-1">Nomor: 474/023/WHI-PEM/${currentYear}</p>
           </div>
 
           <!-- SURAT LEADING -->
@@ -701,7 +701,7 @@ export default function AdminSuratMasterTemplate() {
                             ? 'SURAT KETERANGAN KEPEMILIKAN TANAH'
                             : 'SURAT KETERANGAN USAHA'}
                     </p>
-                    <p className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 mt-1">Nomor: 474/023/WHi-PEM/2026</p>
+                    <p className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 mt-1">Nomor: 474/023/WHI-PEM/2026</p>
                   </div>
 
                   {/* Intro */}

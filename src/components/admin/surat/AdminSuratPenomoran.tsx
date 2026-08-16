@@ -22,7 +22,7 @@ import { resolveCurrentTenant } from "../../../utils/tenantResolver";
 
 export default function AdminSuratPenomoran() {
   const [format, setFormat] = useState(
-    "[NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]",
+    "[NO KODE SURAT]/[NO URUT SURAT]/WHI-[KODE]/[TAHUN]",
   );
 
   // Custom confirm state
@@ -74,7 +74,7 @@ export default function AdminSuratPenomoran() {
     setClassifications(getLetterClassifications());
     let storedFormat = localStorage.getItem("surat_format");
     if (!storedFormat) {
-      storedFormat = "[NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]";
+      storedFormat = "[NO KODE SURAT]/[NO URUT SURAT]/WHI-[KODE]/[TAHUN]";
       localStorage.setItem("surat_format", storedFormat);
     }
     if (storedFormat) {
@@ -118,8 +118,8 @@ export default function AdminSuratPenomoran() {
     },
     {
       code: "[DESA]",
-      desc: "Singkatan/inisial nama desa (cth: WHi, DS)",
-      sample: "WHi",
+      desc: "Singkatan/inisial nama desa (cth: WHI, DS)",
+      sample: "WHI",
     },
     {
       code: "[NAMA_DESA]",
@@ -157,7 +157,7 @@ export default function AdminSuratPenomoran() {
       "Pemerintah Kabupaten Hulu Sungai Selatan";
 
     const getDesaInitial = (name: string) => {
-      if ((name || '').toLowerCase().includes("Sukamakmur")) return "WHi";
+      if ((name || '').toLowerCase().includes("Sukamakmur")) return "WHI";
       if ((name || '').toLowerCase().includes("sukamaju")) return "DS-SKM";
       const words = name
         .replace(/desa|kelurahan/gi, "")
@@ -440,7 +440,7 @@ return (
                 value={format}
                 disabled={!isSuperAdmin}
                 onChange={(e) => setFormat(e.target.value)}
-                placeholder="Contoh: [NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]"
+                placeholder="Contoh: [NO KODE SURAT]/[NO URUT SURAT]/WHI-[KODE]/[TAHUN]"
                 className={`w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono text-gray-900 dark:text-white font-bold bg-gray-50/50 dark:bg-slate-800/50 ${!isSuperAdmin ? "opacity-60 cursor-not-allowed" : ""}`}
               />
             </div>

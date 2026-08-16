@@ -431,7 +431,7 @@ export default function AdminSuratSKL({
     const printDate = isBackdate ? new Date(tanggalSurat) : today;
     const tglFormatted = printDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const villageLogo = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
-    const noSuratVal = noSurat || 'SKL/146/WHi/2026';
+    const noSuratVal = noSurat || 'SKL/146/WHI/2026';
     const cleanStr = (str, pattern) => str.replace(pattern, '').trim();
     
     const terbilang = (angka) => {
@@ -618,7 +618,7 @@ export default function AdminSuratSKL({
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
             prefix={kodeKlasifikasiSKL}
-            suffix="WHi-SKL"
+            suffix="WHI-SKL"
             tanggalSurat={tanggalSurat}
             onTanggalSuratChange={setTanggalSurat}
             isBackdate={isBackdate}
