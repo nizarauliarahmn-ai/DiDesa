@@ -325,10 +325,13 @@ export async function getMaxActiveSequenceFromDb(klasifikasi: string, year?: num
       .from('surat')
       .select('nomor')
       .eq('tenant_id', tenantId)
+      // Hanya surat aktif: tolak yang dibatalkan, dihapus, atau di-soft-delete (is_deleted=1)
       .neq('status', 'Dibatalkan')
+      .neq('status', 'Dihapus')
+      .or('is_deleted.is.null,is_deleted.eq.0')
       .gte('created_at', startOfYear)
       .lte('created_at', endOfYear)
-      .limit(2000);
+      .limit(5000);
     if (error) throw error;
     let maxSeq = 0;
     for (const row of data || []) {
