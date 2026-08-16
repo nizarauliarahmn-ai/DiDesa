@@ -10,7 +10,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { FileText, ArrowLeft, Printer, Search, User, FileSignature, AlertCircle, CheckCircle2, History, ZoomIn, ZoomOut, Baby, Building, Users, Activity, Calendar } from 'lucide-react';
-import { getLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -172,8 +172,9 @@ export default function AdminSuratSKL({
     const skl = configs.find(c => c.klasifikasi === 'SKL') || { id: 'fallback_skl', jenis: 'SKL', klasifikasi: 'SKL', kodeKlasifikasi: '474.1', noUrutTerakhir: 0 };
     
     if (!editData) {
-      const generatedNo = generateLetterNumber(skl.klasifikasi, skl.kodeKlasifikasi || '474.1', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
-      setNoSurat(generatedNo);
+      generateLetterNumberAsync(skl.klasifikasi, skl.kodeKlasifikasi || '474.1', isBackdate ? new Date(tanggalSurat) : undefined)
+        .then(setNoSurat)
+        .catch(err => console.error('Gagal generate nomor surat:', err));
     }
 
     const savedRiwayat = localStorage.getItem('riwayat_surat_skl');

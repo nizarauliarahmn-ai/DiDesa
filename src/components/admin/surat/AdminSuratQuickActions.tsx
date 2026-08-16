@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { showToast } from '../../../utils/toast';
-import { generateLetterNumber, incrementSequenceNumber, getLetterClassifications, LetterClassification } from '../../../utils/letterClassifications';
+import { generateLetterNumber, generateLetterNumberAsync, incrementSequenceNumber, getLetterClassifications, LetterClassification } from '../../../utils/letterClassifications';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useUsbScanner } from '../../../utils/usbScanner';
@@ -310,7 +310,7 @@ export function TambahPermohonanModal({ onClose, onSuccess }: { onClose: () => v
     const klas = getLetterClassifications().find(c => c.id === form.jenis || c.jenis === form.jenis);
     if (!klas || !tenantId) return null;
     incrementSequenceNumber(klas.klasifikasi);
-    const finalNumber = generateLetterNumber(klas.klasifikasi, klas.kodeKlasifikasi);
+    const finalNumber = await generateLetterNumberAsync(klas.klasifikasi, klas.kodeKlasifikasi);
     const { data, error } = await supabase
       .from('surat')
       .insert([{

@@ -11,7 +11,7 @@ import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import TTESignatureBox from './TTESignatureBox';
-import { getLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
@@ -213,7 +213,9 @@ export default function AdminSuratUndangan({
   // Auto-generate nomor surat saat membuat undangan baru (mode normal)
   useEffect(() => {
     if (!editData && !nomorSurat) {
-      setNomorSurat(generateLetterNumber('UND', kodeKlasifikasiUND || '005'));
+      generateLetterNumberAsync('UND', kodeKlasifikasiUND || '005')
+        .then(setNomorSurat)
+        .catch(err => console.error('Gagal generate nomor undangan:', err));
     }
   }, []);
 

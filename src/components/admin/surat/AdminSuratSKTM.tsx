@@ -13,7 +13,7 @@ import { FileText, ArrowLeft, Printer, Search, User, Frown,
   MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
   ZoomIn, ZoomOut, ChevronDown
 } from 'lucide-react';
-import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -204,11 +204,12 @@ export default function AdminSuratSKTM({
     const sktm = configs.find(c => c.klasifikasi === 'SKTM') || { id: 'fallback_sktm', jenis: 'SKTM', klasifikasi: 'SKTM', kodeKlasifikasi: '400', noUrutTerakhir: 0 };
     
     if (!editData) {
-      const generatedNo = generateLetterNumber(sktm.klasifikasi, sktm.kodeKlasifikasi || '400', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
-      setFormData(prev => ({
-        ...prev,
-        nomorSurat: generatedNo
-      }));
+      generateLetterNumberAsync(sktm.klasifikasi, sktm.kodeKlasifikasi || '400', isBackdate ? new Date(tanggalSurat) : undefined)
+        .then(generatedNo => setFormData(prev => ({
+          ...prev,
+          nomorSurat: generatedNo
+        })))
+        .catch(err => console.error('Gagal generate nomor surat:', err));
     }
 
     const savedRiwayat = localStorage.getItem('riwayat_surat_sktm');

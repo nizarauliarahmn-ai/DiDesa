@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { ArrowLeft, Save, Printer, Download, Upload, Trash2, History, Heart, ZoomIn, ZoomOut, FileText } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
-import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
@@ -70,7 +70,9 @@ export default function AdminSuratNikah({
   // Auto-generate nomor surat saat membuat surat baru (mode normal)
   useEffect(() => {
     if (!editData && !formData.nomorSurat) {
-      setFormData(prev => ({ ...prev, nomorSurat: generateLetterNumber(backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi || '474') }));
+      generateLetterNumberAsync(backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi || '474')
+        .then(generatedNo => setFormData(prev => ({ ...prev, nomorSurat: generatedNo })))
+        .catch(err => console.error('Gagal generate nomor SKN:', err));
     }
   }, [editData]);
 
@@ -283,8 +285,9 @@ export default function AdminSuratNikah({
     if (!formData.nomorSurat && !editData) {
       const configs = getLetterClassifications();
       const sknConfig = configs.find(c => c.klasifikasi === 'SKN') || { id: 'fallback_skn', jenis: 'SURAT PENGANTAR NIKAH', klasifikasi: 'SKN', kodeKlasifikasi: '474', noUrutTerakhir: 0 };
-      const generatedNo = generateLetterNumber(sknConfig.klasifikasi, sknConfig.kodeKlasifikasi || '474', undefined, isBackdate ? new Date(tanggalSurat) : undefined);
-      setFormData(prev => ({ ...prev, nomorSurat: generatedNo }));
+      generateLetterNumberAsync(sknConfig.klasifikasi, sknConfig.kodeKlasifikasi || '474', isBackdate ? new Date(tanggalSurat) : undefined)
+        .then(generatedNo => setFormData(prev => ({ ...prev, nomorSurat: generatedNo })))
+        .catch(err => console.error('Gagal generate nomor SKN:', err));
     }
 
     // Pre-fill data if presetResident is provided

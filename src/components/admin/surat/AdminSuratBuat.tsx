@@ -12,7 +12,7 @@ import {
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
@@ -333,8 +333,9 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     if (selectedTemplate) {
       const selectedClass = classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate);
       if (selectedClass) {
-        const generatedNo = generateLetterNumber(selectedClass.klasifikasi, selectedClass.kodeKlasifikasi || '140');
-        setNomorSurat(generatedNo);
+        generateLetterNumberAsync(selectedClass.klasifikasi, selectedClass.kodeKlasifikasi || '140')
+          .then(setNomorSurat)
+          .catch(err => console.error('Gagal generate nomor surat:', err));
       }
     }
   }, [selectedTemplate, classifications]);

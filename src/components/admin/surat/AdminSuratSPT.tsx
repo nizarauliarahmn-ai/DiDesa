@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { ArrowLeft, Printer, Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 import {
-  getLetterClassifications, incrementSequenceNumber, generateLetterNumber
+  getLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync
 } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -160,7 +160,9 @@ export default function AdminSuratSPT({
     if (!editData) {
       const configs = getLetterClassifications();
       const sptConfig = configs.find(c => c.klasifikasi === 'SPT') || { klasifikasi: 'SPT', kodeKlasifikasi: '474', noUrutTerakhir: 0 };
-      setFormData(p => ({ ...p, nomorSurat: generateLetterNumber(sptConfig.klasifikasi, sptConfig.kodeKlasifikasi || '474') }));
+      generateLetterNumberAsync(sptConfig.klasifikasi, sptConfig.kodeKlasifikasi || '474')
+        .then(generatedNo => setFormData(p => ({ ...p, nomorSurat: generatedNo })))
+        .catch(err => console.error('Gagal generate nomor surat:', err));
     }
   }, []);
 

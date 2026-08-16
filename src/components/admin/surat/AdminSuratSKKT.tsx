@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Save, Search, Printer, MapPin, Map as MapIcon, Layers, Compass, Navigation, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { getLetterClassifications, generateLetterNumber, incrementSequenceNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, generateLetterNumber, generateLetterNumberAsync, incrementSequenceNumber } from '../../../utils/letterClassifications';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
@@ -149,7 +149,9 @@ export default function AdminSuratSKKT({
     if (!isBackdate) {
       const configs = getLetterClassifications();
       const skkt = configs.find(c => c.klasifikasi === 'SKKT') || { id: 'fallback', jenis: 'Surat Keterangan Kepemilikan Tanah', klasifikasi: 'SKKT', kodeKlasifikasi: '251', noUrutTerakhir: 0 };
-      setFormData(prev => ({ ...prev, nomorSurat: generateLetterNumber(skkt.klasifikasi, skkt.kodeKlasifikasi || '251') }));
+      generateLetterNumberAsync(skkt.klasifikasi, skkt.kodeKlasifikasi || '251')
+        .then(generatedNo => setFormData(prev => ({ ...prev, nomorSurat: generatedNo })))
+        .catch(err => console.error('Gagal generate nomor surat:', err));
       setTanggalSurat(new Date().toISOString().split('T')[0]);
     }
   }, [isBackdate, editData]);

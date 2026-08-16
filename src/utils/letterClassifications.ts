@@ -275,6 +275,103 @@ export function getNextSequenceNumber(klasifikasi: string): number {
   return getGlobalSequenceNumber() + 1;
 }
 
+// --- Penentuan nomor urut berbasis MAX ACTIVE NUMBER dari tabel `surat` ---
+// MAX(CAST(nomor_urut AS INTEGER)) FROM surat WHERE is_deleted=false AND format_surat=X AND tahun=Y
+// Karena `surat` menyimpan nomor terformat (mis. "140/061/WHi-SU/2025"), sequence diekstrak dari string nomor.
+// Fungsi ini menggantikan counter monotonik (auto-increment) yang terus naik meski surat dihapus.
+
+function parseNomorParts(nomor: string): string[] {
+  return String(nomor || '').split('/').map(p => p.trim()).filter(Boolean);
+}
+
+function getSequenceIndexFromFormat(): number {
+  const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHi-[KODE]/[TAHUN]';
+  const segs = formatTemplate.split('/');
+  const idx = segs.findIndex(s => s.includes('[NO URUT SURAT]') || s.includes('[NO]'));
+  return idx >= 0 ? idx : 1;
+}
+
+function extractSequenceFromNomor(nomor: string): number {
+  const parts = parseNomorParts(nomor);
+  const seqIdx = getSequenceIndexFromFormat();
+  const raw = parts[seqIdx] || '';
+  const m = raw.match(/^\d+/);
+  return m ? parseInt(m[0], 10) : 0;
+}
+
+function nomorMatchesKlasifikasi(nomor: string, klasifikasi: string): boolean {
+  const k = (klasifikasi || '').toUpperCase();
+  if (!k) return true;
+  const parts = parseNomorParts(nomor);
+  for (const p of parts) {
+    const token = (p.split('-').pop() || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
+    if (token === k) return true;
+  }
+  return false;
+}
+
+/**
+ * Ambil nomor urut tertinggi yang masih aktif (belum dibatalkan / terhapus)
+ * untuk klasifikasi & tahun tertentu. Mengembalikan -1 jika query gagal.
+ */
+export async function getMaxActiveSequenceFromDb(klasifikasi: string, year?: number): Promise<number> {
+  try {
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) return -1;
+    const targetYear = year || new Date().getFullYear();
+    const startOfYear = new Date(targetYear, 0, 1).toISOString();
+    const endOfYear = new Date(targetYear, 11, 31, 23, 59, 59, 999).toISOString();
+    const { data, error } = await supabase
+      .from('surat')
+      .select('nomor')
+      .eq('tenant_id', tenantId)
+      .neq('status', 'Dibatalkan')
+      .gte('created_at', startOfYear)
+      .lte('created_at', endOfYear)
+      .limit(2000);
+    if (error) throw error;
+    let maxSeq = 0;
+    for (const row of data || []) {
+      if (!row?.nomor) continue;
+      if (!nomorMatchesKlasifikasi(String(row.nomor), klasifikasi)) continue;
+      const seq = extractSequenceFromNomor(String(row.nomor));
+      if (seq > maxSeq) maxSeq = seq;
+    }
+    return maxSeq;
+  } catch (e) {
+    console.error('getMaxActiveSequenceFromDb error:', e);
+    return -1;
+  }
+}
+
+/**
+ * Nomor urut berikutnya = MAX(active) + 1.
+ * Jika tidak ada surat aktif -> 1. Jika query gagal -> fallback counter lama.
+ */
+export async function getNextSequenceNumberAsync(klasifikasi: string, year?: number): Promise<number> {
+  const autoReset = localStorage.getItem('surat_autoreset') !== 'false';
+  const currentYear = year || new Date().getFullYear();
+  const lastYear = localStorage.getItem(`last_year_global`);
+
+  if (autoReset && lastYear && parseInt(lastYear) !== currentYear) {
+    return 1;
+  }
+
+  const maxActive = await getMaxActiveSequenceFromDb(klasifikasi, currentYear);
+  if (maxActive > 0) return maxActive + 1;
+  if (maxActive === 0) return 1;
+
+  // Query gagal -> fallback ke counter lama agar tidak regresi saat offline
+  return getGlobalSequenceNumber() + 1;
+}
+
+/** Versi async dari generateLetterNumber untuk pembuatan nomor baru otomatis. */
+export async function generateLetterNumberAsync(klasifikasi: string, kodeKlasifikasi: string, customDate?: Date): Promise<string> {
+  const year = customDate ? customDate.getFullYear() : new Date().getFullYear();
+  const nextNo = await getNextSequenceNumberAsync(klasifikasi, year);
+  return generateLetterNumber(klasifikasi, kodeKlasifikasi, nextNo, customDate);
+}
+
 export function incrementSequenceNumber(klasifikasi: string) {
   const currentYear = new Date().getFullYear();
   const lastYear = localStorage.getItem(`last_year_global`);

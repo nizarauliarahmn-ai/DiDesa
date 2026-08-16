@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft, Monitor, FileSignature, X } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
-import { getLetterClassifications, LetterClassification, generateLetterNumber } from '../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, generateLetterNumber, generateLetterNumberAsync } from '../utils/letterClassifications';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { addLetterHistory } from '../utils/letterHistory';
 import { fetchResidentsCached } from '../utils/apiCache';
@@ -154,7 +154,7 @@ export default function PublicKiosSurat() {
     }
 
     // Generate official uniform letter code
-    const finalNumber = generateLetterNumber(selectedLetter.klasifikasi, selectedLetter.kodeKlasifikasi || '140');
+    const finalNumber = await generateLetterNumberAsync(selectedLetter.klasifikasi, selectedLetter.kodeKlasifikasi || '140');
 
     let formattedKeperluan = formData['keperluan'] || '';
     if (selectedLetter.fields && selectedLetter.fields.length > 0) {
@@ -263,7 +263,7 @@ export default function PublicKiosSurat() {
       }
 
       const klas = getLetterClassifications().find(c => c.klasifikasi === assistSession.klasifikasi || c.jenis === assistSession.jenis);
-      const finalNumber = generateLetterNumber(assistSession.klasifikasi || 'SU', assistSession.kodeKlasifikasi || '140');
+      const finalNumber = await generateLetterNumberAsync(assistSession.klasifikasi || 'SU', assistSession.kodeKlasifikasi || '140');
 
       // Simpan permohonan (Record A) + auto-record buku tamu (Record B) via kioskSubmissions
       await savePermohonanWithGuestRecord({

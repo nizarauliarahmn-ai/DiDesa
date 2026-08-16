@@ -13,7 +13,7 @@ import { FileText, ArrowLeft, Printer, Save, Search, User, FileCheck,
   MapPin, Calendar, Briefcase, FileSignature, AlertCircle, CheckCircle2, History, Trash2, Heart,
   ZoomIn, ZoomOut, ArrowRight
 } from 'lucide-react';
-import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, saveLetterClassifications, incrementSequenceNumber, generateLetterNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -67,7 +67,9 @@ export default function AdminSuratSKP({
   // Auto-generate nomor surat saat membuat surat baru (mode normal)
   useEffect(() => {
     if (!editData && !formData.nomorSurat) {
-      setFormData((prev: any) => ({ ...prev, nomorSurat: generateLetterNumber(backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi) }));
+      generateLetterNumberAsync(backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi)
+        .then(generatedNo => setFormData((prev: any) => ({ ...prev, nomorSurat: generatedNo })))
+        .catch(err => console.error('Gagal generate nomor surat:', err));
     }
   }, [editData]);
 

@@ -10,7 +10,7 @@ import { capitalizeResidentFields } from '../../../utils/textUtils';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
-import { getLetterClassifications, generateLetterNumber, getGlobalSequenceNumber, incrementSequenceNumber } from '../../../utils/letterClassifications';
+import { getLetterClassifications, generateLetterNumber, getGlobalSequenceNumber, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
@@ -176,8 +176,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     if (editData?.nomorSurat) {
       setNomorSurat(editData.nomorSurat);
     } else {
-      const generatedNo = generateLetterNumber('SPPD', kodeKlasifikasi || '094');
-      setNomorSurat(generatedNo);
+      generateLetterNumberAsync('SPPD', kodeKlasifikasi || '094')
+        .then(setNomorSurat)
+        .catch(err => console.error('Gagal generate nomor surat:', err));
     }
   }, [editData, kodeKlasifikasi]);
 

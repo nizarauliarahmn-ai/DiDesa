@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHistory';
 import { showToast } from '../../utils/toast';
-import { getLetterClassifications, LetterClassification, generateLetterNumber } from '../../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, generateLetterNumber, generateLetterNumberAsync } from '../../utils/letterClassifications';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { supabase } from '../../utils/supabase';
 
@@ -120,13 +120,13 @@ export default function LayananMandiri() {
     const code = letterCodeMap[letterType] || 'SKTM';
     const targetClass = classifications.find(c => c.jenis === letterType || c.klasifikasi === code);
     const kodeKlasifikasi = targetClass?.kodeKlasifikasi || '140';
-    const finalNumber = generateLetterNumber(code, kodeKlasifikasi);
 
     resolveCurrentTenant().then(tenantId => {
       if (!tenantId) {
         showToast('Gagal memproses surat, Tenant ID tidak ditemukan.', 'error');
         return;
       }
+      generateLetterNumberAsync(code, kodeKlasifikasi).then(finalNumber => {
       Promise.resolve().then(async () => {
         try {
         await supabase.from('surat').insert([{
@@ -155,6 +155,7 @@ export default function LayananMandiri() {
       } catch (err) {
         console.error("Notification post failed:", err);
       }
+    });
     });
     });
 
