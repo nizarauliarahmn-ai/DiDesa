@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
+import { DEFAULT_SURAT_FORMAT, formatNomorSurat } from './generateSuratNumber';
 
 export interface LetterField {
   id: string;
@@ -285,7 +286,7 @@ function parseNomorParts(nomor: string): string[] {
 }
 
 function getSequenceIndexFromFormat(): number {
-  const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHI-[KODE]/[TAHUN]';
+  const formatTemplate = localStorage.getItem('surat_format') || DEFAULT_SURAT_FORMAT;
   const segs = formatTemplate.split('/');
   const idx = segs.findIndex(s => s.includes('[NO URUT SURAT]') || s.includes('[NO]'));
   return idx >= 0 ? idx : 1;
@@ -415,7 +416,7 @@ export function incrementSequenceNumber(klasifikasi: string) {
 }
 
 export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: string, nextNoVal?: number | string, customDate?: Date): string {
-  const formatTemplate = localStorage.getItem('surat_format') || '[NO KODE SURAT]/[NO URUT SURAT]/WHI-[KODE]/[TAHUN]';
+  const formatTemplate = localStorage.getItem('surat_format') || DEFAULT_SURAT_FORMAT;
   
   const date = customDate || new Date();
   const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
@@ -451,13 +452,31 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
     nextNoStr = `${parts[0].padStart(3, '0')}.${parts[1]}`;
   }
 
+  // ATURAN UNIVERSAL: seluruh segmen dipaksa FULL UPPERCASE via central helper,
+  // berlaku untuk SEMUA jenis & format surat tanpa pengondisian per jenis.
+  const cleanKode = (kodeKlasifikasi || '140').trim().toUpperCase();
+  const cleanDesa = 'WHI';
+  const cleanSurat = (klasifikasi || '').trim().toUpperCase();
+
+  // Format standar → gunakan central helper sebagai formatter tunggal.
+  if (formatTemplate === DEFAULT_SURAT_FORMAT) {
+    return formatNomorSurat({
+      kodeKlasifikasi: cleanKode,
+      nomorUrut: nextNoStr,
+      singkatanDesa: cleanDesa,
+      singkatanSurat: cleanSurat,
+      tahun: year,
+    });
+  }
+
+  // Format kustom → tetap paksa FULL UPPERCASE untuk seluruh segmen.
   const raw = formatTemplate
-    .replace(/\[NO KODE SURAT\]/g, kodeKlasifikasi || '140')
-    .replace(/\[KODE KLASIFIKASI\]/g, kodeKlasifikasi || '140')
+    .replace(/\[NO KODE SURAT\]/g, cleanKode)
+    .replace(/\[KODE KLASIFIKASI\]/g, cleanKode)
     .replace(/\[NO URUT SURAT\]/g, nextNoStr)
     .replace(/\[NO\]/g, nextNoStr)
-    .replace(/\[KODE\]/g, klasifikasi.toUpperCase())
-    .replace(/\[SINGKATAN SURAT\]/g, klasifikasi.toUpperCase())
+    .replace(/\[KODE\]/g, cleanSurat)
+    .replace(/\[SINGKATAN SURAT\]/g, cleanSurat)
     .replace(/\[BULAN\]/g, romanMonth)
     .replace(/\[BULAN_ANGKA\]/g, numericMonth)
     .replace(/\[TAHUN\]/g, String(year))
@@ -465,10 +484,11 @@ export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: strin
     .replace(/\[NAMA_DESA\]/g, villageName.replace(/desa\s+/gi, '').toUpperCase())
     .replace(/\[KECAMATAN\]/g, kecamatan.toUpperCase())
     .replace(/\[KABUPATEN\]/g, kabupaten.toUpperCase())
-    .replace(/\[DESA\]/g, desaInitial.toUpperCase());
+    .replace(/\[DESA\]/g, desaInitial.toUpperCase())
+    .replace(/WHI-/g, `${cleanDesa}-`);
   
-  // Uppercase seluruh nomor surat kecuali angka, /, -, dan titik
-  // Ini memastikan bagian hardcode di template (mis. 'WHI') ikut jadi kapital
+  // Uppercase seluruh nomor surat (angka, /, -, titik tetap dipertahankan sebagai format).
+  // Ini memastikan bagian hardcode di template (mis. 'WHI') ikut jadi kapital.
   return raw.toUpperCase();
 }
 
