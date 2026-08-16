@@ -265,9 +265,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     }
     setClassifications(cls);
     
-    // Bridge dari Express Desk: auto-pilih template surat & lompat ke step pemohon
+    // Deep-link dari Express Desk: auto-pilih template surat & lompat ke step pemohon
     try {
-      const presetKlas = localStorage.getItem('express_letter_klasifikasi');
+      const params = new URLSearchParams(window.location.search);
+      const presetKlas = params.get('template_klasifikasi') || localStorage.getItem('express_letter_klasifikasi');
       if (presetKlas) {
         const match = cls.find(c => c.klasifikasi === presetKlas);
         if (match) {

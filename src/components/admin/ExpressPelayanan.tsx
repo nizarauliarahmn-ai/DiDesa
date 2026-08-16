@@ -367,11 +367,13 @@ export default function ExpressPelayanan() {
   const launchLetter = (template: any) => {
     if (!activeResident) return;
     const tab = getSuratFormTab(template.klasifikasi);
-    localStorage.setItem('express_preset_resident', JSON.stringify(activeResident));
-    localStorage.setItem('express_letter_tab', tab);
-    localStorage.setItem('express_letter_klasifikasi', template.klasifikasi);
-    localStorage.setItem('express_letter_nama', template.jenis || template.klasifikasi);
-    window.location.href = '/?mode=admin&admin_tab=surat';
+    const params = new URLSearchParams({
+      resident_id: activeResident.id || activeResident.nik || '',
+      template_id: template.id || template.klasifikasi || '',
+      template_klasifikasi: template.klasifikasi || '',
+      surat_tab: tab,
+    });
+    window.location.href = `/admin/surat/buat?${params.toString()}`;
   };
 
   // ── Cetak & WA ─────────────────────────────────────────────────────────

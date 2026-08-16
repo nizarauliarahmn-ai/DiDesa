@@ -21,6 +21,7 @@ import AdminSuratUndangan from './surat/AdminSuratUndangan';
 import { getLetterFullData } from '../../utils/letterHistory';
 import { fetchResidentsCached } from '../../utils/apiCache';
 import { showToast } from '../../utils/toast';
+import { getSuratFormTab } from '../../hooks/useSuratTemplates';
 import { TambahTamuModal, TambahPermohonanModal } from './surat/AdminSuratQuickActions';
 
 export default function AdminSurat({ 
@@ -132,20 +133,37 @@ export default function AdminSurat({
     };
   }, [onClearPresetResident]);
 
-  // Bridge dari Express Desk: presetResident + tab surat dibawa via localStorage
+  // Deep-link dari Express Desk: resident_id + template_id dibawa via URL query string
   useEffect(() => {
     try {
-      const presetRaw = localStorage.getItem('express_preset_resident');
-      const tab = localStorage.getItem('express_letter_tab');
-      if (presetRaw && tab) {
-        const resident = JSON.parse(presetRaw);
-        setLocalPresetResident(resident);
-        setReturnTab('buat');
-        setActiveTab(tab as any);
-        localStorage.removeItem('express_preset_resident');
-        localStorage.removeItem('express_letter_tab');
-        showToast('Data warga dari Express Desk dimuat ✓', 'success');
-      }
+      const params = new URLSearchParams(window.location.search);
+      const rid = params.get('resident_id');
+      const suratTab = params.get('surat_tab');
+      const kls = params.get('template_klasifikasi');
+      if (!rid) return;
+      fetchResidentsCached()
+        .then(res => res.ok ? res.json() : [])
+        .then((residents: any[]) => {
+          const match = residents.find((r: any) => String(r.id) === rid || String(r.nik) === rid);
+          if (!match) return;
+          // Normalisasi field snake_case dari DB agar cocok dengan form surat
+          const resident = {
+            ...match,
+            birthPlace: match.birth_place || match.birthPlace || '',
+            birthDate: match.birth_date || match.birthDate || '',
+            rtRw: match.rt_rw || match.rtRw || '',
+            gender: match.gender || '',
+            religion: match.religion || '',
+            job: match.job || '',
+            address: match.address || '',
+            maritalStatus: match.marital_status || match.maritalStatus || '',
+          };
+          setLocalPresetResident(resident);
+          setReturnTab('buat');
+          setActiveTab((suratTab || (kls ? getSuratFormTab(kls) : 'buat')) as any);
+          showToast('Data warga dari Express Desk dimuat ✓', 'success');
+        })
+        .catch(err => console.error('Express bridge error:', err));
     } catch (e) {
       console.error('Express bridge error:', e);
     }
