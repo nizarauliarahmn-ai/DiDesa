@@ -79,6 +79,24 @@ export default function AdminPendudukDetail({
     }
   }, [data]);
 
+  const pickFirst = (...keys: string[]): string => {
+    if (!data) return '';
+    for (const key of keys) {
+      const v = data[key];
+      if (v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '-') {
+        return String(v);
+      }
+    }
+    return '';
+  };
+
+  const renderValue = (val: string | null | undefined) => {
+    if (!val || val.trim() === '' || val === '-') {
+      return <span className="text-slate-400 italic font-normal text-sm">Belum Terisi</span>;
+    }
+    return <span className="font-semibold text-slate-800 dark:text-slate-100">{val}</span>;
+  };
+
   const ALL_AID_PROGRAMS = useMemo(() => [
     "BLT Dana Desa",
     "Program Keluarga Harapan (PKH)",
@@ -637,7 +655,7 @@ export default function AdminPendudukDetail({
                     <span className="col-span-1">:</span>
                     <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs flex items-center justify-between">
                       <span>{data?.gender || '-'}</span>
-                      <span className="font-bold text-sky-950 dark:text-slate-400 text-[10px]">GOL. DARAH: <strong className="text-rose-600 dark:text-rose-400 font-extrabold">{data?.bloodType || '-'}</strong></span>
+                      <span className="font-bold text-sky-950 dark:text-slate-400 text-[10px]">GOL. DARAH: <strong className="text-rose-600 dark:text-rose-400 font-extrabold">{renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}</strong></span>
                     </span>
                   </div>
 
@@ -680,7 +698,7 @@ export default function AdminPendudukDetail({
                   <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
                     <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Pekerjaan</span>
                     <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.job || '-'}</span>
+                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</span>
                   </div>
 
                   <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
@@ -786,7 +804,7 @@ export default function AdminPendudukDetail({
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">No. WhatsApp</p>
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 font-mono">
-                        {data?.noWhatsapp || "-"}
+                        {renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}
                       </p>
                     </div>
                   </div>
@@ -814,7 +832,7 @@ export default function AdminPendudukDetail({
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 flex items-center gap-2">
                         <span>{data?.religion || "-"}</span>
                         <span className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 px-1.5 py-0.5 rounded font-black border border-rose-200 dark:border-rose-800">
-                          Gol. {data?.bloodType || "-"}
+                          Gol. {renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}
                         </span>
                       </p>
                     </div>
@@ -828,7 +846,7 @@ export default function AdminPendudukDetail({
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
-                        {data?.domicileStatus || "-"}
+                        {renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}
                       </p>
                     </div>
                   </div>
@@ -929,11 +947,11 @@ export default function AdminPendudukDetail({
               <div className="space-y-2.5">
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">No. WhatsApp</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{data?.noWhatsapp || '-'}</span>
+                  <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Status Domisili</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{data?.domicileStatus || '-'}</span>
+                  <span className="text-xs font-bold text-gray-900 dark:text-white">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</span>
                 </div>
               </div>
             </div>
@@ -1081,7 +1099,7 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Pendidikan Terakhir</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">{data?.education || data?.pendidikanTerakhir || "-"}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">{renderValue(pickFirst('education', 'pendidikan', 'pendidikan_terakhir', 'pendidikanTerakhir'))}</p>
                   </div>
                 </div>
 
@@ -1091,7 +1109,7 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Pekerjaan</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">{data?.job || "-"}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</p>
                   </div>
                 </div>
 
@@ -1102,10 +1120,10 @@ export default function AdminPendudukDetail({
                   <div className="min-w-0 flex-1 text-xs">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Orang Tua Kandung</p>
                     <p className="text-gray-700 dark:text-slate-300 mt-0.5 font-medium truncate">
-                      Ayah: <strong className="text-gray-900 dark:text-white">{data?.fatherName || "-"}</strong>
+                      Ayah: <strong className="text-gray-900 dark:text-white">{renderValue(pickFirst('fatherName', 'father_name', 'nama_ayah'))}</strong>
                     </p>
                     <p className="text-gray-700 dark:text-slate-300 font-medium truncate">
-                      Ibu: <strong className="text-gray-900 dark:text-white">{data?.motherName || "-"}</strong>
+                      Ibu: <strong className="text-gray-900 dark:text-white">{renderValue(pickFirst('motherName', 'mother_name', 'nama_ibu'))}</strong>
                     </p>
                   </div>
                 </div>
@@ -1195,7 +1213,7 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status DTKS / Bansos</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{data?.statusDtks || "-"}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('statusDtks', 'status_dtks', 'penerima_bansos'))}</p>
                   </div>
                 </div>
 
@@ -1205,7 +1223,7 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Disabilitas</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{data?.disabilitas || "-"}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('disabilitas', 'jenis_disabilitas'))}</p>
                   </div>
                 </div>
 
@@ -1215,7 +1233,7 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Golongan Darah</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{data?.bloodType || "-"}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}</p>
                   </div>
                 </div>
 
@@ -1225,7 +1243,7 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{data?.domicileStatus || "-"}</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</p>
                   </div>
                 </div>
               </div>
