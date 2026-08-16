@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Camera, Upload, Zap, Loader2, Scan, RefreshCw, MonitorSmartphone, TabletSmartphone, QrCode, Radio, CheckCircle2, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Camera, Upload, Zap, Loader2, Scan, RefreshCw, MonitorSmartphone, TabletSmartphone, QrCode, Radio, CheckCircle2, Search, ArrowLeft, User } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { runKtpOcr, KtpOcrResult, isKtpResultValid, emptyKtpResult } from '../../../utils/ktpOcr';
 import { showToast } from '../../../utils/toast';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
+import { supabase } from '../../../utils/supabase';
 import {
   subscribeKtpScanChannel, sendKtpRequestScanWhenReady, sendKtpScanCompleteWhenReady,
   base64ToBlob, compressImageForRealtime, buildKioskScanUrl,
@@ -24,12 +26,13 @@ interface KTPScannerModalProps {
   /** Gambar hasil paste dari scanner fisik — langsung diproses OCR saat modal terbuka. */
   initialImageBlob?: Blob | null;
   /** Dipanggil saat admin memilih "Cari Manual (NIK / Nama)" — tanpa scan KTP. */
-  onManualSearch?: () => void;
+  onManualPick?: (resident: any) => void;
 }
 
 type ScanMode = 'select' | 'local' | 'remote';
+type ViewMode = 'select' | 'search';
 
-export default function KTPScannerModal({ open, onClose, onResult, variant = 'admin', sessionId, initialImageBlob, onManualSearch }: KTPScannerModalProps) {
+export default function KTPScannerModal({ open, onClose, onResult, variant = 'admin', sessionId, initialImageBlob, onManualPick }: KTPScannerModalProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,6 +41,12 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
   const initialBlobHandledRef = useRef<string | null>(null);
 
   const [mode, setMode] = useState<ScanMode>('select');
+  const [viewMode, setViewMode] = useState<ViewMode>('select');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchTimerRef = useRef<any>(null);
   const [cameraOn, setCameraOn] = useState(false);
   const [cameraError, setCameraError] = useState('');
   const [torchOn, setTorchOn] = useState(false);
@@ -113,6 +122,37 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
     }
   }, [open]);
 
+  // Live search warga (mode 'search' di dalam kontainer gelap)
+  useEffect(() => {
+    if (!open || viewMode !== 'search' || !villageId) return;
+    const val = searchQuery.trim();
+    if (!val) { setSearchResults([]); setSearching(false); return; }
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    setSearching(true);
+    searchTimerRef.current = setTimeout(async () => {
+      try {
+        const isNik = /^\d+$/.test(val);
+        let builder: any = supabase.from('residents').select('*').eq('tenant_id', villageId);
+        builder = isNik ? builder.ilike('nik', `%${val}%`) : builder.or(`name.ilike.%${val}%,nik.ilike.%${val}%`);
+        const { data, error } = await builder.limit(8);
+        if (error) throw error;
+        setSearchResults(data || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setSearching(false);
+      }
+    }, 250);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [open, viewMode, searchQuery, villageId]);
+
+  // Auto-focus input pencarian saat masuk mode 'search'
+  useEffect(() => {
+    if (open && viewMode === 'search') {
+      setTimeout(() => searchInputRef.current?.focus(), 120);
+    }
+  }, [open, viewMode]);
+
   // Auto-start kamera di tablet (variant='tablet'): tanpa layar pemilihan mode
   useEffect(() => {
     if (open && variant === 'tablet') {
@@ -145,6 +185,10 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
       setCameraError('');
       setMode(variant === 'tablet' ? 'local' : 'select');
       setPairStatus('idle');
+      setViewMode('select');
+      setSearchQuery('');
+      setSearchResults([]);
+      setSearching(false);
     }
   }, [open, variant, cleanupPreview]);
 
@@ -390,49 +434,142 @@ export default function KTPScannerModal({ open, onClose, onResult, variant = 'ad
         </button>
       </div>
 
-      {/* Mode Select (hanya admin) */}
+      {/* Mode Select (hanya admin) — dengan transisi in-place ke mode pencarian manual */}
       {variant === 'admin' && mode === 'select' && pairStatus === 'idle' && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-5 p-6 bg-slate-950 overflow-y-auto">
-          <div className="text-center mb-2">
-            <h4 className="text-white text-lg font-black mb-1">Pilih Metode Scan KTP</h4>
-            <p className="text-slate-400 text-xs font-semibold">Data & foto tetap aman di memori perangkat (tidak diunggah ke server).</p>
-          </div>
-          <button
-            onClick={() => { setMode('local'); }}
-            className="w-full max-w-md flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-emerald-600/20 to-teal-600/20 border border-emerald-500/40 hover:border-emerald-400 text-white transition-all cursor-pointer text-left group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <MonitorSmartphone className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div>
-              <p className="font-black text-sm">💻 Kamera PC Ini</p>
-              <p className="text-xs text-slate-400 mt-0.5">Gunakan webcam PC/laptop ini langsung di depan KTP warga.</p>
-            </div>
-          </button>
-          <button
-            onClick={startRemotePairing}
-            className="w-full max-w-md flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/40 hover:border-blue-400 text-white transition-all cursor-pointer text-left group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <TabletSmartphone className="w-6 h-6 text-blue-400" />
-            </div>
-            <div>
-              <p className="font-black text-sm">📱 Panggil Tablet Scanner</p>
-              <p className="text-xs text-slate-400 mt-0.5">Kamera belakang tablet desa — ideal untuk scan KTP tanpa repot.</p>
-            </div>
-          </button>
-          <button
-            onClick={() => { onClose(); onManualSearch?.(); }}
-            className="w-full max-w-md flex items-center gap-4 p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white transition-all cursor-pointer text-left group"
-          >
-            <div className="w-12 h-12 rounded-xl bg-slate-700/60 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-              <Search className="w-6 h-6 text-slate-300" />
-            </div>
-            <div>
-              <p className="font-black text-sm">🔍 Cari Manual (NIK / Nama)</p>
-              <p className="text-xs text-slate-400 mt-0.5">Cari dari database warga jika KTP fisik tidak dibawa.</p>
-            </div>
-          </button>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 bg-slate-950 overflow-y-auto">
+          <AnimatePresence mode="wait" initial={false}>
+            {viewMode === 'select' ? (
+              <motion.div
+                key="select"
+                className="w-full max-w-md flex flex-col items-center gap-5"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+              >
+                <div className="text-center mb-2">
+                  <h4 className="text-white text-lg font-black mb-1">Pilih Metode Scan KTP</h4>
+                  <p className="text-slate-400 text-xs font-semibold">Data & foto tetap aman di memori perangkat (tidak diunggah ke server).</p>
+                </div>
+                <motion.button
+                  onClick={() => { setMode('local'); }}
+                  className="w-full flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-emerald-600/20 to-teal-600/20 border border-emerald-500/40 hover:border-emerald-400 text-white transition-all cursor-pointer text-left group"
+                  exit={{ opacity: 0, y: -16, scale: 0.95 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <MonitorSmartphone className="w-6 h-6 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="font-black text-sm">💻 Kamera PC Ini</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Gunakan webcam PC/laptop ini langsung di depan KTP warga.</p>
+                  </div>
+                </motion.button>
+                <motion.button
+                  onClick={startRemotePairing}
+                  className="w-full flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/40 hover:border-blue-400 text-white transition-all cursor-pointer text-left group"
+                  exit={{ opacity: 0, y: -16, scale: 0.95 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <TabletSmartphone className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="font-black text-sm">📱 Panggil Tablet Scanner</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Kamera belakang tablet desa — ideal untuk scan KTP tanpa repot.</p>
+                  </div>
+                </motion.button>
+                <motion.button
+                  onClick={() => { setSearchQuery(''); setSearchResults([]); setViewMode('search'); }}
+                  className="w-full flex items-center gap-4 p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700 hover:border-slate-500 text-white transition-all cursor-pointer text-left group"
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-slate-700/60 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Search className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <div>
+                    <p className="font-black text-sm">🔍 Cari Manual (NIK / Nama)</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Cari dari database warga jika KTP fisik tidak dibawa.</p>
+                  </div>
+                </motion.button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="search"
+                className="w-full max-w-md flex flex-col"
+                initial={{ opacity: 0, y: 18, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <button
+                    onClick={() => { setViewMode('select'); }}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <ArrowLeft className="w-4 h-4" /> Kembali ke Pilihan Metode
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-700/60 flex items-center justify-center shrink-0">
+                    <Search className="w-5 h-5 text-slate-300" />
+                  </div>
+                  <div>
+                    <p className="font-black text-sm text-white">🔍 Cari Manual (NIK / Nama)</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Cari dari database warga jika KTP fisik tidak dibawa.</p>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="🔍 Ketik NIK atau Nama warga di sini..."
+                    className="w-full pl-11 pr-4 p-4 rounded-2xl bg-slate-800/80 border border-slate-700 text-white placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                  />
+                  {searching && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-emerald-500" />}
+                </div>
+
+                <div className="max-h-[400px] overflow-y-auto mt-4 space-y-2 pr-1">
+                  {!searchQuery.trim() ? (
+                    <p className="text-center text-xs font-semibold text-slate-500 py-8">Ketik NIK atau nama warga untuk mulai mencari.</p>
+                  ) : searchResults.length === 0 && !searching ? (
+                    <p className="text-center text-xs font-semibold text-slate-500 py-8">Warga tidak ditemukan. Periksa kembali NIK / nama.</p>
+                  ) : (
+                    searchResults.map((r) => (
+                      <motion.button
+                        key={r.nik}
+                        onClick={() => { onClose(); onManualPick?.(r); }}
+                        className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-slate-700 hover:border-emerald-500/60 text-left cursor-pointer transition-all"
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {r.photo ? (
+                            <img src={r.photo} alt="" className="w-10 h-10 rounded-lg object-cover bg-slate-700 shrink-0" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center shrink-0"><User className="w-5 h-5 text-slate-300" /></div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="font-bold text-sm text-white truncate">{r.name}</p>
+                            <p className="text-xs text-slate-400 font-mono truncate">
+                              {r.nik} • {[r.address, r.rt_rw || [r.rt, r.rw].filter(Boolean).join('/'), r.dusun].filter(Boolean).join(' • ') || 'RT/RW -'}
+                            </p>
+                          </div>
+                        </div>
+                        <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
+                      </motion.button>
+                    ))
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       )}
 
