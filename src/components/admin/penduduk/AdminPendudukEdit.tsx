@@ -219,20 +219,13 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   const [motherName, setMotherName] = useState((data?.motherName || '').toUpperCase());
 
   // Kontak & Identitas Lain
-  const [gelarDepan, setGelarDepan] = useState(data?.gelarDepan || '');
-  const [gelarBelakang, setGelarBelakang] = useState(data?.gelarBelakang || '');
   const [noWhatsapp, setNoWhatsapp] = useState(data?.noWhatsapp || '');
-  const [dusun, setDusun] = useState(data?.dusun || '');
 
   // Pendidikan & Sipil
-  const [noAktaKelahiran, setNoAktaKelahiran] = useState(data?.noAktaKelahiran || '');
-  const [noAktaNikah, setNoAktaNikah] = useState(data?.noAktaNikah || '');
 
   // Kesejahteraan & Dokumen
-  const [noBpjs, setNoBpjs] = useState(data?.noBpjs || '');
   const [statusDtks, setStatusDtks] = useState(data?.statusDtks || 'Tidak Terdaftar DTKS');
   const [disabilitas, setDisabilitas] = useState(data?.disabilitas || 'Tidak Ada');
-  const [noPaspor, setNoPaspor] = useState(data?.noPaspor || '');
 
   // Same-KK family members used for parent dropdowns
   const [kkMembers, setKkMembers] = useState<any[]>([]);
@@ -443,7 +436,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
     const genderColor = gender === 'Perempuan' ? 'pink' : 'blue';
     const statusColor = residentStatus === 'Aktif' ? 'emerald' : 'gray';
 
-    const fullName = [gelarDepan.trim(), (name || '').trim(), gelarBelakang.trim()].filter(Boolean).join(' ');
+    const fullName = (name || '').trim();
 
     const savedResident = {
       ...data,
@@ -467,19 +460,12 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       rt,
       rw,
       desa,
-      dusun,
       domicileStatus,
       familyRelation,
       education,
-      gelarDepan: gelarDepan.trim(),
-      gelarBelakang: gelarBelakang.trim(),
-      noAktaKelahiran,
-      noAktaNikah,
-      noBpjs,
       statusDtks,
       disabilitas,
       noWhatsapp,
-      noPaspor,
       fatherName: (fatherName || '').trim().toUpperCase(),
       motherName: (motherName || '').trim().toUpperCase(),
       activeAids,
@@ -647,28 +633,6 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                       placeholder="Masukkan nama lengkap..."
                     />
                     {errors.name && <p className="text-xs text-red-500 font-semibold">{errors.name}</p>}
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Gelar Depan</label>
-                    <input 
-                      type="text"
-                      value={gelarDepan}
-                      onChange={(e) => setGelarDepan(e.target.value.toUpperCase())}
-                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                      placeholder="Contoh: Dr., Ir., H."
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Gelar Belakang</label>
-                    <input 
-                      type="text"
-                      value={gelarBelakang}
-                      onChange={(e) => setGelarBelakang(e.target.value.toUpperCase())}
-                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                      placeholder="Contoh: S.E., S.H., M.M."
-                    />
                   </div>
 
                   {/* NIK Field */}
@@ -871,17 +835,6 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     />
                   </div>
 
-                  <div className="md:col-span-2 space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Dusun / Kampung</label>
-                    <input 
-                      type="text"
-                      value={dusun}
-                      onChange={(e) => setDusun(capitalizeWords(e.target.value))}
-                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
-                      placeholder="Contoh: Dusun Krajan"
-                    />
-                  </div>
-
                   <div className="md:col-span-3 space-y-1">
                     <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Desa/Kelurahan</label>
                     <input 
@@ -1013,30 +966,8 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     onToggleManual={setMotherManual}
                     isManual={motherManual}
                     genderFilter="Perempuan"
-                    placeholder="Pilih ibu dari anggota KK..."
+placeholder="Pilih ibu dari anggota KK..."
                   />
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. Akta Kelahiran</label>
-                    <input 
-                      type="text"
-                      value={noAktaKelahiran}
-                      onChange={(e) => setNoAktaKelahiran(e.target.value.toUpperCase())}
-                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
-                      placeholder="Contoh: 3520-LT-2024-1234"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. Akta Nikah</label>
-                    <input 
-                      type="text"
-                      value={noAktaNikah}
-                      onChange={(e) => setNoAktaNikah(e.target.value.toUpperCase())}
-                      className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
-                      placeholder="Contoh: 3520-NK-2024-5678"
-                    />
-                  </div>
                 </div>
               </section>
             </>
@@ -1053,17 +984,6 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. BPJS / KIS</label>
-                  <input 
-                    type="text"
-                    value={noBpjs}
-                    onChange={(e) => setNoBpjs(e.target.value.replace(/[^\d]/g, ''))}
-                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
-                    placeholder="Contoh: 0001234567890"
-                  />
-                </div>
-
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Status DTKS / Bansos</label>
                   <select 
@@ -1092,17 +1012,6 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
                     <option value="Disabilitas Mental">Disabilitas Mental</option>
                     <option value="Disabilitas Ganda">Disabilitas Ganda</option>
                   </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">No. Paspor / KITAS</label>
-                  <input 
-                    type="text"
-                    value={noPaspor}
-                    onChange={(e) => setNoPaspor(e.target.value.toUpperCase())}
-                    className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 font-mono"
-                    placeholder="Contoh: B1234567"
-                  />
                 </div>
 
                 <div className="space-y-1">
