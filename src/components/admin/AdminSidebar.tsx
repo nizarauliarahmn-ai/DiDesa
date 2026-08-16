@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
@@ -276,10 +276,10 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem collapsed={isCollapsed} icon={<Gift size={18} />} label="Bantuan Sosial" active={activeTab === 'bantuan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('bantuan'); }} />
             
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Produk Hukum</p>}
-            <NavItem collapsed={isCollapsed} icon={<FileText size={18} />} label="Penomoran SK & Perdes" active={activeTab === 'produk_hukum'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('produk_hukum'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Scale className="w-5 h-5 transition-colors" strokeWidth={1.75} />} label="Penomoran SK & Perdes" active={activeTab === 'produk_hukum'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('produk_hukum'); }} />
             
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pelayanan Publik</p>}
-            <NavItem id="tour-surat" collapsed={isCollapsed} icon={<FileText size={18} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
+            <NavItem id="tour-surat" collapsed={isCollapsed} icon={<FileSignature className="w-5 h-5 transition-colors" strokeWidth={1.75} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
             <NavItem collapsed={isCollapsed} icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} />
             <NavItem collapsed={isCollapsed} icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
               <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); }} />
