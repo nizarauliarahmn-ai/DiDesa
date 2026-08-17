@@ -299,9 +299,9 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           </div>
 
           {/* Social Links */}
-          <div className="lg:col-span-2 flex justify-center lg:justify-end items-center gap-2 pr-16 md:pr-20">
+          <div className="lg:col-span-2 flex flex-wrap justify-center lg:justify-end items-center gap-2">
             {globalFooterSocial1Link && (
-              <a href={globalFooterSocial1Link} target="_blank" rel="noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold hover:underline transition-colors">
+              <a href={globalFooterSocial1Link} target="_blank" rel="noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold hover:underline transition-colors whitespace-nowrap">
                 Instagram
               </a>
             )}
@@ -309,7 +309,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
               <span className="text-emerald-400/60">•</span>
             )}
             {globalFooterSocial2Link && (
-              <a href={globalFooterSocial2Link} target="_blank" rel="noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold hover:underline transition-colors">
+              <a href={globalFooterSocial2Link} target="_blank" rel="noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold hover:underline transition-colors whitespace-nowrap">
                 TikTok
               </a>
             )}
