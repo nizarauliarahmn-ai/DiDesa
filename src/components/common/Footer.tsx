@@ -337,7 +337,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
               </a>
             )}
           </div>
-          <span className="px-1.5 py-0.5 rounded bg-emerald-800/60 text-emerald-200 font-mono text-[10px]">
+          <span className="px-1.5 py-0.5 rounded bg-emerald-800/60 text-emerald-200 font-mono text-[10px] md:mr-16">
             v5.3
           </span>
         </div>

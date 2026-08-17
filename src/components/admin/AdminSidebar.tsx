@@ -355,17 +355,8 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
               <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                  <Camera size={14} className="text-white" />
               </div>
-              <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
-            </label>
-            <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center pointer-events-none ${authUser?.role === 'saas_admin' ? 'bg-purple-500' : authUser?.role === 'kades' ? 'bg-amber-500' : 'bg-emerald-500'}`} title={authUser?.role === 'saas_admin' ? 'SaaS Admin' : authUser?.role === 'kades' ? 'Super Admin' : 'Admin'}>
-              {authUser?.role === 'saas_admin' ? (
-                <Building2 size={10} className="text-white" />
-              ) : authUser?.role === 'kades' ? (
-                <ShieldCheck size={10} className="text-white" />
-              ) : (
-                <Users size={10} className="text-white" />
-              )}
-            </div>
+<input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
+          </label>
           </div>
           {!isCollapsed && (
           <div className="flex-1">
