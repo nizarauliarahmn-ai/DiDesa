@@ -1085,16 +1085,16 @@ export default function AdminPendudukDetail({
               </div>
             </div>
 
-            {/* Status Bantuan & Kesejahteraan Aktif */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-              <div className="flex items-center justify-between mb-4">
+            {/* Bantuan Sosial */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+              <div className="flex items-center justify-between mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center">
-                    <HandHeart className="w-5 h-5 text-amber-600" />
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 flex items-center justify-center text-amber-700 dark:text-amber-400">
+                    <HandHeart className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-gray-900 dark:text-white text-sm">Bantuan & Kesejahteraan Aktif</h4>
-                    <p className="text-[11px] text-gray-500 dark:text-slate-400">Status penerimaan bantuan sosial</p>
+                    <h4 className="font-bold text-gray-900 dark:text-white text-lg">Bantuan Sosial</h4>
+                    <p className="text-xs text-gray-500 dark:text-slate-400">{bansosHistory.length} catatan bantuan sosial untuk warga ini</p>
                   </div>
                 </div>
                 <button 
@@ -1109,70 +1109,22 @@ export default function AdminPendudukDetail({
                 </button>
               </div>
 
-              <div className="space-y-2.5">
-                {data?.activeAids && (data.activeAids as string[]).filter((a: string) => !a.startsWith("STOPPED:")).length > 0 ? (
-                  (data.activeAids as string[]).filter((a: string) => !a.startsWith("STOPPED:")).map((aid: string, idx: number) => (
-                    <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10">
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate">{aid}</p>
-                        <p className="text-[10px] text-emerald-700 dark:text-emerald-500 font-medium">Penerima aktif</p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider shrink-0">AKTIF</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex items-center gap-2.5 p-3 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/50">
-                    <CreditCard className="w-4 h-4 text-gray-400 shrink-0" />
-                    <p className="text-xs text-gray-500 dark:text-slate-400 italic">Belum terdaftar sebagai penerima bantuan aktif.</p>
-                  </div>
-                )}
-
-                <div className="pt-1">
-                  <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-bold text-gray-900 dark:text-white">BPJS / JKN</p>
-                      <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">{data?.noBpjs || data?.bpjsNumber || data?.bpjs || "Belum ada nomor"}</p>
-                    </div>
-                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shrink-0 ${
-                      (data?.noBpjs || data?.bpjsNumber || data?.bpjs)
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
-                    }`}>
-                      {(data?.noBpjs || data?.bpjsNumber || data?.bpjs) ? 'TERDAFTAR' : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Riwayat Bantuan Sosial */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-              <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
-                  <HandHeart className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Riwayat Bantuan Sosial</h3>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">{bansosHistory.length} catatan bantuan sosial untuk warga ini</p>
-                </div>
-              </div>
-
               {bansosHistory.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
                     <thead>
                       <tr className="border-b border-gray-100 dark:border-slate-800 text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500">
                         <th className="px-3 py-2.5 font-bold">Jenis Program</th>
-                        <th className="px-3 py-2.5 font-bold">Periode</th>
+                        <th className="px-3 py-2.5 font-bold">Tahun</th>
                         <th className="px-3 py-2.5 font-bold">Nominal</th>
-                        <th className="px-3 py-2.5 font-bold">Status Penyaluran</th>
+                        <th className="px-3 py-2.5 font-bold">Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {bansosHistory.map((entry, idx) => (
                         <tr key={idx} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
                           <td className="px-3 py-3 text-xs font-bold text-gray-900 dark:text-white">{entry.program}</td>
-                          <td className="px-3 py-3 text-xs text-gray-500 dark:text-slate-400">{entry.periode}</td>
+                          <td className="px-3 py-3 font-mono text-xs font-bold text-gray-500 dark:text-slate-400">{entry.periode}</td>
                           <td className="px-3 py-3 font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{entry.nominal}</td>
                           <td className="px-3 py-3">
                             <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${
@@ -1192,6 +1144,22 @@ export default function AdminPendudukDetail({
                   <p className="text-sm text-gray-400 italic">Belum ada catatan bantuan sosial untuk warga ini.</p>
                 </div>
               )}
+
+              <div className="pt-4 mt-2">
+                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-bold text-gray-900 dark:text-white">BPJS / JKN</p>
+                    <p className="text-[10px] text-gray-500 dark:text-slate-400 font-medium">{data?.noBpjs || data?.bpjsNumber || data?.bpjs || "Belum ada nomor"}</p>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider shrink-0 ${
+                    (data?.noBpjs || data?.bpjsNumber || data?.bpjs)
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-300'
+                  }`}>
+                    {(data?.noBpjs || data?.bpjsNumber || data?.bpjs) ? 'TERDAFTAR' : 'N/A'}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
