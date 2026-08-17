@@ -394,15 +394,15 @@ export default function AdminSuratSKP({
     }
 
     if (mutationType && nikToMutate) {
-      const ok = await applyResidentMutationOnLetterPublish({
+      const result = await applyResidentMutationOnLetterPublish({
         residentId: nikToMutate,
         letterTypeCode: 'SKP',
         publishDate: tanggalSurat,
       });
-      if (ok) {
+      if (result.ok) {
         showToast(`✅ Surat Pindah berhasil diterbitkan & status kependudukan warga otomatis diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
       } else {
-        showToast('Surat berhasil dicetak namun status kependudukan warga GAGAL diperbarui otomatis. Periksa koneksi database / kolom status penduduk.', "error");
+        showToast(`Surat berhasil dicetak namun status kependudukan warga GAGAL diperbarui otomatis. ${result.message || 'Periksa koneksi database / kolom status penduduk.'}`, "error");
       }
     }
     // Semua Pengikut (checkedFamilyNiks + manualFollowers) ikut termutasi status PINDAH

@@ -116,34 +116,77 @@ async function runResidentUpdate(
   }
 }
 
+export interface ForceUpdateResult {
+  success: boolean;
+  message?: string;
+}
+
 /**
- * Update status kependudukan penduduk secara tangguh.
- * - Identifier valid: prioritas ID (UUID) bila ada, fallback NIK.
- * - Kolom yang ditulis: `status_keberadaan` (utamanya) + `status_penduduk`
- *   + `status` + `status_color`. Kolom yang tak dikenal otomatis di-drop.
- * - Mengembalikan true bila update sukses; false bila gagal.
+ * Update status kependudukan dengan FALLBACK BERLAPIS (multi-kolom x multi-key):
+ * - Identifier: coba ID (UUID) dulu, lalu fallback NIK.
+ * - Kolom: mencoba `status_keberadaan`, `status_penduduk`, `status_warga`,
+ *   lalu `status`.
+ * - TIDAK mengirim `updated_at` (kolom itu TIDAK ADA di tabel `residents` —
+ *   mengirimnya = kegagalan PGRST204 yang selama ini terjadi).
+ * - Setiap error Supabase dicetak utuh ke console agar root cause terlihat.
  */
-export async function updateResidentStatus(
-  resident: { id?: string; nik?: string },
+export async function forceUpdateStatusPenduduk(
+  residentData: { id?: string; nik?: string },
   newStatus: 'PINDAH' | 'MENINGGAL',
-): Promise<boolean> {
-  const targetId = resident?.id;
-  const targetNik = (resident?.nik || '').trim();
+): Promise<ForceUpdateResult> {
+  const targetId = residentData?.id;
+  const targetNik = (residentData?.nik || '').trim();
+
   if (!targetId && !targetNik) {
-    console.error('Update dibatalkan: Data ID dan NIK warga tidak ditemukan.');
-    return false;
+    console.error("ERROR: Data ID maupun NIK pemohon tidak ditemukan pada form.");
+    return { success: false, message: "ID/NIK Pemohon tidak ditemukan di form" };
   }
 
-  const statusLabel = newStatus === 'MENINGGAL' ? 'Meninggal' : 'Pindah';
-  const statusColor = newStatus === 'MENINGGAL' ? 'rose' : 'amber';
-  const payload: Record<string, any> = {
-    status_keberadaan: newStatus,
-    status_penduduk: newStatus,
-    status: statusLabel,
-    status_color: statusColor,
-  };
+  const tenantId = await resolveCurrentTenant();
 
-  return runResidentUpdate(payload, { id: targetId, nik: targetNik }, 'updateResidentStatus');
+  // Daftar skenario nama kolom di database Supabase (tabel `residents`).
+  const candidateColumns = ['status_keberadaan', 'status_penduduk', 'status_warga', 'status'];
+
+  for (const colName of candidateColumns) {
+    const colValue = colName === 'status' ? (newStatus === 'MENINGGAL' ? 'Meninggal' : 'Pindah') : newStatus;
+    const payload: Record<string, any> = { [colName]: colValue };
+
+    const attempt = (key: 'id' | 'nik', value: string) => {
+      let q = supabase.from('residents').update({ ...payload });
+      if (tenantId) q = q.eq('tenant_id', tenantId);
+      return q.eq(key, value);
+    };
+
+    // 1. Coba update via ID
+    if (targetId) {
+      const { error } = await attempt('id', targetId);
+      if (!error) {
+        console.log(`✅ Berhasil update status via kolom '${colName}' menggunakan ID.`);
+        return { success: true, message: `Status diperbarui via kolom '${colName}' (ID)` };
+      }
+      console.error(`SUPABASE UPDATE ERROR DETAILED [id, ${colName}]:`, error);
+    }
+
+    // 2. Fallback: Coba update via NIK
+    if (targetNik) {
+      const { error } = await attempt('nik', targetNik);
+      if (!error) {
+        console.log(`✅ Berhasil update status via kolom '${colName}' menggunakan NIK.`);
+        return { success: true, message: `Status diperbarui via kolom '${colName}' (NIK)` };
+      }
+      console.error(`SUPABASE UPDATE ERROR DETAILED [nik, ${colName}]:`, error);
+    }
+  }
+
+  return {
+    success: false,
+    message: "Seluruh percobaan kolom DB (status_keberadaan, status_penduduk, status_warga, status) gagal. Periksa RLS / Schema Supabase.",
+  };
+}
+
+export interface MutationResult {
+  ok: boolean;
+  message?: string;
 }
 
 /**
@@ -152,27 +195,29 @@ export async function updateResidentStatus(
  * - SKM  => status MENINGGAL + tanggal_kematian
  * - SKN  => marital_status KAWIN
  *
- * Mengembalikan detail kegagalan agar UI bisa menampilkan notifikasi yang jelas
- * ketika update DB gagal (mis. koneksi terputus / RLS).
+ * Mengembalikan `{ ok, message }` agar UI bisa menampilkan error spesifik
+ * Supabase di dalam toast notifikasi.
  */
 export async function applyResidentMutationOnLetterPublish({
   residentId,
   residentNik,
   letterTypeCode,
   publishDate,
-}: ResidentMutationOptions): Promise<boolean> {
+}: ResidentMutationOptions): Promise<MutationResult> {
   const nik = (residentId || residentNik || '').trim();
-  if (!nik || nik === '-' || nik === '') return false;
+  if (!nik || nik === '-' || nik === '') {
+    return { ok: false, message: 'NIK pemohon kosong, tidak bisa update status.' };
+  }
 
   const mutation = getLetterMutationType(letterTypeCode);
-  if (!mutation) return false;
+  if (!mutation) return { ok: true };
 
   const isoDate = toIsoDate(publishDate);
 
-  // 1. Update kolom status keberadaan (PINDAH / MENINGGAL).
-  let primaryOk = true;
+  // 1. Update kolom status keberadaan (multi-kolom fallback).
+  let primary: ForceUpdateResult = { success: true };
   if (mutation === 'PINDAH' || mutation === 'MENINGGAL') {
-    primaryOk = await updateResidentStatus({ nik }, mutation);
+    primary = await forceUpdateStatusPenduduk({ nik }, mutation);
   }
 
   // 2. Kolom pendukung mutasi (status, tanggal_mutasi/kematian, marital_status).
@@ -197,15 +242,20 @@ export async function applyResidentMutationOnLetterPublish({
     payloadOk = await runResidentUpdate(updatePayload, { nik }, 'applyResidentMutationOnLetterPublish');
   }
 
-  const success = mutation === 'KAWIN' ? payloadOk : primaryOk;
+  const ok = mutation === 'KAWIN' ? payloadOk : primary.success;
+  const message = ok
+    ? undefined
+    : mutation === 'KAWIN'
+      ? 'Gagal memperbarui status perkawinan (marital_status). Periksa RLS / Schema Supabase.'
+      : primary.message || 'Gagal memperbarui status kependudukan. Periksa RLS / Schema Supabase.';
 
   addSaaSLog({
     admin: 'Sistem',
     aksi: 'Mutasi Otomatis Kependudukan',
     target: `${nik} -> ${mutation}`,
-    status: success ? 'Berhasil' : 'Gagal',
+    status: ok ? 'Berhasil' : 'Gagal',
     category: 'Penduduk'
   });
 
-  return success;
+  return { ok, message };
 }

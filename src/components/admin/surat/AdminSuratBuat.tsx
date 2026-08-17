@@ -552,19 +552,23 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     // Otomasi Mutasi Kependudukan (SKP/SKM/SKN) dijalankan SEBELUM toast sukses,
     // agar status kependudukan dijamin ter-update sebelum arsip surat dikonfirmasi.
     let mutationOk = true;
+    let mutationMessage: string | null = null;
     let mutationType: ReturnType<typeof getLetterMutationType> = null;
     try {
       mutationType = getLetterMutationType(selectedClass?.klasifikasi);
       if (enableMutation && mutationType && selectedResident?.nik) {
-        mutationOk = await applyResidentMutationOnLetterPublish({
+        const result = await applyResidentMutationOnLetterPublish({
           residentId: selectedResident.nik,
           letterTypeCode: selectedClass?.klasifikasi,
           publishDate: currentDateFormatted(),
         });
+        mutationOk = result.ok;
+        mutationMessage = result.message || null;
       }
     } catch (err) {
       console.error('Gagal memproses mutasi kependudukan otomatis:', err);
       mutationOk = false;
+      mutationMessage = err instanceof Error ? err.message : 'Kesalahan tak dikenal saat update status.';
     }
 
     setIsSaving(false);
@@ -576,7 +580,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       if (mutationOk) {
         showToast(`✅ Surat diterbitkan & status kependudukan ${selectedResident.name} berhasil diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
       } else {
-        showToast(`Surat berhasil diterbitkan, namun status kependudukan ${selectedResident.name} GAGAL diperbarui otomatis. Periksa koneksi database / kolom status penduduk.`, "error");
+        showToast(`Surat berhasil diterbitkan, namun status kependudukan ${selectedResident.name} GAGAL diperbarui otomatis. ${mutationMessage || 'Periksa koneksi database / kolom status penduduk.'}`, "error");
       }
     } else {
       showToast("Surat resmi baru berhasil diterbitkan dan diarsipkan!", "success");

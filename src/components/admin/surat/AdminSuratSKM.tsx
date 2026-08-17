@@ -406,15 +406,15 @@ export default function AdminSuratSKM({
     // Otomasi Mutasi Kependudukan: SKM => status_keberadaan MENINGGAL (real-time)
     const mutationType = getLetterMutationType('SKM');
     if (mutationType && formData.nik) {
-      const ok = await applyResidentMutationOnLetterPublish({
+      const result = await applyResidentMutationOnLetterPublish({
         residentId: formData.nik,
         letterTypeCode: 'SKM',
         publishDate: tanggalSurat,
       });
-      if (ok) {
+      if (result.ok) {
         showToast(`✅ Surat Kematian berhasil diterbitkan & status kependudukan warga otomatis diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
       } else {
-        showToast('Surat berhasil dicetak namun status kependudukan warga GAGAL diperbarui otomatis. Periksa koneksi database / kolom status penduduk.', "error");
+        showToast(`Surat berhasil dicetak namun status kependudukan warga GAGAL diperbarui otomatis. ${result.message || 'Periksa koneksi database / kolom status penduduk.'}`, "error");
       }
     }
   };
