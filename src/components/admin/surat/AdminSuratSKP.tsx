@@ -833,7 +833,7 @@ export default function AdminSuratSKP({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKP', { kode: '400', jenis: 'Surat Keterangan Pindah', deskripsi: 'Surat Pengantar Keterangan Pindah' })}
+          template={getLetterHeaderTemplate('SKP', { kode: '400', jenis: 'Surat Keterangan Pindah', deskripsi: 'Surat Pengantar Keterangan Pindah', nomorSurat: formData.nomorSurat })}
           icon={<FileCheck className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

@@ -506,7 +506,7 @@ export default function AdminSuratSKBM({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKBM', { kode: '400', jenis: 'Surat Keterangan Belum Menikah', deskripsi: 'Surat Keterangan Belum Pernah Menikah (SKBM)' })}
+          template={getLetterHeaderTemplate('SKBM', { kode: '400', jenis: 'Surat Keterangan Belum Menikah', deskripsi: 'Surat Keterangan Belum Pernah Menikah (SKBM)', nomorSurat: formData.nomorSurat })}
           icon={<Award className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

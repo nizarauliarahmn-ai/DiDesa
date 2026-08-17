@@ -564,7 +564,7 @@ export default function AdminSuratSKD({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKD', { kode: '145', jenis: 'Surat Keterangan Domisili', deskripsi: 'Surat Keterangan Domisili Perorangan (SKD)' })}
+          template={getLetterHeaderTemplate('SKD', { kode: '145', jenis: 'Surat Keterangan Domisili', deskripsi: 'Surat Keterangan Domisili Perorangan (SKD)', nomorSurat: formData.nomorSurat })}
           icon={<Home className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

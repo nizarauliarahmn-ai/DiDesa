@@ -532,7 +532,7 @@ export default function AdminSuratSKPH({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKPH', { kode: '400', jenis: 'Surat Keterangan Penghasilan', deskripsi: 'Surat Keterangan Penghasilan / Gaji (SKPH)' })}
+          template={getLetterHeaderTemplate('SKPH', { kode: '400', jenis: 'Surat Keterangan Penghasilan', deskripsi: 'Surat Keterangan Penghasilan / Gaji (SKPH)', nomorSurat: formData.nomorSurat })}
           icon={<DollarSign className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

@@ -800,7 +800,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SPPD', { kode: '094', jenis: 'Surat Perjalanan Dinas', deskripsi: 'Surat Perintah & Perjalanan Dinas (SPPD)' })}
+          template={getLetterHeaderTemplate('SPPD', { kode: '094', jenis: 'Surat Perjalanan Dinas', deskripsi: 'Surat Perintah & Perjalanan Dinas (SPPD)', nomorSurat: nomorSurat })}
           icon={<Plane className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

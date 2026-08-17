@@ -575,7 +575,7 @@ export default function AdminSuratSDU({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SDU', { kode: '400', jenis: 'Surat Keterangan Domisili Usaha', deskripsi: 'Surat Keterangan Domisili Usaha (SDU)' })}
+          template={getLetterHeaderTemplate('SDU', { kode: '400', jenis: 'Surat Keterangan Domisili Usaha', deskripsi: 'Surat Keterangan Domisili Usaha (SDU)', nomorSurat: formData.nomorSurat })}
           icon={<Store className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

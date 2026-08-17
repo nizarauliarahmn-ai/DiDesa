@@ -550,7 +550,7 @@ export default function AdminSuratSKU({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKU', { kode: '400', jenis: 'Surat Keterangan Usaha', deskripsi: 'Surat Keterangan Usaha Mikro / Menengah (SKU)' })}
+          template={getLetterHeaderTemplate('SKU', { kode: '400', jenis: 'Surat Keterangan Usaha', deskripsi: 'Surat Keterangan Usaha Mikro / Menengah (SKU)', nomorSurat: formData.nomorSurat })}
           icon={<Store className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

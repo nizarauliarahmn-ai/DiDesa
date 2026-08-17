@@ -544,7 +544,7 @@ export default function AdminSuratSKL({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKL', { kode: '474.1', jenis: 'Surat Keterangan Kelahiran', deskripsi: 'Surat Keterangan Kelahiran (SKL)' })}
+          template={getLetterHeaderTemplate('SKL', { kode: '474.1', jenis: 'Surat Keterangan Kelahiran', deskripsi: 'Surat Keterangan Kelahiran (SKL)', nomorSurat: noSurat })}
           icon={<Baby className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

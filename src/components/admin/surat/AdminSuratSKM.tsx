@@ -542,7 +542,7 @@ export default function AdminSuratSKM({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKM', { kode: '400', jenis: 'Surat Keterangan Kematian', deskripsi: 'Surat Keterangan Kematian (SKM)' })}
+          template={getLetterHeaderTemplate('SKM', { kode: '400', jenis: 'Surat Keterangan Kematian', deskripsi: 'Surat Keterangan Kematian (SKM)', nomorSurat: formData.nomorSurat })}
           icon={<Heart className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

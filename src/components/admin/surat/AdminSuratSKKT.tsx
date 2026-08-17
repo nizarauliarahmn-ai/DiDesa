@@ -679,7 +679,7 @@ export default function AdminSuratSKKT({
 
       {/* Header Bar */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKKT', { kode: '593', jenis: 'Surat Keterangan Kepemilikan Tanah', deskripsi: 'Surat Pernyataan Penguasaan Fisik Bidang Tanah & Gambar Situasi Kasar Tanah' })}
+          template={getLetterHeaderTemplate('SKKT', { kode: '593', jenis: 'Surat Keterangan Kepemilikan Tanah', deskripsi: 'Surat Pernyataan Penguasaan Fisik Bidang Tanah & Gambar Situasi Kasar Tanah', nomorSurat: formData.nomorSurat })}
           icon={<Landmark className="w-5 h-5" />}
           onBack={onBack}
           onSave={handleSave}

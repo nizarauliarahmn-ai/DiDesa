@@ -509,7 +509,7 @@ export default function AdminSuratSKTM({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKTM', { kode: '400', jenis: 'Surat Keterangan Tidak Mampu', deskripsi: 'Surat Keterangan Tidak Mampu (Siswa / Sekolah)' })}
+          template={getLetterHeaderTemplate('SKTM', { kode: '400', jenis: 'Surat Keterangan Tidak Mampu', deskripsi: 'Surat Keterangan Tidak Mampu (Siswa / Sekolah)', nomorSurat: formData.nomorSurat })}
           icon={<Frown className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

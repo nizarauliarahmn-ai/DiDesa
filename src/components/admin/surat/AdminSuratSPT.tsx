@@ -709,7 +709,7 @@ export default function AdminSuratSPT({
     <div className="space-y-5 pb-20">
       {/* 📜 Header 📜 */}
       <SuratEditorHeader 
-        template={getLetterHeaderTemplate('SPT', { kode: '474', jenis: 'Surat Pernyataan Taspen', deskripsi: 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk' })}
+        template={getLetterHeaderTemplate('SPT', { kode: '474', jenis: 'Surat Pernyataan Taspen', deskripsi: 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk', nomorSurat: formData.nomorSurat })}
         icon={<ShieldCheck className="w-5 h-5" />}
         onBack={onBack}
         onPrint={handlePrint}

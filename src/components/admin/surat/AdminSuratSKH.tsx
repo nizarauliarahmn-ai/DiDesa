@@ -520,7 +520,7 @@ export default function AdminSuratSKH({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKH', { kode: '400', jenis: 'Surat Keterangan Kehilangan', deskripsi: 'Surat Keterangan Kehilangan (SKH)' })}
+          template={getLetterHeaderTemplate('SKH', { kode: '400', jenis: 'Surat Keterangan Kehilangan', deskripsi: 'Surat Keterangan Kehilangan (SKH)', nomorSurat: formData.nomorSurat })}
           icon={<FileText className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}

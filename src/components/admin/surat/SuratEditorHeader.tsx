@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Printer, Save, Loader2 } from 'lucide-react';
 import { getLetterClassifications } from '../../../utils/letterClassifications';
+import { extractSequenceFromNomor } from '../../../services/penomoranSuratService';
 
 export interface SuratEditorTemplate {
   title: string;
@@ -35,7 +36,7 @@ const toTitleCase = (s: string) =>
 
 export function getLetterHeaderTemplate(
   klasifikasi: string,
-  fallback: { kode?: string; jenis?: string; deskripsi?: string } = {}
+  fallback: { kode?: string; jenis?: string; deskripsi?: string; nomorSurat?: string } = {}
 ): SuratEditorTemplate {
   let t;
   try {
@@ -44,12 +45,23 @@ export function getLetterHeaderTemplate(
     t = undefined;
   }
   const jenis = fallback.jenis || (t?.jenis ? toTitleCase(t.jenis) : 'Surat');
+  // SINGLE SOURCE OF TRUTH: jika nomor surat aktual dari state form disediakan,
+  // tampilkan urutannya (mis. "475/059/WHI-SKP/2026" -> "059") sehingga header
+  // selalu sinkron dengan pratinjau & database. Fallback ke counter bila kosong.
+  let sequenceNo = '';
+  if (fallback.nomorSurat && fallback.nomorSurat.trim()) {
+    const seq = extractSequenceFromNomor(fallback.nomorSurat);
+    if (seq > 0) sequenceNo = String(seq).padStart(3, '0');
+  }
+  if (!sequenceNo && t?.noUrutTerakhir) {
+    sequenceNo = String(t.noUrutTerakhir).padStart(3, '0');
+  }
   return {
     title: `Buat ${jenis}`,
     description: t?.deskripsi || fallback.deskripsi || '',
     kode: klasifikasi,
     classificationCode: t?.kodeKlasifikasi || fallback.kode || '',
-    sequenceNo: t?.noUrutTerakhir ? String(t.noUrutTerakhir).padStart(3, '0') : '',
+    sequenceNo,
   };
 }
 
