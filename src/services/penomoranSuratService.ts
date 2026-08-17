@@ -6,13 +6,14 @@ import { DEFAULT_SURAT_FORMAT } from '../utils/generateSuratNumber';
 // Layanan Penomoran Surat Berbasis DAFTAR SURAT AKTIF dari DB (MAX + 1)
 // ----------------------------------------------------------------------------
 // ATURAN:
-//  - SUMBER NOMOR = Daftar Surat Aktif yang TAMPIL di UI (tabel `surat`),
-//    hanya baris berstatus aktif (BUKAN 'Dibatalkan'/'Dihapus').
-//  - Nomor berikutnya = (NOMOR URUT TERTINGGI yang tampil di daftar aktif) + 1.
+//  - SUMBER NOMOR = nomor yang TAMPIL di Daftar Surat di UI (tabel `surat`).
+//    Hanya baris yang disembunyikan dari daftar ('Dihapus') yang dibuang.
+//    'Dibatalkan' tetap tampil di daftar sehingga ikut dihitung.
+//  - Nomor berikutnya = (NOMOR URUT TERTINGGI yang tampil di daftar) + 1.
 //    Contoh:
-//    - Surat aktif: 001-006 (semua lengkap)     => berikutnya 007.
-//    - Surat aktif: 001-006, 003 dihapus        => berikutnya 007.
-//    - Daftar kosong                            => berikutnya 001.
+//    - Daftar menampilkan: 001-006 (semua lengkap)   => berikutnya 007.
+//    - Daftar menampilkan: 001-006, 003 disembunyikan => berikutnya 007.
+//    - Daftar kosong                                 => berikutnya 001.
 //  - PENOMORAN GLOBAL (satu urutan untuk SEMUA jenis surat) sesuai kebijakan
 //    desa. Deteksi tidak memfilter per-klasifikasi agar tidak kembali ke 001.
 //  - Deteksi dibaca dari NOMOR yang tersimpan (sama seperti yang tampil di
@@ -181,13 +182,15 @@ export async function getMaxActiveNomorUrut(klasifikasi: string, tahun?: number)
 }
 
 /**
- * Kumpulkan semua nomor urut aktif (yang belum dibatalkan/dihapus) pada tabel
- * `surat`. Mengembalikan array kosong jika query gagal sehingga caller bisa
- * mendeteksi fallback.
+ * Kumpulkan semua nomor urut yang TAMPIL di Daftar Surat UI (tabel `surat`).
+ * Filter PERSIS sama dengan `fetchLetterHistoryAsync`: hanya baris ber-status
+ * 'Dihapus' (soft-delete yang disembunyikan) yang dibuang; 'Dibatalkan' yang
+ * masih tampil di daftar ikut dihitung. Mengembalikan array kosong jika query
+ * gagal sehingga caller bisa mendeteksi fallback.
  *
  * Pembatasan per tahun HANYA berlaku bila "Reset Setiap Awal Tahun" aktif
- * (`surat_autoreset === 'true'`). Default = semua surat aktif lintas tahun
- * ikut dihitung agar penomoran meneruskan (060 -> 061), tidak kembali ke 001.
+ * (`surat_autoreset === 'true'`). Default = semua nomor yang tampil lintas
+ * tahun ikut dihitung agar penomoran meneruskan (060 -> 061), tidak kembali 001.
  */
 export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number): Promise<number[]> {
   const tenantId = await resolveCurrentTenant();
@@ -203,17 +206,17 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
   // PENTING (kebijakan desa): penomoran memakai SATU URUTAN GLOBAL yang
   // diakumulasikan untuk SEMUA jenis surat (lihat AdminSuratPenomoran
   // "Sistem Penomoran Urut Tunggal (Global) Aktif"). Oleh karena itu parameter
-  // `klasifikasi` TIDAK dipakai untuk memfilter — seluruh surat aktif tahun
-  // berjalan ikut dihitung, agar nomor berikutnya selalu MAX global + 1
-  // (gap-filling) dan tidak "malah kembali ke 001" saat membuat jenis lain.
+  // `klasifikasi` TIDAK dipakai untuk memfilter — seluruh surat yang TAMPIL di
+  // daftar ikut dihitung, agar nomor berikutnya selalu MAX yang tampil + 1.
+  //
+  // FILTER = PERSIS sama dengan daftar surat yang tampil di UI
+  // (`fetchLetterHistoryAsync`): HANYA 'Dihapus' (soft-delete, disembunyikan)
+  // yang dibuang. 'Dibatalkan' TETAP TAMPIL di daftar sehingga ikut dihitung.
+  // Hard-delete otomatis hilang dari DB.
   const { data, error } = await supabase
     .from('surat')
     .select('nomor')
     .eq('tenant_id', tenantId)
-    // Dua cara penghapusan yang harus dihormati:
-    //  1) Hard delete => baris terhapus dari DB (tidak ikut terdeteksi).
-    //  2) Batal/cancel => status 'Dibatalkan' -> DITOLAK agar nomornya diisi ulang.
-    .neq('status', 'Dibatalkan')
     .neq('status', 'Dihapus')
     .limit(5000);
 
