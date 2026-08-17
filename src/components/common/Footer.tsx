@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Mail, Phone, Globe, Instagram, Music, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin } from 'lucide-react';
+import { Mail, Phone, MessageSquare, Send, X as CloseIcon } from 'lucide-react';
 import { addFeedback } from '../../utils/feedbackData';
 import { loadAppSettings } from '../../utils/appSettings';
 
@@ -47,23 +47,6 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
       window.location.href = '/affiliator';
     } else {
       window.location.href = 'https://sistemdidesa.id/affiliator';
-    }
-  };
-
-  const renderSocialIcon = (iconUrl: string) => {
-    if (!iconUrl) return <Globe className="w-4 h-4" />;
-    if (iconUrl.startsWith('http') || iconUrl.startsWith('data:')) {
-      return <img src={iconUrl} alt="Social" className="w-4 h-4 object-contain opacity-70 group-hover:opacity-100 transition-opacity" />;
-    }
-    // Fallback for legacy static icon names
-    switch(iconUrl) {
-      case 'instagram': return <Instagram className="w-4 h-4" />;
-      case 'tiktok': return <Music className="w-4 h-4" />;
-      case 'facebook': return <Facebook className="w-4 h-4" />;
-      case 'twitter': return <Twitter className="w-4 h-4" />;
-      case 'youtube': return <Youtube className="w-4 h-4" />;
-      case 'linkedin': return <Linkedin className="w-4 h-4" />;
-      default: return <Globe className="w-4 h-4" />;
     }
   };
 
@@ -124,9 +107,9 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   }, []);
 
   return (
-    <footer className="print:hidden w-full relative mt-auto bg-emerald-900 dark:bg-emerald-950 border-t border-emerald-800 text-emerald-100">
+    <footer className="print:hidden w-full relative mt-auto bg-emerald-700 dark:bg-emerald-800 border-t border-emerald-600 text-white">
       {/* Brand Bar */}
-      <div className="h-[55px] px-4 md:px-8 flex items-center justify-between border-b border-emerald-800/60">
+      <div className="h-[55px] px-4 md:px-8 flex items-center justify-between border-b border-emerald-600/60">
         <div className="flex items-center gap-3">
           <div 
             className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-[9px] shadow-sm shrink-0 overflow-hidden"
@@ -290,7 +273,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           {/* Affiliator Card */}
           <div className="lg:col-span-4">
             {globalFooterAffiliateTitle && (
-              <div className="bg-emerald-800/60 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-700/60 shadow-lg group/card relative overflow-hidden">
+              <div className="bg-emerald-800/40 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-600/60 shadow-lg group/card relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full -mr-8 -mt-8 transition-transform group-hover/card:scale-150 duration-700" />
                 <div className="flex-1 space-y-0.5 relative z-10">
                   <h4 className="text-[9px] font-black text-emerald-100 uppercase tracking-widest leading-none">{globalFooterAffiliateTitle}</h4>
@@ -315,16 +298,19 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
             )}
           </div>
 
-          {/* Social Icons */}
-          <div className="lg:col-span-2 flex justify-center lg:justify-end gap-2 pr-16 md:pr-20">
+          {/* Social Links */}
+          <div className="lg:col-span-2 flex justify-center lg:justify-end items-center gap-2 pr-16 md:pr-20">
             {globalFooterSocial1Link && (
-              <a href={globalFooterSocial1Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-emerald-800/50 border border-emerald-700 rounded-lg text-emerald-100 hover:text-white hover:bg-emerald-700 flex items-center justify-center transition-all hover:-translate-y-0.5 overflow-hidden">
-                {renderSocialIcon(globalFooterSocial1Icon)}
+              <a href={globalFooterSocial1Link} target="_blank" rel="noopener noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold underline-offset-4 hover:underline transition-all">
+                {globalFooterSocial1Icon === 'tiktok' ? 'TikTok' : globalFooterSocial1Icon === 'instagram' ? 'Instagram' : globalFooterSocial1Icon}
               </a>
             )}
+            {globalFooterSocial1Link && globalFooterSocial2Link && (
+              <span className="text-white/60">•</span>
+            )}
             {globalFooterSocial2Link && (
-              <a href={globalFooterSocial2Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-emerald-800/50 border border-emerald-700 rounded-lg text-emerald-100 hover:text-white hover:bg-emerald-700 flex items-center justify-center transition-all hover:-translate-y-0.5 overflow-hidden">
-                {renderSocialIcon(globalFooterSocial2Icon)}
+              <a href={globalFooterSocial2Link} target="_blank" rel="noopener noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold underline-offset-4 hover:underline transition-all">
+                {globalFooterSocial2Icon === 'tiktok' ? 'TikTok' : globalFooterSocial2Icon === 'instagram' ? 'Instagram' : globalFooterSocial2Icon}
               </a>
             )}
           </div>
@@ -332,7 +318,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
         </div>
 
         {/* Divider */}
-        <hr className="mt-8 mb-4 border-emerald-800/60" />
+        <hr className="mt-8 mb-4 border-emerald-600/60" />
 
         {/* Bottom Bar: Legal Links */}
         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-[11px] sm:text-xs text-emerald-100 pb-2">

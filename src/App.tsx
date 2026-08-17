@@ -530,7 +530,7 @@ export default function App() {
               toggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)}
               className="sticky top-0 z-50"
             />
-            <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-72 lg:pb-80 flex flex-col min-h-full print:p-0 print:block">
+            <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-4 flex flex-col min-h-full print:p-0 print:block">
               <div className="flex-1 print:block">
                 <PageTransition pageKey={adminTab}>
                 {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
@@ -644,7 +644,7 @@ export default function App() {
           onLogout={handleLogout}
         />
         <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scroll-smooth transition-all duration-300 ease-in-out">
-          <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-72 lg:pb-80 flex flex-col min-h-full">
+          <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-4 flex flex-col min-h-full">
             
             <div className="flex-1 w-full">
               <PageTransition pageKey={publicTab}>
