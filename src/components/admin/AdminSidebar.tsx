@@ -244,10 +244,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         </div>
         {!isCollapsed && (
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <h1 className="text-xl font-bold tracking-tight leading-none truncate" style={{ color: globalColor }}>{globalName}</h1>
-              <span className="text-[9px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">v5.3</span>
-            </div>
+            <h1 className="text-xl font-bold tracking-tight leading-none truncate" style={{ color: globalColor }}>{globalName}</h1>
             <p className="text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-widest mt-1 truncate">
               {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
             </p>
@@ -403,6 +400,14 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <LogOut size={16} />
           </button>
         </div>
+        {!isCollapsed && (
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+          <span>DiDesa App</span>
+          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono text-[10px]">
+            v5.3
+          </span>
+        </div>
+        )}
       </div>
     </aside>
     </>
