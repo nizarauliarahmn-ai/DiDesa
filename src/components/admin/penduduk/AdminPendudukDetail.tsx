@@ -7,7 +7,7 @@ import { fetchResidentLettersAsync, LetterHistory, getLetterFullData } from '../
 import ConfirmModal from '../../common/ConfirmModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../../utils/supabase';
-import { STATUS_KEBERADAAN_OPTIONS, normalizeStatusKeberadaan } from '../../../utils/statusKeberadaan';
+import { normalizeStatusKeberadaan } from '../../../utils/statusKeberadaan';
 
 interface AdminPendudukDetailProps {
   onBack: () => void;
@@ -30,6 +30,13 @@ const GENDER_OPTIONS = ['Laki-laki', 'Perempuan'];
 const AGAMA_OPTIONS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
 const MARITAL_OPTIONS = ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'];
 const DOMICILE_OPTIONS = ['Sesuai KTP', 'Tetap', 'Luar', 'Pindah', 'Tidak Sesuai'];
+const STATUS_KEBERADAAN_OPTIONS = [
+  { value: 'TETAP', label: 'TETAP' },
+  { value: 'SEMENTARA', label: 'SEMENTARA' },
+  { value: 'PINDAH', label: 'PINDAH' },
+  { value: 'MENINGGAL', label: 'MENINGGAL' },
+  { value: 'GANDA', label: 'GANDA' },
+];
 const HUBUNGAN_OPTIONS = ['Kepala Keluarga', 'Istri', 'Anak', 'Menantu', 'Cucu', 'Orang Tua', 'Mertua', 'Famili Lain', 'Lainnya'];
 const GOLDAR_OPTIONS = ['A', 'B', 'AB', 'O', 'Tidak Diketahui'];
 const PEKERJAAN_OPTIONS = [
@@ -212,7 +219,11 @@ export default function AdminPendudukDetail({
   const [motherManual, setMotherManual] = useState(false);
 
   const startEditMode = () => {
-    setEditFormData({ ...data });
+    // Sanitasi status_keberadaan: nilai legacy ('Belum Kawin', 'Kawin', 'Aktif', dll)
+    // atau nilai tidak valid dipaksa menjadi 'TETAP'.
+    const rawStatus = normalizeStatusKeberadaan(data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP');
+    const sanitizedStatus = STATUS_KEBERADAAN_OPTIONS.some(o => o.value === rawStatus) ? rawStatus : 'TETAP';
+    setEditFormData({ ...data, statusKeberadaan: sanitizedStatus, status: sanitizedStatus });
     // Auto-fallback ke mode manual bila nama orang tua tidak cocok dengan anggota KK saat ini
     const kkNames = (familyMembers || []).map((m: any) => String(m.name || '').toLowerCase());
     setFatherManual(!!(data?.fatherName || '').trim() && !kkNames.includes(String(data.fatherName || '').toLowerCase()));
@@ -1348,7 +1359,19 @@ export default function AdminPendudukDetail({
                     <EditableField editing value={editFormData.nik || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, nik: v }))} />
                     <EditableField editing value={editFormData.noKk || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noKk: v }))} />
                     <div className="grid grid-cols-2 gap-1.5">
-                      <EditableField editing value={editFormData.statusKeberadaan || editFormData.status || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, statusKeberadaan: v, status: v }))} options={STATUS_KEBERADAAN_OPTIONS} />
+                      <select
+                        name="status_keberadaan"
+                        value={STATUS_KEBERADAAN_OPTIONS.some(o => o.value === editFormData.statusKeberadaan)
+                          ? editFormData.statusKeberadaan
+                          : 'TETAP'}
+                        onChange={(e) => setEditFormData(prev => ({ ...prev, statusKeberadaan: e.target.value, status: e.target.value }))}
+                        className="w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
+                      >
+                        <option value="">-- Pilih Status --</option>
+                        {STATUS_KEBERADAAN_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
                       <EditableField editing value={editFormData.maritalStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, maritalStatus: v }))} options={MARITAL_OPTIONS} />
                     </div>
                     <EditableField editing value={editFormData.familyRelation || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, familyRelation: v }))} options={HUBUNGAN_OPTIONS} />
