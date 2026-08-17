@@ -557,7 +557,8 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
       <div className="bg-white dark:bg-slate-900 pt-10 border-t border-gray-200 dark:border-slate-800">
          <div className="max-w-7xl mx-auto px-6 text-center text-sm text-slate-500 pb-10">
             &copy; {new Date().getFullYear()} Hak Cipta Dilindungi. <strong className="text-slate-700 dark:text-slate-300">DiDesa</strong> — Solusi Administrasi & Digitalisasi Desa Modern Indonesia.{' '}
-            <a href="/affiliator" className="text-emerald-600 hover:underline font-semibold">Program Afiliasi</a>
+            <a href="/affiliator" className="text-emerald-600 hover:underline font-semibold">Program Afiliasi</a>{' '}
+            <span className="ml-1 inline-block px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono text-[10px]">v5.3</span>
          </div>
       </div>
 
