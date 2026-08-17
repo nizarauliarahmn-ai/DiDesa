@@ -536,7 +536,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     setSuccess(true);
   };
 
-  const handleSimpan = () => {
+  const handleSimpan = async () => {
     recordLetterToHistory();
     setIsSaving(true);
 
@@ -549,32 +549,41 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       localStorage.setItem('letter_usage_counts', JSON.stringify(updatedUsage));
     }
 
-    setTimeout(() => {
-      setIsSaving(false);
-      if (selectedClass) {
-        incrementSequenceNumber(selectedClass.klasifikasi);
-      }
-
-      showToast("Surat resmi baru berhasil diterbitkan dan diarsipkan!", "success");
-      // Tampilkan modal sukses pasca-terbit dengan aksi Cetak & Kirim WA
-      setShowSuratSuccessModal(true);
-
-      // Otomasi Mutasi Kependudukan (SKP/SKM/SKN) jika checkbox pengaman dicentang
-      const mutationType = getLetterMutationType(selectedClass?.klasifikasi);
+    // Otomasi Mutasi Kependudukan (SKP/SKM/SKN) dijalankan SEBELUM toast sukses,
+    // agar status kependudukan dijamin ter-update sebelum arsip surat dikonfirmasi.
+    let mutationOk = true;
+    let mutationType: ReturnType<typeof getLetterMutationType> = null;
+    try {
+      mutationType = getLetterMutationType(selectedClass?.klasifikasi);
       if (enableMutation && mutationType && selectedResident?.nik) {
-        applyResidentMutationOnLetterPublish({
+        mutationOk = await applyResidentMutationOnLetterPublish({
           residentId: selectedResident.nik,
           letterTypeCode: selectedClass?.klasifikasi,
           publishDate: currentDateFormatted(),
-        }).then(ok => {
-          if (ok) {
-            showToast(`✅ Surat diterbitkan & status kependudukan ${selectedResident.name} berhasil diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
-          } else {
-            showToast(`Status kependudukan ${selectedResident.name} gagal diperbarui otomatis.`, "error");
-          }
         });
       }
-    }, 1500);
+    } catch (err) {
+      console.error('Gagal memproses mutasi kependudukan otomatis:', err);
+      mutationOk = false;
+    }
+
+    setIsSaving(false);
+    if (selectedClass) {
+      incrementSequenceNumber(selectedClass.klasifikasi);
+    }
+
+    if (mutationType && enableMutation && selectedResident?.nik) {
+      if (mutationOk) {
+        showToast(`✅ Surat diterbitkan & status kependudukan ${selectedResident.name} berhasil diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
+      } else {
+        showToast(`Surat berhasil diterbitkan, namun status kependudukan ${selectedResident.name} GAGAL diperbarui otomatis. Periksa koneksi database / kolom status penduduk.`, "error");
+      }
+    } else {
+      showToast("Surat resmi baru berhasil diterbitkan dan diarsipkan!", "success");
+    }
+
+    // Tampilkan modal sukses pasca-terbit dengan aksi Cetak & Kirim WA
+    setShowSuratSuccessModal(true);
   };
 
   // Kirim notifikasi WA ke pemohon (cek nomor; jika kosong buka modal input cepat)

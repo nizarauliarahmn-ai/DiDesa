@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { DEFAULT_SURAT_FORMAT, formatNomorSurat } from './generateSuratNumber';
-import { getMaxActiveNomorUrut, extractSequenceFromNomor, nomorMatchesKlasifikasi } from '../services/penomoranSuratService';
+import { getMaxActiveNomorUrut, getNextAvailableNomorUrut, extractSequenceFromNomor, nomorMatchesKlasifikasi } from '../services/penomoranSuratService';
 
 export interface LetterField {
   id: string;
@@ -277,20 +277,22 @@ export function getNextSequenceNumber(klasifikasi: string): number {
   return getGlobalSequenceNumber() + 1;
 }
 
-// --- Penentuan nomor urut berbasis MAX ACTIVE NUMBER dari tabel `surat` ---
-// MAX(nomor_urut aktif) + 1, didelegasikan ke layanan terpusat
+// --- Penentuan nomor urut berbasis DB aktif dengan SMART GAP-FILLING ---
+// Nomor berikutnya = nomor urut terkecil yang belum dipakai. Jika ada celah
+// (mis. 003 dihapus/dibatalkan), celah terkecil otomatis diisi. Jika semua
+// lengkap, lanjut ke MAX + 1. Didelegasikan ke layanan terpusat
 // `penomoranSuratService` agar konsisten di seluruh modul pembuat surat.
 
 /**
  * Ambil nomor urut tertinggi yang masih aktif (belum dibatalkan / terhapus)
- * untuk klasifikasi & tahun tertentu. Mengembalikan -1 jika query gagal.
+ * untuk klasifikasi & tahun tertentu. Mengembalikan 0 jika query gagal.
  */
 export async function getMaxActiveSequenceFromDb(klasifikasi: string, year?: number): Promise<number> {
   return getMaxActiveNomorUrut(klasifikasi, year);
 }
 
 /**
- * Nomor urut berikutnya = MAX(active) + 1.
+ * Nomor urut berikutnya = nomor urut terkecil yang belum dipakai (gap-filling).
  * Jika tidak ada surat aktif -> 1. Jika query gagal -> fallback counter lama.
  */
 export async function getNextSequenceNumberAsync(klasifikasi: string, year?: number): Promise<number> {
@@ -302,9 +304,8 @@ export async function getNextSequenceNumberAsync(klasifikasi: string, year?: num
     return 1;
   }
 
-  const maxActive = await getMaxActiveSequenceFromDb(klasifikasi, currentYear);
-  if (maxActive > 0) return maxActive + 1;
-  if (maxActive === 0) return 1;
+  const nextAvailable = await getNextAvailableNomorUrut(klasifikasi, currentYear);
+  if (nextAvailable > 0) return nextAvailable;
 
   // Query gagal -> fallback ke counter lama agar tidak regresi saat offline
   return getGlobalSequenceNumber() + 1;

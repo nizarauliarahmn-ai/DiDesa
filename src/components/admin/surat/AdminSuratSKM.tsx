@@ -414,7 +414,7 @@ export default function AdminSuratSKM({
       if (ok) {
         showToast(`✅ Surat Kematian berhasil diterbitkan & status kependudukan warga otomatis diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
       } else {
-        showToast('Surat berhasil dicetak namun status kependudukan warga gagal diperbarui otomatis.', "error");
+        showToast('Surat berhasil dicetak namun status kependudukan warga GAGAL diperbarui otomatis. Periksa koneksi database / kolom status penduduk.', "error");
       }
     }
   };

@@ -52,10 +52,60 @@ function toIsoDate(dateStr?: string): string {
 }
 
 /**
+ * Update status kependudukan penduduk secara tangguh.
+ * - Coba kolom `status_keberadaan` terlebih dahulu.
+ * - Jika nama kolom di DB berbeda (`status_penduduk`), otomatis fallback.
+ * - Error RLS / koneksi DB ditangkap dan dilaporkan secara eksplisit.
+ * - Cache global di-invalidate sehingga UI selalu re-fetch.
+ */
+export async function updateResidentStatus(
+  residentNik: string,
+  newStatus: 'PINDAH' | 'MENINGGAL',
+): Promise<boolean> {
+  const nik = (residentNik || '').trim();
+  if (!nik || nik === '-' || nik === '') return false;
+
+  const nowIso = new Date().toISOString();
+  const payload = { status_keberadaan: newStatus, updated_at: nowIso };
+
+  try {
+    const tenantId = await resolveCurrentTenant();
+    let query = supabase.from('residents').update(payload);
+    if (tenantId) query = query.eq('tenant_id', tenantId);
+    const { error } = await query.eq('nik', nik);
+
+    if (error) {
+      console.warn('Update status_keberadaan gagal, fallback ke status_penduduk:', error.message);
+      // Fallback jika nama kolom di DB adalah status_penduduk
+      let fbQuery = supabase.from('residents').update({ status_penduduk: newStatus, updated_at: nowIso });
+      if (tenantId) fbQuery = fbQuery.eq('tenant_id', tenantId);
+      const fb = await fbQuery.eq('nik', nik);
+
+      if (fb.error) {
+        // Kemungkinan besar kegagalan RLS / koneksi DB
+        console.error('Gagal update status penduduk (status_penduduk):', fb.error);
+        return false;
+      }
+    }
+
+    // Re-fetch state global (React Query / cache local)
+    invalidateResidentsCache();
+    window.dispatchEvent(new Event('residents_updated'));
+    return true;
+  } catch (err) {
+    console.error('updateResidentStatus error:', err);
+    return false;
+  }
+}
+
+/**
  * Terapkan mutasi kependudukan otomatis saat surat resmi diterbitkan.
  * - SKP  => status PINDAH + tanggal_mutasi
  * - SKM  => status MENINGGAL + tanggal_kematian
  * - SKN  => marital_status KAWIN
+ *
+ * Mengembalikan detail kegagalan agar UI bisa menampilkan notifikasi yang jelas
+ * ketika update DB gagal (mis. koneksi terputus / RLS).
  */
 export async function applyResidentMutationOnLetterPublish({
   residentId,
@@ -76,19 +126,31 @@ export async function applyResidentMutationOnLetterPublish({
     updatePayload.status = 'Pindah';
     updatePayload.status_color = 'gray';
     updatePayload.is_deleted = false;
-    updatePayload.status_keberadaan = 'PINDAH';
-    updatePayload.status_penduduk = 'PINDAH';
     updatePayload.tanggal_mutasi = isoDate;
   } else if (mutation === 'MENINGGAL') {
     updatePayload.status = 'Meninggal';
     updatePayload.status_color = 'gray';
     updatePayload.is_deleted = false;
-    updatePayload.status_keberadaan = 'MENINGGAL';
-    updatePayload.status_penduduk = 'MENINGGAL';
     updatePayload.tanggal_kematian = isoDate;
   } else if (mutation === 'KAWIN') {
     updatePayload.marital_status = 'Kawin';
     updatePayload.status_perkawinan = 'KAWIN';
+  }
+
+  // 1. Update kolom status keberadaan dengan fallback nama kolom.
+  const statusOk = await updateResidentStatus(nik, mutation as 'PINDAH' | 'MENINGGAL');
+  if (!statusOk) return false;
+
+  // 2. Terapkan kolom pendukung mutasi (status, tanggal_mutasi/kematian, dst).
+  if (Object.keys(updatePayload).length === 0) {
+    addSaaSLog({
+      admin: 'Sistem',
+      aksi: 'Mutasi Otomatis Kependudukan',
+      target: `${nik} -> ${mutation}`,
+      status: 'Berhasil',
+      category: 'Penduduk'
+    });
+    return true;
   }
 
   try {
