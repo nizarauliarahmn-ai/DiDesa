@@ -185,7 +185,24 @@ export default function AdminPendudukDetail({
       status_color: form.status === 'Meninggal' ? 'rose' : form.status === 'Pindah' ? 'amber' : 'emerald'
     };
     try {
-      const { error } = await supabase.from('residents').update(dbPayload).eq('nik', data.nik);
+      let payload = { ...dbPayload };
+      let query = supabase.from('residents').update(payload).eq('nik', data.nik);
+      let { error } = await query;
+      // Defensif: kolom yang tidak ada di skema DB dibuang lalu coba lagi
+      // (mis. disabilitas/status_dtks/golongan_darah belum ditambahkan via migrasi)
+      let retries = 0;
+      while (error && error.message?.includes('Could not find the') && error.message?.includes('column') && retries < 12) {
+        const match = error.message.match(/'([^']+)' column/);
+        if (match && match[1]) {
+          delete payload[match[1]];
+          let retryQuery = supabase.from('residents').update(payload).eq('nik', data.nik);
+          const retry = await retryQuery;
+          error = retry.error;
+          retries++;
+        } else {
+          break;
+        }
+      }
       if (error) throw new Error(error.message || "Gagal memperbarui data");
       showToast("✅ Data penduduk berhasil diperbarui", "success");
       const merged = { ...data, ...form, age };
