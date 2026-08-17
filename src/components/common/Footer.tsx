@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Mail, Phone, Globe, Instagram, Music, ChevronUp, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin } from 'lucide-react';
+import { Mail, Phone, Globe, Instagram, Music, MessageSquare, Send, X as CloseIcon, Facebook, Twitter, Youtube, Linkedin } from 'lucide-react';
 import { addFeedback } from '../../utils/feedbackData';
 import { loadAppSettings } from '../../utils/appSettings';
 
 export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
-  const footerRef = useRef<HTMLElement>(null);
-  const [isAtBottom, setIsAtBottom] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [feedbackForm, setFeedbackForm] = useState({
@@ -100,37 +98,6 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
   };
 
   useEffect(() => {
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (!footerRef.current) {
-            ticking = false;
-            return;
-          }
-          const scrollParent = footerRef.current.closest('.overflow-y-auto');
-          if (!scrollParent) {
-            ticking = false;
-            return;
-          }
-
-          const { scrollTop, scrollHeight, clientHeight } = scrollParent as HTMLElement;
-          // Deteksi jika user sudah mencapai batas bawah (toleransi 20px)
-          const isBottom = scrollHeight - scrollTop - clientHeight < 20;
-          setIsAtBottom(isBottom);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    const scrollParent = footerRef.current?.closest('.overflow-y-auto');
-    if (scrollParent) {
-      scrollParent.addEventListener('scroll', handleScroll, { passive: true });
-      handleScroll();
-    }
-
     const handleBrandingUpdate = () => {
       setGlobalName(localStorage.getItem('global_app_name') || 'DiDesa');
       setGlobalLogo(localStorage.getItem('global_app_logo') || '');
@@ -152,36 +119,17 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
     window.addEventListener('global_branding_updated', handleBrandingUpdate);
 
     return () => {
-      scrollParent?.removeEventListener('scroll', handleScroll);
       window.removeEventListener('global_branding_updated', handleBrandingUpdate);
     };
   }, []);
 
   return (
-    <footer 
-      ref={footerRef}
-      className={`print:hidden fixed bottom-[70px] lg:bottom-0 ${
-        isAdmin 
-          ? 'left-4 lg:left-[calc(18rem+1.5rem)] right-4 lg:right-6' 
-          : 'left-4 lg:left-1/2 right-4 lg:right-auto lg:-translate-x-1/2 lg:w-[calc(100%-4rem)] max-w-7xl'
-      } z-40 rounded-t-2xl lg:rounded-b-none rounded-b-2xl will-change-transform group select-none print:hidden border border-white/60 overflow-hidden ${
-        isAtBottom 
-          ? 'translate-y-0 shadow-[0_-8px_32px_rgba(0,0,0,0.05)]' 
-          : 'translate-y-[calc(100%-48px)] hover:translate-y-0 hover:shadow-[0_-8px_32px_rgba(0,0,0,0.15)]'
-      }`}
-      style={{
-        transition: 'transform 0.6s cubic-bezier(0.2, 1, 0.2, 1)',
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.3) 100%)',
-        backdropFilter: 'blur(24px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-        boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 -8px 32px rgba(0, 0, 0, 0.05)'
-      }}
-    >
+    <footer className="print:hidden w-full relative mt-auto bg-emerald-900 dark:bg-emerald-950 border-t border-emerald-800 text-emerald-100">
       {/* Brand Bar */}
-      <div className="h-[55px] px-4 md:px-8 flex items-center justify-between border-b border-white/20">
-        <div className="flex items-center gap-3 transition-transform duration-500 group-hover:translate-y-[-2px]">
+      <div className="h-[55px] px-4 md:px-8 flex items-center justify-between border-b border-emerald-800/60">
+        <div className="flex items-center gap-3">
           <div 
-            className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-[9px] shadow-sm dark:shadow-none shrink-0 overflow-hidden"
+            className="w-6 h-6 rounded-md flex items-center justify-center text-white font-black text-[9px] shadow-sm shrink-0 overflow-hidden"
             style={{ backgroundColor: globalColor }}
           >
             {globalLogo ? (
@@ -191,18 +139,11 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
             )}
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-[11px] font-black tracking-tight text-slate-800 dark:text-slate-100 uppercase">{globalName} Indonesia</span>
+            <span className="text-[11px] font-black tracking-tight text-white uppercase">{globalName} Indonesia</span>
             {globalFooterCopyright && (
-              <span className="text-[9px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider hidden sm:inline">{globalFooterCopyright}</span>
+              <span className="text-[9px] text-emerald-200 font-bold uppercase tracking-wider hidden sm:inline">{globalFooterCopyright}</span>
             )}
           </div>
-        </div>
-
-        <div className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-2 transition-all duration-500 ${isAtBottom ? 'opacity-0 scale-90 translate-y-2 pointer-events-none' : 'opacity-100 scale-100 translate-y-0 group-hover:opacity-0 group-hover:scale-90 group-hover:translate-y-2 group-hover:pointer-events-none'}`}>
-          <span className="text-[9px] font-black text-emerald-800 uppercase tracking-[0.2em] flex items-center gap-2">
-            Informasi & Kemitraan
-            <ChevronUp className="w-3 h-3 text-emerald-600 animate-bounce" />
-          </span>
         </div>
 
         <button 
@@ -210,7 +151,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
             const scrollContainer = document.querySelector('.overflow-y-auto');
             if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          className={`text-[9px] font-black text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-all duration-300 uppercase tracking-widest flex items-center gap-1 ${isAtBottom ? 'opacity-100 translate-y-[-2px]' : 'opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-[-2px] group-hover:pointer-events-auto'}`}
+          className="text-[9px] font-black text-emerald-200 hover:text-white transition-all duration-300 uppercase tracking-widest flex items-center gap-1"
         >
           KEMBALI KE ATAS
         </button>
@@ -223,7 +164,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           {/* Info Section */}
           <div className="lg:col-span-3">
             {globalFooterDesc && (
-              <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed opacity-80 text-center sm:text-left">
+              <p className="text-[10px] text-emerald-100 font-bold leading-relaxed opacity-90 text-center sm:text-left">
                 {globalFooterDesc}
               </p>
             )}
@@ -231,21 +172,21 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
 
           {/* Contact Section */}
           <div className="lg:col-span-3 flex flex-col gap-1.5 items-center sm:items-start">
-            <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Kontak Hubungi</h4>
+            <h4 className="text-[8px] font-black text-emerald-300 uppercase tracking-widest mb-0.5">Kontak Hubungi</h4>
             <div className="flex flex-col gap-1 items-center sm:items-start">
               {globalFooterEmail && (
-                <a href={`mailto:${globalFooterEmail}`} className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
-                  <Mail className="w-3 h-3 text-emerald-600" /> {globalFooterEmail}
+                <a href={`mailto:${globalFooterEmail}`} className="flex items-center gap-2 text-[11px] text-emerald-100 hover:text-white font-bold transition-colors">
+                  <Mail className="w-3 h-3 text-emerald-300" /> {globalFooterEmail}
                 </a>
               )}
               {globalFooterPhone && (
-                <a href={`tel:${globalFooterPhone.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-2 text-[11px] text-slate-700 dark:text-slate-300 hover:text-emerald-700 font-bold transition-colors">
-                  <Phone className="w-3 h-3 text-emerald-600" /> {globalFooterPhone}
+                <a href={`tel:${globalFooterPhone.replace(/[^0-9+]/g, '')}`} className="flex items-center gap-2 text-[11px] text-emerald-100 hover:text-white font-bold transition-colors">
+                  <Phone className="w-3 h-3 text-emerald-300" /> {globalFooterPhone}
                 </a>
               )}
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className="mt-1 flex items-center gap-2 text-[10px] text-emerald-700 font-bold tracking-wide hover:opacity-70 group/saran"
+                className="mt-1 flex items-center gap-2 text-[10px] text-emerald-200 font-bold tracking-wide hover:text-white transition-colors group/saran"
               >
                 <MessageSquare className="w-3 h-3 group-hover/saran:scale-110 transition-transform" /> 
                 <span>Kirim Saran Fitur</span>
@@ -320,7 +261,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                </div>,
                document.body
              )}
-             
+              
              {/* Success Modal */}
              {isSuccessModalOpen && createPortal(
                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
@@ -349,7 +290,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           {/* Affiliator Card */}
           <div className="lg:col-span-4">
             {globalFooterAffiliateTitle && (
-              <div className="bg-emerald-700/80 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-600/30 shadow-lg dark:shadow-none shadow-emerald-900/5 group/card relative overflow-hidden">
+              <div className="bg-emerald-800/60 backdrop-blur-md rounded-xl p-3 flex items-center justify-between gap-3 border border-emerald-700/60 shadow-lg group/card relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full -mr-8 -mt-8 transition-transform group-hover/card:scale-150 duration-700" />
                 <div className="flex-1 space-y-0.5 relative z-10">
                   <h4 className="text-[9px] font-black text-emerald-100 uppercase tracking-widest leading-none">{globalFooterAffiliateTitle}</h4>
@@ -365,7 +306,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                     onClick={handleJoinAffiliate}
                     target={isMainDomain ? undefined : '_blank'}
                     rel="noopener noreferrer"
-                    className="whitespace-nowrap px-4 py-1.5 bg-white dark:bg-slate-900 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-sm dark:shadow-none relative z-10"
+                    className="whitespace-nowrap px-4 py-1.5 bg-white dark:bg-slate-900 text-emerald-800 text-[9px] font-black uppercase tracking-widest rounded-lg hover:bg-emerald-50 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer shadow-sm relative z-10"
                   >
                     GABUNG
                   </a>
@@ -377,12 +318,12 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           {/* Social Icons */}
           <div className="lg:col-span-2 flex justify-center lg:justify-end gap-2 pr-16 md:pr-20">
             {globalFooterSocial1Link && (
-              <a href={globalFooterSocial1Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none overflow-hidden">
+              <a href={globalFooterSocial1Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-emerald-800/50 border border-emerald-700 rounded-lg text-emerald-100 hover:text-white hover:bg-emerald-700 flex items-center justify-center transition-all hover:-translate-y-0.5 overflow-hidden">
                 {renderSocialIcon(globalFooterSocial1Icon)}
               </a>
             )}
             {globalFooterSocial2Link && (
-              <a href={globalFooterSocial2Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/40 border border-white/50 rounded-lg text-slate-500 dark:text-slate-400 hover:text-emerald-600 flex items-center justify-center transition-all hover:-translate-y-0.5 shadow-sm dark:shadow-none overflow-hidden">
+              <a href={globalFooterSocial2Link} target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-emerald-800/50 border border-emerald-700 rounded-lg text-emerald-100 hover:text-white hover:bg-emerald-700 flex items-center justify-center transition-all hover:-translate-y-0.5 overflow-hidden">
                 {renderSocialIcon(globalFooterSocial2Icon)}
               </a>
             )}
@@ -391,19 +332,19 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
         </div>
 
         {/* Divider */}
-        <hr className="mt-8 mb-4 border-gray-100 dark:border-slate-800" />
+        <hr className="mt-8 mb-4 border-emerald-800/60" />
 
         {/* Bottom Bar: Legal Links */}
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-[11px] sm:text-xs text-gray-500 dark:text-slate-400 pb-2">
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-[11px] sm:text-xs text-emerald-100 pb-2">
           {appSettings.termsUrl && (
-            <a href={appSettings.termsUrl} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5 whitespace-nowrap">
+            <a href={appSettings.termsUrl} className="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
               Syarat &amp; Ketentuan
             </a>
           )}
-          <span className="hidden sm:inline text-gray-300 dark:text-slate-600">•</span>
+          <span className="hidden sm:inline text-emerald-700">•</span>
           {appSettings.privacyUrl && (
-            <a href={appSettings.privacyUrl} className="hover:text-emerald-600 transition-colors flex items-center gap-1.5 whitespace-nowrap">
+            <a href={appSettings.privacyUrl} className="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap">
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
               Kebijakan Privasi
             </a>
