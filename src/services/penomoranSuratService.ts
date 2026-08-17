@@ -17,6 +17,9 @@ import { DEFAULT_SURAT_FORMAT } from '../utils/generateSuratNumber';
 //    tertanam di nomor itu sendiri (mis. "/2026").
 //  - Klasifikasi lama yang berganti nama tetap cocok via alias (SKD->SDP,
 //    SKP<->SPH) agar nomor lama tetap terdeteksi.
+//  - Ekstraksi urutan memakai MULTI-STRATEGY SMART EXTRACTOR (format-index,
+//    angka-diantara-garis-miring, deretan-angka, scan segmen) sehingga tahan
+//    variasi kapital/kecil, spasi, atau letak segmen di data lama.
 //  - Jika query gagal => kembalikan 0 agar caller jatuh ke fallback counter lama.
 //
 // Tabel nyata di DB: `surat` (bukan `surats`). Nomor disimpan TERFORMAT, misal
@@ -95,19 +98,55 @@ export function nomorMatchesKlasifikasi(nomor: string, klasifikasi: string): boo
   return false;
 }
 
+/**
+ * Multi-Strategy Smart Number Extractor.
+ * Mencoba beberapa strategi berurutan sampai menemukan nomor urut yang valid,
+ * supaya urutan tetap konsisten & berlanjut meski format string bervariasi
+ * (kapital/kecil, spasi, atau letak segmen yang berubah di data lama).
+ * Tahun (angka 4 digit) sengaja diabaikan agar tidak tersangkut sebagai urutan.
+ */
 export function extractSequenceFromNomor(nomor: string): number {
-  const parts = parseNomorParts(nomor);
+  const normalized = normalizeNomorSurat(nomor);
+  const parts = parseNomorParts(normalized);
   const seqIdx = getSequenceIndexFromFormat();
-  const raw = parts[seqIdx] || '';
-  const m = raw.match(/^\d+/);
-  if (m) return parseInt(m[0], 10);
-  // Fallback: pindai segmen numerik yang bukan tahun.
   const yearIdx = getYearIndexFromFormat();
+
+  // STRATEGY A: segmen sesuai format yang dikonfigurasi (paling otoritatif,
+  // cocok dengan cara aplikasi ini membuat nomor).
+  const rawA = parts[seqIdx] || '';
+  const mA = rawA.match(/^\d+/);
+  if (mA) {
+    const v = parseInt(mA[0], 10);
+    if (v > 0 && v < 2000) return v;
+  }
+
+  // STRATEGY B: angka pertama yang diapit dua garis miring.
+  // "475/075/Whi-Skp/2026" -> 075; "474/060/WHI-SKN/2026" -> 060.
+  const mB = normalized.match(/\/\s*(\d{1,3})\s*\//);
+  if (mB && mB[1]) {
+    const v = parseInt(mB[1], 10);
+    if (v > 0 && v < 2000) return v;
+  }
+
+  // STRATEGY C: seluruh deretan angka; angka kedua (indeks >= 1) biasanya nomor
+  // urut di format Indonesia (mis. [475, 60, 2026] -> 60). Angka 4 digit (tahun)
+  // dilewati.
+  const allNums = normalized.match(/\d+/g) || [];
+  for (let i = 1; i < allNums.length; i++) {
+    const v = parseInt(allNums[i], 10);
+    if (!isNaN(v) && v > 0 && v < 2000) return v;
+  }
+
+  // STRATEGY D: pindai segmen numerik yang bukan tahun.
   for (let i = 0; i < parts.length; i++) {
     if (i === yearIdx) continue;
     const mm = parts[i].match(/^(\d+)$/);
-    if (mm) return parseInt(mm[1], 10);
+    if (mm) {
+      const v = parseInt(mm[1], 10);
+      if (v > 0 && v < 2000) return v;
+    }
   }
+
   return 0;
 }
 
