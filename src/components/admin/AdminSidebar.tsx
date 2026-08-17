@@ -400,14 +400,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <LogOut size={16} />
           </button>
         </div>
-        {!isCollapsed && (
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-slate-800 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-          <span>DiDesa App</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-mono text-[10px]">
-            v5.3
-          </span>
-        </div>
-        )}
       </div>
     </aside>
     </>

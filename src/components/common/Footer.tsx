@@ -321,20 +321,25 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
         <hr className="mt-8 mb-4 border-emerald-600/60" />
 
         {/* Bottom Bar: Legal Links */}
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6 text-[11px] sm:text-xs text-emerald-100 pb-2">
-          {appSettings.termsUrl && (
-            <a href={appSettings.termsUrl} className="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-              Syarat &amp; Ketentuan
-            </a>
-          )}
-          <span className="hidden sm:inline text-emerald-700">•</span>
-          {appSettings.privacyUrl && (
-            <a href={appSettings.privacyUrl} className="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-              Kebijakan Privasi
-            </a>
-          )}
+        <div className="flex flex-wrap items-center justify-center md:justify-between gap-4 sm:gap-6 text-[11px] sm:text-xs text-emerald-100 pb-2">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 sm:gap-6">
+            {appSettings.termsUrl && (
+              <a href={appSettings.termsUrl} className="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Syarat &amp; Ketentuan
+              </a>
+            )}
+            <span className="hidden sm:inline text-emerald-700">•</span>
+            {appSettings.privacyUrl && (
+              <a href={appSettings.privacyUrl} className="hover:text-white transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                Kebijakan Privasi
+              </a>
+            )}
+          </div>
+          <span className="px-1.5 py-0.5 rounded bg-emerald-800/60 text-emerald-200 font-mono text-[10px]">
+            v5.3
+          </span>
         </div>
       </div>
     </footer>

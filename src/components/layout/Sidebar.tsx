@@ -175,11 +175,8 @@ export default function Sidebar({
           {!isCollapsed && <span>Keluar Sesi</span>}
         </button>
         {!isCollapsed && (
-        <div className="w-full flex items-center justify-between pt-2 border-t border-gray-200/50 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-          <span>DiDesa App</span>
-          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-mono text-[10px]">
-            v5.3
-          </span>
+        <div className="text-center pt-2 border-t border-gray-200/50">
+          
         </div>
         )}
       </div>
