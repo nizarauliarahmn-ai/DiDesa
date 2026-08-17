@@ -20,6 +20,7 @@ import { useDragScroll } from '../../../hooks/useDragScroll';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
 import { checkResidentExists } from '../../../utils/residentSync';
+import { applyResidentMutationOnLetterPublish, getLetterMutationType, getMutationStatusLabel } from '../../../utils/mutasiPendudukEngine';
 
 interface Resident {
   nik: string;
@@ -400,6 +401,21 @@ export default function AdminSuratSKM({
     localStorage.setItem('riwayat_surat_skm', JSON.stringify(updatedRiwayat));
     setLoading(false);
     setSuccess(true);
+
+    // Otomasi Mutasi Kependudukan: SKM => status_keberadaan MENINGGAL (real-time)
+    const mutationType = getLetterMutationType('SKM');
+    if (mutationType && formData.nik) {
+      const ok = await applyResidentMutationOnLetterPublish({
+        residentId: formData.nik,
+        letterTypeCode: 'SKM',
+        publishDate: tanggalSurat,
+      });
+      if (ok) {
+        showToast(`✅ Surat Kematian berhasil diterbitkan & status kependudukan warga otomatis diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
+      } else {
+        showToast('Surat berhasil dicetak namun status kependudukan warga gagal diperbarui otomatis.', "error");
+      }
+    }
   };
 
   const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? capitalizeWords(val) : fallback);

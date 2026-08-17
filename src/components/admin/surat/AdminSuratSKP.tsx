@@ -21,6 +21,7 @@ import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
+import { applyResidentMutationOnLetterPublish, getLetterMutationType, getMutationStatusLabel } from '../../../utils/mutasiPendudukEngine';
 
 interface Resident {
   nik: string;
@@ -386,6 +387,31 @@ export default function AdminSuratSKP({
     if (checkedFamilyNiks && checkedFamilyNiks.length > 0) {
       for (const followerNik of checkedFamilyNiks) {
         await autoSyncResidentFromLetter(followerNik, { status: 'Pindah' }, 'Pembuatan Surat');
+      }
+    }
+
+    // Otomasi Mutasi Kependudukan: SKP => status_keberadaan PINDAH (real-time)
+    const mutationType = getLetterMutationType('SKP');
+    const nikToMutate = formData.nik;
+    if (mutationType && nikToMutate) {
+      const ok = await applyResidentMutationOnLetterPublish({
+        residentId: nikToMutate,
+        letterTypeCode: 'SKP',
+        publishDate: tanggalSurat,
+      });
+      if (ok) {
+        showToast(`✅ Surat Pindah berhasil diterbitkan & status kependudukan warga otomatis diperbarui menjadi ${getMutationStatusLabel(mutationType)}.`, "success");
+      } else {
+        showToast('Surat berhasil dicetak namun status kependudukan warga gagal diperbarui otomatis.', "error");
+      }
+    }
+    if (mutationType && checkedFamilyNiks && checkedFamilyNiks.length > 0) {
+      for (const followerNik of checkedFamilyNiks) {
+        await applyResidentMutationOnLetterPublish({
+          residentId: followerNik,
+          letterTypeCode: 'SKP',
+          publishDate: tanggalSurat,
+        });
       }
     }
 
