@@ -36,6 +36,7 @@ export default function AdminPendudukDetail({
   onSetPresetResident
 }: AdminPendudukDetailProps) {
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [viewMode, setViewMode] = useState<'ektp' | 'grid'>('ektp');
   const [detailTab, setDetailTab] = useState(0);
   const [showAidModal, setShowAidModal] = useState(false);
@@ -78,6 +79,26 @@ export default function AdminPendudukDetail({
       setResidentLetters([]);
     }
   }, [data]);
+
+  // Collapsible Sticky Header & Tabs — deteksi scroll (container scroll utama adalah <main>, bukan window)
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = document.querySelector('main');
+      const scrollY = container ? container.scrollTop : window.scrollY;
+      if (scrollY > 100) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    document.querySelector('main')?.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      document.querySelector('main')?.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const pickFirst = (...keys: string[]): string => {
     if (!data) return '';
@@ -407,32 +428,32 @@ export default function AdminPendudukDetail({
         </div>
       )}
 
-      {/* HEADER PROFILE — Top-Bar Lebar Penuh */}
-      <div className="w-full bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      {/* HEADER PROFILE — Top-Bar Lebar Penuh (Collapsible Sticky) */}
+      <div className={`w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between transition-all duration-300 ${isScrolled ? 'sticky top-16 z-30 p-2 sm:p-3 gap-2' : 'p-4 sm:p-6 gap-4'}`}>
         {/* Sisi Kiri: Back + Avatar + Nama + Badges */}
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <button 
             onClick={onBack}
-            className="w-11 h-11 flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-700"
+            className={`flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-700 ${isScrolled ? 'w-10 h-10' : 'w-11 h-11'}`}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
           <div className="relative shrink-0">
             {data?.photo ? (
-              <img src={data.photo} alt={data.name} className="w-16 h-16 rounded-2xl border-2 border-white shadow-md object-cover" />
+              <img src={data.photo} alt={data.name} className={`border-2 border-white shadow-md object-cover transition-all ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`} />
             ) : (
-              <div className={`w-16 h-16 rounded-2xl border-2 border-white shadow-md flex items-center justify-center text-white ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'}`}>
-                <User className="w-8 h-8" fill="currentColor" />
+              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'} ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
+                <User className={isScrolled ? 'w-5 h-5' : 'w-8 h-8'} fill="currentColor" />
               </div>
             )}
           </div>
 
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg sm:text-xl font-black text-gray-900 dark:text-white leading-tight uppercase truncate">
+            <h2 className={`font-black text-gray-900 dark:text-white leading-tight uppercase truncate transition-all ${isScrolled ? 'text-sm sm:text-base' : 'text-lg sm:text-xl'}`}>
               {data?.name || "Nama Penduduk"}
             </h2>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+            <div className={`flex flex-wrap items-center gap-1.5 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
               {(() => {
                 const keberadaan = (data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').trim().toLowerCase();
                 if (keberadaan.includes('meninggal') || keberadaan === 'mati' || keberadaan === 'wafat') {
@@ -477,7 +498,7 @@ export default function AdminPendudukDetail({
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-1.5">
+            <div className={`flex items-center gap-2 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
               <p className="font-mono text-gray-500 dark:text-slate-400 text-xs">
                 NIK: {data?.nik || "-"}
               </p>
@@ -499,11 +520,11 @@ export default function AdminPendudukDetail({
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button 
             onClick={() => setIsPrinting(true)}
-            className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 transition-colors flex items-center gap-2 text-xs font-bold border border-emerald-100 dark:border-emerald-800"
+            className={`rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 transition-all flex items-center gap-2 text-xs font-bold border border-emerald-100 dark:border-emerald-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
             title="Cetak Profil"
           >
             <Printer className="w-4 h-4" />
-            Cetak
+            <span className={isScrolled ? 'hidden' : ''}>Cetak</span>
           </button>
           {!isPending ? (
             <>
@@ -514,36 +535,36 @@ export default function AdminPendudukDetail({
                     onNavigateToTab('surat');
                   }
                 }}
-                className="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 transition-colors flex items-center gap-2 text-xs font-bold border border-blue-100 dark:border-blue-800"
+                className={`rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 transition-all flex items-center gap-2 text-xs font-bold border border-blue-100 dark:border-blue-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
                 title="Buat Surat"
               >
                 <FileText className="w-4 h-4" />
-                Surat
+                <span className={isScrolled ? 'hidden' : ''}>Surat</span>
               </button>
-              <button onClick={onEdit} className="px-3.5 py-2 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors flex items-center gap-2 text-xs shadow-sm cursor-pointer">
+              <button onClick={onEdit} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
                 <Edit2 className="w-4 h-4" />
-                Edit Data
+                <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
               </button>
-              <button onClick={handleMoveResident} className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-400 transition-colors flex items-center gap-2 text-xs font-bold border border-amber-100 dark:border-amber-800" title="Mutasi Warga">
+              <button onClick={handleMoveResident} className={`rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-400 transition-all flex items-center gap-2 text-xs font-bold border border-amber-100 dark:border-amber-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Mutasi Warga">
                 <ArrowRightLeft className="w-4 h-4" />
-                Mutasi
+                <span className={isScrolled ? 'hidden' : ''}>Mutasi</span>
               </button>
-              <button onClick={handleDeleteResident} className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 transition-colors flex items-center gap-2 text-xs font-bold border border-rose-100 dark:border-rose-800" title="Pindah ke Tong Sampah">
+              <button onClick={handleDeleteResident} className={`rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 transition-all flex items-center gap-2 text-xs font-bold border border-rose-100 dark:border-rose-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Pindah ke Tong Sampah">
                 <Trash2 className="w-4 h-4" />
-                Hapus
+                <span className={isScrolled ? 'hidden' : ''}>Hapus</span>
               </button>
             </>
           ) : (
-            <button onClick={onEdit} className="px-3.5 py-2 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-colors flex items-center gap-2 text-xs shadow-sm cursor-pointer">
+            <button onClick={onEdit} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
               <Edit2 className="w-4 h-4" />
-              Edit Data
+              <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
             </button>
           )}
         </div>
       </div>
 
       {/* 5-Tab Navigation */}
-      <div className="sticky top-16 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible">
+      <div className={`sticky z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible ${isScrolled ? 'top-[120px]' : 'top-16'}`}>
         <div className="flex gap-1.5 min-w-max">
           {DETAIL_TABS.map((tab) => {
             const Icon = tab.icon;
