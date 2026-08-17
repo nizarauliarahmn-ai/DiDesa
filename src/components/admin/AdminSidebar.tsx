@@ -361,15 +361,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
           {!isCollapsed && (
           <div className="flex-1">
             <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-2 leading-tight mb-1">{authUser?.name || "Admin Desa"}</p>
-            <div className="flex items-center gap-1.5">
-              <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
-                authUser?.role === 'saas_admin' ? 'bg-purple-100 text-purple-700' : 
-                authUser?.role === 'kades' ? 'bg-amber-100 text-amber-700' : 
-                'bg-emerald-100 text-emerald-700'
-              }`}>
-                {authUser?.role === 'saas_admin' ? 'SaaS Admin' : authUser?.role === 'kades' ? 'Super Admin' : 'Admin'}
-              </span>
-            </div>
           </div>
           )}
         </div>
