@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { DEFAULT_SURAT_FORMAT, formatNomorSurat } from './generateSuratNumber';
+import { getMaxActiveNomorUrut, extractSequenceFromNomor, nomorMatchesKlasifikasi } from '../services/penomoranSuratService';
 
 export interface LetterField {
   id: string;
@@ -277,75 +278,15 @@ export function getNextSequenceNumber(klasifikasi: string): number {
 }
 
 // --- Penentuan nomor urut berbasis MAX ACTIVE NUMBER dari tabel `surat` ---
-// MAX(CAST(nomor_urut AS INTEGER)) FROM surat WHERE is_deleted=false AND format_surat=X AND tahun=Y
-// Karena `surat` menyimpan nomor terformat (mis. "140/061/WHI-SU/2025"), sequence diekstrak dari string nomor.
-// Fungsi ini menggantikan counter monotonik (auto-increment) yang terus naik meski surat dihapus.
-
-function parseNomorParts(nomor: string): string[] {
-  return String(nomor || '').split('/').map(p => p.trim()).filter(Boolean);
-}
-
-function getSequenceIndexFromFormat(): number {
-  const formatTemplate = localStorage.getItem('surat_format') || DEFAULT_SURAT_FORMAT;
-  const segs = formatTemplate.split('/');
-  const idx = segs.findIndex(s => s.includes('[NO URUT SURAT]') || s.includes('[NO]'));
-  return idx >= 0 ? idx : 1;
-}
-
-function extractSequenceFromNomor(nomor: string): number {
-  const parts = parseNomorParts(nomor);
-  const seqIdx = getSequenceIndexFromFormat();
-  const raw = parts[seqIdx] || '';
-  const m = raw.match(/^\d+/);
-  return m ? parseInt(m[0], 10) : 0;
-}
-
-function nomorMatchesKlasifikasi(nomor: string, klasifikasi: string): boolean {
-  const k = (klasifikasi || '').toUpperCase();
-  if (!k) return true;
-  const parts = parseNomorParts(nomor);
-  for (const p of parts) {
-    const token = (p.split('-').pop() || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
-    if (token === k) return true;
-  }
-  return false;
-}
+// MAX(nomor_urut aktif) + 1, didelegasikan ke layanan terpusat
+// `penomoranSuratService` agar konsisten di seluruh modul pembuat surat.
 
 /**
  * Ambil nomor urut tertinggi yang masih aktif (belum dibatalkan / terhapus)
  * untuk klasifikasi & tahun tertentu. Mengembalikan -1 jika query gagal.
  */
 export async function getMaxActiveSequenceFromDb(klasifikasi: string, year?: number): Promise<number> {
-  try {
-    const tenantId = await resolveCurrentTenant();
-    if (!tenantId) return -1;
-    const targetYear = year || new Date().getFullYear();
-    const startOfYear = new Date(targetYear, 0, 1).toISOString();
-    const endOfYear = new Date(targetYear, 11, 31, 23, 59, 59, 999).toISOString();
-    const { data, error } = await supabase
-      .from('surat')
-      .select('nomor')
-      .eq('tenant_id', tenantId)
-      // Hanya surat aktif: tolak yang dibatalkan, dihapus, atau di-soft-delete (is_deleted=1)
-      .neq('status', 'Dibatalkan')
-      .neq('status', 'Dihapus')
-      .or('is_deleted.is.null,is_deleted.eq.0')
-      .gte('created_at', startOfYear)
-      .lte('created_at', endOfYear)
-      .limit(5000);
-    if (error) throw error;
-    let maxSeq = 0;
-    for (const row of data || []) {
-      if (!row?.nomor) continue;
-      if (!nomorMatchesKlasifikasi(String(row.nomor), klasifikasi)) continue;
-      const seq = extractSequenceFromNomor(String(row.nomor));
-      if (seq > maxSeq) maxSeq = seq;
-    }
-    return maxSeq;
-  } catch (e) {
-    console.error('getMaxActiveSequenceFromDb error:', e);
-    return -1;
-  }
+  return getMaxActiveNomorUrut(klasifikasi, year);
 }
 
 /**
