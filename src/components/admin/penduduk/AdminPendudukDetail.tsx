@@ -72,7 +72,8 @@ function EditableField({
   options,
   type = 'text',
   className = '',
-  inputClass = ''
+  inputClass = '',
+  label
 }: {
   editing: boolean;
   value: string;
@@ -81,6 +82,7 @@ function EditableField({
   type?: string;
   className?: string;
   inputClass?: string;
+  label?: string;
 }) {
   if (!editing) {
     return (
@@ -90,27 +92,39 @@ function EditableField({
     );
   }
   const baseInput = 'w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none';
-  if (options && options.length) {
-    const opts = value && !options.includes(value) ? [value, ...options] : options;
+  const field = (() => {
+    if (options && options.length) {
+      const opts = value && !options.includes(value) ? [value, ...options] : options;
+      return (
+        <select
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${baseInput} cursor-pointer ${inputClass}`}
+        >
+          <option value="">Pilih...</option>
+          {opts.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      );
+    }
     return (
-      <select
+      <input
+        type={type}
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        className={`${baseInput} cursor-pointer ${inputClass}`}
-      >
-        <option value="">Pilih...</option>
-        {opts.map((o) => <option key={o} value={o}>{o}</option>)}
-      </select>
+        placeholder="Belum Terisi"
+        className={`${baseInput} ${inputClass}`}
+      />
     );
-  }
+  })();
   return (
-    <input
-      type={type}
-      value={value || ''}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="Belum Terisi"
-      className={`${baseInput} ${inputClass}`}
-    />
+    <div className="flex flex-col gap-1">
+      {label && (
+        <label className="text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
+          {label}
+        </label>
+      )}
+      {field}
+    </div>
   );
 }
 
@@ -1132,8 +1146,8 @@ export default function AdminPendudukDetail({
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Tempat, Tgl Lahir</p>
                       {isEditMode ? (
                         <div className="mt-1 space-y-1.5">
-                          <EditableField editing value={editFormData.birthPlace || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthPlace: v }))} />
-                          <EditableField editing value={editFormData.birthDate || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthDate: v }))} type="date" />
+                          <EditableField editing value={editFormData.birthPlace || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthPlace: v }))} label="Tempat Lahir" />
+                          <EditableField editing value={editFormData.birthDate || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthDate: v }))} type="date" label="Tanggal Lahir" />
                         </div>
                       ) : (
                         <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
@@ -1157,7 +1171,7 @@ export default function AdminPendudukDetail({
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Jenis Kelamin</p>
                       {isEditMode ? (
                         <div className="mt-1">
-                          <EditableField editing value={editFormData.gender || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, gender: v }))} options={GENDER_OPTIONS} />
+                          <EditableField editing value={editFormData.gender || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, gender: v }))} options={GENDER_OPTIONS} label="Jenis Kelamin" />
                         </div>
                       ) : (
                         <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">
@@ -1176,7 +1190,7 @@ export default function AdminPendudukDetail({
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">No. WhatsApp</p>
                       {isEditMode ? (
                         <div className="mt-1">
-                          <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} />
+                          <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} label="No. WhatsApp" />
                         </div>
                       ) : (
                         <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 font-mono">
@@ -1208,8 +1222,8 @@ export default function AdminPendudukDetail({
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Agama / Gol. Darah</p>
                       {isEditMode ? (
                         <div className="mt-1 space-y-1.5">
-                          <EditableField editing value={editFormData.religion || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, religion: v }))} options={AGAMA_OPTIONS} />
-                          <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} />
+                          <EditableField editing value={editFormData.religion || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, religion: v }))} options={AGAMA_OPTIONS} label="Agama" />
+                          <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} label="Golongan Darah" />
                         </div>
                       ) : (
                         <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 flex items-center gap-2">
@@ -1231,7 +1245,7 @@ export default function AdminPendudukDetail({
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
                       {isEditMode ? (
                         <div className="mt-1">
-                          <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} />
+<EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} label="Status Domisili" />
                         </div>
                       ) : (
                         <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
@@ -1264,8 +1278,8 @@ export default function AdminPendudukDetail({
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Alamat Jalan / Dusun</p>
                       {isEditMode ? (
                         <div className="mt-1.5 space-y-1.5">
-                          <EditableField editing value={editFormData.address || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, address: v }))} />
-                          <EditableField editing value={editFormData.dusun || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, dusun: v }))} />
+                          <EditableField editing value={editFormData.address || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, address: v }))} label="Alamat Jalan" />
+                          <EditableField editing value={editFormData.dusun || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, dusun: v }))} label="Dusun" />
                         </div>
                       ) : (
                         <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 leading-snug">
@@ -1281,10 +1295,10 @@ export default function AdminPendudukDetail({
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Wilayah RT / RW & Desa</p>
                       {isEditMode ? (
                         <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-                          <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} />
-                          <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} />
+                          <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} label="RT" />
+                          <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} label="RW" />
                           <div className="col-span-2">
-                            <EditableField editing value={editFormData.desa || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, desa: v }))} />
+                            <EditableField editing value={editFormData.desa || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, desa: v }))} label="Desa / Kelurahan" />
                           </div>
                         </div>
                       ) : (
@@ -1355,32 +1369,35 @@ export default function AdminPendudukDetail({
                 {isEditMode && (
                   <div className="p-3 rounded-xl border border-emerald-100 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/30 space-y-2">
                     <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-black uppercase tracking-wider">Identitas Penduduk</p>
-                    <EditableField editing value={editFormData.name || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, name: v }))} inputClass="uppercase" />
-                    <EditableField editing value={editFormData.nik || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, nik: v }))} />
-                    <EditableField editing value={editFormData.noKk || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noKk: v }))} />
+                    <EditableField editing value={editFormData.name || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, name: v }))} inputClass="uppercase" label="Nama Lengkap" />
+                    <EditableField editing value={editFormData.nik || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, nik: v }))} label="NIK" />
+                    <EditableField editing value={editFormData.noKk || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noKk: v }))} label="No. KK" />
                     <div className="grid grid-cols-2 gap-1.5">
-                      <select
-                        name="status_keberadaan"
-                        value={STATUS_KEBERADAAN_OPTIONS.some(o => o.value === editFormData.statusKeberadaan)
-                          ? editFormData.statusKeberadaan
-                          : 'TETAP'}
-                        onChange={(e) => setEditFormData(prev => ({ ...prev, statusKeberadaan: e.target.value, status: e.target.value }))}
-                        className="w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
-                      >
-                        <option value="">-- Pilih Status --</option>
-                        {STATUS_KEBERADAAN_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                      <EditableField editing value={editFormData.maritalStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, maritalStatus: v }))} options={MARITAL_OPTIONS} />
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">Status Keberadaan</label>
+                        <select
+                          name="status_keberadaan"
+                          value={STATUS_KEBERADAAN_OPTIONS.some(o => o.value === editFormData.statusKeberadaan)
+                            ? editFormData.statusKeberadaan
+                            : 'TETAP'}
+                          onChange={(e) => setEditFormData(prev => ({ ...prev, statusKeberadaan: e.target.value, status: e.target.value }))}
+                          className="w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
+                        >
+                          <option value="">-- Pilih Status --</option>
+                          {STATUS_KEBERADAAN_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <EditableField editing value={editFormData.maritalStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, maritalStatus: v }))} options={MARITAL_OPTIONS} label="Status Perkawinan" />
                     </div>
-                    <EditableField editing value={editFormData.familyRelation || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, familyRelation: v }))} options={HUBUNGAN_OPTIONS} />
+                    <EditableField editing value={editFormData.familyRelation || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, familyRelation: v }))} options={HUBUNGAN_OPTIONS} label="Hubungan Keluarga" />
                   </div>
                 )}
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">No. WhatsApp</span>
                   {isEditMode ? (
-                    <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} className="w-48 text-right" />
+                    <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} className="w-48 text-right" label="No. WhatsApp" />
                   ) : (
                     <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}</span>
                   )}
@@ -1388,7 +1405,7 @@ export default function AdminPendudukDetail({
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Status Domisili</span>
                   {isEditMode ? (
-                    <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} className="w-48 text-right" />
+                    <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} className="w-48 text-right" label="Status Domisili" />
                   ) : (
                     <span className="text-xs font-bold text-gray-900 dark:text-white">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</span>
                   )}
@@ -1396,7 +1413,7 @@ export default function AdminPendudukDetail({
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Pendidikan</span>
                   {isEditMode ? (
-                    <EditableField editing value={editFormData.education || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, education: v }))} options={PENDIDIKAN_OPTIONS} className="w-48 text-right" />
+                    <EditableField editing value={editFormData.education || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, education: v }))} options={PENDIDIKAN_OPTIONS} className="w-48 text-right" label="Pendidikan" />
                   ) : (
                     <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('education', 'pendidikan', 'pendidikan_terakhir', 'pendidikanTerakhir'))}</span>
                   )}
@@ -1404,7 +1421,7 @@ export default function AdminPendudukDetail({
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Pekerjaan</span>
                   {isEditMode ? (
-                    <EditableField editing value={editFormData.job || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, job: v }))} options={PEKERJAAN_OPTIONS} className="w-48 text-right" />
+                    <EditableField editing value={editFormData.job || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, job: v }))} options={PEKERJAAN_OPTIONS} className="w-48 text-right" label="Pekerjaan" />
                   ) : (
                     <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</span>
                   )}
@@ -1596,7 +1613,7 @@ export default function AdminPendudukDetail({
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status DTKS / Bansos</p>
                     {isEditMode ? (
                       <div className="mt-1">
-                        <EditableField editing value={editFormData.statusDtks || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, statusDtks: v }))} />
+                        <EditableField editing value={editFormData.statusDtks || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, statusDtks: v }))} label="Status DTKS / Bansos" />
                       </div>
                     ) : (
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('statusDtks', 'status_dtks', 'penerima_bansos'))}</p>
@@ -1612,7 +1629,7 @@ export default function AdminPendudukDetail({
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Disabilitas</p>
                     {isEditMode ? (
                       <div className="mt-1">
-                        <EditableField editing value={editFormData.disabilitas || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, disabilitas: v }))} />
+                        <EditableField editing value={editFormData.disabilitas || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, disabilitas: v }))} label="Disabilitas" />
                       </div>
                     ) : (
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('disabilitas', 'jenis_disabilitas'))}</p>
@@ -1628,7 +1645,7 @@ export default function AdminPendudukDetail({
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Golongan Darah</p>
                     {isEditMode ? (
                       <div className="mt-1">
-                        <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} />
+                        <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} label="Golongan Darah" />
                       </div>
                     ) : (
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}</p>
@@ -1644,7 +1661,7 @@ export default function AdminPendudukDetail({
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
                     {isEditMode ? (
                       <div className="mt-1">
-                        <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} />
+                        <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} label="Status Domisili" />
                       </div>
                     ) : (
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</p>
