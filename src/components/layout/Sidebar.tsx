@@ -98,14 +98,11 @@ export default function Sidebar({
             )}
           </div>
 
-          {/* Teks Judul + Version + Subtitle */}
+          {/* Teks Judul + Subtitle */}
           {!isCollapsed && (
           <div className="flex flex-col min-w-0 leading-none">
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-slate-800 dark:text-white text-base whitespace-nowrap">{globalName}</span>
-              <span className="text-[10px] font-bold bg-emerald-100 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded-full shrink-0">v5.3</span>
-            </div>
-            <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-1">
+            <span className="font-bold text-slate-800 dark:text-white text-base truncate">{globalName}</span>
+            <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-1 truncate">
               {desaName.replace(/desa|kelurahan/gi, '').trim().toUpperCase()}
             </span>
           </div>
@@ -178,8 +175,11 @@ export default function Sidebar({
           {!isCollapsed && <span>Keluar Sesi</span>}
         </button>
         {!isCollapsed && (
-        <div className="text-center pt-2 border-t border-gray-200/50">
-          
+        <div className="w-full flex items-center justify-between pt-2 border-t border-gray-200/50 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+          <span>DiDesa App</span>
+          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-mono text-[10px]">
+            v5.3
+          </span>
         </div>
         )}
       </div>
