@@ -107,6 +107,84 @@ function EditableField({
   );
 }
 
+// Hybrid parent input: pilih dari anggota KK (dropdown) atau ketik manual
+function ParentHybridInput({
+  label,
+  members,
+  value,
+  onChange,
+  isManual,
+  onToggleManual,
+  genderFilter,
+  excludeNik
+}: {
+  label: string;
+  members: any[];
+  value: string;
+  onChange: (v: string) => void;
+  isManual: boolean;
+  onToggleManual: (v: boolean) => void;
+  genderFilter: 'Laki-laki' | 'Perempuan';
+  excludeNik?: string;
+}) {
+  const candidates = useMemo(() => {
+    const want = genderFilter === 'Laki-laki' ? ['laki-laki', 'l', 'laki'] : ['perempuan', 'p', 'wanita'];
+    return (members || []).filter((m: any) =>
+      want.includes(String(m.gender || '').toLowerCase()) &&
+      String(m.nik || '') !== String(excludeNik || '')
+    );
+  }, [members, genderFilter, excludeNik]);
+
+  const hasCandidates = candidates.length > 0;
+  const effectiveManual = isManual || !hasCandidates;
+
+  const inputClass = 'w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none';
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{label}</span>
+        {hasCandidates && (
+          <button
+            type="button"
+            onClick={() => onToggleManual(!effectiveManual)}
+            className="text-[9px] font-bold text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 shrink-0"
+          >
+            {effectiveManual ? '↺ Kembali ke Pilih KK' : '✏️ Ketik Manual'}
+          </button>
+        )}
+      </div>
+      {effectiveManual ? (
+        <input
+          type="text"
+          value={value || ''}
+          onChange={(e) => onChange(e.target.value.toUpperCase())}
+          placeholder="Ketik nama secara manual..."
+          className={inputClass}
+        />
+      ) : (
+        <select
+          value={value || ''}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v === '__MANUAL__') { onToggleManual(true); return; }
+            onChange(v);
+          }}
+          className={`${inputClass} cursor-pointer`}
+        >
+          <option value="">-- Pilih dari Anggota KK --</option>
+          {candidates.map((m: any) => (
+            <option key={m.nik || m.id || m.name} value={m.name}>
+              {m.name} ({m.familyRelation || 'Anggota KK'})
+            </option>
+          ))}
+          <option value="__MANUAL__">✏️ Ketik Manual / Tulis Nama Lain...</option>
+        </select>
+      )}
+    </div>
+  );
+}
+
 export default function AdminPendudukDetail({ 
   onBack, 
   onEdit, 
@@ -130,14 +208,22 @@ export default function AdminPendudukDetail({
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
+  const [fatherManual, setFatherManual] = useState(false);
+  const [motherManual, setMotherManual] = useState(false);
 
   const startEditMode = () => {
     setEditFormData({ ...data });
+    // Auto-fallback ke mode manual bila nama orang tua tidak cocok dengan anggota KK saat ini
+    const kkNames = (familyMembers || []).map((m: any) => String(m.name || '').toLowerCase());
+    setFatherManual(!!(data?.fatherName || '').trim() && !kkNames.includes(String(data.fatherName || '').toLowerCase()));
+    setMotherManual(!!(data?.motherName || '').trim() && !kkNames.includes(String(data.motherName || '').toLowerCase()));
     setIsEditMode(true);
   };
 
   const cancelEditMode = () => {
     setEditFormData({});
+    setFatherManual(false);
+    setMotherManual(false);
     setIsEditMode(false);
   };
 
@@ -1287,9 +1373,27 @@ export default function AdminPendudukDetail({
                 <div className="p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 text-xs">
                   <p className="text-gray-500 dark:text-slate-400 mb-1.5">Orang Tua Kandung</p>
                   {isEditMode ? (
-                    <div className="space-y-1.5">
-                      <EditableField editing value={editFormData.fatherName || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, fatherName: v }))} />
-                      <EditableField editing value={editFormData.motherName || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, motherName: v }))} />
+                    <div className="space-y-2">
+                      <ParentHybridInput
+                        label="Nama Ayah"
+                        members={familyMembers}
+                        value={editFormData.fatherName || ''}
+                        onChange={(v) => setEditFormData(prev => ({ ...prev, fatherName: v }))}
+                        isManual={fatherManual}
+                        onToggleManual={setFatherManual}
+                        genderFilter="Laki-laki"
+                        excludeNik={data?.nik}
+                      />
+                      <ParentHybridInput
+                        label="Nama Ibu"
+                        members={familyMembers}
+                        value={editFormData.motherName || ''}
+                        onChange={(v) => setEditFormData(prev => ({ ...prev, motherName: v }))}
+                        isManual={motherManual}
+                        onToggleManual={setMotherManual}
+                        genderFilter="Perempuan"
+                        excludeNik={data?.nik}
+                      />
                     </div>
                   ) : (
                     <>
