@@ -301,16 +301,16 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
           {/* Social Links */}
           <div className="lg:col-span-2 flex justify-center lg:justify-end items-center gap-2 pr-16 md:pr-20">
             {globalFooterSocial1Link && (
-              <a href={globalFooterSocial1Link} target="_blank" rel="noopener noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold underline-offset-4 hover:underline transition-all">
-                {globalFooterSocial1Icon === 'tiktok' ? 'TikTok' : globalFooterSocial1Icon === 'instagram' ? 'Instagram' : globalFooterSocial1Icon}
+              <a href={globalFooterSocial1Link} target="_blank" rel="noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold hover:underline transition-colors">
+                Instagram
               </a>
             )}
             {globalFooterSocial1Link && globalFooterSocial2Link && (
-              <span className="text-white/60">•</span>
+              <span className="text-emerald-400/60">•</span>
             )}
             {globalFooterSocial2Link && (
-              <a href={globalFooterSocial2Link} target="_blank" rel="noopener noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold underline-offset-4 hover:underline transition-all">
-                {globalFooterSocial2Icon === 'tiktok' ? 'TikTok' : globalFooterSocial2Icon === 'instagram' ? 'Instagram' : globalFooterSocial2Icon}
+              <a href={globalFooterSocial2Link} target="_blank" rel="noreferrer" className="text-white hover:text-emerald-100 text-xs font-semibold hover:underline transition-colors">
+                TikTok
               </a>
             )}
           </div>
