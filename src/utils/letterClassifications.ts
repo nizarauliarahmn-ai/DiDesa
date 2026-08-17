@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { DEFAULT_SURAT_FORMAT, formatNomorSurat } from './generateSuratNumber';
-import { getMaxActiveNomorUrut, getNextAvailableNomorUrut, extractSequenceFromNomor, nomorMatchesKlasifikasi } from '../services/penomoranSuratService';
+import { getMaxActiveNomorUrut, getNextNomorSurat, getNextNomorSuratSync, incrementGlobalSequenceNumber } from '../services/penomoranSuratService';
 
 export interface LetterField {
   id: string;
@@ -266,15 +266,7 @@ export function saveLetterClassifications(classifications: LetterClassification[
 }
 
 export function getNextSequenceNumber(klasifikasi: string): number {
-  const autoReset = localStorage.getItem('surat_autoreset') !== 'false';
-  const currentYear = new Date().getFullYear();
-  const lastYear = localStorage.getItem(`last_year_global`);
-
-  if (autoReset && lastYear && parseInt(lastYear) !== currentYear) {
-    return 1;
-  }
-  
-  return getGlobalSequenceNumber() + 1;
+  return getNextNomorSuratSync(klasifikasi);
 }
 
 // --- Penentuan nomor urut berbasis DB aktif dengan SMART GAP-FILLING ---
@@ -296,23 +288,7 @@ export async function getMaxActiveSequenceFromDb(klasifikasi: string, year?: num
  * Jika tidak ada surat aktif -> 1. Jika query gagal -> fallback counter lama.
  */
 export async function getNextSequenceNumberAsync(klasifikasi: string, year?: number): Promise<number> {
-  const autoReset = localStorage.getItem('surat_autoreset') !== 'false';
-  const currentYear = year || new Date().getFullYear();
-  const lastYear = localStorage.getItem(`last_year_global`);
-
-  if (autoReset && lastYear && parseInt(lastYear) !== currentYear) {
-    return 1;
-  }
-
-  try {
-    const nextAvailable = await getNextAvailableNomorUrut(klasifikasi, currentYear);
-    if (nextAvailable > 0) return nextAvailable;
-  } catch (e) {
-    console.error('getNextSequenceNumberAsync: query gagal, fallback ke counter lama:', e);
-  }
-
-  // Query gagal -> fallback ke counter lama agar tidak regresi saat offline
-  return getGlobalSequenceNumber() + 1;
+  return getNextNomorSurat(klasifikasi, year);
 }
 
 /** Versi async dari generateLetterNumber untuk pembuatan nomor baru otomatis. */
@@ -323,42 +299,7 @@ export async function generateLetterNumberAsync(klasifikasi: string, kodeKlasifi
 }
 
 export function incrementSequenceNumber(klasifikasi: string) {
-  const currentYear = new Date().getFullYear();
-  const lastYear = localStorage.getItem(`last_year_global`);
-  
-  const autoReset = localStorage.getItem('surat_autoreset') !== 'false';
-  let nextVal = getGlobalSequenceNumber() + 1;
-  
-  if (autoReset && lastYear && parseInt(lastYear) !== currentYear) {
-    nextVal = 1;
-  }
-  
-  localStorage.setItem(`last_year_global`, String(currentYear));
-  saveGlobalSequenceNumber(nextVal);
-  
-  // Also push to Supabase in background
-  setTimeout(async () => {
-    try {
-      const tenantId = await resolveCurrentTenant();
-      
-      if (tenantId) {
-        // Just push the sequence number to the first classification record as a master record,
-        // or trigger a function. We'll update the global sequence by updating the max number.
-        // The most robust way is to update all active classifications in Supabase.
-        const classes = getLetterClassifications();
-        if (classes.length > 0) {
-          await supabase.from('letter_classifications')
-            .update({ no_urut_terakhir: nextVal })
-            .eq('tenant_id', tenantId);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to sync sequence number to Supabase:', e);
-    }
-  }, 10);
-  
-  // Dispatch event to refresh UI
-  window.dispatchEvent(new Event('letter_classifications_updated'));
+  void incrementGlobalSequenceNumber(klasifikasi);
 }
 
 export function generateLetterNumber(klasifikasi: string, kodeKlasifikasi: string, nextNoVal?: number | string, customDate?: Date): string {

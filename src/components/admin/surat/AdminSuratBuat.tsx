@@ -11,7 +11,8 @@ import {
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumberAsync, generateLetterNumber } from '../../../utils/letterClassifications';
+import { useNextNomorSurat } from '../../../hooks/useNextNomorSurat';
 import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
@@ -333,17 +334,16 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     };
   }, []);
 
-  // Update nomorSurat when a template classification is chosen
+  // Nomor urut berikutnya diambil TUNGGAL dari SSOT `useNextNomorSurat()`
+  // saat sebuah kartu jenis surat dipilih, lalu dialirkan ke form/header/preview.
+  const selectedClassForNumber = classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate);
+  const { nomor: nextNomor } = useNextNomorSurat(selectedClassForNumber?.klasifikasi);
+
   useEffect(() => {
-    if (selectedTemplate) {
-      const selectedClass = classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate);
-      if (selectedClass) {
-        generateLetterNumberAsync(selectedClass.klasifikasi, selectedClass.kodeKlasifikasi || '140')
-          .then(setNomorSurat)
-          .catch(err => console.error('Gagal generate nomor surat:', err));
-      }
+    if (selectedClassForNumber && nextNomor !== null) {
+      setNomorSurat(generateLetterNumber(selectedClassForNumber.klasifikasi, selectedClassForNumber.kodeKlasifikasi || '140', nextNomor));
     }
-  }, [selectedTemplate, classifications]);
+  }, [selectedClassForNumber, nextNomor]);
 
   const recordLetterToHistory = () => {
     if (hasRecorded) return;
@@ -1090,9 +1090,6 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                             Kode: {t.kodeKlasifikasi}
                           </span>
                         )}
-                        <span className="text-[10px] text-gray-400 font-mono ml-1">
-                          No: {String(t.noUrutTerakhir).padStart(3, '0')}
-                        </span>
                         {(usageCounts[t.klasifikasi] || 0) > 0 && (
                           <span className="ml-auto text-[9px] bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide border border-amber-200/50">
                             🔥 Sering

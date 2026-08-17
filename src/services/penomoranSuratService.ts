@@ -58,6 +58,17 @@ function getYearIndexFromFormat(): number {
 }
 
 /**
+ * Reset otomatis per tahun hanya aktif bila user SECARA EKSPLISIT menyimpan
+ * toggle "Reset Setiap Awal Tahun" = ON di Pengaturan Penomoran Surat
+ * (`surat_autoreset === 'true'`). Default (belum diatur / 'false') = NONAKTIF,
+ * sehingga penomoran meneruskan nomor dari daftar surat (mis. 060 -> 061)
+ * dan tidak "kembali ke 001" saat tahun berganti.
+ */
+export function isAutoResetEnabled(): boolean {
+  return localStorage.getItem('surat_autoreset') === 'true';
+}
+
+/**
  * Ambil tahun yang tertanam DI DALAM nomor surat (mis. ".../2026").
  * Deteksi ini mensejajarkan penomoran dengan angka yang TAMPAK di daftar surat,
  * alih-alih mengandalkan `created_at` yang bisa beda tahun (backdate/timezone).
@@ -169,8 +180,12 @@ export async function getMaxActiveNomorUrut(klasifikasi: string, tahun?: number)
 
 /**
  * Kumpulkan semua nomor urut aktif (yang belum dibatalkan/dihapus) pada tabel
- * `surat` untuk klasifikasi & tahun tertentu. Mengembalikan array kosong jika
- * query gagal sehingga caller bisa mendeteksi fallback.
+ * `surat`. Mengembalikan array kosong jika query gagal sehingga caller bisa
+ * mendeteksi fallback.
+ *
+ * Pembatasan per tahun HANYA berlaku bila "Reset Setiap Awal Tahun" aktif
+ * (`surat_autoreset === 'true'`). Default = semua surat aktif lintas tahun
+ * ikut dihitung agar penomoran meneruskan (060 -> 061), tidak kembali ke 001.
  */
 export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number): Promise<number[]> {
   const tenantId = await resolveCurrentTenant();
@@ -206,10 +221,13 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
   for (const row of data || []) {
     const nomorStr = normalizeNomorSurat(String(row?.nomor || ''));
     if (!nomorStr) continue;
-    // Batasi per tahun berdasarkan tahun yang tertanam DI NOMOR itu sendiri.
-    // Jika tahun tidak bisa ditentukan, surat tetap dihitung (tidak dibuang).
-    const nomorYear = extractYearFromNomor(nomorStr);
-    if (nomorYear !== null && nomorYear !== targetYear) continue;
+    // Batasi per tahun hanya bila "Reset Setiap Awal Tahun" AKTIF
+    // (surat_autoreset === 'true'). Tahun dibaca DARI NOMOR itu sendiri;
+    // jika tidak bisa ditentukan, surat tetap dihitung (tidak dibuang).
+    if (isAutoResetEnabled()) {
+      const nomorYear = extractYearFromNomor(nomorStr);
+      if (nomorYear !== null && nomorYear !== targetYear) continue;
+    }
     const seq = extractSequenceFromNomor(nomorStr);
     if (seq > 0) sequences.push(seq);
   }
@@ -230,12 +248,119 @@ export async function getNextAvailableNomorUrut(klasifikasi: string, tahun?: num
   return candidate;
 }
 
+// ============================================================================
+// SINGLE SOURCE OF TRUTH (SSOT) — SATU-SATUNYA TEMPAT KALKULASI NOMOR URUT
+// ----------------------------------------------------------------------------
+// ATURAN BAKU:
+//  - SEMUA modul (kartu jenis surat, form pembuat, header modal, pratinjau,
+//    payload simpan) WAJIB mengambil nomor urut berikutnya dari sini.
+//    DILARANG menghitung urutan sendiri di luar file ini.
+//  - Urutan GLOBAL: satu urutan untuk SEMUA jenis surat (kebijakan desa).
+//  - Gap-filling: nomor urut terkecil yang belum dipakai di daftar surat aktif.
+//  - "Reset Setiap Awal Tahun" hanya aktif bila toggle disimpan EKSPLISIT ON
+//    (`surat_autoreset === 'true'`); default = meneruskan nomor dari daftar.
+// ============================================================================
+
+const GLOBAL_SEQ_KEY = 'global_letter_sequence_number';
+const LAST_YEAR_KEY = 'last_year_global';
+
+export function getGlobalSequenceCounter(): number {
+  const stored = localStorage.getItem(GLOBAL_SEQ_KEY);
+  if (stored !== null) {
+    const n = parseInt(stored, 10);
+    if (!isNaN(n)) return n;
+  }
+  return 0;
+}
+
+export function saveGlobalSequenceCounter(num: number): void {
+  localStorage.setItem(GLOBAL_SEQ_KEY, String(num));
+  // Jaga klasifikasi tetap sinkron dengan counter global (badge lama).
+  const stored = localStorage.getItem('letter_classifications');
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored) as Array<Record<string, unknown>>;
+      if (Array.isArray(parsed)) {
+        localStorage.setItem('letter_classifications', JSON.stringify(parsed.map(c => ({ ...c, noUrutTerakhir: num }))));
+      }
+    } catch (e) {}
+  }
+}
+
+export function getLastGlobalSequenceYear(): number {
+  const stored = localStorage.getItem(LAST_YEAR_KEY);
+  return stored !== null ? parseInt(stored, 10) : NaN;
+}
+
+export function setLastGlobalSequenceYear(year: number): void {
+  localStorage.setItem(LAST_YEAR_KEY, String(year));
+}
+
 /**
- * Nomor urut berikutnya (gap-filling), diformat 3 digit (padStart).
- * Jika query gagal => "001" (caller fallback).
+ * HITUNGAN TUNGGAL nomor urut berikutnya (SSOT, async berbasis DB).
+ * 1) Tahun berganti + autoReset ON  => 1 (mulai siklus tahun baru).
+ * 2) DB  => nomor urut terkecil yang belum dipakai (gap-filling, global).
+ * 3) Query gagal                    => fallback counter lama.
  */
-export const getNextNomorSurat = async (kodeFormat: string, tahun: number): Promise<string> => {
-  const nextNomor = await getNextAvailableNomorUrut(kodeFormat, tahun);
-  const safeNext = nextNomor > 0 ? nextNomor : 1;
-  return String(safeNext).padStart(3, '0');
-};
+export async function getNextNomorSurat(klasifikasi: string, year?: number): Promise<number> {
+  const currentYear = year || new Date().getFullYear();
+  const lastYear = getLastGlobalSequenceYear();
+
+  if (isAutoResetEnabled() && !isNaN(lastYear) && lastYear !== currentYear) {
+    return 1;
+  }
+
+  try {
+    const nextAvailable = await getNextAvailableNomorUrut(klasifikasi, currentYear);
+    if (nextAvailable > 0) return nextAvailable;
+  } catch (e) {
+    console.error('getNextNomorSurat: query gagal, fallback ke counter lama:', e);
+  }
+
+  return getGlobalSequenceCounter() + 1;
+}
+
+/**
+ * Versi SINKRON (hanya localStorage) — fallback last-resort bagi formatter
+ * `generateLetterNumber` bila nomor tidak disuplai. Aturan SSOT sama.
+ */
+export function getNextNomorSuratSync(klasifikasi: string, year?: number): number {
+  const currentYear = year || new Date().getFullYear();
+  const lastYear = getLastGlobalSequenceYear();
+
+  if (isAutoResetEnabled() && !isNaN(lastYear) && lastYear !== currentYear) {
+    return 1;
+  }
+
+  return getGlobalSequenceCounter() + 1;
+}
+
+/**
+ * Naikkan counter global setelah surat disimpan (SSOT), lalu sinkronkan ke
+ * Supabase (best effort). Dipanggil oleh modul pembuat surat — bukan backdate.
+ */
+export async function incrementGlobalSequenceNumber(klasifikasi: string, year?: number): Promise<void> {
+  const currentYear = year || new Date().getFullYear();
+  const lastYear = getLastGlobalSequenceYear();
+
+  let nextVal = getGlobalSequenceCounter() + 1;
+  if (isAutoResetEnabled() && !isNaN(lastYear) && lastYear !== currentYear) {
+    nextVal = 1;
+  }
+
+  setLastGlobalSequenceYear(currentYear);
+  saveGlobalSequenceCounter(nextVal);
+
+  setTimeout(async () => {
+    try {
+      const tenantId = await resolveCurrentTenant();
+      if (tenantId) {
+        await supabase.from('letter_classifications').update({ no_urut_terakhir: nextVal }).eq('tenant_id', tenantId);
+      }
+    } catch (e) {
+      console.error('Failed to sync sequence number to Supabase:', e);
+    }
+  }, 10);
+
+  window.dispatchEvent(new Event('letter_classifications_updated'));
+}

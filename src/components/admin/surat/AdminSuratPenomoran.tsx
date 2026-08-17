@@ -54,7 +54,7 @@ export default function AdminSuratPenomoran() {
     });
   };
 
-  const [autoReset, setAutoReset] = useState(true);
+  const [autoReset, setAutoReset] = useState(false);
   const [classifications, setClassifications] = useState<
     LetterClassification[]
   >([]);
