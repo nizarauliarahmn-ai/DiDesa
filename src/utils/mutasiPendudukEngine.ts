@@ -51,51 +51,99 @@ function toIsoDate(dateStr?: string): string {
   return isNaN(iso.getTime()) ? new Date().toISOString().split('T')[0] : iso.toISOString().split('T')[0];
 }
 
+/** Cetak detail error Supabase/PostgREST untuk debugging cepat (message/details/hint/code). */
+function logSupabaseError(context: string, error: { message?: string; details?: string; hint?: string; code?: string } | null) {
+  if (!error) return;
+  console.error(`DEBUG SUPABASE UPDATE ERROR [${context}]:`, {
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+    code: error.code,
+  });
+}
+
 /**
- * Update status kependudukan penduduk secara tangguh.
- * - Coba kolom `status_keberadaan` terlebih dahulu.
- * - Jika nama kolom di DB berbeda (`status_penduduk`), otomatis fallback.
- * - Error RLS / koneksi DB ditangkap dan dilaporkan secara eksplisit.
- * - Cache global di-invalidate sehingga UI selalu re-fetch.
+ * Jalankan update ke tabel `residents` secara tangguh.
+ * - Identifier: prioritas `id` (UUID) bila ada, fallback `nik`.
+ * - Defensif: kolom yang tidak dikenal di skema DB (PGRST204 "Could not find
+ *   the '<kolom>' column") otomatis DIBUANG lalu query dicoba ulang.
+ * - TIDAK mengirim `updated_at` karena kolom tersebut tidak ada di tabel
+ *   `residents` (salah satu penyebab utama kegagalan update status).
+ * - Error diketik penuh via logSupabaseError agar root cause terlihat.
  */
-export async function updateResidentStatus(
-  residentNik: string,
-  newStatus: 'PINDAH' | 'MENINGGAL',
+async function runResidentUpdate(
+  payload: Record<string, any>,
+  filter: { id?: string; nik?: string },
+  context: string,
 ): Promise<boolean> {
-  const nik = (residentNik || '').trim();
-  if (!nik || nik === '-' || nik === '') return false;
-
-  const nowIso = new Date().toISOString();
-  const payload = { status_keberadaan: newStatus, updated_at: nowIso };
-
   try {
     const tenantId = await resolveCurrentTenant();
-    let query = supabase.from('residents').update(payload);
-    if (tenantId) query = query.eq('tenant_id', tenantId);
-    const { error } = await query.eq('nik', nik);
 
-    if (error) {
-      console.warn('Update status_keberadaan gagal, fallback ke status_penduduk:', error.message);
-      // Fallback jika nama kolom di DB adalah status_penduduk
-      let fbQuery = supabase.from('residents').update({ status_penduduk: newStatus, updated_at: nowIso });
-      if (tenantId) fbQuery = fbQuery.eq('tenant_id', tenantId);
-      const fb = await fbQuery.eq('nik', nik);
+    const buildQuery = () => {
+      let q = supabase.from('residents').update({ ...payload });
+      if (tenantId) q = q.eq('tenant_id', tenantId);
+      if (filter.id) q = q.eq('id', filter.id);
+      else if (filter.nik) q = q.eq('nik', filter.nik);
+      return q;
+    };
 
-      if (fb.error) {
-        // Kemungkinan besar kegagalan RLS / koneksi DB
-        console.error('Gagal update status penduduk (status_penduduk):', fb.error);
-        return false;
-      }
+    let { error } = await buildQuery();
+
+    // Defensif: kolom yang tidak ada di skema DB dibuang lalu coba lagi.
+    let retries = 0;
+    while (error && error.message?.includes('Could not find the') && error.message?.includes('column') && retries < 12) {
+      const match = error.message.match(/'([^']+)' column/);
+      if (!match || !match[1]) break;
+      delete payload[match[1]];
+      logSupabaseError(`${context} (drop kolom '${match[1]}')`, error);
+      const retry = await buildQuery();
+      error = retry.error;
+      retries++;
     }
 
-    // Re-fetch state global (React Query / cache local)
+    if (error) {
+      logSupabaseError(context, error);
+      return false;
+    }
+
+    // Invalidate cache global supaya UI selalu re-fetch (cache lokal + event).
     invalidateResidentsCache();
     window.dispatchEvent(new Event('residents_updated'));
     return true;
   } catch (err) {
-    console.error('updateResidentStatus error:', err);
+    console.error(`${context}: unexpected error:`, err);
     return false;
   }
+}
+
+/**
+ * Update status kependudukan penduduk secara tangguh.
+ * - Identifier valid: prioritas ID (UUID) bila ada, fallback NIK.
+ * - Kolom yang ditulis: `status_keberadaan` (utamanya) + `status_penduduk`
+ *   + `status` + `status_color`. Kolom yang tak dikenal otomatis di-drop.
+ * - Mengembalikan true bila update sukses; false bila gagal.
+ */
+export async function updateResidentStatus(
+  resident: { id?: string; nik?: string },
+  newStatus: 'PINDAH' | 'MENINGGAL',
+): Promise<boolean> {
+  const targetId = resident?.id;
+  const targetNik = (resident?.nik || '').trim();
+  if (!targetId && !targetNik) {
+    console.error('Update dibatalkan: Data ID dan NIK warga tidak ditemukan.');
+    return false;
+  }
+
+  const statusLabel = newStatus === 'MENINGGAL' ? 'Meninggal' : 'Pindah';
+  const statusColor = newStatus === 'MENINGGAL' ? 'rose' : 'amber';
+  const payload: Record<string, any> = {
+    status_keberadaan: newStatus,
+    status_penduduk: newStatus,
+    status: statusLabel,
+    status_color: statusColor,
+  };
+
+  return runResidentUpdate(payload, { id: targetId, nik: targetNik }, 'updateResidentStatus');
 }
 
 /**
@@ -120,16 +168,23 @@ export async function applyResidentMutationOnLetterPublish({
   if (!mutation) return false;
 
   const isoDate = toIsoDate(publishDate);
-  const updatePayload: Record<string, any> = {};
 
+  // 1. Update kolom status keberadaan (PINDAH / MENINGGAL).
+  let primaryOk = true;
+  if (mutation === 'PINDAH' || mutation === 'MENINGGAL') {
+    primaryOk = await updateResidentStatus({ nik }, mutation);
+  }
+
+  // 2. Kolom pendukung mutasi (status, tanggal_mutasi/kematian, marital_status).
+  const updatePayload: Record<string, any> = {};
   if (mutation === 'PINDAH') {
     updatePayload.status = 'Pindah';
-    updatePayload.status_color = 'gray';
+    updatePayload.status_color = 'amber';
     updatePayload.is_deleted = false;
     updatePayload.tanggal_mutasi = isoDate;
   } else if (mutation === 'MENINGGAL') {
     updatePayload.status = 'Meninggal';
-    updatePayload.status_color = 'gray';
+    updatePayload.status_color = 'rose';
     updatePayload.is_deleted = false;
     updatePayload.tanggal_kematian = isoDate;
   } else if (mutation === 'KAWIN') {
@@ -137,66 +192,20 @@ export async function applyResidentMutationOnLetterPublish({
     updatePayload.status_perkawinan = 'KAWIN';
   }
 
-  // 1. Update kolom status keberadaan dengan fallback nama kolom.
-  const statusOk = await updateResidentStatus(nik, mutation as 'PINDAH' | 'MENINGGAL');
-  if (!statusOk) return false;
-
-  // 2. Terapkan kolom pendukung mutasi (status, tanggal_mutasi/kematian, dst).
-  if (Object.keys(updatePayload).length === 0) {
-    addSaaSLog({
-      admin: 'Sistem',
-      aksi: 'Mutasi Otomatis Kependudukan',
-      target: `${nik} -> ${mutation}`,
-      status: 'Berhasil',
-      category: 'Penduduk'
-    });
-    return true;
+  let payloadOk = true;
+  if (Object.keys(updatePayload).length > 0) {
+    payloadOk = await runResidentUpdate(updatePayload, { nik }, 'applyResidentMutationOnLetterPublish');
   }
 
-  try {
-    const tenantId = await resolveCurrentTenant();
-    let query = supabase.from('residents').update(updatePayload);
-    if (tenantId) query = query.eq('tenant_id', tenantId);
-    query = query.eq('nik', nik);
+  const success = mutation === 'KAWIN' ? payloadOk : primaryOk;
 
-    let { error } = await query;
+  addSaaSLog({
+    admin: 'Sistem',
+    aksi: 'Mutasi Otomatis Kependudukan',
+    target: `${nik} -> ${mutation}`,
+    status: success ? 'Berhasil' : 'Gagal',
+    category: 'Penduduk'
+  });
 
-    // Defensif: kolom yang tidak ada di skema DB akan dibuang lalu coba lagi
-    let retries = 0;
-    while (error && error.message?.includes('Could not find the') && error.message?.includes('column') && retries < 10) {
-      const match = error.message.match(/'([^']+)' column/);
-      if (match && match[1]) {
-        delete updatePayload[match[1]];
-        let retryQuery = supabase.from('residents').update(updatePayload);
-        if (tenantId) retryQuery = retryQuery.eq('tenant_id', tenantId);
-        retryQuery = retryQuery.eq('nik', nik);
-        const retry = await retryQuery;
-        error = retry.error;
-        retries++;
-      } else {
-        break;
-      }
-    }
-
-    if (error) {
-      console.error('Gagal menerapkan mutasi penduduk otomatis:', error);
-      return false;
-    }
-
-    invalidateResidentsCache();
-    window.dispatchEvent(new Event('residents_updated'));
-
-    addSaaSLog({
-      admin: 'Sistem',
-      aksi: 'Mutasi Otomatis Kependudukan',
-      target: `${nik} -> ${mutation}`,
-      status: 'Berhasil',
-      category: 'Penduduk'
-    });
-
-    return true;
-  } catch (err) {
-    console.error('applyResidentMutationOnLetterPublish error:', err);
-    return false;
-  }
+  return success;
 }
