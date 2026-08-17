@@ -28,6 +28,16 @@ function parseNomorParts(nomor: string): string[] {
   return String(nomor || '').split('/').map(p => p.trim()).filter(Boolean);
 }
 
+/**
+ * Normalisasi nomor surat: trim + FULL UPPERCASE.
+ * Data lama di DB bisa tersimpan campur huruf (mis. "475/075/Whi-Skp/2026"),
+ * sedangkan kode baru pakai "WHI-SKP". Seluruh deteksi/pembandingan dilakukan
+ * pada bentuk normal ini sehingga pencarian bebas kapital/kecil.
+ */
+export function normalizeNomorSurat(nomor: string): string {
+  return String(nomor || '').trim().toUpperCase();
+}
+
 function getSequenceIndexFromFormat(): number {
   const formatTemplate = localStorage.getItem('surat_format') || DEFAULT_SURAT_FORMAT;
   const segs = formatTemplate.split('/');
@@ -77,7 +87,7 @@ export function nomorMatchesKlasifikasi(nomor: string, klasifikasi: string): boo
   const k = (klasifikasi || '').toUpperCase().trim();
   if (!k) return true;
   const aliases = new Set([k, ...(KLASIFIKASI_ALIASES[k] || [])]);
-  const parts = parseNomorParts(nomor);
+  const parts = parseNomorParts(normalizeNomorSurat(nomor));
   for (const p of parts) {
     const token = (p.split('-').pop() || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
     if (token && aliases.has(token)) return true;
@@ -146,7 +156,7 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
 
   const sequences: number[] = [];
   for (const row of data || []) {
-    const nomorStr = String(row?.nomor || '');
+    const nomorStr = normalizeNomorSurat(String(row?.nomor || ''));
     if (!nomorStr) continue;
     if (!nomorMatchesKlasifikasi(nomorStr, klasifikasi)) continue;
     // Batasi per tahun berdasarkan tahun yang tertanam DI NOMOR itu sendiri.

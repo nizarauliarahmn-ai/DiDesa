@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { addSaaSLog } from './saasLogs';
 import { autoSyncResidentFromLetter } from './residentSync';
+import { normalizeNomorSurat } from '../services/penomoranSuratService';
 
 export interface LetterHistory {
   id: string;
@@ -65,7 +66,9 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
       
       const insertData: any = {
         tenant_id: tenantId,
-        nomor: letter.nomor,
+        // Simpan nomor dalam bentuk String Kapital Murni agar pencarian
+        // berikutnya konsisten (mis. "475/076/WHI-SKP/2026").
+        nomor: normalizeNomorSurat(letter.nomor),
         jenis_surat: letter.jenis,
         nik: letter.nik,
         nama: letter.nama,
@@ -148,7 +151,7 @@ export async function updateLetterHistoryAsync(id: string, updatedFields: Partia
     if (updatedFields.status !== undefined) {
       updatePayload.status = updatedFields.status === 'Proses' ? 'pending' : updatedFields.status;
     }
-    if (updatedFields.nomor !== undefined) updatePayload.nomor = updatedFields.nomor;
+    if (updatedFields.nomor !== undefined) updatePayload.nomor = normalizeNomorSurat(updatedFields.nomor);
     if (updatedFields.nama !== undefined) updatePayload.nama = updatedFields.nama;
     if (updatedFields.nik !== undefined) updatePayload.nik = updatedFields.nik;
     if (updatedFields.keperluan !== undefined) updatePayload.keterangan = updatedFields.keperluan;
