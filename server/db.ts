@@ -51,6 +51,17 @@ export const globalUpdatesTable = pgTable("global_updates", {
   isPopup: integer("is_popup").default(0),
 });
 
+export const guideContentTable = pgTable("guide_content", {
+  id: text("id").primaryKey(),
+  category: text("category").notNull(),
+  categoryLabel: text("category_label").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  icon: text("icon").default("FileText"),
+  sortOrder: integer("sort_order").default(0),
+  isActive: integer("is_active").default(1),
+});
+
 export const aiUsageTable = pgTable("ai_usage", {
   tenantId: text("tenant_id"),
   usageDate: text("usage_date"),
@@ -172,6 +183,17 @@ if (databaseUrl) {
       CREATE TABLE IF NOT EXISTS global_settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS guide_content (
+        id TEXT PRIMARY KEY,
+        category TEXT NOT NULL,
+        category_label TEXT NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        icon TEXT DEFAULT 'FileText',
+        sort_order INTEGER DEFAULT 0,
+        is_active INTEGER DEFAULT 1
       );
 
       CREATE TABLE IF NOT EXISTS tenants (

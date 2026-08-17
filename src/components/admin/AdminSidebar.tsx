@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
@@ -297,6 +297,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem collapsed={isCollapsed} icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={activeTab === 'saas_bugs' ? 0 : pendingBugsCount} />
             <NavItem collapsed={isCollapsed} icon={<FileText size={18} className="text-emerald-600" />} label="Template Surat Global" active={activeTab === 'template_surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('template_surat'); }} />
             <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} className="text-teal-600" />} label="Panduan & Documentation" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
+            <NavItem collapsed={isCollapsed} icon={<BookOpenCheck size={18} className="text-teal-600" />} label="Kelola Konten Panduan" active={activeTab === 'panduan_cms'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan_cms'); }} />
             <NavItem collapsed={isCollapsed} icon={<Settings size={18} />} label="Branding Platform" active={activeTab === 'global_branding'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('global_branding'); }} />
           </>
         )}

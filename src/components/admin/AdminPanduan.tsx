@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Tablet, FileText, Gift, Building2, HelpCircle, 
   Search, AlertTriangle, ExternalLink, 
   Printer, Sparkles, ShieldCheck,
-  ChevronDown, ChevronRight, Copy, Check, Users
+  ChevronDown, ChevronRight, Copy, Check, Users, BookOpenCheck
 } from 'lucide-react';
+import Markdown from 'react-markdown';
+import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
+import {
+  GuideContentItem, DEFAULT_CATEGORIES, getGuideIcon, getCategoryLabel
+} from '../../utils/guideContent';
 
 export default function AdminPanduan() {
-  const [activeCategory, setActiveCategory] = useState<'kiosk' | 'surat' | 'bansos' | 'pengaturan' | 'faq' | 'ai'>('kiosk');
+  const [activeCategory, setActiveCategory] = useState<string>('kiosk');
   const [searchQuery, setSearchQuery] = useState('');
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
+  const [dbItems, setDbItems] = useState<GuideContentItem[]>([]);
 
   const tenantName = localStorage.getItem('kop_desa') || 'Desa Anda';
   
@@ -24,6 +30,74 @@ export default function AdminPanduan() {
     } catch (e) {}
   }
 
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('guide_content')
+          .select('*')
+          .eq('is_active', 1)
+          .order('sort_order', { ascending: true });
+        if (error) throw error;
+        setDbItems((data || []).sort((a, b) => a.sort_order - b.sort_order));
+      } catch (err: any) {
+        console.warn('Gagal memuat konten panduan dari Supabase:', err.message || err);
+      }
+    };
+    loadItems();
+
+    const onUpdate = () => loadItems();
+    window.addEventListener('guide_content_updated', onUpdate);
+
+    const channel = supabase
+      .channel('public_guide_content_viewer')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'guide_content' }, () => {
+        loadItems();
+      })
+      .subscribe();
+
+    return () => {
+      window.removeEventListener('guide_content_updated', onUpdate);
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const customCategories = Array.from(
+    new Set(dbItems.map(i => i.category).filter(c => !DEFAULT_CATEGORIES.some(d => d.key === c)))
+  );
+
+  const tabs = [
+    ...DEFAULT_CATEGORIES,
+    ...customCategories.map(c => ({
+      key: c,
+      label: dbItems.find(i => i.category === c)?.category_label || c
+    }))
+  ];
+
+  const labelOf = (cat: string) => {
+    const item = dbItems.find(i => i.category === cat);
+    if (item?.category_label) return item.category_label;
+    return getCategoryLabel(cat);
+  };
+
+  const iconOf = (cat: string) => {
+    const item = dbItems.find(i => i.category === cat);
+    return getGuideIcon(item?.icon);
+  };
+
+  const itemsOf = (cat: string) => {
+    const list = dbItems
+      .filter(i => i.category === cat && i.is_active === 1)
+      .sort((a, b) => a.sort_order - b.sort_order);
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(i =>
+      i.title.toLowerCase().includes(q) ||
+      i.content.toLowerCase().includes(q) ||
+      i.category_label.toLowerCase().includes(q)
+    );
+  };
+
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(label);
@@ -34,6 +108,70 @@ export default function AdminPanduan() {
   const handlePrint = () => {
     window.print();
   };
+
+  const renderDbSection = (cat: string) => {
+    const items = itemsOf(cat);
+    return (
+      <div className="space-y-6 animate-in fade-in duration-300">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4 w-full">
+            {labelOf(cat)}
+          </h2>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/40 px-2.5 py-1 rounded-full border border-teal-100 dark:border-teal-900/50">
+            <BookOpenCheck size={12} /> Dikelola oleh Platform
+          </span>
+        </div>
+
+        {items.length === 0 ? (
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm text-center">
+            <p className="text-sm text-gray-500 dark:text-slate-400">
+              Tidak ada konten yang cocok dengan pencarian "{searchQuery}".
+            </p>
+          </div>
+        ) : cat === 'faq' ? (
+          <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-4">
+            {items.map((item) => (
+              <div key={item.id} className="border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === item.id ? null : item.id)}
+                  className="w-full p-4 text-left font-bold text-gray-900 dark:text-white flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-sm"
+                >
+                  <span>{item.title}</span>
+                  {openFaq === item.id ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                </button>
+                {openFaq === item.id && (
+                  <div className="p-4 text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 leading-relaxed border-t border-gray-100 dark:border-slate-800 prose prose-teal dark:prose-invert max-w-none">
+                    <Markdown>{item.content}</Markdown>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {items.map((item) => {
+              const Icon = getGuideIcon(item.icon);
+              return (
+                <div key={item.id} className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+                      <Icon size={20} />
+                    </div>
+                    <h4 className="font-bold text-gray-900 dark:text-white leading-snug">{item.title}</h4>
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed prose prose-teal dark:prose-invert max-w-none">
+                    <Markdown>{item.content}</Markdown>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const hasDbContent = (cat: string) => dbItems.some(i => i.category === cat && i.is_active === 1);
 
   return (
     <div className="space-y-6 pb-24 print:p-0 print:m-0">
@@ -88,78 +226,29 @@ export default function AdminPanduan() {
 
       {/* Navigation Categories */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none print:hidden">
-        <button
-          onClick={() => setActiveCategory('kiosk')}
-          className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
-            activeCategory === 'kiosk'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-              : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
-          }`}
-        >
-          <Tablet size={18} /> Operasional Kios & Buku Tamu
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('surat')}
-          className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
-            activeCategory === 'surat'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-              : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
-          }`}
-        >
-          <FileText size={18} /> Pengurusan Surat Administrasi
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('bansos')}
-          className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
-            activeCategory === 'bansos'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-              : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
-          }`}
-        >
-          <Gift size={18} /> Bantuan Sosial & Penduduk
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('pengaturan' as any)}
-          className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
-            activeCategory === ('pengaturan' as any)
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-              : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
-          }`}
-        >
-          <Building2 size={18} /> Pengaturan KOP & Profil Desa
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('ai')}
-          className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
-            activeCategory === 'ai'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-              : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
-          }`}
-        >
-          <Sparkles size={18} /> Pengaturan Asisten AI (Desi)
-        </button>
-
-        <button
-          onClick={() => setActiveCategory('faq')}
-          className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
-            activeCategory === 'faq'
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-              : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
-          }`}
-        >
-          <HelpCircle size={18} /> FAQ & Solusi Kendala
-        </button>
+        {tabs.map((tab) => {
+          const TabIcon = iconOf(tab.key);
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveCategory(tab.key)}
+              className={`px-5 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 shrink-0 transition-all ${
+                activeCategory === tab.key
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                  : 'bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-300 hover:bg-gray-50 border border-gray-100 dark:border-slate-800'
+              }`}
+            >
+              <TabIcon size={18} /> {tab.label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Main Content Area */}
       <div className="space-y-6">
 
         {/* CATEGORY 1: KIOSK & BUKU TAMU */}
-        {activeCategory === 'kiosk' && (
+        {activeCategory === 'kiosk' && (hasDbContent('kiosk') ? renderDbSection('kiosk') : (
           <div className="space-y-6 animate-in fade-in duration-300">
             
             {/* Quick Links Box */}
@@ -282,10 +371,10 @@ export default function AdminPanduan() {
             </div>
 
           </div>
-        )}
+        ))}
 
         {/* CATEGORY 2: SURAT ADMINISTRASI */}
-        {activeCategory === 'surat' && (
+        {activeCategory === 'surat' && (hasDbContent('surat') ? renderDbSection('surat') : (
           <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 animate-in fade-in duration-300">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4">
               Panduan Alur Pengurusan Surat Administrasi Desa
@@ -331,10 +420,10 @@ export default function AdminPanduan() {
 
             </div>
           </div>
-        )}
+        ))}
 
         {/* CATEGORY 3: BANTUAN SOSIAL */}
-        {activeCategory === 'bansos' && (
+        {activeCategory === 'bansos' && (hasDbContent('bansos') ? renderDbSection('bansos') : (
           <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 animate-in fade-in duration-300">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4">
               Panduan Pengelolaan Bantuan Sosial & Data Kependudukan
@@ -364,10 +453,10 @@ export default function AdminPanduan() {
 
             </div>
           </div>
-        )}
+        ))}
 
         {/* CATEGORY 4: PENGATURAN KOP & PROFIL DESA */}
-        {activeCategory === 'pengaturan' && (
+        {activeCategory === 'pengaturan' && (hasDbContent('pengaturan') ? renderDbSection('pengaturan') : (
           <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 animate-in fade-in duration-300">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4">
               Panduan Pengaturan KOP Surat, Logo & Profil Desa
@@ -397,10 +486,10 @@ export default function AdminPanduan() {
 
             </div>
           </div>
-        )}
+        ))}
 
         {/* CATEGORY 5: FAQ */}
-        {activeCategory === 'faq' && (
+        {activeCategory === 'faq' && (hasDbContent('faq') ? renderDbSection('faq') : (
           <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-6 animate-in fade-in duration-300">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4">
               Pertanyaan Sering Ditanyakan (FAQ) & Solusi Kendala
@@ -425,19 +514,19 @@ export default function AdminPanduan() {
                   q: "Bagaimana cara mencetak surat dengan KOP desa resmi?",
                   a: "Atur terlebih dahulu nama desa dan logo desa di menu Pengaturan. Setelah itu, setiap kali Anda mengeklik cetak surat di menu Surat & Administrasi, KOP surat resmi akan otomatis terpasang rapi."
                 }
-              ].map((faq, idx) => (
+              ].map((faq) => (
                 <div 
-                  key={idx} 
+                  key={faq.q} 
                   className="border border-gray-100 dark:border-slate-800 rounded-2xl overflow-hidden"
                 >
                   <button
-                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                    onClick={() => setOpenFaq(openFaq === faq.q ? null : faq.q)}
                     className="w-full p-4 text-left font-bold text-gray-900 dark:text-white flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors text-sm"
                   >
                     <span>{faq.q}</span>
-                    {openFaq === idx ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                    {openFaq === faq.q ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
                   </button>
-                  {openFaq === idx && (
+                  {openFaq === faq.q && (
                     <div className="p-4 text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 leading-relaxed border-t border-gray-100 dark:border-slate-800">
                       {faq.a}
                     </div>
@@ -447,10 +536,10 @@ export default function AdminPanduan() {
 
             </div>
           </div>
-        )}
+        ))}
 
         {/* CATEGORY 6: ASISTEN AI */}
-        {activeCategory === 'ai' && (
+        {activeCategory === 'ai' && (hasDbContent('ai') ? renderDbSection('ai') : (
           <div className="space-y-6 animate-in fade-in duration-300">
             <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-8">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b border-gray-100 dark:border-slate-800 pb-4 flex items-center gap-2">
@@ -492,7 +581,10 @@ export default function AdminPanduan() {
               </div>
             </div>
           </div>
-        )}
+        ))}
+
+        {/* CUSTOM CATEGORIES */}
+        {customCategories.includes(activeCategory) && renderDbSection(activeCategory)}
 
       </div>
 

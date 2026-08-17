@@ -29,6 +29,7 @@ import AdminSaaSBugReports from './components/admin/AdminSaaSBugReports';
 import GlobalBugReportButton from './components/common/GlobalBugReportButton';
 import AdminSaaSTemplateSurat from './components/admin/AdminSaaSTemplateSurat';
 import AdminPanduan from './components/admin/AdminPanduan';
+import AdminSaaSPanduanCMS from './components/admin/AdminSaaSPanduanCMS';
 import ToastContainer from './components/common/ToastContainer';
 import WaNotificationManager from './components/common/WaNotificationManager';
 import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
@@ -578,6 +579,7 @@ export default function App() {
                   />
                 )}
                 {adminTab === 'panduan' && <AdminPanduan />}
+                {adminTab === 'panduan_cms' && user.role === 'saas_admin' && <AdminSaaSPanduanCMS />}
 
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}
                 {adminTab === 'saas_leads' && user.role === 'saas_admin' && <AdminSaaSLeads onSetActiveTab={setAdminTab} />}
