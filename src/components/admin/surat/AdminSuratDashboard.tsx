@@ -3,7 +3,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
   Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen, MessageCircle
 } from 'lucide-react';
-import { fetchLetterHistoryAsync, LetterHistory, deleteLetterHistoryAsync, cancelLetterHistoryAsync } from '../../../utils/letterHistory';
+import { fetchLetterHistoryAsync, LetterHistory, cancelLetterHistoryAsync, deleteSuratSmart } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
@@ -205,9 +205,15 @@ export default function AdminSuratDashboard({
   };
 
   const handleDelete = async (surat: LetterHistory) => {
-    const updated = await deleteLetterHistoryAsync(surat.id);
-    setSuratList(updated);
-    showToast(`Arsip surat berhasil dihapus.`, 'success');
+    try {
+      const result = await deleteSuratSmart(surat);
+      const updated = await fetchLetterHistoryAsync();
+      setSuratList(updated);
+      showToast(result.message, 'success');
+    } catch (e) {
+      console.error('Gagal menghapus surat:', e);
+      showToast('Gagal menghapus surat. Coba lagi.', 'error');
+    }
     setSuratToDelete(null);
     if (selectedSurat && selectedSurat.id === surat.id) {
       setSelectedSurat(null);
@@ -227,14 +233,27 @@ export default function AdminSuratDashboard({
   const handleBulkDelete = async () => {
     if (selectedSuratIds.length === 0) return;
     
-    // We have to delete sequentially or adapt bulk delete. Sequential is fine.
+    // Penghapusan masal mengikuti aturan yang sama (dual-mode per surat).
+    let hardCount = 0;
+    let softCount = 0;
     for (const id of selectedSuratIds) {
-       await deleteLetterHistoryAsync(id);
+      const surat = suratList.find(s => s.id === id);
+      if (!surat) continue;
+      try {
+        const result = await deleteSuratSmart(surat);
+        if (result.type === 'HARD_DELETE') hardCount++;
+        else softCount++;
+      } catch (e) {
+        console.error('Gagal menghapus surat masal:', id, e);
+      }
     }
     const updated = await fetchLetterHistoryAsync();
     
     setSuratList(updated);
-    showToast(`${selectedSuratIds.length} arsip surat berhasil dihapus secara masal.`, 'success');
+    const parts: string[] = [];
+    if (hardCount > 0) parts.push(`${hardCount} dihapus permanen`);
+    if (softCount > 0) parts.push(`${softCount} disembunyikan (nomor tengah)`);
+    showToast(`${selectedSuratIds.length} arsip surat dihapus: ${parts.join(', ') || 'gagal'}.`, 'success');
     setSelectedSuratIds([]);
     setShowBulkDeleteModal(false);
     if (selectedSurat && selectedSuratIds.includes(selectedSurat.id)) {

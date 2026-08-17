@@ -2,7 +2,7 @@ import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { addSaaSLog } from './saasLogs';
 import { autoSyncResidentFromLetter } from './residentSync';
-import { normalizeNomorSurat } from '../services/penomoranSuratService';
+import { normalizeNomorSurat, getAllActiveNomorUrut, extractSequenceFromNomor } from '../services/penomoranSuratService';
 
 export interface LetterHistory {
   id: string;
@@ -12,7 +12,7 @@ export interface LetterHistory {
   nama: string;
   tanggal: string;
   keperluan: string;
-  status: 'Selesai' | 'Proses' | 'Dibatalkan' | 'pending';
+  status: 'Selesai' | 'Proses' | 'Dibatalkan' | 'Dihapus' | 'pending';
   data?: any;
 }
 
@@ -25,6 +25,8 @@ export async function fetchLetterHistoryAsync(): Promise<LetterHistory[]> {
       .from('surat')
       .select('id, nomor, jenis_surat, nik, nama, created_at, keterangan, status, data')
       .eq('tenant_id', tenantId)
+      // Surat yang di-soft-delete (nomor tengah) disembunyikan dari daftar aktif.
+      .neq('status', 'Dihapus')
       .order('created_at', { ascending: false });
       
     if (error) throw error;
@@ -138,6 +140,54 @@ export async function deleteLetterHistoryAsync(id: string): Promise<LetterHistor
     console.error("Error deleting letter:", e);
     return await fetchLetterHistoryAsync();
   }
+}
+
+export interface SmartDeleteResult {
+  type: 'HARD_DELETE' | 'SOFT_DELETE';
+  message: string;
+}
+
+/**
+ * PENGHAPUSAN DUAL-MODE (Daftar Surat Aktif sebagai SSOT):
+ * 1) NOMOR TERAKHIR (Tail Delete): surat memegang nomor urut tertinggi (MAX)
+ *    yang aktif di daftar => HARD DELETE permanen. MAX otomatis turun sehingga
+ *    surat berikutnya memakai nomor yang baru dibebaskan (mis. 060).
+ * 2) NOMOR TENGAH/AWAL (Middle Delete): bukan nomor terakhir => SOFT DELETE
+ *    (status 'Dihapus'). Baris tetap tersimpan agar MAX tidak berubah sehingga
+ *    surat berikutnya tetap berlanjut ke MAX + 1 (mis. 061).
+ *
+ * Tabel nyata `surat` tidak punya kolom `nomor_urut`/`tahun`/`is_deleted`/`updated_at`,
+ * jadi:
+ *  - MAX dihitung dari daftar surat aktif via ekstraktor SSOT (extractSequenceFromNomor).
+ *  - Soft delete cukup mengubah kolom `status` menjadi 'Dihapus'.
+ */
+export async function deleteSuratSmart(surat: { id: string; nomor?: string }, tahun?: number): Promise<SmartDeleteResult> {
+  const nomorUrutTarget = extractSequenceFromNomor(normalizeNomorSurat(surat.nomor || ''));
+
+  // 1. Nomor urut tertinggi (MAX) yang aktif di daftar saat ini (SSOT).
+  let currentMaxNum = 0;
+  try {
+    const sequences = await getAllActiveNomorUrut('', tahun);
+    currentMaxNum = sequences.length > 0 ? Math.max(...sequences) : 0;
+  } catch (e) {
+    console.error('deleteSuratSmart: gagal membaca MAX dari daftar aktif:', e);
+  }
+
+  // 2. Nomor tak bisa diekstrak => pertahankan perilaku lama (hapus permanen).
+  //    ATAU surat adalah NOMOR TERAKHIR (Tail Delete) => HARD DELETE PERMANEN.
+  if (nomorUrutTarget === 0 || nomorUrutTarget >= currentMaxNum) {
+    const { error } = await supabase.from('surat').delete().eq('id', surat.id);
+    if (error) throw error;
+    return { type: 'HARD_DELETE', message: 'Nomor terakhir dihapus permanen. Penomoran mundur.' };
+  }
+
+  // 3. NOMOR TENGAH/AWAL (Middle Delete) => SOFT DELETE (simpan histori).
+  const { error } = await supabase
+    .from('surat')
+    .update({ status: 'Dihapus' })
+    .eq('id', surat.id);
+  if (error) throw error;
+  return { type: 'SOFT_DELETE', message: 'Surat tengah disembunyikan. Urutan nomor utama tetap berlanjut.' };
 }
 
 export function deleteLetterHistory(id: string): LetterHistory[] {
