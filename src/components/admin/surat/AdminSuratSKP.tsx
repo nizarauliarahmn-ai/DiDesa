@@ -384,15 +384,15 @@ export default function AdminSuratSKP({
       status: 'Pindah'
     }, 'Pembuatan Surat');
 
-    if (checkedFamilyNiks && checkedFamilyNiks.length > 0) {
+    // Otomasi Mutasi Kependudukan: SKP => status_keberadaan PINDAH (real-time)
+    const mutationType = getLetterMutationType('SKP');
+    const nikToMutate = formData.nik;
+    if (mutationType && checkedFamilyNiks && checkedFamilyNiks.length > 0) {
       for (const followerNik of checkedFamilyNiks) {
         await autoSyncResidentFromLetter(followerNik, { status: 'Pindah' }, 'Pembuatan Surat');
       }
     }
 
-    // Otomasi Mutasi Kependudukan: SKP => status_keberadaan PINDAH (real-time)
-    const mutationType = getLetterMutationType('SKP');
-    const nikToMutate = formData.nik;
     if (mutationType && nikToMutate) {
       const ok = await applyResidentMutationOnLetterPublish({
         residentId: nikToMutate,
@@ -405,10 +405,13 @@ export default function AdminSuratSKP({
         showToast('Surat berhasil dicetak namun status kependudukan warga gagal diperbarui otomatis.', "error");
       }
     }
-    if (mutationType && checkedFamilyNiks && checkedFamilyNiks.length > 0) {
-      for (const followerNik of checkedFamilyNiks) {
+    // Semua Pengikut (checkedFamilyNiks + manualFollowers) ikut termutasi status PINDAH
+    if (mutationType) {
+      const allFollowers = getFollowersList();
+      for (const follower of allFollowers) {
+        if (!follower.nik || follower.nik === '-' || follower.nik === '') continue;
         await applyResidentMutationOnLetterPublish({
-          residentId: followerNik,
+          residentId: follower.nik,
           letterTypeCode: 'SKP',
           publishDate: tanggalSurat,
         });
