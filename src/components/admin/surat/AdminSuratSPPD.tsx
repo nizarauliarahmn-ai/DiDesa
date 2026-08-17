@@ -423,7 +423,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   <div class="grid grid-cols-[80px_10px_1fr]">
                     <span>Lembar ke</span><span>:</span><span>1</span>
                     <span>Kode Nomor</span><span>:</span><span>${kodeKlasifikasi}</span>
-                    <span>Nomor</span><span>:</span><span>${nomorSurat}</span>
+                    <span>Nomor</span><span>:</span><span class="uppercase">${nomorSurat.toUpperCase()}</span>
                   </div>
                 </div>
                 
@@ -525,7 +525,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <div class="w-[47%] pl-4 text-[9px] flex flex-col">
                 <div class="pl-8 mb-2">
                   <div class="grid grid-cols-[90px_10px_1fr] leading-tight mb-2">
-                    <span>I. SPPD Nomor</span><span>:</span><span>${nomorSurat}</span>
+                    <span>I. SPPD Nomor</span><span>:</span><span class="uppercase">${nomorSurat.toUpperCase()}</span>
                     <span>Berangkat dari</span><span>:</span><span>${tempatBerangkat}</span>
                     <span class="pl-2 italic">(tempat kedudukan)</span><span></span><span></span>
                     <span>Pada tanggal</span><span>:</span><span>${formatDateFull(tanggalBerangkat)}</span>
@@ -728,6 +728,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
               ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
               ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
+              .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
         </head>
@@ -740,7 +741,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <div class="text-[14px] text-black">
               <div class="text-center mb-8">
                 <h6 class="font-bold underline uppercase text-[16px]">SURAT TUGAS</h6>
-                <p class="font-bold mt-1">Nomor : ${nomorSurat}</p>
+                <p class="font-bold mt-1 nomor-surat-cetak" style="text-transform:uppercase;">Nomor : ${nomorSurat.toUpperCase()}</p>
               </div>
 
               <div class="mb-6 text-justify leading-relaxed">

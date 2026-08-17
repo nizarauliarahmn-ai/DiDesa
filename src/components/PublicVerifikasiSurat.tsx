@@ -228,7 +228,7 @@ export default function PublicVerifikasiSurat() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor Surat</span>
-                    <p className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs mt-0.5">{letter.nomor || "-"}</p>
+                    <p className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs mt-0.5 uppercase">{letter.nomor.toUpperCase() || "-"}</p>
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanggal Diterbitkan</span>

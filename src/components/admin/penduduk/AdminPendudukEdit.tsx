@@ -1104,7 +1104,7 @@ placeholder="Pilih ibu dari anggota KK..."
                     <tbody>
                       {residentLetters.map((letter: any) => (
                         <tr key={letter.id} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                          <td className="px-3 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white">{letter.nomor || '-'}</td>
+                          <td className="px-3 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white uppercase">{letter.nomor.toUpperCase() || '-'}</td>
                           <td className="px-3 py-3 text-xs text-gray-700 dark:text-slate-300">{letter.jenis}</td>
                           <td className="px-3 py-3 text-xs text-gray-500 dark:text-slate-400">{letter.tanggal}</td>
                           <td className="px-3 py-3">
@@ -1420,7 +1420,7 @@ placeholder="Pilih ibu dari anggota KK..."
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-2.5">
                   <span className="text-gray-500 dark:text-slate-400">Nomor Surat</span>
-                  <span className="font-bold text-gray-900 dark:text-white text-right font-mono">{viewLetter.nomor || '-'}</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right font-mono uppercase">{viewLetter.nomor.toUpperCase() || '-'}</span>
                 </div>
                 <div className="flex justify-between gap-3 border-b border-gray-100 dark:border-slate-800 pb-2.5">
                   <span className="text-gray-500 dark:text-slate-400">Jenis Surat</span>

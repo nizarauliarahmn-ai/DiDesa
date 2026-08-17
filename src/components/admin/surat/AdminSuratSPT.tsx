@@ -380,7 +380,8 @@ export default function AdminSuratSPT({
         doc.open();
         doc.write(`<html><head><title>SPT</title><style>
           @media print { @page { size: A4; margin: 0; } body { margin:0; padding:0; background:white; }
-            .page-break { page-break-before:always; break-before:page; display:block; } }
+            .page-break { page-break-before:always; break-before:page; display:block; }
+            .nomor-surat-cetak { text-transform: uppercase !important; } }
           body { margin:0; }
         </style></head><body>
           ${generatePage1HTML()}
@@ -423,7 +424,7 @@ export default function AdminSuratSPT({
     <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;position:relative;background:white;font-family:${letterFont};">
       <div style="text-align:center;margin-bottom:10px;">
         <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">SURAT KUASA AHLI WARIS</h3>
-        <p style="margin:2px 0 0 0;font-size:13.5px;">Nomor : ${v(formData.nomorSurat)}</p>
+        <p class="nomor-surat-cetak" style="margin:2px 0 0 0;font-size:13.5px;text-transform:uppercase;">Nomor : ${v(formData.nomorSurat).toUpperCase()}</p>
       </div>
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:12px;font-size:13.5px;">
@@ -588,7 +589,7 @@ export default function AdminSuratSPT({
             <td style="vertical-align:top;text-align:center;">
               ${activeDesa}, ${tglFormatted}<br/><br/>
               <em>Dirigister di: Desa ${activeDesa}</em><br/>
-              Nomor: ${v(formData.nomorSurat)}<br/>
+              Nomor: ${v(formData.nomorSurat).toUpperCase()}<br/>
               Tanggal: ${tglFormatted}<br/>
               <strong>Kepala Desa ${activeDesa}</strong>
               <br/><br/><br/><br/>
@@ -618,7 +619,7 @@ export default function AdminSuratSPT({
     <div style="width:210mm;min-height:297mm;padding:25mm 20mm 20mm 20mm;box-sizing:border-box;position:relative;background:white;font-family:${letterFont};">
       <div style="text-align:center;margin-bottom:20px;">
         <h3 style="text-decoration:underline;margin:0;font-size:15.5px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">LAMPIRAN SURAT KUASA AHLI WARIS</h3>
-        <p style="margin:2px 0 0 0;font-size:13.5px;">Nomor : ${v(formData.nomorSurat)}</p>
+        <p class="nomor-surat-cetak" style="margin:2px 0 0 0;font-size:13.5px;text-transform:uppercase;">Nomor : ${v(formData.nomorSurat).toUpperCase()}</p>
       </div>
 
       <h4 style="font-size:13px;margin-bottom:10px;">A. Lanjutan Daftar Ahli Waris (No. 6 dst)</h4>

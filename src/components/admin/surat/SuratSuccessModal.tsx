@@ -57,7 +57,7 @@ export default function SuratSuccessModal({
                 </div>
                 <div className="flex justify-between items-center gap-2">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Nomor Surat</span>
-                  <span className="font-mono text-sm font-bold text-emerald-700 dark:text-emerald-400">{nomorSurat}</span>
+                  <span className="font-mono text-sm font-bold text-emerald-700 dark:text-emerald-400 uppercase nomor-surat-cetak">{nomorSurat.toUpperCase()}</span>
                 </div>
                 <div className="flex justify-between items-center gap-2 border-t border-slate-200 dark:border-slate-700 pt-2.5">
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold flex items-center gap-1">

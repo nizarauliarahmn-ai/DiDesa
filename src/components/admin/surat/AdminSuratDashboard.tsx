@@ -536,7 +536,7 @@ export default function AdminSuratDashboard({
                 <p>:</p>
               </div>
               <div className="flex-1">
-                <p className="font-mono font-bold">{surat.nomor}</p>
+                <p className="font-mono font-bold uppercase nomor-surat-cetak">{surat.nomor.toUpperCase()}</p>
                 <p>Penting</p>
                 <p>-</p>
                 <p className="font-bold uppercase text-emerald-950">{surat.keperluan || (code === 'UND' ? 'UNDANGAN PERTEMUAN KOORDINASI' : 'PERMOHONAN RESMI / KOORDINASI')}</p>
@@ -613,7 +613,7 @@ export default function AdminSuratDashboard({
                   }
                 })()}
               </h6>
-              <p className="text-[14px] font-mono mt-1">Nomor: {surat.nomor}</p>
+              <p className="text-[14px] font-mono mt-1 uppercase nomor-surat-cetak">Nomor: {surat.nomor.toUpperCase()}</p>
             </div>
 
             
@@ -994,6 +994,7 @@ export default function AdminSuratDashboard({
               .printable-table-area, .printable-table-area * {
                 visibility: visible !important;
               }
+              .nomor-surat-cetak { text-transform: uppercase !important; }
               
               /* Padding dalam area cetak agar tabel tidak mepet tepi */
               .printable-table-area {
@@ -1361,7 +1362,7 @@ export default function AdminSuratDashboard({
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
-                        <span className={isCancelled ? 'line-through text-gray-500 dark:text-slate-400' : ''}>{surat.nomor}</span>
+                        <span className={isCancelled ? 'line-through text-gray-500 dark:text-slate-400' : 'uppercase'}>{surat.nomor.toUpperCase()}</span>
                         {isCancelled && (
                           <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">DIBATALKAN</span>
                         )}
@@ -1555,7 +1556,7 @@ export default function AdminSuratDashboard({
                     <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
                       <div>
                         <span className="text-gray-400 block text-xs">Nomor Surat</span>
-                        <span className="font-mono font-bold text-gray-900 dark:text-white break-all">{selectedSurat.nomor}</span>
+                        <span className="font-mono font-bold text-gray-900 dark:text-white break-all uppercase">{selectedSurat.nomor.toUpperCase()}</span>
                       </div>
                       <div>
                         <span className="text-gray-400 block text-xs">Jenis Surat</span>
@@ -1627,7 +1628,7 @@ export default function AdminSuratDashboard({
             <div>
               <h3 className="text-base font-bold text-gray-900 dark:text-white">Konfirmasi Batalkan Surat</h3>
               <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Apakah Anda yakin ingin membatalkan surat nomor <span className="font-mono font-bold text-orange-600 break-all">{suratToCancel.nomor}</span>? Surat akan tetap tercatat di arsip namun tidak dapat diedit atau dicetak lagi.
+                Apakah Anda yakin ingin membatalkan surat nomor <span className="font-mono font-bold text-orange-600 break-all uppercase">{suratToCancel.nomor.toUpperCase()}</span>? Surat akan tetap tercatat di arsip namun tidak dapat diedit atau dicetak lagi.
               </p>
             </div>
             <div className="flex gap-3">
@@ -1658,7 +1659,7 @@ export default function AdminSuratDashboard({
             <div>
               <h3 className="text-base font-bold text-gray-900 dark:text-white">Konfirmasi Hapus Arsip Surat</h3>
               <p className="text-sm text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Apakah Anda yakin ingin menghapus arsip surat nomor <span className="font-mono font-bold text-red-600 break-all">{suratToDelete.nomor}</span>? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
+                Apakah Anda yakin ingin menghapus arsip surat nomor <span className="font-mono font-bold text-red-600 break-all uppercase">{suratToDelete.nomor.toUpperCase()}</span>? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
               </p>
             </div>
             <div className="flex gap-3">

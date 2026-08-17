@@ -151,6 +151,7 @@ export default function AdminSuratUndangan({
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
+        .nomor-surat-cetak { text-transform: uppercase !important; }
         .print-wrapper-container {
           transform: none !important;
           width: 100% !important;
@@ -1099,7 +1100,7 @@ export default function AdminSuratUndangan({
                       <tr>
                         <td className="w-20 font-normal py-0.5 align-top">Nomor</td>
                         <td className="w-4 text-center py-0.5 align-top">:</td>
-                        <td className="py-0.5 align-top">{nomorSurat}</td>
+                        <td className="py-0.5 align-top uppercase nomor-surat-cetak">{nomorSurat.toUpperCase()}</td>
                       </tr>
                       <tr>
                         <td className="font-normal py-0.5 align-top">Sifat</td>
@@ -1291,7 +1292,7 @@ export default function AdminSuratUndangan({
                           <tr>
                             <td className="w-28 font-normal py-0.5">Nomor Surat</td>
                             <td className="w-4 text-center py-0.5">:</td>
-                            <td className="py-0.5">{nomorSurat}</td>
+                            <td className="py-0.5 uppercase nomor-surat-cetak">{nomorSurat.toUpperCase()}</td>
                           </tr>
                           <tr>
                             <td className="font-normal py-0.5">Tanggal Surat</td>
@@ -1414,6 +1415,7 @@ export default function AdminSuratUndangan({
             margin: 0 !important;
 
           }
+          .nomor-surat-cetak { text-transform: uppercase !important; }
         }
       `}</style>
 

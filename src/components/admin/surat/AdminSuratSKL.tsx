@@ -346,6 +346,7 @@ export default function AdminSuratSKL({
                 width: 210mm; 
                 height: 297mm; 
               }
+              .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
         </head>
@@ -459,7 +460,7 @@ export default function AdminSuratSKL({
         <!-- JUDUL SURAT -->
         <div style="text-align:center;margin-bottom:10px;">
           <h2 style="font-size:14px;font-weight:bold;text-decoration:underline;margin:0 0 2px 0;text-transform:uppercase;">SURAT KETERANGAN LAHIR</h2>
-          <div style="font-size:12px;">Nomor: ${noSuratVal}</div>
+          <div class="nomor-surat-cetak" style="font-size:12px;text-transform:uppercase;">Nomor: ${noSuratVal.toUpperCase()}</div>
         </div>
 
         <p style="text-align:justify;line-height:1.3;margin-bottom:8px;font-size:12px;text-indent:30px;">

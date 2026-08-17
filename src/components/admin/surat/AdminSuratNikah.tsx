@@ -514,6 +514,7 @@ export default function AdminSuratNikah({
                       width: 210mm; 
                       height: 297mm; 
                     }
+                    .nomor-surat-cetak { text-transform: uppercase !important; }
                   }
                 </style>
               </head>
@@ -676,7 +677,7 @@ export default function AdminSuratNikah({
           ['KABUPATEN', v(formData.namaKabupaten).toUpperCase()]
         ])}
         <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PENGANTAR PERKAWINAN</h3>
-        <p style="text-align:center;margin-top:-6px;">Nomor: ${v(formData.nomorSurat)}</p>
+        <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
         <p>yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(P.nama)}</span>`],
@@ -986,6 +987,7 @@ export default function AdminSuratNikah({
             body { margin: 0; padding: 0; background: white !important; -webkit-print-color-adjust: exact; }
             .print\\:hidden { display: none !important; }
             .printable-area { display: block !important; }
+            .nomor-surat-cetak { text-transform: uppercase !important; }
           }
         `}} />
       </div>

@@ -105,6 +105,7 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
           .content-wrapper {
             padding-bottom: 35mm !important; /* Prevents text overlapping footer */
           }
+          .nomor-surat-cetak { text-transform: uppercase !important; }
         }
       </style>
     </head>

@@ -244,7 +244,7 @@ export default function LayananMandiri() {
         {/* Title */}
         <div className="text-center mb-6">
           <h6 className="font-bold underline uppercase text-sm">{surat.jenis.toUpperCase()}</h6>
-          <p className="text-xs font-mono">Nomor: {surat.nomor}</p>
+          <p className="text-xs font-mono uppercase">Nomor: {surat.nomor.toUpperCase()}</p>
         </div>
 
         {/* Content */}
@@ -518,7 +518,7 @@ export default function LayananMandiri() {
                           <tr key={letter.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
                             <td className="py-4">
                               {letter.status === 'Selesai' ? (
-                                <span className="font-mono font-bold text-gray-900 dark:text-white">{letter.nomor}</span>
+                                <span className="font-mono font-bold text-gray-900 dark:text-white uppercase">{letter.nomor.toUpperCase()}</span>
                               ) : (
                                 <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">Menunggu Persetujuan Admin</span>
                               )}
@@ -624,7 +624,7 @@ export default function LayananMandiri() {
             <div className="bg-white dark:bg-slate-900 px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between sticky top-0 z-10">
               <div>
                 <h3 className="font-bold text-gray-900 dark:text-white text-base">Cetak Mandiri Surat Resmi</h3>
-                <p className="text-[11px] text-gray-400 font-semibold mt-0.5">Nomor: {selectedLetter.nomor} &bull; Jenis: {selectedLetter.jenis}</p>
+                <p className="text-[11px] text-gray-400 font-semibold mt-0.5">Nomor: <span className="uppercase">{selectedLetter.nomor.toUpperCase()}</span> &bull; Jenis: {selectedLetter.jenis}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button 

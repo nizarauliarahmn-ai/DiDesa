@@ -499,6 +499,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       width: 210mm; 
                       height: 297mm; 
                     }
+                    .nomor-surat-cetak { text-transform: uppercase !important; }
                   }
                 </style>
               </head>
@@ -788,7 +789,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       a.remove();
       setTimeout(() => URL.revokeObjectURL(pdfUrl), 5000);
 
-      const message = `Assalamualaikum, berikut surat resmi ${desaName} untuk Bapak/Ibu ${selectedResident?.name || 'Warga'}\n\nNomor: ${nomorSurat}\nJenis: ${classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate)?.jenis || 'Surat Resmi'}\n\nFile PDF (${fileName}) sudah terunduh. Silakan diunggah/diteruskan sesuai keperluan. Terima kasih.`;
+      const message = `Assalamualaikum, berikut surat resmi ${desaName} untuk Bapak/Ibu ${selectedResident?.name || 'Warga'}\n\nNomor: ${nomorSurat.toUpperCase()}\nJenis: ${classifications.find(c => c.klasifikasi === selectedTemplate || c.id === selectedTemplate)?.jenis || 'Surat Resmi'}\n\nFile PDF (${fileName}) sudah terunduh. Silakan diunggah/diteruskan sesuai keperluan. Terima kasih.`;
       const waHref = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
       window.open(waHref, '_blank');
 
@@ -1782,7 +1783,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                                 <p>:</p>
                               </div>
                               <div className="flex-1">
-                                <p className="font-mono font-bold">{nomorSurat}</p>
+                                <p className="font-mono font-bold uppercase">{nomorSurat.toUpperCase()}</p>
                                 <p>Penting</p>
                                 <p>-</p>
                                 <p className="font-bold uppercase text-emerald-950">{keperluan || (selectedTemplate === 'UND' ? 'UNDANGAN PERTEMUAN KOORDINASI' : 'PERMOHONAN RESMI / KOORDINASI')}</p>
@@ -1908,7 +1909,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                             <h6 className="font-bold underline uppercase text-[16px] tracking-wide">
                               {selectedClass ? selectedClass.jenis : 'SURAT KETERANGAN'}
                             </h6>
-                            <p className="text-[14px] font-mono">Nomor: {nomorSurat}</p>
+                            <p className="text-[14px] font-mono uppercase nomor-surat-cetak">Nomor: {nomorSurat.toUpperCase()}</p>
                           </div>
                           <p className="text-justify leading-[1.15] mb-3">Yang bertanda tangan di bawah ini:</p>
                           <div className="pl-8 mb-4 space-y-1 text-[14px]">

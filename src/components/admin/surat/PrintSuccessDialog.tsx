@@ -35,7 +35,7 @@ export default function PrintSuccessDialog({
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Surat Berhasil Dicetak!</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-              {jenisSurat} dengan nomor <span className="font-mono font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-xs">{nomorSurat}</span> atas nama <strong className="text-slate-800 dark:text-slate-100 font-semibold">{namaWarga}</strong> telah berhasil diregistrasi dan dicetak.
+              {jenisSurat} dengan nomor <span className="font-mono font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-xs uppercase nomor-surat-cetak">{nomorSurat.toUpperCase()}</span> atas nama <strong className="text-slate-800 dark:text-slate-100 font-semibold">{namaWarga}</strong> telah berhasil diregistrasi dan dicetak.
             </p>
 
             <div className="space-y-2">

@@ -749,7 +749,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
                       <span className="text-[10px] text-gray-500 dark:text-slate-400 font-bold whitespace-nowrap">{letter.tanggal}</span>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 truncate">
-                      No: <span className="text-gray-900 dark:text-white font-extrabold">{letter.nomor}</span>
+                      No: <span className="text-gray-900 dark:text-white font-extrabold uppercase">{letter.nomor.toUpperCase()}</span>
                     </p>
                     <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
                       Pemohon: <span className="text-gray-900 dark:text-white font-extrabold">{letter.nama}</span>

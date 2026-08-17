@@ -498,6 +498,7 @@ export default function AdminSuratSKP({
               }
               tr { page-break-inside: avoid !important; }
               thead { display: table-header-group !important; }
+              .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
         </head>
@@ -599,7 +600,7 @@ export default function AdminSuratSKP({
       <!-- JUDUL SURAT -->
       <div style="text-align:center;margin-bottom:12px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN PINDAH</h3>
-        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear())}</p>
+        <p class="nomor-surat-cetak" style="margin:2px 0 0 0;font-size:14px;text-transform:uppercase;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear()).toUpperCase()}</p>
       </div>
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:6px;font-size:13.5px;">
@@ -757,7 +758,7 @@ export default function AdminSuratSKP({
         <!-- KOP LAMPIRAN -->
         <div style="text-align: center; margin-bottom: 24px;">
           <h3 style="margin: 0; font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">LAMPIRAN SURAT KETERANGAN PINDAH</h3>
-          <p style="margin: 4px 0; font-size: 13px; font-family: monospace;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear())}</p>
+          <p class="nomor-surat-cetak" style="margin: 4px 0; font-size: 13px; font-family: monospace; text-transform: uppercase;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear()).toUpperCase()}</p>
           <div style="margin: 10px auto; width: 100%; border-bottom: 1px solid #000;"></div>
           <p style="margin: 6px 0 2px 0; font-size: 13px;">Daftar pengikut / anggota keluarga yang ikut pindah dari penduduk atas nama:</p>
           <p style="margin: 2px 0; font-size: 14px; font-weight: bold; text-transform: uppercase;">${v(formData.nama)} (NIK: ${v(formData.nik)})</p>
@@ -790,7 +791,7 @@ export default function AdminSuratSKP({
         </div>
 
         <p style="text-align:justify; line-height:1.25; margin-bottom:24px; font-size:13px; font-style: italic;">
-          * Lampiran ini merupakan satu kesatuan yang tidak terpisahkan dari Surat Keterangan Pindah Nomor: ${v(formData.nomorSurat)}.
+          * Lampiran ini merupakan satu kesatuan yang tidak terpisahkan dari Surat Keterangan Pindah Nomor: ${v(formData.nomorSurat).toUpperCase()}.
         </p>
 
         <!-- TANDA TANGAN LEMBAR 2 -->

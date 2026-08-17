@@ -385,6 +385,7 @@ export default function AdminSuratSKD({
                 width: 210mm; 
                 height: 297mm; 
               }
+              .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
         </head>
@@ -475,7 +476,7 @@ export default function AdminSuratSKD({
       <!-- JUDUL SURAT -->
       <div style="text-align:center;margin-bottom:15px;">
         <h3 style="text-decoration:underline;margin:0;font-size:16px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">SURAT KETERANGAN DOMISILI PERORANGAN</h3>
-        <p style="margin:2px 0 0 0;font-size:14px;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear())}</p>
+        <p class="nomor-surat-cetak" style="margin:2px 0 0 0;font-size:14px;text-transform:uppercase;">Nomor : ${v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear()).toUpperCase()}</p>
       </div>
 
       <p style="text-align:justify;line-height:1.15;margin-bottom:10px;font-size:14px;">

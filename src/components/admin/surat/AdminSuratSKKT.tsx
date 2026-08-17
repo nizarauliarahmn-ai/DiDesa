@@ -357,7 +357,7 @@ export default function AdminSuratSKKT({
         <!-- JUDUL SURAT -->
         <div style="text-align:center; margin-top:5px; margin-bottom:16px;">
           <h3 style="text-decoration:underline; margin:0; font-size:14px; text-transform:uppercase; font-weight:bold; letter-spacing:0.5px;">SURAT PERNYATAAN PENGUASAAN FISIK BIDANG TANAH</h3>
-          <p style="margin:3px 0 0 0; font-size:12px;">Nomor : ${formData.nomorSurat || '...'}</p>
+          <p class="nomor-surat-cetak" style="margin:3px 0 0 0; font-size:12px; text-transform:uppercase;">Nomor : ${(formData.nomorSurat || '...').toUpperCase()}</p>
         </div>
 
         <p style="margin-bottom:6px;">Yang bertanda tangan di bawah ini :</p>
@@ -632,6 +632,7 @@ export default function AdminSuratSKKT({
                 color: #64748b;
                 text-align: left;
               }
+              .nomor-surat-cetak { text-transform: uppercase !important; }
             </style>
           </head>
           <body>
