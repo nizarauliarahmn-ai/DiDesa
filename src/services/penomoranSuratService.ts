@@ -3,26 +3,28 @@ import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { DEFAULT_SURAT_FORMAT } from '../utils/generateSuratNumber';
 
 // ============================================================================
-// Layanan Penomoran Surat Berbasis Nomor Aktif dari DB (SMART GAP-FILLING)
+// Layanan Penomoran Surat Berbasis DAFTAR SURAT AKTIF dari DB (MAX + 1)
 // ----------------------------------------------------------------------------
 // ATURAN:
-//  - Nomor berikutnya diambil dari NOMOR URUT TERKECIL YANG BELUM DIPAKAI
-//    (gap-filling). Contoh:
-//    - Surat aktif: 001-006, lalu 003 dihapus  => berikutnya 003 (sela diisi).
-//    - Surat aktif: 001-005 (006 dihapus)       => berikutnya 006.
+//  - SUMBER NOMOR = Daftar Surat Aktif yang TAMPIL di UI (tabel `surat`),
+//    hanya baris berstatus aktif (BUKAN 'Dibatalkan'/'Dihapus').
+//  - Nomor berikutnya = (NOMOR URUT TERTINGGI yang tampil di daftar aktif) + 1.
+//    Contoh:
 //    - Surat aktif: 001-006 (semua lengkap)     => berikutnya 007.
-//  - Nomor yang Dibatalkan/Dihapus diabaikan sehingga celahnya otomatis diisi.
+//    - Surat aktif: 001-006, 003 dihapus        => berikutnya 007.
+//    - Daftar kosong                            => berikutnya 001.
 //  - PENOMORAN GLOBAL (satu urutan untuk SEMUA jenis surat) sesuai kebijakan
 //    desa. Deteksi tidak memfilter per-klasifikasi agar tidak kembali ke 001.
 //  - Deteksi dibaca dari NOMOR yang tersimpan (sama seperti yang tampil di
 //    daftar surat), bukan dari created_at. Tahun disaring dari angka yang
-//    tertanam di nomor itu sendiri (mis. "/2026").
+//    tertanam di nomor itu sendiri (mis. "/2026") HANYA bila "Reset Setiap
+//    Awal Tahun" aktif; default = seluruh daftar lintas tahun ikut dihitung.
 //  - Klasifikasi lama yang berganti nama tetap cocok via alias (SKD->SDP,
 //    SKP<->SPH) agar nomor lama tetap terdeteksi.
 //  - Ekstraksi urutan memakai MULTI-STRATEGY SMART EXTRACTOR (format-index,
 //    angka-diantara-garis-miring, deretan-angka, scan segmen) sehingga tahan
 //    variasi kapital/kecil, spasi, atau letak segmen di data lama.
-//  - Jika query gagal => kembalikan 0 agar caller jatuh ke fallback counter lama.
+//  - Jika query gagal => fallback ke counter lama.
 //
 // Tabel nyata di DB: `surat` (bukan `surats`). Nomor disimpan TERFORMAT, misal
 // "140/061/WHI-SU/2025", jadi sequence diekstrak dari string nomor berdasarkan
@@ -234,20 +236,6 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
   return sequences;
 }
 
-/**
- * Nomor urut berikutnya = NOMOR URUT TERKECIL YANG BELUM DIPAKAI (gap-filling).
- * - Jika ada celah (mis. 003 dihapus), celah terkecil diisi.
- * - Jika semua lengkap, lanjut ke MAX + 1.
- * - Jika query gagal => 0 (caller fallback ke counter lama).
- */
-export async function getNextAvailableNomorUrut(klasifikasi: string, tahun?: number): Promise<number> {
-  const sequences = await getAllActiveNomorUrut(klasifikasi, tahun);
-  const used = new Set(sequences);
-  let candidate = 1;
-  while (used.has(candidate)) candidate++;
-  return candidate;
-}
-
 // ============================================================================
 // SINGLE SOURCE OF TRUTH (SSOT) — SATU-SATUNYA TEMPAT KALKULASI NOMOR URUT
 // ----------------------------------------------------------------------------
@@ -255,8 +243,10 @@ export async function getNextAvailableNomorUrut(klasifikasi: string, tahun?: num
 //  - SEMUA modul (kartu jenis surat, form pembuat, header modal, pratinjau,
 //    payload simpan) WAJIB mengambil nomor urut berikutnya dari sini.
 //    DILARANG menghitung urutan sendiri di luar file ini.
+//  - SUMBER NOMOR = DAFTAR SURAT AKTIF yang tampil di UI (tabel `surat`),
+//    hanya baris berstatus aktif (BUKAN Dibatalkan/Dihapus).
+//  - Nomor berikutnya = (NOMOR URUT TERTINGGI di daftar aktif) + 1.
 //  - Urutan GLOBAL: satu urutan untuk SEMUA jenis surat (kebijakan desa).
-//  - Gap-filling: nomor urut terkecil yang belum dipakai di daftar surat aktif.
 //  - "Reset Setiap Awal Tahun" hanya aktif bila toggle disimpan EKSPLISIT ON
 //    (`surat_autoreset === 'true'`); default = meneruskan nomor dari daftar.
 // ============================================================================
@@ -298,8 +288,10 @@ export function setLastGlobalSequenceYear(year: number): void {
 
 /**
  * HITUNGAN TUNGGAL nomor urut berikutnya (SSOT, async berbasis DB).
+ * SUMBER = Daftar Surat Aktif yang tampil di UI (tabel `surat`).
  * 1) Tahun berganti + autoReset ON  => 1 (mulai siklus tahun baru).
- * 2) DB  => nomor urut terkecil yang belum dipakai (gap-filling, global).
+ * 2) DB  => (NOMOR URUT TERTINGGI di daftar surat aktif) + 1.
+ *          Daftar kosong / tanpa tahun tersaring => 1 ("001").
  * 3) Query gagal                    => fallback counter lama.
  */
 export async function getNextNomorSurat(klasifikasi: string, year?: number): Promise<number> {
@@ -311,8 +303,9 @@ export async function getNextNomorSurat(klasifikasi: string, year?: number): Pro
   }
 
   try {
-    const nextAvailable = await getNextAvailableNomorUrut(klasifikasi, currentYear);
-    if (nextAvailable > 0) return nextAvailable;
+    const activeSequences = await getAllActiveNomorUrut(klasifikasi, currentYear);
+    const maxDisplayedNumber = activeSequences.length > 0 ? Math.max(...activeSequences) : 0;
+    return maxDisplayedNumber + 1;
   } catch (e) {
     console.error('getNextNomorSurat: query gagal, fallback ke counter lama:', e);
   }
