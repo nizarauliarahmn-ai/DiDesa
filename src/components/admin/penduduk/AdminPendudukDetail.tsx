@@ -441,8 +441,11 @@ export default function AdminPendudukDetail({
         </div>
       )}
 
-      {/* HEADER PROFILE — Top-Bar Lebar Penuh (Collapsible Sticky) */}
-      <div className={`w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-wrap items-center justify-between transition-all duration-300 ${isScrolled ? 'sticky top-16 z-30 p-2 sm:p-3 gap-2' : 'p-4 sm:p-6 gap-4'}`}>
+      {/* UNIFIED STICKY CONTAINER — Kartu Profil + Tab Navigasi */}
+      <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-sm transition-all duration-300 ease-out mb-6 overflow-hidden">
+        {/* AREA HEADER PROFIL (MORPHING CONTENT) */}
+        <div className={`transition-all duration-300 ease-out px-6 ${isScrolled ? 'py-2.5 bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-700/50' : 'py-6'}`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Sisi Kiri: Back + Avatar + Nama + Badges */}
         <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <button 
@@ -586,11 +589,12 @@ export default function AdminPendudukDetail({
             </button>
           )}
         </div>
-      </div>
+          </div>
+        </div>
 
-      {/* 5-Tab Navigation */}
-      <div className={`sticky z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md pt-2.5 pb-1 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible ${isScrolled ? 'top-[136px]' : 'top-20'}`}>
-        <div className="flex gap-1.5 min-w-max">
+        {/* AREA TAB NAVIGASI (SELALU MENEMPEL DI DASAR KONTAINER STICKY) */}
+        <div className="px-6 py-2 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700/50 flex items-center gap-2 overflow-x-auto">
+          <div className="flex gap-1.5 min-w-max">
           {DETAIL_TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = detailTab === tab.id;
@@ -610,6 +614,7 @@ export default function AdminPendudukDetail({
               </button>
             );
           })}
+          </div>
         </div>
       </div>
 
