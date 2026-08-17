@@ -11,6 +11,9 @@ interface GlobalUpdate {
   version: string;
   release_date: string;
   type: string;
+  cta_route?: string;
+  cta_label?: string;
+  is_popup?: number;
 }
 
 interface Props {
@@ -18,6 +21,30 @@ interface Props {
   /** Scope guard: hanya aktif di Dashboard Admin / Super Admin Desa (mode admin & sudah login). */
   enabled?: boolean;
 }
+
+/** Baca daftar ID log pembaruan yang sudah dilihat pengguna dari localStorage. */
+const readSeenIds = (): string[] => {
+  try {
+    const raw = localStorage.getItem('seen_changelog_ids');
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+/** Tandai log pembaruan sebagai sudah dilihat (dedup 1x per log). */
+const markSeen = (id: string, version?: string) => {
+  const seen = readSeenIds();
+  if (!seen.includes(id)) {
+    seen.push(id);
+    localStorage.setItem('seen_changelog_ids', JSON.stringify(seen));
+  }
+  // Kunci lama (backward-compat) agar pengguna yang pernah menutup pop-up
+  // versi sama tidak melihatnya lagi.
+  if (version) {
+    localStorage.setItem(`didesa_seen_announcement_${id}_${version}`, 'true');
+  }
+};
 
 export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled = false }) => {
   const [latestUpdate, setLatestUpdate] = useState<GlobalUpdate | null>(null);
@@ -58,16 +85,16 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
       try {
         const { data, error } = await supabase
           .from('global_updates')
-          .select('id, version, title, content, release_date, type')
+          .select('id, version, title, content, release_date, type, cta_route, cta_label, is_popup')
           .eq('is_active', 1)
+          .eq('is_popup', 1)
           .order('release_date', { ascending: false })
           .limit(1);
         
         if (!error && data && data.length > 0) {
           const latest = data[0];
-          // Tampil 1 kali per versi: kunci unik id + versi.
-          const storageKey = `didesa_seen_announcement_${latest.id}_${latest.version}`;
-          const alreadySeen = localStorage.getItem(storageKey) === 'true';
+          // Tampil 1 kali per log: cek ID pada seen_changelog_ids (localStorage array).
+          const alreadySeen = readSeenIds().includes(latest.id);
           
           if (!alreadySeen) {
             setLatestUpdate(latest);
@@ -111,10 +138,29 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
 
   const handleClose = () => {
     if (latestUpdate) {
-      const storageKey = `didesa_seen_announcement_${latestUpdate.id}_${latestUpdate.version}`;
-      localStorage.setItem(storageKey, 'true');
+      markSeen(latestUpdate.id, latestUpdate.version);
     }
     setIsVisible(false);
+  };
+
+  /** Tombol utama CTA: tandai terlihat lalu navigasi ke fitur terkait. */
+  const handlePrimaryAction = () => {
+    if (latestUpdate) {
+      markSeen(latestUpdate.id, latestUpdate.version);
+    }
+    setIsVisible(false);
+    if (latestUpdate?.cta_route) {
+      window.location.href = latestUpdate.cta_route;
+    }
+  };
+
+  /** Link sekunder: buka modul Log Pembaruan (changelog) SaaS. */
+  const handleSeeAllUpdates = () => {
+    if (latestUpdate) {
+      markSeen(latestUpdate.id, latestUpdate.version);
+    }
+    setIsVisible(false);
+    window.location.href = `${window.location.origin}/?mode=admin&admin_tab=log_pembaruan`;
   };
 
   const getIcon = (type: string) => {
@@ -215,13 +261,19 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
             </div>
 
             {/* Footer */}
-            <div className="p-6 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+            <div className="p-6 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
               <button
-                onClick={handleClose}
+                onClick={handleSeeAllUpdates}
+                className="px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer"
+              >
+                Lihat Semua Log Pembaruan
+              </button>
+              <button
+                onClick={latestUpdate.cta_route ? handlePrimaryAction : handleClose}
                 className="px-8 py-3 text-white rounded-xl font-bold shadow-lg dark:shadow-none transition-all active:scale-95"
                 style={{ backgroundColor: globalColor, boxShadow: `0 4px 12px ${globalColor}33` }}
               >
-                Mengerti & Lanjutkan
+                {latestUpdate.cta_route && latestUpdate.cta_label ? latestUpdate.cta_label : 'Mengerti & Lanjutkan'}
               </button>
             </div>
           </motion.div>

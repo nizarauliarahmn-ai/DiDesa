@@ -3,7 +3,8 @@ import {
   Sparkles, Plus, Edit3, Trash2, Rocket, ShieldCheck, Zap, Info, 
   Search, RefreshCw, Eye, CheckCircle2, Clock, Globe,
   FileText, X, Tag, Calendar, Bold, Italic, Heading2, Heading3,
-  List, ListOrdered, Quote, Code, Minus, Wand2, Strikethrough
+  List, ListOrdered, Quote, Code, Minus, Wand2, Strikethrough,
+  Megaphone
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase } from '../../utils/supabase';
@@ -20,6 +21,9 @@ export interface GlobalUpdateItem {
   type: 'feature' | 'fix' | 'improvement' | string;
   is_active: number; // 1 = Active, 0 = Inactive / Draft
   created_at?: string;
+  cta_route?: string;
+  cta_label?: string;
+  is_popup?: number; // 1 = tampil sebagai Pop-up pengumuman utama
 }
 
 export const AdminSaaSGlobalUpdates: React.FC = () => {
@@ -41,6 +45,9 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
     type: 'feature' as 'feature' | 'fix' | 'improvement',
     release_date: new Date().toISOString().split('T')[0],
     is_active: 1,
+    is_popup: 0,
+    cta_route: '',
+    cta_label: '',
     content: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,6 +144,9 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
       type: 'feature',
       release_date: new Date().toISOString().split('T')[0],
       is_active: 1,
+      is_popup: 0,
+      cta_route: '',
+      cta_label: '',
       content: '### ✨ Apa yang baru di versi ini?\n\n- **Fitur Baru**: Deskripsi fitur utama yang ditambahkan...\n- **Peningkatan**: Optimasi kecepatan halaman kependudukan...\n- **Perbaikan**: Perbaikan sistem cetak surat.'
     });
     setActiveTabForm('write');
@@ -151,6 +161,9 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
       type: (item.type as 'feature' | 'fix' | 'improvement') || 'feature',
       release_date: item.release_date || new Date().toISOString().split('T')[0],
       is_active: item.is_active ?? 1,
+      is_popup: item.is_popup ?? 0,
+      cta_route: item.cta_route || '',
+      cta_label: item.cta_label || '',
       content: item.content || ''
     });
     setActiveTabForm('write');
@@ -173,6 +186,9 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
         type: formData.type,
         release_date: formData.release_date,
         is_active: Number(formData.is_active),
+        is_popup: Number(formData.is_popup),
+        cta_route: formData.cta_route?.trim() || null,
+        cta_label: formData.cta_label?.trim() || null,
         content: formData.content
       };
 
@@ -505,6 +521,12 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                       </span>
                     )}
 
+                    {item.is_popup === 1 && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-fuchsia-100 dark:bg-fuchsia-950/60 text-fuchsia-700 dark:text-fuchsia-400 border border-fuchsia-200 dark:border-fuchsia-800">
+                        <Megaphone size={11} /> Pop-up Utama
+                      </span>
+                    )}
+
                     {index === 0 && (
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 text-white uppercase tracking-wider shadow-xs">
                         Rilis Terbaru
@@ -717,6 +739,59 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                   <div className={`w-4 h-4 rounded-full bg-white transition-transform ${formData.is_active === 1 ? 'translate-x-6' : 'translate-x-0'}`} />
                 </button>
               </div>
+
+              {/* Pop-up Pengumuman Utama */}
+              <div className="flex items-center justify-between p-4 bg-fuchsia-50/60 dark:bg-fuchsia-950/20 rounded-2xl border border-fuchsia-100 dark:border-fuchsia-900/40">
+                <div className="space-y-0.5">
+                  <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Megaphone size={14} className="text-fuchsia-600 dark:text-fuchsia-400" />
+                    Pop-up Pengumuman Utama
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Jika aktif, log terbaru ini otomatis tampil sebagai pop-up "Apa Yang Baru" ke seluruh akun desa (1x per pengguna).
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, is_popup: formData.is_popup === 1 ? 0 : 1 })}
+                  className={`w-12 h-6 rounded-full transition-colors p-1 relative cursor-pointer ${formData.is_popup === 1 ? 'bg-fuchsia-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                >
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${formData.is_popup === 1 ? 'translate-x-6' : 'translate-x-0'}`} />
+                </button>
+              </div>
+
+              {/* CTA (Tombol Tindakan Pop-up) */}
+              {formData.is_popup === 1 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Tautan Tombol Utama (CTA Route)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.cta_route}
+                      onChange={(e) => setFormData({ ...formData, cta_route: e.target.value })}
+                      placeholder="misal: /?admin_tab=surat"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">Navigasi internal saat tombol utama pop-up ditekan.</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Teks Tombol Utama (CTA Label)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.cta_label}
+                      onChange={(e) => setFormData({ ...formData, cta_label: e.target.value })}
+                      placeholder="misal: Coba Buat Surat"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">Kosongkan jika hanya ingin tombol "Mengerti & Lanjutkan".</p>
+                  </div>
+                </div>
+              )}
 
               {/* Detail Content (Write / Preview Tabs) */}
               {/* Detail Content (Word-Style Rich Editor + Tabs) */}

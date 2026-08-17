@@ -46,6 +46,9 @@ export const globalUpdatesTable = pgTable("global_updates", {
   releaseDate: text("release_date").notNull(),
   type: text("type").notNull(), // 'feature', 'fix', 'improvement'
   isActive: integer("is_active").default(1),
+  ctaRoute: text("cta_route"),
+  ctaLabel: text("cta_label"),
+  isPopup: integer("is_popup").default(0),
 });
 
 export const aiUsageTable = pgTable("ai_usage", {
@@ -160,7 +163,10 @@ if (databaseUrl) {
         version TEXT NOT NULL,
         release_date TEXT NOT NULL,
         type TEXT NOT NULL,
-        is_active INTEGER DEFAULT 1
+        is_active INTEGER DEFAULT 1,
+        cta_route TEXT,
+        cta_label TEXT,
+        is_popup INTEGER DEFAULT 0
       );
 
       CREATE TABLE IF NOT EXISTS global_settings (
