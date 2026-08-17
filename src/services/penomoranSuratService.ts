@@ -12,6 +12,11 @@ import { DEFAULT_SURAT_FORMAT } from '../utils/generateSuratNumber';
 //    - Surat aktif: 001-005 (006 dihapus)       => berikutnya 006.
 //    - Surat aktif: 001-006 (semua lengkap)     => berikutnya 007.
 //  - Nomor yang Dibatalkan/Dihapus diabaikan sehingga celahnya otomatis diisi.
+//  - Deteksi dibaca dari NOMOR yang tersimpan (sama seperti yang tampil di
+//    daftar surat), bukan dari created_at. Tahun disaring dari angka yang
+//    tertanam di nomor itu sendiri (mis. "/2026").
+//  - Klasifikasi lama yang berganti nama tetap cocok via alias (SKD->SDP,
+//    SKP<->SPH) agar nomor lama tetap terdeteksi.
 //  - Jika query gagal => kembalikan 0 agar caller jatuh ke fallback counter lama.
 //
 // Tabel nyata di DB: `surat` (bukan `surats`). Nomor disimpan TERFORMAT, misal
@@ -30,23 +35,70 @@ function getSequenceIndexFromFormat(): number {
   return idx >= 0 ? idx : 1;
 }
 
+function getYearIndexFromFormat(): number {
+  const formatTemplate = localStorage.getItem('surat_format') || DEFAULT_SURAT_FORMAT;
+  const segs = formatTemplate.split('/');
+  const idx = segs.findIndex(s => s.includes('[TAHUN]') || s.includes('[TAHUN_2D]'));
+  return idx >= 0 ? idx : segs.length - 1;
+}
+
+/**
+ * Ambil tahun yang tertanam DI DALAM nomor surat (mis. ".../2026").
+ * Deteksi ini mensejajarkan penomoran dengan angka yang TAMPAK di daftar surat,
+ * alih-alih mengandalkan `created_at` yang bisa beda tahun (backdate/timezone).
+ * Mengembalikan null jika tahun tidak bisa ditentukan (format kustom tanpa [TAHUN]).
+ */
+export function extractYearFromNomor(nomor: string): number | null {
+  const parts = parseNomorParts(nomor);
+  const yearIdx = getYearIndexFromFormat();
+  const raw = parts[yearIdx] || '';
+  const m4 = raw.match(/^(\d{4})$/);
+  if (m4) return parseInt(m4[1], 10);
+  const m2 = raw.match(/^(\d{2})$/);
+  if (m2) return 2000 + parseInt(m2[1], 10);
+  for (const p of parts) {
+    const mm = p.match(/^(\d{4})$/);
+    if (mm) return parseInt(mm[1], 10);
+  }
+  return null;
+}
+
+// Alias klasifikasi untuk kode lama yang pernah dipakai sebelum migrasi nama.
+// Contoh: SKD -> SDP (SK Domisili), SKP <-> SPH, dst. Jadi nomor lama seperti
+// "WHI-SKD" tetap terdeteksi saat klasifikasi sekarang "SDP".
+const KLASIFIKASI_ALIASES: Record<string, string[]> = {
+  'SDP': ['SKD', 'SKDPR', 'SKDP'],
+  'SKD': ['SDP', 'SKDPR', 'SKDP'],
+  'SKP': ['SPH'],
+  'SPH': ['SKP'],
+};
+
+export function nomorMatchesKlasifikasi(nomor: string, klasifikasi: string): boolean {
+  const k = (klasifikasi || '').toUpperCase().trim();
+  if (!k) return true;
+  const aliases = new Set([k, ...(KLASIFIKASI_ALIASES[k] || [])]);
+  const parts = parseNomorParts(nomor);
+  for (const p of parts) {
+    const token = (p.split('-').pop() || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
+    if (token && aliases.has(token)) return true;
+  }
+  return false;
+}
+
 export function extractSequenceFromNomor(nomor: string): number {
   const parts = parseNomorParts(nomor);
   const seqIdx = getSequenceIndexFromFormat();
   const raw = parts[seqIdx] || '';
   const m = raw.match(/^\d+/);
-  return m ? parseInt(m[0], 10) : 0;
-}
-
-export function nomorMatchesKlasifikasi(nomor: string, klasifikasi: string): boolean {
-  const k = (klasifikasi || '').toUpperCase();
-  if (!k) return true;
-  const parts = parseNomorParts(nomor);
-  for (const p of parts) {
-    const token = (p.split('-').pop() || '').replace(/[^A-Z0-9]/g, '').toUpperCase();
-    if (token === k) return true;
+  if (m) return parseInt(m[0], 10);
+  // Fallback: pindai segmen numerik yang bukan tahun.
+  const yearIdx = getYearIndexFromFormat();
+  for (let i = 0; i < parts.length; i++) {
+    if (i === yearIdx) continue;
+    const mm = parts[i].match(/^(\d+)$/);
+    if (mm) return parseInt(mm[1], 10);
   }
-  return false;
+  return 0;
 }
 
 /**
@@ -73,29 +125,35 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
   const tenantId = await resolveCurrentTenant();
   if (!tenantId) return [];
   const targetYear = tahun || new Date().getFullYear();
-  const startOfYear = new Date(targetYear, 0, 1).toISOString();
-  const endOfYear = new Date(targetYear, 11, 31, 23, 59, 59, 999).toISOString();
 
+  // Sumber deteksi = tabel `surat` yang SAMA dengan daftar surat (daftar surat
+  // menampilkan SEMUA tahun tanpa filter). TIDAK memakai filter `created_at`
+  // karena tahun yang tertanam di nomor (mis. "/2026") lebih sesuai dengan angka
+  // yang terlihat di daftar; filter created_at bisa melewatkan surat backdate/
+  // lintas tahun sehingga penomoran "malah kembali ke 1".
   const { data, error } = await supabase
     .from('surat')
     .select('nomor')
     .eq('tenant_id', tenantId)
-    // Hanya surat aktif: tolak yang dibatalkan/dihapus.
-    // CATATAN: tabel `surat` TIDAK punya kolom is_deleted (lihat SCHEMA_SUPABASE.sql),
-    // jadi filter is_deleted dihapus agar query tidak error -> tidak jatuh ke counter lama.
+    // Dua cara penghapusan yang harus dihormati:
+    //  1) Hard delete => baris terhapus dari DB (tidak ikut terdeteksi).
+    //  2) Batal/cancel => status 'Dibatalkan' -> DITOLAK agar nomornya diisi ulang.
     .neq('status', 'Dibatalkan')
     .neq('status', 'Dihapus')
-    .gte('created_at', startOfYear)
-    .lte('created_at', endOfYear)
     .limit(5000);
 
   if (error) throw error;
 
   const sequences: number[] = [];
   for (const row of data || []) {
-    if (!row?.nomor) continue;
-    if (!nomorMatchesKlasifikasi(String(row.nomor), klasifikasi)) continue;
-    const seq = extractSequenceFromNomor(String(row.nomor));
+    const nomorStr = String(row?.nomor || '');
+    if (!nomorStr) continue;
+    if (!nomorMatchesKlasifikasi(nomorStr, klasifikasi)) continue;
+    // Batasi per tahun berdasarkan tahun yang tertanam DI NOMOR itu sendiri.
+    // Jika tahun tidak bisa ditentukan, surat tetap dihitung (tidak dibuang).
+    const nomorYear = extractYearFromNomor(nomorStr);
+    if (nomorYear !== null && nomorYear !== targetYear) continue;
+    const seq = extractSequenceFromNomor(nomorStr);
     if (seq > 0) sequences.push(seq);
   }
   return sequences;
