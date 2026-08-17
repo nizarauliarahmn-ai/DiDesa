@@ -818,21 +818,22 @@ export default function AdminPendudukDetail({
                   {data.familyRelation}
                 </span>
               )}
+              {(() => {
+                const birthYear = data?.birthDate ? new Date(data.birthDate).getFullYear() : null;
+                const currentYear = new Date().getFullYear();
+                const age = birthYear ? Math.max(0, currentYear - birthYear) : (data?.age || 0);
+                const isLansia = age >= 60;
+                return isLansia ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200/80 flex items-center gap-1">
+                    <span>🧓</span> Lansia
+                  </span>
+                ) : null;
+              })()}
             </div>
             <div className={`flex items-center gap-2 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
-              <p className="font-mono text-gray-500 dark:text-slate-400 text-xs">
+              <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                 NIK: {data?.nik || "-"}
-              </p>
-              {data?.nik && (
-                <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center group relative cursor-help">
-                  <QRCodeSVG value={data.nik} size={20} />
-                  {/* Tooltip on hover */}
-                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-2 rounded-xl shadow-xl border border-gray-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                    <p className="text-[10px] font-bold text-gray-500 text-center mb-1 whitespace-nowrap">Scan Kunjungan Tamu</p>
-                    <QRCodeSVG value={data.nik} size={120} />
-                  </div>
-                </div>
-              )}
+              </span>
             </div>
           </div>
         </div>
