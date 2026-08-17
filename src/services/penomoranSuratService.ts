@@ -62,10 +62,11 @@ export async function getMaxActiveNomorUrut(klasifikasi: string, tahun?: number)
       .from('surat')
       .select('nomor')
       .eq('tenant_id', tenantId)
-      // Hanya surat aktif: tolak yang dibatalkan, dihapus, atau di-soft-delete (is_deleted=1)
+      // Hanya surat aktif: tolak yang dibatalkan/dihapus.
+      // CATATAN: tabel `surat` TIDAK punya kolom is_deleted (lihat SCHEMA_SUPABASE.sql),
+      // jadi filter is_deleted dihapus agar query tidak error -> tidak jatuh ke counter lama.
       .neq('status', 'Dibatalkan')
       .neq('status', 'Dihapus')
-      .or('is_deleted.is.null,is_deleted.eq.0')
       .gte('created_at', startOfYear)
       .lte('created_at', endOfYear)
       .limit(5000);
