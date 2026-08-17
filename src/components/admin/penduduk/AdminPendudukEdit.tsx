@@ -1263,7 +1263,7 @@ placeholder="Pilih ibu dari anggota KK..."
             </div>
 
             <div className="space-y-2">
-              {['Aktif', 'Pindah', 'Meninggal', 'Ganda'].map((status) => (
+              {['Aktif', 'Tetap', 'Pindah', 'Meninggal', 'Ganda', 'Sementara'].map((status) => (
                 <button
                   key={status}
                   type="button"

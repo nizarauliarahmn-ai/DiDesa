@@ -30,7 +30,7 @@ const AGAMA_OPTIONS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghu
 const MARITAL_OPTIONS = ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'];
 const DOMICILE_OPTIONS = ['Sesuai KTP', 'Tetap', 'Luar', 'Pindah', 'Tidak Sesuai'];
 const HUBUNGAN_OPTIONS = ['Kepala Keluarga', 'Istri', 'Anak', 'Menantu', 'Cucu', 'Orang Tua', 'Mertua', 'Famili Lain', 'Lainnya'];
-const STATUS_KEBERADAAN_OPTIONS = ['Aktif', 'Tetap', 'Pindah', 'Meninggal', 'Ganda'];
+const STATUS_KEBERADAAN_OPTIONS = ['Aktif', 'Tetap', 'Pindah', 'Meninggal', 'Ganda', 'Sementara'];
 const GOLDAR_OPTIONS = ['A', 'B', 'AB', 'O', 'Tidak Diketahui'];
 const PEKERJAAN_OPTIONS = [
   'Belum / Tidak Bekerja',
