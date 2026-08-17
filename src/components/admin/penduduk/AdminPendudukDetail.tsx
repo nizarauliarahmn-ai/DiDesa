@@ -25,6 +25,88 @@ const AID_PROGRAM_NOMINAL: Record<string, string> = {
   'Bantuan Pangan Non-Tunai': 'Rp 200.000',
 };
 
+const GENDER_OPTIONS = ['Laki-laki', 'Perempuan'];
+const AGAMA_OPTIONS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
+const MARITAL_OPTIONS = ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'];
+const DOMICILE_OPTIONS = ['Sesuai KTP', 'Tetap', 'Luar', 'Pindah', 'Tidak Sesuai'];
+const HUBUNGAN_OPTIONS = ['Kepala Keluarga', 'Istri', 'Anak', 'Menantu', 'Cucu', 'Orang Tua', 'Mertua', 'Famili Lain', 'Lainnya'];
+const STATUS_KEBERADAAN_OPTIONS = ['Aktif', 'Tetap', 'Pindah', 'Meninggal', 'Ganda'];
+const GOLDAR_OPTIONS = ['A', 'B', 'AB', 'O', 'Tidak Diketahui'];
+const PEKERJAAN_OPTIONS = [
+  'Belum / Tidak Bekerja',
+  'Mengurus Rumah Tangga',
+  'Pelajar / Mahasiswa',
+  'Pensiunan',
+  'Pegawai Negeri Sipil (PNS)',
+  'Tentara Nasional Indonesia (TNI)',
+  'Kepolisian RI (POLRI)',
+  'Karyawan Swasta',
+  'Karyawan BUMN / BUMD',
+  'Wiraswasta',
+  'Buruh Harian Lepas',
+  'Petani / Pekebun',
+  'Nelayan / Perikanan',
+  'Lainnya'
+];
+const PENDIDIKAN_OPTIONS = [
+  'Tidak/Belum Sekolah',
+  'SD / Sederajat',
+  'SMP / Sederajat',
+  'SMA / Sederajat',
+  'Diploma (D1/D2/D3)',
+  'Sarjana (S1)',
+  'Pascasarjana (S2/S3)'
+];
+
+function EditableField({
+  editing,
+  value,
+  onChange,
+  options,
+  type = 'text',
+  className = '',
+  inputClass = ''
+}: {
+  editing: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  options?: string[];
+  type?: string;
+  className?: string;
+  inputClass?: string;
+}) {
+  if (!editing) {
+    return (
+      <span className={className}>
+        {value ? value : <span className="italic text-gray-400 dark:text-slate-500">Belum Terisi</span>}
+      </span>
+    );
+  }
+  const baseInput = 'w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none';
+  if (options && options.length) {
+    const opts = value && !options.includes(value) ? [value, ...options] : options;
+    return (
+      <select
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        className={`${baseInput} cursor-pointer ${inputClass}`}
+      >
+        <option value="">Pilih...</option>
+        {opts.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+    );
+  }
+  return (
+    <input
+      type={type}
+      value={value || ''}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="Belum Terisi"
+      className={`${baseInput} ${inputClass}`}
+    />
+  );
+}
+
 export default function AdminPendudukDetail({ 
   onBack, 
   onEdit, 
@@ -45,6 +127,75 @@ export default function AdminPendudukDetail({
   const [isUpdatingAid, setIsUpdatingAid] = useState(false);
   const [aidError, setAidError] = useState("");
   const [viewLetter, setViewLetter] = useState<any>(null);
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editFormData, setEditFormData] = useState<any>({});
+
+  const startEditMode = () => {
+    setEditFormData({ ...data });
+    setIsEditMode(true);
+  };
+
+  const cancelEditMode = () => {
+    setEditFormData({});
+    setIsEditMode(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!data?.nik) return;
+    const form = editFormData || {};
+    const birthYear = new Date(form.birthDate || data?.birthDate || '').getFullYear();
+    const currentYear = new Date().getFullYear();
+    const age = isNaN(birthYear) ? (data?.age || 30) : Math.max(0, currentYear - birthYear);
+    const dbPayload = {
+      nik: form.nik ?? data.nik,
+      initials: form.initials ?? data?.initials ?? '',
+      name: form.name ?? data?.name ?? '',
+      no_kk: form.noKk ?? data?.noKk ?? '',
+      gender: form.gender ?? data?.gender ?? '',
+      birth_place: form.birthPlace ?? data?.birthPlace ?? '',
+      birth_date: form.birthDate ?? data?.birthDate ?? '',
+      age,
+      blood_type: form.bloodType ?? data?.bloodType ?? '',
+      religion: form.religion ?? data?.religion ?? '',
+      education: form.education ?? data?.education ?? '',
+      pendidikan_terakhir: form.education ?? data?.education ?? '',
+      no_whatsapp: form.noWhatsapp ?? data?.noWhatsapp ?? '',
+      dusun: form.dusun ?? data?.dusun ?? '',
+      status_domisili: form.domicileStatus ?? data?.domicileStatus ?? '',
+      domicile_status: form.domicileStatus ?? data?.domicileStatus ?? '',
+      job: form.job ?? data?.job ?? '',
+      pekerjaan: form.job ?? data?.job ?? '',
+      jenis_pekerjaan: form.job ?? data?.job ?? '',
+      pekerjaan_nama: form.job ?? data?.job ?? '',
+      address: form.address ?? data?.address ?? '',
+      rt: form.rt ?? data?.rt ?? '',
+      rw: form.rw ?? data?.rw ?? '',
+      desa: form.desa ?? data?.desa ?? '',
+      status: form.status ?? data?.status ?? 'Aktif',
+      status_keberadaan: form.statusKeberadaan ?? data?.status_keberadaan ?? form.status ?? data?.status ?? 'Tetap',
+      family_relation: form.familyRelation ?? data?.familyRelation ?? '',
+      father_name: form.fatherName ?? data?.fatherName ?? '',
+      mother_name: form.motherName ?? data?.motherName ?? '',
+      marital_status: form.maritalStatus ?? data?.maritalStatus ?? '',
+      status_dtks: form.statusDtks ?? data?.statusDtks ?? '',
+      disabilitas: form.disabilitas ?? data?.disabilitas ?? '',
+      golongan_darah: form.bloodType ?? data?.bloodType ?? '',
+      gender_color: form.gender === 'Perempuan' ? 'pink' : 'blue',
+      status_color: form.status === 'Meninggal' ? 'rose' : form.status === 'Pindah' ? 'amber' : 'emerald'
+    };
+    try {
+      const { error } = await supabase.from('residents').update(dbPayload).eq('nik', data.nik);
+      if (error) throw new Error(error.message || "Gagal memperbarui data");
+      showToast("✅ Data penduduk berhasil diperbarui", "success");
+      const merged = { ...data, ...form, age };
+      if (onUpdateResident) onUpdateResident(merged);
+      setIsEditMode(false);
+      setEditFormData({});
+    } catch (e: any) {
+      showToast(e.message || "Gagal menyimpan perubahan.", "error");
+    }
+  };
 
   const [confirmState, setConfirmState] = useState<{
     isOpen: boolean;
@@ -544,6 +695,31 @@ export default function AdminPendudukDetail({
 
         {/* Sisi Kanan: Action Buttons */}
         <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {isEditMode ? (
+            <>
+              <span className={`flex items-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-xs font-black uppercase tracking-wider ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}>
+                <Edit2 className="w-4 h-4" />
+                Mode Edit Aktif
+              </span>
+              <button
+                onClick={handleSaveEdit}
+                className={`rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+                title="Simpan Perubahan"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span className={isScrolled ? 'hidden' : ''}>Simpan Perubahan</span>
+              </button>
+              <button
+                onClick={cancelEditMode}
+                className={`rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+                title="Batal"
+              >
+                <X className="w-4 h-4" />
+                <span className={isScrolled ? 'hidden' : ''}>Batal</span>
+              </button>
+            </>
+          ) : (
+            <>
           <button 
             onClick={() => setIsPrinting(true)}
             className={`rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 transition-all flex items-center gap-2 text-xs font-bold border border-emerald-100 dark:border-emerald-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
@@ -567,7 +743,7 @@ export default function AdminPendudukDetail({
                 <FileText className="w-4 h-4" />
                 <span className={isScrolled ? 'hidden' : ''}>Surat</span>
               </button>
-              <button onClick={onEdit} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+              <button onClick={startEditMode} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
                 <Edit2 className="w-4 h-4" />
                 <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
               </button>
@@ -581,10 +757,12 @@ export default function AdminPendudukDetail({
               </button>
             </>
           ) : (
-            <button onClick={onEdit} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+            <button onClick={startEditMode} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
               <Edit2 className="w-4 h-4" />
               <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
             </button>
+          )}
+            </>
           )}
         </div>
           </div>
@@ -821,9 +999,16 @@ export default function AdminPendudukDetail({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Tempat, Tgl Lahir</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
-                        {data?.birthPlace || "Belum diisi"}, {data?.birthDate || "-"}
-                      </p>
+                      {isEditMode ? (
+                        <div className="mt-1 space-y-1.5">
+                          <EditableField editing value={editFormData.birthPlace || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthPlace: v }))} />
+                          <EditableField editing value={editFormData.birthDate || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthDate: v }))} type="date" />
+                        </div>
+                      ) : (
+                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
+                          {data?.birthPlace || "Belum diisi"}, {data?.birthDate || "-"}
+                        </p>
+                      )}
                       {data?.age && (
                         <span className="inline-block mt-1 text-[10px] font-black bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                           {data.age} Tahun
@@ -839,9 +1024,15 @@ export default function AdminPendudukDetail({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Jenis Kelamin</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">
-                        {data?.gender || "-"}
-                      </p>
+                      {isEditMode ? (
+                        <div className="mt-1">
+                          <EditableField editing value={editFormData.gender || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, gender: v }))} options={GENDER_OPTIONS} />
+                        </div>
+                      ) : (
+                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">
+                          {data?.gender || "-"}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -852,9 +1043,15 @@ export default function AdminPendudukDetail({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">No. WhatsApp</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 font-mono">
-                        {renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}
-                      </p>
+                      {isEditMode ? (
+                        <div className="mt-1">
+                          <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} />
+                        </div>
+                      ) : (
+                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 font-mono">
+                          {renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -878,12 +1075,19 @@ export default function AdminPendudukDetail({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Agama / Gol. Darah</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 flex items-center gap-2">
-                        <span>{data?.religion || "-"}</span>
-                        <span className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 px-1.5 py-0.5 rounded font-black border border-rose-200 dark:border-rose-800">
-                          Gol. {renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}
-                        </span>
-                      </p>
+                      {isEditMode ? (
+                        <div className="mt-1 space-y-1.5">
+                          <EditableField editing value={editFormData.religion || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, religion: v }))} options={AGAMA_OPTIONS} />
+                          <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} />
+                        </div>
+                      ) : (
+                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 flex items-center gap-2">
+                          <span>{data?.religion || "-"}</span>
+                          <span className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 px-1.5 py-0.5 rounded font-black border border-rose-200 dark:border-rose-800">
+                            Gol. {renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}
+                          </span>
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -894,9 +1098,15 @@ export default function AdminPendudukDetail({
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
-                        {renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}
-                      </p>
+                      {isEditMode ? (
+                        <div className="mt-1">
+                          <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} />
+                        </div>
+                      ) : (
+                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
+                          {renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -921,24 +1131,41 @@ export default function AdminPendudukDetail({
                     </div>
                     <div>
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Alamat Jalan / Dusun</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 leading-snug">
-                        {data?.address || "Belum ada alamat jalan"}
-                        {data?.dusun && <span className="text-emerald-700 dark:text-emerald-400 font-bold">, {data.dusun}</span>}
-                      </p>
+                      {isEditMode ? (
+                        <div className="mt-1.5 space-y-1.5">
+                          <EditableField editing value={editFormData.address || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, address: v }))} />
+                          <EditableField editing value={editFormData.dusun || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, dusun: v }))} />
+                        </div>
+                      ) : (
+                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 leading-snug">
+                          {data?.address || "Belum ada alamat jalan"}
+                          {data?.dusun && <span className="text-emerald-700 dark:text-emerald-400 font-bold">, {data.dusun}</span>}
+                        </p>
+                      )}
                     </div>
                   </div>
 
                   <div className="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 flex flex-col justify-between gap-2">
                     <div>
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Wilayah RT / RW & Desa</p>
-                      <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                        <span className="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
-                          RT {data?.rt || '01'} / RW {data?.rw || '01'}
-                        </span>
-                        <span className="font-bold text-xs bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-md border border-gray-200 dark:border-slate-700">
-                          {data?.desa || 'Desa Sukamaju'}
-                        </span>
-                      </div>
+                      {isEditMode ? (
+                        <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+                          <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} />
+                          <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} />
+                          <div className="col-span-2">
+                            <EditableField editing value={editFormData.desa || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, desa: v }))} />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                          <span className="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
+                            RT {data?.rt || '01'} / RW {data?.rw || '01'}
+                          </span>
+                          <span className="font-bold text-xs bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-md border border-gray-200 dark:border-slate-700">
+                            {data?.desa || 'Desa Sukamaju'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 pt-1">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -994,30 +1221,68 @@ export default function AdminPendudukDetail({
                 </div>
               </div>
               <div className="space-y-2.5">
+                {isEditMode && (
+                  <div className="p-3 rounded-xl border border-emerald-100 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/30 space-y-2">
+                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-black uppercase tracking-wider">Identitas Penduduk</p>
+                    <EditableField editing value={editFormData.name || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, name: v }))} inputClass="uppercase" />
+                    <EditableField editing value={editFormData.nik || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, nik: v }))} />
+                    <EditableField editing value={editFormData.noKk || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noKk: v }))} />
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <EditableField editing value={editFormData.statusKeberadaan || editFormData.status || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, statusKeberadaan: v, status: v }))} options={STATUS_KEBERADAAN_OPTIONS} />
+                      <EditableField editing value={editFormData.maritalStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, maritalStatus: v }))} options={MARITAL_OPTIONS} />
+                    </div>
+                    <EditableField editing value={editFormData.familyRelation || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, familyRelation: v }))} options={HUBUNGAN_OPTIONS} />
+                  </div>
+                )}
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">No. WhatsApp</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}</span>
+                  {isEditMode ? (
+                    <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} className="w-48 text-right" />
+                  ) : (
+                    <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}</span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Status Domisili</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</span>
+                  {isEditMode ? (
+                    <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} className="w-48 text-right" />
+                  ) : (
+                    <span className="text-xs font-bold text-gray-900 dark:text-white">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Pendidikan</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('education', 'pendidikan', 'pendidikan_terakhir', 'pendidikanTerakhir'))}</span>
+                  {isEditMode ? (
+                    <EditableField editing value={editFormData.education || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, education: v }))} options={PENDIDIKAN_OPTIONS} className="w-48 text-right" />
+                  ) : (
+                    <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('education', 'pendidikan', 'pendidikan_terakhir', 'pendidikanTerakhir'))}</span>
+                  )}
                 </div>
                 <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
                   <span className="text-xs text-gray-500 dark:text-slate-400">Pekerjaan</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</span>
+                  {isEditMode ? (
+                    <EditableField editing value={editFormData.job || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, job: v }))} options={PEKERJAAN_OPTIONS} className="w-48 text-right" />
+                  ) : (
+                    <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</span>
+                  )}
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 text-xs">
                   <p className="text-gray-500 dark:text-slate-400 mb-1.5">Orang Tua Kandung</p>
-                  <p className="font-bold text-gray-900 dark:text-white truncate">
-                    Ayah: {renderValue(pickFirst('fatherName', 'father_name', 'nama_ayah'))}
-                  </p>
-                  <p className="font-bold text-gray-900 dark:text-white truncate mt-0.5">
-                    Ibu: {renderValue(pickFirst('motherName', 'mother_name', 'nama_ibu'))}
-                  </p>
+                  {isEditMode ? (
+                    <div className="space-y-1.5">
+                      <EditableField editing value={editFormData.fatherName || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, fatherName: v }))} />
+                      <EditableField editing value={editFormData.motherName || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, motherName: v }))} />
+                    </div>
+                  ) : (
+                    <>
+                      <p className="font-bold text-gray-900 dark:text-white truncate">
+                        Ayah: {renderValue(pickFirst('fatherName', 'father_name', 'nama_ayah'))}
+                      </p>
+                      <p className="font-bold text-gray-900 dark:text-white truncate mt-0.5">
+                        Ibu: {renderValue(pickFirst('motherName', 'mother_name', 'nama_ibu'))}
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -1049,7 +1314,13 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status DTKS / Bansos</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('statusDtks', 'status_dtks', 'penerima_bansos'))}</p>
+                    {isEditMode ? (
+                      <div className="mt-1">
+                        <EditableField editing value={editFormData.statusDtks || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, statusDtks: v }))} />
+                      </div>
+                    ) : (
+                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('statusDtks', 'status_dtks', 'penerima_bansos'))}</p>
+                    )}
                   </div>
                 </div>
 
@@ -1059,7 +1330,13 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Disabilitas</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('disabilitas', 'jenis_disabilitas'))}</p>
+                    {isEditMode ? (
+                      <div className="mt-1">
+                        <EditableField editing value={editFormData.disabilitas || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, disabilitas: v }))} />
+                      </div>
+                    ) : (
+                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('disabilitas', 'jenis_disabilitas'))}</p>
+                    )}
                   </div>
                 </div>
 
@@ -1069,7 +1346,13 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Golongan Darah</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}</p>
+                    {isEditMode ? (
+                      <div className="mt-1">
+                        <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} />
+                      </div>
+                    ) : (
+                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}</p>
+                    )}
                   </div>
                 </div>
 
@@ -1079,7 +1362,13 @@ export default function AdminPendudukDetail({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</p>
+                    {isEditMode ? (
+                      <div className="mt-1">
+                        <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} />
+                      </div>
+                    ) : (
+                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</p>
+                    )}
                   </div>
                 </div>
               </div>
