@@ -12,6 +12,8 @@ import { DEFAULT_SURAT_FORMAT } from '../utils/generateSuratNumber';
 //    - Surat aktif: 001-005 (006 dihapus)       => berikutnya 006.
 //    - Surat aktif: 001-006 (semua lengkap)     => berikutnya 007.
 //  - Nomor yang Dibatalkan/Dihapus diabaikan sehingga celahnya otomatis diisi.
+//  - PENOMORAN GLOBAL (satu urutan untuk SEMUA jenis surat) sesuai kebijakan
+//    desa. Deteksi tidak memfilter per-klasifikasi agar tidak kembali ke 001.
 //  - Deteksi dibaca dari NOMOR yang tersimpan (sama seperti yang tampil di
 //    daftar surat), bukan dari created_at. Tahun disaring dari angka yang
 //    tertanam di nomor itu sendiri (mis. "/2026").
@@ -180,6 +182,13 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
   // karena tahun yang tertanam di nomor (mis. "/2026") lebih sesuai dengan angka
   // yang terlihat di daftar; filter created_at bisa melewatkan surat backdate/
   // lintas tahun sehingga penomoran "malah kembali ke 1".
+  //
+  // PENTING (kebijakan desa): penomoran memakai SATU URUTAN GLOBAL yang
+  // diakumulasikan untuk SEMUA jenis surat (lihat AdminSuratPenomoran
+  // "Sistem Penomoran Urut Tunggal (Global) Aktif"). Oleh karena itu parameter
+  // `klasifikasi` TIDAK dipakai untuk memfilter — seluruh surat aktif tahun
+  // berjalan ikut dihitung, agar nomor berikutnya selalu MAX global + 1
+  // (gap-filling) dan tidak "malah kembali ke 001" saat membuat jenis lain.
   const { data, error } = await supabase
     .from('surat')
     .select('nomor')
@@ -197,7 +206,6 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
   for (const row of data || []) {
     const nomorStr = normalizeNomorSurat(String(row?.nomor || ''));
     if (!nomorStr) continue;
-    if (!nomorMatchesKlasifikasi(nomorStr, klasifikasi)) continue;
     // Batasi per tahun berdasarkan tahun yang tertanam DI NOMOR itu sendiri.
     // Jika tahun tidak bisa ditentukan, surat tetap dihitung (tidak dibuang).
     const nomorYear = extractYearFromNomor(nomorStr);

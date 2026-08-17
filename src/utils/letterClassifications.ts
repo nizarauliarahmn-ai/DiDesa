@@ -304,8 +304,12 @@ export async function getNextSequenceNumberAsync(klasifikasi: string, year?: num
     return 1;
   }
 
-  const nextAvailable = await getNextAvailableNomorUrut(klasifikasi, currentYear);
-  if (nextAvailable > 0) return nextAvailable;
+  try {
+    const nextAvailable = await getNextAvailableNomorUrut(klasifikasi, currentYear);
+    if (nextAvailable > 0) return nextAvailable;
+  } catch (e) {
+    console.error('getNextSequenceNumberAsync: query gagal, fallback ke counter lama:', e);
+  }
 
   // Query gagal -> fallback ke counter lama agar tidak regresi saat offline
   return getGlobalSequenceNumber() + 1;
