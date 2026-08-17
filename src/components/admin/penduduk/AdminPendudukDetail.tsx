@@ -80,20 +80,33 @@ export default function AdminPendudukDetail({
     }
   }, [data]);
 
-  // Collapsible Sticky Header & Tabs — deteksi scroll (container scroll utama adalah <main>, bukan window)
+  // Collapsible Sticky Header & Tabs — deteksi scroll dengan Ambang Batas Ganda (Hysteresis) + rAF throttle
+  // Container scroll utama adalah <main>, bukan window; jadi posisi diambil dari scrollTop <main>.
   useEffect(() => {
+    let ticking = false;
+
     const handleScroll = () => {
-      const container = document.querySelector('main');
-      const scrollY = container ? container.scrollTop : window.scrollY;
-      if (scrollY > 100) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const container = document.querySelector('main');
+          const currentScroll = container ? container.scrollTop : window.scrollY;
+
+          // Ambang Batas Ganda (Mencegah Jitter / Getar):
+          // Hanya mengecil jika scroll > 160px, dan hanya membesar jika scroll < 50px
+          setIsScrolled((prev) => {
+            if (!prev && currentScroll > 160) return true;
+            if (prev && currentScroll < 50) return false;
+            return prev;
+          });
+
+          ticking = false;
+        });
+        ticking = true;
       }
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     document.querySelector('main')?.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.querySelector('main')?.removeEventListener('scroll', handleScroll);
