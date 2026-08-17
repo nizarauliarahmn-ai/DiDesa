@@ -11,6 +11,7 @@ import { capitalizeWords, parseAddressString } from '../../../utils/textUtils';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { fetchResidentLettersAsync, getLetterFullData } from '../../../utils/letterHistory';
+import { STATUS_KEBERADAAN_OPTIONS, normalizeStatusKeberadaan } from '../../../utils/statusKeberadaan';
 
 interface AdminPendudukEditProps {
   onBack: () => void;
@@ -241,7 +242,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
   
   const [familyRelation, setFamilyRelation] = useState(data?.familyRelation || 'Kepala Keluarga');
   const [education, setEducation] = useState(data?.education || 'Sarjana (S1)');
-  const [residentStatus, setResidentStatus] = useState(data?.status || 'Aktif');
+  const [residentStatus, setResidentStatus] = useState(normalizeStatusKeberadaan(data?.status || data?.status_keberadaan || 'TETAP'));
   const [maritalStatus, setMaritalStatus] = useState(data?.maritalStatus || 'Belum Kawin');
   const [activeAids, setActiveAids] = useState<string[]>(data?.activeAids || []);
 
@@ -434,7 +435,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
 
     // Compute status colors
     const genderColor = gender === 'Perempuan' ? 'pink' : 'blue';
-    const statusColor = residentStatus === 'Aktif' ? 'emerald' : 'gray';
+    const statusColor = residentStatus === 'Aktif' || residentStatus === 'TETAP' ? 'emerald' : 'gray';
 
     const fullName = (name || '').trim();
 
@@ -448,6 +449,7 @@ export default function AdminPendudukEdit({ onBack, data, onSave }: AdminPendudu
       genderColor,
       rtRw: `${rt.padStart(2, '0')} / ${rw.padStart(2, '0')}`,
       status: residentStatus,
+      statusKeberadaan: residentStatus,
       maritalStatus,
       statusColor,
       initials: fullName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase(),
@@ -1263,7 +1265,7 @@ placeholder="Pilih ibu dari anggota KK..."
             </div>
 
             <div className="space-y-2">
-              {['Aktif', 'Tetap', 'Pindah', 'Meninggal', 'Ganda', 'Sementara'].map((status) => (
+              {STATUS_KEBERADAAN_OPTIONS.map((status) => (
                 <button
                   key={status}
                   type="button"

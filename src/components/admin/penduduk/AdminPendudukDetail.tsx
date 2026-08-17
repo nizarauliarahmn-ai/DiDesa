@@ -7,6 +7,7 @@ import { fetchResidentLettersAsync, LetterHistory, getLetterFullData } from '../
 import ConfirmModal from '../../common/ConfirmModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../../utils/supabase';
+import { STATUS_KEBERADAAN_OPTIONS, normalizeStatusKeberadaan } from '../../../utils/statusKeberadaan';
 
 interface AdminPendudukDetailProps {
   onBack: () => void;
@@ -30,7 +31,6 @@ const AGAMA_OPTIONS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghu
 const MARITAL_OPTIONS = ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'];
 const DOMICILE_OPTIONS = ['Sesuai KTP', 'Tetap', 'Luar', 'Pindah', 'Tidak Sesuai'];
 const HUBUNGAN_OPTIONS = ['Kepala Keluarga', 'Istri', 'Anak', 'Menantu', 'Cucu', 'Orang Tua', 'Mertua', 'Famili Lain', 'Lainnya'];
-const STATUS_KEBERADAAN_OPTIONS = ['Aktif', 'Tetap', 'Pindah', 'Meninggal', 'Ganda', 'Sementara'];
 const GOLDAR_OPTIONS = ['A', 'B', 'AB', 'O', 'Tidak Diketahui'];
 const PEKERJAAN_OPTIONS = [
   'Belum / Tidak Bekerja',
@@ -258,8 +258,8 @@ export default function AdminPendudukDetail({
       rt: form.rt ?? data?.rt ?? '',
       rw: form.rw ?? data?.rw ?? '',
       desa: form.desa ?? data?.desa ?? '',
-      status: form.status ?? data?.status ?? 'Aktif',
-      status_keberadaan: form.statusKeberadaan ?? data?.status_keberadaan ?? form.status ?? data?.status ?? 'Tetap',
+      status: normalizeStatusKeberadaan(form.status ?? data?.status ?? 'TETAP'),
+      status_keberadaan: normalizeStatusKeberadaan(form.statusKeberadaan ?? data?.status_keberadaan ?? form.status ?? data?.status ?? 'TETAP'),
       family_relation: form.familyRelation ?? data?.familyRelation ?? '',
       father_name: form.fatherName ?? data?.fatherName ?? '',
       mother_name: form.motherName ?? data?.motherName ?? '',
@@ -735,7 +735,7 @@ export default function AdminPendudukDetail({
             )}
             <div className={`flex flex-wrap items-center gap-1.5 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
               {(() => {
-                const keberadaan = (data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').trim().toLowerCase();
+                const keberadaan = normalizeStatusKeberadaan(data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').toLowerCase();
                 if (keberadaan.includes('meninggal') || keberadaan === 'mati' || keberadaan === 'wafat') {
                   return (
                     <span className="bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
@@ -749,6 +749,22 @@ export default function AdminPendudukDetail({
                     <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                       {keberadaan.includes('mutasi') ? 'Mutasi' : 'Pindah'}
+                    </span>
+                  );
+                }
+                if (keberadaan === 'sementara') {
+                  return (
+                    <span className="bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                      Sementara
+                    </span>
+                  );
+                }
+                if (keberadaan === 'ganda') {
+                  return (
+                    <span className="bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                      Ganda
                     </span>
                   );
                 }

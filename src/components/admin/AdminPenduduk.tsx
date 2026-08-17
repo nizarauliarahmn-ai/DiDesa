@@ -11,6 +11,7 @@ import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { normalizeStatusKeberadaan } from '../../utils/statusKeberadaan';
 
 const FILTERS = ["Semua", "✨ Terbaru", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati"];
 
@@ -197,7 +198,9 @@ export default function AdminPenduduk({
       rt: savedResident.rt,
       rw: savedResident.rw,
       desa: savedResident.desa,
-      status: savedResident.status || 'Aktif',
+      status: normalizeStatusKeberadaan(savedResident.status || savedResident.statusKeberadaan || 'TETAP'),
+      status_keberadaan: normalizeStatusKeberadaan(savedResident.statusKeberadaan || savedResident.status || 'TETAP'),
+      status_penduduk: normalizeStatusKeberadaan(savedResident.statusKeberadaan || savedResident.status || 'TETAP'),
       domicile_status: savedResident.domicileStatus,
       family_relation: savedResident.familyRelation,
       father_name: savedResident.fatherName,
