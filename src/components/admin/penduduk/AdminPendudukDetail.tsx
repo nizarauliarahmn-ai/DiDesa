@@ -450,9 +450,21 @@ export default function AdminPendudukDetail({
           </div>
 
           <div className="min-w-0 flex-1">
-            <h2 className={`font-black text-gray-900 dark:text-white leading-tight uppercase truncate transition-all ${isScrolled ? 'text-sm sm:text-base' : 'text-lg sm:text-xl'}`}>
-              {data?.name || "Nama Penduduk"}
-            </h2>
+            {isScrolled ? (
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="font-bold text-slate-900 dark:text-white text-base truncate uppercase">
+                  {data?.name || "Nama Penduduk"}
+                </span>
+                <span className="text-slate-300 dark:text-slate-600">•</span>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md shrink-0">
+                  NIK: {data?.nik || "-"}
+                </span>
+              </div>
+            ) : (
+              <h2 className="font-black text-gray-900 dark:text-white leading-tight uppercase truncate text-lg sm:text-xl">
+                {data?.name || "Nama Penduduk"}
+              </h2>
+            )}
             <div className={`flex flex-wrap items-center gap-1.5 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
               {(() => {
                 const keberadaan = (data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').trim().toLowerCase();
@@ -564,7 +576,7 @@ export default function AdminPendudukDetail({
       </div>
 
       {/* 5-Tab Navigation */}
-      <div className={`sticky z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible ${isScrolled ? 'top-[120px]' : 'top-16'}`}>
+      <div className={`sticky z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md pt-2.5 pb-1 -mx-6 px-6 mb-6 border-b border-slate-200/80 dark:border-slate-700/50 shadow-sm transition-all overflow-x-auto overflow-y-visible ${isScrolled ? 'top-[136px]' : 'top-20'}`}>
         <div className="flex gap-1.5 min-w-max">
           {DETAIL_TABS.map((tab) => {
             const Icon = tab.icon;
