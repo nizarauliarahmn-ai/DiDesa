@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, ShieldCheck, Phone, BookOpen, HandHeart, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, ShieldCheck, Phone, HandHeart, HeartHandshake, Eye } from 'lucide-react';
 import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
@@ -418,11 +418,9 @@ export default function AdminPendudukDetail({
   }, [data?.activeAids]);
 
   const DETAIL_TABS = [
-    { id: 0, label: 'Identitas & Kontak', icon: User },
-    { id: 1, label: 'Keluarga & Pendidikan', icon: GraduationCap },
-    { id: 2, label: 'Kesejahteraan & Dokumen', icon: Heart },
-    { id: 3, label: 'Riwayat Dokumen', icon: FileText },
-    { id: 4, label: 'Riwayat Bantuan Sosial', icon: HandHeart },
+    { id: 0, label: 'Profil & Kependudukan', icon: User },
+    { id: 1, label: 'Kesejahteraan & Bansos', icon: HeartHandshake },
+    { id: 2, label: 'Riwayat Surat', icon: FileText },
   ];
 
   return (
@@ -618,7 +616,7 @@ export default function AdminPendudukDetail({
         </div>
       </div>
 
-      {/* ===== TAB 1: Identitas & Kontak ===== */}
+      {/* ===== TAB 1: Profil & Kependudukan ===== */}
       {detailTab === 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
           {/* KOLOM KIRI UTAMA */}
@@ -984,15 +982,15 @@ export default function AdminPendudukDetail({
               )}
             </div>
 
-            {/* Kontak & Identitas Lain */}
+            {/* Kontak & Informasi Keluarga */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-9 h-9 rounded-xl bg-sky-50 flex items-center justify-center">
                   <Phone className="w-5 h-5 text-sky-600" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">Kontak & Identitas Lain</h4>
-                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Informasi kontak & dokumen identitas</p>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">Kontak & Informasi Keluarga</h4>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Kontak, domisili, pendidikan & orang tua</p>
                 </div>
               </div>
               <div className="space-y-2.5">
@@ -1004,244 +1002,31 @@ export default function AdminPendudukDetail({
                   <span className="text-xs text-gray-500 dark:text-slate-400">Status Domisili</span>
                   <span className="text-xs font-bold text-gray-900 dark:text-white">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</span>
                 </div>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Pendidikan</span>
+                  <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('education', 'pendidikan', 'pendidikan_terakhir', 'pendidikanTerakhir'))}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Pekerjaan</span>
+                  <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</span>
+                </div>
+                <div className="p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 text-xs">
+                  <p className="text-gray-500 dark:text-slate-400 mb-1.5">Orang Tua Kandung</p>
+                  <p className="font-bold text-gray-900 dark:text-white truncate">
+                    Ayah: {renderValue(pickFirst('fatherName', 'father_name', 'nama_ayah'))}
+                  </p>
+                  <p className="font-bold text-gray-900 dark:text-white truncate mt-0.5">
+                    Ibu: {renderValue(pickFirst('motherName', 'mother_name', 'nama_ibu'))}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ===== TAB 2: Keluarga & Pendidikan ===== */}
+      {/* ===== TAB 2: Kesejahteraan & Bansos ===== */}
       {detailTab === 1 && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
-          <div className="lg:col-span-8 space-y-6">
-            {/* Hubungan Keluarga / Anggota Kartu Keluarga */}
-            {(() => {
-              const otherMembers = (familyMembers || []).filter((m: any) => m && m.nik !== data?.nik && m.name !== data?.name);
-
-              if (otherMembers.length === 0) {
-                return (
-                  <div className="bg-emerald-50/60 dark:bg-emerald-950/40 rounded-2xl p-5 border border-emerald-200/60 dark:border-emerald-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md">
-                        <Users className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-emerald-900 dark:text-emerald-300 text-sm">Status Kartu Keluarga</h4>
-                          <span className="px-2.5 py-0.5 bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 text-[10px] font-extrabold rounded-full uppercase tracking-wider">
-                            KK Mandiri
-                          </span>
-                        </div>
-                        <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-0.5 font-medium">
-                          Yang bersangkutan terdaftar sebagai <strong>Kepala Keluarga / Anggota Tunggal</strong> dalam Kartu Keluarga ini.
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 shrink-0 self-start sm:self-auto">
-                      KK: {data?.noKk || data?.no_kk || "-"}
-                    </span>
-                  </div>
-                );
-              }
-
-              return (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-emerald-700" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white text-lg">Anggota Kartu Keluarga</h4>
-                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Relasi dihitung terhadap Kepala Keluarga</p>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold text-gray-500 dark:text-slate-400 font-mono bg-gray-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-700">
-                      KK: {data?.noKk || data?.no_kk || "-"}
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
-                    {familyMembers.map((member: any) => {
-                      const isCurrent = member.nik === data?.nik;
-                      const isKepalaKeluarga = (member.familyRelation || '').toLowerCase().includes('kepala');
-                      const memberIsFemale = member.gender === 'Perempuan';
-                      
-                      return (
-                        <div 
-                          key={member.nik}
-                          id={`family-member-${member.nik}`}
-                          onClick={() => {
-                            if (!isCurrent && onSelectResident) {
-                              onSelectResident(member);
-                            }
-                          }}
-                          className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 ${
-                            isCurrent 
-                              ? 'bg-emerald-50/40 border-emerald-200 dark:border-emerald-800/50 shadow-sm dark:shadow-none cursor-default ring-1 ring-emerald-500/20' 
-                              : 'bg-white dark:bg-slate-900 hover:bg-emerald-50/20 border-gray-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800/50 hover:shadow-sm cursor-pointer group'
-                          }`}
-                        >
-                          <div className={`w-11 h-11 rounded-full flex items-center justify-center border-2 border-white shadow-sm dark:shadow-none shrink-0 ${
-                            memberIsFemale 
-                              ? 'bg-gradient-to-br from-pink-400 to-pink-500 text-white' 
-                              : 'bg-gradient-to-br from-blue-400 to-blue-500 text-white'
-                          }`}>
-                            {member.photo ? (
-                              <img src={member.photo} alt={member.name} className="w-full h-full rounded-full object-cover" />
-                            ) : (
-                              <User className="w-5 h-5" fill="currentColor" />
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <p className={`font-bold text-[14px] truncate ${isCurrent ? 'text-emerald-800 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors'}`}>
-                              {member.name}
-                            </p>
-                            <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5 font-medium truncate font-mono">
-                              {member.nik}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-1 shrink-0">
-                            {isCurrent ? (
-                              <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[9px] font-bold rounded-md uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
-                                Sedang Dilihat
-                              </span>
-                            ) : isKepalaKeluarga ? (
-                              <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[9px] font-bold rounded-md uppercase tracking-wider border border-blue-100 dark:border-blue-800">
-                                Kepala Keluarga
-                              </span>
-                            ) : (
-                              <span className="px-2 py-0.5 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-[9px] font-bold rounded-md uppercase tracking-wider border border-violet-100 dark:border-violet-800">
-                                {member.familyRelation || 'Anggota'}
-                              </span>
-                            )}
-                            {!isCurrent && (
-                              <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                                Lihat Profil →
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Pendidikan & Dokumen Sipil */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-              <div className="flex items-center gap-3 mb-5 border-b border-gray-100 dark:border-slate-800 pb-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-indigo-700 dark:text-indigo-400">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white text-lg">Pendidikan & Dokumen Sipil</h4>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">Riwayat pendidikan dan dokumen administrasi kependudukan</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0 mt-0.5">
-                    <GraduationCap className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Pendidikan Terakhir</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">{renderValue(pickFirst('education', 'pendidikan', 'pendidikan_terakhir', 'pendidikanTerakhir'))}</p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
-                    <Briefcase className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Pekerjaan</p>
-                    <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0 mt-0.5">
-                    <Users className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1 text-xs">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Orang Tua Kandung</p>
-                    <p className="text-gray-700 dark:text-slate-300 mt-0.5 font-medium truncate">
-                      Ayah: <strong className="text-gray-900 dark:text-white">{renderValue(pickFirst('fatherName', 'father_name', 'nama_ayah'))}</strong>
-                    </p>
-                    <p className="text-gray-700 dark:text-slate-300 font-medium truncate">
-                      Ibu: <strong className="text-gray-900 dark:text-white">{renderValue(pickFirst('motherName', 'mother_name', 'nama_ibu'))}</strong>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* KOLOM KANAN SIDEBAR */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Status Keluarga */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-violet-600" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 dark:text-white text-sm">Status Keluarga</h4>
-                  <p className="text-[11px] text-gray-500 dark:text-slate-400">Posisi dalam keluarga</p>
-                </div>
-              </div>
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Hubungan Keluarga</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{data?.familyRelation || '-'}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Status Perkawinan</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white">{data?.maritalStatus || '-'}</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">No. KK</span>
-                  <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{data?.noKk || data?.no_kk || '-'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Panel Akses Cepat Surat */}
-            <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-2xl p-5 text-white shadow-lg dark:shadow-none shadow-emerald-900/20 relative overflow-hidden">
-              <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm">Akses Cepat Surat</h4>
-                  <p className="text-[11px] text-emerald-100/80">Terbitkan surat untuk warga ini</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  if (onSetPresetResident && onNavigateToTab) {
-                    onSetPresetResident(data);
-                    onNavigateToTab('surat');
-                  }
-                }}
-                className="w-full mt-3 px-4 py-3 rounded-xl bg-white text-emerald-800 font-black text-sm hover:bg-emerald-50 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md"
-              >
-                <Plus className="w-4 h-4" />
-                Buatkan Surat untuk Warga Ini
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ===== TAB 3: Kesejahteraan & Dokumen ===== */}
-      {detailTab === 2 && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
           {/* KOLOM KIRI UTAMA */}
           <div className="lg:col-span-8 space-y-6">
@@ -1359,6 +1144,55 @@ export default function AdminPendudukDetail({
                 </div>
               </div>
             </div>
+
+            {/* Riwayat Bantuan Sosial */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+              <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
+                  <HandHeart className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Riwayat Bantuan Sosial</h3>
+                  <p className="text-xs text-gray-500 dark:text-slate-400">{bansosHistory.length} catatan bantuan sosial untuk warga ini</p>
+                </div>
+              </div>
+
+              {bansosHistory.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead>
+                      <tr className="border-b border-gray-100 dark:border-slate-800 text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                        <th className="px-3 py-2.5 font-bold">Jenis Program</th>
+                        <th className="px-3 py-2.5 font-bold">Periode</th>
+                        <th className="px-3 py-2.5 font-bold">Nominal</th>
+                        <th className="px-3 py-2.5 font-bold">Status Penyaluran</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bansosHistory.map((entry, idx) => (
+                        <tr key={idx} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="px-3 py-3 text-xs font-bold text-gray-900 dark:text-white">{entry.program}</td>
+                          <td className="px-3 py-3 text-xs text-gray-500 dark:text-slate-400">{entry.periode}</td>
+                          <td className="px-3 py-3 font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{entry.nominal}</td>
+                          <td className="px-3 py-3">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${
+                              entry.status === 'Aktif'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800'
+                                : 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:border-rose-800'
+                            }`}>{entry.status}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40 text-center">
+                  <HandHeart className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400 italic">Belum ada catatan bantuan sosial untuk warga ini.</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* KOLOM KANAN SIDEBAR */}
@@ -1392,8 +1226,8 @@ export default function AdminPendudukDetail({
         </div>
       )}
 
-      {/* ===== TAB 4: Riwayat Dokumen (Surat) ===== */}
-      {detailTab === 3 && (
+      {/* ===== TAB 3: Riwayat Surat ===== */}
+      {detailTab === 2 && (
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
@@ -1452,57 +1286,6 @@ export default function AdminPendudukDetail({
             <div className="p-8 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40 text-center">
               <History className="w-8 h-8 text-gray-300 mx-auto mb-2" />
               <p className="text-sm text-gray-400 italic">Belum ada riwayat surat untuk warga ini.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ===== TAB 5: Riwayat Bantuan Sosial ===== */}
-      {detailTab === 4 && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-          <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-700 dark:text-emerald-400">
-              <HandHeart className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Riwayat Bantuan Sosial</h3>
-              <p className="text-xs text-gray-500 dark:text-slate-400">{bansosHistory.length} catatan bantuan sosial untuk warga ini</p>
-            </div>
-          </div>
-
-          {bansosHistory.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead>
-                  <tr className="border-b border-gray-100 dark:border-slate-800 text-[10px] uppercase tracking-wider text-gray-400 dark:text-slate-500">
-                    <th className="px-3 py-2.5 font-bold">Jenis Program</th>
-                    <th className="px-3 py-2.5 font-bold">Periode</th>
-                    <th className="px-3 py-2.5 font-bold">Nominal</th>
-                    <th className="px-3 py-2.5 font-bold">Status Penyaluran</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bansosHistory.map((entry, idx) => (
-                    <tr key={idx} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="px-3 py-3 text-xs font-bold text-gray-900 dark:text-white">{entry.program}</td>
-                      <td className="px-3 py-3 text-xs text-gray-500 dark:text-slate-400">{entry.periode}</td>
-                      <td className="px-3 py-3 font-mono text-xs font-bold text-emerald-700 dark:text-emerald-400">{entry.nominal}</td>
-                      <td className="px-3 py-3">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${
-                          entry.status === 'Aktif'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:border-emerald-800'
-                            : 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-900/30 dark:border-rose-800'
-                        }`}>{entry.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-8 rounded-xl border border-dashed border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/40 text-center">
-              <HandHeart className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400 italic">Belum ada catatan bantuan sosial untuk warga ini.</p>
             </div>
           )}
         </div>
