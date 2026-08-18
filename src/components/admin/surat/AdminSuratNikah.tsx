@@ -267,7 +267,15 @@ export default function AdminSuratNikah({
   useEffect(() => {
     fetchResidentsCached()
       .then(res => res.json())
-      .then(data => setResidents(Array.isArray(data) ? data : []))
+      .then(data => {
+        const list = Array.isArray(data) ? data : [];
+        setResidents(list);
+        // Pre-fill data jika presetResident disediakan (setelah daftar penduduk siap
+        // agar data orang tua bisa dicocokkan dari data penduduk)
+        if (presetResident) {
+          handleSelectResident(presetResident, list);
+        }
+      })
       .catch(err => console.error("Error loading residents:", err));
 
     const saved = localStorage.getItem('riwayat_surat_nikah');
@@ -284,11 +292,6 @@ export default function AdminSuratNikah({
       generateLetterNumberAsync(sknConfig.klasifikasi, sknConfig.kodeKlasifikasi || '474', isBackdate ? new Date(tanggalSurat) : undefined)
         .then(generatedNo => setFormData(prev => ({ ...prev, nomorSurat: generatedNo })))
         .catch(err => console.error('Gagal generate nomor SKN:', err));
-    }
-
-    // Pre-fill data if presetResident is provided
-    if (presetResident) {
-      handleSelectResident(presetResident);
     }
   }, []);
 
@@ -334,8 +337,51 @@ export default function AdminSuratNikah({
     };
   }, []);
 
-  const handleSelectResident = (res: any) => {
+  // Cari penduduk berdasarkan nama persis (untuk auto-lengkap data orang tua)
+  const findResidentByName = (list: any[], name: string) => {
+    if (!name) return undefined;
+    const target = String(name).toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!target) return undefined;
+    return list.find((r: any) => (String(r.name || '').toLowerCase().replace(/\s+/g, ' ').trim() === target));
+  };
+
+  // Isi data orang tua (NIK, TTL, agama, pekerjaan, alamat) dari data penduduk
+  // bila nama ayah/ibu cocok persis dengan salah satu warga.
+  const buildOrtuUpdates = (list: any[], side: 'Suami' | 'Istri', ayahName: string, ibuName: string) => {
+    const ayah = findResidentByName(list, ayahName);
+    const ibu = findResidentByName(list, ibuName);
+    const updates: any = {};
+    if (ayah) {
+      updates[`namaAyah${side}`] = ayah.name;
+      updates[`nikAyah${side}`] = ayah.nik || '';
+      updates[`tempatLahirAyah${side}`] = ayah.birthPlace || '';
+      updates[`tanggalLahirAyah${side}`] = ayah.birthDate || '';
+      updates[`agamaAyah${side}`] = ayah.religion || 'Islam';
+      updates[`pekerjaanAyah${side}`] = ayah.job || '';
+      updates[`alamatOrtu${side}`] = ayah.address || '';
+    } else if (ayahName) {
+      updates[`namaAyah${side}`] = ayahName;
+    }
+    if (ibu) {
+      updates[`namaIbu${side}`] = ibu.name;
+      updates[`nikIbu${side}`] = ibu.nik || '';
+      updates[`tempatLahirIbu${side}`] = ibu.birthPlace || '';
+      updates[`tanggalLahirIbu${side}`] = ibu.birthDate || '';
+      updates[`agamaIbu${side}`] = ibu.religion || 'Islam';
+      updates[`pekerjaanIbu${side}`] = ibu.job || '';
+      if (!updates[`alamatOrtu${side}`]) updates[`alamatOrtu${side}`] = ibu.address || '';
+    } else if (ibuName) {
+      updates[`namaIbu${side}`] = ibuName;
+    }
+    return updates;
+  };
+
+  const handleSelectResident = (res: any, list: any[] = residents) => {
     const isMale = res.gender === 'Laki-laki' || res.gender === 'L';
+    const ayahName = res.fatherName || res.father_name || '';
+    const ibuName = res.motherName || res.mother_name || '';
+    const ortuSuami = isMale ? buildOrtuUpdates(list, 'Suami', ayahName, ibuName) : {};
+    const ortuIstri = !isMale ? buildOrtuUpdates(list, 'Istri', ayahName, ibuName) : {};
     setFormData(prev => ({
       ...prev,
       isWargaSuami: isMale,
@@ -349,9 +395,6 @@ export default function AdminSuratNikah({
       pendidikanSuami: isMale ? (res.education || '') : prev.pendidikanSuami,
       alamatSuami: isMale ? (res.address || '') : prev.alamatSuami,
 
-      namaAyahSuami: isMale ? (res.fatherName || res.father_name || prev.namaAyahSuami) : prev.namaAyahSuami,
-      namaIbuSuami: isMale ? (res.motherName || res.mother_name || prev.namaIbuSuami) : prev.namaIbuSuami,
-
       namaIstri: !isMale ? res.name : prev.namaIstri,
       nikIstri: !isMale ? res.nik : prev.nikIstri,
       noKKIstri: !isMale ? (res.noKk || res.no_kk || '') : prev.noKKIstri,
@@ -362,8 +405,8 @@ export default function AdminSuratNikah({
       pendidikanIstri: !isMale ? (res.education || '') : prev.pendidikanIstri,
       alamatIstri: !isMale ? (res.address || '') : prev.alamatIstri,
 
-      namaAyahIstri: !isMale ? (res.fatherName || res.father_name || prev.namaAyahIstri) : prev.namaAyahIstri,
-      namaIbuIstri: !isMale ? (res.motherName || res.mother_name || prev.namaIbuIstri) : prev.namaIbuIstri,
+      ...ortuSuami,
+      ...ortuIstri,
     }));
     setSearchQuery('');
   };
