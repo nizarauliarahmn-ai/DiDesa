@@ -125,6 +125,7 @@ export default function AdminPenduduk({
            birthPlace: r.birth_place,
            birthDate: r.birth_date,
            bloodType: r.blood_type || r.golongan_darah,
+           maritalStatus: r.marital_status || r.maritalStatus || '',
            domicileStatus: r.domicile_status || r.status_domisili,
            familyRelation: r.family_relation,
            fatherName: r.father_name,

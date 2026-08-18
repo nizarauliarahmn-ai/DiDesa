@@ -424,6 +424,35 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
     active_aids: JSON.stringify(r.activeAids || []),
   });
 
+  // Defensif: kolom yang belum ada di skema DB (mis. sebelum migrasi dijalankan)
+  // dibuang otomatis lalu permintaan diulang, mengikuti pola AdminPendudukDetail,
+  // sehingga satu baris yang gagal tidak menghentikan seluruh impor.
+  const executeWithColumnFallback = async (
+    payload: Record<string, any>,
+    run: (cols: Record<string, any>) => PromiseLike<{ error: any }>,
+    label: string
+  ): Promise<void> => {
+    const cols: Record<string, any> = { ...payload };
+    let result = await run(cols);
+    let retries = 0;
+    while (
+      result.error &&
+      result.error.message?.includes('Could not find the') &&
+      result.error.message?.includes('column') &&
+      retries < 15
+    ) {
+      const match = result.error.message.match(/'([^']+)' column/);
+      if (match && match[1]) {
+        delete cols[match[1]];
+        result = await run(cols);
+        retries++;
+      } else {
+        break;
+      }
+    }
+    if (result.error) throw new Error(`${label}: ${result.error.message}`);
+  };
+
   // Smart Merge: jika NIK sudah ada, perbarui HANYA kolom yang masih kosong/null di DB.
   // Jika belum ada, tambahkan baris baru. Tangani duplicate-key saat balapan (race).
   const smartUpsertResident = async (payload: Record<string, any>, tenantId: string): Promise<'inserted' | 'updated'> => {
@@ -455,31 +484,34 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
         }
       }
       if (Object.keys(updateData).length > 0) {
-        const { error: updateError } = await supabase
-          .from('residents')
-          .update(updateData)
-          .eq('nik', nik)
-          .eq('tenant_id', tenantId);
-        if (updateError) throw new Error(`Gagal memperbarui NIK ${nik}: ${updateError.message}`);
+        await executeWithColumnFallback(
+          updateData,
+          (cols) => supabase.from('residents').update(cols).eq('nik', nik).eq('tenant_id', tenantId),
+          `Gagal memperbarui NIK ${nik}`
+        );
       }
       return 'updated';
     }
 
     // 3. NIK BELUM ADA → tambahkan sebagai penduduk baru
-    const { error: insertError } = await supabase.from('residents').insert([payload]);
-    if (insertError) {
-      const msg = (insertError.message || '').toLowerCase();
+    try {
+      await executeWithColumnFallback(
+        payload,
+        (cols) => supabase.from('residents').insert([cols]),
+        `Gagal menambahkan NIK ${nik}`
+      );
+    } catch (err: any) {
+      const msg = ((err?.message || '') as string).toLowerCase();
       if (msg.includes('duplicate')) {
         // NIK baru saja dimasukkan proses lain (balapan) → jangan abaikan, lakukan update ringan
-        const { error: retryError } = await supabase
-          .from('residents')
-          .update(payload)
-          .eq('nik', nik)
-          .eq('tenant_id', tenantId);
-        if (retryError) throw new Error(`Gagal menyinkronkan NIK ${nik}: ${retryError.message}`);
+        await executeWithColumnFallback(
+          payload,
+          (cols) => supabase.from('residents').update(cols).eq('nik', nik).eq('tenant_id', tenantId),
+          `Gagal menyinkronkan NIK ${nik}`
+        );
         return 'updated';
       }
-      throw new Error(`Gagal menambahkan NIK ${nik}: ${insertError.message}`);
+      throw err;
     }
     return 'inserted';
   };
