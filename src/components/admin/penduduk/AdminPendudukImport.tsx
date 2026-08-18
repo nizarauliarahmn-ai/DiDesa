@@ -516,6 +516,30 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
     return 'inserted';
   };
 
+  // Insert batch penduduk baru (potong per 100 baris) dengan defensive fallback kolom
+  const insertBatchWithFallback = async (rows: Record<string, any>[]): Promise<number> => {
+    const cols = rows.map((row) => ({ ...row }));
+    let result = await supabase.from('residents').insert(cols);
+    let retries = 0;
+    while (
+      result.error &&
+      result.error.message?.includes('Could not find the') &&
+      result.error.message?.includes('column') &&
+      retries < 15
+    ) {
+      const match = result.error.message.match(/'([^']+)' column/);
+      if (match && match[1]) {
+        cols.forEach((row) => { delete row[match[1]]; });
+        result = await supabase.from('residents').insert(cols);
+        retries++;
+      } else {
+        break;
+      }
+    }
+    if (result.error) throw new Error(result.error.message);
+    return cols.length;
+  };
+
   // Trigger batch upload langsung ke Supabase (dengan smart dedup + real-time refresh)
   const handleConfirmImport = async () => {
     // Only import valid rows
@@ -538,11 +562,84 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
     try {
       let inserted = 0;
       let updated = 0;
+
+      // 1. Ambil semua NIK yang sudah ada dalam beberapa query batch (bukan per baris)
+      const nikList = validResidents.map((r) => String(r.nik));
+      const existingByNik = new Map<string, any>();
+      for (let i = 0; i < nikList.length; i += 400) {
+        const chunkNiks = nikList.slice(i, i + 400);
+        const { data: rows, error: fetchErr } = await supabase
+          .from('residents')
+          .select('*')
+          .in('nik', chunkNiks)
+          .eq('tenant_id', tenantId);
+        if (fetchErr) throw new Error(`Gagal memuat data penduduk: ${fetchErr.message}`);
+        (rows || []).forEach((row) => existingByNik.set(String(row.nik), row));
+      }
+
+      // 2. Pisahkan baris baru vs baris lama; siapkan update smart-merge di memori
+      const newResidents: Record<string, any>[] = [];
+      const updateTasks: (() => Promise<void>)[] = [];
       for (const r of validResidents) {
+        const nik = String(r.nik);
         const payload = buildDbPayload(r, tenantId);
-        const result = await smartUpsertResident(payload, tenantId);
-        if (result === 'inserted') inserted++;
-        else updated++;
+        const existing = existingByNik.get(nik);
+        if (!existing) {
+          newResidents.push(payload);
+          continue;
+        }
+        const updateData: Record<string, any> = {};
+        for (const [key, value] of Object.entries(payload)) {
+          if (key === 'tenant_id' || key === 'nik') continue;
+          const current = existing[key];
+          const blankInDb = current === null || current === undefined || current === '' ||
+            (Array.isArray(current) && current.length === 0) ||
+            (typeof current === 'string' && current.trim() === '');
+          const hasFileValue = value !== null && value !== undefined && value !== '' &&
+            !(Array.isArray(value) && value.length === 0);
+          if (blankInDb && hasFileValue) {
+            updateData[key] = value;
+          }
+        }
+        if (Object.keys(updateData).length > 0) {
+          updateTasks.push(() =>
+            executeWithColumnFallback(
+              updateData,
+              (cols) => supabase.from('residents').update(cols).eq('nik', nik).eq('tenant_id', tenantId),
+              `Gagal memperbarui NIK ${nik}`
+            ).then(() => { updated++; })
+          );
+        } else {
+          updated++;
+        }
+      }
+
+      // 3. Insert baris baru secara batch (100 baris per permintaan)
+      const CHUNK = 100;
+      for (let i = 0; i < newResidents.length; i += CHUNK) {
+        const chunk = newResidents.slice(i, i + CHUNK);
+        try {
+          inserted += await insertBatchWithFallback(chunk);
+        } catch (err: any) {
+          const msg = (err?.message || '').toLowerCase();
+          if (msg.includes('duplicate')) {
+            // Balapan: NIK baru saja dibuat proses lain → proses per baris secara aman
+            for (const row of chunk) {
+              const result = await smartUpsertResident(row, tenantId);
+              if (result === 'inserted') inserted++;
+              else updated++;
+            }
+          } else {
+            throw err;
+          }
+        }
+      }
+
+      // 4. Update baris lama secara paralel (20 permintaan bersamaan)
+      const CONCURRENCY = 20;
+      for (let i = 0; i < updateTasks.length; i += CONCURRENCY) {
+        const slice = updateTasks.slice(i, i + CONCURRENCY);
+        await Promise.all(slice.map((fn) => fn()));
       }
 
       setImportProcessing(false);
