@@ -722,6 +722,11 @@ export default function AdminSuratNikah({
                 position: relative; 
                 overflow: hidden;
                 color: black;
+                page-break-inside: avoid;
+              }
+              .page:not(:last-of-type) {
+                break-after: page;
+                page-break-after: always;
               }
               .printable-area {
                 position: absolute !important;
@@ -761,7 +766,7 @@ export default function AdminSuratNikah({
           </head>
           <body>
             ${pages.map((p, i) => `
-              <div class="page" ${i < pages.length - 1 ? 'style="break-after: page;"' : ''}>
+              <div class="page">
                 <div class="printable-area bg-white dark:bg-slate-900 text-black">
                   ${p.content}
                 </div>
@@ -772,8 +777,29 @@ export default function AdminSuratNikah({
       `);
       doc.close();
 
+      // Ensure every page & image (logo, QR) is fully rendered before printing,
+      // so the print job is a single clean spool (no partial/duplicated output).
+      const win = iframe.contentWindow;
+      const waitForReady = new Promise<void>((resolve) => {
+        if (!win) return resolve();
+        const imgs = Array.from(win.document.images);
+        if (win.document.readyState === 'complete' && imgs.every(img => img.complete)) {
+          return resolve();
+        }
+        let done = false;
+        const finish = () => { if (!done) { done = true; resolve(); } };
+        const maxWait = setTimeout(finish, 5000);
+        const clearTimer = () => { clearTimeout(maxWait); finish(); };
+        imgs.forEach(img => {
+          if (img.complete) return;
+          img.addEventListener('load', clearTimer, { once: true });
+          img.addEventListener('error', clearTimer, { once: true });
+        });
+        win.addEventListener('load', clearTimer, { once: true });
+      });
+
       // Trigger printing directly and reliably from parent window
-      setTimeout(() => {
+      waitForReady.then(() => {
         try {
           iframe.contentWindow?.focus();
           iframe.contentWindow?.print();
@@ -781,7 +807,7 @@ export default function AdminSuratNikah({
           console.error("Iframe print error:", e);
           window.print();
         }
-      }, 500);
+      });
     } catch (e) {
       console.error('Failed to print via iframe', e);
       window.print();

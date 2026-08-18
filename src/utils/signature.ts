@@ -1,3 +1,7 @@
+import React from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+import { renderToStaticMarkup } from 'react-dom/server';
+
 export function isKadesOfficial(namaPejabat: string): boolean {
   const kadesName = (localStorage.getItem('kop_kades') || localStorage.getItem('village_kades') || 'Fazakkir Rahmad').toLowerCase().trim();
   const currentName = (namaPejabat || '').toLowerCase().trim();
@@ -96,13 +100,22 @@ export function getPrintSignatureHTML(
   const verifyTargetUrl = cleanNomor 
     ? `${originUrl}/?tab=verifikasi&no=${encodeURIComponent(cleanNomor)}`
     : `${originUrl}/?tab=verifikasi`;
-  const verifyQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(verifyTargetUrl)}`;
+  const verifyQrSvg = renderToStaticMarkup(
+    React.createElement(QRCodeSVG, {
+      value: verifyTargetUrl,
+      size: 64,
+      level: 'M',
+      fgColor: '#000000',
+      bgColor: '#FFFFFF',
+      includeMargin: false,
+    })
+  );
 
   const cleanRole = rightRoleHtml.replace(/<br\s*\/?>/gi, ' ');
   const signatureContentHtml = showTTE ? `
     <div style="border:1px solid #000;padding:6px 10px;background:#fff;display:inline-flex;align-items:center;gap:10px;text-align:left;font-family:Arial,sans-serif;max-width:330px;box-sizing:border-box;margin-top:4px;">
       <div style="flex-shrink:0;">
-        <img src="${verifyQrUrl}" style="width:64px;height:64px;display:block;" />
+        ${verifyQrSvg}
       </div>
       <div style="flex:1;font-size:10px;line-height:1.25;color:#000;">
         <p style="margin:0 0 3px 0;font-size:9.5px;color:#000;font-weight:bold;">${cleanDesaName}, ${tglFormatted}</p>
