@@ -637,7 +637,7 @@ export default function AdminSuratNikah({
     
     // Modern isolated iframe printing to prevent scale/overflow truncation & default browser headers/footers
     const pages = printAll
-      ? visibleDocTabs.map(t => ({ content: getDocHtml(t.id) }))
+      ? visibleDocTabs.slice().reverse().map(t => ({ content: getDocHtml(t.id) }))
       : [{ content: getDocHtml() }];
     const anyContent = pages.some(p => p.content);
     if (anyContent) {
