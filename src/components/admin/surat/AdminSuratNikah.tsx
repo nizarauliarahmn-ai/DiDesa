@@ -222,6 +222,14 @@ export default function AdminSuratNikah({
     { id: 'n4_istri', label: 'N4 - Izin Ortu Istri' },
   ];
 
+  // Hanya tampilkan biodata calon yang berdomisili (suami atau istri) agar
+  // admin tidak bingung melihat biodata ganda di tahap Preview & Cetak.
+  const visibleDocTabs = DOC_TABS.filter(t => {
+    if (t.id === 'biodata_suami') return !!formData.isWargaSuami;
+    if (t.id === 'biodata_istri') return !formData.isWargaSuami;
+    return true;
+  });
+
   const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const BULAN = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
@@ -549,7 +557,7 @@ export default function AdminSuratNikah({
     }
   };
 
-  const handlePrint = async () => {
+  const handlePrint = async (printAll = false) => {
     if ((!formData.namaSuami || !formData.namaSuami.trim()) && (!formData.namaIstri || !formData.namaIstri.trim())) {
       showToast("Mohon lengkapi setidaknya salah satu Nama Calon Suami/Istri terlebih dahulu sebelum mencetak surat.", 'error');
       return;
@@ -628,107 +636,117 @@ export default function AdminSuratNikah({
     }
     
     // Modern isolated iframe printing to prevent scale/overflow truncation & default browser headers/footers
-    const content = getDocHtml();
-    const iframe = iframeRef.current;
-    if (content && iframe) {
-      try {
-        const doc = iframe.contentWindow?.document;
-        if (doc) {
-          const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-            .map(el => el.outerHTML)
-            .join('\n');
-
-          doc.open();
-          doc.write(`
-            <html>
-              <head>
-                <title>Cetak Surat Pengantar Nikah</title>
-                ${styles}
-                <style>
-                  @page { size: A4; margin: 0 !important; }
-                  body { 
-                    margin: 0; 
-                    padding: 0; 
-                    background: white; 
-                    -webkit-print-color-adjust: exact; 
-                    print-color-adjust: exact; 
-                  }
-                  .page { 
-                    width: 210mm; 
-                    height: 297mm; 
-                    margin: 0; 
-                    box-sizing: border-box; 
-                    background: white; 
-                    position: relative; 
-                    overflow: hidden;
-                    color: black;
-                  }
-                  .printable-area {
-                    position: absolute !important;
-                    left: 0 !important;
-                    top: 0 !important;
-                    width: 210mm !important;
-                    height: 297mm !important;
-                    margin: 0 !important;
-                    padding: 56px 75px !important; /* matches preview's padding precisely */
-                    box-sizing: border-box !important;
-                    background: white !important;
-                    color: black !important;
-                    box-shadow: none !important;
-                    border: none !important;
-                    display: block !important;
-                    transform: none !important;
-                    visibility: visible !important;
-                    font-family: ${letterFont}, serif;
-                    font-size: 11px;
-                    line-height: 1.45;
-                  }
-                  .printable-area * {
-                    visibility: visible !important;
-                  }
-                  /* Hide crop marks in print */
-                  .crop-mark { 
-                    display: none !important; 
-                  }
-                  @media print {
-                    body, .page { 
-                      width: 210mm; 
-                      height: 297mm; 
-                    }
-                    .nomor-surat-cetak { text-transform: uppercase !important; }
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="page">
-                  <div class="printable-area bg-white dark:bg-slate-900 text-black">
-                    ${content}
-                  </div>
-                </div>
-              </body>
-            </html>
-          `);
-          doc.close();
-
-          // Trigger printing directly and reliably from parent window
-          setTimeout(() => {
-            try {
-              iframe.contentWindow?.focus();
-              iframe.contentWindow?.print();
-            } catch (e) {
-              console.error("Iframe print error:", e);
-              window.print();
-            }
-          }, 500);
-        }
-      } catch (e) {
-        console.error('Failed to print via iframe', e);
-        window.print();
-      }
+    const pages = printAll
+      ? visibleDocTabs.map(t => ({ content: getDocHtml(t.id) }))
+      : [{ content: getDocHtml() }];
+    const anyContent = pages.some(p => p.content);
+    if (anyContent) {
+      openPrintFrame(printAll ? 'Cetak Semua Berkas Nikah' : 'Cetak Surat Pengantar Nikah', pages);
     } else {
       window.print();
     }
     setSuccess(true);
+  };
+
+  // Build one A4 page per document and print them in a single print job
+  const openPrintFrame = (title: string, pages: { content: string }[]) => {
+    const iframe = iframeRef.current;
+    if (!iframe) { window.print(); return; }
+    try {
+      const doc = iframe.contentWindow?.document;
+      if (!doc) { window.print(); return; }
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(el => el.outerHTML)
+        .join('\n');
+
+      doc.open();
+      doc.write(`
+        <html>
+          <head>
+            <title>${title}</title>
+            ${styles}
+            <style>
+              @page { size: A4; margin: 0 !important; }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                background: white; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+              }
+              .page { 
+                width: 210mm; 
+                height: 297mm; 
+                margin: 0; 
+                box-sizing: border-box; 
+                background: white; 
+                position: relative; 
+                overflow: hidden;
+                color: black;
+              }
+              .printable-area {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 56px 75px !important; /* matches preview's padding precisely */
+                box-sizing: border-box !important;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+                transform: none !important;
+                visibility: visible !important;
+                font-family: ${letterFont}, serif;
+                font-size: 11px;
+                line-height: 1.45;
+              }
+              .printable-area * {
+                visibility: visible !important;
+              }
+              /* Hide crop marks in print */
+              .crop-mark { 
+                display: none !important; 
+              }
+              @media print {
+                body, .page { 
+                  width: 210mm; 
+                  height: 297mm; 
+                }
+                .nomor-surat-cetak { text-transform: uppercase !important; }
+              }
+            </style>
+          </head>
+          <body>
+            ${pages.map((p, i) => `
+              <div class="page" ${i < pages.length - 1 ? 'style="break-after: page;"' : ''}>
+                <div class="printable-area bg-white dark:bg-slate-900 text-black">
+                  ${p.content}
+                </div>
+              </div>
+            `).join('\n')}
+          </body>
+        </html>
+      `);
+      doc.close();
+
+      // Trigger printing directly and reliably from parent window
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch (e) {
+          console.error("Iframe print error:", e);
+          window.print();
+        }
+      }, 500);
+    } catch (e) {
+      console.error('Failed to print via iframe', e);
+      window.print();
+    }
   };
 
   const generateKopSuratHTML = (config: { logoUrl: string, kabupaten: string, kecamatan: string, desa: string, alamat: string, kontak: string, fontFamily: string }) => {
@@ -771,8 +789,9 @@ export default function AdminSuratNikah({
   
   const tempatTgl = () => { return v(formData.namaDesa, '.....') + ', ' + v(fmtTgl(formData.tanggalSurat)); };
 
-  const getDocHtml = () => {
+  const getDocHtml = (docId?: string) => {
     try {
+      const targetDoc = docId || activeDoc;
       let html = '';
       
       // Standard table: values not bold
@@ -794,8 +813,8 @@ export default function AdminSuratNikah({
         </table>
       `;
 
-    const isSuami = activeDoc === 'biodata_suami' || (activeDoc === 'n1' && formData.isWargaSuami);
-    const isIstri = activeDoc === 'biodata_istri' || (activeDoc === 'n1' && !formData.isWargaSuami);
+    const isSuami = targetDoc === 'biodata_suami' || (targetDoc === 'n1' && formData.isWargaSuami);
+    const isIstri = targetDoc === 'biodata_istri' || (targetDoc === 'n1' && !formData.isWargaSuami);
 
     const fontStyle = `font-family: ${letterFont};`;
 
@@ -817,8 +836,8 @@ export default function AdminSuratNikah({
       alamatOrtu: formData.alamatOrtuIstri
     };
 
-    if (activeDoc.startsWith('biodata')) {
-      const targetIsSuami = activeDoc === 'biodata_suami';
+    if (targetDoc.startsWith('biodata')) {
+      const targetIsSuami = targetDoc === 'biodata_suami';
       const P = targetIsSuami ? {
         nik: formData.nikSuami, noKK: formData.noKKSuami, nama: formData.namaSuami, jk: 'Laki-Laki', ttl: ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami),
         pend: formData.pendidikanSuami, warga: formData.kewarganegaraanSuami, agama: formData.agamaSuami, kerja: formData.pekerjaanSuami, alamat: formData.alamatSuami
@@ -849,7 +868,7 @@ export default function AdminSuratNikah({
         <p>&bull; Penetapan hari/tanggal/tempat akad nikah dikonsultasikan dengan ${v(formData.namaKUA, 'KUA')}.</p>
       `;
     }
-    else if (activeDoc === 'n1') {
+    else if (targetDoc === 'n1') {
       html = `
         ${lampiranHtml('N1')}
         ${dtTableCompact([
@@ -909,7 +928,7 @@ export default function AdminSuratNikah({
       )}
       `;
     }
-    else if (activeDoc === 'n2') {
+    else if (targetDoc === 'n2') {
       html = `
         ${lampiranHtml('N2')}
         <div style="line-height:1.35;margin:0;padding:0;">
@@ -946,7 +965,7 @@ export default function AdminSuratNikah({
         </div>
       `;
     }
-    else if (activeDoc === 'n3') {
+    else if (targetDoc === 'n3') {
       html = `
         ${lampiranHtml('N3')}
         <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PERSETUJUAN MEMPELAI</h3>
@@ -977,8 +996,8 @@ export default function AdminSuratNikah({
         </div>
       `;
     }
-    else if (activeDoc.startsWith('n4_')) {
-      const isSuami = activeDoc === 'n4_suami';
+    else if (targetDoc.startsWith('n4_')) {
+      const isSuami = targetDoc === 'n4_suami';
       const anak = isSuami ? {
         nama: formData.namaSuami, nik: formData.nikSuami, jk: 'Laki-Laki', ttl: ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami),
         warga: formData.kewarganegaraanSuami, agama: formData.agamaSuami, kerja: formData.pekerjaanSuami, alamat: formData.alamatSuami,
@@ -1738,11 +1757,14 @@ export default function AdminSuratNikah({
               <div className="lg:col-span-5 flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">5. Preview & Cetak</h2>
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button onClick={saveToRiwayat} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 transition-colors">
                       <Save className="w-4 h-4" /> Simpan 
                     </button>
-                    <button onClick={handlePrint} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-md dark:shadow-none shadow-emerald-600/20 transition-all active:scale-95">
+                    <button onClick={() => handlePrint(true)} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 shadow-md dark:shadow-none shadow-teal-600/20 transition-all active:scale-95">
+                      <Printer className="w-4 h-4" /> Cetak Semua
+                    </button>
+                    <button onClick={() => handlePrint()} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-md dark:shadow-none shadow-emerald-600/20 transition-all active:scale-95">
                       <Printer className="w-4 h-4" /> Cetak
                     </button>
                   </div>
@@ -1751,7 +1773,7 @@ export default function AdminSuratNikah({
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pilih Dokumen</label>
                   <div className="flex flex-wrap gap-2">
-                    {DOC_TABS.map(tab => (
+                    {visibleDocTabs.map(tab => (
                       <button 
                         key={tab.id}
                         onClick={() => setActiveDoc(tab.id)}
