@@ -231,23 +231,26 @@ export default function AdminSuratNikah({
     { id: 'biodata_istri', label: 'Biodata Istri' },
     { id: 'n1_suami', label: 'N1 - Pengantar Suami' },
     { id: 'n1_istri', label: 'N1 - Pengantar Istri' },
-    { id: 'n2', label: 'N2 - Permohonan KUA' },
-    { id: 'n3', label: 'N3 - Persetujuan' },
+    { id: 'n2_suami', label: 'N2 - Permohonan Suami' },
+    { id: 'n2_istri', label: 'N2 - Permohonan Istri' },
+    { id: 'n3_suami', label: 'N3 - Persetujuan Suami' },
+    { id: 'n3_istri', label: 'N3 - Persetujuan Istri' },
     { id: 'n4_suami', label: 'N4 - Izin Ortu Suami' },
     { id: 'n4_istri', label: 'N4 - Izin Ortu Istri' },
+    { id: 'n6_suami', label: 'N6 - Kematian Istri Terdahulu' },
+    { id: 'n6_istri', label: 'N6 - Kematian Suami Terdahulu' },
   ];
 
-  // Berdasarkan siapa yang berdomisili, munculkan dokumen yang relevan saja:
-  // biodata + N1 per calon yang berdomisili; N2/N3/N4 selalu tampil.
+  // Berdasarkan siapa yang berdomisili, munculkan dokumen yang relevan saja.
+  // Saat keduanya berdomisili, semua syarat (N1, N2, N3, N4) dibuat untuk masing-masing calon.
+  // N6 hanya untuk calon berdomisili yang berstatus Duda/Janda.
   const visibleDocTabs = DOC_TABS.filter(t => {
-    if (t.id === 'biodata_suami' || t.id === 'n1_suami') return !!formData.wargaSuami;
-    if (t.id === 'biodata_istri' || t.id === 'n1_istri') return !!formData.wargaIstri;
+    if (t.id === 'n6_suami') return !!formData.wargaSuami && formData.statusSuami === 'Duda';
+    if (t.id === 'n6_istri') return !!formData.wargaIstri && formData.statusIstri === 'Janda';
+    if (/_(suami)$/.test(t.id)) return !!formData.wargaSuami;
+    if (/_(istri)$/.test(t.id)) return !!formData.wargaIstri;
     return true;
   });
-
-  // Pemohon (yang menandatangani N2) = calon berdomisili. Bila keduanya warga desa,
-  // prioritas pemohon adalah calon suami.
-  const pemohonSide: 'Suami' | 'Istri' = formData.wargaIstri && !formData.wargaSuami ? 'Istri' : 'Suami';
 
   // Mode pemilihan warga berdomisili di tahap 1
   const domMode: 'suami' | 'istri' | 'keduanya' =
@@ -965,7 +968,11 @@ export default function AdminSuratNikah({
       )}
       `;
     }
-    else if (targetDoc === 'n2') {
+    else if (targetDoc === 'n2_suami' || targetDoc === 'n2_istri') {
+      const n2ForSuami = targetDoc === 'n2_suami';
+      const pm = n2ForSuami
+        ? { nama: formData.namaSuami, bin: 'BIN', ayah: formData.namaAyahSuami }
+        : { nama: formData.namaIstri, bin: 'BINTI', ayah: formData.namaAyahIstri };
       html = `
         ${lampiranHtml('N2')}
         <div style="line-height:1.35;margin:0;padding:0;">
@@ -998,38 +1005,38 @@ export default function AdminSuratNikah({
         </div>
         <div style="margin-top:16px;display:flex;justify-content:space-between;">
           <div style="text-align:center;width:44%;">Yang menerima,<br>Kepala ${v(formData.namaKUA, 'KUA')}<span style="font-weight:700;margin-top:56px;display:block;">&nbsp;</span></div>
-          <div style="text-align:center;width:44%;">Pemohon,<span style="font-weight:700;margin-top:56px;display:block;">${vn(pemohonSide === 'Istri' ? formData.namaIstri : formData.namaSuami)}</span>${pemohonSide === 'Istri' ? 'BINTI' : 'BIN'} ${vn(pemohonSide === 'Istri' ? formData.namaAyahIstri : formData.namaAyahSuami)}</div>
+          <div style="text-align:center;width:44%;">Pemohon,<span style="font-weight:700;margin-top:56px;display:block;">${vn(pm.nama)}</span>${pm.bin} ${vn(pm.ayah)}</div>
         </div>
       `;
     }
-    else if (targetDoc === 'n3') {
+    else if (targetDoc === 'n3_suami' || targetDoc === 'n3_istri') {
+      const n3ForSuami = targetDoc === 'n3_suami';
+      const catin = n3ForSuami ? {
+        nama: formData.namaSuami, nik: formData.nikSuami, jk: 'Laki-Laki', ttl: ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami),
+        kerja: formData.pekerjaanSuami, alamat: formData.alamatSuami, pasangan: formData.namaIstri, bin: 'BIN', ayah: formData.namaAyahSuami
+      } : {
+        nama: formData.namaIstri, nik: formData.nikIstri, jk: 'Perempuan', ttl: ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri),
+        kerja: formData.pekerjaanIstri, alamat: formData.alamatIstri, pasangan: formData.namaSuami, bin: 'BINTI', ayah: formData.namaAyahIstri
+      };
       html = `
         ${lampiranHtml('N3')}
         <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PERSETUJUAN MEMPELAI</h3>
         <p>yang bertanda tangan di bawah ini:</p>
-        <p style="font-weight:700;">A. Calon Suami</p>
         ${dtTable([
-          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaSuami)}</span>`],
-          ['2. NIK', v(formData.nikSuami)],
-          ['3. Jenis Kelamin', 'Laki-Laki'],
-          ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami)],
-          ['5. Pekerjaan', v(formData.pekerjaanSuami)],
-          ['6. Alamat', v(formData.alamatSuami)]
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(catin.nama)}</span>`],
+          ['2. NIK', v(catin.nik)],
+          ['3. Jenis Kelamin', catin.jk],
+          ['4. Tempat Tanggal Lahir', catin.ttl],
+          ['5. Pekerjaan', v(catin.kerja)],
+          ['6. Alamat', v(catin.alamat)]
         ])}
-        <p style="font-weight:700;">B. Calon Istri</p>
+        <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, kesadaran sendiri, dan tanpa ada paksaan dari siapapun, setuju untuk melangsungkan perkawinan dengan calon ${n3ForSuami ? 'istri' : 'suami'} sebagai berikut:</p>
         ${dtTable([
-          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaIstri)}</span>`],
-          ['2. NIK', v(formData.nikIstri)],
-          ['3. Jenis Kelamin', 'Perempuan'],
-          ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri)],
-          ['5. Pekerjaan', v(formData.pekerjaanIstri)],
-          ['6. Alamat', v(formData.alamatIstri)]
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(catin.pasangan)}</span>`]
         ])}
-        <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, kesadaran sendiri, dan tanpa ada paksaan dari siapapun, setuju untuk melangsungkan perkawinan.</p>
         <p style="text-align:right;">${tempatTgl()}</p>
-        <div style="margin-top:22px;display:flex;justify-content:space-between;">
-          <div style="text-align:center;width:44%;">Calon Suami,<span style="font-weight:700;margin-top:56px;display:block;">${vn(formData.namaSuami)}</span>BIN ${vn(formData.namaAyahSuami)}</div>
-          <div style="text-align:center;width:44%;">Calon Istri,<span style="font-weight:700;margin-top:56px;display:block;">${vn(formData.namaIstri)}</span>BINTI ${vn(formData.namaAyahIstri)}</div>
+        <div style="margin-top:22px;display:flex;justify-content:flex-end;">
+          <div style="text-align:center;width:44%;">Calon ${n3ForSuami ? 'Suami' : 'Istri'},<span style="font-weight:700;margin-top:56px;display:block;">${vn(catin.nama)}</span>${catin.bin} ${vn(catin.ayah)}</div>
         </div>
       `;
     }
@@ -1100,6 +1107,60 @@ export default function AdminSuratNikah({
             <span style="font-weight:700;">${vn(anak.ayah)}</span>
           </div>
         </div>
+      `;
+    }
+    else if (targetDoc === 'n6_suami' || targetDoc === 'n6_istri') {
+      const n6ForSuami = targetDoc === 'n6_suami';
+      const almarhum = n6ForSuami ? formData.namaIstriTerdahulu : formData.namaSuamiTerdahulu;
+      const almarhumLabel = n6ForSuami ? 'Almarhumah' : 'Almarhum';
+      const relasi = n6ForSuami ? 'Istri' : 'Suami';
+      const calon = n6ForSuami ? {
+        nama: formData.namaSuami, nik: formData.nikSuami, alamat: formData.alamatSuami
+      } : {
+        nama: formData.namaIstri, nik: formData.nikIstri, alamat: formData.alamatIstri
+      };
+      html = `
+        ${lampiranHtml('N6')}
+        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT KETERANGAN KEMATIAN ${relasi.toUpperCase()}</h3>
+        <p>Yang bertanda tangan di bawah ini menerangkan dengan sesungguhnya bahwa orang yang namanya tersebut di bawah ini:</p>
+        ${dtTable([
+          ['Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(almarhum)}</span>`],
+          ['NIK', '............'],
+          ['Jenis Kelamin', n6ForSuami ? 'Perempuan' : 'Laki-Laki'],
+          ['Tempat, Tanggal Lahir', '............'],
+          ['Agama', 'Islam'],
+          ['Pekerjaan', '............'],
+          ['Alamat', '............']
+        ])}
+        <p>adalah benar ${relasi.toLowerCase()} (${almarhumLabel}) dari:</p>
+        ${dtTable([
+          ['Nama', vn(calon.nama)],
+          ['NIK', v(calon.nik)],
+          ['Alamat', v(calon.alamat)]
+        ])}
+        <p>yang meninggal dunia pada:</p>
+        ${dtTable([
+          ['Hari, Tanggal', '............'],
+          ['Tempat', '............'],
+          ['Penyebab Kematian', '............']
+        ])}
+        <p>Surat keterangan ini dibuat untuk keperluan kelengkapan persyaratan pencatatan perkawinan.</p>
+        ${getPrintSignatureHTML(
+          formData.namaDesa,
+          v(fmtTgl(formData.tanggalSurat)),
+          formData.namaPejabat,
+          formData.jabatanPejabat,
+          (() => {
+            try {
+              const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+              const found = officersList.find((o: any) => o.name === formData.namaPejabat);
+              return found?.nip || '-';
+            } catch(e) {
+              return '-';
+            }
+          })(),
+          formData.includeCamat
+        )}
       `;
     }
     
