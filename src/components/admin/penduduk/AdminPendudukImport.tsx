@@ -614,8 +614,8 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                 <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 shadow-sm dark:shadow-none group-hover:scale-105 transition-transform">
                   <Upload className="w-6 h-6" />
                 </div>
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Pilih file CSV atau seret ke sini</p>
-                <p className="text-xs text-slate-400 mt-1">Mendukung format file .csv (Pemisah koma atau titik koma)</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-100">Pilih file Excel / CSV atau seret ke sini</p>
+                <p className="text-xs text-slate-400 mt-1">Mendukung format .xlsx, .xls, .csv (pemisah koma, titik koma, atau tab)</p>
               </div>
 
               <div className="flex items-center gap-3 my-4">
