@@ -213,9 +213,9 @@ export default function AdminSuratNikah({
   ];
 
   const DOC_TABS = [
-    { id: 'n1', label: `N1 - Pengantar (${formData.isWargaSuami ? 'Suami' : 'Istri'})` },
     { id: 'biodata_suami', label: 'Biodata Suami' },
     { id: 'biodata_istri', label: 'Biodata Istri' },
+    { id: 'n1', label: `N1 - Pengantar (${formData.isWargaSuami ? 'Suami' : 'Istri'})` },
     { id: 'n2', label: 'N2 - Permohonan KUA' },
     { id: 'n3', label: 'N3 - Persetujuan' },
     { id: 'n4_suami', label: 'N4 - Izin Ortu Suami' },
