@@ -109,13 +109,15 @@ if (
     if (url.includes('/api/residents/batch') && init && init.method === 'POST') {
       const body = JSON.parse(init.body as string);
       const list = getLocalResidents();
+      let count = 0;
       body.forEach((newRes: any) => {
         if (!list.some((r: any) => r.nik === newRes.nik)) {
           list.push(newRes);
+          count++;
         }
       });
       saveLocalResidents(list);
-      return new Response(JSON.stringify({ success: true }), { status: 200 });
+      return new Response(JSON.stringify({ success: true, count }), { status: 200 });
     }
 
     // POST approve/reject/request-approval

@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { X, Upload, Download, Check, CheckCircle, AlertCircle, ArrowRight, Database, Loader2 } from 'lucide-react';
 import { read, utils } from 'xlsx';
 import { showToast } from '../../../utils/toast';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 
 interface AdminPendudukImportProps {
   onClose: () => void;
@@ -76,6 +78,37 @@ function parseCSV(text: string): string[][] {
   return lines.filter(r => r.some(cell => cell.trim() !== ""));
 }
 
+// Sanitasi NIK: Excel/CSV sering menyimpan NIK 16 digit sebagai angka/notasi ilmiah
+// (misal "3.20102E+15"). Normalisasikan menjadi string digit murni 16 digit.
+function sanitizeNik(raw: any): string {
+  if (raw === null || raw === undefined) return '';
+  let s = String(raw).trim();
+
+  // Notasi ilmiah (3.20102040506E+15 / 3.20102e+15) → digit penuh
+  if (/^\d+(\.\d+)?[eE][+-]?\d+$/.test(s)) {
+    try {
+      const asNumber = Number(s);
+      if (Number.isFinite(asNumber) && Math.abs(asNumber) < 1e21) {
+        s = asNumber.toFixed(0);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // Buang spasi, titik, strip, tanda plus, dan karakter non-digit lain
+  return s.replace(/[^0-9]/g, '');
+}
+
+// Konversi serial tanggal Excel (misal 46200) menjadi format ISO YYYY-MM-DD
+function excelDateToISO(serial: number): string {
+  const utcDays = Math.floor(serial - 25569);
+  const ms = utcDays * 86400 * 1000;
+  const date = new Date(ms);
+  if (isNaN(date.getTime())) return String(serial);
+  return date.toISOString().slice(0, 10);
+}
+
 export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudukImportProps) {
   const [step, setStep] = useState(1); // 1: Upload, 2: Column Mapping, 3: Preview, 4: Success
   const [csvText, setCsvText] = useState('');
@@ -84,23 +117,18 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
   const [csvRows, setCsvRows] = useState<string[][]>([]);
   const [columnMapping, setColumnMapping] = useState<Record<string, number>>({});
   const [importProcessing, setImportProcessing] = useState(false);
-  const [importResult, setImportResult] = useState<{ success: boolean; count: number; error?: string } | null>(null);
+  const [importResult, setImportResult] = useState<{ success: boolean; count: number; inserted?: number; updated?: number; error?: string } | null>(null);
 
-  // Parse CSV and enter column mapping state
-  const handleCSVContentLoaded = (text: string) => {
-    const parsed = parseCSV(text);
-    if (parsed.length < 2) {
-      showToast("Format CSV tidak valid atau data kosong. Harap sertakan baris header dan minimal satu baris data.", "error");
+  // Terapkan header + baris data hasil parsing (baik dari CSV teks maupun Excel)
+  const applyParsedData = (headers: string[], rows: string[][]) => {
+    if (rows.length === 0) {
+      showToast("File tidak memiliki baris data. Harap sertakan minimal satu baris data.", "error");
       return;
     }
-
-    const headers = parsed[0].map(h => h.trim());
-    const dataRows = parsed.slice(1);
-
     setCsvHeaders(headers);
-    setCsvRows(dataRows);
+    setCsvRows(rows);
 
-    // Automap based on synonyms
+    // Automap berdasarkan sinonim kolom
     const initialMapping: Record<string, number> = {};
     FIELD_DEFINITIONS.forEach(field => {
       const matchedIdx = headers.findIndex(h => {
@@ -114,6 +142,66 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
 
     setColumnMapping(initialMapping);
     setStep(2);
+  };
+
+  // Parse CSV and enter column mapping state
+  const handleCSVContentLoaded = (text: string) => {
+    const parsed = parseCSV(text);
+    if (parsed.length < 2) {
+      showToast("Format CSV tidak valid atau data kosong. Harap sertakan baris header dan minimal satu baris data.", "error");
+      return;
+    }
+
+    const headers = parsed[0].map(h => h.trim());
+    const dataRows = parsed.slice(1);
+
+    applyParsedData(headers, dataRows);
+  };
+
+  // Baca sheet Excel dengan nilai mentah (raw) agar NIK 16 digit & tanggal tidak rusak
+  const loadExcelRows = (worksheet: any) => {
+    const rows = utils.sheet_to_json<any[]>(worksheet, { header: 1, raw: true, defval: '' });
+    if (!rows || rows.length === 0) {
+      showToast("File Excel kosong / tidak memiliki data.", "error");
+      return;
+    }
+
+    const headers = rows[0].map((c: any, idx: number) => {
+      const t = String(c ?? '').trim();
+      return t || `Kolom ${idx + 1}`;
+    });
+
+    const birthDateColIdx = headers.findIndex(h => {
+      const lh = h.toLowerCase();
+      return ['tanggal lahir', 'tanggal_lahir', 'tanggal', 'birth date', 'tgl lahir', 'tgl_lahir', 'tgl'].some(syn => lh.includes(syn));
+    });
+
+    const cellToText = (cell: any): string => {
+      if (cell === null || cell === undefined) return '';
+      if (cell instanceof Date && !isNaN(cell.getTime())) return cell.toISOString().slice(0, 10);
+      if (typeof cell === 'number') {
+        if (Number.isInteger(cell) && Math.abs(cell) < 1e21) {
+          if (birthDateColIdx !== -1 && cell > 20000 && cell < 60000) {
+            return excelDateToISO(cell);
+          }
+          return String(cell);
+        }
+        return String(cell);
+      }
+      return String(cell);
+    };
+
+    const dataRows = rows
+      .slice(1)
+      .map(row => (Array.isArray(row) ? row : [row]).map(cellToText))
+      .filter(row => row.some(cell => cell.trim() !== ''));
+
+    if (dataRows.length === 0) {
+      showToast("Tidak ada baris data yang ditemukan di dalam file Excel.", "error");
+      return;
+    }
+
+    applyParsedData(headers, dataRows);
   };
 
   // Helper to process both CSV and Excel
@@ -136,8 +224,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
             const workbook = read(data, { type: 'array' });
             const firstSheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[firstSheetName];
-            const csvString = utils.sheet_to_csv(worksheet);
-            handleCSVContentLoaded(csvString);
+            loadExcelRows(worksheet);
           } catch (error) {
             showToast("Gagal membaca file Excel", "error");
           }
@@ -182,8 +269,8 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
       });
 
       // Validations and Normalizations
-      // NIK
-      res.nik = (res.nik || '').replace(/[^0-9]/g, ''); // strip spaces/chars
+      // NIK (dukung scientific notation dari Excel/kutipan teks)
+      res.nik = sanitizeNik(res.nik);
       
       // Initials generator
       if (res.name) {
@@ -306,8 +393,102 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
     return { validCount, invalidCount, details };
   }, [mappedResidents]);
 
-  // Trigger batch upload to backend
-  const handleConfirmImport = () => {
+  // Bangun payload database (snake_case) yang persis dengan skema Supabase residents
+  const buildDbPayload = (r: any, tenantId: string): Record<string, any> => ({
+    tenant_id: tenantId,
+    nik: r.nik,
+    initials: r.initials || '',
+    name: r.name,
+    no_kk: r.noKk || '',
+    gender: r.gender,
+    gender_color: r.genderColor || 'blue',
+    status_color: r.statusColor || 'emerald',
+    marital_status: r.maritalStatus,
+    status: r.status || 'Aktif',
+    age: Number(r.age) || 30,
+    birth_place: r.birthPlace || '',
+    birth_date: r.birthDate || '',
+    blood_type: r.bloodType || '',
+    religion: r.religion || '',
+    job: r.job || '',
+    address: r.address || '',
+    rt_rw: r.rtRw || '',
+    rt: r.rt || '',
+    rw: r.rw || '',
+    desa: r.desa || '',
+    domicile_status: r.domicileStatus || '',
+    family_relation: r.familyRelation || '',
+    education: r.education || '',
+    father_name: r.fatherName || '',
+    mother_name: r.motherName || '',
+    active_aids: JSON.stringify(r.activeAids || []),
+    created_at: new Date().toISOString(),
+  });
+
+  // Smart Merge: jika NIK sudah ada, perbarui HANYA kolom yang masih kosong/null di DB.
+  // Jika belum ada, tambahkan baris baru. Tangani duplicate-key saat balapan (race).
+  const smartUpsertResident = async (payload: Record<string, any>, tenantId: string): Promise<'inserted' | 'updated'> => {
+    const nik = payload.nik;
+
+    // 1. Periksa keberadaan NIK di database Supabase
+    const { data: existing, error: findError } = await supabase
+      .from('residents')
+      .select('*')
+      .eq('nik', nik)
+      .eq('tenant_id', tenantId)
+      .maybeSingle();
+
+    if (findError) throw new Error(`Gagal memeriksa NIK ${nik} di database: ${findError.message}`);
+
+    // 2. NIK SUDAH ADA → update hanya kolom yang di DB masih kosong/null
+    if (existing) {
+      const updateData: Record<string, any> = {};
+      for (const [key, value] of Object.entries(payload)) {
+        if (key === 'tenant_id' || key === 'nik' || key === 'created_at') continue;
+        const current = existing[key];
+        const blankInDb = current === null || current === undefined || current === '' ||
+          (Array.isArray(current) && current.length === 0) ||
+          (typeof current === 'string' && current.trim() === '');
+        const hasFileValue = value !== null && value !== undefined && value !== '' &&
+          !(Array.isArray(value) && value.length === 0);
+        if (blankInDb && hasFileValue) {
+          updateData[key] = value;
+        }
+      }
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateError } = await supabase
+          .from('residents')
+          .update(updateData)
+          .eq('nik', nik)
+          .eq('tenant_id', tenantId);
+        if (updateError) throw new Error(`Gagal memperbarui NIK ${nik}: ${updateError.message}`);
+      }
+      return 'updated';
+    }
+
+    // 3. NIK BELUM ADA → tambahkan sebagai penduduk baru
+    const { error: insertError } = await supabase.from('residents').insert([payload]);
+    if (insertError) {
+      const msg = (insertError.message || '').toLowerCase();
+      if (msg.includes('duplicate')) {
+        // NIK baru saja dimasukkan proses lain (balapan) → jangan abaikan, lakukan update ringan
+        const updatePayload = { ...payload };
+        delete updatePayload.created_at;
+        const { error: retryError } = await supabase
+          .from('residents')
+          .update(updatePayload)
+          .eq('nik', nik)
+          .eq('tenant_id', tenantId);
+        if (retryError) throw new Error(`Gagal menyinkronkan NIK ${nik}: ${retryError.message}`);
+        return 'updated';
+      }
+      throw new Error(`Gagal menambahkan NIK ${nik}: ${insertError.message}`);
+    }
+    return 'inserted';
+  };
+
+  // Trigger batch upload langsung ke Supabase (dengan smart dedup + real-time refresh)
+  const handleConfirmImport = async () => {
     // Only import valid rows
     const validResidents = mappedResidents.filter((_, idx) => validationResults.details[idx].isValid);
 
@@ -316,30 +497,34 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
       return;
     }
 
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) {
+      showToast("Gagal: ID Desa (tenant) tidak ditemukan. Pastikan Anda sudah login/memilih desa.", "error");
+      return;
+    }
+
     setImportProcessing(true);
     setStep(4);
 
-    fetch('/api/residents/batch', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(validResidents)
-    })
-      .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })
-      .then((data) => {
-        setImportProcessing(false);
-        if (data.success) {
-          setImportResult({ success: true, count: data.count });
-          onRefresh();
-        } else {
-          setImportResult({ success: false, count: 0, error: data.error || 'Terjadi kesalahan saat mengimpor.' });
-        }
-      })
-      .catch((err) => {
-        setImportProcessing(false);
-        setImportResult({ success: false, count: 0, error: err.message || 'Koneksi ke server gagal.' });
-      });
+    try {
+      let inserted = 0;
+      let updated = 0;
+      for (const r of validResidents) {
+        const payload = buildDbPayload(r, tenantId);
+        const result = await smartUpsertResident(payload, tenantId);
+        if (result === 'inserted') inserted++;
+        else updated++;
+      }
+
+      setImportProcessing(false);
+      setImportResult({ success: true, count: inserted + updated, inserted, updated });
+      // Refresh tabel UI & statistik langsung tanpa reload halaman
+      onRefresh();
+      window.dispatchEvent(new Event('residents_updated'));
+    } catch (err: any) {
+      setImportProcessing(false);
+      setImportResult({ success: false, count: 0, error: err.message || 'Terjadi kesalahan saat mengimpor ke database.' });
+    }
   };
 
   const handleSampleTemplateDownload = () => {
@@ -669,8 +854,18 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                   </div>
                   <h4 className="text-xl font-extrabold text-slate-900 dark:text-white">Impor Berhasil! 🎉</h4>
                   <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md font-medium">
-                    Selamat! <span className="font-extrabold text-slate-800 dark:text-slate-100">{importResult.count} data penduduk</span> berhasil disimpan dan disinkronkan ke dalam database dengan aman.
+                    Selamat! <span className="font-extrabold text-slate-800 dark:text-slate-100">{importResult.count} data penduduk</span> berhasil disinkronkan ke dalam database dengan aman.
                   </p>
+                  {typeof importResult.inserted === 'number' && typeof importResult.updated === 'number' && (
+                    <div className="flex items-center gap-2 text-[11px] font-bold">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        <Check className="w-3 h-3" /> {importResult.inserted} Baru Ditambahkan
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                        {importResult.updated} Diperbarui (NIK Sama)
+                      </span>
+                    </div>
+                  )}
                   <button 
                     onClick={() => {
                       onClose();

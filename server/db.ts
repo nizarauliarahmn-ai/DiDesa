@@ -499,6 +499,7 @@ export async function insertResident(resident: any): Promise<any> {
   if (supabase) {
     try {
       const dbFormat = {
+        tenant_id: resident.tenant_id || null,
         nik: resident.nik,
         initials: resident.initials,
         name: resident.name,

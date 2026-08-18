@@ -299,15 +299,22 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
     }
   };
 
-  const moveItem = async (index: number, dir: -1 | 1) => {
-    const sorted = [...items].sort((a, b) => a.sort_order - b.sort_order);
+  const filtered = items.filter(i =>
+    !searchQuery.trim() ||
+    i.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    i.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    i.category_label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const moveItem = async (id: string, dir: -1 | 1) => {
+    const base = searchQuery.trim() ? filtered : items;
+    const sorted = [...base].sort((a, b) => a.sort_order - b.sort_order);
+    const index = sorted.findIndex(i => i.id === id);
+    if (index < 0) return;
     const target = index + dir;
     if (target < 0 || target >= sorted.length) return;
     const a = sorted[index];
     const b = sorted[target];
-    const nextItems = [...sorted];
-    nextItems[index] = b;
-    nextItems[target] = a;
     const ops = [
       supabase.from('guide_content').update({ sort_order: b.sort_order }).eq('id', a.id),
       supabase.from('guide_content').update({ sort_order: a.sort_order }).eq('id', b.id),
@@ -320,13 +327,6 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
     window.dispatchEvent(new Event('guide_content_updated'));
     fetchItems();
   };
-
-  const filtered = items.filter(i =>
-    !searchQuery.trim() ||
-    i.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    i.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    i.category_label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="space-y-6 pb-24">
@@ -443,7 +443,7 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <button
-                      onClick={() => moveItem(idx, -1)}
+                      onClick={() => moveItem(item.id, -1)}
                       disabled={idx === 0}
                       className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed"
                       title="Naikkan urutan"
@@ -451,7 +451,7 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
                       <ArrowUp size={16} />
                     </button>
                     <button
-                      onClick={() => moveItem(idx, 1)}
+                      onClick={() => moveItem(item.id, 1)}
                       disabled={idx === filtered.length - 1}
                       className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed"
                       title="Turunkan urutan"
