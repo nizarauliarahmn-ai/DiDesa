@@ -235,8 +235,7 @@ export default function AdminSuratNikah({
     { id: 'n1_istri', label: 'N1 - Pengantar Istri' },
     { id: 'n2_suami', label: 'N2 - Permohonan Suami' },
     { id: 'n2_istri', label: 'N2 - Permohonan Istri' },
-    { id: 'n3_suami', label: 'N3 - Persetujuan Suami' },
-    { id: 'n3_istri', label: 'N3 - Persetujuan Istri' },
+    { id: 'n3', label: 'N3 - Persetujuan Mempelai' },
     { id: 'n4_suami', label: 'N4 - Izin Ortu Suami' },
     { id: 'n4_istri', label: 'N4 - Izin Ortu Istri' },
     { id: 'n6_suami', label: 'N6 - Kematian Istri Terdahulu' },
@@ -249,6 +248,9 @@ export default function AdminSuratNikah({
   const visibleDocTabs = DOC_TABS.filter(t => {
     if (t.id === 'n6_suami') return !!formData.wargaSuami && formData.statusSuami === 'Duda';
     if (t.id === 'n6_istri') return !!formData.wargaIstri && formData.statusIstri === 'Janda';
+    // N3 (Surat Persetujuan Mempelai) adalah satu dokumen bersama kedua calon,
+    // muncul bila minimal salah satu calon berdomisili.
+    if (t.id === 'n3') return !!formData.wargaSuami || !!formData.wargaIstri;
     if (/_(suami)$/.test(t.id)) return !!formData.wargaSuami;
     if (/_(istri)$/.test(t.id)) return !!formData.wargaIstri;
     return true;
@@ -1043,34 +1045,50 @@ export default function AdminSuratNikah({
         </div>
       `;
     }
-    else if (targetDoc === 'n3_suami' || targetDoc === 'n3_istri') {
-      const n3ForSuami = targetDoc === 'n3_suami';
-      const catin = n3ForSuami ? {
-        nama: formData.namaSuami, nik: formData.nikSuami, jk: 'Laki-Laki', ttl: ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami),
-        kerja: formData.pekerjaanSuami, alamat: formData.alamatSuami, pasangan: formData.namaIstri, bin: 'BIN', ayah: formData.namaAyahSuami
-      } : {
-        nama: formData.namaIstri, nik: formData.nikIstri, jk: 'Perempuan', ttl: ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri),
-        kerja: formData.pekerjaanIstri, alamat: formData.alamatIstri, pasangan: formData.namaSuami, bin: 'BINTI', ayah: formData.namaAyahIstri
-      };
+    else if (targetDoc === 'n3') {
       html = `
         ${lampiranHtml('N3')}
         <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PERSETUJUAN MEMPELAI</h3>
         <p>yang bertanda tangan di bawah ini:</p>
-        ${dtTable([
-          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(catin.nama)}</span>`],
-          ['2. NIK', v(catin.nik)],
-          ['3. Jenis Kelamin', catin.jk],
-          ['4. Tempat Tanggal Lahir', catin.ttl],
-          ['5. Pekerjaan', v(catin.kerja)],
-          ['6. Alamat', v(catin.alamat)]
-        ])}
-        <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, kesadaran sendiri, dan tanpa ada paksaan dari siapapun, setuju untuk melangsungkan perkawinan dengan calon ${n3ForSuami ? 'istri' : 'suami'} sebagai berikut:</p>
-        ${dtTable([
-          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(catin.pasangan)}</span>`]
-        ])}
-        <p style="text-align:right;">${tempatTgl()}</p>
-        <div style="margin-top:22px;display:flex;justify-content:flex-end;">
-          <div style="text-align:center;width:44%;">Calon ${n3ForSuami ? 'Suami' : 'Istri'},<span style="font-weight:700;margin-top:56px;display:block;">${vn(catin.nama)}</span>${catin.bin} ${vn(catin.ayah)}</div>
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-top:4px;">
+          <div style="flex:1;min-width:0;">
+            <p style="font-weight:700;text-align:center;text-decoration:underline;margin:2px 0 4px 0;">CALON SUAMI</p>
+            ${dtTable([
+              ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaSuami)}</span>`],
+              ['2. NIK', v(formData.nikSuami)],
+              ['3. Jenis Kelamin', 'Laki-Laki'],
+              ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami)],
+              ['5. Pekerjaan', v(formData.pekerjaanSuami)],
+              ['6. Alamat', v(formData.alamatSuami)]
+            ])}
+            <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela dan tanpa paksaan dari siapapun, setuju untuk melangsungkan perkawinan dengan calon istri:</p>
+            <p style="font-weight:700;text-transform:uppercase;margin:2px 0 0 0;">${vn(formData.namaIstri)}</p>
+            <p style="text-align:right;margin:14px 0 0 0;">${tempatTgl()}</p>
+            <div style="text-align:center;margin-top:46px;">
+              Calon Suami,
+              <span style="font-weight:700;margin-top:52px;display:block;">${vn(formData.namaSuami)}</span>
+              BIN ${vn(formData.namaAyahSuami)}
+            </div>
+          </div>
+          <div style="flex:1;min-width:0;border-left:1px solid #000;padding-left:16px;">
+            <p style="font-weight:700;text-align:center;text-decoration:underline;margin:2px 0 4px 0;">CALON ISTRI</p>
+            ${dtTable([
+              ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaIstri)}</span>`],
+              ['2. NIK', v(formData.nikIstri)],
+              ['3. Jenis Kelamin', 'Perempuan'],
+              ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri)],
+              ['5. Pekerjaan', v(formData.pekerjaanIstri)],
+              ['6. Alamat', v(formData.alamatIstri)]
+            ])}
+            <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela dan tanpa paksaan dari siapapun, setuju untuk melangsungkan perkawinan dengan calon suami:</p>
+            <p style="font-weight:700;text-transform:uppercase;margin:2px 0 0 0;">${vn(formData.namaSuami)}</p>
+            <p style="text-align:right;margin:14px 0 0 0;">${tempatTgl()}</p>
+            <div style="text-align:center;margin-top:46px;">
+              Calon Istri,
+              <span style="font-weight:700;margin-top:52px;display:block;">${vn(formData.namaIstri)}</span>
+              BINTI ${vn(formData.namaAyahIstri)}
+            </div>
+          </div>
         </div>
       `;
     }
