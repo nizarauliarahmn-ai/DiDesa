@@ -4,7 +4,7 @@ import { fetchResidentsCached } from '../../../utils/apiCache';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import React, { useState, useEffect, useRef } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Save, Printer, Trash2, ZoomIn, ZoomOut } from 'lucide-react';
+import { ArrowLeft, Save, Printer, Trash2, ZoomIn, ZoomOut, Users } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -12,8 +12,52 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
+import { autoSyncResidentFromLetter, updateResidentParents } from '../../../utils/residentSync';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+
+function ParentMemberPicker({ open, onToggle, members, onSelect, hint }: {
+  open: boolean;
+  onToggle: () => void;
+  members: any[];
+  onSelect: (m: any) => void;
+  hint?: string;
+}) {
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg px-2 py-1.5 transition-colors"
+      >
+        <Users className="w-3.5 h-3.5" /> Pilih dari Anggota KK
+      </button>
+      {hint && !open && (
+        <p className="text-[9px] text-slate-400 mt-1">{hint}</p>
+      )}
+      {open && (
+        <div className="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+          {members.length === 0 ? (
+            <div className="p-3 text-center text-[10px] text-slate-400">
+              Tidak ada anggota KK yang cocok (pastikan calon punya No. KK yang terisi).
+            </div>
+          ) : (
+            members.map(m => (
+              <button
+                key={m.id || m.nik}
+                type="button"
+                onClick={() => onSelect(m)}
+                className="w-full px-3 py-2 text-left hover:bg-emerald-50 dark:hover:bg-emerald-900/20 border-b last:border-0"
+              >
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">{m.name}</p>
+                <p className="text-[10px] text-slate-500">NIK: {m.nik}</p>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminSuratNikah({ 
   onBack, 
@@ -52,6 +96,7 @@ export default function AdminSuratNikah({
   const [residents, setResidents] = useState<any[]>([]);
   const [isLoadingResidents, setIsLoadingResidents] = useState(false);
   const [previewZoom, setPreviewZoom] = useState(0.45);
+  const [openParentPicker, setOpenParentPicker] = useState<string | null>(null);
   const dragProps = useDragScroll();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
@@ -337,19 +382,38 @@ export default function AdminSuratNikah({
     };
   }, []);
 
-  // Cari penduduk berdasarkan nama persis (untuk auto-lengkap data orang tua)
-  const findResidentByName = (list: any[], name: string) => {
+  // Cari penduduk berdasarkan nama orang tua untuk auto-lengkap data.
+  // Prioritas: (1) nama persis, (2) nama sebagian HANYA di antara anggota KK yang sama
+  // agar tidak salah isi bila ada warga bernama mirip dari KK lain.
+  const findResidentByName = (list: any[], name: string, calonKk?: string) => {
     if (!name) return undefined;
-    const target = String(name).toLowerCase().replace(/\s+/g, ' ').trim();
+    const norm = (s: any) => String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const target = norm(name);
     if (!target) return undefined;
-    return list.find((r: any) => (String(r.name || '').toLowerCase().replace(/\s+/g, ' ').trim() === target));
+
+    const exact = list.find((r: any) => norm(r.name) === target);
+    if (exact) return exact;
+
+    if (!calonKk) return undefined;
+    const kk = String(calonKk).trim();
+    if (!kk || kk === '-') return undefined;
+    const candidates = list.filter((r: any) => {
+      const rKk = String(r.noKk || r.no_kk || '').trim();
+      if (rKk !== kk) return false;
+      const rName = norm(r.name);
+      if (target.length >= 3 && rName.includes(target)) return true;
+      if (rName.length >= 3 && target.includes(rName)) return true;
+      return false;
+    });
+    return candidates.length === 1 ? candidates[0] : undefined;
   };
 
-  // Isi data orang tua (NIK, TTL, agama, pekerjaan, alamat) dari data penduduk
-  // bila nama ayah/ibu cocok persis dengan salah satu warga.
-  const buildOrtuUpdates = (list: any[], side: 'Suami' | 'Istri', ayahName: string, ibuName: string) => {
-    const ayah = findResidentByName(list, ayahName);
-    const ibu = findResidentByName(list, ibuName);
+  // Isi data orang tua (NIK, TTL, agama, pekerjaan, alamat) dari data penduduk.
+  // Bila ayah/ibu sudah ditentukan di data penduduk (cocok persis / anggota KK sama),
+  // seluruh kolom otomatis terisi dari data penduduk tersebut.
+  const buildOrtuUpdates = (list: any[], side: 'Suami' | 'Istri', ayahName: string, ibuName: string, calonKk: string) => {
+    const ayah = findResidentByName(list, ayahName, calonKk);
+    const ibu = findResidentByName(list, ibuName, calonKk);
     const updates: any = {};
     if (ayah) {
       updates[`namaAyah${side}`] = ayah.name;
@@ -380,8 +444,9 @@ export default function AdminSuratNikah({
     const isMale = res.gender === 'Laki-laki' || res.gender === 'L';
     const ayahName = res.fatherName || res.father_name || '';
     const ibuName = res.motherName || res.mother_name || '';
-    const ortuSuami = isMale ? buildOrtuUpdates(list, 'Suami', ayahName, ibuName) : {};
-    const ortuIstri = !isMale ? buildOrtuUpdates(list, 'Istri', ayahName, ibuName) : {};
+    const calonKk = String(res.noKk || res.no_kk || '').trim();
+    const ortuSuami = isMale ? buildOrtuUpdates(list, 'Suami', ayahName, ibuName, calonKk) : {};
+    const ortuIstri = !isMale ? buildOrtuUpdates(list, 'Istri', ayahName, ibuName, calonKk) : {};
     setFormData(prev => ({
       ...prev,
       isWargaSuami: isMale,
@@ -409,6 +474,67 @@ export default function AdminSuratNikah({
       ...ortuIstri,
     }));
     setSearchQuery('');
+  };
+
+  // Nomor KK calon mempelai (dari form atau lookup ke data penduduk bila masih '-')
+  const calonNoKk = (side: 'Suami' | 'Istri') => {
+    const nik = side === 'Suami' ? formData.nikSuami : formData.nikIstri;
+    const formKk = String((side === 'Suami' ? formData.noKKSuami : formData.noKKIstri) || '').trim();
+    if (formKk && formKk !== '-') return formKk;
+    if (nik) {
+      const res = residents.find((r: any) => String(r.nik) === nik);
+      const rKk = String(res?.noKk || res?.no_kk || '').trim();
+      if (rKk && rKk !== '-') return rKk;
+    }
+    return '';
+  };
+
+  // Anggota KK yang sama dengan calon, difilter jenis kelamin (Ayah = pria, Ibu = wanita)
+  const kkMembers = (side: 'Suami' | 'Istri', role: 'Ayah' | 'Ibu') => {
+    const kk = calonNoKk(side);
+    if (!kk) return [];
+    const calonNik = side === 'Suami' ? formData.nikSuami : formData.nikIstri;
+    const wantMale = role === 'Ayah';
+    return residents.filter((r: any) => {
+      if (String(r.nik) === calonNik) return false;
+      if (String(r.noKk || r.no_kk || '').trim() !== kk) return false;
+      const isMale = r.gender === 'Laki-laki' || r.gender === 'L';
+      return wantMale ? isMale : !isMale;
+    });
+  };
+
+  // Pilih orang tua dari anggota KK: isi kolom surat + sinkron balik ke data penduduk
+  const handlePickParent = async (side: 'Suami' | 'Istri', role: 'Ayah' | 'Ibu', member: any) => {
+    const prefix = `${role}${side}`;
+    const calonNik = side === 'Suami' ? formData.nikSuami : formData.nikIstri;
+    setFormData(prev => {
+      const next: any = {
+        ...prev,
+        [`nama${prefix}`]: member.name,
+        [`nik${prefix}`]: member.nik || '',
+        [`tempatLahir${prefix}`]: member.birthPlace || '',
+        [`tanggalLahir${prefix}`]: member.birthDate || '',
+        [`agama${prefix}`]: member.religion || 'Islam',
+        [`pekerjaan${prefix}`]: member.job || '',
+      };
+      const alamatKey = `alamatOrtu${side}`;
+      if (!String(next[alamatKey] || '').trim()) {
+        next[alamatKey] = member.address || '';
+      }
+      return next;
+    });
+    setOpenParentPicker(null);
+
+    if (calonNik && calonNik !== '-') {
+      const isAyah = role === 'Ayah';
+      const payload = isAyah
+        ? { fatherName: member.name, sameKk: true, source: 'Surat Nikah' }
+        : { motherName: member.name, sameKk: true, source: 'Surat Nikah' };
+      const changed = await updateResidentParents(calonNik, payload);
+      if (changed) {
+        showToast('Data orang tua disinkronkan ke data penduduk (ayah/ibu + status Anak bila layak).', 'success');
+      }
+    }
   };
 
   const handlePrint = async () => {
@@ -1347,6 +1473,12 @@ export default function AdminSuratNikah({
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ayah Suami</p>
                   <div className="grid grid-cols-1 gap-3">
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ayah</label><input type="text" name="namaAyahSuami" value={formData.namaAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <ParentMemberPicker
+                      open={openParentPicker === 'AyahSuami'}
+                      onToggle={() => setOpenParentPicker(openParentPicker === 'AyahSuami' ? null : 'AyahSuami')}
+                      members={kkMembers('Suami', 'Ayah')}
+                      onSelect={(m) => handlePickParent('Suami', 'Ayah', m)}
+                    />
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ayah</label><input type="text" name="nikAyahSuami" value={formData.nikAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirAyahSuami" value={formData.tempatLahirAyahSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
@@ -1371,6 +1503,12 @@ export default function AdminSuratNikah({
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ibu Suami</p>
                   <div className="grid grid-cols-1 gap-3">
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ibu</label><input type="text" name="namaIbuSuami" value={formData.namaIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <ParentMemberPicker
+                      open={openParentPicker === 'IbuSuami'}
+                      onToggle={() => setOpenParentPicker(openParentPicker === 'IbuSuami' ? null : 'IbuSuami')}
+                      members={kkMembers('Suami', 'Ibu')}
+                      onSelect={(m) => handlePickParent('Suami', 'Ibu', m)}
+                    />
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ibu</label><input type="text" name="nikIbuSuami" value={formData.nikIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirIbuSuami" value={formData.tempatLahirIbuSuami} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
@@ -1402,6 +1540,12 @@ export default function AdminSuratNikah({
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ayah Istri</p>
                   <div className="grid grid-cols-1 gap-3">
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ayah</label><input type="text" name="namaAyahIstri" value={formData.namaAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <ParentMemberPicker
+                      open={openParentPicker === 'AyahIstri'}
+                      onToggle={() => setOpenParentPicker(openParentPicker === 'AyahIstri' ? null : 'AyahIstri')}
+                      members={kkMembers('Istri', 'Ayah')}
+                      onSelect={(m) => handlePickParent('Istri', 'Ayah', m)}
+                    />
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ayah</label><input type="text" name="nikAyahIstri" value={formData.nikAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirAyahIstri" value={formData.tempatLahirAyahIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
@@ -1426,6 +1570,12 @@ export default function AdminSuratNikah({
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data Ibu Istri</p>
                   <div className="grid grid-cols-1 gap-3">
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Ibu</label><input type="text" name="namaIbuIstri" value={formData.namaIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" /></div>
+                    <ParentMemberPicker
+                      open={openParentPicker === 'IbuIstri'}
+                      onToggle={() => setOpenParentPicker(openParentPicker === 'IbuIstri' ? null : 'IbuIstri')}
+                      members={kkMembers('Istri', 'Ibu')}
+                      onSelect={(m) => handlePickParent('Istri', 'Ibu', m)}
+                    />
                     <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">NIK Ibu</label><input type="text" name="nikIbuIstri" value={formData.nikIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label><input type="text" name="tempatLahirIbuIstri" value={formData.tempatLahirIbuIstri} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" /></div>

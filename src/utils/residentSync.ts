@@ -235,3 +235,78 @@ export async function autoSyncResidentFromLetter(nik: string, letterData: any, l
     console.error('Auto sync resident error:', err);
   }
 }
+
+// Sinkron data orang tua dari pembuatan surat (mis. Surat Nikah) ke data penduduk.
+// HANYA mengisi field ayah/ibu yang masih kosong (tidak menimpa data yang sudah ada),
+// dan mengubah relasi keluarga menjadi "Anak" bila calon masih bukan Kepala Keluarga
+// serta orang tua yang dipilih berada di KK yang sama (sameKk).
+export async function updateResidentParents(
+  nik: string,
+  data: { fatherName?: string; motherName?: string; sameKk?: boolean; source?: string }
+): Promise<boolean> {
+  if (!nik || nik === '-' || nik.trim() === '') return false;
+  try {
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) return false;
+
+    const { data: existing, error: findError } = await supabase
+      .from('residents')
+      .select('father_name, mother_name, no_kk, family_relation, status, is_deleted')
+      .eq('nik', nik)
+      .eq('tenant_id', tenantId)
+      .maybeSingle();
+    if (findError || !existing) return false;
+
+    const blank = (v: any) => {
+      if (v === null || v === undefined) return true;
+      const s = String(v).trim();
+      return s === '' || s === '-';
+    };
+
+    const updates: Record<string, any> = {};
+    if (data.fatherName && blank(existing.father_name)) updates.father_name = data.fatherName;
+    if (data.motherName && blank(existing.mother_name)) updates.mother_name = data.motherName;
+
+    if (Object.keys(updates).length > 0 && data.sameKk) {
+      const relation = String(existing.family_relation || '').trim();
+      const isHead = relation.toLowerCase().includes('kepala keluarga');
+      if (!isHead && relation !== 'Anak') updates.family_relation = 'Anak';
+    }
+
+    if (Object.keys(updates).length === 0) return false;
+
+    let query = supabase.from('residents').update(updates).eq('nik', nik).eq('tenant_id', tenantId);
+    let { error } = await query;
+    let retries = 0;
+    while (error && error.message?.includes('Could not find the') && error.message?.includes('column') && retries < 5) {
+      const match = error.message.match(/'([^']+)' column/);
+      if (match && match[1]) {
+        delete updates[match[1]];
+        const retry = await supabase.from('residents').update(updates).eq('nik', nik).eq('tenant_id', tenantId);
+        error = retry.error;
+        retries++;
+      } else {
+        break;
+      }
+    }
+    if (error) {
+      console.error('updateResidentParents error:', error);
+      return false;
+    }
+
+    window.dispatchEvent(new Event('residents_updated'));
+    if (data.source) {
+      addSaaSLog({
+        admin: 'Sistem',
+        aksi: 'Sinkron Data Orang Tua',
+        target: `NIK ${nik} (via ${data.source})`,
+        status: 'Berhasil',
+        category: 'Penduduk'
+      });
+    }
+    return true;
+  } catch (err) {
+    console.error('updateResidentParents error:', err);
+    return false;
+  }
+}
