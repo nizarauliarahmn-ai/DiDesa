@@ -422,7 +422,6 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
     father_name: r.fatherName || '',
     mother_name: r.motherName || '',
     active_aids: JSON.stringify(r.activeAids || []),
-    created_at: new Date().toISOString(),
   });
 
   // Smart Merge: jika NIK sudah ada, perbarui HANYA kolom yang masih kosong/null di DB.
@@ -444,7 +443,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
     if (existing) {
       const updateData: Record<string, any> = {};
       for (const [key, value] of Object.entries(payload)) {
-        if (key === 'tenant_id' || key === 'nik' || key === 'created_at') continue;
+        if (key === 'tenant_id' || key === 'nik') continue;
         const current = existing[key];
         const blankInDb = current === null || current === undefined || current === '' ||
           (Array.isArray(current) && current.length === 0) ||
@@ -472,11 +471,9 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
       const msg = (insertError.message || '').toLowerCase();
       if (msg.includes('duplicate')) {
         // NIK baru saja dimasukkan proses lain (balapan) → jangan abaikan, lakukan update ringan
-        const updatePayload = { ...payload };
-        delete updatePayload.created_at;
         const { error: retryError } = await supabase
           .from('residents')
-          .update(updatePayload)
+          .update(payload)
           .eq('nik', nik)
           .eq('tenant_id', tenantId);
         if (retryError) throw new Error(`Gagal menyinkronkan NIK ${nik}: ${retryError.message}`);
