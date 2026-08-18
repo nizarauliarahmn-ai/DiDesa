@@ -723,7 +723,7 @@ export default function AdminSuratNikah({
               }
               .page { 
                 width: 210mm; 
-                height: 297mm; 
+                height: 296.9mm; 
                 margin: 0; 
                 box-sizing: border-box; 
                 background: white; 
@@ -741,7 +741,7 @@ export default function AdminSuratNikah({
                 left: 0 !important;
                 top: 0 !important;
                 width: 210mm !important;
-                height: 297mm !important;
+                height: 296.9mm !important;
                 margin: 0 !important;
                 padding: 56px 75px !important; /* matches preview's padding precisely */
                 box-sizing: border-box !important;
@@ -753,20 +753,20 @@ export default function AdminSuratNikah({
                 transform: none !important;
                 visibility: visible !important;
                 font-family: ${letterFont}, serif;
-                font-size: 11px;
-                line-height: 1.45;
+                font-size: 12pt;
+                line-height: 1.3;
               }
               .printable-area * {
                 visibility: visible !important;
               }
-              /* Hide crop marks in print */
+              .printable-area p { margin: 5px 0; }
               .crop-mark { 
                 display: none !important; 
               }
               @media print {
                 body, .page { 
                   width: 210mm; 
-                  height: 297mm; 
+                  height: 296.9mm; 
                 }
                 .nomor-surat-cetak { text-transform: uppercase !important; }
               }
@@ -870,12 +870,12 @@ export default function AdminSuratNikah({
       // Standard table: values not bold
       const dtTable = (rows: any[]) => `
         <table style="width:100%;border-collapse:collapse;margin:6px 0;font-family:${letterFont};">
-          ${rows.map(r => `<tr><td style="width:38%;padding:2.5px 4px;vertical-align:top;">${r[0]}</td><td style="width:2%;padding:2.5px 4px;vertical-align:top;">:</td><td style="padding:2.5px 4px;vertical-align:top;">${r[1]}</td></tr>`).join('')}
+          ${rows.map(r => `<tr><td style="width:38%;padding:1.5px 3px;vertical-align:top;">${r[0]}</td><td style="width:2%;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${r[1]}</td></tr>`).join('')}
         </table>
       `;
       // Compact header table (no bottom margin), values not bold
       const dtTableCompact = (rows: any[]) => `
-        <table style="width:100%;border-collapse:collapse;margin:2px 0 4px 0;font-family:${letterFont};">
+        <table style="width:100%;border-collapse:collapse;margin:2px 0 4px 0;font-family:${letterFont};font-size:10px;line-height:1.3;">
           ${rows.map(r => `<tr><td style="width:38%;padding:1px 4px;vertical-align:top;line-height:1.4;">${r[0]}</td><td style="width:2%;padding:1px 4px;vertical-align:top;line-height:1.4;">:</td><td style="padding:1px 4px;vertical-align:top;line-height:1.4;">${r[1]}</td></tr>`).join('')}
         </table>
       `;
@@ -922,7 +922,7 @@ export default function AdminSuratNikah({
 
       html = `
         ${kopHtml()}
-        <h3 style="text-align:center;font-size:14px;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">BIODATA CALON PENGANTIN</h3>
+        <h3 style="text-align:center;font-size:12pt;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">BIODATA CALON PENGANTIN</h3>
         ${dtTable([
           ['NIK', v(P.nik)],
           ['NO. KK', v(P.noKK)],
@@ -950,7 +950,7 @@ export default function AdminSuratNikah({
           ['KECAMATAN', v(formData.namaKecamatan).toUpperCase()],
           ['KABUPATEN', v(formData.namaKabupaten).toUpperCase()]
         ])}
-        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PENGANTAR PERKAWINAN</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
         <p>yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
@@ -1054,7 +1054,7 @@ export default function AdminSuratNikah({
       };
       html = `
         ${lampiranHtml('N3')}
-        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT PERSETUJUAN MEMPELAI</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PERSETUJUAN MEMPELAI</h3>
         <p>yang bertanda tangan di bawah ini:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(catin.nama)}</span>`],
@@ -1096,7 +1096,7 @@ export default function AdminSuratNikah({
 
       html = `
         ${lampiranHtml('N4')}
-        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT IZIN ORANG TUA</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT IZIN ORANG TUA</h3>
         <p>yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;">A. AYAH</p>
         ${dtTable([
@@ -1155,7 +1155,7 @@ export default function AdminSuratNikah({
       };
       html = `
         ${lampiranHtml('N6')}
-        <h3 style="text-align:center;font-size:14px;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:14px 0 4px;">SURAT KETERANGAN KEMATIAN ${relasi.toUpperCase()}</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT KETERANGAN KEMATIAN ${relasi.toUpperCase()}</h3>
         <p>Yang bertanda tangan di bawah ini menerangkan dengan sesungguhnya bahwa orang yang namanya tersebut di bawah ini:</p>
         ${dtTable([
           ['Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(almarhum)}</span>`],
@@ -1305,8 +1305,8 @@ export default function AdminSuratNikah({
           height: '297mm',
           padding: '20mm',
           fontFamily: letterFont, 
-          fontSize: '12px', 
-          lineHeight: '1.45',
+          fontSize: '12pt', 
+          lineHeight: '1.3',
           position: 'relative',
           boxSizing: 'border-box'
         }}
@@ -2038,8 +2038,8 @@ export default function AdminSuratNikah({
                       transform: `scale(${previewZoom})`,
                       transformOrigin: 'top left',
                       fontFamily: letterFont,
-                      fontSize: '12px',
-                      lineHeight: '1.45',
+                      fontSize: '12pt',
+                      lineHeight: '1.3',
                       position: 'relative',
                       boxSizing: 'border-box',
                       color: 'black'
