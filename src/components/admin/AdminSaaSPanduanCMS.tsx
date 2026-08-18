@@ -2,12 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Plus, Edit3, Trash2, Search, RefreshCw, Eye, CheckCircle2, X,
   Bold, Italic, Heading2, Heading3, List, ListOrdered, Quote, Code, Minus,
-  BookOpenCheck, ArrowUp, ArrowDown, EyeOff, FileText, LayoutList
+  BookOpenCheck, ArrowUp, ArrowDown, EyeOff, FileText, LayoutList,
+  Image as ImageIcon, Loader2
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 import { addSaaSLog } from '../../utils/saasLogs';
+import { compressImage, formatFileSize } from '../../utils/bugReportService';
 import ConfirmModal from '../common/ConfirmModal';
 import {
   GuideContentItem, DEFAULT_CATEGORIES, GUIDE_ICON_OPTIONS, getGuideIcon, getCategoryLabel
@@ -35,8 +37,10 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
     content: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const insertFormatting = (prefix: string, suffix: string = '', defaultPlaceholder: string = '') => {
     const textarea = textareaRef.current;
@@ -55,6 +59,72 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
       textarea.focus();
       textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
     }, 50);
+  };
+
+  const insertImageMarkdown = (url: string, alt: string) => {
+    const textarea = textareaRef.current;
+    const replacement = `\n\n![${alt}](${url})\n`;
+    if (!textarea) {
+      setFormData(prev => ({ ...prev, content: prev.content + replacement }));
+      return;
+    }
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const currentText = formData.content;
+    const selectedText = currentText.substring(start, end).trim();
+    const altText = selectedText || alt || 'Gambar';
+    const finalReplacement = `![${altText}](${url})`;
+    const newText = currentText.substring(0, start) + finalReplacement + currentText.substring(end);
+    setFormData(prev => ({ ...prev, content: newText }));
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + finalReplacement.length, start + finalReplacement.length);
+    }, 50);
+  };
+
+  const handleSelectImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Hanya file gambar yang dapat disisipkan!', 'error');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const originalSize = file.size;
+      const compressedBlob = await compressImage(file);
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'gambar';
+      const ext = (compressedBlob.type === 'image/webp' ? 'webp' : compressedBlob.type === 'image/png' ? 'png' : 'jpg');
+      const path = `guide/${Date.now()}_${safeName.replace(/\.(jpg|jpeg|png|webp|gif|heic)$/i, '')}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('guide-images')
+        .upload(path, compressedBlob, { contentType: compressedBlob.type || 'image/webp', upsert: false });
+
+      if (uploadError) {
+        const message = (uploadError.message || '').toLowerCase();
+        if (message.includes('bucket not found') || message.includes('does not exist')) {
+          throw new Error('Bucket "guide-images" belum dibuat. Jalankan migration 20260818_guide_images_bucket.sql di Supabase Editor.');
+        }
+        throw new Error(uploadError.message || 'Gagal mengunggah gambar');
+      }
+
+      const { data } = supabase.storage.from('guide-images').getPublicUrl(path);
+      const url = data.publicUrl;
+      insertImageMarkdown(url, safeName.replace(/\.(jpg|jpeg|png|webp|gif|heic)$/i, ''));
+      showToast(
+        `Gambar disisipkan! ${formatFileSize(originalSize)} → ${formatFileSize(compressedBlob.size)} (kompresi).`,
+        'success'
+      );
+    } catch (err: any) {
+      console.error('Error uploading image:', err);
+      showToast('Gagal menyisipkan gambar: ' + (err.message || err), 'error');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const fetchItems = async () => {
@@ -416,7 +486,7 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
                   </div>
                 </div>
                 <div className="mt-3 pl-15 ml-15 text-xs text-gray-600 dark:text-slate-400 line-clamp-2 prose prose-sm prose-teal dark:prose-invert max-w-none">
-                  <Markdown>{item.content}</Markdown>
+                  <Markdown>{item.content.split(/\n/).map(line => line.startsWith('![') ? '' : line).join('\n')}</Markdown>
                 </div>
               </div>
             );
@@ -549,7 +619,27 @@ export const AdminSaaSPanduanCMS: React.FC = () => {
                   <button type="button" onClick={() => insertFormatting('> ', '', 'Catatan penting')} className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300"><Quote size={14} /></button>
                   <button type="button" onClick={() => insertFormatting('`', '`', 'kode')} className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300"><Code size={14} /></button>
                   <button type="button" onClick={() => insertFormatting('\n---\n', '', '')} className="p-2 rounded-lg bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300"><Minus size={14} /></button>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingImage}
+                    className="p-2 rounded-lg bg-teal-100 dark:bg-teal-900/40 hover:bg-teal-200 dark:hover:bg-teal-900/60 text-teal-700 dark:text-teal-300 transition-all disabled:opacity-50 flex items-center gap-1"
+                    title="Sisipkan gambar (otomatis dikompres)"
+                  >
+                    {uploadingImage ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
+                    <span className="text-[11px] font-bold">{uploadingImage ? 'Kompresi & unggah...' : 'Gambar'}</span>
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleSelectImage}
+                    className="hidden"
+                  />
                 </div>
+                <p className="text-[11px] text-gray-400 dark:text-slate-500 mb-2">
+                  Gambar otomatis dikompres (maks 1200px, WebP/JPEG) sebelum diunggah ke Supabase Storage bucket <code className="font-mono bg-gray-100 dark:bg-slate-800 px-1 rounded">guide-images</code>.
+                </p>
 
                 {activeTabForm === 'write' ? (
                   <textarea
