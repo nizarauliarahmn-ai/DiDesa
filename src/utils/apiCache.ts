@@ -4,6 +4,28 @@ import { resolveCurrentTenant } from './tenantResolver';
 let residentsCache: Promise<any[]> | null = null;
 let cacheTime = 0;
 
+// Normalize raw Supabase rows (snake_case) to also expose camelCase keys,
+// so all surat forms can read `birthPlace`/`birthDate`/`noKk`/etc. safely.
+function normalizeResidentRow(r: any) {
+  if (!r) return r;
+  return {
+    ...r,
+    birthPlace: r.birthPlace || r.birth_place || '',
+    birthDate: r.birthDate || r.birth_date || '',
+    bloodType: r.bloodType || r.blood_type || '',
+    noKk: r.noKk || r.no_kk || '',
+    fatherName: r.fatherName || r.father_name || '',
+    motherName: r.motherName || r.mother_name || '',
+    rtRw: r.rtRw || r.rt_rw || '',
+    domicileStatus: r.domicileStatus || r.domicile_status || '',
+    maritalStatus: r.maritalStatus || r.marital_status || '',
+    statusColor: r.statusColor || r.status_color || '',
+    genderColor: r.genderColor || r.gender_color || '',
+    activeAids: r.activeAids || r.active_aids || [],
+    isDeleted: r.isDeleted || r.is_deleted || 0
+  };
+}
+
 export function fetchResidentsCached(force = false) {
   if (!force && residentsCache && Date.now() - cacheTime < 10000) {
     return residentsCache.then(data => ({
@@ -34,7 +56,7 @@ export function fetchResidentsCached(force = false) {
         console.error("Error fetching residents from Supabase for cache:", error);
         hasMore = false;
       } else if (data) {
-        allData = [...allData, ...data];
+        allData = [...allData, ...data.map(normalizeResidentRow)];
         if (data.length < pageSize) {
           hasMore = false;
         } else {

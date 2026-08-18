@@ -447,32 +447,40 @@ export default function AdminSuratNikah({
     const calonKk = String(res.noKk || res.no_kk || '').trim();
     const ortuSuami = isMale ? buildOrtuUpdates(list, 'Suami', ayahName, ibuName, calonKk) : {};
     const ortuIstri = !isMale ? buildOrtuUpdates(list, 'Istri', ayahName, ibuName, calonKk) : {};
-    setFormData(prev => ({
-      ...prev,
-      isWargaSuami: isMale,
-      namaSuami: isMale ? res.name : prev.namaSuami,
-      nikSuami: isMale ? res.nik : prev.nikSuami,
-      noKKSuami: isMale ? (res.noKk || res.no_kk || '') : prev.noKKSuami,
-      tempatLahirSuami: isMale ? res.birthPlace : prev.tempatLahirSuami,
-      tanggalLahirSuami: isMale ? res.birthDate : prev.tanggalLahirSuami,
-      agamaSuami: isMale ? (res.religion || 'Islam') : prev.agamaSuami,
-      pekerjaanSuami: isMale ? (res.job || '') : prev.pekerjaanSuami,
-      pendidikanSuami: isMale ? (res.education || '') : prev.pendidikanSuami,
-      alamatSuami: isMale ? (res.address || '') : prev.alamatSuami,
+    setFormData(prev => {
+      const next = {
+        ...prev,
+        isWargaSuami: isMale,
+        namaSuami: isMale ? res.name : prev.namaSuami,
+        nikSuami: isMale ? res.nik : prev.nikSuami,
+        noKKSuami: isMale ? (res.noKk || res.no_kk || '') : prev.noKKSuami,
+        tempatLahirSuami: isMale ? res.birthPlace : prev.tempatLahirSuami,
+        tanggalLahirSuami: isMale ? res.birthDate : prev.tanggalLahirSuami,
+        agamaSuami: isMale ? (res.religion || 'Islam') : prev.agamaSuami,
+        pekerjaanSuami: isMale ? (res.job || '') : prev.pekerjaanSuami,
+        pendidikanSuami: isMale ? (res.education || '') : prev.pendidikanSuami,
+        alamatSuami: isMale ? (res.address || '') : prev.alamatSuami,
 
-      namaIstri: !isMale ? res.name : prev.namaIstri,
-      nikIstri: !isMale ? res.nik : prev.nikIstri,
-      noKKIstri: !isMale ? (res.noKk || res.no_kk || '') : prev.noKKIstri,
-      tempatLahirIstri: !isMale ? res.birthPlace : prev.tempatLahirIstri,
-      tanggalLahirIstri: !isMale ? res.birthDate : prev.tanggalLahirIstri,
-      agamaIstri: !isMale ? (res.religion || 'Islam') : prev.agamaIstri,
-      pekerjaanIstri: !isMale ? (res.job || '') : prev.pekerjaanIstri,
-      pendidikanIstri: !isMale ? (res.education || '') : prev.pendidikanIstri,
-      alamatIstri: !isMale ? (res.address || '') : prev.alamatIstri,
+        namaIstri: !isMale ? res.name : prev.namaIstri,
+        nikIstri: !isMale ? res.nik : prev.nikIstri,
+        noKKIstri: !isMale ? (res.noKk || res.no_kk || '') : prev.noKKIstri,
+        tempatLahirIstri: !isMale ? res.birthPlace : prev.tempatLahirIstri,
+        tanggalLahirIstri: !isMale ? res.birthDate : prev.tanggalLahirIstri,
+        agamaIstri: !isMale ? (res.religion || 'Islam') : prev.agamaIstri,
+        pekerjaanIstri: !isMale ? (res.job || '') : prev.pekerjaanIstri,
+        pendidikanIstri: !isMale ? (res.education || '') : prev.pendidikanIstri,
+        alamatIstri: !isMale ? (res.address || '') : prev.alamatIstri,
 
-      ...ortuSuami,
-      ...ortuIstri,
-    }));
+        ...ortuSuami,
+        ...ortuIstri,
+      };
+      // Wali nikah = ayah pengantin wanita; otomatis isi bila calon istri berdomisili
+      // dan ayahnya sudah terisi dari data penduduk. Jika kosong, diisi manual.
+      if (!isMale && next.namaAyahIstri && !String(next.namaWali || '').trim()) {
+        next.namaWali = next.namaAyahIstri;
+      }
+      return next;
+    });
     setSearchQuery('');
   };
 
@@ -520,6 +528,10 @@ export default function AdminSuratNikah({
       const alamatKey = `alamatOrtu${side}`;
       if (!String(next[alamatKey] || '').trim()) {
         next[alamatKey] = member.address || '';
+      }
+      // Wali nikah = ayah pengantin wanita; ikut terisi bila ayah istri dipilih dari KK
+      if (side === 'Istri' && role === 'Ayah' && !String(next.namaWali || '').trim()) {
+        next.namaWali = member.name;
       }
       return next;
     });
