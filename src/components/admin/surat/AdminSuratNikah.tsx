@@ -99,6 +99,7 @@ export default function AdminSuratNikah({
   const [openParentPicker, setOpenParentPicker] = useState<string | null>(null);
   const dragProps = useDragScroll();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const archivedRef = useRef(false);
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
 
   // Migrasi data lama (isWargaSuami boolean) ke model domisili per calon
@@ -117,6 +118,7 @@ export default function AdminSuratNikah({
   // Prefill in edit mode
   useEffect(() => {
     if (editData) {
+      archivedRef.current = false;
       setFormData(prev => ({ ...prev, ...normalizeDomicile(editData) }));
     }
   }, [editData]);
@@ -347,6 +349,7 @@ export default function AdminSuratNikah({
         status: 'Selesai'
       });
     }
+    archivedRef.current = true;
     
     showToast('Tersimpan di riwayat!', 'success');
   };
@@ -683,6 +686,11 @@ export default function AdminSuratNikah({
       openPrintFrame(printAll ? 'Cetak Semua Berkas Nikah' : 'Cetak Surat Pengantar Nikah', pages);
     } else {
       window.print();
+    }
+    // Arsip otomatis setelah mencetak (konsisten dengan jenis surat lain),
+    // tanpa membuat duplikat bila sudah pernah disimpan/dicetak sebelumnya.
+    if (!archivedRef.current) {
+      saveToRiwayat();
     }
     setSuccess(true);
   };
