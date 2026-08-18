@@ -609,8 +609,6 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
               `Gagal memperbarui NIK ${nik}`
             ).then(() => { updated++; })
           );
-        } else {
-          updated++;
         }
       }
 
