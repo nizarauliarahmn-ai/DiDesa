@@ -89,7 +89,7 @@ export default function AdminSuratNikah({
 
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(1);
-  const [activeDoc, setActiveDoc] = useState('n1');
+  const [activeDoc, setActiveDoc] = useState('n1_suami');
   const [showRiwayat, setShowRiwayat] = useState(false);
   const [riwayat, setRiwayat] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -101,10 +101,23 @@ export default function AdminSuratNikah({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
 
+  // Migrasi data lama (isWargaSuami boolean) ke model domisili per calon
+  const normalizeDomicile = (d: any) => {
+    if (d && d.wargaSuami === undefined && d.isWargaSuami !== undefined) {
+      return {
+        ...d,
+        wargaSuami: !!d.isWargaSuami,
+        wargaIstri: false,
+        isWargaSuami: undefined
+      };
+    }
+    return d;
+  };
+
   // Prefill in edit mode
   useEffect(() => {
     if (editData) {
-      setFormData(prev => ({ ...prev, ...editData }));
+      setFormData(prev => ({ ...prev, ...normalizeDomicile(editData) }));
     }
   }, [editData]);
 
@@ -128,7 +141,8 @@ export default function AdminSuratNikah({
   const defaultJabatan = localStorage.getItem('kop_jabatan') || 'Kepala Desa';
 
   const [formData, setFormData] = useState<any>({
-    isWargaSuami: true, // true: Suami warga kita, false: Istri warga kita
+    wargaSuami: true,  // true: Calon suami berdomisili (warga desa)
+    wargaIstri: false, // true: Calon istri berdomisili (warga desa)
     namaDesa: defaultDesa,
     namaKecamatan: defaultKecamatan,
     namaKabupaten: defaultKabupaten,
@@ -215,20 +229,37 @@ export default function AdminSuratNikah({
   const DOC_TABS = [
     { id: 'biodata_suami', label: 'Biodata Suami' },
     { id: 'biodata_istri', label: 'Biodata Istri' },
-    { id: 'n1', label: `N1 - Pengantar (${formData.isWargaSuami ? 'Suami' : 'Istri'})` },
+    { id: 'n1_suami', label: 'N1 - Pengantar Suami' },
+    { id: 'n1_istri', label: 'N1 - Pengantar Istri' },
     { id: 'n2', label: 'N2 - Permohonan KUA' },
     { id: 'n3', label: 'N3 - Persetujuan' },
     { id: 'n4_suami', label: 'N4 - Izin Ortu Suami' },
     { id: 'n4_istri', label: 'N4 - Izin Ortu Istri' },
   ];
 
-  // Hanya tampilkan biodata calon yang berdomisili (suami atau istri) agar
-  // admin tidak bingung melihat biodata ganda di tahap Preview & Cetak.
+  // Berdasarkan siapa yang berdomisili, munculkan dokumen yang relevan saja:
+  // biodata + N1 per calon yang berdomisili; N2/N3/N4 selalu tampil.
   const visibleDocTabs = DOC_TABS.filter(t => {
-    if (t.id === 'biodata_suami') return !!formData.isWargaSuami;
-    if (t.id === 'biodata_istri') return !formData.isWargaSuami;
+    if (t.id === 'biodata_suami' || t.id === 'n1_suami') return !!formData.wargaSuami;
+    if (t.id === 'biodata_istri' || t.id === 'n1_istri') return !!formData.wargaIstri;
     return true;
   });
+
+  // Pemohon (yang menandatangani N2) = calon berdomisili. Bila keduanya warga desa,
+  // prioritas pemohon adalah calon suami.
+  const pemohonSide: 'Suami' | 'Istri' = formData.wargaIstri && !formData.wargaSuami ? 'Istri' : 'Suami';
+
+  // Mode pemilihan warga berdomisili di tahap 1
+  const domMode: 'suami' | 'istri' | 'keduanya' =
+    formData.wargaSuami && formData.wargaIstri ? 'keduanya' : formData.wargaSuami ? 'suami' : 'istri';
+
+  const setDomMode = (mode: 'suami' | 'istri' | 'keduanya') => {
+    setFormData(prev => ({
+      ...prev,
+      wargaSuami: mode === 'suami' || mode === 'keduanya',
+      wargaIstri: mode === 'istri' || mode === 'keduanya'
+    }));
+  };
 
   const HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const BULAN = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -456,9 +487,12 @@ export default function AdminSuratNikah({
     const ortuSuami = isMale ? buildOrtuUpdates(list, 'Suami', ayahName, ibuName, calonKk) : {};
     const ortuIstri = !isMale ? buildOrtuUpdates(list, 'Istri', ayahName, ibuName, calonKk) : {};
     setFormData(prev => {
+      // Tandai sisi yang berdomisili berdasarkan gender calon yang dipilih,
+      // namun jangan menonaktifkan sisi lain (agar mode "Keduanya" tetap terjaga).
+      const wargaSuami = prev.wargaSuami || isMale;
+      const wargaIstri = prev.wargaIstri || !isMale;
       const next = {
         ...prev,
-        isWargaSuami: isMale,
         namaSuami: isMale ? res.name : prev.namaSuami,
         nikSuami: isMale ? res.nik : prev.nikSuami,
         noKKSuami: isMale ? (res.noKk || res.no_kk || '') : prev.noKKSuami,
@@ -481,10 +515,12 @@ export default function AdminSuratNikah({
 
         ...ortuSuami,
         ...ortuIstri,
+        wargaSuami,
+        wargaIstri,
       };
-      // Wali nikah = ayah pengantin wanita; otomatis isi bila calon istri berdomisili
-      // dan ayahnya sudah terisi dari data penduduk. Jika kosong, diisi manual.
-      if (!isMale && next.namaAyahIstri && !String(next.namaWali || '').trim()) {
+      // Wali nikah = ayah pengantin wanita; otomatis isi bila ayah istri terisi
+      // dari data penduduk. Jika kosong, diisi manual.
+      if (next.namaAyahIstri && !String(next.namaWali || '').trim()) {
         next.namaWali = next.namaAyahIstri;
       }
       return next;
@@ -813,20 +849,13 @@ export default function AdminSuratNikah({
         </table>
       `;
 
-    const isSuami = targetDoc === 'biodata_suami' || (targetDoc === 'n1' && formData.isWargaSuami);
-    const isIstri = targetDoc === 'biodata_istri' || (targetDoc === 'n1' && !formData.isWargaSuami);
+    const isSuami = targetDoc === 'biodata_suami' || targetDoc === 'n1_suami';
+    const isIstri = targetDoc === 'biodata_istri' || targetDoc === 'n1_istri';
 
     const fontStyle = `font-family: ${letterFont};`;
 
-    const P = formData.isWargaSuami ? {
-      nama: formData.namaSuami, nik: formData.nikSuami, noKK: formData.noKKSuami, jk: 'Laki-Laki', ttl: ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami),
-      warga: formData.kewarganegaraanSuami, agama: formData.agamaSuami, kerja: formData.pekerjaanSuami, alamat: formData.alamatSuami,
-      status: formData.statusSuami, labelPasanganTerdahulu: 'Nama Istri Terdahulu',
-      pasanganTerdahulu: formData.statusSuami === 'Duda' ? vn(formData.namaIstriTerdahulu) : '-',
-      ayah: formData.namaAyahSuami, nikAyah: formData.nikAyahSuami, ttlAyah: ttl(formData.tempatLahirAyahSuami, formData.tanggalLahirAyahSuami), agamaAyah: formData.agamaAyahSuami, kerjaAyah: formData.pekerjaanAyahSuami,
-      ibu: formData.namaIbuSuami, nikIbu: formData.nikIbuSuami, ttlIbu: ttl(formData.tempatLahirIbuSuami, formData.tanggalLahirIbuSuami), agamaIbu: formData.agamaIbuSuami, kerjaIbu: formData.pekerjaanIbuSuami,
-      alamatOrtu: formData.alamatOrtuSuami
-    } : {
+    // Data calon untuk N1 (Surat Pengantar). Setiap calon berdomisili mendapat N1 sendiri.
+    const P = targetDoc === 'n1_istri' ? {
       nama: formData.namaIstri, nik: formData.nikIstri, noKK: formData.noKKIstri, jk: 'Perempuan', ttl: ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri),
       warga: formData.kewarganegaraanIstri, agama: formData.agamaIstri, kerja: formData.pekerjaanIstri, alamat: formData.alamatIstri,
       status: formData.statusIstri, labelPasanganTerdahulu: 'Nama Suami Terdahulu',
@@ -834,6 +863,14 @@ export default function AdminSuratNikah({
       ayah: formData.namaAyahIstri, nikAyah: formData.nikAyahIstri, ttlAyah: ttl(formData.tempatLahirAyahIstri, formData.tanggalLahirAyahIstri), agamaAyah: formData.agamaAyahIstri, kerjaAyah: formData.pekerjaanAyahIstri,
       ibu: formData.namaIbuIstri, nikIbu: formData.nikIbuIstri, ttlIbu: ttl(formData.tempatLahirIbuIstri, formData.tanggalLahirIbuIstri), agamaIbu: formData.agamaIbuIstri, kerjaIbu: formData.pekerjaanIbuIstri,
       alamatOrtu: formData.alamatOrtuIstri
+    } : {
+      nama: formData.namaSuami, nik: formData.nikSuami, noKK: formData.noKKSuami, jk: 'Laki-Laki', ttl: ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami),
+      warga: formData.kewarganegaraanSuami, agama: formData.agamaSuami, kerja: formData.pekerjaanSuami, alamat: formData.alamatSuami,
+      status: formData.statusSuami, labelPasanganTerdahulu: 'Nama Istri Terdahulu',
+      pasanganTerdahulu: formData.statusSuami === 'Duda' ? vn(formData.namaIstriTerdahulu) : '-',
+      ayah: formData.namaAyahSuami, nikAyah: formData.nikAyahSuami, ttlAyah: ttl(formData.tempatLahirAyahSuami, formData.tanggalLahirAyahSuami), agamaAyah: formData.agamaAyahSuami, kerjaAyah: formData.pekerjaanAyahSuami,
+      ibu: formData.namaIbuSuami, nikIbu: formData.nikIbuSuami, ttlIbu: ttl(formData.tempatLahirIbuSuami, formData.tanggalLahirIbuSuami), agamaIbu: formData.agamaIbuSuami, kerjaIbu: formData.pekerjaanIbuSuami,
+      alamatOrtu: formData.alamatOrtuSuami
     };
 
     if (targetDoc.startsWith('biodata')) {
@@ -868,7 +905,7 @@ export default function AdminSuratNikah({
         <p>&bull; Penetapan hari/tanggal/tempat akad nikah dikonsultasikan dengan ${v(formData.namaKUA, 'KUA')}.</p>
       `;
     }
-    else if (targetDoc === 'n1') {
+    else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
       html = `
         ${lampiranHtml('N1')}
         ${dtTableCompact([
@@ -961,7 +998,7 @@ export default function AdminSuratNikah({
         </div>
         <div style="margin-top:16px;display:flex;justify-content:space-between;">
           <div style="text-align:center;width:44%;">Yang menerima,<br>Kepala ${v(formData.namaKUA, 'KUA')}<span style="font-weight:700;margin-top:56px;display:block;">&nbsp;</span></div>
-          <div style="text-align:center;width:44%;">Pemohon,<span style="font-weight:700;margin-top:56px;display:block;">${vn(formData.isWargaSuami ? formData.namaSuami : formData.namaIstri)}</span>${formData.isWargaSuami ? 'BIN' : 'BINTI'} ${vn(formData.isWargaSuami ? formData.namaAyahSuami : formData.namaAyahIstri)}</div>
+          <div style="text-align:center;width:44%;">Pemohon,<span style="font-weight:700;margin-top:56px;display:block;">${vn(pemohonSide === 'Istri' ? formData.namaIstri : formData.namaSuami)}</span>${pemohonSide === 'Istri' ? 'BINTI' : 'BIN'} ${vn(pemohonSide === 'Istri' ? formData.namaAyahIstri : formData.namaAyahSuami)}</div>
         </div>
       `;
     }
@@ -1134,7 +1171,7 @@ export default function AdminSuratNikah({
                     <td className="p-3 text-sm flex gap-2">
                       <button 
                         onClick={() => {
-                          setFormData(r.data);
+                          setFormData(normalizeDomicile(r.data));
                           setShowRiwayat(false);
                           setStep(6);
                         }}
@@ -1256,7 +1293,24 @@ export default function AdminSuratNikah({
         {step === 1 && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none">
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">1. Pilih Mempelai (Warga Desa)</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Pilih salah satu calon mempelai yang merupakan warga desa kita.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Tentukan calon mempelai mana saja yang berdomisili di desa ini. Data warga yang dipilih otomatis melengkapi biodata, orang tua, dan N1.</p>
+
+            <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-1">Berdomisili di desa ini:</span>
+              {([
+                { m: 'suami' as const, label: 'Suami saja' },
+                { m: 'istri' as const, label: 'Istri saja' },
+                { m: 'keduanya' as const, label: 'Suami & Istri' }
+              ]).map(o => (
+                <button
+                  key={o.m}
+                  onClick={() => setDomMode(o.m)}
+                  className={`px-4 py-1.5 rounded-lg text-xs font-bold border transition-all ${domMode === o.m ? 'bg-emerald-600 text-white border-emerald-600 shadow-md dark:shadow-none shadow-emerald-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
             
             <div className="space-y-6">
               <div className="relative">
@@ -1264,7 +1318,7 @@ export default function AdminSuratNikah({
                 <div className="flex gap-2">
                   <input 
                     type="text" 
-                    placeholder="Masukkan Nama atau NIK..."
+                    placeholder={`Masukkan Nama atau NIK${domMode === 'keduanya' ? ' (cari suami lalu istri)' : domMode === 'suami' ? ' (calon suami)' : ' (calon istri)'}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
@@ -1275,10 +1329,12 @@ export default function AdminSuratNikah({
                 {searchQuery.trim().length > 0 && (
                   <div className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-64 overflow-y-auto">
                     {(() => {
-                      const filtered = residents.filter(r => 
+                      const raw = residents.filter(r => 
                         (r.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || 
                         (r.nik || '').includes(searchQuery || '')
                       );
+                      const isMale = (r: any) => r.gender === 'Laki-laki' || r.gender === 'L';
+                      const filtered = raw.filter(r => domMode === 'suami' ? isMale(r) : domMode === 'istri' ? !isMale(r) : true);
                       
                       if (filtered.length === 0) {
                         return (
@@ -1286,10 +1342,13 @@ export default function AdminSuratNikah({
                             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Warga tidak ditemukan dalam database penduduk.</p>
                             <button 
                               onClick={() => {
+                                const fillSuami = domMode !== 'istri';
                                 setFormData(prev => ({
                                   ...prev,
-                                  isWargaSuami: true,
-                                  namaSuami: searchQuery.toUpperCase()
+                                  wargaSuami: prev.wargaSuami || fillSuami,
+                                  wargaIstri: prev.wargaIstri || !fillSuami,
+                                  namaSuami: fillSuami ? searchQuery.toUpperCase() : prev.namaSuami,
+                                  namaIstri: !fillSuami ? searchQuery.toUpperCase() : prev.namaIstri
                                 }));
                                 setStep(2);
                                 setSearchQuery('');
@@ -1322,28 +1381,42 @@ export default function AdminSuratNikah({
                 )}
               </div>
 
-              {(formData.namaSuami || formData.namaIstri) && (
-                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
-                      {(formData.isWargaSuami ? formData.namaSuami : formData.namaIstri).charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Warga Desa Terpilih</p>
-                      <p className="font-bold text-slate-900 dark:text-white">{formData.isWargaSuami ? formData.namaSuami : formData.namaIstri}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {formData.isWargaSuami ? formData.nikSuami : formData.nikIstri}</p>
-                    </div>
+              {(() => {
+                const cards = [
+                  { key: 'suami' as const, nama: formData.namaSuami, nik: formData.nikSuami, aktif: !!formData.wargaSuami },
+                  { key: 'istri' as const, nama: formData.namaIstri, nik: formData.nikIstri, aktif: !!formData.wargaIstri },
+                ].filter(c => c.aktif && ((c.nama && c.nama.trim()) || (c.nik && c.nik.trim())));
+                if (cards.length === 0) return null;
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {cards.map(c => (
+                      <div key={c.key} className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-between">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xl shrink-0">
+                            {(c.nama || '?').charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">{c.key === 'suami' ? 'Calon Suami' : 'Calon Istri'} (Warga Desa)</p>
+                            <p className="font-bold text-slate-900 dark:text-white truncate">{c.nama || 'Isi manual di tahap 2'}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">NIK: {c.nik || '-'}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              ...(c.key === 'suami' ? { namaSuami: '', nikSuami: '' } : { namaIstri: '', nikIstri: '' })
+                            }));
+                          }}
+                          className="text-xs font-bold text-rose-600 hover:underline shrink-0"
+                        >
+                          Ganti
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                  <button 
-                    onClick={() => {
-                      setFormData(prev => ({ ...prev, namaSuami: '', nikSuami: '', namaIstri: '', nikIstri: '' }));
-                    }}
-                    className="text-xs font-bold text-rose-600 hover:underline"
-                  >
-                    Ganti
-                  </button>
-                </div>
-              )}
+                );
+              })()}
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Tanggal Menikah</label><input type="date" name="tanggalMenikah" value={formData.tanggalMenikah} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500" /></div>
@@ -1366,14 +1439,14 @@ export default function AdminSuratNikah({
 
         {step === 2 && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">2. Data Pasangan (Luar Desa)</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Lengkapi data pasangan yang berasal dari luar desa.</p>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">2. Data Pasangan</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Lengkapi data pasangan. Kolom calon yang berdomisili sudah terisi otomatis dari data penduduk dan tetap bisa disunting.</p>
 
             <div className="grid grid-cols-2 gap-8">
               {/* KOLOM SUAMI */}
               <div className="space-y-4">
-                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${formData.isWargaSuami ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-800'}`}>
-                  Calon Suami {formData.isWargaSuami && <span className="text-[10px] bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800">WARGA KITA</span>}
+                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${formData.wargaSuami ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-800'}`}>
+                  Calon Suami {formData.wargaSuami && <span className="text-[10px] bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800">WARGA KITA</span>}
                 </h3>
                 
                 <div className="space-y-3">
@@ -1428,8 +1501,8 @@ export default function AdminSuratNikah({
 
               {/* KOLOM ISTRI */}
               <div className="space-y-4">
-                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${!formData.isWargaSuami ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-800'}`}>
-                  Calon Istri {!formData.isWargaSuami && <span className="text-[10px] bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800">WARGA KITA</span>}
+                <h3 className={`text-xs font-bold uppercase tracking-widest pb-2 border-b flex items-center gap-2 ${formData.wargaIstri ? 'text-emerald-700 border-emerald-100' : 'text-slate-500 dark:text-slate-400 border-slate-100 dark:border-slate-800'}`}>
+                  Calon Istri {formData.wargaIstri && <span className="text-[10px] bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800">WARGA KITA</span>}
                 </h3>
 
                 <div className="space-y-3">
