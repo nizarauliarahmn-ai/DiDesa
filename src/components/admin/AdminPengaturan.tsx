@@ -11,6 +11,7 @@ import {
 import VillageMapModal from '../common/VillageMapModal';
 import VillageMapPreview from '../common/VillageMapPreview';
 import { testGoogleDriveFolder } from '../../utils/googleDriveUpload';
+import { getZonaWaktu, detectZonaWaktu, WAKTU_ZONA_OPTIONS, WAKTU_ZONA_LABEL, ZonaWaktu } from '../../utils/zonaWaktu';
 
 export default function AdminPengaturan() {
   const [tenantId, setTenantId] = useState<string | null>(null);
@@ -19,6 +20,7 @@ export default function AdminPengaturan() {
   const [kabupaten, setKabupaten] = useState(() => localStorage.getItem('village_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [alamat, setAlamat] = useState(() => localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
   const [kontak, setKontak] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
+  const [zonaWaktu, setZonaWaktu] = useState<ZonaWaktu>(() => getZonaWaktu());
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
   
   const [welcomeBannerUrl, setWelcomeBannerUrl] = useState(() => localStorage.getItem('village_welcome_banner_url') || 'https://images.unsplash.com/photo-1590123514210-90c74993a404?auto=format&fit=crop&q=80&w=2000');
@@ -66,6 +68,7 @@ export default function AdminPengaturan() {
           set('village_alamat', setAlamat);
           set('kop_kontak', setKontak);
           set('kop_logo_url', setLogoUrl);
+          set('kop_waktu', (v: string) => setZonaWaktu(v as ZonaWaktu));
           set('village_welcome_banner_url', setWelcomeBannerUrl);
           set('village_welcome_banner_y_offset', setWelcomeBannerYOffset);
           set('village_welcome_banner_zoom', setWelcomeBannerZoom);
@@ -154,6 +157,7 @@ export default function AdminPengaturan() {
       kop_alamat: alamat,
       kop_kontak: kontak,
       kop_logo_url: logoUrl,
+      kop_waktu: zonaWaktu,
       village_welcome_banner_url: welcomeBannerUrl,
       village_welcome_banner_y_offset: welcomeBannerYOffset,
       village_welcome_banner_zoom: welcomeBannerZoom,
@@ -377,6 +381,22 @@ export default function AdminPengaturan() {
                   onChange={(e) => setKontak(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-medium transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                 />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Zona Waktu (Waktu Cetak Surat)</label>
+                <select
+                  value={zonaWaktu}
+                  onChange={(e) => setZonaWaktu(e.target.value as ZonaWaktu)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
+                >
+                  {WAKTU_ZONA_OPTIONS.map((z) => (
+                    <option key={z} value={z}>{WAKTU_ZONA_LABEL[z]}</option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
+                  Otomatis terisi sesuai zona waktu perangkat Anda ({detectZonaWaktu()} terdeteksi). Dapat diubah manual dan disinkronkan ke cloud.
+                </p>
               </div>
             </div>
           </div>

@@ -14,6 +14,7 @@ import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { autoSyncResidentFromLetter, updateResidentParents } from '../../../utils/residentSync';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { getZonaWaktu } from '../../../utils/zonaWaktu';
 
 function ParentMemberPicker({ open, onToggle, members, onSelect, hint }: {
   open: boolean;
@@ -329,7 +330,7 @@ export default function AdminSuratNikah({
   const fmtJam = (val: any) => {
     const s = String(val || '').trim();
     if (!s) return '..............................';
-    return s.replace(/:/g, '.') + ' WITA';
+    return s.replace(/:/g, '.') + ' ' + getZonaWaktu();
   };
 
   const saveToRiwayat = () => {
