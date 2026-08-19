@@ -8,6 +8,7 @@ import {
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
+import { resolveKadesName } from '../../../utils/letterOfficers';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import TTESignatureBox from './TTESignatureBox';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
@@ -125,7 +126,7 @@ export default function AdminSuratUndangan({
     } catch { return []; }
   })();
 
-  const [pejabatNama, setPejabatNama] = useState(() => localStorage.getItem('kop_kades') || localStorage.getItem('village_kades_name') || '');
+  const [pejabatNama, setPejabatNama] = useState(() => resolveKadesName() || localStorage.getItem('village_kades_name') || '');
   const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('kades_title') || 'Kepala Desa');
   const [pejabatNip, setPejabatNip] = useState(() => localStorage.getItem('kades_nip') || '-');
   const [isTTE, setIsTTE] = useState<boolean>(true);
@@ -945,8 +946,8 @@ export default function AdminSuratUndangan({
                         }
                       } catch (e) {}
                       return (
-                        <option value={localStorage.getItem('kop_kades') || ''}>
-                          {localStorage.getItem('kop_kades') || ''} (Kepala Desa)
+                        <option value={resolveKadesName() || ''}>
+                          {resolveKadesName() || ''} (Kepala Desa)
                         </option>
                       );
                     })()}

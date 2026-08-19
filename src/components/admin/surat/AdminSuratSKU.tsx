@@ -2,6 +2,7 @@ import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader'
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
+import { resolveKadesName } from '../../../utils/letterOfficers';
 import { parseAddress } from '../../../utils/addressParser';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useEffect, useRef } from 'react';
@@ -138,7 +139,7 @@ export default function AdminSuratSKU({
     usahaOmzet: '',
     
     // Pejabat
-    namaPejabat: localStorage.getItem('kop_kades') || '',
+    namaPejabat: resolveKadesName() || '',
     jabatanPejabat: 'Kepala Desa',
     includeCamat: false,
     
@@ -244,7 +245,7 @@ export default function AdminSuratSKU({
     const savedRiwayat = localStorage.getItem('riwayat_surat_sku');
     if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
 
-    const activePejabat = localStorage.getItem('kop_kades') || '';
+    const activePejabat = resolveKadesName() || '';
     try {
       const stored = localStorage.getItem('village_officers');
       if (stored) {
@@ -972,7 +973,7 @@ export default function AdminSuratSKU({
                             ));
                           }
                         } catch (e) {}
-                        return <option value={localStorage.getItem('kop_kades') || 'Kepala Desa'}>{localStorage.getItem('kop_kades') || 'Kepala Desa'} (Kepala Desa)</option>;
+                        return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
                       })()}
                     </select>
                   </div>

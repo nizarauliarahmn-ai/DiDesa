@@ -1,6 +1,7 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached, invalidateResidentsCache } from '../../../utils/apiCache';
+import { resolveKadesName } from '../../../utils/letterOfficers';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { Search, User, FileText, FileSignature, ZoomIn, ZoomOut, Plus, ShieldAlert, Check, X, Edit2, Save, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
@@ -139,7 +140,7 @@ export default function AdminSuratSPT({
     saksi1: '',
     saksi2: '',
     saksi3: '',
-    namaPejabat: localStorage.getItem('kop_kades') || '',
+    namaPejabat: resolveKadesName() || '',
   });
 
   // ─── Load all residents ───

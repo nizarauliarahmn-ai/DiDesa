@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { getLetterClassifications, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { resolveKadesName } from '../../../utils/letterOfficers';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
@@ -110,7 +111,7 @@ export default function AdminSuratSKKT({
     // RT & Pejabat
     nomorRt: '',
     namaKetuaRt: '',
-    namaPejabat: localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || '',
+    namaPejabat: localStorage.getItem('village_super_admin') || resolveKadesName() || '',
     jabatanPejabat: localStorage.getItem('village_super_admin_role') || 'Kepala Desa',
     includeCamat: false,
     namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
@@ -159,7 +160,7 @@ export default function AdminSuratSKKT({
         .then(data => { if (Array.isArray(data)) setResidents(data); })
         .catch(e => console.error(e));
 
-      const activePejabat = localStorage.getItem('village_super_admin') || localStorage.getItem('kop_kades') || '';
+      const activePejabat = localStorage.getItem('village_super_admin') || resolveKadesName() || '';
       try {
         const stored = localStorage.getItem('village_officers');
         if (stored) {
@@ -973,7 +974,7 @@ export default function AdminSuratSKKT({
                             ));
                           }
                         } catch (err) {}
-                        return <option value={localStorage.getItem('kop_kades') || 'Kepala Desa'}>{localStorage.getItem('kop_kades') || 'Kepala Desa'} (Kepala Desa)</option>;
+                        return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
                       })()}
                     </select>
                   </div>

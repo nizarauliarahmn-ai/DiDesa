@@ -17,7 +17,7 @@ import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { formatRupiahWithTerbilang, RupiahInput } from '../../../utils/numberToTerbilang';
-import { getOfficerOptions } from '../../../utils/letterOfficers';
+import { getOfficerOptions, resolveKadesName, resolveKadesOfficer } from '../../../utils/letterOfficers';
 import KTPScannerModal from './KTPScannerModal';
 import { KtpOcrResult } from '../../../utils/ktpOcr';
 import { useUsbScanner } from '../../../utils/usbScanner';
@@ -135,11 +135,11 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [alamatKantor, setAlamatKantor] = useState(() => localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261');
   const [kontakKantor, setKontakKantor] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
   const [letterFont, setLetterFont] = useState(() => localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif');
-  const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || '');
-  const [roleKades, setRoleKades] = useState('Kepala Desa');
+  const [namaKades, setNamaKades] = useState(() => resolveKadesName());
+  const [roleKades, setRoleKades] = useState(() => resolveKadesOfficer()?.role || 'Kepala Desa');
   const [includeCamat, setIncludeCamat] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
-  const [nipKades, setNipKades] = useState('-');
+  const [nipKades, setNipKades] = useState(() => resolveKadesOfficer()?.nip || '-');
 
   const [officersList, setOfficersList] = useState<any[]>(() => getOfficerOptions());
 
@@ -280,12 +280,12 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       setKontakKantor(localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
       setLetterFont(localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif');
       
-      const currentActiveKades = localStorage.getItem('kop_kades') || '';
+      const currentActiveKades = resolveKadesName();
       setNamaKades(currentActiveKades);
       
       const list = getOfficerOptions();
       setOfficersList(list);
-      const found = list.find((o: any) => o.name === currentActiveKades);
+      const found = resolveKadesOfficer();
       if (found) {
         setRoleKades(found.role);
         setNipKades(found.nip);

@@ -304,6 +304,18 @@ export default function AdminAparatur() {
             }
           });
           setCloudSynced(true);
+
+          // Jika kop_kades belum diatur (Penandatangan Utama belum dipilih),
+          // tetapkan otomatis dari officer ber-role "Kepala Desa" di desa ini.
+          // Pencegahan: jangan pernah fallback ke kades desa lain.
+          const currentKades = localStorage.getItem('kop_kades');
+          if (!currentKades) {
+            const autoKades = officers.find((o: any) => String(o.role || '').toLowerCase().includes('kepala desa') && o.name);
+            if (autoKades && autoKades.name) {
+              setNamaKades(autoKades.name);
+              localStorage.setItem('kop_kades', autoKades.name);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to load online settings from Supabase:', err);

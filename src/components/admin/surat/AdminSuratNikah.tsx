@@ -1,6 +1,7 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
+import { resolveKadesName } from '../../../utils/letterOfficers';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import React, { useState, useEffect, useRef } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
@@ -140,7 +141,7 @@ export default function AdminSuratNikah({
   const defaultKUA = 'KUA Kecamatan ' + defaultKecamatan;
   const defaultAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
   const defaultKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
-  const defaultPejabat = localStorage.getItem('kop_kades') || '';
+  const defaultPejabat = resolveKadesName() || '';
   const defaultJabatan = localStorage.getItem('kop_jabatan') || 'Kepala Desa';
 
   const [formData, setFormData] = useState<any>({
@@ -409,7 +410,7 @@ export default function AdminSuratNikah({
       const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
       const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
       const activeKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
-      const activePejabat = localStorage.getItem('kop_kades') || '';
+      const activePejabat = resolveKadesName() || '';
       
       let activeJabatan = 'Kepala Desa';
       try {
@@ -1958,7 +1959,7 @@ export default function AdminSuratNikah({
                   onChange={(e) => {
                     const val = e.target.value;
                     const stored = localStorage.getItem('village_officers');
-                    const defaultKades = localStorage.getItem('kop_kades') || 'Kepala Desa';
+                    const defaultKades = resolveKadesName() || 'Kepala Desa';
                     const officers = stored ? JSON.parse(stored) : [
                       { name: defaultKades, role: 'Kepala Desa', nip: '-' },
                     ];
@@ -1974,7 +1975,7 @@ export default function AdminSuratNikah({
                   {(() => {
                     try {
                       const stored = localStorage.getItem('village_officers');
-                      const defaultKades = localStorage.getItem('kop_kades') || 'Kepala Desa';
+                      const defaultKades = resolveKadesName() || 'Kepala Desa';
                       const list = stored ? JSON.parse(stored) : [
                         { name: defaultKades, role: 'Kepala Desa', nip: '-' },
                       ];

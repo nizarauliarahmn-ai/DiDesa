@@ -3,6 +3,7 @@ import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader'
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
+import { resolveKadesName } from '../../../utils/letterOfficers';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -121,7 +122,7 @@ export default function AdminSuratSKL({
   });
 
   // Pejabat
-  const [namaPejabat, setNamaPejabat] = useState(localStorage.getItem('kop_kades') || '');
+  const [namaPejabat, setNamaPejabat] = useState(resolveKadesName() || '');
   const [jabatanPejabat, setJabatanPejabat] = useState('Kepala Desa');
   const [includeCamat, setIncludeCamat] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
@@ -178,7 +179,7 @@ export default function AdminSuratSKL({
     const savedRiwayat = localStorage.getItem('riwayat_surat_skl');
     if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
 
-    const activePejabat = localStorage.getItem('kop_kades') || '';
+    const activePejabat = resolveKadesName() || '';
     try {
       const stored = localStorage.getItem('village_officers');
       if (stored) {
@@ -933,7 +934,7 @@ export default function AdminSuratSKL({
                             ));
                           }
                         } catch (e) {}
-                        return <option value={localStorage.getItem('kop_kades') || 'Kepala Desa'}>{localStorage.getItem('kop_kades') || 'Kepala Desa'} (Kepala Desa)</option>;
+                        return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
                       })()}
                     </select>
                   </div>
