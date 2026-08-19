@@ -445,7 +445,13 @@ export default function AdminSuratDashboard({
       );
     } else {
       if (useEsignature) {
-        const verifyUrl = typeof window !== 'undefined' ? `${window.location.origin}/?tab=verifikasi&id=${surat.id}` : `https://sistemdidesa.id/?tab=verifikasi&id=${surat.id}`;
+        const authUserStr = typeof window !== 'undefined' ? localStorage.getItem('didesa_auth_user') : null;
+        let tenantId = '';
+        try {
+          const authUser = JSON.parse(authUserStr || '{}');
+          if (authUser && authUser.tenantId) tenantId = String(authUser.tenantId);
+        } catch (e) {}
+        const verifyUrl = typeof window !== 'undefined' ? `${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(tenantId)}&id=${surat.id}` : `https://sistemdidesa.id/?tab=verifikasi&t_id=${encodeURIComponent(tenantId)}&id=${surat.id}`;
         return (
           <div className="mt-8 flex justify-end text-black">
             <div className="text-right">

@@ -97,8 +97,19 @@ export function getPrintSignatureHTML(
   );
   const originUrl = isLocalhost ? window.location.origin : 'https://sistemdidesa.id';
   const cleanNomor = (nomorSurat || '').trim();
+
+  // Identitas tenant (aman: hanya dipakai sebagai parameter verifikasi di URL,
+  // bukan secret). Diresolusi sinkron dari sesi login aktif saat surat dicetak.
+  let printTenantId = '';
+  try {
+    const authUser = JSON.parse(localStorage.getItem('didesa_auth_user') || '{}');
+    if (authUser && authUser.tenantId) {
+      printTenantId = String(authUser.tenantId);
+    }
+  } catch (e) {}
+
   const verifyTargetUrl = cleanNomor 
-    ? `${originUrl}/?tab=verifikasi&no=${encodeURIComponent(cleanNomor)}`
+    ? `${originUrl}/?tab=verifikasi&t_id=${encodeURIComponent(printTenantId)}&no=${encodeURIComponent(cleanNomor)}`
     : `${originUrl}/?tab=verifikasi`;
   const verifyQrSvg = renderToStaticMarkup(
     React.createElement(QRCodeSVG, {

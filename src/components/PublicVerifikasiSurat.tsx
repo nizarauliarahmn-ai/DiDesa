@@ -28,6 +28,7 @@ export default function PublicVerifikasiSurat() {
     const fetchLetter = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const searchParam = urlParams.get('no') || urlParams.get('id') || urlParams.get('nomor') || urlParams.get('ref') || urlParams.get('verify') || '';
+      const tenantParam = urlParams.get('t_id') || urlParams.get('tenant_id') || '';
 
       if (!searchParam) {
         setError("Nomor atau ID Surat tidak ditemukan dalam URL verifikasi.");
@@ -40,14 +41,21 @@ export default function PublicVerifikasiSurat() {
         const cleanId = decodeURIComponent(searchParam).trim();
 
         // 1. Search in Supabase database
+        let dbVerified = false;
         try {
-          const { data, error: dbError } = await supabase
+          // WAJIB filter tenant: nomor surat antar desa bisa sama, hanya boleh
+          // terverifikasi jika benar-benar berasal dari tenant yang mencetaknya.
+          let query = supabase
             .from('surat')
             .select('*')
-            .or(`id.eq.${cleanId},nomor.eq.${cleanId}`)
-            .maybeSingle();
+            .or(`id.eq.${cleanId},nomor.eq.${cleanId}`);
+          if (tenantParam) {
+            query = query.eq('tenant_id', tenantParam);
+          }
+          const { data, error: dbError } = await query.maybeSingle();
 
           if (data) {
+            dbVerified = true;
             setLetter({
               id: data.id,
               nomor: data.nomor || cleanId,
@@ -76,6 +84,15 @@ export default function PublicVerifikasiSurat() {
           }
         } catch (dbErr) {
           console.warn("Supabase query fallback to local history:", dbErr);
+        }
+
+        // KEAMANAN: jika QR membawa identitas tenant (t_id), verifikasi HANYA sah
+        // bila surat ditemukan di arsip tenant tersebut. Gagal = tolak, jangan
+        // pernah jatuh ke fallback localStorage yang bisa menghasilkan positif palsu.
+        if (tenantParam && !dbVerified) {
+          setError("Dokumen tidak ditemukan di arsip desa yang menerbitkan surat ini.");
+          setLoading(false);
+          return;
         }
 
         // 2. Search in LocalStorage letter histories
