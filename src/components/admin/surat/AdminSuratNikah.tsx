@@ -1048,12 +1048,12 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n3') {
       html = `
         ${lampiranHtml('N3')}
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PERSETUJUAN MEMPELAI</h3>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 16px;">SURAT PERSETUJUAN MEMPELAI</h3>
         <p>Yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;margin:8px 0 2px 0;">A. Calon Suami:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaSuami)}</span>`],
-          ['2. Nomor Induk Kependudukan (NIK)', v(formData.nikSuami)],
+          ['2. NIK', v(formData.nikSuami)],
           ['3. Jenis Kelamin', 'Laki-Laki'],
           ['4. Tempat dan tanggal lahir', ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami)],
           ['5. Kewarganegaraan', v(formData.kewarganegaraanSuami, 'Indonesia')],
@@ -1061,10 +1061,10 @@ export default function AdminSuratNikah({
           ['7. Pekerjaan', v(formData.pekerjaanSuami)],
           ['8. Alamat', v(formData.alamatSuami)]
         ])}
-        <p style="font-weight:700;margin:8px 0 2px 0;">B. Calon Istri:</p>
+        <p style="font-weight:700;margin:18px 0 2px 0;">B. Calon Istri:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaIstri)}</span>`],
-          ['2. Nomor Induk Kependudukan (NIK)', v(formData.nikIstri)],
+          ['2. NIK', v(formData.nikIstri)],
           ['3. Jenis Kelamin', 'Perempuan'],
           ['4. Tempat dan tanggal lahir', ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri)],
           ['5. Kewarganegaraan', v(formData.kewarganegaraanIstri, 'Indonesia')],
@@ -1085,8 +1085,8 @@ export default function AdminSuratNikah({
           <div style="text-align:center;width:46%;font-weight:700;">${vn(formData.namaIstri)}</div>
         </div>
         <div style="display:flex;justify-content:space-between;margin-top:2px;">
-          <div style="text-align:center;width:46%;font-weight:700;">BIN ${vn(formData.namaAyahSuami)}</div>
-          <div style="text-align:center;width:46%;font-weight:700;">BINTI ${vn(formData.namaAyahIstri)}</div>
+          <div style="text-align:center;width:46%;">BIN ${vn(formData.namaAyahSuami)}</div>
+          <div style="text-align:center;width:46%;">BINTI ${vn(formData.namaAyahIstri)}</div>
         </div>
       `;
     }
