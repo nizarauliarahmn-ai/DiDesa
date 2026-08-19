@@ -326,6 +326,12 @@ export default function AdminSuratNikah({
     return v(tempat, '.....') + ', ' + (t || '.....');
   };
 
+  const fmtJam = (val: any) => {
+    const s = String(val || '').trim();
+    if (!s) return '..............................';
+    return s.replace(/:/g, '.') + ' WITA';
+  };
+
   const saveToRiwayat = () => {
     const id = 'RWY-' + Date.now();
     const entry = { id, savedAt: new Date().toISOString(), data: JSON.parse(JSON.stringify(formData)) };
@@ -1047,7 +1053,7 @@ export default function AdminSuratNikah({
           ['dengan Calon Istri', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaIstri)}</span>`],
           ['Hari', v(formData.hariMenikah)],
           ['Tanggal', v(fmtTgl(formData.tanggalMenikah))],
-          ['Jam', v(formData.jamMenikah)],
+          ['Pukul', fmtJam(formData.jamMenikah)],
           ['Bertempat di', v(formData.tempatMenikah)]
         ])}
         </div>
