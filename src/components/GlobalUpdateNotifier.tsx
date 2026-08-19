@@ -13,6 +13,8 @@ interface GlobalUpdate {
   type: string;
   cta_route?: string;
   cta_label?: string;
+  actionUrl?: string;
+  actionLabel?: string;
   is_popup?: number;
 }
 
@@ -93,11 +95,17 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
         
         if (!error && data && data.length > 0) {
           const latest = data[0];
+          // Dukung deep-link via kolom cta_route/cta_label (tanpa ubah schema DB).
+          const mapped: GlobalUpdate = {
+            ...latest,
+            actionUrl: latest.cta_route || '',
+            actionLabel: latest.cta_label || 'Coba Sekarang'
+          };
           // Tampil 1 kali per log: cek ID pada seen_changelog_ids (localStorage array).
           const alreadySeen = readSeenIds().includes(latest.id);
           
           if (!alreadySeen) {
-            setLatestUpdate(latest);
+            setLatestUpdate(mapped);
             clearTimeout(showTimer);
             showTimer = setTimeout(() => setIsVisible(true), 1500);
           }
@@ -151,6 +159,17 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
     setIsVisible(false);
     if (latestUpdate?.cta_route) {
       window.location.href = latestUpdate.cta_route;
+    }
+  };
+
+  /** Tombol aksi deep-link: arahkan pengguna presisi ke actionUrl lalu tutup modal. */
+  const handleActionNavigate = () => {
+    if (latestUpdate) {
+      markSeen(latestUpdate.id, latestUpdate.version);
+    }
+    setIsVisible(false);
+    if (latestUpdate?.actionUrl) {
+      window.location.href = latestUpdate.actionUrl;
     }
   };
 
@@ -262,12 +281,22 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
 
             {/* Footer */}
             <div className="p-6 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
-              <button
-                onClick={handleSeeAllUpdates}
-                className="px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer"
-              >
-                Lihat Semua Log Pembaruan
-              </button>
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3">
+                {latestUpdate.actionUrl && (
+                  <button
+                    onClick={handleActionNavigate}
+                    className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-all shadow-sm"
+                  >
+                    {latestUpdate.actionLabel || 'Coba Sekarang ➔'}
+                  </button>
+                )}
+                <button
+                  onClick={handleSeeAllUpdates}
+                  className="px-4 py-3 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all cursor-pointer"
+                >
+                  Lihat Semua Log Pembaruan
+                </button>
+              </div>
               <button
                 onClick={latestUpdate.cta_route ? handlePrimaryAction : handleClose}
                 className="px-8 py-3 text-white rounded-xl font-bold shadow-lg dark:shadow-none transition-all active:scale-95"
