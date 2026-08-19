@@ -1072,9 +1072,9 @@ export default function AdminSuratNikah({
           ['7. Pekerjaan', v(formData.pekerjaanIstri)],
           ['8. Alamat', v(formData.alamatIstri)]
         ])}
-        <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, dengan kesadaran sendiri, tanpa ada paksaan dari siapapun juga, setuju untuk melangsungkan perkawinan.</p>
-        <p>Demikianlah surat persetujuan ini dibuat untuk digunakan seperlunya.</p>
-        <p style="text-align:right;margin:10px 0 0 0;">${tempatTgl()}</p>
+        <p style="text-align:justify;">Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, dengan kesadaran sendiri, tanpa ada paksaan dari siapapun juga, setuju untuk melangsungkan perkawinan.</p>
+        <p style="margin:12px 0 0 0;">Demikianlah surat persetujuan ini dibuat untuk digunakan seperlunya.</p>
+        <p style="text-align:right;margin:10px 0 0 0;">${v(String(formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, ''), '.....') + ', ' + v(fmtTgl(formData.tanggalSurat))}</p>
         <div style="display:flex;justify-content:space-between;margin-top:36px;">
           <div style="text-align:center;width:46%;">Calon Suami,</div>
           <div style="text-align:center;width:46%;">Calon Istri,</div>
