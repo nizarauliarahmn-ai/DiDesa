@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, Newspaper, ShieldCheck, Building2, ArrowLeft } from 'lucide-react';
+import { ensureKadesInOfficers } from './utils/letterOfficers';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import Dashboard from './components/Dashboard';
@@ -322,6 +323,11 @@ export default function App() {
             localStorage.removeItem(k);
           }
         }
+
+        // Pastikan kades resmi tenant (kop_kades) selalu ada di village_officers
+        // agar dropdown pejabat di form surat menampilkan kades yang benar,
+        // bukan nama kades desa lain yang tersisa di daftar aparatur lama.
+        ensureKadesInOfficers();
 
         window.dispatchEvent(new Event('village_settings_updated'));
         window.dispatchEvent(new Event('app_theme_updated'));

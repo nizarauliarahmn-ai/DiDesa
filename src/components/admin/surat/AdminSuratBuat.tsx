@@ -17,6 +17,7 @@ import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getReactSignaturePreview } from '../../../utils/signature';
 import { formatRupiahWithTerbilang, RupiahInput } from '../../../utils/numberToTerbilang';
+import { getOfficerOptions } from '../../../utils/letterOfficers';
 import KTPScannerModal from './KTPScannerModal';
 import { KtpOcrResult } from '../../../utils/ktpOcr';
 import { useUsbScanner } from '../../../utils/usbScanner';
@@ -140,16 +141,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [useEsignature, setUseEsignature] = useState(true);
   const [nipKades, setNipKades] = useState('-');
 
-  const [officersList, setOfficersList] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem('village_officers');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {}
-    const defaultKades = localStorage.getItem('kop_kades') || 'Kepala Desa';
-    return [
-      { name: defaultKades, role: 'Kepala Desa', nip: '-' },
-    ];
-  });
+  const [officersList, setOfficersList] = useState<any[]>(() => getOfficerOptions());
 
   const renderReactSignature = (desaName: string, tglFormatted: string, namaPejabat: string, jabatanPejabat: string, nipPejabat?: string, includeCamatOverride?: boolean) => {
     const sig = getReactSignaturePreview(desaName, tglFormatted, namaPejabat, jabatanPejabat, nipPejabat, includeCamatOverride);
@@ -291,21 +283,16 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       const currentActiveKades = localStorage.getItem('kop_kades') || '';
       setNamaKades(currentActiveKades);
       
-      try {
-        const stored = localStorage.getItem('village_officers');
-        if (stored) {
-          const list = JSON.parse(stored);
-          setOfficersList(list);
-          const found = list.find((o: any) => o.name === currentActiveKades);
-          if (found) {
-            setRoleKades(found.role);
-            setNipKades(found.nip);
-          } else {
-            setRoleKades('Kepala Desa');
-            setNipKades('-');
-          }
-        }
-      } catch (e) {}
+      const list = getOfficerOptions();
+      setOfficersList(list);
+      const found = list.find((o: any) => o.name === currentActiveKades);
+      if (found) {
+        setRoleKades(found.role);
+        setNipKades(found.nip);
+      } else {
+        setRoleKades('Kepala Desa');
+        setNipKades('-');
+      }
     };
     const handleClassificationsUpdate = () => {
       const cls = getLetterClassifications();

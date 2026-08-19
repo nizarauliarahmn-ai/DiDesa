@@ -327,8 +327,18 @@ export default function AdminAparatur() {
 
     setIsSyncing(true);
 
+    // Sinkronkan nama Kades (kop_kades) ke dalam daftar aparatur (village_officers):
+    // baris dengan peran 'Kepala Desa' diganti nama kades terkini, sehingga
+    // dropdown pejabat di form surat tidak lagi menampilkan nama kades lama
+    // (mis. kades desa lain) yang tertinggal di daftar aparatur.
+    const syncedOfficers = officers.map((o: any) =>
+      String(o.role || '').toLowerCase().includes('kepala desa')
+        ? { ...o, name: namaKades || o.name }
+        : o
+    );
+
     // Save to Local Cache
-    localStorage.setItem('village_officers', JSON.stringify(officers));
+    localStorage.setItem('village_officers', JSON.stringify(syncedOfficers));
     localStorage.setItem('village_bpd', JSON.stringify(bpdList));
     localStorage.setItem('village_lpm', JSON.stringify(lpmList));
     localStorage.setItem('kop_kades', namaKades);
@@ -342,7 +352,7 @@ export default function AdminAparatur() {
     // Save ONLINE to Supabase Cloud — Batch upsert (1 request, bukan 20)
     if (tenantId) {
       const settingsToSave = [
-        { tenant_id: tenantId, key: 'village_officers', value: JSON.stringify(officers) },
+        { tenant_id: tenantId, key: 'village_officers', value: JSON.stringify(syncedOfficers) },
         { tenant_id: tenantId, key: 'village_bpd', value: JSON.stringify(bpdList) },
         { tenant_id: tenantId, key: 'village_lpm', value: JSON.stringify(lpmList) },
         { tenant_id: tenantId, key: 'kop_kades', value: namaKades },
