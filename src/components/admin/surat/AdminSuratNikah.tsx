@@ -140,7 +140,7 @@ export default function AdminSuratNikah({
   const defaultKUA = 'KUA Kecamatan ' + defaultKecamatan;
   const defaultAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
   const defaultKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
-  const defaultPejabat = localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD';
+  const defaultPejabat = localStorage.getItem('kop_kades') || '';
   const defaultJabatan = localStorage.getItem('kop_jabatan') || 'Kepala Desa';
 
   const [formData, setFormData] = useState<any>({
@@ -409,7 +409,7 @@ export default function AdminSuratNikah({
       const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
       const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
       const activeKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
-      const activePejabat = localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD';
+      const activePejabat = localStorage.getItem('kop_kades') || '';
       
       let activeJabatan = 'Kepala Desa';
       try {
@@ -1958,14 +1958,9 @@ export default function AdminSuratNikah({
                   onChange={(e) => {
                     const val = e.target.value;
                     const stored = localStorage.getItem('village_officers');
+                    const defaultKades = localStorage.getItem('kop_kades') || 'Kepala Desa';
                     const officers = stored ? JSON.parse(stored) : [
-                      { name: 'Fazakkir Rahmad', role: 'Kepala Desa', nip: '-' },
-                      { name: 'Siti Aminah', role: 'Sekretaris Desa', nip: '198510122010122003' },
-                      { name: 'Muhammad Noor', role: 'Kasi Pemerintahan', nip: '198704152014021002' },
-                      { name: 'Ahmad Rifai', role: 'Kasi Kesejahteraan', nip: '-' },
-                      { name: 'Rahmadi', role: 'Kasi Pelayanan', nip: '-' },
-                      { name: 'H. Supian', role: 'Kaur Keuangan', nip: '-' },
-                      { name: 'Sri Wahyuni', role: 'Kaur Umum', nip: '-' }
+                      { name: defaultKades, role: 'Kepala Desa', nip: '-' },
                     ];
                     const found = officers.find((o: any) => o.name === val);
                     setFormData(prev => ({ 
@@ -1979,14 +1974,9 @@ export default function AdminSuratNikah({
                   {(() => {
                     try {
                       const stored = localStorage.getItem('village_officers');
+                      const defaultKades = localStorage.getItem('kop_kades') || 'Kepala Desa';
                       const list = stored ? JSON.parse(stored) : [
-                        { name: 'Fazakkir Rahmad', role: 'Kepala Desa', nip: '-' },
-                        { name: 'Siti Aminah', role: 'Sekretaris Desa', nip: '198510122010122003' },
-                        { name: 'Muhammad Noor', role: 'Kasi Pemerintahan', nip: '198704152014021002' },
-                        { name: 'Ahmad Rifai', role: 'Kasi Kesejahteraan', nip: '-' },
-                        { name: 'Rahmadi', role: 'Kasi Pelayanan', nip: '-' },
-                        { name: 'H. Supian', role: 'Kaur Keuangan', nip: '-' },
-                        { name: 'Sri Wahyuni', role: 'Kaur Umum', nip: '-' }
+                        { name: defaultKades, role: 'Kepala Desa', nip: '-' },
                       ];
                       return list.map((off: any, idx: number) => (
                         <option key={idx} value={off.name}>{off.name} ({off.role})</option>

@@ -266,11 +266,11 @@ export default function App() {
         if (tenant) {
           const tName = tenant.nama_desa;
           if (tName) {
+            // SELALU tulis dari tenant aktif (sumber kebenaran), bukan hanya jika
+            // kosong. Mencegah nama desa tenant lain tertinggal di localStorage
+            // dan bocor ke surat yang dicetak / verifikasi QR.
             localStorage.setItem('village_name', tName);
-            const currentKop = localStorage.getItem('kop_desa');
-            if (!currentKop || currentKop === 'Desa Sukamakmur' || currentKop === 'Sukamakmur') {
-              localStorage.setItem('kop_desa', tName.toLowerCase().startsWith('desa') ? tName : `Desa ${tName}`);
-            }
+            localStorage.setItem('kop_desa', tName.toLowerCase().startsWith('desa') ? tName : `Desa ${tName}`);
           }
         }
 
@@ -302,6 +302,27 @@ export default function App() {
           ];
           localStorage.setItem('village_officers', JSON.stringify(defaultOfficers));
         }
+
+        // ── KEAMANAN MULTI-TENANT ──
+        // Hapus semua key kop_*/village_* yang BUKAN milik tenant aktif.
+        // Mencegah data desa lain (mis. nama kades Wasah Hilir) bocor ke tenant
+        // berikutnya yang kebetulan belum memiliki nilai tersebut di saas_settings.
+        const allowedKeys = new Set<string>(data.map((r: any) => r.key));
+        allowedKeys.add('kop_desa'); allowedKeys.add('village_name');
+        allowedKeys.add('kop_kecamatan'); allowedKeys.add('village_kecamatan');
+        allowedKeys.add('kop_kabupaten'); allowedKeys.add('village_kabupaten');
+        allowedKeys.add('kop_provinsi'); allowedKeys.add('village_provinsi');
+        allowedKeys.add('kop_alamat'); allowedKeys.add('village_alamat');
+        allowedKeys.add('kop_kontak'); allowedKeys.add('village_kontak');
+        allowedKeys.add('kop_logo_url'); allowedKeys.add('village_logo_url');
+        allowedKeys.add('village_id'); allowedKeys.add('village_domain');
+        const storageKeys = Object.keys(localStorage);
+        for (const k of storageKeys) {
+          if ((k.startsWith('kop_') || k.startsWith('village_')) && !allowedKeys.has(k)) {
+            localStorage.removeItem(k);
+          }
+        }
+
         window.dispatchEvent(new Event('village_settings_updated'));
         window.dispatchEvent(new Event('app_theme_updated'));
         window.dispatchEvent(new Event('letter_font_updated'));

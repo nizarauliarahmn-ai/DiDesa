@@ -48,7 +48,7 @@ export function generateSuratCetak(tipeSurat: string, kontenSurat: string, dataW
   const customColor = localStorage.getItem('global_app_color') || '#047857';
   const logoKop = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
   const currentYear = new Date().getFullYear();
-  const signatureKades = localStorage.getItem('village_super_admin') || 'Fazakkir Rahmad';
+  const signatureKades = localStorage.getItem('village_super_admin') || '';
   const signatureKadesNip = localStorage.getItem('village_super_admin_nip') || '-';
   const signatureKadesRole = localStorage.getItem('village_super_admin_role') || 'Kepala Desa';
   
@@ -236,7 +236,7 @@ export default function AdminSuratMasterTemplate() {
   const [selectedResidentIndex, setSelectedResidentIndex] = useState(0);
   const selectedResident = mockResidents[selectedResidentIndex];
 
-  const dynamicKadesName = localStorage.getItem('village_super_admin') || 'Fazakkir Rahmad';
+  const dynamicKadesName = localStorage.getItem('village_super_admin') || '';
   const dynamicKadesNip = localStorage.getItem('village_super_admin_nip') || '19741025 200604 1 007';
   const dynamicKadesRole = localStorage.getItem('village_super_admin_role') || 'Kepala Desa';
 

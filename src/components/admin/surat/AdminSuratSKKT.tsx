@@ -973,7 +973,7 @@ export default function AdminSuratSKKT({
                             ));
                           }
                         } catch (err) {}
-                        return <option value="FAZAKKIR RAHMAD">FAZAKKIR RAHMAD (Kepala Desa)</option>;
+                        return <option value={localStorage.getItem('kop_kades') || 'Kepala Desa'}>{localStorage.getItem('kop_kades') || 'Kepala Desa'} (Kepala Desa)</option>;
                       })()}
                     </select>
                   </div>

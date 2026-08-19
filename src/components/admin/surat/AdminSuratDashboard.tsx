@@ -345,7 +345,7 @@ export default function AdminSuratDashboard({
     const desaName = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
     const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261';
     const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
-    const namaKades = localStorage.getItem('kop_kades') || 'Fazakkir Rahmad';
+    const namaKades = localStorage.getItem('kop_kades') || '';
 
     const renderReactSignature = (desaName: string, tglFormatted: string, namaPejabat: string, jabatanPejabat: string, nipPejabat?: string, includeCamatOverride?: boolean) => {
       const sig = getReactSignaturePreview(desaName, tglFormatted, namaPejabat, jabatanPejabat, nipPejabat, includeCamatOverride);

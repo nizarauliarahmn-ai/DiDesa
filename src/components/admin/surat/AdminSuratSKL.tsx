@@ -121,7 +121,7 @@ export default function AdminSuratSKL({
   });
 
   // Pejabat
-  const [namaPejabat, setNamaPejabat] = useState(localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD');
+  const [namaPejabat, setNamaPejabat] = useState(localStorage.getItem('kop_kades') || '');
   const [jabatanPejabat, setJabatanPejabat] = useState('Kepala Desa');
   const [includeCamat, setIncludeCamat] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
@@ -178,7 +178,7 @@ export default function AdminSuratSKL({
     const savedRiwayat = localStorage.getItem('riwayat_surat_skl');
     if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
 
-    const activePejabat = localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD';
+    const activePejabat = localStorage.getItem('kop_kades') || '';
     try {
       const stored = localStorage.getItem('village_officers');
       if (stored) {
@@ -933,7 +933,7 @@ export default function AdminSuratSKL({
                             ));
                           }
                         } catch (e) {}
-                        return <option value="FAZAKKIR RAHMAD">FAZAKKIR RAHMAD (Kepala Desa)</option>;
+                        return <option value={localStorage.getItem('kop_kades') || 'Kepala Desa'}>{localStorage.getItem('kop_kades') || 'Kepala Desa'} (Kepala Desa)</option>;
                       })()}
                     </select>
                   </div>

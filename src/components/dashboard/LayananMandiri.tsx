@@ -218,7 +218,7 @@ export default function LayananMandiri() {
     const desaName = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
     const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261';
     const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
-    const namaKades = localStorage.getItem('kop_kades') || 'Fazakkir Rahmad';
+    const namaKades = localStorage.getItem('kop_kades') || '';
 
     const rtRwStr = verifiedResident?.rt_rw ? `RT/RW ${verifiedResident.rt_rw}` : 'RT 02/01';
 

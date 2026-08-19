@@ -134,7 +134,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [alamatKantor, setAlamatKantor] = useState(() => localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261');
   const [kontakKantor, setKontakKantor] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
   const [letterFont, setLetterFont] = useState(() => localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif');
-  const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || 'Fazakkir Rahmad');
+  const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || '');
   const [roleKades, setRoleKades] = useState('Kepala Desa');
   const [includeCamat, setIncludeCamat] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
@@ -145,14 +145,9 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       const stored = localStorage.getItem('village_officers');
       if (stored) return JSON.parse(stored);
     } catch (e) {}
+    const defaultKades = localStorage.getItem('kop_kades') || 'Kepala Desa';
     return [
-      { name: 'Fazakkir Rahmad', role: 'Kepala Desa', nip: '-' },
-      { name: 'Siti Aminah', role: 'Sekretaris Desa', nip: '198510122010122003' },
-      { name: 'Muhammad Noor', role: 'Kasi Pemerintahan', nip: '198704152014021002' },
-      { name: 'Ahmad Rifai', role: 'Kasi Kesejahteraan', nip: '-' },
-      { name: 'Rahmadi', role: 'Kasi Pelayanan', nip: '-' },
-      { name: 'H. Supian', role: 'Kaur Keuangan', nip: '-' },
-      { name: 'Sri Wahyuni', role: 'Kaur Umum', nip: '-' }
+      { name: defaultKades, role: 'Kepala Desa', nip: '-' },
     ];
   });
 
@@ -293,7 +288,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       setKontakKantor(localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
       setLetterFont(localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif');
       
-      const currentActiveKades = localStorage.getItem('kop_kades') || 'Fazakkir Rahmad';
+      const currentActiveKades = localStorage.getItem('kop_kades') || '';
       setNamaKades(currentActiveKades);
       
       try {

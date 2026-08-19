@@ -54,7 +54,7 @@ export default function AdminAparatur() {
   const [officers, setOfficers] = useState<Officer[]>([]);
   const [bpdList, setBpdList] = useState<Officer[]>([]);
   const [lpmList, setLpmList] = useState<Officer[]>([]);
-  const [namaKades, setNamaKades] = useState<string>('Fazakkir Rahmad');
+  const [namaKades, setNamaKades] = useState<string>(() => localStorage.getItem('kop_kades') || '');
 
   // Camat / Left Signature
   const [sigLeftRole, setSigLeftRole] = useState('Camat Simpur');

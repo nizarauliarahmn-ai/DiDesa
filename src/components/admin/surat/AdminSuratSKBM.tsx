@@ -108,7 +108,7 @@ export default function AdminSuratSKBM({
     keperluan: 'Persyaratan Administrasi',
     
     // Pejabat
-    namaPejabat: localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD',
+    namaPejabat: localStorage.getItem('kop_kades') || '',
     jabatanPejabat: 'Kepala Desa',
     includeCamat: false,
     
@@ -212,7 +212,7 @@ export default function AdminSuratSKBM({
     const savedRiwayat = localStorage.getItem('riwayat_surat_skbm');
     if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
 
-    const activePejabat = localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD';
+    const activePejabat = localStorage.getItem('kop_kades') || '';
     try {
       const stored = localStorage.getItem('village_officers');
       if (stored) {
@@ -761,7 +761,7 @@ export default function AdminSuratSKBM({
                             ));
                           }
                         } catch (e) {}
-                        return <option value="FAZAKKIR RAHMAD">FAZAKKIR RAHMAD (Kepala Desa)</option>;
+                        return <option value={localStorage.getItem('kop_kades') || 'Kepala Desa'}>{localStorage.getItem('kop_kades') || 'Kepala Desa'} (Kepala Desa)</option>;
                       })()}
                     </select>
                   </div>

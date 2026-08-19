@@ -11,10 +11,10 @@ export default function PublicVerifikasiSurat() {
   const [village, setVillage] = useState<{ namaDesa?: string; kecamatan?: string; kabupaten?: string; provinsi?: string } | null>(null);
 
   const resolveBranding = (overrides?: { namaDesa?: string; kecamatan?: string; kabupaten?: string; provinsi?: string }) => {
-    const activeDesa = overrides?.namaDesa || localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Wasah Hilir';
-    const activeKecamatan = overrides?.kecamatan || localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
-    const activeKabupaten = overrides?.kabupaten || localStorage.getItem('kop_kabupaten') || 'Kabupaten Hulu Sungai Selatan';
-    const activeProvinsi = overrides?.provinsi || localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan';
+    const activeDesa = overrides?.namaDesa || 'Desa';
+    const activeKecamatan = overrides?.kecamatan || '';
+    const activeKabupaten = overrides?.kabupaten || '';
+    const activeProvinsi = overrides?.provinsi || '';
     const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
     const desaTitle = activeDesa.toUpperCase().startsWith('DESA') || activeDesa.toUpperCase().startsWith('KELURAHAN')
       ? activeDesa.toUpperCase()
@@ -78,6 +78,24 @@ export default function PublicVerifikasiSurat() {
                 kabupaten: d.namaKabupaten || d.kabupaten,
                 provinsi: d.namaProvinsi || d.provinsi
               });
+            } else {
+              // Fallback: ambil identitas desa dari tabel tenants (sumber kebenaran
+              // per tenant), bukan dari localStorage yang bisa bocor lintas tenant.
+              try {
+                const { data: tenantRow } = await supabase
+                  .from('tenants')
+                  .select('nama_desa, kecamatan, nama_kecamatan, kabupaten, nama_kabupaten, provinsi, nama_provinsi')
+                  .eq('id', data.tenant_id)
+                  .maybeSingle();
+                if (tenantRow) {
+                  setVillage({
+                    namaDesa: tenantRow.nama_desa,
+                    kecamatan: tenantRow.kecamatan || tenantRow.nama_kecamatan,
+                    kabupaten: tenantRow.kabupaten || tenantRow.nama_kabupaten,
+                    provinsi: tenantRow.provinsi || tenantRow.nama_provinsi
+                  });
+                }
+              } catch (e) {}
             }
             setLoading(false);
             return;
@@ -182,8 +200,8 @@ export default function PublicVerifikasiSurat() {
     return `${nikStr.slice(0, 6)}******${nikStr.slice(-4)}`;
   };
 
-  const defaultKadesName = localStorage.getItem('kop_kades') || localStorage.getItem('village_kades') || 'Fazakkir Rahmad';
-  const defaultKadesRole = `KEPALA DESA ${branding.cleanDesaName.toUpperCase()}`;
+  const defaultKadesName = letter?.pejabat_nama || '';
+  const defaultKadesRole = letter?.pejabat_jabatan || `KEPALA DESA ${branding.cleanDesaName.toUpperCase()}`;
 
   const signerTitle = letter?.pejabat_jabatan 
     ? (letter.pejabat_jabatan.toUpperCase().includes('KEPALA') ? letter.pejabat_jabatan.toUpperCase() : `a.n. KEPALA DESA - ${letter.pejabat_jabatan.toUpperCase()}`)

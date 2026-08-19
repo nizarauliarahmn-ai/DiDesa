@@ -125,7 +125,7 @@ export default function AdminSuratUndangan({
     } catch { return []; }
   })();
 
-  const [pejabatNama, setPejabatNama] = useState(() => localStorage.getItem('kop_kades') || localStorage.getItem('village_kades_name') || 'FAZAKKIR RAHMAD');
+  const [pejabatNama, setPejabatNama] = useState(() => localStorage.getItem('kop_kades') || localStorage.getItem('village_kades_name') || '');
   const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('kades_title') || 'Kepala Desa');
   const [pejabatNip, setPejabatNip] = useState(() => localStorage.getItem('kades_nip') || '-');
   const [isTTE, setIsTTE] = useState<boolean>(true);
@@ -945,8 +945,8 @@ export default function AdminSuratUndangan({
                         }
                       } catch (e) {}
                       return (
-                        <option value={localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'}>
-                          {localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD'} (Kepala Desa)
+                        <option value={localStorage.getItem('kop_kades') || ''}>
+                          {localStorage.getItem('kop_kades') || ''} (Kepala Desa)
                         </option>
                       );
                     })()}

@@ -80,7 +80,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [pdfAnalyzing, setPdfAnalyzing] = useState(false);
   const [pdfFileName, setPdfFileName] = useState('');
   const pdfInputRef = useRef<HTMLInputElement>(null);
-  const [namaKades, setNamaKades] = useState('FAZAKKIR RAHMAD');
+  const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || '');
   const [roleKades, setRoleKades] = useState('Kepala Desa');
   const [nipKades, setNipKades] = useState('');
   const [includeCamat, setIncludeCamat] = useState(false);
@@ -160,7 +160,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   useEffect(() => {
     const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
     setDesaName(activeDesa);
-    setNamaKades(localStorage.getItem('kop_kades') || 'FAZAKKIR RAHMAD');
+    setNamaKades(localStorage.getItem('kop_kades') || '');
     setRoleKades('Kepala Desa');
     
     const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
