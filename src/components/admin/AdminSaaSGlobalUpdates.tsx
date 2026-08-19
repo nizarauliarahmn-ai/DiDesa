@@ -10,6 +10,7 @@ import Markdown from 'react-markdown';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 import { addSaaSLog } from '../../utils/saasLogs';
+import { GlobalUpdatePopup } from '../../components/GlobalUpdatePopup';
 import ConfirmModal from '../common/ConfirmModal';
 
 export interface GlobalUpdateItem {
@@ -988,51 +989,14 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
 
       {/* PREVIEW POP-UP MODAL */}
       {previewItem && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden relative animate-in zoom-in-95 duration-200">
-            {/* Top Header Badge */}
-            <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 p-6 text-white relative">
-              <button
-                onClick={() => setPreviewItem(null)}
-                className="absolute top-4 right-4 p-1.5 text-white/80 hover:text-white rounded-full bg-black/20 hover:bg-black/40 transition-all cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-3 py-0.5 bg-white/20 backdrop-blur-sm text-white font-mono font-black text-xs rounded-full">
-                  {previewItem.version}
-                </span>
-                <span className="px-2.5 py-0.5 bg-emerald-400 text-slate-950 font-bold text-[10px] uppercase rounded-full tracking-wider">
-                  PREVIEW POP-UP DESA
-                </span>
-              </div>
-
-              <h3 className="text-xl font-extrabold leading-snug">
-                {previewItem.title}
-              </h3>
-              <p className="text-xs text-indigo-100 mt-1">Tanggal Rilis: {previewItem.release_date}</p>
-            </div>
-
-            {/* Body */}
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-              <div className="prose prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-200 text-xs">
-                <Markdown>{previewItem.content}</Markdown>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-              <span className="text-slate-500 dark:text-slate-400">Pratinjau tampilan warga / admin desa</span>
-              <button
-                onClick={() => setPreviewItem(null)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all cursor-pointer"
-              >
-                Tutup Preview
-              </button>
-            </div>
-          </div>
-        </div>
+        <GlobalUpdatePopup
+          update={previewItem}
+          globalName={localStorage.getItem('global_app_name') || 'DiDesa'}
+          globalColor={localStorage.getItem('global_app_color') || '#047857'}
+          onClose={() => setPreviewItem(null)}
+          onPrimaryAction={() => setPreviewItem(null)}
+          onSeeAllUpdates={() => setPreviewItem(null)}
+        />
       )}
       {/* MODAL KONFIRMASI HAPUS MODERN */}
       <ConfirmModal
