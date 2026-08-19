@@ -871,7 +871,11 @@ export default function AdminSuratNikah({
 
   const lampiranHtml = (model: string) => {
     return `
-      <div style="font-size:10px;line-height:1.35;font-family:${letterFont};">Lampiran<br>Keputusan Dirjen Bimas Islam No. 713 Tahun 2018<br>Tentang Penetapan Formulir dan Laporan Pencatatan Perkawinan atau Rujuk</div>
+      <div style="font-size:10pt;line-height:1.2;font-family:${letterFont};margin-bottom:16px;">
+        <p>Lampiran</p>
+        <p>Keputusan Dirjen Bimas Islam No. 713 Tahun 2018</p>
+        <p>Tentang Penetapan Formulir dan Laporan Pencatatan Perkawinan atau Rujuk</p>
+      </div>
       <div style="text-align:right;font-weight:700;font-family:${letterFont};">Model ${model}</div>
     `;
   };
@@ -1168,7 +1172,7 @@ export default function AdminSuratNikah({
       html = `
         ${lampiranHtml('N4')}
         <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT IZIN ORANG TUA</h3>
-        <p>yang bertanda tangan di bawah ini:</p>
+        <p>Yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;">A. AYAH</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(anak.ayah)}</span>`],
@@ -1205,7 +1209,7 @@ export default function AdminSuratNikah({
           ['5. Pekerjaan', v(anak.kerjaPasangan)],
           ['6. Alamat', v(anak.alamatPasangan)]
         ])}
-        <p>Demikianlah surat izin ini dibuat dengan kesadaran tanpa ada paksaan dari siapapun dan untuk digunakan seperlunya.</p>
+        <p>Demikianlah surat izin ini dibuat dengan kesadaran tanpa ada paksaan dari siapa pun dan untuk digunakan seperlunya.</p>
         <div style="margin-top:20px;display:flex;justify-content:flex-end;">
           <div style="text-align:center;width:230px;">
             <div style="margin-bottom:45px;">${tempatTgl()}<br>Wali,</div>
