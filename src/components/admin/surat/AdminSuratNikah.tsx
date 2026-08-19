@@ -1046,7 +1046,7 @@ export default function AdminSuratNikah({
         <div style="line-height:1.35;margin:0;padding:0;">
         <p style="text-align:right;margin:0 0 10px 0;">${tempatTgl()}</p>
         <p style="margin:0 0 8px 0;">Perihal: Permohonan Kehendak Perkawinan</p>
-        <p style="margin:0 0 18px 0;line-height:1.2;">Kepada Yth.<br>Kepala ${normKUA()}<br>di - Tempat</p>
+        <p style="margin:0 0 18px 0;line-height:1.2;">Kepada Yth.<br>Kepala ${normKUA()}<br>di -<br><span style="display:inline-block;padding-left:24px;">Tempat</span></p>
         <p style="margin:0 0 2px 0;">Dengan hormat, Kami mengajukan permohonan kehendak perkawinan untuk atas kami:</p>
         <div style="margin-left:32px;">
         ${dtTableN2([
@@ -1066,11 +1066,28 @@ export default function AdminSuratNikah({
               <span style="line-height:1.3;">${item}</span>
             </div>`).join('')}
         </div>
-        <p style="margin:0 0 2px 0;">Demikian permohonan ini Kami sampaikan, kiranya dapat diperiksa, dihadiri, dan dicatat sesuai dengan ketentuan perundang-undangan.</p>
+        <p style="text-align:justify;margin-top:32px;">Demikian permohonan ini Kami sampaikan, kiranya dapat diperiksa, dihadiri, dan dicatat sesuai dengan ketentuan perundang-undangan.</p>
         </div>
-        <div style="margin-top:16px;display:flex;justify-content:space-between;">
-          <div style="text-align:center;width:44%;">Yang menerima,<br>Kepala ${normKUA()}<span style="font-weight:700;margin-top:56px;display:block;">&nbsp;</span></div>
-          <div style="text-align:center;width:44%;">Pemohon,<span style="font-weight:700;margin-top:56px;display:block;">${vn(pm.nama)}</span>${pm.bin} ${vn(pm.ayah)}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px;page-break-inside:avoid;">
+          <div style="display:flex;flex-direction:column;justify-content:space-between;height:160px;text-align:center;">
+            <div>
+              <p>Yang menerima,</p>
+              <p>Kepala ${normKUA()}</p>
+            </div>
+            <div>
+              <p style="font-weight:700;">( .................................... )</p>
+              <p>NIP. ....................................</p>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;justify-content:space-between;height:160px;text-align:center;">
+            <div>
+              <p>Pemohon,</p>
+            </div>
+            <div>
+              <p style="font-weight:700;text-decoration:underline;text-transform:uppercase;">${vn(pm.nama)}</p>
+              <p style="text-transform:uppercase;">${pm.bin} ${vn(pm.ayah)}</p>
+            </div>
+          </div>
         </div>
       `;
     }
