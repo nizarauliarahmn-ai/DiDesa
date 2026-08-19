@@ -44,7 +44,7 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
     type: 'feature' as 'feature' | 'fix' | 'improvement',
     release_date: new Date().toISOString().split('T')[0],
     is_active: 1,
-    is_popup: 0,
+    is_popup: 1,
     cta_route: '',
     content: ''
   });
@@ -142,7 +142,7 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
       type: 'feature',
       release_date: new Date().toISOString().split('T')[0],
       is_active: 1,
-      is_popup: 0,
+      is_popup: 1,
       cta_route: '',
       content: '### ✨ Apa yang baru di versi ini?\n\n- **Fitur Baru**: Deskripsi fitur utama yang ditambahkan...\n- **Peningkatan**: Optimasi kecepatan halaman kependudukan...\n- **Perbaikan**: Perbaikan sistem cetak surat.'
     });

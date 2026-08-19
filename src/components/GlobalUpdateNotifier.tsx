@@ -84,9 +84,8 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
       try {
         const { data, error } = await supabase
           .from('global_updates')
-          .select('id, version, title, content, release_date, type, cta_route, is_popup')
+          .select('id, version, title, content, release_date, type, cta_route')
           .eq('is_active', 1)
-          .eq('is_popup', 1)
           .order('release_date', { ascending: false })
           .limit(1);
         
