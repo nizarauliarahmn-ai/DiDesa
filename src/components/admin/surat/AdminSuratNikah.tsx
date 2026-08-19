@@ -1074,8 +1074,8 @@ export default function AdminSuratNikah({
         ])}
         <p style="text-align:justify;">Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, dengan kesadaran sendiri, tanpa ada paksaan dari siapapun juga, setuju untuk melangsungkan perkawinan.</p>
         <p style="margin:12px 0 0 0;">Demikianlah surat persetujuan ini dibuat untuk digunakan seperlunya.</p>
-        <p style="text-align:right;margin:10px 0 0 0;">${v(String(formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, ''), '.....') + ', ' + v(fmtTgl(formData.tanggalSurat))}</p>
-        <div style="display:flex;justify-content:space-between;margin-top:36px;">
+        <p style="text-align:center;margin:34px 0 0 0;">${v(String(formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, ''), '.....') + ', ' + v(fmtTgl(formData.tanggalSurat))}</p>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
           <div style="text-align:center;width:46%;">Calon Suami,</div>
           <div style="text-align:center;width:46%;">Calon Istri,</div>
         </div>
@@ -1153,7 +1153,7 @@ export default function AdminSuratNikah({
         <p>Demikianlah surat izin ini dibuat dengan kesadaran tanpa ada paksaan dari siapapun dan untuk digunakan seperlunya.</p>
         <div style="margin-top:20px;display:flex;justify-content:flex-end;">
           <div style="text-align:center;width:230px;">
-            <div style="margin-bottom:45px;">${tempatTgl()}<br>Wali,</div>
+            <div style="margin-bottom:45px;">${v(String(formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, ''), '.....') + ', ' + v(fmtTgl(formData.tanggalSurat))}<br>Wali,</div>
             <span style="font-weight:700;">${vn(anak.ayah)}</span>
           </div>
         </div>
