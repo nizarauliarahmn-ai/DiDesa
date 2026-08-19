@@ -117,7 +117,7 @@ export const GlobalUpdatePopup: React.FC<Props> = ({ update, globalName, globalC
             className="px-8 py-3 text-white rounded-xl font-bold shadow-lg dark:shadow-none transition-all active:scale-95 cursor-pointer"
             style={{ backgroundColor: globalColor, boxShadow: `0 4px 12px ${globalColor}33` }}
           >
-            {update.cta_route ? 'Coba Sekarang ➔' : 'Mengerti & Lanjutkan'}
+            {update.cta_route ? 'Coba Sekarang ➔' : 'Mengerti dan Lanjutkan'}
           </button>
         </div>
       </motion.div>
