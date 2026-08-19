@@ -782,7 +782,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
               <div class="mb-10 text-justify leading-relaxed">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
 
-              ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat)}
+              ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat, true, nomorSurat)}
             </div>
             <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
                 ${SAAS_CONFIG.globalFooterHTML}

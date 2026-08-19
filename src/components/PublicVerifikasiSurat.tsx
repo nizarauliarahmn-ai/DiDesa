@@ -7,16 +7,22 @@ export default function PublicVerifikasiSurat() {
   const [letter, setLetter] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Active village branding details (dynamic from localStorage or fallback)
-  const activeDesa = localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Wasah Hilir';
-  const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
-  const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Kabupaten Hulu Sungai Selatan';
-  const activeProvinsi = localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan';
+  // Branding desa: diprioritaskan dari data surat (hasil verifikasi), fallback ke localStorage.
+  const [village, setVillage] = useState<{ namaDesa?: string; kecamatan?: string; kabupaten?: string; provinsi?: string } | null>(null);
 
-  const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
-  const desaTitle = activeDesa.toUpperCase().startsWith('DESA') || activeDesa.toUpperCase().startsWith('KELURAHAN')
-    ? activeDesa.toUpperCase()
-    : `DESA ${cleanDesaName.toUpperCase()}`;
+  const resolveBranding = (overrides?: { namaDesa?: string; kecamatan?: string; kabupaten?: string; provinsi?: string }) => {
+    const activeDesa = overrides?.namaDesa || localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Wasah Hilir';
+    const activeKecamatan = overrides?.kecamatan || localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
+    const activeKabupaten = overrides?.kabupaten || localStorage.getItem('kop_kabupaten') || 'Kabupaten Hulu Sungai Selatan';
+    const activeProvinsi = overrides?.provinsi || localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan';
+    const cleanDesaName = activeDesa.replace(/desa|kelurahan/gi, '').trim();
+    const desaTitle = activeDesa.toUpperCase().startsWith('DESA') || activeDesa.toUpperCase().startsWith('KELURAHAN')
+      ? activeDesa.toUpperCase()
+      : `DESA ${cleanDesaName.toUpperCase()}`;
+    return { activeDesa, activeKecamatan, activeKabupaten, activeProvinsi, cleanDesaName, desaTitle };
+  };
+
+  const branding = resolveBranding(village || undefined);
 
   useEffect(() => {
     const fetchLetter = async () => {
@@ -55,6 +61,16 @@ export default function PublicVerifikasiSurat() {
               pejabat_jabatan: data.pejabat_jabatan,
               pejabat_nip: data.pejabat_nip
             });
+            // Branding desa mengikuti data surat, bukan localStorage browser.
+            const d = data.data || {};
+            if (d.namaDesa) {
+              setVillage({
+                namaDesa: d.namaDesa,
+                kecamatan: d.namaKecamatan || d.kecamatan,
+                kabupaten: d.namaKabupaten || d.kabupaten,
+                provinsi: d.namaProvinsi || d.provinsi
+              });
+            }
             setLoading(false);
             return;
           }
@@ -103,6 +119,15 @@ export default function PublicVerifikasiSurat() {
             pejabat_jabatan: foundLocal.data?.jabatanPejabat,
             pejabat_nip: foundLocal.data?.nipPejabat
           });
+          const d = foundLocal.data || {};
+          if (d.namaDesa) {
+            setVillage({
+              namaDesa: d.namaDesa,
+              kecamatan: d.namaKecamatan || d.kecamatan,
+              kabupaten: d.namaKabupaten || d.kabupaten,
+              provinsi: d.namaProvinsi || d.provinsi
+            });
+          }
           setLoading(false);
           return;
         }
@@ -141,7 +166,7 @@ export default function PublicVerifikasiSurat() {
   };
 
   const defaultKadesName = localStorage.getItem('kop_kades') || localStorage.getItem('village_kades') || 'Fazakkir Rahmad';
-  const defaultKadesRole = `KEPALA DESA ${cleanDesaName.toUpperCase()}`;
+  const defaultKadesRole = `KEPALA DESA ${branding.cleanDesaName.toUpperCase()}`;
 
   const signerTitle = letter?.pejabat_jabatan 
     ? (letter.pejabat_jabatan.toUpperCase().includes('KEPALA') ? letter.pejabat_jabatan.toUpperCase() : `a.n. KEPALA DESA - ${letter.pejabat_jabatan.toUpperCase()}`)
@@ -165,9 +190,9 @@ export default function PublicVerifikasiSurat() {
           </div>
 
           <h2 className="text-xs font-extrabold uppercase tracking-widest text-emerald-200">SISTEM VERIFIKASI DOKUMEN RESMI</h2>
-          <h1 className="text-2xl font-black mt-1 tracking-tight">PEMERINTAH {desaTitle}</h1>
+          <h1 className="text-2xl font-black mt-1 tracking-tight">PEMERINTAH {branding.desaTitle}</h1>
           <p className="text-xs text-emerald-100/90 mt-1.5 font-medium">
-            {activeKecamatan}, {activeKabupaten}, {activeProvinsi} • Terintegrasi di sistemdidesa.id
+            {branding.activeKecamatan}, {branding.activeKabupaten}, {branding.activeProvinsi} • Terintegrasi di sistemdidesa.id
           </p>
         </div>
 

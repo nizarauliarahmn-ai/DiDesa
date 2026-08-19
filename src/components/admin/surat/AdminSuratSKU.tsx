@@ -533,7 +533,8 @@ export default function AdminSuratSKU({
           }
         })(),
         formData.includeCamat,
-        useEsignature
+        useEsignature,
+        formData.nomorSurat
       )}
       <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
         ${SAAS_CONFIG.globalFooterHTML}

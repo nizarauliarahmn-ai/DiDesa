@@ -1083,7 +1083,9 @@ export default function AdminSuratNikah({
               return '-';
             }
           })(),
-        formData.includeCamat
+        formData.includeCamat,
+        useEsignature,
+        formData.nomorSurat
       )}
       `;
     }
@@ -1318,7 +1320,9 @@ export default function AdminSuratNikah({
               return '-';
             }
           })(),
-          formData.includeCamat
+          formData.includeCamat,
+          useEsignature,
+          formData.nomorSurat
         )}
       `;
     }

@@ -744,9 +744,10 @@ export default function AdminSuratSKP({
           } catch(e) {
             return '-';
           }
-        })(),
+          })(),
         formData.includeCamat,
-        useEsignature
+        useEsignature,
+        formData.nomorSurat
       )}
       <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
         ${SAAS_CONFIG.globalFooterHTML}
@@ -809,7 +810,9 @@ export default function AdminSuratSKP({
               return '-';
             }
           })(),
-          false
+          false,
+          false,
+          formData.nomorSurat
         )}
 
         <!-- FOOTER LEMBAR 2 -->

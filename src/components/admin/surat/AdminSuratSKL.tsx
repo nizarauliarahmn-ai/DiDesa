@@ -522,7 +522,8 @@ export default function AdminSuratSKL({
           jabatanPejabat,
           "",
           includeCamat,
-          useEsignature
+          useEsignature,
+          noSurat
         )}
 
         <!-- GLOBAL FOOTER -->
