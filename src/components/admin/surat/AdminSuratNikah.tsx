@@ -862,7 +862,7 @@ export default function AdminSuratNikah({
     `;
   };
   
-  const tempatTgl = () => { return v(formData.namaDesa, '.....') + ', ' + v(fmtTgl(formData.tanggalSurat)); };
+  const tempatTgl = () => { return v(String(formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, ''), '.....') + ', ' + v(fmtTgl(formData.tanggalSurat)); };
 
   const getDocHtml = (docId?: string) => {
     try {
@@ -892,6 +892,19 @@ export default function AdminSuratNikah({
     const isIstri = targetDoc === 'biodata_istri' || targetDoc === 'n1_istri';
 
     const fontStyle = `font-family: ${letterFont};`;
+
+    // Normalisasi nama KUA: selalu KUA uppercase, tanpa duplikasi "Kecamatan".
+    const normKUA = () => {
+      let s = String(formData.namaKUA || '').trim();
+      if (!s) s = 'KUA Kecamatan ' + String(formData.namaKecamatan || '').trim();
+      return s
+        .replace(/^kepala\s+/i, '')
+        .replace(/\bkua\b/gi, 'KUA')
+        .replace(/\bKecamatan\s*Kecamatan\b/gi, 'Kecamatan')
+        .replace(/\bKec\.\s*/gi, 'Kecamatan ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
 
     // Data calon untuk N1 (Surat Pengantar). Setiap calon berdomisili mendapat N1 sendiri.
     const P = targetDoc === 'n1_istri' ? {
@@ -940,8 +953,8 @@ export default function AdminSuratNikah({
         <hr style="border:none;border-top:1px solid #111;margin:10px 0;">
         <p style="font-weight:700;">PERHATIAN</p>
         <p>&bull; Dalam penulisan Model N-1: NIK, NAMA, TEMPAT TANGGAL LAHIR, harus sesuai dengan identitas pribadi (Akta Lahir, KTP, Kartu Keluarga, Ijazah).</p>
-        <p>&bull; Calon mempelai dan wali harus datang langsung ke ${v(formData.namaKUA, 'KUA')} untuk pendaftaran nikah, pemeriksaan dan penasehatan pra-nikah. Catin wajib berpakaian rapi dan sopan.</p>
-        <p>&bull; Penetapan hari/tanggal/tempat akad nikah dikonsultasikan dengan ${v(formData.namaKUA, 'KUA')}.</p>
+        <p>&bull; Calon mempelai dan wali harus datang langsung ke ${normKUA()} untuk pendaftaran nikah, pemeriksaan dan penasehatan pra-nikah. Catin wajib berpakaian rapi dan sopan.</p>
+        <p>&bull; Penetapan hari/tanggal/tempat akad nikah dikonsultasikan dengan ${normKUA()}.</p>
       `;
     }
     else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
@@ -1009,13 +1022,26 @@ export default function AdminSuratNikah({
       const pm = n2ForSuami
         ? { nama: formData.namaSuami, bin: 'BIN', ayah: formData.namaAyahSuami }
         : { nama: formData.namaIstri, bin: 'BINTI', ayah: formData.namaAyahIstri };
+      const lampiranList = [
+        'Surat Pengantar Perkawinan dari Desa/Kelurahan (Model N1)',
+        'Surat Permohonan Kehendak Perkawinan (Model N2)',
+        'Surat Persetujuan Mempelai (Model N3)',
+        'Surat Izin Orang Tua (Model N4)',
+        'Surat Keterangan Kematian Suami/Istri (Model N6), bila berlaku',
+        'Fotokopi KTP dan Kartu Keluarga',
+        'Fotokopi Akta Kelahiran',
+        'Fotokopi Ijazah Terakhir',
+        'Dokumen tambahan sesuai ketentuan (akta cerai, izin atasan, dispensasi, dsb.) bila berlaku',
+        'Pas foto berwarna'
+      ];
       html = `
         ${lampiranHtml('N2')}
         <div style="line-height:1.35;margin:0;padding:0;">
         <p style="text-align:right;margin:0 0 10px 0;">${tempatTgl()}</p>
         <p style="margin:0 0 8px 0;">Perihal: Permohonan Kehendak Perkawinan</p>
-        <p style="margin:0 0 18px 0;line-height:1.45;">Kepada Yth.<br>Kepala ${v(formData.namaKUA, 'KUA Kecamatan')}<br>di - Tempat</p>
-        <p style="margin:0 0 2px 0;">Dengan hormat, kami mengajukan permohonan kehendak perkawinan untuk atas kami:</p>
+        <p style="margin:0 0 18px 0;line-height:1.2;">Kepada Yth.<br>Kepala ${normKUA()}<br>di - Tempat</p>
+        <p style="margin:0 0 2px 0;">Dengan hormat, Kami mengajukan permohonan kehendak perkawinan untuk atas kami:</p>
+        <div style="margin-left:32px;">
         ${dtTableN2([
           ['Calon Suami', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaSuami)}</span>`],
           ['dengan Calon Istri', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaIstri)}</span>`],
@@ -1024,23 +1050,19 @@ export default function AdminSuratNikah({
           ['Jam', v(formData.jamMenikah)],
           ['Bertempat di', v(formData.tempatMenikah)]
         ])}
-        <p style="margin:18px 0 2px 0;">Bersama ini kami lampirkan surat-surat yang diperlukan untuk diperiksa sebagai berikut:</p>
-        <ol style="margin:0 0 2px 0;padding-left:20px;font-size:10.8px;list-style:decimal;">
-          <li>Surat Pengantar Perkawinan dari Desa/Kelurahan (Model N1)</li>
-          <li>Surat Permohonan Kehendak Perkawinan (Model N2)</li>
-          <li>Surat Persetujuan Mempelai (Model N3)</li>
-          <li>Surat Izin Orang Tua (Model N4)</li>
-          <li>Surat Keterangan Kematian Suami/Istri (Model N6), bila berlaku</li>
-          <li>Fotokopi KTP dan Kartu Keluarga</li>
-          <li>Fotokopi Akta Kelahiran</li>
-          <li>Fotokopi Ijazah Terakhir</li>
-          <li>Dokumen tambahan sesuai ketentuan (akta cerai, izin atasan, dispensasi, dsb.) bila berlaku</li>
-          <li>Pas foto berwarna</li>
-        </ol>
-        <p style="margin:0 0 2px 0;">Demikian permohonan ini kami sampaikan, kiranya dapat diperiksa, dihadiri, dan dicatat sesuai dengan ketentuan perundang-undangan.</p>
+        </div>
+        <p style="margin:18px 0 2px 0;">Bersama ini Kami lampirkan surat-surat yang diperlukan untuk diperiksa sebagai berikut:</p>
+        <div style="margin:10px 0 2px 0;padding-left:16px;">
+          ${lampiranList.map((item, index) => `
+            <div style="display:grid;grid-template-columns:28px 1fr;align-items:start;margin:2px 0;">
+              <span style="text-align:left;">${index + 1}.</span>
+              <span style="line-height:1.3;">${item}</span>
+            </div>`).join('')}
+        </div>
+        <p style="margin:0 0 2px 0;">Demikian permohonan ini Kami sampaikan, kiranya dapat diperiksa, dihadiri, dan dicatat sesuai dengan ketentuan perundang-undangan.</p>
         </div>
         <div style="margin-top:16px;display:flex;justify-content:space-between;">
-          <div style="text-align:center;width:44%;">Yang menerima,<br>Kepala ${v(formData.namaKUA, 'KUA')}<span style="font-weight:700;margin-top:56px;display:block;">&nbsp;</span></div>
+          <div style="text-align:center;width:44%;">Yang menerima,<br>Kepala ${normKUA()}<span style="font-weight:700;margin-top:56px;display:block;">&nbsp;</span></div>
           <div style="text-align:center;width:44%;">Pemohon,<span style="font-weight:700;margin-top:56px;display:block;">${vn(pm.nama)}</span>${pm.bin} ${vn(pm.ayah)}</div>
         </div>
       `;
@@ -1074,7 +1096,7 @@ export default function AdminSuratNikah({
         ])}
         <p style="text-align:justify;">Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, dengan kesadaran sendiri, tanpa ada paksaan dari siapapun juga, setuju untuk melangsungkan perkawinan.</p>
         <p style="margin:12px 0 0 0;">Demikianlah surat persetujuan ini dibuat untuk digunakan seperlunya.</p>
-        <p style="text-align:center;margin:34px 0 0 0;">${v(String(formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, ''), '.....') + ', ' + v(fmtTgl(formData.tanggalSurat))}</p>
+        <p style="text-align:center;margin:34px 0 0 0;">${tempatTgl()}</p>
         <div style="display:flex;justify-content:space-between;margin-top:6px;">
           <div style="text-align:center;width:46%;">Calon Suami,</div>
           <div style="text-align:center;width:46%;">Calon Istri,</div>
@@ -1153,7 +1175,7 @@ export default function AdminSuratNikah({
         <p>Demikianlah surat izin ini dibuat dengan kesadaran tanpa ada paksaan dari siapapun dan untuk digunakan seperlunya.</p>
         <div style="margin-top:20px;display:flex;justify-content:flex-end;">
           <div style="text-align:center;width:230px;">
-            <div style="margin-bottom:45px;">${v(String(formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, ''), '.....') + ', ' + v(fmtTgl(formData.tanggalSurat))}<br>Wali,</div>
+            <div style="margin-bottom:45px;">${tempatTgl()}<br>Wali,</div>
             <span style="font-weight:700;">${vn(anak.ayah)}</span>
           </div>
         </div>
