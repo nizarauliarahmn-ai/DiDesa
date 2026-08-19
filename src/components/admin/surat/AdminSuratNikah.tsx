@@ -974,7 +974,7 @@ export default function AdminSuratNikah({
         ])}
         <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
-        <p>yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
+        <p>Yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(P.nama)}</span>`],
           ['2. NIK', v(P.nik)],
@@ -1004,8 +1004,8 @@ export default function AdminSuratNikah({
           ['4. Pekerjaan', v(P.kerjaIbu)],
           ['5. Alamat', v(P.alamatOrtu)]
         ])}
-        <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Jam ${v(formData.jamMenikah)} WIB di ${v(formData.tempatMenikah)}.</p>
-        <p style="margin-top:10px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
+        <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
+        <p style="text-align:justify;margin-top:24px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
         ${getPrintSignatureHTML(
           formData.namaDesa,
           v(fmtTgl(formData.tanggalSurat)),
