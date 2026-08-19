@@ -22,7 +22,6 @@ export interface GlobalUpdateItem {
   is_active: number; // 1 = Active, 0 = Inactive / Draft
   created_at?: string;
   cta_route?: string;
-  cta_label?: string;
   is_popup?: number; // 1 = tampil sebagai Pop-up pengumuman utama
 }
 
@@ -47,7 +46,6 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
     is_active: 1,
     is_popup: 0,
     cta_route: '',
-    cta_label: '',
     content: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -146,7 +144,6 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
       is_active: 1,
       is_popup: 0,
       cta_route: '',
-      cta_label: '',
       content: '### ✨ Apa yang baru di versi ini?\n\n- **Fitur Baru**: Deskripsi fitur utama yang ditambahkan...\n- **Peningkatan**: Optimasi kecepatan halaman kependudukan...\n- **Perbaikan**: Perbaikan sistem cetak surat.'
     });
     setActiveTabForm('write');
@@ -163,7 +160,6 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
       is_active: item.is_active ?? 1,
       is_popup: item.is_popup ?? 0,
       cta_route: item.cta_route || '',
-      cta_label: item.cta_label || '',
       content: item.content || ''
     });
     setActiveTabForm('write');
@@ -188,7 +184,6 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
         is_active: Number(formData.is_active),
         is_popup: Number(formData.is_popup),
         cta_route: formData.cta_route?.trim() || null,
-        cta_label: formData.cta_label?.trim() || null,
         content: formData.content
       };
 
@@ -749,7 +744,7 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
 
               {/* CTA (Tombol Tindakan Pop-up) */}
               {formData.is_popup === 1 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-1 p-4 bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-100 dark:border-slate-800">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                       Tautan Tombol Utama (CTA Route)
@@ -762,21 +757,8 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     />
                     <p className="text-[10px] text-slate-400 mt-1">
-                      Navigasi internal saat tombol utama pop-up ditekan. Deep-link ke form surat: <span className="font-mono">/?admin_tab=surat&surat_form=nikah</span> (ganti <span className="font-mono">nikah</span> dengan <span className="font-mono">sktm</span>, <span className="font-mono">sku</span>, dll.)
+                      Navigasi internal saat tombol utama pop-up ditekan. Tombol akan selalu bertuliskan "Coba Sekarang". Deep-link ke form surat: <span className="font-mono">/?admin_tab=surat&surat_form=nikah</span> (ganti <span className="font-mono">nikah</span> dengan <span className="font-mono">sktm</span>, <span className="font-mono">sku</span>, dll.)
                     </p>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Teks Tombol Utama (CTA Label)
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.cta_label}
-                      onChange={(e) => setFormData({ ...formData, cta_label: e.target.value })}
-                      placeholder="misal: Coba Buat Surat"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">Kosongkan jika hanya ingin tombol "Mengerti & Lanjutkan".</p>
                   </div>
                 </div>
               )}

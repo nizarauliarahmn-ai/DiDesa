@@ -12,7 +12,6 @@ interface GlobalUpdate {
   release_date: string;
   type: string;
   cta_route?: string;
-  cta_label?: string;
   is_popup?: number;
 }
 
@@ -85,7 +84,7 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
       try {
         const { data, error } = await supabase
           .from('global_updates')
-          .select('id, version, title, content, release_date, type, cta_route, cta_label, is_popup')
+          .select('id, version, title, content, release_date, type, cta_route, is_popup')
           .eq('is_active', 1)
           .eq('is_popup', 1)
           .order('release_date', { ascending: false })
@@ -275,7 +274,7 @@ export const GlobalUpdateNotifier: React.FC<Props> = ({ isBusy = false, enabled 
                 className="px-8 py-3 text-white rounded-xl font-bold shadow-lg dark:shadow-none transition-all active:scale-95"
                 style={{ backgroundColor: globalColor, boxShadow: `0 4px 12px ${globalColor}33` }}
               >
-                {latestUpdate.cta_route && latestUpdate.cta_label ? latestUpdate.cta_label : 'Mengerti & Lanjutkan'}
+                {latestUpdate.cta_route ? 'Coba Sekarang ➔' : 'Mengerti & Lanjutkan'}
               </button>
             </div>
           </motion.div>
