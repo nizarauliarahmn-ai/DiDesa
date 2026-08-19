@@ -69,33 +69,34 @@ export default function PublicVerifikasiSurat() {
               pejabat_jabatan: data.pejabat_jabatan,
               pejabat_nip: data.pejabat_nip
             });
-            // Branding desa mengikuti data surat, bukan localStorage browser.
+            // Branding desa SELALU mengutamakan tabel tenants (sumber kebenaran
+            // per tenant_id surat), bukan data.data yang bisa berisi nama desa
+            // salah pada surat lama, dan bukan localStorage browser.
             const d = data.data || {};
-            if (d.namaDesa) {
-              setVillage({
-                namaDesa: d.namaDesa,
-                kecamatan: d.namaKecamatan || d.kecamatan,
-                kabupaten: d.namaKabupaten || d.kabupaten,
-                provinsi: d.namaProvinsi || d.provinsi
-              });
-            } else {
-              // Fallback: ambil identitas desa dari tabel tenants (sumber kebenaran
-              // per tenant), bukan dari localStorage yang bisa bocor lintas tenant.
-              try {
-                const { data: tenantRow } = await supabase
-                  .from('tenants')
-                  .select('nama_desa, kecamatan, nama_kecamatan, kabupaten, nama_kabupaten, provinsi, nama_provinsi')
-                  .eq('id', data.tenant_id)
-                  .maybeSingle();
-                if (tenantRow) {
-                  setVillage({
-                    namaDesa: tenantRow.nama_desa,
-                    kecamatan: tenantRow.kecamatan || tenantRow.nama_kecamatan,
-                    kabupaten: tenantRow.kabupaten || tenantRow.nama_kabupaten,
-                    provinsi: tenantRow.provinsi || tenantRow.nama_provinsi
-                  });
-                }
-              } catch (e) {}
+            let villageFromTenants: any = null;
+            try {
+              const { data: tenantRow } = await supabase
+                .from('tenants')
+                .select('nama_desa, kecamatan, nama_kecamatan, kabupaten, nama_kabupaten, provinsi, nama_provinsi')
+                .eq('id', data.tenant_id)
+                .maybeSingle();
+              if (tenantRow && tenantRow.nama_desa) {
+                villageFromTenants = {
+                  namaDesa: tenantRow.nama_desa,
+                  kecamatan: tenantRow.kecamatan || tenantRow.nama_kecamatan,
+                  kabupaten: tenantRow.kabupaten || tenantRow.nama_kabupaten,
+                  provinsi: tenantRow.provinsi || tenantRow.nama_provinsi
+                };
+              }
+            } catch (e) {}
+            const villageSource = villageFromTenants || (d.namaDesa ? {
+              namaDesa: d.namaDesa,
+              kecamatan: d.namaKecamatan || d.kecamatan,
+              kabupaten: d.namaKabupaten || d.kabupaten,
+              provinsi: d.namaProvinsi || d.provinsi
+            } : null);
+            if (villageSource) {
+              setVillage(villageSource);
             }
             setLoading(false);
             return;
