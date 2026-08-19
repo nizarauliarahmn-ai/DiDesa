@@ -975,18 +975,18 @@ export default function AdminSuratNikah({
       html = `
         ${lampiranHtml('N1')}
         <div style="font-size:8pt;line-height:1.2;margin-bottom:24px;text-transform:uppercase;">
-          <div style="display:grid;grid-template-columns:140px 10px 1fr;">
-            <div>KANTOR DESA/KELURAHAN</div>
+          <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;">
+            <div style="white-space:nowrap;">KANTOR DESA/KELURAHAN</div>
             <div>:</div>
             <div>${v(formData.namaDesa, 'WASAH HILIR').replace(/^desa\s+/i, '').toUpperCase()}</div>
           </div>
-          <div style="display:grid;grid-template-columns:140px 10px 1fr;">
-            <div>KECAMATAN</div>
+          <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;margin-top:4px;">
+            <div style="white-space:nowrap;">KECAMATAN</div>
             <div>:</div>
             <div>${v(formData.namaKecamatan, 'SIMPUR').replace(/^kecamatan\s+/i, '').toUpperCase()}</div>
           </div>
-          <div style="display:grid;grid-template-columns:140px 10px 1fr;">
-            <div>KABUPATEN/KOTA</div>
+          <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;margin-top:4px;">
+            <div style="white-space:nowrap;">KABUPATEN/KOTA</div>
             <div>:</div>
             <div>${v(formData.namaKabupaten, 'HULU SUNGAI SELATAN').replace(/^pemerintah\s+kabupaten\s+/i, '').replace(/^(kabupaten|kota)\s+/i, '').toUpperCase()}</div>
           </div>
