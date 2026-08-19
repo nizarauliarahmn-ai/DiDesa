@@ -231,9 +231,10 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
   const handleToggleStatus = async (item: GlobalUpdateItem) => {
     const nextStatus = item.is_active === 1 ? 0 : 1;
     try {
+      // Satu toggle mengontrol keduanya: aktif/publikasikan + tampil sebagai pop-up.
       const { error } = await supabase
         .from('global_updates')
-        .update({ is_active: nextStatus })
+        .update({ is_active: nextStatus, is_popup: nextStatus })
         .eq('id', item.id);
 
       if (error) throw error;
@@ -722,42 +723,27 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                 />
               </div>
 
-              {/* Status Publikasi Switch */}
-              <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+              {/* Publikasi & Pop-up (satu toggle, menyetel keduanya) */}
+              <div className="flex items-center justify-between p-4 bg-indigo-50/60 dark:bg-indigo-950/20 rounded-2xl border border-indigo-100 dark:border-indigo-900/40">
                 <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-slate-900 dark:text-white">Status Publikasi Online</div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <Megaphone size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    Publikasikan & Tampilkan Pop-up
+                  </div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Jika diaktifkan, pop-up notifikasi pembaruan ini akan tampil otomatis di seluruh akun desa.
+                    Jika aktif, rilis ini tampil di log dan otomatis muncul sebagai pop-up "Apa Yang Baru" ke seluruh akun desa (1x per pengguna).
                   </div>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, is_active: formData.is_active === 1 ? 0 : 1 })}
+                  onClick={() => setFormData(prev => {
+                    const next = prev.is_active === 1 ? 0 : 1;
+                    return { ...prev, is_active: next, is_popup: next };
+                  })}
                   className={`w-12 h-6 rounded-full transition-colors p-1 relative cursor-pointer ${formData.is_active === 1 ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                 >
                   <div className={`w-4 h-4 rounded-full bg-white transition-transform ${formData.is_active === 1 ? 'translate-x-6' : 'translate-x-0'}`} />
-                </button>
-              </div>
-
-              {/* Pop-up Pengumuman Utama */}
-              <div className="flex items-center justify-between p-4 bg-fuchsia-50/60 dark:bg-fuchsia-950/20 rounded-2xl border border-fuchsia-100 dark:border-fuchsia-900/40">
-                <div className="space-y-0.5">
-                  <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Megaphone size={14} className="text-fuchsia-600 dark:text-fuchsia-400" />
-                    Pop-up Pengumuman Utama
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Jika aktif, log terbaru ini otomatis tampil sebagai pop-up "Apa Yang Baru" ke seluruh akun desa (1x per pengguna).
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, is_popup: formData.is_popup === 1 ? 0 : 1 })}
-                  className={`w-12 h-6 rounded-full transition-colors p-1 relative cursor-pointer ${formData.is_popup === 1 ? 'bg-fuchsia-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-                >
-                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${formData.is_popup === 1 ? 'translate-x-6' : 'translate-x-0'}`} />
                 </button>
               </div>
 
