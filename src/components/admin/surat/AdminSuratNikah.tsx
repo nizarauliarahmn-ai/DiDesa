@@ -893,12 +893,6 @@ export default function AdminSuratNikah({
           ${rows.map(r => `<tr><td style="width:38%;padding:1.5px 3px;vertical-align:top;">${r[0]}</td><td style="width:2%;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${r[1]}</td></tr>`).join('')}
         </table>
       `;
-      // Compact header table (no bottom margin), values not bold
-      const dtTableCompact = (rows: any[]) => `
-        <table style="width:100%;border-collapse:collapse;margin:2px 0 4px 0;font-family:${letterFont};font-size:10px;line-height:1.3;">
-          ${rows.map(r => `<tr><td style="width:38%;padding:1px 4px;vertical-align:top;line-height:1.4;">${r[0]}</td><td style="width:2%;padding:1px 4px;vertical-align:top;line-height:1.4;">:</td><td style="padding:1px 4px;vertical-align:top;line-height:1.4;">${r[1]}</td></tr>`).join('')}
-        </table>
-      `;
       // Extra-tight table used only by N2 biodata/waktu block, values not bold
       const dtTableN2 = (rows: any[]) => `
         <table style="width:100%;border-collapse:collapse;margin:0;font-family:${letterFont};">
@@ -980,11 +974,23 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
       html = `
         ${lampiranHtml('N1')}
-        ${dtTableCompact([
-          ['KANTOR DESA', v(formData.namaDesa).toUpperCase()],
-          ['KECAMATAN', v(formData.namaKecamatan).toUpperCase()],
-          ['KABUPATEN', v(formData.namaKabupaten).toUpperCase()]
-        ])}
+        <div style="font-size:8pt;line-height:1.2;margin-bottom:24px;text-transform:uppercase;">
+          <div style="display:grid;grid-template-columns:140px 10px 1fr;">
+            <div>KANTOR DESA/KELURAHAN</div>
+            <div>:</div>
+            <div>${v(formData.namaDesa, 'WASAH HILIR').replace(/^desa\s+/i, '').toUpperCase()}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:140px 10px 1fr;">
+            <div>KECAMATAN</div>
+            <div>:</div>
+            <div>${v(formData.namaKecamatan, 'SIMPUR').replace(/^kecamatan\s+/i, '').toUpperCase()}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:140px 10px 1fr;">
+            <div>KABUPATEN/KOTA</div>
+            <div>:</div>
+            <div>${v(formData.namaKabupaten, 'HULU SUNGAI SELATAN').replace(/^pemerintah\s+kabupaten\s+/i, '').replace(/^(kabupaten|kota)\s+/i, '').toUpperCase()}</div>
+          </div>
+        </div>
         <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
         <p>Yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
