@@ -694,8 +694,23 @@ export default function AdminSuratNikah({
     }
     
     // Modern isolated iframe printing to prevent scale/overflow truncation & default browser headers/footers
+    // Physical (DOM) print order, top sheet to bottom: N6 -> N4 -> N3 -> N2 -> N1 -> Biodata
+    const PRINT_RANK: Record<string, number> = {
+      n6_suami: 10, n6_istri: 10,
+      n4_suami: 20, n4_istri: 20,
+      n3: 30,
+      n2_suami: 40, n2_istri: 40,
+      n1_suami: 50, n1_istri: 50,
+      biodata_suami: 60, biodata_istri: 60,
+    };
     const pages = printAll
-      ? visibleDocTabs.slice().reverse().map(t => ({ content: getDocHtml(t.id) }))
+      ? visibleDocTabs
+          .slice()
+          .sort((a, b) =>
+            (PRINT_RANK[a.id] ?? 99) - (PRINT_RANK[b.id] ?? 99) ||
+            a.label.localeCompare(b.label)
+          )
+          .map(t => ({ content: getDocHtml(t.id) }))
       : [{ content: getDocHtml() }];
     const anyContent = pages.some(p => p.content);
     if (anyContent) {
