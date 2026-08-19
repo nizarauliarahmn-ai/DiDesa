@@ -758,10 +758,12 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                       type="text"
                       value={formData.cta_route}
                       onChange={(e) => setFormData({ ...formData, cta_route: e.target.value })}
-                      placeholder="misal: /?admin_tab=surat"
+                      placeholder="misal: /?admin_tab=surat&surat_form=nikah"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     />
-                    <p className="text-[10px] text-slate-400 mt-1">Navigasi internal saat tombol utama pop-up ditekan.</p>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Navigasi internal saat tombol utama pop-up ditekan. Deep-link ke form surat: <span className="font-mono">/?admin_tab=surat&surat_form=nikah</span> (ganti <span className="font-mono">nikah</span> dengan <span className="font-mono">sktm</span>, <span className="font-mono">sku</span>, dll.)
+                    </p>
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">

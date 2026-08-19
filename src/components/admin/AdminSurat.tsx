@@ -35,7 +35,14 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'master_template'>(presetResident ? 'buat' : 'dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'master_template'>(() => {
+    // Dukungan deep-link: /?admin_tab=surat&surat_form=nikah langsung membuka form tertentu.
+    const suratFormParam = new URLSearchParams(window.location.search).get('surat_form');
+    if (suratFormParam && suratFormParam !== 'dashboard' && suratFormParam !== 'inbox' && suratFormParam !== 'buat' && suratFormParam !== 'penomoran' && suratFormParam !== 'master_template') {
+      return suratFormParam as any;
+    }
+    return presetResident ? 'buat' : 'dashboard';
+  });
   const [editData, setEditData] = useState<any>(null);
   const [editLetterId, setEditLetterId] = useState<string | null>(null);
   const [localPresetResident, setLocalPresetResident] = useState<any>(null);
