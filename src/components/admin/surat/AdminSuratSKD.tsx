@@ -846,7 +846,7 @@ export default function AdminSuratSKD({
                 <h3 className="font-bold text-slate-800 dark:text-slate-100">Pejabat Penandatangan</h3>
               </div>
               <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
                     <select 
@@ -879,15 +879,6 @@ export default function AdminSuratSKD({
                         return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
                       })()}
                     </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-amber-900">Jabatan</label>
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none font-medium"
-                      value={formData.jabatanPejabat}
-                      onChange={(e) => setFormData({...formData, jabatanPejabat: e.target.value})}
-                    />
                   </div>
                 
                 </div>

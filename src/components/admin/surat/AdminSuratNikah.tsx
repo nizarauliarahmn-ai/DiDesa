@@ -1989,9 +1989,6 @@ export default function AdminSuratNikah({
                 </select>
                 <p className="text-[10px] text-emerald-700 font-medium">* Daftar pejabat dapat disesuaikan pada Menu Pengaturan Desa</p>
               </div>
-              <div className="space-y-1"><label className="text-xs font-bold text-slate-700 dark:text-slate-300">Jabatan (Ketik Manual jika perlu)</label>
-                <input type="text" name="jabatanPejabat" value={formData.jabatanPejabat} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900" />
-              </div>
 
               <div className="md:col-span-2 mt-4 pt-4 border-t border-emerald-100 space-y-3">
                 {/* Toggle TTE / QR Code */}
