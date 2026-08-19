@@ -333,6 +333,13 @@ export default function AdminSuratNikah({
     return s.replace(/:/g, '.') + ' ' + getZonaWaktu();
   };
 
+  // Pendidikan: pertahankan singkatan tingkat (SD/SMP/SMA/SMK/D1-D4/S1-S3) tetap kapital penuh.
+  const vPend = (val: any) => {
+    const s = String(val || '').trim();
+    if (!s) return '..............................';
+    return s.replace(/\b(sd|smp|sma|smk|d[1-4]|s[1-3])\b/gi, (m) => m.toUpperCase());
+  };
+
   const saveToRiwayat = () => {
     const id = 'RWY-' + Date.now();
     const entry = { id, savedAt: new Date().toISOString(), data: JSON.parse(JSON.stringify(formData)) };
@@ -951,7 +958,7 @@ export default function AdminSuratNikah({
           ['NAMA LENGKAP', vn(P.nama)],
           ['JENIS KELAMIN', P.jk],
           ['TEMPAT TANGGAL LAHIR', P.ttl],
-          ['PENDIDIKAN', v(P.pend)],
+          ['PENDIDIKAN', vPend(P.pend)],
           ['WARGANEGARA', v(P.warga)],
           ['AGAMA', v(P.agama, 'Islam')],
           ['PEKERJAAN', v(P.kerja)],
