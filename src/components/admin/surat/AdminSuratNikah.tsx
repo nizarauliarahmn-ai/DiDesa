@@ -871,9 +871,9 @@ export default function AdminSuratNikah({
 
   const lampiranHtml = (model: string) => {
     return `
-      <div style="font-size:10pt;line-height:1.2;font-family:${letterFont};margin-bottom:16px;">
+      <div style="font-size:8pt;line-height:1.2;font-family:${letterFont};margin-bottom:16px;">
         <p>Lampiran</p>
-        <p>Keputusan Dirjen Bimas Islam No. 713 Tahun 2018</p>
+        <p>Keputusan Dirjen Bimas Islam Nomor 713 Tahun 2018</p>
         <p>Tentang Penetapan Formulir dan Laporan Pencatatan Perkawinan atau Rujuk</p>
       </div>
       <div style="text-align:right;font-weight:700;font-family:${letterFont};">Model ${model}</div>
