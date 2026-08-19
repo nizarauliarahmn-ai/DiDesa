@@ -107,9 +107,10 @@ function persistActiveTenantId(id: string) {
  * Versi SINKRON dari resolveCurrentTenant — dipakai saat membuat QR TTE
  * yang TIDAK boleh async (fungsi cetak sinkron). Prioritas:
  * 1. Parameter URL `t_id`
- * 2. `didesa_active_tenant_id` (hasil resolveCurrentTenant terakhir, sumber
- *    yang sama dengan penyimpanan surat ke tabel `surat`)
- * 3. `didesa_auth_user.tenantId` (login kades/admin langsung)
+ * 2. `didesa_auth_user.tenantId` (login kades/admin LANGSUNG sebagai tenant
+ *    — sumber paling otoritatif; tidak mungkin basi dari kunjungan desa lain)
+ * 3. `didesa_active_tenant_id` (cache hasil resolveCurrentTenant, dipakai
+ *    saat admin SaaS tanpa tenantId mengelola portal desa via subdomain/param)
  */
 export function getActiveTenantIdSync(): string {
   try {
@@ -119,16 +120,16 @@ export function getActiveTenantIdSync(): string {
   } catch (e) {}
 
   try {
-    const cached = localStorage.getItem('didesa_active_tenant_id');
-    if (cached) return cached;
-  } catch (e) {}
-
-  try {
     const localAuth = localStorage.getItem('didesa_auth_user');
     if (localAuth) {
       const user = JSON.parse(localAuth);
       if (user && user.tenantId) return String(user.tenantId);
     }
+  } catch (e) {}
+
+  try {
+    const cached = localStorage.getItem('didesa_active_tenant_id');
+    if (cached) return cached;
   } catch (e) {}
 
   return '';

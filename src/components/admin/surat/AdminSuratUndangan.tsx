@@ -9,6 +9,7 @@ import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { resolveKadesName } from '../../../utils/letterOfficers';
+import { getActiveTenantIdSync } from '../../../utils/tenantResolver';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import TTESignatureBox from './TTESignatureBox';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
@@ -1210,7 +1211,7 @@ export default function AdminSuratUndangan({
                             officerName={pejabatNama}
                             nip={pejabatNip}
                             dateStr={fmtShortDate(tanggalSurat)}
-                            verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
+                            verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
                           />
                         </div>
                       ) : (
@@ -1235,7 +1236,7 @@ export default function AdminSuratUndangan({
                             officerName={pejabatNama}
                             nip={pejabatNip}
                             dateStr={fmtShortDate(tanggalSurat)}
-                            verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
+                            verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
                           />
                         </div>
                       ) : (
@@ -1338,7 +1339,7 @@ export default function AdminSuratUndangan({
                                   officerName={pejabatNama}
                                   nip={pejabatNip}
                                   dateStr={fmtShortDate(tanggalSurat)}
-                                  verifyUrl={`https://sistemdidesa.id/verify-tte?doc=${encodeURIComponent(nomorSurat)}`}
+                                  verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
                                 />
                               </div>
                             ) : (
