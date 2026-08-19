@@ -1,6 +1,7 @@
 import React from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { getActiveTenantIdSync } from './tenantResolver';
 
 export function isKadesOfficial(namaPejabat: string): boolean {
   const kadesName = (localStorage.getItem('kop_kades') || localStorage.getItem('village_kades') || 'Fazakkir Rahmad').toLowerCase().trim();
@@ -96,17 +97,16 @@ export function getPrintSignatureHTML(
     window.location.hostname.startsWith('192.168.')
   );
   const originUrl = isLocalhost ? window.location.origin : 'https://sistemdidesa.id';
-  const cleanNomor = (nomorSurat || '').trim();
+  // Nomor dinormalisasi UPPERCASE agar persis sama dengan kolom `nomor` di tabel
+  // `surat` (yang disimpan lewat normalizeNomorSurat). Supabase `.eq('nomor', ...)`
+  // bersifat case-sensitive, jadi QR dan arsip DB harus byte-identik.
+  const cleanNomor = (nomorSurat || '').trim().toUpperCase();
 
   // Identitas tenant (aman: hanya dipakai sebagai parameter verifikasi di URL,
-  // bukan secret). Diresolusi sinkron dari sesi login aktif saat surat dicetak.
-  let printTenantId = '';
-  try {
-    const authUser = JSON.parse(localStorage.getItem('didesa_auth_user') || '{}');
-    if (authUser && authUser.tenantId) {
-      printTenantId = String(authUser.tenantId);
-    }
-  } catch (e) {}
+  // bukan secret). Sumber SINKRON yang SAMA dengan penyimpanan surat
+  // (`resolveCurrentTenant`), sehingga QR selalu menunjuk ke arsip desa yang
+  // benar walau admin masuk sebagai SaaS admin tanpa `tenantId`.
+  const printTenantId = getActiveTenantIdSync();
 
   const verifyTargetUrl = cleanNomor 
     ? `${originUrl}/?tab=verifikasi&t_id=${encodeURIComponent(printTenantId)}&no=${encodeURIComponent(cleanNomor)}`

@@ -4,11 +4,15 @@ let cachedTenantId: string | null = null;
 let isResolving = false;
 
 export async function resolveCurrentTenant(): Promise<string | null> {
-  if (cachedTenantId) return cachedTenantId;
+  if (cachedTenantId) {
+    persistActiveTenantId(cachedTenantId);
+    return cachedTenantId;
+  }
   if (isResolving) {
     while (isResolving) {
       await new Promise(resolve => setTimeout(resolve, 50));
     }
+    if (cachedTenantId) persistActiveTenantId(cachedTenantId);
     return cachedTenantId;
   }
 
@@ -21,6 +25,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
     const directId = urlParams.get('t_id');
     if (directId) {
       cachedTenantId = directId;
+      persistActiveTenantId(directId);
       isResolving = false;
       return directId;
     }
@@ -51,6 +56,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
         
       if (data && data.id) {
         cachedTenantId = data.id;
+        persistActiveTenantId(data.id);
         isResolving = false;
         return data.id;
       } else {
@@ -68,6 +74,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
         const user = JSON.parse(localAuth);
         if (user && user.tenantId) {
           cachedTenantId = user.tenantId;
+          persistActiveTenantId(user.tenantId);
           isResolving = false;
           return user.tenantId;
         }
@@ -85,6 +92,51 @@ export async function resolveCurrentTenant(): Promise<string | null> {
   }
 }
 
+// Simpan tenant aktif hasil resolve ke localStorage agar fungsi SINKRON lain
+// (mis. pembuat QR TTE saat cetak surat) memakai sumber tenant yang SAMA
+// dengan yang dipakai penyimpanan surat (`resolveCurrentTenant`).
+function persistActiveTenantId(id: string) {
+  try {
+    if (id && localStorage.getItem('didesa_active_tenant_id') !== id) {
+      localStorage.setItem('didesa_active_tenant_id', id);
+    }
+  } catch (e) {}
+}
+
+/**
+ * Versi SINKRON dari resolveCurrentTenant — dipakai saat membuat QR TTE
+ * yang TIDAK boleh async (fungsi cetak sinkron). Prioritas:
+ * 1. Parameter URL `t_id`
+ * 2. `didesa_active_tenant_id` (hasil resolveCurrentTenant terakhir, sumber
+ *    yang sama dengan penyimpanan surat ke tabel `surat`)
+ * 3. `didesa_auth_user.tenantId` (login kades/admin langsung)
+ */
+export function getActiveTenantIdSync(): string {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const directId = urlParams.get('t_id');
+    if (directId) return directId;
+  } catch (e) {}
+
+  try {
+    const cached = localStorage.getItem('didesa_active_tenant_id');
+    if (cached) return cached;
+  } catch (e) {}
+
+  try {
+    const localAuth = localStorage.getItem('didesa_auth_user');
+    if (localAuth) {
+      const user = JSON.parse(localAuth);
+      if (user && user.tenantId) return String(user.tenantId);
+    }
+  } catch (e) {}
+
+  return '';
+}
+
 export function clearTenantCache() {
   cachedTenantId = null;
+  try {
+    localStorage.removeItem('didesa_active_tenant_id');
+  } catch (e) {}
 }

@@ -6,6 +6,7 @@ import {
 import { fetchLetterHistoryAsync, LetterHistory, cancelLetterHistoryAsync, deleteSuratSmart } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
 import { getReactSignaturePreview } from '../../../utils/signature';
+import { getActiveTenantIdSync } from '../../../utils/tenantResolver';
 import { showToast } from '../../../utils/toast';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import TTESignatureBox from './TTESignatureBox';
@@ -445,12 +446,7 @@ export default function AdminSuratDashboard({
       );
     } else {
       if (useEsignature) {
-        const authUserStr = typeof window !== 'undefined' ? localStorage.getItem('didesa_auth_user') : null;
-        let tenantId = '';
-        try {
-          const authUser = JSON.parse(authUserStr || '{}');
-          if (authUser && authUser.tenantId) tenantId = String(authUser.tenantId);
-        } catch (e) {}
+        const tenantId = getActiveTenantIdSync();
         const verifyUrl = typeof window !== 'undefined' ? `${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(tenantId)}&id=${surat.id}` : `https://sistemdidesa.id/?tab=verifikasi&t_id=${encodeURIComponent(tenantId)}&id=${surat.id}`;
         return (
           <div className="mt-8 flex justify-end text-black">

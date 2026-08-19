@@ -38,7 +38,9 @@ export default function PublicVerifikasiSurat() {
 
       try {
         setLoading(true);
-        const cleanId = decodeURIComponent(searchParam).trim();
+        // Nomor di-uppercase agar cocok dengan kolom `nomor` di tabel `surat`
+        // yang disimpan dalam bentuk kapital murni (normalizeNomorSurat).
+        const cleanId = decodeURIComponent(searchParam).trim().toUpperCase();
 
         // 1. Search in Supabase database
         let dbVerified = false;
