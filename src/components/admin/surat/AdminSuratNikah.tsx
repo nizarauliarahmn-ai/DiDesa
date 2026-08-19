@@ -924,7 +924,7 @@ export default function AdminSuratNikah({
 
       html = `
         ${kopHtml()}
-        <h3 style="text-align:center;font-size:12pt;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">BIODATA CALON PENGANTIN</h3>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">BIODATA CALON PENGANTIN</h3>
         ${dtTable([
           ['NIK', v(P.nik)],
           ['NO. KK', v(P.noKK)],
@@ -952,7 +952,7 @@ export default function AdminSuratNikah({
           ['KECAMATAN', v(formData.namaKecamatan).toUpperCase()],
           ['KABUPATEN', v(formData.namaKabupaten).toUpperCase()]
         ])}
-        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PENGANTAR PERKAWINAN</h3>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
         <p>yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
@@ -1048,47 +1048,45 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n3') {
       html = `
         ${lampiranHtml('N3')}
-        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PERSETUJUAN MEMPELAI</h3>
-        <p>yang bertanda tangan di bawah ini:</p>
-        <div style="display:flex;gap:16px;align-items:flex-start;margin-top:4px;">
-          <div style="flex:1;min-width:0;">
-            <p style="font-weight:700;text-align:center;text-decoration:underline;margin:2px 0 4px 0;">CALON SUAMI</p>
-            ${dtTable([
-              ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaSuami)}</span>`],
-              ['2. NIK', v(formData.nikSuami)],
-              ['3. Jenis Kelamin', 'Laki-Laki'],
-              ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami)],
-              ['5. Pekerjaan', v(formData.pekerjaanSuami)],
-              ['6. Alamat', v(formData.alamatSuami)]
-            ])}
-            <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela dan tanpa paksaan dari siapapun, setuju untuk melangsungkan perkawinan dengan calon istri:</p>
-            <p style="font-weight:700;text-transform:uppercase;margin:2px 0 0 0;">${vn(formData.namaIstri)}</p>
-            <p style="text-align:right;margin:14px 0 0 0;">${tempatTgl()}</p>
-            <div style="text-align:center;margin-top:46px;">
-              Calon Suami,
-              <span style="font-weight:700;margin-top:52px;display:block;">${vn(formData.namaSuami)}</span>
-              BIN ${vn(formData.namaAyahSuami)}
-            </div>
-          </div>
-          <div style="flex:1;min-width:0;border-left:1px solid #000;padding-left:16px;">
-            <p style="font-weight:700;text-align:center;text-decoration:underline;margin:2px 0 4px 0;">CALON ISTRI</p>
-            ${dtTable([
-              ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaIstri)}</span>`],
-              ['2. NIK', v(formData.nikIstri)],
-              ['3. Jenis Kelamin', 'Perempuan'],
-              ['4. Tempat Tanggal Lahir', ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri)],
-              ['5. Pekerjaan', v(formData.pekerjaanIstri)],
-              ['6. Alamat', v(formData.alamatIstri)]
-            ])}
-            <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela dan tanpa paksaan dari siapapun, setuju untuk melangsungkan perkawinan dengan calon suami:</p>
-            <p style="font-weight:700;text-transform:uppercase;margin:2px 0 0 0;">${vn(formData.namaSuami)}</p>
-            <p style="text-align:right;margin:14px 0 0 0;">${tempatTgl()}</p>
-            <div style="text-align:center;margin-top:46px;">
-              Calon Istri,
-              <span style="font-weight:700;margin-top:52px;display:block;">${vn(formData.namaIstri)}</span>
-              BINTI ${vn(formData.namaAyahIstri)}
-            </div>
-          </div>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PERSETUJUAN MEMPELAI</h3>
+        <p>Yang bertanda tangan di bawah ini:</p>
+        <p style="font-weight:700;margin:8px 0 2px 0;">A. Calon Suami:</p>
+        ${dtTable([
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaSuami)}</span>`],
+          ['2. Nomor Induk Kependudukan (NIK)', v(formData.nikSuami)],
+          ['3. Jenis Kelamin', 'Laki-Laki'],
+          ['4. Tempat dan tanggal lahir', ttl(formData.tempatLahirSuami, formData.tanggalLahirSuami)],
+          ['5. Kewarganegaraan', v(formData.kewarganegaraanSuami, 'Indonesia')],
+          ['6. Agama', v(formData.agamaSuami, 'Islam')],
+          ['7. Pekerjaan', v(formData.pekerjaanSuami)],
+          ['8. Alamat', v(formData.alamatSuami)]
+        ])}
+        <p style="font-weight:700;margin:8px 0 2px 0;">B. Calon Istri:</p>
+        ${dtTable([
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaIstri)}</span>`],
+          ['2. Nomor Induk Kependudukan (NIK)', v(formData.nikIstri)],
+          ['3. Jenis Kelamin', 'Perempuan'],
+          ['4. Tempat dan tanggal lahir', ttl(formData.tempatLahirIstri, formData.tanggalLahirIstri)],
+          ['5. Kewarganegaraan', v(formData.kewarganegaraanIstri, 'Indonesia')],
+          ['6. Agama', v(formData.agamaIstri, 'Islam')],
+          ['7. Pekerjaan', v(formData.pekerjaanIstri)],
+          ['8. Alamat', v(formData.alamatIstri)]
+        ])}
+        <p>Menyatakan dengan sesungguhnya bahwa atas dasar suka rela, dengan kesadaran sendiri, tanpa ada paksaan dari siapapun juga, setuju untuk melangsungkan perkawinan.</p>
+        <p>Demikianlah surat persetujuan ini dibuat untuk digunakan seperlunya.</p>
+        <p style="text-align:right;margin:10px 0 0 0;">${tempatTgl()}</p>
+        <div style="display:flex;justify-content:space-between;margin-top:36px;">
+          <div style="text-align:center;width:46%;">Calon Suami,</div>
+          <div style="text-align:center;width:46%;">Calon Istri,</div>
+        </div>
+        <div style="height:70px;"></div>
+        <div style="display:flex;justify-content:space-between;">
+          <div style="text-align:center;width:46%;font-weight:700;">${vn(formData.namaSuami)}</div>
+          <div style="text-align:center;width:46%;font-weight:700;">${vn(formData.namaIstri)}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:2px;">
+          <div style="text-align:center;width:46%;font-weight:700;">BIN ${vn(formData.namaAyahSuami)}</div>
+          <div style="text-align:center;width:46%;font-weight:700;">BINTI ${vn(formData.namaAyahIstri)}</div>
         </div>
       `;
     }
@@ -1114,7 +1112,7 @@ export default function AdminSuratNikah({
 
       html = `
         ${lampiranHtml('N4')}
-        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT IZIN ORANG TUA</h3>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT IZIN ORANG TUA</h3>
         <p>yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;">A. AYAH</p>
         ${dtTable([
@@ -1173,7 +1171,7 @@ export default function AdminSuratNikah({
       };
       html = `
         ${lampiranHtml('N6')}
-        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT KETERANGAN KEMATIAN ${relasi.toUpperCase()}</h3>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT KETERANGAN KEMATIAN ${relasi.toUpperCase()}</h3>
         <p>Yang bertanda tangan di bawah ini menerangkan dengan sesungguhnya bahwa orang yang namanya tersebut di bawah ini:</p>
         ${dtTable([
           ['Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(almarhum)}</span>`],
