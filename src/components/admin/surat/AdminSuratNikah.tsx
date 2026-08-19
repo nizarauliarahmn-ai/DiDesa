@@ -694,14 +694,16 @@ export default function AdminSuratNikah({
     }
     
     // Modern isolated iframe printing to prevent scale/overflow truncation & default browser headers/footers
-    // Physical (DOM) print order, top sheet to bottom: N6 -> N4 -> N3 -> N2 -> N1 -> Biodata
+    // Printers stack output face-down (top of tray = last page spooled), so the DOM
+    // order is intentionally the REVERSE of the desired physical order.
+    // Desired physical output (top sheet first): N6 -> N4 -> N3 -> N2 -> N1 -> Biodata.
     const PRINT_RANK: Record<string, number> = {
-      n6_suami: 10, n6_istri: 10,
-      n4_suami: 20, n4_istri: 20,
-      n3: 30,
-      n2_suami: 40, n2_istri: 40,
-      n1_suami: 50, n1_istri: 50,
-      biodata_suami: 60, biodata_istri: 60,
+      biodata_suami: 10, biodata_istri: 10,
+      n1_suami: 20, n1_istri: 20,
+      n2_suami: 30, n2_istri: 30,
+      n3: 40,
+      n4_suami: 50, n4_istri: 50,
+      n6_suami: 60, n6_istri: 60,
     };
     const pages = printAll
       ? visibleDocTabs
