@@ -958,10 +958,12 @@ export default function AdminSuratNikah({
           ['TEMPAT TINGGAL', v(P.alamat)]
         ])}
         <hr style="border:none;border-top:1px solid #111;margin:10px 0;">
-        <p style="font-weight:700;">PERHATIAN</p>
-        <p>&bull; Dalam penulisan Model N-1: NIK, NAMA, TEMPAT TANGGAL LAHIR, harus sesuai dengan identitas pribadi (Akta Lahir, KTP, Kartu Keluarga, Ijazah).</p>
-        <p>&bull; Calon mempelai dan wali harus datang langsung ke ${normKUA()} untuk pendaftaran nikah, pemeriksaan dan penasehatan pra-nikah. Catin wajib berpakaian rapi dan sopan.</p>
-        <p>&bull; Penetapan hari/tanggal/tempat akad nikah dikonsultasikan dengan ${normKUA()}.</p>
+        <p style="font-weight:700;margin:0 0 6px 0;">PERHATIAN</p>
+        <ul style="list-style:disc;padding-left:20px;margin:0;text-align:justify;">
+          <li style="margin:6px 0;line-height:1.35;">Dalam penulisan Model N1: NIK, NAMA, TEMPAT TANGGAL LAHIR, harus sesuai dengan identitas pribadi (Akta Kelahiran, KTP, Kartu Keluarga, Ijazah).</li>
+          <li style="margin:6px 0;line-height:1.35;">Calon mempelai dan wali harus datang langsung ke ${normKUA()} untuk pendaftaran nikah, pemeriksaan, dan penasihatan pranikah. Catin wajib berpakaian rapi dan sopan.</li>
+          <li style="margin:6px 0;line-height:1.35;">Penetapan hari/tanggal/tempat akad nikah dikonsultasikan dengan ${normKUA()}.</li>
+        </ul>
       `;
     }
     else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
