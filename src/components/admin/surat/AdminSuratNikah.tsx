@@ -729,7 +729,8 @@ export default function AdminSuratNikah({
             <title>${title}</title>
             ${styles}
             <style>
-              @page { size: A4; margin: 0 !important; }
+              /* Portrait A4, single-sided spooling: no duplex forced anywhere */
+              @page { size: A4 portrait; margin: 0 !important; }
               body { 
                 margin: 0; 
                 padding: 0; 
@@ -748,7 +749,8 @@ export default function AdminSuratNikah({
                 color: black;
                 page-break-inside: avoid;
               }
-              .page:not(:last-of-type) {
+              .page:not(:last-of-type),
+              .page-break {
                 break-after: page;
                 page-break-after: always;
               }
@@ -783,6 +785,10 @@ export default function AdminSuratNikah({
                 body, .page { 
                   width: 210mm; 
                   height: 296.9mm; 
+                }
+                .page-break {
+                  page-break-after: always;
+                  break-after: page;
                 }
                 .nomor-surat-cetak { text-transform: uppercase !important; }
               }
