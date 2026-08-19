@@ -36,10 +36,16 @@ export default function AdminSurat({
   debouncedSearchQuery?: string;
 }) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'master_template'>(() => {
-    // Dukungan deep-link: /?admin_tab=surat&surat_form=nikah langsung membuka form tertentu.
+    // Dukungan deep-link: /?admin_tab=surat&surat_form=skn langsung membuka form tertentu.
+    // Memakai singkatan surat resmi, dengan alias tab lama untuk kompatibilitas.
+    const suratFormAlias: Record<string, any> = {
+      skn: 'nikah', sktm: 'sktm', skbm: 'skbm', skh: 'skh', skl: 'skl', skm: 'skm',
+      sku: 'sku', skph: 'skph', skd: 'skd', sdp: 'skd', skp: 'skp', sdu: 'sdu',
+      spt: 'spt', sppd: 'sppd', skkt: 'skkt', und: 'undangan'
+    };
     const suratFormParam = new URLSearchParams(window.location.search).get('surat_form');
-    if (suratFormParam && suratFormParam !== 'dashboard' && suratFormParam !== 'inbox' && suratFormParam !== 'buat' && suratFormParam !== 'penomoran' && suratFormParam !== 'master_template') {
-      return suratFormParam as any;
+    if (suratFormParam && suratFormAlias[suratFormParam]) {
+      return suratFormAlias[suratFormParam];
     }
     return presetResident ? 'buat' : 'dashboard';
   });

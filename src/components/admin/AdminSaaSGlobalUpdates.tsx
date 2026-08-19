@@ -754,11 +754,11 @@ export const AdminSaaSGlobalUpdates: React.FC = () => {
                       type="text"
                       value={formData.cta_route}
                       onChange={(e) => setFormData({ ...formData, cta_route: e.target.value })}
-                      placeholder="misal: /?admin_tab=surat&surat_form=nikah"
+                      placeholder="misal: /?admin_tab=surat&surat_form=skn"
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                     />
                     <p className="text-[10px] text-slate-400 mt-1">
-                      Navigasi internal saat tombol utama pop-up ditekan. Tombol akan selalu bertuliskan "Coba Sekarang". Deep-link ke form surat: <span className="font-mono">/?admin_tab=surat&surat_form=nikah</span> (ganti <span className="font-mono">nikah</span> dengan <span className="font-mono">sktm</span>, <span className="font-mono">sku</span>, dll.)
+                      Navigasi internal saat tombol utama pop-up ditekan. Tombol akan selalu bertuliskan "Coba Sekarang". Deep-link ke form surat pakai singkatan resmi: <span className="font-mono">/?admin_tab=surat&surat_form=skn</span> (Surat Pengantar Nikah). Lainnya: <span className="font-mono">sktm</span>, <span className="font-mono">skbm</span>, <span className="font-mono">skh</span>, <span className="font-mono">skl</span>, <span className="font-mono">skm</span>, <span className="font-mono">sku</span>, <span className="font-mono">skph</span>, <span className="font-mono">skd</span>, <span className="font-mono">skp</span>, <span className="font-mono">sdu</span>, <span className="font-mono">spt</span>, <span className="font-mono">sppd</span>, <span className="font-mono">skkt</span>, <span className="font-mono">und</span>.
                     </p>
                   </div>
                 </div>
