@@ -753,7 +753,7 @@ export default function AdminSuratNikah({
                 -webkit-print-color-adjust: exact; 
                 print-color-adjust: exact; 
               }
-              .page { 
+              .page, .print-page { 
                 width: 210mm; 
                 height: 296.9mm; 
                 margin: 0; 
@@ -765,6 +765,7 @@ export default function AdminSuratNikah({
                 page-break-inside: avoid;
               }
               .page:not(:last-of-type),
+              .print-page:not(:last-of-type),
               .page-break {
                 break-after: page;
                 page-break-after: always;
@@ -797,9 +798,25 @@ export default function AdminSuratNikah({
                 display: none !important; 
               }
               @media print {
-                body, .page { 
+                body, .page, .print-page { 
                   width: 210mm; 
                   height: 296.9mm; 
+                }
+                body * {
+                  visibility: hidden;
+                }
+                .print-container, .print-container * {
+                  visibility: visible;
+                }
+                .print-container {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 100%;
+                }
+                .print-page {
+                  page-break-after: always;
+                  break-after: page;
                 }
                 .page-break {
                   page-break-after: always;
@@ -810,13 +827,15 @@ export default function AdminSuratNikah({
             </style>
           </head>
           <body>
-            ${pages.map((p, i) => `
-              <div class="page">
-                <div class="printable-area bg-white dark:bg-slate-900 text-black">
-                  ${p.content}
+            <div class="print-container">
+              ${pages.map((p, i) => `
+                <div class="page print-page">
+                  <div class="printable-area bg-white dark:bg-slate-900 text-black">
+                    ${p.content}
+                  </div>
                 </div>
-              </div>
-            `).join('\n')}
+              `).join('\n')}
+            </div>
           </body>
         </html>
       `);
