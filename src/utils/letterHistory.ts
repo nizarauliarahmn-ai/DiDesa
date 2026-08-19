@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { addSaaSLog } from './saasLogs';
-import { autoSyncResidentFromLetter } from './residentSync';
+import { autoSyncResidentFromLetter, updateResidentMaritalStatus } from './residentSync';
 import { normalizeNomorSurat, getAllActiveNomorUrut, extractSequenceFromNomor } from '../services/penomoranSuratService';
 
 export interface LetterHistory {
@@ -164,6 +164,24 @@ export interface SmartDeleteResult {
 export async function deleteSuratSmart(surat: { id: string; nomor?: string }, tahun?: number): Promise<SmartDeleteResult> {
   const nomorUrutTarget = extractSequenceFromNomor(normalizeNomorSurat(surat.nomor || ''));
 
+  // Baca data surat (jenis + payload) SEBELUM dihapus agar dampak di data penduduk
+  // bisa dibatalkan (rollback) setelah penghapusan.
+  let jenisSurat = '';
+  let letterData: any = null;
+  try {
+    const { data: row } = await supabase
+      .from('surat')
+      .select('jenis_surat, data')
+      .eq('id', surat.id)
+      .maybeSingle();
+    if (row) {
+      jenisSurat = row.jenis_surat || '';
+      letterData = row.data || {};
+    }
+  } catch (e) {
+    console.error('deleteSuratSmart: gagal membaca data surat untuk rollback:', e);
+  }
+
   // 1. Nomor urut tertinggi (MAX) yang aktif di daftar saat ini (SSOT).
   let currentMaxNum = 0;
   try {
@@ -178,6 +196,8 @@ export async function deleteSuratSmart(surat: { id: string; nomor?: string }, ta
   if (nomorUrutTarget === 0 || nomorUrutTarget >= currentMaxNum) {
     const { error } = await supabase.from('surat').delete().eq('id', surat.id);
     if (error) throw error;
+    // Rollback data penduduk (Surat Nikah): kembalikan status perkawinan.
+    await rollbackResidentFromNikah(jenisSurat, letterData);
     return { type: 'HARD_DELETE', message: 'Nomor terakhir dihapus permanen. Penomoran mundur.' };
   }
 
@@ -187,7 +207,29 @@ export async function deleteSuratSmart(surat: { id: string; nomor?: string }, ta
     .update({ status: 'Dihapus' })
     .eq('id', surat.id);
   if (error) throw error;
+  // Rollback data penduduk (Surat Nikah): kembalikan status perkawinan.
+  await rollbackResidentFromNikah(jenisSurat, letterData);
   return { type: 'SOFT_DELETE', message: 'Surat tengah disembunyikan. Urutan nomor utama tetap berlanjut.' };
+}
+
+// Bila surat yang dihapus adalah Surat Nikah, batalkan dampaknya di data penduduk:
+// status perkawinan suami & istri (yang berdomisili di desa admin) dikembalikan ke 'Belum Kawin'.
+async function rollbackResidentFromNikah(jenisSurat: string, letterData: any) {
+  if (!jenisSurat || !letterData) return;
+  const isNikah = jenisSurat.toLowerCase().includes('nikah');
+  if (!isNikah) return;
+
+  const niks: string[] = [];
+  if (letterData.nikSuami && letterData.nikSuami !== '-') niks.push(letterData.nikSuami);
+  if (letterData.nikIstri && letterData.nikIstri !== '-') niks.push(letterData.nikIstri);
+
+  for (const nik of niks) {
+    try {
+      await updateResidentMaritalStatus(nik, 'Belum Kawin', 'Penghapusan Surat Nikah');
+    } catch (e) {
+      console.error(`Rollback status perkawinan NIK ${nik} gagal:`, e);
+    }
+  }
 }
 
 export function deleteLetterHistory(id: string): LetterHistory[] {

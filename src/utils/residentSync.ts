@@ -128,6 +128,95 @@ export async function reactivateResident(nik: string): Promise<boolean> {
   }
 }
 
+// Sinkron status perkawinan penduduk (mis. dari Surat Nikah / penghapusan surat).
+// HANYA memperbarui penduduk yang sudah terdata AKTIF (berdomisili di desa admin).
+// Tidak pernah menginsert penduduk baru — urusan itu tetap di autoSyncResidentFromLetter.
+export async function updateResidentMaritalStatus(
+  nik: string,
+  maritalStatus: string,
+  source: string
+): Promise<boolean> {
+  if (!nik || nik === '-' || nik.trim() === '') return false;
+  try {
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) return false;
+
+    const { data: existing, error } = await supabase
+      .from('residents')
+      .select('marital_status, status, is_deleted')
+      .eq('nik', nik)
+      .eq('tenant_id', tenantId)
+      .limit(10);
+    if (error) {
+      console.error('updateResidentMaritalStatus query error:', error);
+      return false;
+    }
+
+    const active = existing?.find(r => {
+      if (String(r.is_deleted) === '1' || r.is_deleted === true) return false;
+      const s = (r.status || 'Aktif').toLowerCase();
+      if (s.includes('pindah') || s.includes('meninggal') || s === 'mati' || s === 'archived') return false;
+      return true;
+    });
+    // Bukan warga aktif desa admin => tidak disentuh.
+    if (!active) return false;
+
+    if (String(active.marital_status || '').trim().toLowerCase() === maritalStatus.trim().toLowerCase()) {
+      return true; // sudah sesuai, tidak perlu update
+    }
+
+    const updatePayload: Record<string, any> = { marital_status: maritalStatus };
+    let { error: updateError } = await supabase
+      .from('residents')
+      .update(updatePayload)
+      .eq('nik', nik)
+      .eq('tenant_id', tenantId);
+
+    let retries = 0;
+    while (updateError && updateError.message?.includes('Could not find the') && updateError.message?.includes('column') && retries < 5) {
+      const match = updateError.message.match(/'([^']+)' column/);
+      if (match && match[1]) {
+        delete updatePayload[match[1]];
+        const retry = await supabase.from('residents').update(updatePayload).eq('nik', nik).eq('tenant_id', tenantId);
+        updateError = retry.error;
+        retries++;
+      } else {
+        break;
+      }
+    }
+    if (updateError) {
+      console.error('updateResidentMaritalStatus update error:', updateError);
+      return false;
+    }
+
+    // Sinkronkan cache lokal agar tabel penduduk langsung berubah tanpa refresh.
+    const cached = localStorage.getItem('village_residents');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        const updated = parsed.map((r: any) =>
+          r.nik === nik ? { ...r, maritalStatus, marital_status: maritalStatus } : r
+        );
+        localStorage.setItem('village_residents', JSON.stringify(updated));
+      } catch (e) {}
+    }
+
+    window.dispatchEvent(new Event('residents_updated'));
+
+    addSaaSLog({
+      admin: 'Sistem',
+      aksi: 'Sinkron Status Perkawinan',
+      target: `NIK ${nik} -> ${maritalStatus} (via ${source})`,
+      status: 'Berhasil',
+      category: 'Penduduk'
+    });
+    return true;
+  } catch (err) {
+    console.error('updateResidentMaritalStatus error:', err);
+    return false;
+  }
+}
+
 // Background sync function for places where we want to automatically insert
 // the resident without user intervention (e.g. LayananMandiri, AdminApprovalQueue)
 export async function autoSyncResidentFromLetter(nik: string, letterData: any, letterType: string) {

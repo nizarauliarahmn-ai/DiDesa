@@ -12,7 +12,7 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
-import { autoSyncResidentFromLetter, updateResidentParents } from '../../../utils/residentSync';
+import { autoSyncResidentFromLetter, updateResidentParents, updateResidentMaritalStatus } from '../../../utils/residentSync';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { getZonaWaktu } from '../../../utils/zonaWaktu';
 
@@ -676,6 +676,7 @@ export default function AdminSuratNikah({
         status: 'Kawin',
         statusColor: 'emerald'
       }, 'Pembuatan Surat');
+      await updateResidentMaritalStatus(formData.nikSuami, 'Kawin', 'Surat Nikah');
     }
     if (formData.nikIstri) {
       await autoSyncResidentFromLetter(formData.nikIstri, { 
@@ -691,6 +692,7 @@ export default function AdminSuratNikah({
         status: 'Kawin',
         statusColor: 'emerald'
       }, 'Pembuatan Surat');
+      await updateResidentMaritalStatus(formData.nikIstri, 'Kawin', 'Surat Nikah');
     }
     
     // Modern isolated iframe printing to prevent scale/overflow truncation & default browser headers/footers
