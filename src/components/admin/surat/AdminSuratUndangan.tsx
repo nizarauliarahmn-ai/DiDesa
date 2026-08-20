@@ -3,7 +3,7 @@ import {
   Search, FileText, FileSignature, 
   ZoomIn, ZoomOut, Plus, Calendar, Users,
   ToggleLeft, ToggleRight, Trash2,
-  ArrowUp, ArrowDown, Mail, X, ChevronDown
+  ArrowUp, ArrowDown, Mail, X, ChevronDown, Save
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
@@ -861,7 +861,7 @@ export default function AdminSuratUndangan({
                 }}
                 className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
               >
-                <span>💾</span>
+                <Save size={14} className="text-emerald-600 shrink-0" />
                 <span>Simpan Daftar Ini sebagai Preset</span>
               </button>
             )}
