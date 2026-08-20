@@ -49,6 +49,7 @@ import { subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from '
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant, clearTenantCache } from './utils/tenantResolver';
 import { performLazyCleanup } from './utils/cleanupService';
+import { useDynamicTitle } from './utils/useDynamicTitle';
 
 // Public views
 import TransparansiDana from './components/dashboard/TransparansiDana';
@@ -229,6 +230,8 @@ export default function App() {
     const saved = localStorage.getItem('didesa_auth_user');
     return saved ? !!JSON.parse(saved).isImpersonated : false;
   });
+
+  useDynamicTitle({ role: user?.role });
 
   const handleStopImpersonation = () => {
     const originalAdmin = localStorage.getItem('didesa_impersonator');
