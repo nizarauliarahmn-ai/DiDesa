@@ -1328,7 +1328,7 @@ export default function AdminSuratUndangan({
                         {chunk.items.map((r, i) => (
                           <tr key={r.id}>
                             <td className="border border-black px-3 py-2 text-center font-bold">{chunk.startIndex + i + 1}</td>
-                            <td className="border border-black px-4 py-2 font-bold">{r.name}</td>
+                            <td className="border border-black px-4 py-2">{r.name}</td>
                             <td className="border border-black px-4 py-2">{r.jabatan || '-'}</td>
                           </tr>
                         ))}
