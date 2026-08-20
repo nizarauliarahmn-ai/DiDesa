@@ -511,7 +511,7 @@ export default function AdminSuratSDU({
 
       <!-- DATA PIMPINAN -->
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.6;font-size:14px;">
-        <tr><td style="width:38%;vertical-align:top;">a. Nama</td><td style="width:3%;vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.nama)}</td></tr>
+        <tr><td style="width:38%;vertical-align:top;">a. Nama</td><td style="width:3%;vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(formData.nama)}</strong></td></tr>
         <tr><td style="vertical-align:top;">b. NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.nik)}</td></tr>
         <tr><td style="vertical-align:top;">c. Jenis Kelamin</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.jenisKelamin)}</td></tr>
         <tr><td style="vertical-align:top;">d. Tempat, Tgl Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.tempatLahir)}, ${fmtDate(formData.tanggalLahir)}</td></tr>
