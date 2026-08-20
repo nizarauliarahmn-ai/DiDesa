@@ -900,6 +900,7 @@ export default function AdminSuratUndangan({
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Kalimat Penutup Surat</label>
                 <textarea 
                   rows={2}
+                  data-no-cap
                   value={paragrafPenutup}
                   onChange={(e) => setParagrafPenutup(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium resize-none"
@@ -1182,7 +1183,7 @@ export default function AdminSuratUndangan({
                       <tr>
                         <td className="py-0.5 font-normal">Tempat</td>
                         <td className="text-center py-0.5">:</td>
-                        <td className="py-0.5 font-normal">{tempatAcara}</td>
+                        <td className="py-0.5 font-normal">{capitalizeWords(tempatAcara)}</td>
                       </tr>
                     </tbody>
                   </table>
