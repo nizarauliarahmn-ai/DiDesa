@@ -967,6 +967,7 @@ export default function AdminSuratUndangan({
                     <label className="block text-[11px] font-bold text-slate-500 mb-1">Teks Paragraf Kustom (Opsional):</label>
                     <textarea 
                       rows={2}
+                      data-no-cap
                       value={paragrafKustom}
                       onChange={(e) => setParagrafKustom(e.target.value)}
                       placeholder="Contoh: Sehubungan akan dibangunnya Posyandu Harapan..."
