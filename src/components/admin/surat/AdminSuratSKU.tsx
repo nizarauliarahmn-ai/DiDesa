@@ -637,7 +637,7 @@ export default function AdminSuratSKU({
                 </div>
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Penduduk</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                                 <UnifiedResidentSearch
                   formData={formData}
                   setFormData={setFormData}

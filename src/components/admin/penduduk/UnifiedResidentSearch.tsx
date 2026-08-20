@@ -101,16 +101,16 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
     if (!showDropdown || activeField !== field || !queryVal) return null;
 
     return (
-      <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-30">
+      <div className="absolute top-full left-0 right-0 z-50 w-full mt-1 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-y-auto max-h-60">
         {filteredResidents.length > 0 ? (
           filteredResidents.map((res: any) => (
             <button
               key={res.nik}
               onClick={() => handleSelectResident(res)}
-              className="w-full p-3.5 flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 cursor-pointer"
+              className="w-full py-2 px-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 cursor-pointer text-sm"
               type="button"
             >
-              <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-sm">
+              <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-sm">
                 {res.name?.[0]}
               </div>
               <div className="min-w-0 flex-1">
@@ -126,9 +126,9 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
               setShowDropdown(false);
               onOpenQuickAdd(field === 'nik' ? queryVal : undefined, field === 'nama' ? queryVal : undefined);
             }}
-            className="w-full p-3.5 flex items-center gap-3 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left transition-colors cursor-pointer group"
+            className="w-full py-2 px-3 flex items-center gap-3 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-left transition-colors cursor-pointer group"
           >
-            <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/60 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 font-bold group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/60 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 font-bold group-hover:scale-105 transition-transform">
               <UserPlus className="w-4 h-4" />
             </div>
             <div className="min-w-0 flex-1">
@@ -149,22 +149,24 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
     <>
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
         <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-        <input 
-          type="text"
-          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-          placeholder="Ketik nama warga..."
-          value={formData.nama || ''}
-          onChange={(e) => {
-            const val = e.target.value;
-            setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nama: val}) : {...formData, nama: val});
-            setActiveField('nama');
-            setShowDropdown(true);
-          }}
-          onFocus={() => {
-            setActiveField('nama');
-            if (formData.nama) setShowDropdown(true);
-          }}
-        />
+        <div className="relative w-full">
+          <input 
+            type="text"
+            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
+            placeholder="Ketik nama warga..."
+            value={formData.nama || ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nama: val}) : {...formData, nama: val});
+              setActiveField('nama');
+              setShowDropdown(true);
+            }}
+            onFocus={() => {
+              setActiveField('nama');
+              if (formData.nama) setShowDropdown(true);
+            }}
+          />
+        </div>
         {renderDropdown('nama')}
       </div>
 
@@ -180,22 +182,24 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
             <Scan className="w-3.5 h-3.5" /> Scan KTP / KK
           </button>
         </div>
-        <input 
-          type="text"
-          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-          placeholder="Ketik NIK warga..."
-          value={formData.nik || ''}
-          onChange={(e) => {
-            const val = e.target.value;
-            setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nik: val}) : {...formData, nik: val});
-            setActiveField('nik');
-            setShowDropdown(true);
-          }}
-          onFocus={() => {
-            setActiveField('nik');
-            if (formData.nik) setShowDropdown(true);
-          }}
-        />
+        <div className="relative w-full">
+          <input 
+            type="text"
+            className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
+            placeholder="Ketik NIK warga..."
+            value={formData.nik || ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nik: val}) : {...formData, nik: val});
+              setActiveField('nik');
+              setShowDropdown(true);
+            }}
+            onFocus={() => {
+              setActiveField('nik');
+              if (formData.nik) setShowDropdown(true);
+            }}
+          />
+        </div>
         {renderDropdown('nik')}
         <ResidentStatusBadge
           nik={formData.nik}
