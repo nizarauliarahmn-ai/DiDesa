@@ -648,7 +648,7 @@ export default function AdminBukuTamu() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
-                      handleSendToKiosk();
+                      handleSave();
                     }
                   }}
                   className="w-full h-11 px-4 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 cursor-pointer"

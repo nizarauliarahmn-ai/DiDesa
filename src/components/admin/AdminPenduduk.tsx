@@ -637,7 +637,7 @@ export default function AdminPenduduk({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setShowExportMenu(false);
+    setShowMoreMenu(false);
   };
 
   // Exclude Pindah and Meninggal from active population counts (so they don't count towards active headcounts)
