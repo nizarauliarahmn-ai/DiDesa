@@ -8,6 +8,10 @@ import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
 import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 
+// Status tiket yang dianggap sudah selesai ditangani (resolved).
+// Tiket berstatus ini TIDAK boleh memicu badge notifikasi merah.
+const RESOLVED_TICKET_STATUSES = new Set(['Selesai', 'Selesai Ditangani', 'Resolved', 'Closed']);
+
 const compressImage = (file: File): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -155,6 +159,9 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       const reports = await fetchBugReportsOnline();
       const read = getBugReportReadState();
       setPendingBugsCount(reports.filter(r => {
+        // Abaikan tiket yang sudah selesai ditangani (resolved) — badge
+        // notifikasi HANYA muncul untuk tiket yang masih aktif.
+        if (RESOLVED_TICKET_STATUSES.has(r.status)) return false;
         const msgs = r.messages || [];
         const last = msgs[msgs.length - 1];
         if (!last || last.role === 'SaaS Admin') return false;
