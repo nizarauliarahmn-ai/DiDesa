@@ -1,7 +1,7 @@
 import { supabase } from './supabase';
 import { resolveCurrentTenant } from './tenantResolver';
 import { DEFAULT_SURAT_FORMAT, formatNomorSurat } from './generateSuratNumber';
-import { getMaxActiveNomorUrut, getNextNomorSurat, getNextNomorSuratSync, incrementGlobalSequenceNumber } from '../services/penomoranSuratService';
+import { getMaxActiveNomorUrut, getNextNomorSurat, getNextNomorSuratSync, incrementGlobalSequenceNumber, getGlobalSequenceCounter } from '../services/penomoranSuratService';
 
 export interface LetterField {
   id: string;
@@ -107,11 +107,9 @@ export function getSaaSTemplates(): LetterClassification[] {
 }
 
 export function getGlobalSequenceNumber(): number {
-  const stored = localStorage.getItem('global_letter_sequence_number');
-  if (stored !== null) {
-    return parseInt(stored, 10);
-  }
-  
+  const globalSeq = getGlobalSequenceCounter();
+  if (globalSeq > 0) return globalSeq;
+
   // Let's find the max last number of any classification
   const storedClass = localStorage.getItem('letter_classifications');
   let maxVal = 56; // default fallback matching the screenshot
@@ -123,13 +121,14 @@ export function getGlobalSequenceNumber(): number {
       }
     } catch (e) {}
   }
-  localStorage.setItem('global_letter_sequence_number', String(maxVal));
   return maxVal;
 }
 
 export function saveGlobalSequenceNumber(num: number) {
+  // Delegate ke helper penomoranSuratService yang sudah menulis key per-tenant
+  // agar counter tidak tercampur antar desa di browser yang sama.
   localStorage.setItem('global_letter_sequence_number', String(num));
-  
+
   // Also keep all classifications synced with this global number
   const stored = localStorage.getItem('letter_classifications');
   if (stored) {

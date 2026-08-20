@@ -1,5 +1,5 @@
 import { supabase } from '../utils/supabase';
-import { resolveCurrentTenant } from '../utils/tenantResolver';
+import { resolveCurrentTenant, getActiveTenantIdSync } from '../utils/tenantResolver';
 import { DEFAULT_SURAT_FORMAT } from '../utils/generateSuratNumber';
 
 // ============================================================================
@@ -257,8 +257,26 @@ export async function getAllActiveNomorUrut(klasifikasi: string, tahun?: number)
 const GLOBAL_SEQ_KEY = 'global_letter_sequence_number';
 const LAST_YEAR_KEY = 'last_year_global';
 
+// ============================================================================
+// ISOLASI PENOMORAN PER TENANT
+// ----------------------------------------------------------------------------
+// Counter fallback & "tahun terakhir" di localStorage WAJIB discope per tenant
+// (`global_letter_sequence_number_<tenantId>`, `last_year_global_<tenantId>`).
+// Tanpa scoping, dua desa yang dibuka di browser yang sama berbagi satu key
+// sehingga nomor urut & siklus tahun bisa tercampur antar desa. Key tanpa
+// tenantId (SaaS global / belum login) tetap memakai key lama sebagai fallback.
+// ============================================================================
+function getSeqKey(): string {
+  const tid = getActiveTenantIdSync();
+  return tid ? `${GLOBAL_SEQ_KEY}_${tid}` : GLOBAL_SEQ_KEY;
+}
+function getLastYearKey(): string {
+  const tid = getActiveTenantIdSync();
+  return tid ? `${LAST_YEAR_KEY}_${tid}` : LAST_YEAR_KEY;
+}
+
 export function getGlobalSequenceCounter(): number {
-  const stored = localStorage.getItem(GLOBAL_SEQ_KEY);
+  const stored = localStorage.getItem(getSeqKey());
   if (stored !== null) {
     const n = parseInt(stored, 10);
     if (!isNaN(n)) return n;
@@ -267,7 +285,7 @@ export function getGlobalSequenceCounter(): number {
 }
 
 export function saveGlobalSequenceCounter(num: number): void {
-  localStorage.setItem(GLOBAL_SEQ_KEY, String(num));
+  localStorage.setItem(getSeqKey(), String(num));
   // Jaga klasifikasi tetap sinkron dengan counter global (badge lama).
   const stored = localStorage.getItem('letter_classifications');
   if (stored) {
@@ -281,12 +299,12 @@ export function saveGlobalSequenceCounter(num: number): void {
 }
 
 export function getLastGlobalSequenceYear(): number {
-  const stored = localStorage.getItem(LAST_YEAR_KEY);
+  const stored = localStorage.getItem(getLastYearKey());
   return stored !== null ? parseInt(stored, 10) : NaN;
 }
 
 export function setLastGlobalSequenceYear(year: number): void {
-  localStorage.setItem(LAST_YEAR_KEY, String(year));
+  localStorage.setItem(getLastYearKey(), String(year));
 }
 
 /**
