@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 
-interface JobComboboxProps {
+interface SuggestComboboxProps {
   value: string;
   onChange: (value: string) => void;
   options: string[];
   placeholder?: string;
 }
 
-export function JobCombobox({ value, onChange, options, placeholder }: JobComboboxProps) {
+export function SuggestCombobox({ value, onChange, options, placeholder }: SuggestComboboxProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +32,7 @@ export function JobCombobox({ value, onChange, options, placeholder }: JobCombob
         type="text"
         data-no-cap
         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-        placeholder={placeholder || "Ketik pekerjaan..."}
+        placeholder={placeholder || "Ketik..."}
         value={value || ''}
         onChange={(e) => {
           onChange(e.target.value);

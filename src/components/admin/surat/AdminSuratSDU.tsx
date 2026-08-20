@@ -20,7 +20,7 @@ import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUt
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { JobCombobox } from './JobCombobox';
+import { SuggestCombobox } from './SuggestCombobox';
 import { checkResidentExists } from '../../../utils/residentSync';
 
 const BUSINESS_CATEGORIES = [
@@ -749,7 +749,7 @@ export default function AdminSuratSDU({
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <JobCombobox
+                  <SuggestCombobox
                     value={formData.pekerjaan}
                     onChange={(v) => setFormData({...formData, pekerjaan: v})}
                     options={jobs}
@@ -772,6 +772,7 @@ export default function AdminSuratSDU({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
                   <input 
                     type="text"
+                    placeholder="Contoh: Kandangan"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tempatLahir}
                     onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
@@ -810,6 +811,7 @@ export default function AdminSuratSDU({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
                   <textarea 
                     rows={2}
+                    placeholder="Contoh: Jl. Keramat, RT.001 RW.002, Desa Wasah Hilir"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={formData.alamat}
                     onChange={(e) => {

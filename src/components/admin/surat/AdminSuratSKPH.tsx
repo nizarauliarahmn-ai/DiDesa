@@ -20,7 +20,8 @@ import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUt
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { JobCombobox } from './JobCombobox';
+import { SuggestCombobox } from './SuggestCombobox';
+import { KEPERLUAN_OPTIONS } from './keperluanOptions';
 import { checkResidentExists } from '../../../utils/residentSync';
 
 interface Resident {
@@ -661,7 +662,7 @@ export default function AdminSuratSKPH({
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <JobCombobox
+                  <SuggestCombobox
                     value={formData.pekerjaan}
                     onChange={(v) => setFormData({...formData, pekerjaan: v})}
                     options={jobs}
@@ -684,6 +685,7 @@ export default function AdminSuratSKPH({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
                   <input 
                     type="text"
+                    placeholder="Contoh: Kandangan"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tempatLahir}
                     onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
@@ -722,6 +724,7 @@ export default function AdminSuratSKPH({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
                   <textarea 
                     rows={2}
+                    placeholder="Contoh: Jl. Keramat, RT.001 RW.002, Desa Wasah Hilir"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={formData.alamat}
                     onChange={(e) => {
@@ -778,12 +781,11 @@ export default function AdminSuratSKPH({
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat (Diberikan Untuk...)</label>
-                  <input 
-                    type="text"
-                    placeholder="Contoh: Persyaratan pengajuan kredit bank"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  <SuggestCombobox
                     value={formData.keperluan}
-                    onChange={(e) => setFormData({...formData, keperluan: e.target.value})}
+                    onChange={(v) => setFormData({...formData, keperluan: v})}
+                    options={KEPERLUAN_OPTIONS}
+                    placeholder="Contoh: Persyaratan pengajuan kredit bank"
                   />
                   <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
                 </div>
