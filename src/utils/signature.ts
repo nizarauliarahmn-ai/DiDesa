@@ -35,6 +35,20 @@ export function resolveOfficerRole(namaPejabat: string, inputJabatan: string): s
   return cleanInputRole && cleanInputRole.toLowerCase() !== 'kepala desa' ? cleanInputRole : 'Sekretaris Desa';
 }
 
+/**
+ * Teks peran penandatangan yang KONSISTEN untuk semua surat:
+ * - Pejabat yang dikenal sebagai Kepala Desa → "Kepala Desa"
+ * - Selain itu (mis. Sekretaris Desa) → "a.n. Kepala Desa, {Peran}"
+ * Dipakai oleh getPrintSignatureHTML (cetak), getReactSignaturePreview,
+ * SharedSignatureBlock (pratinjau TTE), dan blok tanda tangan manual.
+ */
+export function resolveSignatureRoleText(namaPejabat: string, jabatanPejabat: string): string {
+  if (isKadesOfficial(namaPejabat)) return 'Kepala Desa';
+  const actualRole = resolveOfficerRole(namaPejabat, jabatanPejabat);
+  if (!actualRole || actualRole.toLowerCase() === 'kepala desa') return 'Kepala Desa';
+  return `a.n. Kepala Desa, ${actualRole}`;
+}
+
 export function getPrintSignatureHTML(
   desaName: string, 
   tglFormatted: string, 
@@ -46,7 +60,6 @@ export function getPrintSignatureHTML(
   nomorSurat?: string
 ): string {
   const isDual = includeCamatOverride === true;
-  const isKades = isKadesOfficial(namaPejabat);
   const showTTE = useEsignature !== false;
 
   // Uppercase only the name part, preserving the degree
@@ -72,12 +85,12 @@ export function getPrintSignatureHTML(
   const cleanDesaName = desaName.replace(/desa|kelurahan/gi, '').trim();
 
   // Right Side role text
+  const roleText = resolveSignatureRoleText(namaPejabat, jabatanPejabat);
   let rightRoleHtml = '';
-  if (isKades) {
-    rightRoleHtml = `Kepala Desa`;
+  if (roleText.includes('a.n.')) {
+    rightRoleHtml = roleText.replace(/^a\.n\. Kepala Desa, /, 'a.n. Kepala Desa,<br>');
   } else {
-    const actualRole = resolveOfficerRole(namaPejabat, jabatanPejabat);
-    rightRoleHtml = `a.n. Kepala Desa,<br>${actualRole}`;
+    rightRoleHtml = roleText;
   }
 
   const textAlign = sigAlign === 'left' ? 'left' : 'center';
@@ -201,7 +214,6 @@ export function getReactSignaturePreview(
   useEsignature?: boolean
 ) {
   const isDual = includeCamatOverride === true;
-  const isKades = isKadesOfficial(namaPejabat);
   const showTTE = useEsignature !== false;
 
   const sigLeftRoleRaw = localStorage.getItem('village_signature_left_role') || 'Camat Simpur';
@@ -220,12 +232,7 @@ export function getReactSignaturePreview(
   const cleanDesaName = desaName.replace(/desa|kelurahan/gi, '').trim();
 
   let rightRole = '';
-  if (isKades) {
-    rightRole = `Kepala Desa`;
-  } else {
-    const actualRole = resolveOfficerRole(namaPejabat, jabatanPejabat);
-    rightRole = `a.n. Kepala Desa,\n${actualRole}`;
-  }
+  rightRole = resolveSignatureRoleText(namaPejabat, jabatanPejabat).replace(/^a\.n\. Kepala Desa, /, 'a.n. Kepala Desa,\n');
 
   return {
     isDual,

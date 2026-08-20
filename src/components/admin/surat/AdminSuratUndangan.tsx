@@ -12,6 +12,7 @@ import { resolveKadesName } from '../../../utils/letterOfficers';
 import { getActiveTenantIdSync } from '../../../utils/tenantResolver';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import SharedSignatureBlock from './SharedSignatureBlock';
+import { resolveSignatureRoleText } from '../../../utils/signature';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -129,6 +130,9 @@ export default function AdminSuratUndangan({
 
   const [pejabatNama, setPejabatNama] = useState(() => resolveKadesName() || localStorage.getItem('village_kades_name') || '');
   const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('kades_title') || 'Kepala Desa');
+
+  // Format peran penandatangan konsisten dengan SKTM (a.n. bila bukan Kepala Desa)
+  const roleDisplayText = resolveSignatureRoleText(pejabatNama, pejabatJabatan);
   const [pejabatNip, setPejabatNip] = useState(() => localStorage.getItem('kades_nip') || '-');
   const [isTTE, setIsTTE] = useState<boolean>(true);
   const [includeCamat, setIncludeCamat] = useState<boolean>(editData?.includeCamat || false);
@@ -1220,7 +1224,7 @@ export default function AdminSuratUndangan({
                         </div>
                       ) : (
                         <>
-                          <p className="font-bold">{pejabatJabatan}</p>
+                          <p className="font-bold">{roleDisplayText}</p>
                           <div className="my-2 h-20" />
                           <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
                           {pejabatNip && pejabatNip !== '-' && (
@@ -1246,7 +1250,7 @@ export default function AdminSuratUndangan({
                               </div>
                       ) : (
                         <>
-                          <p className="font-bold">{pejabatJabatan}</p>
+                          <p className="font-bold">{roleDisplayText}</p>
                           <div className="my-2 h-20" />
                           <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
                           {pejabatNip && pejabatNip !== '-' && (
@@ -1350,7 +1354,7 @@ export default function AdminSuratUndangan({
                         </div>
                             ) : (
                               <>
-                                <p className="font-bold">{pejabatJabatan}</p>
+                                <p className="font-bold">{roleDisplayText}</p>
                                 <div className="my-2 h-20" />
                                 <p className="font-bold uppercase underline text-[12pt]">{pejabatNama}</p>
                                 {pejabatNip && pejabatNip !== '-' && (
