@@ -161,8 +161,8 @@ export default function AdminSuratUndangan({
   }, []);
 
   // Event Details State
-  const [tglAcara, setTglAcara] = useState(editData?.tglAcara || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]);
-  const [waktuAcara, setWaktuAcara] = useState(editData?.waktuAcara || '08.00 WITA s.d Selesai');
+  const [tglAcara, setTglAcara] = useState(editData?.tglAcara || '');
+  const [waktuAcara, setWaktuAcara] = useState(editData?.waktuAcara || '');
   const [isCustomWaktu, setIsCustomWaktu] = useState(false);
   const [tempatAcara, setTempatAcara] = useState(editData?.tempatAcara || '');
 
@@ -1001,8 +1001,9 @@ export default function AdminSuratUndangan({
                         setWaktuAcara(e.target.value);
                       }
                     }}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold"
                   >
+                    <option value="">-- Pilih Waktu --</option>
                     <option value="08.00 WITA s.d Selesai">08.00 WITA s.d Selesai</option>
                     <option value="08.30 WITA s.d Selesai">08.30 WITA s.d Selesai</option>
                     <option value="09.00 WITA s.d Selesai">09.00 WITA s.d Selesai</option>
@@ -1015,13 +1016,13 @@ export default function AdminSuratUndangan({
                     <option value="custom">+ Ketik Manual / Kustom...</option>
                   </select>
 
-                  {(isCustomWaktu || !['08.00 WITA s.d Selesai','08.30 WITA s.d Selesai','09.00 WITA s.d Selesai','09.30 WITA s.d Selesai','10.00 WITA s.d Selesai','13.30 WITA s.d Selesai','14.00 WITA s.d Selesai','19.30 WITA s.d Selesai','20.00 WITA s.d Selesai'].includes(waktuAcara)) && (
+                  {(isCustomWaktu || (waktuAcara && !['08.00 WITA s.d Selesai','08.30 WITA s.d Selesai','09.00 WITA s.d Selesai','09.30 WITA s.d Selesai','10.00 WITA s.d Selesai','13.30 WITA s.d Selesai','14.00 WITA s.d Selesai','19.30 WITA s.d Selesai','20.00 WITA s.d Selesai'].includes(waktuAcara))) && (
                     <input 
                       type="text"
                       value={waktuAcara}
                       onChange={(e) => setWaktuAcara(e.target.value)}
                       placeholder="Contoh: 08.00 WITA s.d Selesai..."
-                      className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
+                      className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium"
                     />
                   )}
                 </div>
