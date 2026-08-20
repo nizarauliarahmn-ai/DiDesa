@@ -3,7 +3,7 @@ import {
   Search, FileText, FileSignature, 
   ZoomIn, ZoomOut, Plus, Calendar, Users,
   ToggleLeft, ToggleRight, Trash2,
-  ArrowUp, ArrowDown, Mail, X
+  ArrowUp, ArrowDown, Mail, X, ChevronDown
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
@@ -58,6 +58,37 @@ const fmtShortDate = (d: string) => {
   } catch { return d; }
 };
 
+// UI metadata for Quick Presets dropdown (does not affect preset logic)
+const PRESET_GROUPS: { label: string; highlight?: boolean; items: { key: string; label: string; desc?: string }[] }[] = [
+  {
+    label: 'Paket Khusus',
+    highlight: true,
+    items: [
+      { key: 'rembuk_stunting', label: 'Paket Rembuk Stunting (12 Penerima)', desc: 'Otomatis menambahkan 12 daftar penerima standar' }
+    ]
+  },
+  {
+    label: 'Lembaga Desa',
+    items: [
+      { key: 'rt_rw', label: 'Ketua RT / RW' },
+      { key: 'bpd', label: 'Pengurus BPD' },
+      { key: 'perangkat', label: 'Perangkat Desa' },
+      { key: 'pld', label: 'PD & PLD' },
+      { key: 'pkk', label: 'Ketua TP-PKK Desa' },
+      { key: 'posyandu', label: 'Kader Posyandu' }
+    ]
+  },
+  {
+    label: 'Tokoh & Instansi',
+    items: [
+      { key: 'tokoh', label: 'Tokoh Masyarakat' },
+      { key: 'ta', label: 'Tenaga Ahli Kabupaten' },
+      { key: 'camat', label: 'Camat' },
+      { key: 'hpk', label: 'Sasaran 1000 HPK' }
+    ]
+  }
+];
+
 export default function AdminSuratUndangan({
   onBack,
   editData,
@@ -99,6 +130,21 @@ export default function AdminSuratUndangan({
   const [newRecipJabatan, setNewRecipJabatan] = useState('');
   const [newRecipAlamat, setNewRecipAlamat] = useState('di Tempat');
   const [isManualFormOpen, setIsManualFormOpen] = useState(false);
+
+  // Quick Presets Dropdown State
+  const [showPresetMenu, setShowPresetMenu] = useState(false);
+  const presetMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close preset dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (presetMenuRef.current && !presetMenuRef.current.contains(e.target as Node)) {
+        setShowPresetMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Event Details State
   const [tglAcara, setTglAcara] = useState(editData?.tglAcara || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]);
@@ -622,78 +668,53 @@ export default function AdminSuratUndangan({
               )}
             </div>
 
-            {/* Quick Presets */}
-            <div>
+            {/* Quick Presets Dropdown */}
+            <div className="relative" ref={presetMenuRef}>
               <label className="block text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Preset Cepat:</label>
-              <div className="flex flex-wrap gap-2">
-                <button 
-                  onClick={() => handleAddPreset('rt_rw')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Ketua RT / RW
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('bpd')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Pengurus BPD
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('perangkat')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Perangkat Desa
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('tokoh')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Tokoh Masyarakat
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('pld')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + PD & PLD
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('ta')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Tenaga Ahli Kabupaten
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('camat')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Camat
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('pkk')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Ketua TP-PKK Desa
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('posyandu')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Kader Posyandu
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('hpk')}
-                  className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 rounded-xl text-xs font-bold transition-all"
-                >
-                  + Sasaran 1000 HPK
-                </button>
-                <button 
-                  onClick={() => handleAddPreset('rembuk_stunting')}
-                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-sm hover:shadow transition-all flex items-center gap-1.5"
-                  title="Otomatis menambahkan 12 daftar penerima standar acara Rembuk Stunting"
-                >
-                  + Paket Rembuk Stunting (12 Penerima)
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setShowPresetMenu(!showPresetMenu)}
+                className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:border-emerald-400 transition-all"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Plus size={14} className="text-emerald-600" />
+                  Pilih Preset Penerima
+                </span>
+                <ChevronDown size={14} className={`transition-transform ${showPresetMenu ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showPresetMenu && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl z-20 overflow-hidden max-h-72 overflow-y-auto">
+                  {PRESET_GROUPS.map(group => (
+                    <div key={group.label}>
+                      <p className={`px-4 pt-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider ${group.highlight ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        {group.label}
+                      </p>
+                      {group.items.map(item => (
+                        <button
+                          key={item.key}
+                          type="button"
+                          onClick={() => {
+                            handleAddPreset(item.key);
+                            setShowPresetMenu(false);
+                          }}
+                          className={`w-full text-left px-4 py-2.5 flex items-start gap-2 transition-colors hover:bg-emerald-50 dark:hover:bg-slate-700/60 ${
+                            group.highlight
+                              ? 'text-emerald-700 dark:text-emerald-300 font-bold'
+                              : 'text-slate-700 dark:text-slate-200 font-semibold'
+                          }`}
+                        >
+                          <Plus size={14} className="mt-0.5 shrink-0 text-emerald-500" />
+                          <span>
+                            {item.label}
+                            {item.desc && <span className="block text-[10px] font-medium text-slate-400 dark:text-slate-500">{item.desc}</span>}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Added Recipients List */}
