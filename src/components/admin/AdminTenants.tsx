@@ -804,7 +804,7 @@ export default function AdminTenants() {
                             
                             <div className="hidden print-show mt-2">
                               <span className="text-[10px] text-gray-500 block mb-0.5">URL Akses Portal:</span>
-                              <span className="font-mono text-xs font-bold text-emerald-700 break-all">{window.location.origin}/?tenant={tenant.domain}</span>
+                              <span className="font-mono text-xs font-bold text-emerald-700 break-all">https://{tenant.domain}.sistemdidesa.id/?tenant={tenant.domain}</span>
                             </div>
 
                             {tenant.domain && (
