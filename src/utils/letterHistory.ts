@@ -79,13 +79,11 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
         data: letter.data
       };
 
-      // Simpan data pejabat penandatangan sebagai kolom terpisah agar halaman
-      // verifikasi publik bisa menampilkan pejabat yang benar per tenant tanpa
-      // bergantung pada localStorage (sumber kebenaran = data surat).
-      const d = (letter.data || {}) as any;
-      if (d.namaPejabat) insertData.pejabat_nama = d.namaPejabat;
-      if (d.jabatanPejabat) insertData.pejabat_jabatan = d.jabatanPejabat;
-      if (d.nipPejabat && d.nipPejabat !== '-') insertData.pejabat_nip = d.nipPejabat;
+      // Data pejabat penandatangan disimpan DI DALAM kolom `data` (JSON) —
+      // tabel `surat` TIDAK memiliki kolom terpisah pejabat_nama/jabatan/nip,
+      // sehingga insert kolom yang tidak ada akan membuat seluruh penyimpanan
+      // surat baru GAGAL diam-diam (PGRST204) dan surat tidak pernah masuk DB.
+      // Halaman verifikasi publik membaca dari data.data.namaPejabat/jabatanPejabat.
 
       // Gunakan custom date untuk backdate jika ada, dengan validasi format tanggal ISO
       if (letter.tanggal && !letter.tanggal.includes(' ')) {

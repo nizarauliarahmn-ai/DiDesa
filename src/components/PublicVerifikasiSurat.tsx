@@ -67,9 +67,9 @@ export default function PublicVerifikasiSurat() {
               keterangan: data.keterangan || "Pengurusan Administrasi Kependudukan Desa",
               status: data.status || "Selesai",
               created_at: data.created_at || new Date().toISOString(),
-              pejabat_nama: data.pejabat_nama,
-              pejabat_jabatan: data.pejabat_jabatan,
-              pejabat_nip: data.pejabat_nip
+              pejabat_nama: data.data?.namaPejabat || data.pejabat_nama,
+              pejabat_jabatan: data.data?.jabatanPejabat || data.pejabat_jabatan,
+              pejabat_nip: data.data?.nipPejabat || data.pejabat_nip
             });
             // Branding desa SELALU mengutamakan tabel tenants (sumber kebenaran
             // per tenant_id surat), bukan data.data yang bisa berisi nama desa
