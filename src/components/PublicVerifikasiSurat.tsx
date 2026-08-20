@@ -47,14 +47,23 @@ export default function PublicVerifikasiSurat() {
         try {
           // WAJIB filter tenant: nomor surat antar desa bisa sama, hanya boleh
           // terverifikasi jika benar-benar berasal dari tenant yang mencetaknya.
-          let query = supabase
-            .from('surat')
-            .select('*')
-            .or(`id.eq.${cleanId},nomor.eq.${cleanId}`);
+          // PENTING: kolom `id` bertipe uuid. Jika `cleanId` berupa NOMOR surat
+          // (mis. "400/007/SM-SKTM/2026"), `.or(id.eq...,nomor.eq...)` membuat
+          // PostgREST men-cast string itu ke uuid -> error "invalid input syntax
+          // for type uuid" -> seluruh query gagal. Maka id hanya dipakai bila
+          // nilai jelas berbentuk UUID; untuk nomor surat cukup `nomor.eq`.
+          const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId);
+          let query = supabase.from('surat').select('*');
           if (tenantParam) {
             query = query.eq('tenant_id', tenantParam);
           }
-          const { data, error: dbError } = await query.maybeSingle();
+          const { data, error: dbError } = isUuid
+            ? await query.or(`id.eq.${cleanId},nomor.eq.${cleanId}`).maybeSingle()
+            : await query.eq('nomor', cleanId).maybeSingle();
+
+          if (dbError) {
+            console.warn("Supabase query error:", dbError);
+          }
 
           if (data) {
             dbVerified = true;
