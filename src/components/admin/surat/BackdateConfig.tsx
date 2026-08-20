@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, ChevronDown } from 'lucide-react';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 
@@ -132,9 +132,12 @@ export default function BackdateConfig({
       </h3>
 
       <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800/50">
-        <div>
-          <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Buat Surat Sisipan (Tanggal Mundur)</span>
-          <span className="block text-[10px] text-slate-500 mt-0.5">Aktifkan untuk menyisipkan surat lama. Nomor surat wajib diisi manual.</span>
+        <div className="flex items-center gap-2">
+          <div>
+            <span className="block text-sm font-bold text-slate-800 dark:text-slate-200">Buat Surat Sisipan (Tanggal Mundur)</span>
+            <span className="block text-[10px] text-slate-500 mt-0.5">Aktifkan untuk menyisipkan surat lama. Nomor surat wajib diisi manual.</span>
+          </div>
+          <ChevronDown size={16} className={`shrink-0 text-slate-400 transition-transform ${isBackdate ? 'rotate-180' : ''}`} />
         </div>
         <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-3">
           <input
@@ -147,6 +150,7 @@ export default function BackdateConfig({
         </label>
       </div>
 
+      {isBackdate && (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
@@ -209,6 +213,7 @@ export default function BackdateConfig({
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
