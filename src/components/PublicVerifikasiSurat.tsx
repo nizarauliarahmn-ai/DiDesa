@@ -2,6 +2,71 @@ import { useState, useEffect } from 'react';
 import { ShieldCheck, CheckCircle2, AlertTriangle, Building2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../utils/supabase';
 
+// Pemetaan kode jenis surat -> nama lengkap (untuk tampilan "Nama (KODE)").
+const JENIS_SURAT_NAMA_LENGKAP: Record<string, string> = {
+  SU: 'Surat Umum',
+  UND: 'Undangan',
+  SKM: 'Surat Keterangan Kematian',
+  SKAW: 'Surat Keterangan Ahli Waris',
+  SDP: 'Surat Keterangan Domisili',
+  SKD: 'Surat Keterangan Domisili',
+  SKUM: 'Surat Keterangan Umum',
+  SKN: 'Surat Keterangan Nikah',
+  SKTM: 'Surat Keterangan Tidak Mampu',
+  SKKT: 'Surat Keterangan Kepemilikan Tanah',
+  SKBM: 'Surat Keterangan Belum Menikah',
+  SKH: 'Surat Keterangan Kehilangan',
+  SKP: 'Surat Keterangan Pindah',
+  SRI: 'Surat Rekomendasi',
+  SKU: 'Surat Keterangan Usaha',
+  KEU: 'Keuangan',
+  SKL: 'Surat Keterangan Lahir',
+  JBT: 'Jual Beli Tanah',
+  PRW: 'Surat Keterangan Perawan',
+  NSB: 'Surat Keterangan Nasab',
+  KSA: 'Surat Kuasa',
+  SKKB: 'Surat Keterangan Kelakuan Baik',
+  PNG: 'Surat Pengantar',
+  SPND: 'Surat Pengunduran Diri',
+  SPJN: 'Surat Perjanjian',
+  SJBT: 'Surat Jual Beli Tanah',
+  SKS: 'Surat Kuasa',
+  SKPH: 'Surat Keterangan Penghasilan',
+  SPT: 'Surat Pengurusan Taspen',
+  SDU: 'Surat Keterangan Domisili Usaha',
+  SPPD: 'Surat Perintah Perjalanan Dinas',
+};
+
+// Normalisasi teks untuk perbandingan (hapus kata umum "surat"/"keterangan",
+// spasi berlebih, dan seragamkan kapital).
+const normJenis = (s: string) =>
+  s.toUpperCase().replace(/SURAT\s+|KETERANGAN\s+/g, '').replace(/\s+/g, ' ').trim();
+
+// Ubah jenis surat menjadi "Nama Lengkap (KODE)".
+function formatJenisSurat(jenis?: string): string {
+  const raw = (jenis || '').trim();
+  if (!raw) return 'Surat Keterangan Resmi';
+  // Sudah dalam format "Nama (KODE)" — biarkan apa adanya.
+  if (/\([A-Z0-9]{2,}\)$/.test(raw)) return raw;
+
+  const upper = raw.toUpperCase();
+
+  // 1) Nilai adalah KODE langsung (mis. "SKTM").
+  const langsung = JENIS_SURAT_NAMA_LENGKAP[upper];
+  if (langsung) return `${langsung} (${upper})`;
+
+  // 2) Nilai adalah NAMA PANJANG (mis. "SURAT KETERANGAN PINDAH").
+  const normalizedRaw = normJenis(raw);
+  const match = Object.entries(JENIS_SURAT_NAMA_LENGKAP).find(([kode, nama]) => {
+    const n = normJenis(nama);
+    return n === normalizedRaw || normalizedRaw.includes(n) || n.includes(normalizedRaw);
+  });
+  if (match) return `${JENIS_SURAT_NAMA_LENGKAP[match[0]]} (${match[0]})`;
+
+  // 3) Fallback: pertahankan teks asli.
+  return raw;
+}
+
 export default function PublicVerifikasiSurat() {
   const [loading, setLoading] = useState(true);
   const [letter, setLetter] = useState<any>(null);
@@ -290,7 +355,7 @@ export default function PublicVerifikasiSurat() {
                 <div className="flex justify-between items-start border-b border-slate-200/60 dark:border-slate-700/60 pb-3">
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jenis Surat</span>
-                    <p className="font-extrabold text-sm text-slate-900 dark:text-white mt-0.5">{letter.jenis_surat || "Surat Keterangan"}</p>
+                    <p className="font-extrabold text-sm text-slate-900 dark:text-white mt-0.5">{formatJenisSurat(letter.jenis_surat)}</p>
                   </div>
                   <span className="px-2.5 py-1 bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-300 font-bold rounded-lg text-[10px]">
                     Status: {letter.status?.toUpperCase() || 'SELESAI'}
@@ -345,7 +410,7 @@ export default function PublicVerifikasiSurat() {
 
         {/* Footer */}
         <div className="p-4 bg-slate-100/60 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-500 font-medium">
-          Dikelola secara aman oleh <strong>DiDesa — Platform Smart Village Indonesia</strong>
+          Dikelola secara aman oleh <strong>DiDesa — Sistem Digitalisasi Desa</strong>
         </div>
       </div>
     </div>
