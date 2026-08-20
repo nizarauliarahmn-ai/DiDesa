@@ -15,6 +15,7 @@ import SharedSignatureBlock from './SharedSignatureBlock';
 import { resolveSignatureRoleText } from '../../../utils/signature';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
+import { saveCustomPreset, getCustomPresets, deleteCustomPreset, type CustomRecipientPreset } from '../../../utils/customPresets';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { showToast } from '../../../utils/toast';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
@@ -134,6 +135,19 @@ export default function AdminSuratUndangan({
   // Quick Presets Dropdown State
   const [showPresetMenu, setShowPresetMenu] = useState(false);
   const presetMenuRef = useRef<HTMLDivElement>(null);
+
+  // Custom Presets (Simpan Daftar Penerima) State
+  const [customPresets, setCustomPresets] = useState<CustomRecipientPreset[]>([]);
+  const [showSavePresetModal, setShowSavePresetModal] = useState(false);
+  const [presetNameInput, setPresetNameInput] = useState('');
+  const [savingPreset, setSavingPreset] = useState(false);
+
+  // Load custom presets milik tenant ini
+  useEffect(() => {
+    getCustomPresets()
+      .then(setCustomPresets)
+      .catch((e) => console.error('Gagal memuat preset kustom:', e));
+  }, []);
 
   // Close preset dropdown when clicking outside
   useEffect(() => {
@@ -453,6 +467,47 @@ export default function AdminSuratUndangan({
     setRecipients(newRecipients);
   };
 
+  // Save Custom Preset Handler
+  const handleSaveCustomPreset = async () => {
+    if (recipients.length === 0) {
+      showToast('Tidak ada penerima untuk disimpan sebagai preset', 'info');
+      return;
+    }
+    if (!presetNameInput.trim()) {
+      showToast('Nama preset tidak boleh kosong', 'info');
+      return;
+    }
+    setSavingPreset(true);
+    try {
+      await saveCustomPreset(presetNameInput.trim(), recipients.map(r => ({ id: r.id, name: r.name, jabatan: r.jabatan, alamat: r.alamat })));
+      const updated = await getCustomPresets();
+      setCustomPresets(updated);
+      setShowSavePresetModal(false);
+      setPresetNameInput('');
+      showToast('Preset penerima berhasil disimpan', 'success');
+    } catch (e) {
+      console.error('Gagal menyimpan preset:', e);
+      showToast('Gagal menyimpan preset', 'error');
+    } finally {
+      setSavingPreset(false);
+    }
+  };
+
+  const handleApplyCustomPreset = (preset: CustomRecipientPreset) => {
+    const now = Date.now();
+    setRecipients(prev => [
+      ...prev,
+      ...preset.recipients.map((r, i) => ({
+        id: `${now}_${i}`,
+        name: capitalizeWords(r.name || ''),
+        jabatan: r.jabatan || undefined,
+        alamat: r.alamat || 'di Tempat'
+      }))
+    ]);
+    setShowPresetMenu(false);
+    showToast(`Preset "${preset.name}" ditambahkan (${preset.recipients.length} penerima)`, 'success');
+  };
+
   // Save Handler
   const handleSave = async () => {
     if (recipients.length === 0) {
@@ -713,6 +768,43 @@ export default function AdminSuratUndangan({
                       ))}
                     </div>
                   ))}
+
+                  {customPresets.length > 0 && (
+                    <div>
+                      <p className="px-4 pt-3 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-sky-600 dark:text-sky-400">Preset Desa Saya</p>
+                      {customPresets.map(preset => (
+                        <div key={preset.id} className="flex items-center">
+                          <button
+                            type="button"
+                            onClick={() => handleApplyCustomPreset(preset)}
+                            className="flex-1 min-w-0 text-left px-4 py-2.5 flex items-center gap-2 transition-colors hover:bg-emerald-50 dark:hover:bg-slate-700/60 text-slate-700 dark:text-slate-200 font-semibold"
+                          >
+                            <Users size={14} className="shrink-0 text-sky-500" />
+                            <span className="truncate">
+                              {preset.name}
+                              <span className="block text-[10px] font-medium text-slate-400 dark:text-slate-500">
+                                {preset.recipients?.length || 0} penerima
+                              </span>
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteCustomPreset(preset.id)
+                                .then(() => setCustomPresets(prev => prev.filter(p => p.id !== preset.id)))
+                                .then(() => showToast(`Preset "${preset.name}" dihapus`, 'success'))
+                                .catch(() => showToast('Gagal menghapus preset', 'error'));
+                            }}
+                            className="p-2 mr-1 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"
+                            title="Hapus preset"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -758,6 +850,21 @@ export default function AdminSuratUndangan({
                 ))
               )}
             </div>
+
+            {/* Save Current Recipient List as Custom Preset */}
+            {recipients.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPresetNameInput('');
+                  setShowSavePresetModal(true);
+                }}
+                className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
+              >
+                <span>💾</span>
+                <span>Simpan Daftar Ini sebagai Preset</span>
+              </button>
+            )}
 
             {/* Add New Manual Recipient Form */}
             <div className="pt-3 border-t dark:border-slate-800">
@@ -1455,6 +1562,68 @@ export default function AdminSuratUndangan({
           .nomor-surat-cetak { text-transform: uppercase !important; }
         }
       `}</style>
+
+      {/* Save Custom Preset Modal */}
+      {showSavePresetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowSavePresetModal(false)}
+          />
+          <div className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 p-6 z-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Simpan Daftar sebagai Preset
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowSavePresetModal(false)}
+                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 hover:text-gray-600 transition-all"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">
+              Simpan <span className="font-bold text-slate-700 dark:text-slate-200">{recipients.length} penerima</span> saat ini sebagai preset yang bisa dipanggil lagi di masa depan.
+            </p>
+
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Nama Preset</label>
+            <input
+              type="text"
+              autoFocus
+              value={presetNameInput}
+              onChange={(e) => setPresetNameInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSaveCustomPreset();
+                }
+              }}
+              placeholder="Misal: Panitia Desa"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold focus:border-emerald-500 outline-none mb-4"
+            />
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowSavePresetModal(false)}
+                className="flex-1 py-2.5 px-4 rounded-xl border-2 border-gray-100 dark:border-slate-800 hover:border-gray-200 text-sm font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveCustomPreset}
+                disabled={savingPreset || !presetNameInput.trim()}
+                className="flex-1 py-2.5 px-4 rounded-xl text-sm font-bold text-white bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 transition-all shadow-lg dark:shadow-none disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {savingPreset ? 'Menyimpan...' : 'Simpan Preset'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Success Dialog */}
       {showSuccessDialog && (

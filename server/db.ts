@@ -216,6 +216,14 @@ if (databaseUrl) {
         PRIMARY KEY (tenant_id, usage_date)
       );
 
+      CREATE TABLE IF NOT EXISTS custom_recipient_presets (
+        id TEXT PRIMARY KEY,
+        tenant_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        recipients JSONB NOT NULL DEFAULT '[]'::jsonb,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
       ALTER TABLE tenants ADD COLUMN IF NOT EXISTS admin_email TEXT;
       ALTER TABLE tenants ADD COLUMN IF NOT EXISTS admin_password TEXT;
       ALTER TABLE tenants ADD COLUMN IF NOT EXISTS kades_email TEXT;
