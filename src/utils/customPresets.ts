@@ -11,9 +11,23 @@ export interface CustomPresetRecipient {
 export interface CustomRecipientPreset {
   id: string;
   tenant_id: string;
+  created_by?: string;
   name: string;
   recipients: CustomPresetRecipient[];
   created_at?: string;
+}
+
+// Identitas admin yang login (email unik per akun). Preset bersifat PRIVAT
+// per admin — tidak terlihat admin lain walau di desa yang sama.
+function getCurrentAdminEmail(): string {
+  try {
+    const raw = localStorage.getItem('didesa_auth_user');
+    if (raw) {
+      const user = JSON.parse(raw);
+      return String(user.email || '').trim().toLowerCase();
+    }
+  } catch {}
+  return '';
 }
 
 async function getTenantId(): Promise<string | null> {
@@ -37,7 +51,13 @@ export async function saveCustomPreset(
 
   const { data, error } = await supabase
     .from('custom_recipient_presets')
-    .insert([{ id, tenant_id: tenantId, name, recipients }])
+    .insert([{
+      id,
+      tenant_id: tenantId,
+      created_by: getCurrentAdminEmail(),
+      name,
+      recipients
+    }])
     .select()
     .single();
 
@@ -49,21 +69,33 @@ export async function getCustomPresets(): Promise<CustomRecipientPreset[]> {
   const tenantId = await getTenantId();
   if (!tenantId) return [];
 
-  const { data, error } = await supabase
+  const adminEmail = getCurrentAdminEmail();
+
+  // Filter ketat: hanya preset milik tenant INI dan admin INI.
+  let query = supabase
     .from('custom_recipient_presets')
     .select('*')
-    .eq('tenant_id', tenantId)
-    .order('created_at', { ascending: false });
+    .eq('tenant_id', tenantId);
+
+  if (adminEmail) {
+    query = query.eq('created_by', adminEmail);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) throw error;
   return data || [];
 }
 
 export async function deleteCustomPreset(id: string): Promise<void> {
+  const tenantId = await getTenantId();
+  const adminEmail = getCurrentAdminEmail();
   const { error } = await supabase
     .from('custom_recipient_presets')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId)
+    .eq('created_by', adminEmail);
 
   if (error) throw error;
 }

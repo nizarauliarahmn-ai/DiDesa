@@ -7,13 +7,17 @@
 CREATE TABLE IF NOT EXISTS public.custom_recipient_presets (
   id TEXT PRIMARY KEY,
   tenant_id TEXT NOT NULL,
+  created_by TEXT NOT NULL DEFAULT '',
   name TEXT NOT NULL,
   recipients JSONB NOT NULL DEFAULT '[]'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_custom_recipient_presets_tenant
-  ON public.custom_recipient_presets (tenant_id, created_at DESC);
+  ON public.custom_recipient_presets (tenant_id, created_by, created_at DESC);
+
+-- Pastikan kolom created_by ada (aman jika tabel sudah dibuat dari versi sebelumnya)
+ALTER TABLE public.custom_recipient_presets ADD COLUMN IF NOT EXISTS created_by TEXT NOT NULL DEFAULT '';
 
 -- Policy RLS: mengikuti pola tabel lain (surat, aspirasi, dst.) yang memakai
 -- akses terbuka + filter tenant_id di level aplikasi (anon key tanpa klaim tenant).
