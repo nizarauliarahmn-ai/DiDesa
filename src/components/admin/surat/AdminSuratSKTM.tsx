@@ -1,5 +1,6 @@
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { JobCombobox } from './JobCombobox';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
@@ -127,8 +128,8 @@ export default function AdminSuratSKTM({
     'Petani/Pekebun', 'Buruh Tani/Perkebunan', 'Peternak', 'Nelayan/Perikanan', 'Buruh Nelayan/Perikanan',
     'Buruh Harian Lepas', 'Pedagang', 'Wiraswasta', 'Karyawan Swasta', 'Karyawan BUMN/BUMD',
     'Sopir/Ojek', 'Tukang (Kayu/Batu/Las/Jahit, dll)', 'Mekanik', 'Pembantu Rumah Tangga',
-    'Guru', 'Bidan', 'Perawat', 'Ustadz/Mubaligh', 'Imam Masjid', 'Paraji',
-    'Perangkat Desa', 'Kepala Desa', 'Pegawai Negeri Sipil'
+    'Guru', 'Bidan', 'Perawat', 'Ustadz/Mubaligh',
+    'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)'
   ];
 
   const updateResidentData = async (nik: string, data: any) => {
@@ -624,14 +625,11 @@ export default function AdminSuratSKTM({
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  <JobCombobox
                     value={formData.pekerjaan}
-                    onChange={(e) => setFormData({...formData, pekerjaan: e.target.value})}
-                  >
-                    <option value="">Pilih Pekerjaan</option>
-                    {jobs.map((j, i) => <option key={i} value={j}>{j}</option>)}
-                  </select>
+                    onChange={(v) => setFormData({...formData, pekerjaan: v})}
+                    options={jobs}
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
