@@ -716,11 +716,11 @@ export default function AdminSuratSKBM({
 
             {/* Pejabat Penandatangan */}
             <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none mt-6">
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
                   <FileSignature className="w-4 h-4 text-amber-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100">Pejabat Penandatangan</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pejabat Penandatangan</h3>
               </div>
               <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
                 <div className="grid grid-cols-1 gap-6">
