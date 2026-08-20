@@ -178,7 +178,7 @@ export default function AdminSuratUndangan({
   );
   const [paragrafPenutup, setParagrafPenutup] = useState(
     editData?.paragrafPenutup || 
-    'Demikian undangan ini disampaikan, atas perhatian dan kerja samanya kami ucapkan terima kasih.'
+    'Demikian undangan ini disampaikan, atas perhatian dan kerja samanya Kami ucapkan terima kasih.'
   );
   const [showPenutupEditor, setShowPenutupEditor] = useState(false);
 
