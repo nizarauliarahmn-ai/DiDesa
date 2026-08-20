@@ -668,12 +668,7 @@ export default function AdminHeader({
                 <CheckCircle className="w-3.5 h-3.5" />
                 PostgreSQL Aktif
               </span>
-            ) : (dbStatus.engine && (dbStatus.engine.toLowerCase().includes("supabase") || dbStatus.engine.toLowerCase().includes("multi-tenant"))) ? (
-              <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/50 px-2.5 py-1 rounded-full">
-                <CheckCircle className="w-3.5 h-3.5" />
-                Tersinkronisasi Cloud
-              </span>
-            ) : (
+            ) : (dbStatus.engine && (dbStatus.engine.toLowerCase().includes("supabase") || dbStatus.engine.toLowerCase().includes("multi-tenant"))) ? null : (
               <span 
                 className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200/50 px-2.5 py-1 rounded-full cursor-help" 
                 title="Database cloud tidak terhubung / salah ketik di .env. Menggunakan memori sementara."
