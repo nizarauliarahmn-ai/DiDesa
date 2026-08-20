@@ -8,7 +8,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useReactToPrint } from 'react-to-print';
 import {
   BookOpen, Plus, QrCode, Search, Printer, Download,
-  LogIn, Building2, CheckCircle2, X, Trash2, Send
+  LogIn, Building2, CheckCircle2, X, Trash2, Send, Eye, Pencil
 } from 'lucide-react';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 
@@ -64,6 +64,8 @@ export default function AdminBukuTamu() {
   const [form, setForm] = useState({
     nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0]
   });
+  const [editId, setEditId] = useState<string | null>(null);
+  const [viewEntry, setViewEntry] = useState<GuestEntry | null>(null);
   
   const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
@@ -82,9 +84,32 @@ export default function AdminBukuTamu() {
   }, [tenantId]);
 
 
-  const handleSendToKiosk = () => {
+  const handleSave = () => {
     if (!form.nama.trim()) { showToast('Nama tamu wajib diisi.', 'error'); return; }
     if (!form.keperluan.trim()) { showToast('Keperluan kunjungan wajib diisi.', 'error'); return; }
+
+    if (editId) {
+      // Mode edit: simpan langsung ke database, bukan broadcast ke kios.
+      const updatePayload: any = {
+        nik: form.nik || null,
+        nama: form.nama,
+        alamat: form.alamat || null,
+        instansi: form.instansi || null,
+        keperluan: form.keperluan
+      };
+      supabase.from('guest_book').update(updatePayload).eq('id', editId).then(({ error }) => {
+        if (!error) {
+          showToast('Data tamu berhasil diperbarui.', 'success');
+          fetchEntries();
+        } else {
+          showToast('Gagal memperbarui data tamu.', 'error');
+        }
+      });
+      setEditId(null);
+      setShowModal(false);
+      setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] });
+      return;
+    }
 
     const payload = {
       nik: form.nik,
@@ -181,6 +206,18 @@ export default function AdminBukuTamu() {
 
   const handleDelete = (id: string, nama: string) => {
     setDeleteConfirm({ isOpen: true, id, nama });
+  };
+
+  const handleEdit = (entry: GuestEntry) => {
+    setEditId(entry.id);
+    setForm({
+      nik: entry.nik || '',
+      nama: entry.nama || '',
+      alamat: entry.alamat || '',
+      instansi: entry.instansi || '',
+      keperluan: entry.keperluan || KEPERLUAN_OPTIONS[0]
+    });
+    setShowModal(true);
   };
 
   const executeDelete = async () => {
@@ -339,7 +376,7 @@ export default function AdminBukuTamu() {
   };
 
   const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div className="animate-in fade-in duration-300">
@@ -445,6 +482,7 @@ export default function AdminBukuTamu() {
             <tr>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">No</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tamu</th>
+              <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden md:table-cell">Instansi</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider hidden md:table-cell">Keperluan</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Waktu</th>
               <th className="px-5 py-3.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">TTD</th>
@@ -453,10 +491,10 @@ export default function AdminBukuTamu() {
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
             {loading ? (
-              <tr><td colSpan={6} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
+              <tr><td colSpan={7} className="px-5 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-16 text-center">
+                <td colSpan={7} className="px-5 py-16 text-center">
                   <BookOpen className="w-12 h-12 text-gray-200 dark:text-slate-700 mx-auto mb-3" />
                   <p className="text-sm text-gray-400 font-medium">Belum ada tamu hari ini</p>
                   <p className="text-xs text-gray-300 dark:text-slate-600 mt-1">Klik "Tambah Tamu" atau "Scan QR / NIK" untuk mencatat tamu baru</p>
@@ -465,20 +503,22 @@ export default function AdminBukuTamu() {
             ) : (
               filtered.map((entry, i) => (
                 <tr key={entry.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                  <td className="px-5 py-4 text-sm text-gray-500 dark:text-slate-400 font-mono">{i + 1}</td>
+                  <td className="px-5 py-4 text-sm text-gray-500 dark:text-slate-400 font-mono whitespace-nowrap">{i + 1}</td>
                   <td className="px-5 py-4">
-                    <p className="text-sm font-bold text-gray-900 dark:text-white uppercase">{entry.nama}</p>
-                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-0.5">{entry.nik || 'Tamu Luar'}</p>
-                    <p className="text-[11px] text-gray-400 dark:text-slate-500 mt-0.5 truncate max-w-[180px]">{entry.alamat || entry.instansi || '-'}</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white uppercase whitespace-nowrap">{entry.nama}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-0.5 whitespace-nowrap">{entry.nik || 'Tamu Luar'}</p>
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400">
+                    <p className="text-xs font-medium text-gray-700 dark:text-slate-300 whitespace-nowrap">{entry.instansi || entry.alamat || '-'}</p>
+                  </td>
+                  <td className="px-5 py-4 hidden md:table-cell">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
                       {entry.keperluan}
                     </span>
                   </td>
                   <td className="px-5 py-4">
-                    <span className="text-sm font-bold text-gray-900 dark:text-white block">{fmtTime(entry.tanggal_masuk)}</span>
-                    <span className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-0.5">{fmtDate(entry.tanggal_masuk)}</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white block whitespace-nowrap">{fmtTime(entry.tanggal_masuk)}</span>
+                    <span className="text-[11px] text-gray-500 dark:text-slate-400 font-mono mt-0.5 whitespace-nowrap">{fmtDate(entry.tanggal_masuk)}</span>
                   </td>
                   <td className="px-5 py-4">
                     {entry.signature_url ? (
@@ -489,14 +529,30 @@ export default function AdminBukuTamu() {
                       <span className="text-[11px] text-gray-400 italic">-</span>
                     )}
                   </td>
-                  <td className="px-5 py-4 text-right">
-                    <button
-                      onClick={() => handleDelete(entry.id, entry.nama)}
-                      className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-                      title="Hapus Data Tamu"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                      <button
+                        onClick={() => setViewEntry(entry)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors"
+                        title="Lihat Detail Tamu"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(entry)}
+                        className="p-2 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-colors"
+                        title="Edit Data Tamu"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(entry.id, entry.nama)}
+                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                        title="Hapus Data Tamu"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -511,19 +567,21 @@ export default function AdminBukuTamu() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
-                <Send className="w-5 h-5 text-emerald-700" />
-                Kirim Data ke Kios
+                {editId ? <Pencil className="w-5 h-5 text-amber-600" /> : <Send className="w-5 h-5 text-emerald-700" />}
+                {editId ? 'Edit Data Tamu' : 'Kirim Data ke Kios'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+              {!editId && (
               <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 p-3 rounded-xl text-sm mb-2 flex gap-3 items-start border border-blue-100 dark:border-blue-800">
                 <BookOpen className="w-5 h-5 shrink-0 mt-0.5" />
                 <p>Data yang diinput akan dikirim langsung ke layar Tablet Kios. Tamu hanya perlu membubuhkan tanda tangannya di layar sana.</p>
               </div>
+              )}
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">NIK (Opsional)</label>
@@ -601,15 +659,14 @@ export default function AdminBukuTamu() {
             </div>
 
             <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 bg-gray-50/50 dark:bg-slate-900/50">
-              <button onClick={() => setShowModal(false)} className="px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
+              <button onClick={() => { setShowModal(false); setEditId(null); }} className="px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
                 Batal
               </button>
               <button
-                onClick={handleSendToKiosk}
-                className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 shadow-md hover:shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                onClick={handleSave}
+                className={`px-8 py-2.5 ${editId ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-500/20' : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-emerald-500/20'} text-white text-sm font-bold rounded-xl hover:shadow-lg shadow-md transition-all flex items-center justify-center gap-2`}
               >
-                <Send className="w-4 h-4" />
-                Kirim ke Layar Kiosk
+                {editId ? <><Pencil className="w-4 h-4" /> Simpan Perubahan</> : <><Send className="w-4 h-4" /> Kirim ke Layar Kiosk</>}
               </button>
             </div>
           </div>
@@ -741,6 +798,76 @@ export default function AdminBukuTamu() {
               >
                 <Printer className="w-4 h-4" />
                 Cetak Sekarang
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Detail Tamu */}
+      {viewEntry && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+              <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                <Eye className="w-5 h-5 text-blue-600" />
+                Detail Tamu
+              </h3>
+              <button onClick={() => setViewEntry(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Nama</span>
+                <span className="font-bold text-gray-900 dark:text-white uppercase">{viewEntry.nama}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">NIK</span>
+                <span className="font-mono text-gray-700 dark:text-slate-300">{viewEntry.nik || 'Tamu Luar'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Instansi / Asal</span>
+                <span className="text-gray-700 dark:text-slate-300">{viewEntry.instansi || viewEntry.alamat || '-'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Keperluan</span>
+                <span className="text-gray-700 dark:text-slate-300">{viewEntry.keperluan}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tujuan Temu</span>
+                <span className="text-gray-700 dark:text-slate-300">{viewEntry.tujuan_temu || '-'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Masuk</span>
+                <span className="text-gray-700 dark:text-slate-300 whitespace-nowrap">{fmtTime(viewEntry.tanggal_masuk)} • {fmtDate(viewEntry.tanggal_masuk)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Keluar</span>
+                <span className="text-gray-700 dark:text-slate-300 whitespace-nowrap">
+                  {viewEntry.tanggal_keluar ? `${fmtTime(viewEntry.tanggal_keluar)} • ${fmtDate(viewEntry.tanggal_keluar)}` : 'Belum Check-out'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</span>
+                <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${viewEntry.status === 'hadir' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'}`}>
+                  {viewEntry.status === 'hadir' ? 'Hadir' : 'Selesai'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tanda Tangan</span>
+                {viewEntry.signature_url ? (
+                  <div className="h-12 w-28 bg-white border border-gray-200 rounded flex items-center justify-center overflow-hidden">
+                    <img src={viewEntry.signature_url} alt="TTD" className="max-w-full max-h-full object-contain" />
+                  </div>
+                ) : (
+                  <span className="text-[11px] text-gray-400 italic">-</span>
+                )}
+              </div>
+            </div>
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 bg-gray-50/50 dark:bg-slate-900/50">
+              <button onClick={() => setViewEntry(null)} className="px-5 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-all">
+                Tutup
               </button>
             </div>
           </div>
