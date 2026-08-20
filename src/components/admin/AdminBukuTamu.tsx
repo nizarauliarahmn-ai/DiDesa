@@ -839,12 +839,6 @@ export default function AdminBukuTamu() {
                 <span className="text-gray-700 dark:text-slate-300 whitespace-nowrap">{fmtTime(viewEntry.tanggal_masuk)} • {fmtDate(viewEntry.tanggal_masuk)}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Keluar</span>
-                <span className="text-gray-700 dark:text-slate-300 whitespace-nowrap">
-                  {viewEntry.tanggal_keluar ? `${fmtTime(viewEntry.tanggal_keluar)} • ${fmtDate(viewEntry.tanggal_keluar)}` : 'Belum Check-out'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</span>
                 <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${viewEntry.status === 'hadir' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'}`}>
                   {viewEntry.status === 'hadir' ? 'Hadir' : 'Selesai'}
