@@ -15,23 +15,14 @@ CREATE TABLE IF NOT EXISTS public.custom_recipient_presets (
 CREATE INDEX IF NOT EXISTS idx_custom_recipient_presets_tenant
   ON public.custom_recipient_presets (tenant_id, created_at DESC);
 
--- Policy RLS: baca/tulis hanya untuk tenant yang bersangkutan
+-- Policy RLS: mengikuti pola tabel lain (surat, aspirasi, dst.) yang memakai
+-- akses terbuka + filter tenant_id di level aplikasi (anon key tanpa klaim tenant).
 ALTER TABLE public.custom_recipient_presets ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Custom Recipient Presets Select Own Tenant" ON public.custom_recipient_presets;
-CREATE POLICY "Custom Recipient Presets Select Own Tenant"
+DROP POLICY IF EXISTS "Akses Publik Custom Recipient Presets" ON public.custom_recipient_presets;
+CREATE POLICY "Akses Publik Custom Recipient Presets"
   ON public.custom_recipient_presets
-  FOR SELECT
-  USING (tenant_id = (auth.jwt() ->> 'tenant_id') OR tenant_id = current_setting('app.tenant_id', true));
-
-DROP POLICY IF EXISTS "Custom Recipient Presets Insert Own Tenant" ON public.custom_recipient_presets;
-CREATE POLICY "Custom Recipient Presets Insert Own Tenant"
-  ON public.custom_recipient_presets
-  FOR INSERT
-  WITH CHECK (tenant_id = (auth.jwt() ->> 'tenant_id') OR tenant_id = current_setting('app.tenant_id', true));
-
-DROP POLICY IF EXISTS "Custom Recipient Presets Delete Own Tenant" ON public.custom_recipient_presets;
-CREATE POLICY "Custom Recipient Presets Delete Own Tenant"
-  ON public.custom_recipient_presets
-  FOR DELETE
-  USING (tenant_id = (auth.jwt() ->> 'tenant_id') OR tenant_id = current_setting('app.tenant_id', true));
+  FOR ALL
+  TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
