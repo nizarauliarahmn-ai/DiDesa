@@ -3,7 +3,7 @@ import {
   Search, FileText, FileSignature, 
   ZoomIn, ZoomOut, Plus, Calendar, Users, FileSpreadsheet,
   ToggleLeft, ToggleRight, Trash2,
-  ArrowUp, ArrowDown, Mail
+  ArrowUp, ArrowDown, Mail, X
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
@@ -98,6 +98,7 @@ export default function AdminSuratUndangan({
   const [newRecipName, setNewRecipName] = useState('');
   const [newRecipJabatan, setNewRecipJabatan] = useState('');
   const [newRecipAlamat, setNewRecipAlamat] = useState('di Tempat');
+  const [isManualFormOpen, setIsManualFormOpen] = useState(false);
 
   // Event Details State
   const [tglAcara, setTglAcara] = useState(editData?.tglAcara || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0]);
@@ -757,45 +758,75 @@ export default function AdminSuratUndangan({
             </div>
 
             {/* Add New Manual Recipient Form */}
-            <div className="pt-3 border-t dark:border-slate-800 space-y-2">
-              <p className="text-xs font-bold text-slate-600 dark:text-slate-400">Tambah Penerima Manual:</p>
-              <input 
-                type="text"
-                placeholder="Nama / Penerima (misal: Isya Ansari)..."
-                value={newRecipName}
-                onChange={(e) => setNewRecipName(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <input 
-                  type="text"
-                  placeholder="Jabatan (misal: BPD / RT.03)..."
-                  value={newRecipJabatan}
-                  onChange={(e) => setNewRecipJabatan(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
-                />
-                <input 
-                  type="text"
-                  placeholder="Lokasi (default: di Tempat)..."
-                  value={newRecipAlamat}
-                  onChange={(e) => setNewRecipAlamat(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (newRecipName.trim()) {
-                    handleAddRecipient(newRecipName, newRecipJabatan, newRecipAlamat);
-                    setNewRecipName('');
-                    setNewRecipJabatan('');
-                  }
-                }}
-                className="w-full py-2.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-              >
-                <Plus size={14} />
-                <span>Tambahkan Penerima</span>
-              </button>
+            <div className="pt-3 border-t dark:border-slate-800">
+              {!isManualFormOpen ? (
+                <button
+                  type="button"
+                  onClick={() => setIsManualFormOpen(true)}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:border-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
+                >
+                  <Plus size={14} />
+                  <span>Tambah Penerima Manual</span>
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-bold text-slate-600 dark:text-slate-400">Tambah Penerima Manual:</p>
+                    <button
+                      type="button"
+                      onClick={() => setIsManualFormOpen(false)}
+                      className="p-1 text-slate-400 hover:text-rose-500 rounded-lg transition-all"
+                      title="Tutup"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <input 
+                    type="text"
+                    placeholder="Nama / Penerima (misal: Isya Ansari)..."
+                    value={newRecipName}
+                    onChange={(e) => setNewRecipName(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="text"
+                      placeholder="Jabatan (misal: BPD / RT.03)..."
+                      value={newRecipJabatan}
+                      onChange={(e) => setNewRecipJabatan(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
+                    />
+                    <input 
+                      type="text"
+                      placeholder="Lokasi (default: di Tempat)..."
+                      value={newRecipAlamat}
+                      onChange={(e) => setNewRecipAlamat(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newRecipName.trim()) {
+                        handleAddRecipient(newRecipName, newRecipJabatan, newRecipAlamat);
+                        setNewRecipName('');
+                        setNewRecipJabatan('');
+                      }
+                    }}
+                    className="w-full py-2.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <Plus size={14} />
+                    <span>Tambahkan Penerima</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsManualFormOpen(false)}
+                    className="w-full py-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Batal
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
