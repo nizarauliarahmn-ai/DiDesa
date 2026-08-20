@@ -835,10 +835,6 @@ export default function AdminBukuTamu() {
                 <span className="text-gray-700 dark:text-slate-300">{viewEntry.keperluan}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Tujuan Temu</span>
-                <span className="text-gray-700 dark:text-slate-300">{viewEntry.tujuan_temu || '-'}</span>
-              </div>
-              <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Masuk</span>
                 <span className="text-gray-700 dark:text-slate-300 whitespace-nowrap">{fmtTime(viewEntry.tanggal_masuk)} • {fmtDate(viewEntry.tanggal_masuk)}</span>
               </div>
