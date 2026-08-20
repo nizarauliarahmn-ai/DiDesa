@@ -127,9 +127,11 @@ export function addLetterHistory(letter: Omit<LetterHistory, 'id'>): LetterHisto
 
 export async function fetchResidentLettersAsync(nik: string, name: string): Promise<LetterHistory[]> {
   const all = await fetchLetterHistoryAsync();
-  return all.filter(item => 
-    (item.nik && item.nik === nik) || 
-    (item.nama && (item.nama || '').toLowerCase() === (name || '').toLowerCase())
+  // Privasi: hanya cocokkan NIK. Fallback ke nama HANYA bila surat tidak mencatat NIK,
+  // agar warga bernama kembar tidak bisa melihat surat milik orang lain.
+  return all.filter(item =>
+    (item.nik && item.nik === nik) ||
+    (!item.nik && (item.nama || '').toLowerCase() === (name || '').toLowerCase())
   );
 }
 

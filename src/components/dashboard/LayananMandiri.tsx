@@ -1,23 +1,27 @@
-import { fetchResidentsCached } from '../../utils/apiCache';
 import React, { useState, useEffect } from 'react';
 import { SAAS_CONFIG } from '../admin/surat/AdminSuratMasterTemplate';
 import { 
   ShieldCheck, FileText, Send, History, CheckCircle, Clock, AlertTriangle, 
-  Printer, X, Eye, ZoomIn, ZoomOut, UserCheck, MessageSquare, AlertCircle
+  Printer, X, Eye, ZoomIn, ZoomOut, UserCheck, MessageSquare, AlertCircle,
+  Loader2, Lock
 } from 'lucide-react';
 import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHistory';
 import { showToast } from '../../utils/toast';
 import { getLetterClassifications, LetterClassification, generateLetterNumberAsync } from '../../utils/letterClassifications';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { supabase } from '../../utils/supabase';
+import {
+  lookupResidentByNik, createWargaSession, getWargaSession, clearWargaSession, getSessionRemainingMinutes
+} from '../../utils/wargaOtp';
 
 export default function LayananMandiri() {
   const [nikInput, setNikInput] = useState('');
-  const [residents, setResidents] = useState<any[]>([]);
-  const [verifiedResident, setVerifiedResident] = useState<any | null>(() => {
-    const saved = localStorage.getItem('didesa_verified_resident');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [verifiedResident, setVerifiedResident] = useState<any | null>(() => getWargaSession());
+
+  const [authNotice, setAuthNotice] = useState('');
+  const [isCheckingNik, setIsCheckingNik] = useState(false);
+  const [lookupAttempts, setLookupAttempts] = useState(0);
+  const [lookupLockCountdown, setLookupLockCountdown] = useState(0);
 
   const [activeSubTab, setActiveSubTab] = useState<'surat' | 'riwayat' | 'aspirasi'>('surat');
 
@@ -46,45 +50,63 @@ export default function LayananMandiri() {
     }
   }, []);
 
-  // Fetch residents for NIK verification
+  // Countdown lockout percobaan NIK salah
   useEffect(() => {
-    fetchResidentsCached()
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        if (Array.isArray(data)) {
-          setResidents(data);
-        }
-      })
-      .catch(err => {
-        // Silent catch for network errors during dev server restarts
-      });
-  }, []);
+    if (lookupLockCountdown <= 0) return;
+    const t = setInterval(() => setLookupLockCountdown(c => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [lookupLockCountdown]);
 
-  const handleVerify = (e: React.FormEvent) => {
+  const resetLogin = () => {
+    setNikInput('');
+    setAuthNotice('');
+    setLookupAttempts(0);
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nikInput.trim()) {
-      showToast('Harap masukkan NIK Anda', 'error');
+    if (lookupLockCountdown > 0) {
+      setAuthNotice(`Terlalu banyak percobaan. Coba lagi dalam ${lookupLockCountdown} detik.`);
       return;
     }
-
-    const found = residents.find(r => r.nik === nikInput.trim());
-    if (found) {
-      setVerifiedResident(found);
-      localStorage.setItem('didesa_verified_resident', JSON.stringify(found));
-      showToast(`NIK terverifikasi! Selamat datang, ${found.name}`, 'success');
-    } else {
-      showToast('NIK tidak ditemukan dalam database kependudukan desa. Pastikan NIK Anda benar.', 'error');
+    const cleanNik = nikInput.trim();
+    if (!cleanNik) {
+      setAuthNotice('Harap masukkan NIK Anda.');
+      return;
+    }
+    if (!/^\d{16}$/.test(cleanNik)) {
+      setAuthNotice('NIK harus terdiri dari 16 digit angka.');
+      return;
+    }
+    setAuthNotice('');
+    setIsCheckingNik(true);
+    try {
+      const resident = await lookupResidentByNik(cleanNik);
+      if (!resident) {
+        const next = lookupAttempts + 1;
+        setLookupAttempts(next);
+        if (next >= 5) {
+          setLookupAttempts(0);
+          setLookupLockCountdown(60);
+        }
+        setAuthNotice('NIK tidak ditemukan dalam database kependudukan desa. Pastikan NIK Anda benar.');
+        return;
+      }
+      setLookupAttempts(0);
+      const session = createWargaSession(resident);
+      setVerifiedResident(session);
+      setNikInput('');
+      showToast(`NIK terverifikasi! Selamat datang, ${session.name}`, 'success');
+    } finally {
+      setIsCheckingNik(false);
     }
   };
 
   const handleLogoutResident = () => {
+    clearWargaSession();
     setVerifiedResident(null);
-    localStorage.removeItem('didesa_verified_resident');
-    setNikInput('');
-    showToast('Sesi mandiri ditutup.', 'info');
+    resetLogin();
+    showToast('Sesi mandiri ditutup. Terima kasih!', 'info');
   };
 
   const loadPersonalLetters = async () => {
@@ -220,7 +242,7 @@ export default function LayananMandiri() {
     const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
     const namaKades = localStorage.getItem('kop_kades') || '';
 
-    const rtRwStr = verifiedResident?.rt_rw ? `RT/RW ${verifiedResident.rt_rw}` : 'RT 02/01';
+    const rtRwStr = verifiedResident?.rtRw ? `RT/RW ${verifiedResident.rtRw}` : 'RT 02/01';
 
     return (
       <div className="text-black text-left font-sans leading-relaxed p-2" style={{ fontFamily: 'Arial, sans-serif' }}>
@@ -327,26 +349,37 @@ export default function LayananMandiri() {
           <div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white">Portal Layanan Mandiri Warga</h3>
             <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed font-semibold">
-              Masukkan Nomor Induk Kependudukan (NIK) Anda untuk mengakses layanan pengajuan surat online dan melacak riwayat administrasi kependudukan Anda.
+              Masukkan Nomor Induk Kependudukan (NIK) Anda untuk mengakses pengajuan surat dan riwayat administrasi. Sesi berakhir otomatis setelah 60 menit demi keamanan data.
             </p>
           </div>
+
+          {authNotice && (
+            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/50 rounded-xl text-left flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+              <p className="text-xs font-semibold text-rose-700 dark:text-rose-300 leading-relaxed">{authNotice}</p>
+            </div>
+          )}
 
           <form onSubmit={handleVerify} className="space-y-4 text-left">
             <div className="space-y-2">
               <label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block">NOMOR INDUK KEPENDUDUKAN (NIK)</label>
               <input 
                 type="text" 
+                inputMode="numeric"
+                maxLength={16}
                 placeholder="Masukkan 16 digit NIK Anda..." 
                 value={nikInput}
-                onChange={(e) => setNikInput(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50/50 dark:bg-slate-800/50"
+                onChange={(e) => setNikInput(e.target.value.replace(/\D/g, '').slice(0, 16))}
+                disabled={isCheckingNik}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 text-sm outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50/50 dark:bg-slate-800/50 disabled:opacity-60"
               />
             </div>
             <button 
               type="submit"
-              className="w-full bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm hover:bg-emerald-800 transition-all shadow-sm dark:shadow-none active:scale-95"
+              disabled={isCheckingNik}
+              className="w-full bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm hover:bg-emerald-800 transition-all shadow-sm dark:shadow-none active:scale-95 disabled:opacity-60 flex items-center justify-center gap-2"
             >
-              Verifikasi & Masuk Portal
+              {isCheckingNik ? (<><Loader2 size={16} className="animate-spin" /> Memeriksa NIK...</>) : (<><ShieldCheck size={16} /> Verifikasi & Masuk Portal</>)}
             </button>
           </form>
 
@@ -355,7 +388,7 @@ export default function LayananMandiri() {
             <div>
               <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-0.5">Petunjuk Simulasi Sandbox</p>
               <p className="text-xs text-amber-700 font-semibold leading-relaxed">
-                Anda dapat menggunakan NIK terdaftar <span className="font-mono font-extrabold">3201020405060001</span> (Ahmad Bukhori) atau NIK terdaftar lainnya dari database kependudukan untuk menguji portal warga ini.
+                Gunakan NIK terdaftar <span className="font-mono font-extrabold">3201020405060001</span> (Ahmad Bukhori) atau NIK terdaftar lain dari database kependudukan untuk menguji portal warga ini.
               </p>
             </div>
           </div>
@@ -372,6 +405,9 @@ export default function LayananMandiri() {
               <div>
                 <h3 className="font-bold text-gray-900 dark:text-white text-base">Selamat Datang, {verifiedResident.name}</h3>
                 <p className="text-xs text-gray-400 font-bold mt-0.5">NIK: <span className="font-mono">{verifiedResident.nik}</span> &bull; Domisili: RT {verifiedResident.rtRw || '02 / 01'}</p>
+                <p className="text-[11px] text-gray-400 font-semibold mt-1 inline-flex items-center gap-1">
+                  <Lock size={11} className="text-emerald-600" /> Sesi aktif &bull; otomatis berakhir dalam <span className="font-mono font-bold">{getSessionRemainingMinutes(verifiedResident)} menit</span>
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
