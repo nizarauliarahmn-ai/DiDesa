@@ -1116,7 +1116,7 @@ export default function AdminSuratUndangan({
                       <tr>
                         <td className="font-normal py-0.5 align-top">Hal</td>
                         <td className="text-center py-0.5 align-top">:</td>
-                        <td className="font-bold py-0.5 align-top">{perihal || ''}</td>
+                        <td className="font-bold py-0.5 align-top">{capitalizeWords(perihal) || ''}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -1305,7 +1305,7 @@ export default function AdminSuratUndangan({
                           <tr>
                             <td className="font-normal py-0.5">Perihal</td>
                             <td className="text-center py-0.5">:</td>
-                            <td className="font-bold py-0.5">{perihal}</td>
+                            <td className="font-bold py-0.5">{capitalizeWords(perihal)}</td>
                           </tr>
                         </tbody>
                       </table>
