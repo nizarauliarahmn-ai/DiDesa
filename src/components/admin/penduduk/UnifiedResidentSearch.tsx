@@ -148,7 +148,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
   return (
     <>
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
-        <div className="flex items-center min-h-[32px]">
+        <div className="flex items-center h-8">
           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
         </div>
         <div className="relative w-full">
@@ -173,7 +173,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
       </div>
 
       <div className="space-y-2 relative" ref={activeField === 'nik' ? dropdownRef : null}>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 h-8">
           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
           <button
             type="button"
