@@ -17,7 +17,6 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeField, setActiveField] = useState<'nama' | 'nik' | null>(null);
   const [showKtpScanner, setShowKtpScanner] = useState(false);
-  const [isNotFound, setIsNotFound] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -152,26 +151,14 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
         <div className="flex justify-between items-center mb-1">
           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-          <div className="flex gap-2">
-            {isNotFound && (
-              <button
-                type="button"
-                onClick={() => onOpenQuickAdd(formData.nik, formData.nama)}
-                className="inline-flex items-center px-3 py-1.5 rounded-lg text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all cursor-pointer"
-                title="Warga belum terdaftar di Data Desa. Klik untuk menambah warga baru."
-              >
-                Tidak Ditemukan · + Tambah Warga
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setShowKtpScanner(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-              title="Scan KTP / KK untuk isi data otomatis"
-            >
-              <Scan className="w-3.5 h-3.5" /> Scan KTP / KK
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowKtpScanner(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+            title="Scan KTP / KK untuk isi data otomatis"
+          >
+            <Scan className="w-3.5 h-3.5" /> Scan KTP / KK
+          </button>
         </div>
         <div className="relative w-full">
           <input 
@@ -220,7 +207,6 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
         <ResidentStatusBadge
           nik={formData.nik}
           name={formData.nama}
-          onNotFoundChange={setIsNotFound}
         />
       </div>
       </div>

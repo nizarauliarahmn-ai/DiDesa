@@ -6,14 +6,12 @@ interface ResidentStatusBadgeProps {
   nik?: string;
   name?: string;
   onStatusVerified?: (isVerifiedActive: boolean) => void;
-  onNotFoundChange?: (isNotFound: boolean) => void;
 }
 
 export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
   nik,
   name,
-  onStatusVerified,
-  onNotFoundChange
+  onStatusVerified
 }) => {
   const [checkResult, setCheckResult] = useState<ResidentCheckResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +25,6 @@ export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
     if (!cleanNik && !cleanName) {
       setCheckResult(null);
       if (onStatusVerified) onStatusVerified(false);
-      if (onNotFoundChange) onNotFoundChange(false);
       return;
     }
 
@@ -38,9 +35,6 @@ export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
       setIsLoading(false);
       if (onStatusVerified) {
         onStatusVerified(res.exists);
-      }
-      if (onNotFoundChange) {
-        onNotFoundChange(res.statusType === 'not_found');
       }
     }, 350);
 
@@ -60,7 +54,6 @@ export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
       setCheckResult(res);
       setIsLoading(false);
       if (onStatusVerified) onStatusVerified(res.exists);
-      if (onNotFoundChange) onNotFoundChange(res.statusType === 'not_found');
     }
   };
 
