@@ -21,7 +21,7 @@ export default function SharedSignatureBlock({
 
   return (
     <div
-      className="border border-black text-black bg-white inline-flex items-center gap-2.5 text-left font-sans shadow-none rounded-none max-w-[340px]"
+      className="border border-black text-black bg-white inline-flex items-center gap-2.5 text-left font-sans shadow-none rounded-none max-w-[340px] py-1.5 px-2.5"
       style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
     >
       <div
