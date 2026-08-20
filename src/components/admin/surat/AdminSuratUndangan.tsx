@@ -3,7 +3,7 @@ import {
   Search, FileText, FileSignature, 
   ZoomIn, ZoomOut, Plus, Calendar, Users,
   ToggleLeft, ToggleRight, Trash2,
-  ArrowUp, ArrowDown, Mail, X, ChevronDown, Save
+  ArrowUp, ArrowDown, Mail, X, ChevronDown, Save, Lock, Pencil
 } from 'lucide-react';
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
@@ -178,8 +178,9 @@ export default function AdminSuratUndangan({
   );
   const [paragrafPenutup, setParagrafPenutup] = useState(
     editData?.paragrafPenutup || 
-    'Demikian undangan ini disampaikan, atas perhatian dan kerjasamanya kami ucapkan terima kasih.'
+    'Demikian undangan ini disampaikan, atas perhatian dan kerja samanya kami ucapkan terima kasih.'
   );
+  const [showPenutupEditor, setShowPenutupEditor] = useState(false);
 
   // Signature State & Village Officers List (SKTM-style)
   const officerList: any[] = (() => {
@@ -1038,14 +1039,45 @@ export default function AdminSuratUndangan({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Kalimat Penutup Surat</label>
-                <textarea 
-                  rows={2}
-                  data-no-cap
-                  value={paragrafPenutup}
-                  onChange={(e) => setParagrafPenutup(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium resize-none"
-                />
+                {!showPenutupEditor ? (
+                  <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 px-3.5 py-2.5">
+                    <div className="min-w-0">
+                      <label className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+                        <Lock size={11} className="text-slate-400" />
+                        Kalimat Penutup Surat
+                      </label>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 italic truncate">{paragrafPenutup}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPenutupEditor(true)}
+                      className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:border-emerald-400 hover:text-emerald-600 transition-all"
+                    >
+                      <Pencil size={12} />
+                      Ubah
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-bold text-slate-500 dark:text-slate-400">Kalimat Penutup Surat</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowPenutupEditor(false)}
+                        className="text-[11px] font-bold text-slate-400 hover:text-rose-500 transition-colors"
+                      >
+                        Selesai
+                      </button>
+                    </div>
+                    <textarea 
+                      rows={2}
+                      data-no-cap
+                      value={paragrafPenutup}
+                      onChange={(e) => setParagrafPenutup(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium resize-none"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
