@@ -11,7 +11,7 @@ import { fetchResidentsCached } from '../../../utils/apiCache';
 import { resolveKadesName } from '../../../utils/letterOfficers';
 import { getActiveTenantIdSync } from '../../../utils/tenantResolver';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import TTESignatureBox from './TTESignatureBox';
+import SharedSignatureBlock from './SharedSignatureBlock';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -1209,10 +1209,11 @@ export default function AdminSuratUndangan({
                     <div className="w-[45%] text-center">
                       {isTTE ? (
                         <div className="my-2 min-h-[75px] flex items-center justify-center">
-                          <TTESignatureBox
+                          <SharedSignatureBlock
                             officerTitle={pejabatJabatan}
                             officerName={pejabatNama}
                             nip={pejabatNip}
+                            placeName={cleanDesaName}
                             dateStr={fmtShortDate(tanggalSurat)}
                             verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
                           />
@@ -1233,15 +1234,16 @@ export default function AdminSuratUndangan({
                   <div className="flex justify-end text-center">
                     <div className="w-[55%]">
                       {isTTE ? (
-                        <div className="my-2 min-h-[75px] flex items-center justify-center">
-                          <TTESignatureBox
-                            officerTitle={pejabatJabatan}
-                            officerName={pejabatNama}
-                            nip={pejabatNip}
-                            dateStr={fmtShortDate(tanggalSurat)}
-                            verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
-                          />
-                        </div>
+<div className="my-2 min-h-[75px] flex items-center justify-center">
+                                <SharedSignatureBlock
+                                  officerTitle={pejabatJabatan}
+                                  officerName={pejabatNama}
+                                  nip={pejabatNip}
+                                  placeName={cleanDesaName}
+                                  dateStr={fmtShortDate(tanggalSurat)}
+                                  verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
+                                />
+                              </div>
                       ) : (
                         <>
                           <p className="font-bold">{pejabatJabatan}</p>
@@ -1336,15 +1338,16 @@ export default function AdminSuratUndangan({
                         <div className="flex justify-end text-center">
                           <div className="w-[55%]">
                             {isTTE ? (
-                              <div className="my-2 min-h-[75px] flex items-center justify-center">
-                                <TTESignatureBox
-                                  officerTitle={pejabatJabatan}
-                                  officerName={pejabatNama}
-                                  nip={pejabatNip}
-                                  dateStr={fmtShortDate(tanggalSurat)}
-                                  verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
-                                />
-                              </div>
+<div className="my-2 min-h-[75px] flex items-center justify-center">
+                          <SharedSignatureBlock
+                            officerTitle={pejabatJabatan}
+                            officerName={pejabatNama}
+                            nip={pejabatNip}
+                            placeName={cleanDesaName}
+                            dateStr={fmtShortDate(tanggalSurat)}
+                            verifyUrl={`${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(getActiveTenantIdSync())}&no=${encodeURIComponent(nomorSurat.toUpperCase())}`}
+                          />
+                        </div>
                             ) : (
                               <>
                                 <p className="font-bold">{pejabatJabatan}</p>
