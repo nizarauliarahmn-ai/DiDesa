@@ -148,7 +148,9 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
   return (
     <>
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
-        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+        <div className="flex items-center min-h-[32px]">
+          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+        </div>
         <div className="relative w-full">
           <input 
             type="text"
