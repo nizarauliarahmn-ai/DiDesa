@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { checkResidentDetailedStatus, reactivateResident, ResidentCheckResult } from '../../../utils/residentSync';
-import { CheckCircle2, AlertTriangle, UserPlus, RefreshCw, UserCheck } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, RefreshCw, UserCheck } from 'lucide-react';
 
 interface ResidentStatusBadgeProps {
   nik?: string;
   name?: string;
-  onOpenQuickAdd?: (nik?: string, name?: string) => void;
   onStatusVerified?: (isVerifiedActive: boolean) => void;
+  onNotFoundChange?: (isNotFound: boolean) => void;
 }
 
 export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
   nik,
   name,
-  onOpenQuickAdd,
-  onStatusVerified
+  onStatusVerified,
+  onNotFoundChange
 }) => {
   const [checkResult, setCheckResult] = useState<ResidentCheckResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +27,7 @@ export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
     if (!cleanNik && !cleanName) {
       setCheckResult(null);
       if (onStatusVerified) onStatusVerified(false);
+      if (onNotFoundChange) onNotFoundChange(false);
       return;
     }
 
@@ -37,6 +38,9 @@ export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
       setIsLoading(false);
       if (onStatusVerified) {
         onStatusVerified(res.exists);
+      }
+      if (onNotFoundChange) {
+        onNotFoundChange(res.statusType === 'not_found');
       }
     }, 350);
 
@@ -56,6 +60,7 @@ export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
       setCheckResult(res);
       setIsLoading(false);
       if (onStatusVerified) onStatusVerified(res.exists);
+      if (onNotFoundChange) onNotFoundChange(res.statusType === 'not_found');
     }
   };
 
@@ -88,24 +93,6 @@ export const ResidentStatusBadge: React.FC<ResidentStatusBadgeProps> = ({
             <UserCheck className="w-3.5 h-3.5" />
             <span>Aktifkan Kembali Warga</span>
           </button>
-        </div>
-      ) : checkResult?.statusType === 'not_found' ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60 rounded-xl font-medium">
-            <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
-            <span>Warga Belum Terdaftar di Data Desa</span>
-          </div>
-
-          {onOpenQuickAdd && (
-            <button
-              type="button"
-              onClick={() => onOpenQuickAdd(nik, name)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl font-semibold shadow-md transition-all text-xs cursor-pointer"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>+ Tambah Warga Baru</span>
-            </button>
-          )}
         </div>
       ) : null}
 
