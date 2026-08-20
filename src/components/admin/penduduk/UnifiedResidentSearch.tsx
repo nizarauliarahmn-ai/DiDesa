@@ -147,6 +147,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
 
   return (
     <>
+      <div className="space-y-4">
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
         <div className="flex items-center h-8">
           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
@@ -208,6 +209,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
           name={formData.nama}
           onOpenQuickAdd={() => onOpenQuickAdd()}
         />
+      </div>
       </div>
 
       {/* Modal Scanner KTP */}
