@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ResidentStatusBadge } from './ResidentStatusBadge';
 import { capitalizeResidentFields } from '../../../utils/textUtils';
-import { Scan, UserPlus, AlertTriangle } from 'lucide-react';
+import { Scan, UserPlus } from 'lucide-react';
 import KTPScannerModal from '../surat/KTPScannerModal';
 import { KtpOcrResult } from '../../../utils/ktpOcr';
 import { showToast } from '../../../utils/toast';
@@ -157,11 +157,10 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
               <button
                 type="button"
                 onClick={() => onOpenQuickAdd(formData.nik, formData.nama)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all cursor-pointer"
+                className="inline-flex items-center px-3 py-1.5 rounded-lg text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all cursor-pointer"
                 title="Warga belum terdaftar di Data Desa. Klik untuk menambah warga baru."
               >
-                <AlertTriangle className="w-3.5 h-3.5" /> Tidak Ditemukan
-                <UserPlus className="w-3.5 h-3.5" /> + Tambah Warga
+                Tidak Ditemukan · + Tambah Warga
               </button>
             )}
             <button
