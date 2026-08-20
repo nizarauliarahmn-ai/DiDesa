@@ -924,9 +924,10 @@ export default function AdminSuratSKU({
                 <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
               </div>
             </div>
+          </section>
 
             {/* Pejabat Penandatangan */}
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+            <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none mt-6">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
                   <FileSignature className="w-4 h-4 text-amber-600" />
@@ -1010,9 +1011,8 @@ export default function AdminSuratSKU({
                   * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
                 </p>
               </div>
-            </div>
-          </section>
-        </div>
+            </section>
+          </div>
 
         {/* Preview Column */}
         <div className="lg:col-span-5 space-y-6">
