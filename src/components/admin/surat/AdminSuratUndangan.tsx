@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   Search, FileText, FileSignature, 
-  ZoomIn, ZoomOut, Plus, Calendar, Users, FileSpreadsheet,
+  ZoomIn, ZoomOut, Plus, Calendar, Users,
   ToggleLeft, ToggleRight, Trash2,
   ArrowUp, ArrowDown, Mail, X
 } from 'lucide-react';
@@ -581,25 +581,6 @@ export default function AdminSuratUndangan({
               <span className="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 rounded-full text-xs font-bold">
                 {recipients.length} Orang
               </span>
-            </div>
-
-            {/* Auto Attachment Indicator */}
-            <div className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center justify-between transition-all ${
-              isAttached ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
-            }`}>
-              <div className="flex items-center gap-2">
-                <FileSpreadsheet size={16} className={isAttached ? 'text-amber-600' : 'text-slate-400'} />
-                <span>
-                  {isAttached ? 'Daftar penerima dialihkan ke Lampiran Halaman 2 (>3 penerima)' : 'Daftar penerima ditampilkan langsung di Halaman 1 (≤3 penerima)'}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setForceAttachment(!forceAttachment)}
-                className="text-xs font-bold underline shrink-0 hover:text-emerald-600 ml-2"
-              >
-                {forceAttachment ? 'Batal Paksa' : 'Paksa Lampiran'}
-              </button>
             </div>
 
             {/* Resident Autocomplete Search Input */}
