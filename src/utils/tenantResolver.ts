@@ -38,7 +38,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       const hostname = window.location.hostname;
       const parts = hostname.split('.');
       if (parts.length >= 2) {
-        if (parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'didesa' && parts[0] !== 'dev' && parts[0] !== 'staging' && parts[0] !== 'preview') {
+        if (parts[0] !== 'www' && parts[0] !== 'localhost' && parts[0] !== 'didesa' && parts[0] !== 'dev' && parts[0] !== 'staging' && parts[0] !== 'preview' && parts[0] !== 'saas') {
           targetDomain = parts[0];
         }
       }

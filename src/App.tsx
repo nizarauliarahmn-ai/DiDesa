@@ -116,7 +116,10 @@ export default function App() {
   
   const hostname = window.location.hostname;
   const parts = hostname.split('.');
-  const isRootDomain = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost') && !urlParams.get('tenant') && !urlParams.get('t_id');
+  // Subdomain khusus Panel SaaS (saas.sistemdidesa.id) diperlakukan seperti
+  // root domain: BUKAN tenant desa, dan langsung menampilkan Login Platform.
+  const isSaasSubdomain = parts[0] === 'saas' && parts.length >= 3;
+  const isRootDomain = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost' || isSaasSubdomain) && !urlParams.get('tenant') && !urlParams.get('t_id');
 
   const [tenantValid, setTenantValid] = useState<boolean | null>(null);
   const [tenantStatus, setTenantStatus] = useState<string | null>(null);
@@ -166,6 +169,12 @@ export default function App() {
       return 'public';
     }
     if (urlParams.get('preview') === 'true') {
+      return 'admin';
+    }
+
+    // Subdomain khusus SaaS (saas.sistemdidesa.id) → langsung mode admin agar
+    // menampilkan Login Platform (bukan landing page publik).
+    if (isSaasSubdomain) {
       return 'admin';
     }
 
@@ -379,7 +388,7 @@ export default function App() {
           // STRICT ROUTING: If on root domain, redirect to tenant subdomain!
           const hostname = window.location.hostname;
           const parts = hostname.split('.');
-          const isRoot = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost') && !window.location.search.includes('tenant=') && !window.location.search.includes('t_id=');
+          const isRoot = (parts.length < 3 || parts[0] === 'www' || parts[0] === 'didesa' || parts[0] === 'localhost' || parts[0] === 'saas') && !window.location.search.includes('tenant=') && !window.location.search.includes('t_id=');
           
           if (isRoot) {
             const { data } = await supabase.from('tenants').select('domain').eq('id', parsed.tenantId).single();

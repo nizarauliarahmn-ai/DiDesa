@@ -17,7 +17,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   // Available Tenants for Global Login Dropdown
   const [allTenants, setAllTenants] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSaaSLogin, setShowSaaSLogin] = useState(false);
+  // Pada subdomain khusus SaaS (saas.sistemdidesa.id), langsung tampilkan
+  // Login Pengelola Platform tanpa harus klik toggle "Masuk sebagai Pengelola".
+  const [showSaaSLogin, setShowSaaSLogin] = useState(() => window.location.hostname.split('.')[0] === 'saas');
 
   // Determine if we are on a specific subdomain or explicit tenant parameter
   const [isSpecificSubdomain, setIsSpecificSubdomain] = useState(false);
@@ -55,7 +57,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         const tenantParam = urlParams.get('tenant');
         const hostname = window.location.hostname;
         const parts = hostname.split('.');
-        const hasSubdomain = parts.length >= 2 && !['www', 'localhost', 'didesa', 'dev', 'staging', 'preview'].includes(parts[0]);
+        const hasSubdomain = parts.length >= 2 && !['www', 'localhost', 'didesa', 'dev', 'staging', 'preview', 'saas'].includes(parts[0]);
         
         const isSpecific = !!(tenantParam || hasSubdomain);
         setIsSpecificSubdomain(isSpecific);
