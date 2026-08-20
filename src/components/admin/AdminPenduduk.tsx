@@ -1,7 +1,7 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, Upload, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle } from 'lucide-react';
+import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle, MoreHorizontal } from 'lucide-react';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
@@ -13,7 +13,9 @@ import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { normalizeStatusKeberadaan } from '../../utils/statusKeberadaan';
 
-const FILTERS = ["Semua", "✨ Terbaru", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal", "RW 01", "RW 02", "RT 01", "RT 02", "Kawin", "Belum Kawin", "Cerai Mati"];
+// Filter cepat utama — filter lanjutan (RT/RW, status kawin, dll) diakses
+// melalui modal tombol Filter di kanan input pencarian.
+const FILTERS = ["Semua", "✨ Terbaru", "🎁 Penerima Bansos", "🚫 Non-Penerima", "Pindah", "Meninggal"];
 
 export default function AdminPenduduk({ 
   onNavigateToTab, 
@@ -54,7 +56,7 @@ export default function AdminPenduduk({
   const [showQuickFilters, setShowQuickFilters] = useState(true);
   const [selectedPenduduk, setSelectedPenduduk] = useState<any>(null);
   const [editingPenduduk, setEditingPenduduk] = useState<any>(null);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -732,45 +734,49 @@ export default function AdminPenduduk({
           <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">Kelola data informasi kependudukan {villageName}.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
-          <button onClick={() => setShowArchive(true)} className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg border border-rose-200 dark:border-rose-800/50 text-rose-600 dark:text-rose-400 font-bold text-xs sm:text-sm hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors bg-white dark:bg-slate-900 shadow-sm dark:shadow-none whitespace-nowrap">
-            <Trash2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Tong Sampah</span>
-          </button>
-          <button onClick={() => setShowImportModal(true)} className="flex-1 md:flex-none justify-center flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg border border-emerald-700 text-emerald-700 font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-colors shadow-sm dark:shadow-none bg-white dark:bg-slate-900 whitespace-nowrap">
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Impor Data</span>
-            <span className="sm:hidden">Impor</span>
-          </button>
-          
           <div className="relative flex-1 md:flex-none">
             <button 
-              onClick={() => setShowExportMenu(!showExportMenu)} 
-              className="w-full justify-center flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg border border-emerald-700 text-emerald-700 font-bold text-xs sm:text-sm hover:bg-emerald-50 transition-colors shadow-sm dark:shadow-none bg-white dark:bg-slate-900 whitespace-nowrap"
+              onClick={() => setShowMoreMenu(!showMoreMenu)} 
+              className="w-full justify-center flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-lg border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors shadow-sm dark:shadow-none bg-white dark:bg-slate-900 whitespace-nowrap"
             >
-              <Upload className="w-4 h-4" />
-              <span className="hidden sm:inline">Ekspor Data</span>
-              <span className="sm:hidden">Ekspor</span>
+              <MoreHorizontal className="w-4 h-4" />
+              <span className="hidden sm:inline">Opsi Lainnya</span>
             </button>
-            {showExportMenu && (
+            {showMoreMenu && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)}></div>
-                <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl shadow-lg dark:shadow-none py-1.5 z-50 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
+                <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)}></div>
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl shadow-lg dark:shadow-none py-1.5 z-50 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
                   <button 
-                    onClick={() => handleExportData('json')} 
+                    onClick={() => { setShowMoreMenu(false); setShowArchive(true); }} 
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50/60 dark:hover:bg-rose-900/20 flex items-center gap-2 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4 shrink-0" />
+                    Tong Sampah
+                  </button>
+                  <button 
+                    onClick={() => { setShowMoreMenu(false); setShowImportModal(true); }} 
+                    className="w-full text-left px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 flex items-center gap-2 transition-colors"
+                  >
+                    <Download className="w-4 h-4 shrink-0" />
+                    Impor Data
+                  </button>
+                  <div className="my-1 border-t border-gray-100 dark:border-slate-800"></div>
+                  <button 
+                    onClick={() => { setShowMoreMenu(false); handleExportData('json'); }} 
                     className="w-full text-left px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 flex items-center gap-2 transition-colors"
                   >
                     <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0"></span>
-                    <div className="flex mb-6 flex-col">
+                    <div className="flex flex-col">
                       <span>Backup JSON (Lengkap)</span>
                       <span className="text-[10px] text-gray-400 font-normal">Sangat cocok untuk restore</span>
                     </div>
                   </button>
                   <button 
-                    onClick={() => handleExportData('csv')} 
+                    onClick={() => { setShowMoreMenu(false); handleExportData('csv'); }} 
                     className="w-full text-left px-4 py-2.5 text-xs font-semibold text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 flex items-center gap-2 transition-colors"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                    <div className="flex mb-6 flex-col">
+                    <div className="flex flex-col">
                       <span>Unduh CSV (Excel)</span>
                       <span className="text-[10px] text-gray-400 font-normal">Cocok diolah di spreadsheet</span>
                     </div>
@@ -968,7 +974,6 @@ export default function AdminPenduduk({
                       item={item}
                       nik={item.nik} 
                     noKk={item.noKk}
-                    kepalaKeluarga={getKepalaKeluarga(item.noKk)}
                     initials={item.initials} 
                     name={item.name} 
                     age={item.age}
@@ -1207,7 +1212,7 @@ export default function AdminPenduduk({
 }
 
 
-const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, maritalStatus, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
+const TableRow = React.memo(({ item, nik, noKk, initials, name, age, gender, genderColor, rtRw, status, maritalStatus, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
   const getBadgeColors = (color: string) => {
     switch (color) {
       case 'blue': return 'bg-blue-50 text-blue-700 border-blue-100';
@@ -1247,7 +1252,6 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
               </span>
             )}
           </div>
-          <span className="text-[10px] text-gray-400 font-medium mt-0.5">KK: {kepalaKeluarga || '-'}</span>
         </div>
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
