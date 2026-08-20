@@ -147,10 +147,18 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 col-span-full w-full">
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
-        <div className="flex items-center h-8">
+        <div className="flex justify-between items-center mb-1">
           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+          <button
+            type="button"
+            onClick={() => setShowKtpScanner(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
+            title="Scan KTP / KK untuk isi data otomatis"
+          >
+            <Scan className="w-3.5 h-3.5" /> Scan KTP / KK
+          </button>
         </div>
         <div className="relative w-full">
           <input 
@@ -174,16 +182,8 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
       </div>
 
       <div className="space-y-2 relative" ref={activeField === 'nik' ? dropdownRef : null}>
-        <div className="flex items-center justify-between gap-2 h-8">
+        <div className="flex items-center h-8">
           <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-          <button
-            type="button"
-            onClick={() => setShowKtpScanner(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-500/20 active:scale-95 transition-all cursor-pointer"
-            title="Scan KTP / KK untuk isi data otomatis"
-          >
-            <Scan className="w-3.5 h-3.5" /> Scan KTP / KK
-          </button>
         </div>
         <div className="relative w-full">
           <input 
