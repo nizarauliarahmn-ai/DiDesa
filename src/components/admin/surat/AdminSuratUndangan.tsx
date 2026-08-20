@@ -539,13 +539,16 @@ export default function AdminSuratUndangan({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Lampiran</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    Lampiran
+                    <span className="ml-2 text-[10px] font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">Terisi Otomatis</span>
+                  </label>
                   <input 
                     type="text"
                     value={isAttached ? '1 (satu) Lembar' : lampiran}
-                    disabled={isAttached}
+                    readOnly
                     onChange={(e) => setLampiran(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-medium disabled:opacity-60"
+                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-sm font-medium cursor-not-allowed"
                   />
                 </div>
               </div>
