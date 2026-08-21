@@ -622,8 +622,9 @@ export default function AdminSuratSKU({
           
           
 
-          {/* Card 2: Data Penduduk */}
-          <CardWrapper title="Data Penduduk" icon={User}>
+          {/* Form Detail */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
+            {/* Data Penduduk */}
             <div>
               <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
@@ -748,10 +749,15 @@ export default function AdminSuratSKU({
                 </div>
               </div>
             </div>
-          </CardWrapper>
 
-            {/* Card 3: Detail Usaha */}
-            <CardWrapper title="Detail Usaha" icon={Store}>
+            {/* Detail Usaha */}
+            <div>
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <Store className="w-4 h-4 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Detail Usaha</h3>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-2xl border border-slate-100/60">
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Usaha / Toko</label>
@@ -906,10 +912,10 @@ export default function AdminSuratSKU({
                   />
                 </div>
               </div>
-            </CardWrapper>
+            </div>
 
-{/* Card 4: Keperluan Surat */}
-            <CardWrapper title="Keperluan Surat" icon={FileText}>
+            {/* Keperluan Surat */}
+            <div className="pt-2">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat (Diberikan Untuk...)</label>
 <SuggestCombobox
@@ -920,10 +926,17 @@ export default function AdminSuratSKU({
                   />
                 <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
               </div>
-</CardWrapper>
+            </div>
+          </section>
 
-            {/* Card 5: Pejabat Penandatangan */}
-            <CardWrapper title="Pejabat Penandatangan" icon={FileSignature}>
+            {/* Pejabat Penandatangan */}
+            <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none mt-6">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                  <FileSignature className="w-4 h-4 text-amber-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pejabat Penandatangan</h3>
+              </div>
               <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-2">
@@ -1001,7 +1014,7 @@ export default function AdminSuratSKU({
                   * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
                 </p>
               </div>
-            </CardWrapper>
+            </section>
           </div>
 
         {/* Preview Column */}
