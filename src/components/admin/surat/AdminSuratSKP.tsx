@@ -596,7 +596,7 @@ export default function AdminSuratSKP({
       </div>
 
       <p style="text-indent:40px;text-align:justify;line-height:1.25;margin-bottom:6px;font-size:13.5px;">
-        Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa :
+        Yang bertanda tangan di bawah ini Kepala Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)} Kabupaten ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)} Provinsi ${cleanStr(activeProvinsi, /^provinsi\s+/i)}, menerangkan dengan sebenarnya bahwa:
       </p>
 
       <!-- DATA PENDUDUK ASAL -->
