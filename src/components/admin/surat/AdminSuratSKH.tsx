@@ -594,7 +594,13 @@ export default function AdminSuratSKH({
           
 
 {/* Card 2: Data Penduduk */}
-          <CardWrapper title="Data Penduduk" icon={User}>
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <User className="w-4 h-4 text-emerald-600" />
+              </div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Penduduk</h3>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
               <UnifiedResidentSearch
                 formData={formData}
@@ -721,7 +727,7 @@ export default function AdminSuratSKH({
                 <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan tujuan pembuatan surat ini secara spesifik.</p>
               </div>
             </div>
-          </CardWrapper>
+          </div>
 
             {/* Card 3: Detail Keterangan Kehilangan */}
           <CardWrapper title="Detail Keterangan Kehilangan" icon={AlertCircle}>

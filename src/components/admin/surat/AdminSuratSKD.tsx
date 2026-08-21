@@ -10,8 +10,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { User, Home, FileSignature, AlertCircle, History,
-  ZoomIn, ZoomOut
+  ZoomIn, ZoomOut, MapPin, FileText
 } from 'lucide-react';
+import { CardWrapper } from './CardWrapper';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
