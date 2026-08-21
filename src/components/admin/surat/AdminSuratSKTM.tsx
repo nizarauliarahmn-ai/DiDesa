@@ -562,28 +562,23 @@ export default function AdminSuratSKTM({
         {/* Form Column */}
         <div className="lg:col-span-7 space-y-6">
 
-          {/* Card 1: Pengaturan Tanggal & Nomor Surat */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-4">
-            <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-              <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-emerald-600" />
-              </div>
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pengaturan Tanggal & Nomor Surat</h3>
-            </div>
-            <BackdateConfig
-              prefix={kodeKlasifikasiSKTM}
-              suffix="WHI-SKTM"
-              tanggalSurat={tanggalSurat}
-              onTanggalSuratChange={setTanggalSurat}
-              isBackdate={isBackdate}
-              onBackdateChange={setIsBackdate}
-              manualSequence={manualSequence}
-              onManualSequenceChange={setManualSequence}
-              normalNomor={formData.nomorSurat}
-              onCustomNomorSurat={handleCustomNomorSurat}
-            />
-          </div>
+{/* Card 1: Pengaturan Tanggal & Nomor Surat */}
+          <BackdateConfig
+            prefix={kodeKlasifikasiSKTM}
+            suffix="WHI-SKTM"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={setTanggalSurat}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={formData.nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
           
+          
+
+
           
 
 {/* Card 2: Data Penduduk */}
