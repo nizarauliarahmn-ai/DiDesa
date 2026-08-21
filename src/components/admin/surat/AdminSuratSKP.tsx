@@ -802,9 +802,9 @@ export default function AdminSuratSKP({
               return '-';
             }
           })(),
-          false,
-          false,
-          formData.nomorSurat
+          formData.includeCamat,
+useEsignature,
+formData.nomorSurat
         )}
 
         <!-- FOOTER LEMBAR 2 -->
