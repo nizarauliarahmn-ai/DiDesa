@@ -604,26 +604,27 @@ export default function AdminSuratSKU({
         {/* Form Column */}
         <div className="lg:col-span-7 space-y-6">
 
-          {/* Card 1: Pengaturan Tanggal & Nomor Surat */}
-          <CardWrapper title="Pengaturan Tanggal & Nomor Surat" icon={Calendar}>
-            <BackdateConfig
-              prefix={kodeKlasifikasiSKU}
-              suffix="WHI-SKU"
-              tanggalSurat={tanggalSurat}
-              onTanggalSuratChange={setTanggalSurat}
-              isBackdate={isBackdate}
-              onBackdateChange={setIsBackdate}
-              manualSequence={manualSequence}
-              onManualSequenceChange={setManualSequence}
-              normalNomor={formData.nomorSurat}
-              onCustomNomorSurat={handleCustomNomorSurat}
-            />
-          </CardWrapper>
+{/* Card 1: Pengaturan Tanggal & Nomor Surat */}
+          <BackdateConfig
+            prefix={kodeKlasifikasiSKU}
+            suffix="WHI-SKU"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={setTanggalSurat}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={formData.nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
           
           
 
-          {/* Card 2: Data Penduduk */}
-          <CardWrapper title="Data Penduduk" icon={User}>
+
+          
+
+{/* Card 2: Data Penduduk */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-4">
             <div>
               <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
@@ -748,7 +749,7 @@ export default function AdminSuratSKU({
                 </div>
               </div>
             </div>
-          </CardWrapper>
+          </div>
 
             {/* Card 3: Detail Usaha */}
             <CardWrapper title="Detail Usaha" icon={Store}>
@@ -923,7 +924,13 @@ export default function AdminSuratSKU({
 </CardWrapper>
 
             {/* Card 5: Pejabat Penandatangan */}
-            <CardWrapper title="Pejabat Penandatangan" icon={FileSignature}>
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-4">
+              <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                  <FileSignature className="w-4 h-4 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pejabat Penandatangan</h3>
+              </div>
               <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-2">
@@ -1001,7 +1008,7 @@ export default function AdminSuratSKU({
                   * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
                 </p>
               </div>
-            </CardWrapper>
+            </div>
           </div>
 
         {/* Preview Column */}
