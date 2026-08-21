@@ -766,33 +766,12 @@ export default function AdminSuratSKU({
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis / Bidang Usaha</label>
-                  <select 
-                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={BUSINESS_CATEGORIES.includes(formData.usahaJenis) ? formData.usahaJenis : (formData.usahaJenis ? "Lainnya (Tulis Kustom...)" : "")}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === "Lainnya (Tulis Kustom...)") {
-                        setFormData({...formData, usahaJenis: ''});
-                      } else {
-                        setFormData({...formData, usahaJenis: val});
-                      }
-                    }}
-                  >
-                    <option value="" disabled>-- Pilih Bidang Usaha --</option>
-                    {BUSINESS_CATEGORIES.map((cat, idx) => (
-                      <option key={idx} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-
-                  {(!BUSINESS_CATEGORIES.includes(formData.usahaJenis) || formData.usahaJenis === '') && (
-                    <input 
-                      type="text" 
-                      value={formData.usahaJenis}
-                      onChange={(e) => setFormData({...formData, usahaJenis: e.target.value})}
-                      placeholder="Tulis bidang usaha kustom..."
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mt-2"
-                    />
-                  )}
+                  <SuggestCombobox
+                    value={formData.usahaJenis}
+                    onChange={(v) => setFormData({...formData, usahaJenis: v})}
+                    options={BUSINESS_CATEGORIES}
+                    placeholder="Contoh: Perdagangan Sembako / Kuliner / Jasa Perbengkelan..."
+                  />
                 </div>
 
                 <div className="relative space-y-2">
