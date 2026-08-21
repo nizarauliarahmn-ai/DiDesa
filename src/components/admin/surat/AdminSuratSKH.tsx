@@ -575,23 +575,23 @@ export default function AdminSuratSKH({
         <div className="lg:col-span-7 space-y-6">
 
 {/* Card 1: Pengaturan Tanggal & Nomor Surat */}
-          <CardWrapper title="Pengaturan Tanggal & Nomor Surat" icon={Calendar}>
-            <BackdateConfig
-              prefix={kodeKlasifikasiSKH}
-              suffix="WHI-SKH"
-              tanggalSurat={tanggalSurat}
-              onTanggalSuratChange={setTanggalSurat}
-              isBackdate={isBackdate}
-              onBackdateChange={setIsBackdate}
-              manualSequence={manualSequence}
-              onManualSequenceChange={setManualSequence}
-              normalNomor={formData.nomorSurat}
-              onCustomNomorSurat={handleCustomNomorSurat}
-            />
-          </CardWrapper>
+          <BackdateConfig
+            prefix={kodeKlasifikasiSKH}
+            suffix="WHI-SKH"
+            tanggalSurat={tanggalSurat}
+            onTanggalSuratChange={setTanggalSurat}
+            isBackdate={isBackdate}
+            onBackdateChange={setIsBackdate}
+            manualSequence={manualSequence}
+            onManualSequenceChange={setManualSequence}
+            normalNomor={formData.nomorSurat}
+            onCustomNomorSurat={handleCustomNomorSurat}
+          />
           
           
 
+
+          
 
 {/* Card 2: Data Penduduk */}
           <CardWrapper title="Data Penduduk" icon={User}>
@@ -770,7 +770,13 @@ export default function AdminSuratSKH({
           </CardWrapper>
 
             {/* Card 4: Pejabat Penandatangan */}
-          <CardWrapper title="Pejabat Penandatangan" icon={FileSignature}>
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none mt-6">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                <FileSignature className="w-4 h-4 text-amber-600" />
+              </div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pejabat Penandatangan</h3>
+            </div>
             <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
               <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
@@ -849,7 +855,7 @@ export default function AdminSuratSKH({
                 * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
               </p>
             </div>
-          </CardWrapper>
+          </div>
           </div>
 
         {/* Preview Column */}
