@@ -131,7 +131,7 @@ export default function BackdateConfig({
         <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
           <Calendar className="w-4 h-4 text-emerald-600" />
         </div>
-        <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pengaturan Tanggal & Nomor Surat</h3>
+        <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Tanggal & Nomor Surat</h3>
       </div>
 
       <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800/50">
