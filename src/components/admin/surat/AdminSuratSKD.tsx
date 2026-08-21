@@ -771,16 +771,22 @@ export default function AdminSuratSKD({
                     <option value="Indonesia">Indonesia</option>
                     <option value="Asing">Asing</option>
                   </select>
-                </div>
-                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2 space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jalan / Nama Tempat (Sekarang)</label>
-                      <textarea 
-                        rows={2}
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                        value={formData.alamatSekarang}
-                        onChange={(e) => {
+</div>
+              </div>
+            </div>
+          </section>
+
+          {/* Card 3: Detail Domisili */}
+          <CardWrapper title="Detail Domisili" icon={Home}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jalan / Nama Tempat (Sekarang)</label>
+                  <textarea 
+                    rows={2}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                    value={formData.alamatSekarang}
+                    onChange={(e) => {
   const val = e.target.value;
   const parsed = parseAddress(val);
   setFormData(prev => ({
@@ -792,46 +798,84 @@ export default function AdminSuratSKD({
     ...(parsed.kec ? { kecamatanSekarang: parsed.kec } : {})
   }));
 }}
-                        placeholder="Contoh: Jl. Bungur Raya No. 12"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT (Sekarang)</label>
-                        <input 
-                          type="text"
-                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                          value={formData.rtSekarang}
-                          onChange={(e) => setFormData({...formData, rtSekarang: e.target.value})}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW (Sekarang)</label>
-                        <input 
-                          type="text"
-                          className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                          value={formData.rwSekarang}
-                          onChange={(e) => setFormData({...formData, rwSekarang: e.target.value})}
-                        />
-                      </div>
-                    </div>
+                    placeholder="Contoh: Jl. Bungur Raya No. 12"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT (Sekarang)</label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                      value={formData.rtSekarang}
+                      onChange={(e) => setFormData({...formData, rtSekarang: e.target.value})}
+                    />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sifat Domisili</label>
-                    <select 
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none appearance-none"
-                      value={formData.sifatDomisili}
-                      onChange={(e) => setFormData({...formData, sifatDomisili: e.target.value})}
-                    >
-                      <option value="Menetap">Menetap</option>
-                      <option value="Sementara">Sementara</option>
-                    </select>
-                    <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Status kependudukan saat ini.</p>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW (Sekarang)</label>
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                      value={formData.rwSekarang}
+                      onChange={(e) => setFormData({...formData, rwSekarang: e.target.value})}
+                    />
                   </div>
+                </div>
               </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Desa / Kelurahan (Sekarang)</label>
+                <input 
+                  type="text"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.desaSekarang}
+                  onChange={(e) => setFormData({...formData, desaSekarang: e.target.value})}
+                  placeholder="Contoh: Sukamakmur"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kecamatan (Sekarang)</label>
+                <input 
+                  type="text"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.kecamatanSekarang}
+                  onChange={(e) => setFormData({...formData, kecamatanSekarang: e.target.value})}
+                  placeholder="Contoh: Simpur"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kabupaten / Kota (Sekarang)</label>
+                <input 
+                  type="text"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.kabupatenSekarang}
+                  onChange={(e) => setFormData({...formData, kabupatenSekarang: e.target.value})}
+                  placeholder="Contoh: Hulu Sungai Selatan"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Provinsi (Sekarang)</label>
+                <input 
+                  type="text"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.provinsiSekarang}
+                  onChange={(e) => setFormData({...formData, provinsiSekarang: e.target.value})}
+                  placeholder="Contoh: Kalimantan Selatan"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sifat Domisili</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none appearance-none"
+                  value={formData.sifatDomisili}
+                  onChange={(e) => setFormData({...formData, sifatDomisili: e.target.value})}
+                >
+                  <option value="Menetap">Menetap</option>
+                  <option value="Sementara">Sementara</option>
+                </select>
+                <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Status kependudukan saat ini.</p>
               </div>
             </div>
-          </section>
+          </CardWrapper>
 
             {/* Pejabat Penandatangan */}
             <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none mt-6">
