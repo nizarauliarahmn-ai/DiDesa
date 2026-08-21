@@ -9,8 +9,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import PrintSuccessDialog from './PrintSuccessDialog';
 import { FileText, User, FileSignature, AlertCircle, History,
-  ZoomIn, ZoomOut
+  ZoomIn, ZoomOut, Calendar
 } from 'lucide-react';
+import { CardWrapper } from './CardWrapper';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -573,303 +574,282 @@ export default function AdminSuratSKH({
         {/* Form Column */}
         <div className="lg:col-span-7 space-y-6">
 
-          {/* Backdate Config - Paling Atas Form */}
-          <BackdateConfig
-            prefix={kodeKlasifikasiSKH}
-            suffix="WHI-SKH"
-            tanggalSurat={tanggalSurat}
-            onTanggalSuratChange={setTanggalSurat}
-            isBackdate={isBackdate}
-            onBackdateChange={setIsBackdate}
-            manualSequence={manualSequence}
-            onManualSequenceChange={setManualSequence}
-            normalNomor={formData.nomorSurat}
-            onCustomNomorSurat={handleCustomNomorSurat}
-          />
+{/* Card 1: Pengaturan Tanggal & Nomor Surat */}
+          <CardWrapper title="Pengaturan Tanggal & Nomor Surat" icon={Calendar}>
+            <BackdateConfig
+              prefix={kodeKlasifikasiSKH}
+              suffix="WHI-SKH"
+              tanggalSurat={tanggalSurat}
+              onTanggalSuratChange={setTanggalSurat}
+              isBackdate={isBackdate}
+              onBackdateChange={setIsBackdate}
+              manualSequence={manualSequence}
+              onManualSequenceChange={setManualSequence}
+              normalNomor={formData.nomorSurat}
+              onCustomNomorSurat={handleCustomNomorSurat}
+            />
+          </CardWrapper>
           
           
 
-          {/* Form Detail */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
-            {/* Data Penduduk */}
-            <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
-                  <User className="w-4 h-4 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Penduduk</h3>
+
+{/* Card 2: Data Penduduk */}
+          <CardWrapper title="Data Penduduk" icon={User}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+              <UnifiedResidentSearch
+                formData={formData}
+                setFormData={setFormData}
+                residents={residents}
+                onOpenQuickAdd={(nik, name) => {
+                  setQuickAddInitialData({ nik: nik || formData.nik, name: name || formData.nama || (formData as any).name || (formData as any).namaAyah || (formData as any).namaIbu });
+                  setShowQuickAddModal(true);
+                }}
+              />
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.jenisKelamin}
+                  onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
+                >
+                  <option value="Laki-Laki">Laki-Laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                                <UnifiedResidentSearch
-                  formData={formData}
-                  setFormData={setFormData}
-                  residents={residents}
-                  onOpenQuickAdd={(nik, name) => {
-                    setQuickAddInitialData({ nik: nik || formData.nik, name: name || formData.nama || (formData as any).name || (formData as any).namaAyah || (formData as any).namaIbu });
-                    setShowQuickAddModal(true);
-                  }}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.agama}
+                  onChange={(e) => setFormData({...formData, agama: e.target.value})}
+                >
+                  <option value="Islam">Islam</option>
+                  <option value="Kristen">Kristen</option>
+                  <option value="Katolik">Katolik</option>
+                  <option value="Hindu">Hindu</option>
+                  <option value="Budha">Budha</option>
+                  <option value="Khonghucu">Khonghucu</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <SuggestCombobox
+                  value={formData.pekerjaan}
+                  onChange={(v) => setFormData({...formData, pekerjaan: v})}
+                  options={jobs}
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.statusPerkawinan}
+                  onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
+                >
+                  <option value="Belum Kawin">Belum Kawin</option>
+                  <option value="Kawin">Kawin</option>
+                  <option value="Cerai Hidup">Cerai Hidup</option>
+                  <option value="Cerai Mati">Cerai Mati</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                <input 
+                  type="text"
+                  placeholder="Contoh: Kandangan"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.tempatLahir}
+                  onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                <input 
+                  type="date"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.tanggalLahir}
+                  onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
-                  <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.jenisKelamin}
-                    onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
-                  >
-                    <option value="Laki-Laki">Laki-Laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
-                  <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.agama}
-                    onChange={(e) => setFormData({...formData, agama: e.target.value})}
-                  >
-                    <option value="Islam">Islam</option>
-                    <option value="Kristen">Kristen</option>
-                    <option value="Katolik">Katolik</option>
-                    <option value="Hindu">Hindu</option>
-                    <option value="Budha">Budha</option>
-                    <option value="Khonghucu">Khonghucu</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <SuggestCombobox
-                    value={formData.pekerjaan}
-                    onChange={(v) => setFormData({...formData, pekerjaan: v})}
-                    options={jobs}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
-                  <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.statusPerkawinan}
-                    onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
-                  >
-                    <option value="Belum Kawin">Belum Kawin</option>
-                    <option value="Kawin">Kawin</option>
-                    <option value="Cerai Hidup">Cerai Hidup</option>
-                    <option value="Cerai Mati">Cerai Mati</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
                   <input 
                     type="text"
-                    placeholder="Contoh: Kandangan"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.tempatLahir}
-                    onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
+                    value={formData.rt}
+                    onChange={(e) => setFormData({...formData, rt: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
                   <input 
-                    type="date"
+                    type="text"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.tanggalLahir}
-                    onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
+                    value={formData.rw}
+                    onChange={(e) => setFormData({...formData, rw: e.target.value})}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.rt}
-                      onChange={(e) => setFormData({...formData, rt: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.rw}
-                      onChange={(e) => setFormData({...formData, rw: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
-                  <textarea 
-                    rows={2}
-                    placeholder="Contoh: Jl. Keramat, RT.001 RW.002, Desa Wasah Hilir"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={formData.alamat}
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
+                <textarea 
+                  rows={2}
+                  placeholder="Contoh: Jl. Keramat, RT.001 RW.002, Desa Wasah Hilir"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  value={formData.alamat}
+                  onChange={(e) => {
+    const val = e.target.value;
+    const parsed = parseAddress(val);
+    setFormData(prev => ({
+      ...prev,
+      alamat: parsed.cleanAddress,
+      ...(parsed.rt ? { rt: parsed.rt } : {}),
+      ...(parsed.rw ? { rw: parsed.rw } : {})
+    }));
+  }}
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat</label>
+                <SuggestCombobox
+                  value={formData.keperluan}
+                  onChange={(v) => setFormData({...formData, keperluan: v})}
+                  options={KEPERLUAN_OPTIONS}
+                  placeholder="Contoh: Persyaratan pembuatan KTP baru"
+                />
+                <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan tujuan pembuatan surat ini secara spesifik.</p>
+              </div>
+            </div>
+          </CardWrapper>
+
+            {/* Card 3: Detail Keterangan Kehilangan */}
+          <CardWrapper title="Detail Keterangan Kehilangan" icon={AlertCircle}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Barang / Dokumen yang Hilang</label>
+                <input 
+                  type="text"
+                  placeholder="Contoh: KTP, Kartu ATM BRI, Buku Tabungan"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-rose-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-rose-200 transition-all"
+                  value={formData.barangHilang}
+                  onChange={(e) => setFormData({...formData, barangHilang: e.target.value})}
+                />
+                <p className="mt-1 text-[10px] text-rose-500 font-medium">* Wajib diisi. Pisahkan dengan koma jika lebih dari satu barang.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Kehilangan</label>
+                <input 
+                  type="date"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.tanggalKehilangan}
+                  onChange={(e) => setFormData({...formData, tanggalKehilangan: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Kehilangan</label>
+                <input 
+                  type="text"
+                  placeholder="Contoh: Perjalanan dari Sukamakmur ke Kandangan"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={formData.tempatKehilangan}
+                  onChange={(e) => setFormData({...formData, tempatKehilangan: e.target.value})}
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keterangan Tambahan (Opsional)</label>
+                <textarea 
+                  rows={2}
+                  placeholder="Contoh: Hilang beserta dompet warna hitam merek Polo"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  value={formData.keteranganKehilangan}
+                  onChange={(e) => setFormData({...formData, keteranganKehilangan: e.target.value})}
+                />
+              </div>
+            </div>
+          </CardWrapper>
+
+            {/* Card 4: Pejabat Penandatangan */}
+          <CardWrapper title="Pejabat Penandatangan" icon={FileSignature}>
+            <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
+                  <select 
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                    value={formData.namaPejabat}
                     onChange={(e) => {
-  const val = e.target.value;
-  const parsed = parseAddress(val);
-  setFormData(prev => ({
-    ...prev,
-    alamat: parsed.cleanAddress,
-    ...(parsed.rt ? { rt: parsed.rt } : {}),
-    ...(parsed.rw ? { rw: parsed.rw } : {})
-  }));
-}}
-                  />
+                      const name = e.target.value;
+                      setFormData(prev => ({ ...prev, namaPejabat: name }));
+                      // Update role if found
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          const found = list.find((o: any) => o.name === name);
+                          if (found) setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
+                        }
+                      } catch (e) {}
+                    }}
+                  >
+                    {(() => {
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          return list.map((o: any, i: number) => (
+                            <option key={i} value={o.name}>{o.name} ({o.role})</option>
+                          ));
+                        }
+                      } catch (e) {}
+                      return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
+                    })()}
+                  </select>
                 </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat</label>
-                  <SuggestCombobox
-                    value={formData.keperluan}
-                    onChange={(v) => setFormData({...formData, keperluan: v})}
-                    options={KEPERLUAN_OPTIONS}
-                    placeholder="Contoh: Persyaratan pembuatan KTP baru"
-                  />
-                  <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan tujuan pembuatan surat ini secara spesifik.</p>
-                </div>
+              
               </div>
-            </div>
-
-            {/* Data Kehilangan */}
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-rose-50 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-4 h-4 text-rose-500" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Kehilangan</h3>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Isi dengan informasi barang/dokumen yang hilang</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Barang / Dokumen yang Hilang</label>
-                  <input 
-                    type="text"
-                    placeholder="Contoh: KTP, Kartu ATM BRI, Buku Tabungan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-rose-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-rose-200 transition-all"
-                    value={formData.barangHilang}
-                    onChange={(e) => setFormData({...formData, barangHilang: e.target.value})}
-                  />
-                  <p className="mt-1 text-[10px] text-rose-500 font-medium">* Wajib diisi. Pisahkan dengan koma jika lebih dari satu barang.</p>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Kehilangan</label>
-                  <input 
-                    type="date"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.tanggalKehilangan}
-                    onChange={(e) => setFormData({...formData, tanggalKehilangan: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Kehilangan</label>
-                  <input 
-                    type="text"
-                    placeholder="Contoh: Perjalanan dari Sukamakmur ke Kandangan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={formData.tempatKehilangan}
-                    onChange={(e) => setFormData({...formData, tempatKehilangan: e.target.value})}
-                  />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keterangan Tambahan (Opsional)</label>
-                  <textarea 
-                    rows={2}
-                    placeholder="Contoh: Hilang beserta dompet warna hitam merek Polo"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={formData.keteranganKehilangan}
-                    onChange={(e) => setFormData({...formData, keteranganKehilangan: e.target.value})}
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-
-            {/* Pejabat Penandatangan */}
-            <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none mt-6">
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
-                  <FileSignature className="w-4 h-4 text-amber-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pejabat Penandatangan</h3>
-              </div>
-              <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
-                    <select 
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
-                      value={formData.namaPejabat}
-                      onChange={(e) => {
-                        const name = e.target.value;
-                        setFormData(prev => ({ ...prev, namaPejabat: name }));
-                        // Update role if found
-                        try {
-                          const stored = localStorage.getItem('village_officers');
-                          if (stored) {
-                            const list = JSON.parse(stored);
-                            const found = list.find((o: any) => o.name === name);
-                            if (found) setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
-                          }
-                        } catch (e) {}
-                      }}
-                    >
-                      {(() => {
-                        try {
-                          const stored = localStorage.getItem('village_officers');
-                          if (stored) {
-                            const list = JSON.parse(stored);
-                            return list.map((o: any, i: number) => (
-                              <option key={i} value={o.name}>{o.name} ({o.role})</option>
-                            ));
-                          }
-                        } catch (e) {}
-                        return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
-                      })()}
-                    </select>
+              
+              <div className="mt-6 pt-6 border-t border-amber-100 space-y-3">
+                {/* Toggle TTE / QR Code */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
                   </div>
-                
-                </div>
-                
-                <div className="mt-6 pt-6 border-t border-amber-100 space-y-3">
-                  {/* Toggle TTE / QR Code */}
-                  <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
-                    <div className="space-y-0.5 pr-4">
-                      <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input 
-                        type="checkbox" 
-                        checked={useEsignature} 
-                        onChange={(e) => setUseEsignature(e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
-                    </div>
-                  </label>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={useEsignature} 
+                      onChange={(e) => setUseEsignature(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
 
-                  {/* Toggle Mengetahui Camat */}
-                  <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
-                    <div className="space-y-0.5 pr-4">
-                      <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input 
-                        type="checkbox" 
-                        checked={formData.includeCamat} 
-                        onChange={(e) => setFormData(prev => ({ ...prev, includeCamat: e.target.checked }))}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
-                    </div>
-                  </label>
-                </div>
-
-                <p className="mt-4 text-[10px] text-amber-700 font-medium italic">
-                  * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
-                </p>
+                {/* Toggle Mengetahui Camat */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={formData.includeCamat} 
+                      onChange={(e) => setFormData(prev => ({ ...prev, includeCamat: e.target.checked }))}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
               </div>
-            </section>
+
+              <p className="mt-4 text-[10px] text-amber-700 font-medium italic">
+                * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
+              </p>
+            </div>
+          </CardWrapper>
           </div>
 
         {/* Preview Column */}
