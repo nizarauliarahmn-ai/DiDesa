@@ -16,18 +16,6 @@ export function parseAddress(fullText: string) {
   const kecMatch = fullText.match(/\b(?:Kecamatan|Kec\.)\s+([a-zA-Z0-9\s]+?)(?=\s+(?:RT|RW|Desa|Kelurahan|Kabupaten|Kab\.|Kota|Provinsi)|\s*$)/i);
   if (kecMatch) kec = kecMatch[1].trim();
 
-  let cleanAddress = fullText;
-  if (rtMatch || rwMatch || desaMatch || kecMatch) {
-    if (rtMatch) cleanAddress = cleanAddress.replace(rtMatch[0], '');
-    if (rwMatch) cleanAddress = cleanAddress.replace(rwMatch[0], '');
-    if (desaMatch) cleanAddress = cleanAddress.replace(desaMatch[0], '');
-    if (kecMatch) cleanAddress = cleanAddress.replace(kecMatch[0], '');
-    
-    cleanAddress = cleanAddress
-      .replace(/,\s*,/g, ',')
-      .replace(/\s+/g, ' ')
-      .replace(/^[,\s]+|[,\s]+$/g, '');
-  }
-
-  return { rt, rw, desa, kec, cleanAddress, original: fullText };
+  // Keep original address intact - DON'T clean/remove components
+  return { rt, rw, desa, kec, cleanAddress: fullText, original: fullText };
 }
