@@ -726,9 +726,9 @@ export default function AdminSuratSKTM({
       ...(parsed.rt ? { rt: parsed.rt } : {}),
       ...(parsed.rw ? { rw: parsed.rw } : {})
     }));
-  }}
+}}
                   />
-                </div>
+</div>
             </div>
           </div>
 
