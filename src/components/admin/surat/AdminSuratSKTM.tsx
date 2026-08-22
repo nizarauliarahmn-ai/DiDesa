@@ -451,7 +451,8 @@ export default function AdminSuratSKTM({
         <tr><td>e. Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
         <tr><td>f. Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
         <tr><td>g. Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
-        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
+        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)}</td><td style="vertical-align:top;">RT</td><td style="vertical-align:top;">:</td><td>${v(formData.rt)}</td><td style="vertical-align:top;">RW</td><td style="vertical-align:top;">:</td><td>${v(formData.rw)}</td></tr>
+        <tr><td style="vertical-align:top;">&nbsp;</td><td style="vertical-align:top;">:</td><td>${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td><td colspan="6" style="vertical-align:top;">&nbsp;</td></tr>
       </table>
 
 
