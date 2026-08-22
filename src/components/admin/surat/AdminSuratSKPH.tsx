@@ -622,7 +622,7 @@ export default function AdminSuratSKPH({
                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
                   <User className="w-4 h-4 text-emerald-600" />
                 </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Penduduk</h3>
+                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Pemohon</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                                 <UnifiedResidentSearch
