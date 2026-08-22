@@ -442,7 +442,7 @@ export default function AdminSuratSKTM({
         Menerangkan dengan sebenarnya bahwa:
       </p>
 
-      <!-- DATA PENDUDUK -->
+<!-- DATA PENDUDUK -->
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
         <tr><td style="width:30%;">a. Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.nama)}</strong></td></tr>
         <tr><td>b. NIK</td><td>:</td><td>${v(formData.nik)}</td></tr>
@@ -451,10 +451,11 @@ export default function AdminSuratSKTM({
         <tr><td>e. Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
         <tr><td>f. Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
         <tr><td>g. Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
-        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)}</td><td style="vertical-align:top;">RT</td><td style="vertical-align:top;">:</td><td>${v(formData.rt)}</td><td style="vertical-align:top;">RW</td><td style="vertical-align:top;">:</td><td>${v(formData.rw)}</td></tr>
-        <tr><td style="vertical-align:top;">&nbsp;</td><td style="vertical-align:top;">:</td><td>${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td><td colspan="6" style="vertical-align:top;">&nbsp;</td></tr>
+        <tr><td style="width:50%;">h. Alamat</td><td style="width:25%;">:</td><td>${v(formData.alamat)}</td></tr>
+        <tr><td style="width:25%;">i. RT</td><td style="width:25%;">:</td><td>${v(formData.rt)}</td></tr>
+        <tr><td style="width:25%;">j. RW</td><td style="width:25%;">:</td><td>${v(formData.rw)}</td></tr>
+        <tr><td>&nbsp;</td><td>&nbsp;</td><td>${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
       </table>
-
 
       <!-- PERNYATAAN -->
       <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
