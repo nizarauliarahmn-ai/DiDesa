@@ -820,7 +820,7 @@ export default function AdminSuratSDU({
     const parsed = parseAddress(val);
     setFormData(prev => ({
       ...prev,
-      alamat: val,
+      alamat: parsed.cleanAddress,
       ...(parsed.rt ? { rt: parsed.rt } : {}),
       ...(parsed.rw ? { rw: parsed.rw } : {})
     }));

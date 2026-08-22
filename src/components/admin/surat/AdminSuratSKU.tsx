@@ -737,14 +737,14 @@ export default function AdminSuratSKU({
                     value={formData.alamat}
                     onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
                     onBlur={(e) => {
-  const val = e.target.value;
-  const parsed = parseAddress(val);
-  setFormData(prev => ({
-    ...prev,
-    alamat: val,
-    ...(parsed.rt ? { rt: parsed.rt } : {}),
-    ...(parsed.rw ? { rw: parsed.rw } : {})
-  }));
+    const val = e.target.value;
+    const parsed = parseAddress(val);
+    setFormData(prev => ({
+      ...prev,
+      alamat: parsed.cleanAddress,
+      ...(parsed.rt ? { rt: parsed.rt } : {}),
+      ...(parsed.rw ? { rw: parsed.rw } : {})
+    }));
   }}
                   />
                 </div>
