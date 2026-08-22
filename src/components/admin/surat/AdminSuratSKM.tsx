@@ -723,6 +723,7 @@ export default function AdminSuratSKM({
                     placeholder="Contoh: Jl. Keramat, RT.001 RW.002, Desa Wasah Hilir"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={formData.alamat}
+                    onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
                     onBlur={(e) => {
     const val = e.target.value;
     const parsed = parseAddress(val);
