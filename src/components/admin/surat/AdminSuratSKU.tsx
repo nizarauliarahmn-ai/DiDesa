@@ -735,12 +735,12 @@ export default function AdminSuratSKU({
                     placeholder="Contoh: Jl. Keramat, RT.001 RW.002, Desa Wasah Hilir"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={formData.alamat}
-                    onChange={(e) => {
+                    onBlur={(e) => {
   const val = e.target.value;
   const parsed = parseAddress(val);
   setFormData(prev => ({
     ...prev,
-    alamat: parsed.cleanAddress,
+    alamat: val,
     ...(parsed.rt ? { rt: parsed.rt } : {}),
     ...(parsed.rw ? { rw: parsed.rw } : {})
   }));
