@@ -15,6 +15,7 @@ import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
+import { parseAddress } from '../../../utils/addressParser';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
 
@@ -191,6 +192,46 @@ export default function AdminSuratSKL({
       }
     } catch (e) {}
   }, []);
+
+  const handleAlamatBlur = (val: string) => {
+    const parsed = parseAddress(val);
+    setFormData(prev => ({
+      ...prev,
+      alamat: parsed.cleanAddress,
+      ...(parsed.rt ? { rt: parsed.rt } : {}),
+      ...(parsed.rw ? { rw: parsed.rw } : {})
+    }));
+  };
+
+  const handleAyahAlamatBlur = (val: string) => {
+    const parsed = parseAddress(val);
+    setAyahData(prev => ({
+      ...prev,
+      alamat: parsed.cleanAddress,
+      ...(parsed.rt ? { rt: parsed.rt } : {}),
+      ...(parsed.rw ? { rw: parsed.rw } : {})
+    }));
+  };
+
+  const handleIbuAlamatBlur = (val: string) => {
+    const parsed = parseAddress(val);
+    setIbuData(prev => ({
+      ...prev,
+      alamat: parsed.cleanAddress,
+      ...(parsed.rt ? { rt: parsed.rt } : {}),
+      ...(parsed.rw ? { rw: parsed.rw } : {})
+    }));
+  };
+
+  const handleSaksiAlamatBlur = (val: string, setSaksiData: (prev: any) => any) => {
+    const parsed = parseAddress(val);
+    setSaksiData(prev => ({
+      ...prev,
+      alamat: parsed.cleanAddress,
+      ...(parsed.rt ? { rt: parsed.rt } : {}),
+      ...(parsed.rw ? { rw: parsed.rw } : {})
+    }));
+  };
 
   const updateResidentData = async (nik: string, data: any) => {
     if (!nik || nik.trim() === '' || nik === '-') return;
@@ -754,11 +795,13 @@ export default function AdminSuratSKL({
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
-                  <textarea 
+<textarea
                     rows={2}
+                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={ayahData.alamat}
-                    onChange={(e) => setAyahData({...ayahData, alamat: e.target.value})}
+                    value={formData.alamat}
+                    onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
+                    onBlur={(e) => handleAlamatBlur(e.target.value)}
                   />
                 </div>
               </div>
@@ -813,13 +856,15 @@ export default function AdminSuratSKL({
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
-                  <textarea 
+<textarea
                     rows={2}
+                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                     value={ibuData.alamat}
-                    onChange={(e) => setIbuData({...ibuData, alamat: e.target.value})}
+                    onChange={(e) => setIbuData(prev => ({ ...prev, alamat: e.target.value }))}
+onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
                   />
-                </div>
+                  </div>
               </div>
             </div>
 
@@ -855,7 +900,14 @@ export default function AdminSuratSKL({
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
-                  <textarea rows={2} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none" value={saksi1Data.alamat} onChange={(e) => setSaksi1Data({...saksi1Data, alamat: e.target.value})} />
+                  <textarea
+                    rows={2}
+                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                    value={saksi1Data.alamat}
+                    onChange={(e) => setSaksi1Data(prev => ({ ...prev, alamat: e.target.value }))}
+                    onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi1Data)}
+                  />
                 </div>
               </div>
             </div>
@@ -891,7 +943,14 @@ export default function AdminSuratSKL({
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
-                  <textarea rows={2} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none" value={saksi2Data.alamat} onChange={(e) => setSaksi2Data({...saksi2Data, alamat: e.target.value})} />
+                  <textarea
+                    rows={2}
+                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                    value={saksi2Data.alamat}
+                    onChange={(e) => setSaksi2Data(prev => ({ ...prev, alamat: e.target.value }))}
+                    onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi2Data)}
+                  />
                 </div>
               </div>
             </div>
