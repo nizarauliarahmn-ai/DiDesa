@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Printer, Save, Loader2 } from 'lucide-react';
 import { getLetterClassifications } from '../../../utils/letterClassifications';
 import { extractSequenceFromNomor } from '../../../services/penomoranSuratService';
+import { getSuratConfig } from '../../../config/suratConfig';
 
 export interface SuratEditorTemplate {
   title: string;
@@ -38,13 +39,15 @@ export function getLetterHeaderTemplate(
   klasifikasi: string,
   fallback: { kode?: string; jenis?: string; deskripsi?: string; nomorSurat?: string } = {}
 ): SuratEditorTemplate {
-  let t;
-  try {
-    t = getLetterClassifications().find((c) => c.klasifikasi === klasifikasi);
-  } catch {
-    t = undefined;
-  }
-  const jenis = fallback.jenis || (t?.jenis ? toTitleCase(t.jenis) : 'Surat');
+  // SINGLE SOURCE OF TRUTH: Use centralized suratConfig as primary source
+  const config = getSuratConfig(klasifikasi);
+  const t = getLetterClassifications().find((c) => c.klasifikasi === klasifikasi);
+  
+  // Priority: config (suratConfig.ts) > fallback > letterClassifications > fallback values
+  const jenis = config?.jenis || fallback.jenis || (t?.jenis ? toTitleCase(t.jenis) : 'Surat');
+  const deskripsi = config?.deskripsi || fallback.deskripsi || t?.deskripsi || '';
+  const kodeKlasifikasi = config?.kodeKlasifikasi || t?.kodeKlasifikasi || fallback.kode || '';
+  
   // SINGLE SOURCE OF TRUTH: jika nomor surat aktual dari state form disediakan,
   // tampilkan urutannya (mis. "475/059/WHI-SKP/2026" -> "059") sehingga header
   // selalu sinkron dengan pratinjau & database. Fallback ke counter bila kosong.
@@ -58,9 +61,9 @@ export function getLetterHeaderTemplate(
   }
   return {
     title: `Buat ${jenis}`,
-    description: t?.deskripsi || fallback.deskripsi || '',
+    description: config?.deskripsi || fallback.deskripsi || t?.deskripsi || '',
     kode: klasifikasi,
-    classificationCode: t?.kodeKlasifikasi || fallback.kode || '',
+    classificationCode: config?.kodeKlasifikasi || t?.kodeKlasifikasi || fallback.kode || '',
     sequenceNo,
   };
 }
