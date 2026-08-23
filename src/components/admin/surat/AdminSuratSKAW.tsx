@@ -66,14 +66,6 @@ export default function AdminSuratSKAW({
   editLetterId?: string | null;
   presetResident?: any;
 }) {
-  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
-  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
-  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
-  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKAW') || { klasifikasi: 'SKAW', kodeKlasifikasi: '474' };
-  const kodeKlasifikasiSKAW = backdateKlas.kodeKlasifikasi || '474';
-  const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
-  const [manualSequence, setManualSequence] = useState('');
-
   const [formData, setFormData] = useState({
     // Data Almarhum (deceased)
     nama_almarhum: '',
@@ -108,6 +100,14 @@ export default function AdminSuratSKAW({
     alamatKantor: localStorage.getItem('kop_alamat') || '',
     kontakKantor: localStorage.getItem('kop_kontak') || '',
   });
+
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
+  const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
+  const backdateKlas = getLetterClassifications().find(c => c.klasifikasi === 'SKAW') || { klasifikasi: 'SKAW', kodeKlasifikasi: '474' };
+  const kodeKlasifikasiSKAW = backdateKlas.kodeKlasifikasi || '474';
+  const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
+  const [manualSequence, setManualSequence] = useState('');
 
   const handleCustomNomorSurat = (nomor: string) => {
     setFormData((prev: any) => ({ ...prev, nomorSurat: nomor }));
