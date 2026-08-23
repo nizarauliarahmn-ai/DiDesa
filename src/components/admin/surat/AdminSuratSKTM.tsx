@@ -133,6 +133,16 @@ export default function AdminSuratSKTM({
     'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)'
   ];
 
+  const handleAlamatBlur = (val: string) => {
+    const parsed = parseAddress(val);
+    setFormData(prev => ({
+      ...prev,
+      alamat: parsed.cleanAddress,
+      ...(parsed.rt ? { rt: parsed.rt } : {}),
+      ...(parsed.rw ? { rw: parsed.rw } : {})
+    }));
+  };
+
   const updateResidentData = async (nik: string, data: any) => {
     if (!nik || nik === '-') return;
     try {
@@ -674,6 +684,7 @@ export default function AdminSuratSKTM({
       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
       value={formData.alamat}
       onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
+      onBlur={(e) => handleAlamatBlur(e.target.value)}
     />
   </div>
   <div className="md:col-span-1 space-y-2">
