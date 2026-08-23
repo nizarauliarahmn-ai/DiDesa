@@ -665,86 +665,7 @@ export default function AdminSuratSKTM({
                   onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
-                  {rtList.length > 0 ? (
-                    <select
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.rt}
-                      onChange={(e) => setFormData({...formData, rt: e.target.value})}
-                    >
-                      <option value="">Pilih RT</option>
-                      {rtList.map((rt, i) => <option key={i} value={rt.no}>{rt.no}</option>)}
-                    </select>
-                  ) : (
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.rt}
-                      onChange={(e) => setFormData({...formData, rt: e.target.value})}
-                      placeholder="Contoh: 001"
-                    />
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
-                  {rwList.length > 0 ? (
-                    <select
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.rw}
-                      onChange={(e) => setFormData({...formData, rw: e.target.value})}
-                    >
-                      <option value="">Pilih RW</option>
-                      {rwList.map((rw, i) => <option key={i} value={rw.no}>{rw.no}</option>)}
-                    </select>
-                  ) : (
-                    <input 
-                      type="text"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      value={formData.rw}
-                      onChange={(e) => setFormData({...formData, rw: e.target.value})}
-                      placeholder="Contoh: 002"
-                    />
-                  )}
-                </div>
-              </div>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-1 space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
-                    <textarea 
-rows={2}
-      placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                      value={formData.alamat}
-                      onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
-                      onBlur={(e) => handleAlamatBlur(e.target.value)}
-                    />
-                  </div>
-                  <div className="md:col-span-1 space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
-                    {rtList.length > 0 ? (
-                      <select
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                        value={formData.rt}
-                        onChange={(e) => setFormData({...formData, rt: e.target.value})}
-                      >
-                        <option value="">Pilih RT</option>
-                        {rtList.map((rt, i) => <option key={i} value={rt.no}>{rt.no}</option>)}
-                      </select>
-                    ) : (
-                      <input 
-                        type="text"
-                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                        value={formData.rt}
-                        onChange={(e) => setFormData({...formData, rt: e.target.value})}
-                        placeholder="Contoh: 001"
-                      />
-                    )}
-                  </div>
-                  <div className="md:col-span-1 space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
-<div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
   <div className="md:col-span-2 space-y-2">
     <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
     <textarea
@@ -776,10 +697,10 @@ rows={2}
     />
   </div>
 </div>
-</div>
-</div>
-</div>
-</div>
+            </div>
+          </div>
+
+          {/* Card 3: Keperluan Surat */}
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-4">
             <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
