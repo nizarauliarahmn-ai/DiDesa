@@ -13,8 +13,9 @@ import AdminSuratSKU from './surat/AdminSuratSKU';
 import AdminSuratSKPH from './surat/AdminSuratSKPH';
 import AdminSuratSKD from './surat/AdminSuratSKD';
 import AdminSuratSKP from './surat/AdminSuratSKP';
+import AdminSuratSKSKAW from './surat/AdminSuratSKAW';
 import AdminSuratSDU from './surat/AdminSuratSDU';
-import AdminSuratSPT from './surat/AdminSuratSPT';
+import AdminSuratSPT from './surat/AdminSuratSPPD';
 import AdminSuratSPPD from './surat/AdminSuratSPPD';
 import AdminSuratSKKT from './surat/AdminSuratSKKT';
 import AdminSuratUndangan from './surat/AdminSuratUndangan';
@@ -41,7 +42,7 @@ export default function AdminSurat({
     const suratFormAlias: Record<string, any> = {
       skn: 'nikah', sktm: 'sktm', skbm: 'skbm', skh: 'skh', skl: 'skl', skm: 'skm',
       sku: 'sku', skph: 'skph', skd: 'skd', sdp: 'skd', skp: 'skp', sdu: 'sdu',
-      spt: 'spt', sppd: 'sppd', skkt: 'skkt', und: 'undangan'
+      spt: 'spt', sppd: 'sppd', skkt: 'skkt', und: 'undangan', skaw: 'skaw'
     };
     const suratFormParam = new URLSearchParams(window.location.search).get('surat_form');
     if (suratFormParam && suratFormAlias[suratFormParam]) {
@@ -56,7 +57,7 @@ export default function AdminSurat({
   const [showTambahTamu, setShowTambahTamu] = useState(false);
   const [showTambahPermohonan, setShowTambahPermohonan] = useState(false);
 
-  const formTabs = new Set(['nikah', 'sktm', 'skbm', 'skh', 'skl', 'skm', 'sku', 'skph', 'skd', 'skp', 'sdu', 'spt', 'sppd', 'skkt', 'undangan']);
+  const formTabs = new Set(['nikah', 'sktm', 'skbm', 'skh', 'skl', 'skm', 'sku', 'skph', 'skd', 'skp', 'sdu', 'spt', 'sppd', 'skkt', 'undangan', 'skaw']);
 
   const changeTab = (tab: any) => {
     setEditData(null);
@@ -116,6 +117,8 @@ export default function AdminSurat({
       setActiveTab('skh');
     } else if (jenis.includes('SKPH') || jenis.includes('PENGHASILAN')) {
       setActiveTab('skph');
+    } else if (jenis.includes('SKPH') || jenis.includes('PENGHASILAN')) {
+      setActiveTab('skph');
     } else if (jenis.includes('SKN') || jenis.includes('PENGANTAR NIKAH')) {
       setActiveTab('nikah');
     } else if (jenis.includes('SPT') || jenis.includes('TASPEN')) {
@@ -126,8 +129,14 @@ export default function AdminSurat({
       setActiveTab('skl');
     } else if (jenis.includes('SKKT') || jenis.includes('TANAH')) {
       setActiveTab('skkt');
+    } else if (jenis.includes('SKL') || jenis.includes('KELAHIRAN')) {
+      setActiveTab('skl');
+    } else if (jenis.includes('SKKT') || jenis.includes('TANAH')) {
+      setActiveTab('skkt');
     } else if (jenis.includes('UND') || jenis.includes('UNDANGAN')) {
       setActiveTab('undangan');
+    } else if (jenis.includes('SKAW') || jenis.includes('AHLI WARIS')) {
+      setActiveTab('skaw');
     }
   };
 
@@ -328,6 +337,14 @@ export default function AdminSurat({
         )}
         {activeTab === 'skp' && (
           <AdminSuratSKP 
+            presetResident={localPresetResident || presetResident}
+            editData={editData}
+            editLetterId={editLetterId}
+            onBack={() => changeTab(returnTab)} 
+          />
+        )}
+        {activeTab === 'skaw' && (
+          <AdminSuratSKAW 
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}
