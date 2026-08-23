@@ -1582,6 +1582,131 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                     </div>
                   </div>
                 )}
+                {selectedTemplate === 'SKAW' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-emerald-50/20 p-5 rounded-2xl border border-emerald-100/50 mb-6">
+                    <div>
+                      <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Data Almarhum</h4>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Nama Almarhum</label>
+                      <input 
+                        type="text" 
+                        value={formData.nama_almarhum}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nama_almarhum: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                      />
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">NIK Almarhum</label>
+                      <input 
+                        type="text" 
+                        value={formData.nik_almarhum}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nik_almarhum: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                      />
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Tempat/Tgl Lahir</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input 
+                          type="text" 
+                          value={formData.tempat_lahir}
+                          onChange={(e) => setFormData(prev => ({ ...prev, tempat_lahir: e.target.value }))}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                          placeholder="Tempat Lahir"
+                        />
+                        <input 
+                          type="date" 
+                          value={formData.tanggal_lahir}
+                          onChange={(e) => setFormData(prev => ({ ...prev, tanggal_lahir: e.target.value }))}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        />
+                      </div>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Jenis Kelamin</label>
+                      <select 
+                        value={formData.jenis_kelamin_almarhum}
+                        onChange={(e) => setFormData(prev => ({ ...prev, jenis_kelamin_almarhum: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                      >
+                        <option value="Laki-Laki">Laki-Laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                      </select>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Agama</label>
+                      <select 
+                        value={formData.agama_almarhum}
+                        onChange={(e) => setFormData(prev => ({ ...prev, agama_almarhum: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                      >
+                        <option value="Islam">Islam</option>
+                        <option value="Kristen">Kristen</option>
+                        <option value="Katolik">Katolik</option>
+                        <option value="Hindu">Hindu</option>
+                        <option value="Buddha">Buddha</option>
+                      </select>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Pekerjaan</label>
+                      <input 
+                        type="text" 
+                        value={formData.pekerjaan_almarhum}
+                        onChange={(e) => setFormData(prev => ({ ...prev, pekerjaan_almarhum: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                        placeholder="Contoh: Pensiunan"
+                      />
+                      <div className="mt-3">
+                        <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Alamat</label>
+                        <textarea 
+                          value={formData.alamat_almarhum}
+                          onChange={(e) => {
+                            setFormData(prev => ({ ...prev, alamat_almarhum: e.target.value }));
+                            handleAlamatBlur(e.target.value);
+                          }}
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm resize-y min-h-[80px]"
+                          rows={3}
+                        />
+                        <p className="text-xs text-emerald-600 font-medium mt-1">Smart Extraction: RT/RW akan otomatis terisi.</p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">RT</label>
+                          <input 
+                            type="text" 
+                            value={formData.rt_almarhum}
+                            onChange={(e) => setFormData(prev => ({ ...prev, rt_almarhum: e.target.value }))}
+                            className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                            placeholder="001"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">RW</label>
+                          <input 
+                            type="text" 
+                            value={formData.rw_almarhum}
+                            onChange={(e) => setFormData(prev => ({ ...prev, rw_almarhum: e.target.value }))}
+                            className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                            placeholder="001"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Data Pasangan</h4>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Nama Pasangan</label>
+                      <input 
+                        type="text" 
+                        value={formData.nama_pasangan}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nama_pasangan: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                      />
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">NIK Pasangan</label>
+                      <input 
+                        type="text" 
+                        value={formData.nik_pasangan}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nik_pasangan: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                      />
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">Tanggal Nikah</label>
+                      <input 
+                        type="date" 
+                        value={formData.tanggal_nikah}
+                        onChange={(e) => setFormData(prev => ({ ...prev, tanggal_nikah: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none font-medium text-sm"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-bold text-gray-600 dark:text-slate-400 mb-2">Keperluan / Keterangan Tambahan</label>
