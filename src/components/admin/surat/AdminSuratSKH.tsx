@@ -687,8 +687,8 @@ export default function AdminSuratSKH({
                   onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                 />
               </div>
-<div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  <div className="md:col-span-3 space-y-2">
+<div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:col-span-2">
+                  <div className="md:col-span-2 space-y-2">
                     <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
                     <textarea
                       rows={2}
