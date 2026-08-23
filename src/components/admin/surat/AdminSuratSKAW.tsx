@@ -451,7 +451,7 @@ export default function AdminSuratSKAW({
                     <input
                       type="text"
                       value={formData.nama_almarhum}
-                      onChange={(e) => setFormData(prev => ({ ...prev, nama_almarhum: e.target.value })}
+                      onChange={(e) => setFormData(prev => ({ ...prev, nama_almarhum: e.target.value }))}
                       className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
                     />
                   </div>
@@ -515,7 +515,7 @@ export default function AdminSuratSKAW({
                       <option value="Katolik">Katolik</option>
                       <option value="Hindu">Hindu</option>
                       <option value="Buddha">Buddha</option>
-                      <option value="Khonghucu">Khonghucu</option>
+                      <option value="Khonghucu">Khonghicu</option>
                     </select>
                   </div>
                   
