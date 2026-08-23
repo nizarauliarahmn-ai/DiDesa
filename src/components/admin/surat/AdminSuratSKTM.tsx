@@ -442,7 +442,7 @@ export default function AdminSuratSKTM({
         Menerangkan dengan sebenarnya bahwa:
       </p>
 
-<!-- DATA PENDUDUK -->
+      <!-- DATA PENDUDUK -->
       <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:10px;margin-left:40px;line-height:1.5;font-size:14px;">
         <tr><td style="width:30%;">a. Nama Lengkap</td><td style="width:3%;">:</td><td><strong style="text-transform:uppercase;">${v(formData.nama)}</strong></td></tr>
         <tr><td>b. NIK</td><td>:</td><td>${v(formData.nik)}</td></tr>
@@ -453,6 +453,7 @@ export default function AdminSuratSKTM({
         <tr><td>g. Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
         <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
       </table>
+
 
       <!-- PERNYATAAN -->
       <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
@@ -664,40 +665,85 @@ export default function AdminSuratSKTM({
                   onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-  <div className="md:col-span-2 space-y-2">
-    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
-    <textarea
-      rows={2}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
+                  {rtList.length > 0 ? (
+                    <select
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                      value={formData.rt}
+                      onChange={(e) => setFormData({...formData, rt: e.target.value})}
+                    >
+                      <option value="">Pilih RT</option>
+                      {rtList.map((rt, i) => <option key={i} value={rt.no}>{rt.no}</option>)}
+                    </select>
+                  ) : (
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                      value={formData.rt}
+                      onChange={(e) => setFormData({...formData, rt: e.target.value})}
+                      placeholder="Contoh: 001"
+                    />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
+                  {rwList.length > 0 ? (
+                    <select
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                      value={formData.rw}
+                      onChange={(e) => setFormData({...formData, rw: e.target.value})}
+                    >
+                      <option value="">Pilih RW</option>
+                      {rwList.map((rw, i) => <option key={i} value={rw.no}>{rw.no}</option>)}
+                    </select>
+                  ) : (
+                    <input 
+                      type="text"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                      value={formData.rw}
+                      onChange={(e) => setFormData({...formData, rw: e.target.value})}
+                      placeholder="Contoh: 002"
+                    />
+                  )}
+                </div>
+              </div>
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-1 space-y-2">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
+                    <textarea 
+rows={2}
       placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-      value={formData.alamat}
-      onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
-    />
-  </div>
-  <div className="md:col-span-1 space-y-2">
-    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
-    <input
-      type="text"
-      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-      placeholder="Contoh: 001"
-      value={formData.rt}
-      onChange={(e) => setFormData(prev => ({ ...prev, rt: e.target.value }))}
-    />
-  </div>
-  <div className="md:col-span-1 space-y-2">
-    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
-    <input
-      type="text"
-      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-      placeholder="Contoh: 002"
-      value={formData.rw}
-      onChange={(e) => setFormData(prev => ({ ...prev, rw: e.target.value }))}
-    />
-  />
-</div>
-</div>
-</div>
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                      value={formData.alamat}
+                      onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
+                      onBlur={(e) => handleAlamatBlur(e.target.value)}
+                    />
+                  </div>
+                  <div className="md:col-span-1 space-y-2">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RT</label>
+                    {rtList.length > 0 ? (
+                      <select
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                        value={formData.rt}
+                        onChange={(e) => setFormData({...formData, rt: e.target.value})}
+                      >
+                        <option value="">Pilih RT</option>
+                        {rtList.map((rt, i) => <option key={i} value={rt.no}>{rt.no}</option>)}
+                      </select>
+                    ) : (
+                      <input 
+                        type="text"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                        value={formData.rt}
+                        onChange={(e) => setFormData({...formData, rt: e.target.value})}
+                        placeholder="Contoh: 001"
+                      />
+                    )}
+                  </div>
+                  <div className="md:col-span-1 space-y-2">
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">RW</label>
 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
   <div className="md:col-span-2 space-y-2">
     <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
@@ -728,12 +774,12 @@ export default function AdminSuratSKTM({
       value={formData.rw}
       onChange={(e) => setFormData(prev => ({ ...prev, rw: e.target.value }))}
     />
-  />
+  </div>
 </div>
-            </div>
-          </div>
-
-          {/* Card 3: Keperluan Surat */}
+</div>
+</div>
+</div>
+</div>
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-4">
             <div className="flex items-center gap-3 mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
