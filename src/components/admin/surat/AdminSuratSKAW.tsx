@@ -1,60 +1,3 @@
-import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
-import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
-import { SuggestCombobox } from './SuggestCombobox';
-import { KEPERLUAN_OPTIONS } from './keperluanOptions';
-import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
-import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
-import BackdateConfig from './BackdateConfig';
-import { generateKopSuratHTML } from '../../../utils/letterFormat';
-import { resolveKadesName } from '../../../utils/letterOfficers';
-import { parseAddress } from '../../../utils/addressParser';
-import { fetchResidentsCached } from '../../../utils/apiCache';
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import PrintSuccessDialog from './PrintSuccessDialog';
-import { User, Frown, FileSignature, AlertCircle, History,
-  ZoomIn, ZoomOut, Calendar, FileText
-} from 'lucide-react';
-import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
-import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
-import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
-import { getPrintSignatureHTML } from '../../../utils/signature';
-import { showToast } from '../../../utils/toast';
-import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
-import { useDragScroll } from '../../../hooks/useDragScroll';
-
-interface Resident {
-  nik: string;
-  name: string;
-  gender: string;
-  birthPlace: string;
-  birthDate: string;
-  job: string;
-  address: string;
-  desa: string;
-  fatherName: string;
-  motherName: string;
-}
-
-interface RtRwEntry { no: string; name: string; }
-
-interface HeirRow {
-  id: string;
-  nama: string;
-  nik: string;
-  hubungan: string;
-  tempatLahir: string;
-  tanggalLahir: string;
-  jenisKelamin: string;
-  agama: string;
-  pekerjaan: string;
-  alamat: string;
-  rt: string;
-  rw: string;
-}
-
-interface RwEntry { no: string; name: string; }
-
 export default function AdminSuratSKAW({ 
   onBack,
   editData,
@@ -109,16 +52,6 @@ export default function AdminSuratSKAW({
   const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, backdateKlas.klasifikasi, backdateKlas.kodeKlasifikasi);
   const [manualSequence, setManualSequence] = useState('');
 
-  const handleCustomNomorSurat = (nomor: string) => {
-    setFormData((prev: any) => ({ ...prev, nomorSurat: nomor }));
-  };
-
-  React.useEffect(() => {
-    if (presetResident) {
-      handleSelectResident(presetResident);
-    }
-  }, [presetResident]);
-
   const [loading, setLoading] = useState(false);
   const [useEsignature, setUseEsignature] = useState(true);
   const [success, setSuccess] = useState(false);
@@ -134,107 +67,15 @@ export default function AdminSuratSKAW({
   const rtList: RtRwEntry[] = (() => { try { return JSON.parse(localStorage.getItem('village_rt_list') || '[]'); } catch { return []; } })();
   const rwList: RwEntry[] = (() => { try { return JSON.parse(localStorage.getItem('village_rw_list') || '[]'); } catch { return []; } })();
 
-  // Prefill in edit mode
-  useEffect(() => {
-    if (editData) {
-      setFormData(prev => ({ ...prev, ...editData }));
-      if (editData.heirs && Array.isArray(editData.heirs)) {
-        setHeirs(editData.heirs.map((h: any) => ({
-          id: h.id || Date.now(),
-          nama: h.nama || '',
-          nik: h.nik || '',
-          hubungan: h.hubungan || '',
-          tempatLahir: h.tempatLahir || '',
-          tanggalLahir: h.tanggalLahir || '',
-          jenisKelamin: h.jenisKelamin || 'Laki-Laki',
-          agama: h.agama || 'Islam',
-          pekerjaan: h.pekerjaan || '',
-          alamat: h.alamat || '',
-          rt: h.rt || '',
-          rw: h.rw || ''
-        })));
-      }
+  const handleCustomNomorSurat = (nomor: string) => {
+    setFormData((prev: any) => ({ ...prev, nomorSurat: nomor }));
+  };
+
+  React.useEffect(() => {
+    if (presetResident) {
+      handleSelectResident(presetResident);
     }
-  }, [editData]);
-
-  const [previewZoom, setPreviewZoom] = useState(0.45);
-  const dragProps = useDragScroll();
-  const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  const jobs = [
-    'Belum/Tidak Bekerja', 'Mengurus Rumah Tangga', 'Pelajar/Mahasiswa', 'Pensiunan',
-    'Petani/Pekebun', 'Buruh Tani/Perkebunan', 'Peternak', 'Nelayan/Perikanan', 'Buruh Nelayan/Perikanan',
-    'Buruh Harian Lepas', 'Pedagang', 'Wiraswasta', 'Karyawan Swasta', 'Karyawan BUMN/BUMD',
-    'Sopir/Ojek', 'Tukang (Kayu/Batu/Las/Jahit, dll)', 'Mekanik', 'Pembantu Rumah Tangga',
-    'Guru', 'Bidan', 'Perawat', 'Ustadz/Mubaligh',
-    'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)'
-  ];
-
-  // Smart Extraction: Parse almarhum address on blur
-  const handleAlamatBlur = (val: string) => {
-    const parsed = parseAddress(val);
-    setFormData(prev => ({
-      ...prev,
-      alamat_almarhum: parsed.cleanAddress,
-      ...(parsed.rt ? { rt_almarhum: parsed.rt } : {}),
-      ...(parsed.rw ? { rw_almarhum: parsed.rw } : {})
-    }));
-  };
-
-  // Handle heir row changes
-  const handleHeirChange = (id: string, field: keyof HeirRow, value: string) => {
-    setHeirs(prev => prev.map(row => 
-      row.id === id ? { ...row, [field]: value } : row
-    ));
-  };
-
-  // Add new heir row
-  const addHeirRow = () => {
-    const newHeir: HeirRow = {
-      id: Date.now().toString(),
-      nama: '',
-      nik: '',
-      hubungan: '',
-      tempatLahir: '',
-      tanggalLahir: '',
-      jenisKelamin: 'Laki-Laki',
-      agama: 'Islam',
-      pekerjaan: '',
-      alamat: '',
-      rt: '',
-      rw: ''
-    };
-    setHeirs(prev => [...prev, newHeir]);
-    setShowAddHeirModal(false);
-  };
-
-  // Delete heir row
-  const deleteHeirRow = (id: string) => {
-    setHeirs(prev => prev.filter(row => row.id !== id));
-  };
-
-  // Save edited heir
-  const saveHeirRow = (id: string, heirData: HeirRow) => {
-    setHeirs(prev => prev.map(row => 
-      row.id === id ? heirData : row
-    ));
-    setEditingHeir(null);
-  };
-
-  // Prefetch residents on mount
-  useEffect(() => {
-    const fetchResidents = async () => {
-      try {
-        const res = await fetchResidentsCached();
-        if (res.ok) {
-          const data = await res.json();
-          setResidents(data);
-        }
-      } catch (e) {}
-    };
-    fetchResidents();
-  }, []);
+  }, [presetResident]);
 
   useEffect(() => {
     const fetchResidents = async () => {
@@ -402,6 +243,66 @@ export default function AdminSuratSKAW({
     }
   };
 
+  // Smart Extraction: Parse almarhum address on blur
+  const handleAlamatBlur = (val: string) => {
+    const parsed = parseAddress(val);
+    setFormData(prev => ({
+      ...prev,
+      alamat_almarhum: parsed.cleanAddress,
+      ...(parsed.rt ? { rt_almarhum: parsed.rt } : {}),
+      ...(parsed.rw ? { rw_almarhum: parsed.rw } : {})
+    }));
+  };
+
+  // Handle heir row changes
+  const handleHeirChange = (id: string, field: keyof HeirRow, value: string) => {
+    setHeirs(prev => prev.map(row => 
+      row.id === id ? { ...row, [field]: value } : row
+    ));
+  };
+
+  // Add new heir row
+  const addHeirRow = () => {
+    const newHeir: HeirRow = {
+      id: Date.now().toString(),
+      nama: '',
+      nik: '',
+      hubungan: '',
+      tempatLahir: '',
+      tanggalLahir: '',
+      jenisKelamin: 'Laki-Laki',
+      agama: 'Islam',
+      pekerjaan: '',
+      alamat: '',
+      rt: '',
+      rw: ''
+    };
+    setHeirs(prev => [...prev, newHeir]);
+    setShowAddHeirModal(false);
+  };
+
+  // Delete heir row
+  const deleteHeirRow = (id: string) => {
+    setHeirs(prev => prev.filter(row => row.id !== id));
+  };
+
+  // Save edited heir
+  const saveHeirRow = (id: string, heirData: HeirRow) => {
+    setHeirs(prev => prev.map(row => 
+      row.id === id ? heirData : row
+    ));
+    setEditingHeir(null);
+  };
+
+  const jobs = [
+    'Belum/Tidak Bekerja', 'Mengurus Rumah Tangga', 'Pelajar/Mahasiswa', 'Pensiunan',
+    'Petani/Pekebun', 'Buruh Tani/Perkebunan', 'Peternak', 'Nelayan/Perikanan', 'Buruh Nelayan/Perikanan',
+    'Buruh Harian Lepas', 'Pedagang', 'Wiraswasta', 'Karyawan Swasta', 'Karyawan BUMN/BUMD',
+    'Sopir/Ojek', 'Tukang (Kayu/Batu/Las/Jahit, dll)', 'Mekanik', 'Pembantu Rumah Tangga',
+    'Guru', 'Bidan', 'Perawat', 'Ustadz/Mubaligh',
+    'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)'
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header dengan template surat terpusat */}
@@ -420,7 +321,7 @@ export default function AdminSuratSKAW({
             <span className="font-medium">Sukses</span>
             <span className="ml-2">Surat Keterangan Ahli Waris berhasil dibuat!</span>
           </div>
-        )}
+        }}
         
         <div className="max-w-7xl mx-auto">
           {/* Card form */}
