@@ -157,42 +157,6 @@ export default function AdminSuratSKAW({
     }
   }, [editData]);
 
-  // Form Data - SKAW specific fields
-  const [formData, setFormData] = useState({
-    // Data Almarhum (deceased)
-    nama_almarhum: '',
-    nik_almarhum: '',
-    tempat_lahir: '',
-    tanggal_lahir: '',
-    jenis_kelamin_almarhum: 'Laki-Laki',
-    agama_almarhum: 'Islam',
-    pekerjaan_almarhum: '',
-    alamat_almarhum: '',
-    rt_almarhum: '',
-    rw_almarhum: '',
-    
-    // Data Pasangan (spouse)
-    nama_pasangan: '',
-    nik_pasangan: '',
-    tanggal_nikah: '',
-    
-    // Keperluan
-    keperluan: 'Keterangan Ahli Waris',
-    
-    // Pejabat
-    namaPejabat: resolveKadesName() || '',
-    jabatanPejabat: 'Kepala Desa',
-    includeCamat: false,
-    
-    // Kop Settings
-    namaDesa: localStorage.getItem('kop_desa') || '',
-    namaKecamatan: localStorage.getItem('kop_kecamatan') || '',
-    namaKabupaten: localStorage.getItem('kop_kabupaten') || '',
-    namaProvinsi: localStorage.getItem('kop_provinsi') || '',
-    alamatKantor: localStorage.getItem('kop_alamat') || '',
-    kontakKantor: localStorage.getItem('kop_kontak') || '',
-  });
-
   const [previewZoom, setPreviewZoom] = useState(0.45);
   const dragProps = useDragScroll();
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
