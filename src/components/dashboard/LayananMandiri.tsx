@@ -8,6 +8,7 @@ import {
 import { fetchResidentLettersAsync, LetterHistory } from '../../utils/letterHistory';
 import { showToast } from '../../utils/toast';
 import { getLetterClassifications, LetterClassification, generateLetterNumberAsync } from '../../utils/letterClassifications';
+import { getBadgeCode, getDisplayName, getVisibleSuratList } from '../../config/suratConfig';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { supabase } from '../../utils/supabase';
 import {
@@ -46,7 +47,7 @@ export default function LayananMandiri() {
     const visibleClasses = getLetterClassifications().filter(c => c.isVisible !== false);
     setClassifications(visibleClasses);
     if (visibleClasses.length > 0) {
-      setLetterType(visibleClasses[0].jenis);
+      setLetterType(`${visibleClasses[0].jenis} (${visibleClasses[0].klasifikasi})`);
     }
   }, []);
 

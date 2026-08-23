@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, FileText, CheckCircle2, User, Home, ArrowLeft, Monitor, FileSignature } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 import { getLetterClassifications, LetterClassification, generateLetterNumberAsync } from '../utils/letterClassifications';
+import { getBadgeCode } from '../../config/suratConfig';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { fetchResidentsCached } from '../utils/apiCache';
 import { showToast } from '../utils/toast';

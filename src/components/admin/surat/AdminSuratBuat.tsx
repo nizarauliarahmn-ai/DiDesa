@@ -12,6 +12,7 @@ import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { getLetterClassifications, LetterClassification, incrementSequenceNumber, generateLetterNumberAsync, generateLetterNumber } from '../../../utils/letterClassifications';
+import { getBadgeCode } from '../../../config/suratConfig';
 import { useNextNomorSurat } from '../../../hooks/useNextNomorSurat';
 import { addLetterHistory } from '../../../utils/letterHistory';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
