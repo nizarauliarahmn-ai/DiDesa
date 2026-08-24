@@ -67,8 +67,8 @@ const formatMonthYearInIndonesian = (monthYearStr: string): string => {
   return monthYearStr;
 };
 
-export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD, onOpenSKKT, onOpenUndangan }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
-  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void, onOpenSKKT?: () => void, onOpenUndangan?: () => void }) {
+export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD, onOpenSKKT, onOpenUndangan, onOpenSKAW }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
+  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void, onOpenSKKT?: () => void, onOpenUndangan?: () => void, onOpenSKAW?: () => void }) {
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
@@ -1004,6 +1004,10 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       }
                       if (t.klasifikasi === 'SKKT') {
                         if (onOpenSKKT) onOpenSKKT();
+                        return;
+                      }
+                      if (t.klasifikasi === 'SKAW') {
+                        if (onOpenSKAW) onOpenSKAW();
                         return;
                       }
                       setSelectedTemplate(t.klasifikasi);
