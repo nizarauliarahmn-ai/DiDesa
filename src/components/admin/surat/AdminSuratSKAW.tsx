@@ -365,10 +365,12 @@ export default function AdminSuratSKAW({
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header dengan template surat terpusat */}
       <SuratEditorHeader 
-        klasifikasi="SKAW" 
-        jenis="SKAW" 
-        deskripsi="Surat Keterangan & Pernyataan Ahli Waris"
-        kodeKlasifikasi="474"
+        template={getLetterHeaderTemplate('SKAW', { 
+          kode: '474', 
+          jenis: 'Surat Keterangan & Pernyataan Ahli Waris', 
+          deskripsi: 'Surat Keterangan & Pernyataan Ahli Waris',
+          nomorSurat: formData.nomorSurat
+        })}
         onBack={onBack}
       />
       
