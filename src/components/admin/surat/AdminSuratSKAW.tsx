@@ -1,3 +1,60 @@
+import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { UnifiedResidentSearch } from '../penduduk/UnifiedResidentSearch';
+import { SuggestCombobox } from './SuggestCombobox';
+import { KEPERLUAN_OPTIONS } from './keperluanOptions';
+import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
+import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
+import BackdateConfig from './BackdateConfig';
+import { generateKopSuratHTML } from '../../../utils/letterFormat';
+import { resolveKadesName } from '../../../utils/letterOfficers';
+import { parseAddress } from '../../../utils/addressParser';
+import { fetchResidentsCached } from '../../../utils/apiCache';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import PrintSuccessDialog from './PrintSuccessDialog';
+import { User, Frown, FileSignature, AlertCircle, History,
+  ZoomIn, ZoomOut, Calendar, FileText
+} from 'lucide-react';
+import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
+import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
+import { getPrintSignatureHTML } from '../../../utils/signature';
+import { showToast } from '../../../utils/toast';
+import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
+import { useDragScroll } from '../../../hooks/useDragScroll';
+
+interface Resident {
+  nik: string;
+  name: string;
+  gender: string;
+  birthPlace: string;
+  birthDate: string;
+  job: string;
+  address: string;
+  desa: string;
+  fatherName: string;
+  motherName: string;
+}
+
+interface RtRwEntry { no: string; name: string; }
+
+interface HeirRow {
+  id: string;
+  nama: string;
+  nik: string;
+  hubungan: string;
+  tempatLahir: string;
+  tanggalLahir: string;
+  jenisKelamin: string;
+  agama: string;
+  pekerjaan: string;
+  alamat: string;
+  rt: string;
+  rw: string;
+}
+
+interface RwEntry { no: string; name: string; }
+
 export default function AdminSuratSKAW({ 
   onBack,
   editData,
