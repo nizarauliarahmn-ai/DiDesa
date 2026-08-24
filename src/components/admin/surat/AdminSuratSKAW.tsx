@@ -230,7 +230,8 @@ export default function AdminSuratSKAW({
         tglSurat: formatIndoDate(tanggalSurat),
         keperluan: formData.keperluan,
         ...letterData
-      });
+});
+  console.log("SKAW V2 BERHASIL LOAD");
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
