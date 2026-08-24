@@ -13,7 +13,7 @@ import AdminSuratSKU from './surat/AdminSuratSKU';
 import AdminSuratSKPH from './surat/AdminSuratSKPH';
 import AdminSuratSKD from './surat/AdminSuratSKD';
 import AdminSuratSKP from './surat/AdminSuratSKP';
-import AdminSuratSKSKAW from './surat/AdminSuratSKAW';
+import AdminSuratSKAW from './surat/AdminSuratSKAW';
 import AdminSuratSDU from './surat/AdminSuratSDU';
 import AdminSuratSPT from './surat/AdminSuratSPPD';
 import AdminSuratSPPD from './surat/AdminSuratSPPD';

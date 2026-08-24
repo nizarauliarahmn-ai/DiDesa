@@ -321,7 +321,7 @@ export default function AdminSuratSKAW({
             <span className="font-medium">Sukses</span>
             <span className="ml-2">Surat Keterangan Ahli Waris berhasil dibuat!</span>
           </div>
-        }}
+        )}
         
         <div className="max-w-7xl mx-auto">
           {/* Card form */}
