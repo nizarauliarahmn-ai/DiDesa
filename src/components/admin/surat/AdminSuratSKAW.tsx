@@ -362,7 +362,7 @@ export default function AdminSuratSKAW({
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="space-y-6 pb-20">
       {/* Header dengan template surat terpusat */}
       <SuratEditorHeader 
         template={getLetterHeaderTemplate('SKAW', { 
@@ -374,21 +374,14 @@ export default function AdminSuratSKAW({
         onBack={onBack}
       />
       
-      <div className="container mx-auto py-6 px-4">
-        {/* Status Toast */}
-        {success && (
-          <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow animate-in fade-in-up-0">
-            <span className="font-medium">Sukses</span>
-            <span className="ml-2">Surat Keterangan Ahli Waris berhasil dibuat!</span>
-          </div>
-        )}
-        
-        <div className="max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Form column */}
+        <div lg:col-span-7 space-y-6>
           {/* Card form */}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden border border-slate-200 dark:border-slate-700">
             
             {/* Header card */}
-            <div className="bg-slate-50 dark:bg-slate-700 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
                 Buat Surat Keterangan Ahli Waris (SKAW)
               </h2>
@@ -402,34 +395,34 @@ export default function AdminSuratSKAW({
               
               {/* Data Almarhum Section */}
               <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Data Almarhum</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Data Almarhum</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Nama Almarhum */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Nama Lengkap Almarhum</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap Almarhum</label>
                     <input
                       type="text"
                       value={formData.nama_almarhum}
                       onChange={(e) => setFormData(prev => ({ ...prev, nama_almarhum: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     />
                   </div>
                   
                   {/* NIK Almarhum */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">NIK Almarhum</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">NIK Almarhum</label>
                     <input
                       type="text"
                       value={formData.nik_almarhum}
                       onChange={(e) => setFormData(prev => ({ ...prev, nik_almarhum: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     />
                   </div>
                   
                   {/* Tempat Lahir Almarhum */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Tempat Lahir</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
                     <input
                       type="text"
                       value={formData.tempat_lahir}
@@ -440,22 +433,22 @@ export default function AdminSuratSKAW({
                   
                   {/* Tanggal Lahir Almarhum */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Tanggal Lahir</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
                     <input
                       type="date"
                       value={formData.tanggal_lahir}
                       onChange={(e) => setFormData(prev => ({ ...prev, tanggal_lahir: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     />
                   </div>
                   
                   {/* Jenis Kelamin Almarhum */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Jenis Kelamin</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
                     <select
                       value={formData.jenis_kelamin_almarhum}
                       onChange={(e) => setFormData(prev => ({ ...prev, jenis_kelamin_almarhum: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     >
                       <option value="Laki-Laki">Laki-Laki</option>
                       <option value="Perempuan">Perempuan</option>
@@ -464,11 +457,11 @@ export default function AdminSuratSKAW({
                   
                   {/* Agama Almarhum */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Agama</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
                     <select
                       value={formData.agama_almarhum}
                       onChange={(e) => setFormData(prev => ({ ...prev, agama_almarhum: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     >
                       <option value="Islam">Islam</option>
                       <option value="Kristen">Kristen</option>
@@ -481,7 +474,7 @@ export default function AdminSuratSKAW({
                   
                   {/* Pekerjaan Almarhum */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Pekerjaan</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
                     <input
                       type="text"
                       value={formData.pekerjaan_almarhum}
@@ -493,14 +486,14 @@ export default function AdminSuratSKAW({
                   
                   {/* Alamat Almarhum */}
                   <div className="col-span-full">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Alamat Lengkap</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
                     <textarea
                       value={formData.alamat_almarhum}
                       onChange={(e) => {
                         setFormData(prev => ({ ...prev, alamat_almarhum: e.target.value }));
                         handleAlamatBlur(e.target.value);
                       }}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500 resize-h min-h-[80px]"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-h min-h-[80px]"
                       rows={3}
                       placeholder="Masukkan alamat lengkap almarhum (contoh: Jl. Contoh No. 123, Desa Contoh)"
                     />
@@ -523,13 +516,12 @@ export default function AdminSuratSKAW({
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">RW</label>
-                      <input
-                        type="text"
-                        value={formData.rw_almarhum}
-                        onChange={(e) => setFormData(prev => ({ ...prev, rw_almarhum: e.target.value }))}
-                        className="w-full px-2 py-1 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
-                        placeholder="001"
-                      />
+<input
+                      type="text"
+                      value={formData.rw_almarhum}
+                      onChange={(e) => setFormData(prev => ({ ...prev, rw_almarhum: e.target.value }))}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    />
                     </div>
                   </div>
                 </div>
@@ -537,39 +529,39 @@ export default function AdminSuratSKAW({
               
               {/* Data Pasangan Section */}
               <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Data Pasangan</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Data Pasangan</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Nama Pasangan */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Nama Pasangan</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Nama Pasangan</label>
                     <input
                       type="text"
                       value={formData.nama_pasangan}
                       onChange={(e) => setFormData(prev => ({ ...prev, nama_pasangan: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     />
                   </div>
                   
                   {/* NIK Pasangan */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">NIK Pasangan</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">NIK Pasangan</label>
                     <input
                       type="text"
                       value={formData.nik_pasangan}
                       onChange={(e) => setFormData(prev => ({ ...prev, nik_pasangan: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     />
                   </div>
                   
                   {/* Tanggal Nikah */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Tanggal Nikah</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Nikah</label>
                     <input
                       type="date"
                       value={formData.tanggal_nikah}
                       onChange={(e) => setFormData(prev => ({ ...prev, tanggal_nikah: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     />
                   </div>
                 </div>
@@ -577,7 +569,7 @@ export default function AdminSuratSKAW({
               
               {/* Daftar Ahli Waris Section */}
               <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Daftar Ahli Waris</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Daftar Ahli Waris</h3>
                 
                 {/* Tombol add heir */}
                 <div className="mb-3 flex items-center justify-between">
@@ -631,7 +623,7 @@ export default function AdminSuratSKAW({
                               <select
                                 value={heir.jenisKelamin}
                                 onChange={(e) => handleHeirChange(heir.id, 'jenisKelamin', e.target.value)}
-                                className="w-full px-2 py-1 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                               >
                                 <option value="Laki-Laki">L</option>
                                 <option value="Perempuan">P</option>
@@ -672,7 +664,7 @@ export default function AdminSuratSKAW({
               
               {/* Keperluan Section */}
               <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Keperluan Pembuatan Surat</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Keperluan Pembuatan Surat</h3>
                 
                 <select
                   value={formData.keperluan}
@@ -689,11 +681,11 @@ export default function AdminSuratSKAW({
               
               {/* Pejabat Section */}
               <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Pejabat Penandatangan</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Pejabat Penandatangan</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Nama Pejabat</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Nama Pejabat</label>
                     <input
                       type="text"
                       value={formData.nomePejabat}
@@ -703,7 +695,7 @@ export default function AdminSuratSKAW({
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Jabatan</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Jabatan</label>
                     <select
                       value={formData.jabatanPejabat}
                       onChange={(e) => setFormData(prev => ({ ...prev, jabatanPejabat: e.target.value }))}
@@ -720,11 +712,11 @@ export default function AdminSuratSKAW({
               
               {/* Kop Settings Section */}
               <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Setelan Kop Surat</h3>
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Setelan Kop Surat</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Nama Desa</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Nama Desa</label>
                     <input
                       type="text"
                       value={formData.namaDesa}
@@ -734,7 +726,7 @@ export default function AdminSuratSKAW({
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Kecamatan</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Kecamatan</label>
                     <input
                       type="text"
                       value={formData.namaKecamatan}
@@ -744,7 +736,7 @@ export default function AdminSuratSKAW({
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Kabupaten/Kota</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Kabupaten/Kota</label>
                     <input
                       type="text"
                       value={formData.namaKabupaten}
@@ -754,7 +746,7 @@ export default function AdminSuratSKAW({
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Provinsi</label>
+                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Provinsi</label>
                     <input
                       type="text"
                       value={formData.namaProvinsi}
@@ -765,7 +757,7 @@ export default function AdminSuratSKAW({
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Alamat Kantor Desa</label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Kantor Desa</label>
                   <textarea
                     value={formData.alamatKantor}
                     onChange={(e) => setFormData(prev => ({ ...prev, alamatKantor: e.target.value }))}
@@ -776,7 +768,7 @@ export default function AdminSuratSKAW({
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">Kontak Kantor</label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Kontak Kantor</label>
                   <input
                     type="text"
                     value={formData.kontakKantor}
@@ -806,6 +798,15 @@ export default function AdminSuratSKAW({
               </div>
               
             </form>
+          </div>
+        </div>
+        {/* Live A4 Preview column */}
+        <div lg:col-span-5>
+          <div className="sticky top-0 z-10 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-lg">
+            <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Live A4 Preview</h3>
+            <div className="prose dark:prose-invert max-h-[500px] overflow-y-auto">
+              {/* Preview content will render here */}
+            </div>
           </div>
         </div>
       </div>
