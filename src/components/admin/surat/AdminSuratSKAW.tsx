@@ -288,7 +288,7 @@ export default function AdminSuratSKAW({
         keperluan: formData.keperluan,
         ...letterData
 });
-  console.log("SKAW V2 BERHASIL LOAD");
+console.log("SKAW V2 BERHASIL LOAD");
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -362,21 +362,25 @@ export default function AdminSuratSKAW({
   ];
 
   return (
-    <div className="space-y-6 pb-20">
-      {/* Header dengan template surat terpusat */}
-      <SuratEditorHeader 
-        template={getLetterHeaderTemplate('SKAW', { 
-          kode: '474', 
-          jenis: 'Surat Keterangan & Pernyataan Ahli Waris', 
-          deskripsi: 'Surat Keterangan & Pernyataan Ahli Waris',
-          nomorSurat: formData.nomorSurat
-        })}
-        onBack={onBack}
-      />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Form column */}
-        <div lg:col-span-7 space-y-6>
+    <div className="w-full flex-1 min-w-0">
+      {/* 1. Bagian Header (Tombol Kembali & Judul) */}
+      <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border-b border-slate-200 dark:border-slate-700">
+        <SuratEditorHeader 
+          template={getLetterHeaderTemplate('SKAW', { 
+            kode: '474', 
+            jenis: 'Surat Keterangan & Pernyataan Ahli Waris', 
+            deskripsi: 'Surat Keterangan & Pernyataan Ahli Waris',
+            nomorSurat: formData.nomorSurat
+          })}
+          onBack={onBack}
+        />
+      </div>
+    
+      {/* 2. Grid Utama */}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        
+        {/* Kolom Kiri: Form */}
+        <div className="lg:col-span-8 2xl:col-span-9 space-y-6 w-full min-w-0">
           {/* Card form */}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden border border-slate-200 dark:border-slate-700">
             
@@ -516,12 +520,13 @@ export default function AdminSuratSKAW({
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">RW</label>
-<input
-                      type="text"
-                      value={formData.rw_almarhum}
-                      onChange={(e) => setFormData(prev => ({ ...prev, rw_almarhum: e.target.value }))}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    />
+                      <input
+                        type="text"
+                        value={formData.rw_almarhum}
+                        onChange={(e) => setFormData(prev => ({ ...prev, rw_almarhum: e.target.value }))}
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                        placeholder="001"
+                      />
                     </div>
                   </div>
                 </div>
@@ -623,7 +628,7 @@ export default function AdminSuratSKAW({
                               <select
                                 value={heir.jenisKelamin}
                                 onChange={(e) => handleHeirChange(heir.id, 'jenisKelamin', e.target.value)}
-className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                               >
                                 <option value="Laki-Laki">L</option>
                                 <option value="Perempuan">P</option>
@@ -800,15 +805,19 @@ className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-20
             </form>
           </div>
         </div>
-        {/* Live A4 Preview column */}
-        <div lg:col-span-5>
-          <div className="sticky top-0 z-10 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-lg">
+        
+        {/* Kolom Kanan: Preview */}
+        <div className="lg:col-span-4 2xl:col-span-3 w-full">
+          <div className="sticky top-6">
             <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-4">Live A4 Preview</h3>
-            <div className="prose dark:prose-invert max-h-[500px] overflow-y-auto">
-              {/* Preview content will render here */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-lg">
+              <div className="prose dark:prose-invert max-h-[500px] overflow-y-auto">
+                {/* Preview content will render here */}
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
