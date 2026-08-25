@@ -22,6 +22,7 @@ import { getPrintSignatureHTML } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
+import PejabatPenandatanganCard from './PejabatPenandatanganCard';
 
 interface Resident {
   nik: string;
@@ -682,38 +683,15 @@ console.log("SKAW V2 BERHASIL LOAD");
                   <option value="Pengajuan HT">Pengajuan Hak Tanah</option>
                   <option value="Lain-lain">Lain-lain</option>
                 </select>
-              </div>
+</div>
               
               {/* Pejabat Section */}
-              <div>
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Pejabat Penandatangan</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Nama Pejabat</label>
-                    <input
-                      type="text"
-                      value={formData.nomePejabat}
-                      onChange={(e) => setFormData(prev => ({ ...prev, namaPejabat: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">Jabatan</label>
-                    <select
-                      value={formData.jabatanPejabat}
-                      onChange={(e) => setFormData(prev => ({ ...prev, jabatanPejabat: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded dark:bg-slate-700 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
-                    >
-                      <option value="Kepala Desa">Kepala Desa</option>
-                      <option value="Kamat">Kamat</option>
-                      <option>Sekretaris Desa</option>
-                      <option>Lurah</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+              <PejabatPenandatanganCard
+                namaPejabat={formData.namaPejabat}
+                setNamaPejabat={setFormData}
+                jabatanPejabat={formData.jabatanPejabat}
+                setJabatanPejabat={setFormData}
+              />
               
               {/* Kop Settings Section */}
               <div>
