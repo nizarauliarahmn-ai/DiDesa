@@ -84,6 +84,30 @@ export const SURAT_CONFIG = {
     noUrutTerakhir: 3, 
     isVisible: true 
   },
+  SKAW: { 
+    id: '31', 
+    jenis: 'SK AHLI WARIS', 
+    klasifikasi: 'SKAW', 
+    kodeKlasifikasi: '474', 
+    deskripsi: 'Surat Keterangan & Pernyataan Ahli Waris', 
+    noUrutTerakhir: 2, 
+    isVisible: true,
+    fields: [
+      { id: 'nama_almarhum', label: 'Nama Almarhum', type: 'text', required: true },
+      { id: 'nik_almarhum', label: 'NIK Almarhum', type: 'text', required: true },
+      { id: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', required: true },
+      { id: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', required: true },
+      { id: 'jenis_kelamin_almarhum', label: 'Jenis Kelamin', type: 'select', required: true, options: ['Laki-Laki', 'Perempuan'] },
+      { id: 'agama_almarhum', label: 'Agama', type: 'text', required: true, placeholder: 'Islam' },
+      { id: 'pekerjaan_almarhum', label: 'Pekerjaan Almarhum', type: 'text', required: true },
+      { id: 'alamat_almarhum', label: 'Alamat Almarhum', type: 'textarea', required: true },
+      { id: 'rt_almarhum', label: 'RT', type: 'text', required: true, placeholder: '001' },
+      { id: 'rw_almarhum', label: 'RW', type: 'text', required: true, placeholder: '001' },
+      { id: 'nama_pasangan', label: 'Nama Pasangan', type: 'text' },
+      { id: 'nik_pasangan', label: 'NIK Pasangan', type: 'text' },
+      { id: 'tanggal_nikah', label: 'Tanggal Nikah', type: 'date' }
+    ]
+  },
   SKBM: { 
     id: '10', 
     jenis: 'SKBM', 
