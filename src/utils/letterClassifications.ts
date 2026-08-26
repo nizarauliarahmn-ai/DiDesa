@@ -180,6 +180,7 @@ export function getLetterClassifications(): LetterClassification[] {
           if (item.jenis !== saasMatch.jenis || 
               item.klasifikasi !== saasMatch.klasifikasi || 
               item.kodeKlasifikasi !== saasMatch.kodeKlasifikasi ||
+              item.deskripsi !== saasMatch.deskripsi ||
               item.isSaaSDisabled !== isSaaSDisabled ||
               item.isVisible !== newIsVisible) {
             updated = true;
