@@ -49,28 +49,27 @@ export default function AdminSaaSTemplateSurat() {
         }
 
         // 2. Jika Supabase berhasil, update localStorage cache
-        if (supabaseData) {
+        if (supabaseData && Array.isArray(supabaseData)) {
           localStorage.setItem('saas_global_letter_catalog', JSON.stringify(supabaseData));
         }
 
-        // 3. Merge dengan initial (tambah yang hilang)
-        const source = supabaseData || (() => {
-          const stored = localStorage.getItem('saas_global_letter_catalog');
-          return stored ? JSON.parse(stored) : null;
-        })() || initial;
+        // 3. Gunakan data dari Supabase / localStorage. Hanya fallback ke initial jika belum pernah ada konfigurasi sama sekali
+        const source = (supabaseData && Array.isArray(supabaseData) && supabaseData.length > 0)
+          ? supabaseData 
+          : (() => {
+              const stored = localStorage.getItem('saas_global_letter_catalog');
+              if (stored) {
+                try {
+                  const p = JSON.parse(stored);
+                  if (Array.isArray(p) && p.length > 0) return p;
+                } catch (e) {}
+              }
+              return null;
+            })() || initial;
 
-        const missingTemplates = initial.filter(initItem =>
-          !source.some((storedItem: any) => storedItem.klasifikasi === initItem.klasifikasi)
-        );
-        let merged = [...source, ...missingTemplates];
-
-        if (!merged.find((m: any) => m.klasifikasi === 'SPPD')) {
-          merged.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
-        }
-
-        // Deduplicate
+        // Deduplicate by klasifikasi
         const uniqueTemplatesMap = new Map();
-        merged.forEach((item: any) => {
+        source.forEach((item: any) => {
           if (!uniqueTemplatesMap.has(item.klasifikasi)) {
             uniqueTemplatesMap.set(item.klasifikasi, item);
           }

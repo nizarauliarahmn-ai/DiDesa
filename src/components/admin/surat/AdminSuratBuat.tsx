@@ -254,9 +254,6 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
 
   useEffect(() => {
     const cls = getLetterClassifications();
-    if (!cls.find(c => c.klasifikasi === 'SPPD')) {
-      cls.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
-    }
     setClassifications(cls);
 
     // Fetch residents for Step 2 search
@@ -297,9 +294,6 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
     };
     const handleClassificationsUpdate = () => {
       const cls = getLetterClassifications();
-      if (!cls.find(c => c.klasifikasi === 'SPPD')) {
-        cls.push({ id: '31', jenis: 'SURAT PERJALANAN DINAS', klasifikasi: 'SPPD', kodeKlasifikasi: '094', deskripsi: 'Surat Perintah & Perjalanan Dinas', noUrutTerakhir: 0, isVisible: true });
-      }
       setClassifications(cls);
     };
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
@@ -820,13 +814,14 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   };
 
   const filteredClassifications = classifications.filter(c => {
+    const isActuallyActive = c.isVisible !== false && !c.isSaaSDisabled;
     const matchesSearch = c.jenis.toLowerCase().includes(searchLetterQuery.toLowerCase()) ||
                           c.klasifikasi.toLowerCase().includes(searchLetterQuery.toLowerCase());
     
     if (!matchesSearch) return false;
 
-    if (statusFilter === 'active') return c.isVisible !== false;
-    if (statusFilter === 'inactive') return c.isVisible === false;
+    if (statusFilter === 'active') return isActuallyActive;
+    if (statusFilter === 'inactive') return !isActuallyActive;
     
     return true;
   });

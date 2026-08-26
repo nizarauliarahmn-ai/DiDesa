@@ -81,27 +81,14 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
 export function getSaaSTemplates(): LetterClassification[] {
   const stored = localStorage.getItem('saas_global_letter_catalog');
   if (stored) {
-    const parsed = JSON.parse(stored) as LetterClassification[];
-    let updated = false;
-    
-    // Merge any missing defaults that might have been added in newer versions
-    INITIAL_CLASSIFICATIONS.forEach(init => {
-      const idx = parsed.findIndex(p => p.id === init.id);
-      if (idx === -1) {
-        parsed.push(init);
-        updated = true;
-      } else if (init.id === '5' && (parsed[idx].klasifikasi !== 'SDP' || parsed[idx].jenis !== 'SK DOMISILI PERORANGAN')) {
-        // Migrate legacy SKD template to SDP (SK Domisili Perorangan) for consistency
-        parsed[idx].klasifikasi = 'SDP';
-        parsed[idx].jenis = 'SK DOMISILI PERORANGAN';
-        updated = true;
+    try {
+      const parsed = JSON.parse(stored) as LetterClassification[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
       }
-    });
-    
-    if (updated) {
-      localStorage.setItem('saas_global_letter_catalog', JSON.stringify(parsed));
+    } catch (e) {
+      console.warn('[letterClassifications] Gagal parse saas_global_letter_catalog:', e);
     }
-    return parsed;
   }
   return INITIAL_CLASSIFICATIONS;
 }
@@ -159,22 +146,36 @@ export function getLetterClassifications(): LetterClassification[] {
       
       let updated = false;
 
-      // Merge new templates from SaaS
+      // 1. FILTER OUT templates that were deleted by SaaS (SaaS is the single source of truth)
+      const prevCount = mapped.length;
+      mapped = mapped.filter(item => 
+        saasTemplates.some(s => s.id === item.id || s.klasifikasi === item.klasifikasi)
+      );
+      if (mapped.length !== prevCount) {
+        updated = true;
+      }
+
+      // 2. Add new templates from SaaS
       saasTemplates.forEach(saasTpl => {
-        const hasId = mapped.some(item => item.id === saasTpl.id);
+        const hasId = mapped.some(item => item.id === saasTpl.id || item.klasifikasi === saasTpl.klasifikasi);
         if (!hasId) {
-          mapped.push({...saasTpl, isVisible: true, noUrutTerakhir: globalSeq});
+          mapped.push({
+            ...saasTpl, 
+            isVisible: saasTpl.isVisible !== false, 
+            isSaaSDisabled: saasTpl.isVisible === false || saasTpl.isSaaSDisabled === true,
+            noUrutTerakhir: globalSeq
+          });
           updated = true;
         }
       });
       
-      // Merge updates from SaaS (jenis, klasifikasi, kodeKlasifikasi, isVisible)
+      // 3. Merge updates from SaaS (jenis, klasifikasi, kodeKlasifikasi, isVisible, isSaaSDisabled)
       mapped = mapped.map(item => {
         const saasMatch = saasTemplates.find(s => s.id === item.id || s.klasifikasi === item.klasifikasi);
         if (saasMatch) {
-          // Sync visibility: SaaS enabled = force visible; SaaS disabled = force hidden; otherwise keep tenant's choice
-          const isSaaSDisabled = saasMatch.isVisible === false;
-          const newIsVisible = saasMatch.isVisible === true ? true : isSaaSDisabled ? false : item.isVisible;
+          // Sync visibility: SaaS disabled = force hidden; otherwise keep tenant's choice
+          const isSaaSDisabled = saasMatch.isVisible === false || saasMatch.isSaaSDisabled === true;
+          const newIsVisible = isSaaSDisabled ? false : (item.isVisible !== undefined ? item.isVisible : true);
 
           if (item.jenis !== saasMatch.jenis || 
               item.klasifikasi !== saasMatch.klasifikasi || 
@@ -184,9 +185,12 @@ export function getLetterClassifications(): LetterClassification[] {
             updated = true;
             return {
               ...item,
+              id: saasMatch.id || item.id,
               jenis: saasMatch.jenis,
               klasifikasi: saasMatch.klasifikasi,
               kodeKlasifikasi: saasMatch.kodeKlasifikasi,
+              deskripsi: saasMatch.deskripsi || item.deskripsi,
+              fields: saasMatch.fields || item.fields,
               isVisible: newIsVisible,
               isSaaSDisabled: isSaaSDisabled,
               noUrutTerakhir: globalSeq
@@ -195,10 +199,6 @@ export function getLetterClassifications(): LetterClassification[] {
         }
         return item;
       });
-      
-      // Clean up templates that were deleted by SaaS
-      const mappedCount = mapped.length;
-      mapped = mapped.filter(item => saasTemplates.some(s => s.id === item.id));
       
       // Auto-deduplicate village classifications by klasifikasi to fix legacy duplicates
       const uniqueMap = new Map();
@@ -209,7 +209,7 @@ export function getLetterClassifications(): LetterClassification[] {
       });
       const deduplicated = Array.from(uniqueMap.values());
       
-      if (deduplicated.length !== mappedCount) updated = true;
+      if (deduplicated.length !== mapped.length) updated = true;
 
       if (updated) {
         localStorage.setItem('letter_classifications', JSON.stringify(deduplicated));
@@ -221,7 +221,12 @@ export function getLetterClassifications(): LetterClassification[] {
   } 
   
   // If no village letter_classifications exist, initialize with SaaS templates
-  const initialForVillage = saasTemplates.map(t => ({...t, isVisible: true, noUrutTerakhir: globalSeq}));
+  const initialForVillage = saasTemplates.map(t => ({
+    ...t, 
+    isVisible: t.isVisible !== false, 
+    isSaaSDisabled: t.isVisible === false || t.isSaaSDisabled === true,
+    noUrutTerakhir: globalSeq
+  }));
   localStorage.setItem('letter_classifications', JSON.stringify(initialForVillage));
   return initialForVillage;
 }
