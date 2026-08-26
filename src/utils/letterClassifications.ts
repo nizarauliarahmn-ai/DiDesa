@@ -28,7 +28,6 @@ export const INITIAL_CLASSIFICATIONS: LetterClassification[] = [
   { id: '1', jenis: 'SURAT UMUM', klasifikasi: 'SU', kodeKlasifikasi: '000', noUrutTerakhir: 5, isVisible: true },
   { id: '2', jenis: 'UNDANGAN', klasifikasi: 'UND', kodeKlasifikasi: '005', noUrutTerakhir: 12, isVisible: true },
   { id: '3', jenis: 'SK KEMATIAN', klasifikasi: 'SKM', kodeKlasifikasi: '474.2', noUrutTerakhir: 3, isVisible: true },
-  { id: '4', jenis: 'SK AHLI WARIS', klasifikasi: 'SKAW', kodeKlasifikasi: '474', deskripsi: 'Surat Keterangan & Pernyataan Ahli Waris', noUrutTerakhir: 2, isVisible: true },
   { id: '5', jenis: 'SK DOMISILI PERORANGAN', klasifikasi: 'SDP', kodeKlasifikasi: '145', noUrutTerakhir: 18, isVisible: true },
   { id: '6', jenis: 'SURAT KETERANGAN UMUM', klasifikasi: 'SKUM', kodeKlasifikasi: '400', noUrutTerakhir: 4, isVisible: true },
   { 
