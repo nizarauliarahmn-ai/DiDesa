@@ -1071,7 +1071,7 @@ export default function AdminSuratNikah({
         ])}
         <p>Wali dari calon pengantin wanita:</p>
         ${dtTable([
-          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${(formData.namaWali && formData.namaWali.trim()) ? formData.namaWali.toUpperCase() : (formData.namaAyahIstri || '').toUpperCase()}</span>`],
+          ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${(formData.namaWali && formData.namaWali.trim()) ? formData.namaWali.toUpperCase() : ((formData.wargaSuami && !formData.wargaIstri) ? (formData.namaAyahSuami || '') : (formData.namaAyahIstri || '')).toUpperCase()}</span>`],
           ['2. Hubungan', `${formData.hubunganWali || 'Ayah Kandung'}`]
         ])}
         <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
@@ -1274,7 +1274,7 @@ export default function AdminSuratNikah({
         <div style="margin-top:20px;display:flex;justify-content:flex-end;">
           <div style="text-align:center;width:230px;">
             <div style="margin-bottom:45px;">${tempatTgl()}<br>Wali,</div>
-            <span style="font-weight:700;">${(formData.namaWali && formData.namaWali.trim()) ? formData.namaWali.toUpperCase() : (formData.namaAyahIstri || '').toUpperCase()}</span>
+            <span style="font-weight:700;">${(formData.namaWali && formData.namaWali.trim()) ? formData.namaWali.toUpperCase() : ((formData.wargaSuami && !formData.wargaIstri) ? (formData.namaAyahSuami || '') : (formData.namaAyahIstri || '')).toUpperCase()}</span>
           </div>
         </div>
       `;
@@ -1950,7 +1950,7 @@ export default function AdminSuratNikah({
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nama Wali</label>
-                <input type="text" name="namaWali" value={formData.namaWali} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" placeholder={formData.namaAyahIstri || "Sama dengan nama ayah kandung"} />
+                <input type="text" name="namaWali" value={formData.namaWali} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 uppercase" placeholder={(formData.wargaSuami && !formData.wargaIstri) ? (formData.namaAyahSuami || "Sama dengan nama ayah kandung") : (formData.namaAyahIstri || "Sama dengan nama ayah kandung")} />
                 <p className="text-[10px] text-emerald-700 font-medium">* Kosongkan jika wali adalah Ayah Kandung</p>
               </div>
               <div className="space-y-1">
