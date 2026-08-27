@@ -783,7 +783,7 @@ export default function AdminSuratNikah({
                 width: 210mm !important;
                 height: 296.9mm !important;
                 margin: 0 !important;
-                padding: 56px 75px !important;
+                padding: 40px 60px !important;
                 box-sizing: border-box !important;
                 background: white !important;
                 color: black !important;
@@ -794,12 +794,12 @@ export default function AdminSuratNikah({
                 visibility: visible !important;
                 font-family: ${letterFont}, serif;
                 font-size: 13px;
-                line-height: 1.5;
+                line-height: 1.35;
               }
               .printable-area * {
                 visibility: visible !important;
               }
-              .printable-area p { margin: 5px 0; }
+              .printable-area p { margin: 3px 0; }
               .crop-mark { 
                 display: none !important; 
               }
@@ -935,7 +935,7 @@ export default function AdminSuratNikah({
       
       // Standard table: values not bold
       const dtTable = (rows: any[]) => `
-        <table style="width:100%;border-collapse:collapse;margin:6px 0;font-family:${letterFont};">
+        <table style="width:100%;border-collapse:collapse;margin:3px 0;font-family:${letterFont};">
           ${rows.map(r => `<tr><td style="width:38%;padding:1.5px 3px;vertical-align:top;">${r[0]}</td><td style="width:2%;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${r[1]}</td></tr>`).join('')}
         </table>
       `;
@@ -1020,7 +1020,7 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
       html = `
         ${lampiranHtml('N1')}
-        <div style="font-size:8pt;line-height:1.2;margin-bottom:24px;text-transform:uppercase;">
+        <div style="font-size:8pt;line-height:1.2;margin-bottom:12px;text-transform:uppercase;">
           <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;">
             <div style="white-space:nowrap;">KANTOR DESA/KELURAHAN</div>
             <div>:</div>
@@ -1037,7 +1037,7 @@ export default function AdminSuratNikah({
             <div>${v(formData.namaKabupaten, 'HULU SUNGAI SELATAN').replace(/^pemerintah\s+kabupaten\s+/i, '').replace(/^(kabupaten|kota)\s+/i, '').toUpperCase()}</div>
           </div>
         </div>
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PENGANTAR PERKAWINAN</h3>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:6px 0 2px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
         <p>Yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
@@ -1075,7 +1075,7 @@ export default function AdminSuratNikah({
           ['2. Hubungan', `${formData.hubunganWali || 'Ayah Kandung'}`]
         ])}
         <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
-        <p style="text-align:justify;margin-top:24px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
+        <p style="text-align:justify;margin-top:8px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
         <div class="mt-auto pt-6">
         ${getPrintSignatureHTML(
           formData.namaDesa,
@@ -2153,12 +2153,12 @@ export default function AdminSuratNikah({
                     style={{ 
                       width: '794px', 
                       height: '1123px', 
-                      padding: '56px 75px',
+                      padding: '40px 60px',
                       transform: `scale(${previewZoom})`,
                       transformOrigin: 'top left',
                       fontFamily: letterFont,
                       fontSize: '13px',
-                      lineHeight: '1.45',
+                      lineHeight: '1.35',
                       position: 'relative',
                       color: 'black',
                       boxSizing: 'border-box'
