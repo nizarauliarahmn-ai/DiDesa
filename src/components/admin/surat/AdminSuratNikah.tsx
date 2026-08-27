@@ -782,7 +782,7 @@ export default function AdminSuratNikah({
                 width: 210mm !important;
                 height: 296.9mm !important;
                 margin: 0 !important;
-                padding: 56px 75px !important; /* matches preview's padding precisely */
+                padding: 32px 40px !important; /* tightened for SKN N1 - fits TTD within 297mm */
                 box-sizing: border-box !important;
                 background: white !important;
                 color: black !important;
@@ -793,7 +793,7 @@ export default function AdminSuratNikah({
                 visibility: visible !important;
                 font-family: ${letterFont}, serif;
                 font-size: 12pt;
-                line-height: 1.3;
+                line-height: 1.15;
               }
               .printable-area * {
                 visibility: visible !important;
@@ -934,7 +934,7 @@ export default function AdminSuratNikah({
       
       // Standard table: values not bold
       const dtTable = (rows: any[]) => `
-        <table style="width:100%;border-collapse:collapse;margin:6px 0;font-family:${letterFont};">
+        <table style="width:100%;border-collapse:collapse;margin:3px 0;font-family:${letterFont};">
           ${rows.map(r => `<tr><td style="width:38%;padding:1.5px 3px;vertical-align:top;">${r[0]}</td><td style="width:2%;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${r[1]}</td></tr>`).join('')}
         </table>
       `;
@@ -1019,7 +1019,7 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
       html = `
         ${lampiranHtml('N1')}
-        <div style="font-size:8pt;line-height:1.2;margin-bottom:24px;text-transform:uppercase;">
+        <div style="font-size:8pt;line-height:1.2;margin-bottom:12px;text-transform:uppercase;">
           <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;">
             <div style="white-space:nowrap;">KANTOR DESA/KELURAHAN</div>
             <div>:</div>
@@ -1036,7 +1036,7 @@ export default function AdminSuratNikah({
             <div>${v(formData.namaKabupaten, 'HULU SUNGAI SELATAN').replace(/^pemerintah\s+kabupaten\s+/i, '').replace(/^(kabupaten|kota)\s+/i, '').toUpperCase()}</div>
           </div>
         </div>
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT PENGANTAR PERKAWINAN</h3>
+        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:8px 0 2px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
         <p>Yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
@@ -1069,7 +1069,7 @@ export default function AdminSuratNikah({
           ['5. Alamat', v(P.alamatOrtu)]
         ])}
         <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
-        <p style="text-align:justify;margin-top:24px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
+        <p style="text-align:justify;margin-top:12px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
         ${getPrintSignatureHTML(
           formData.namaDesa,
           v(fmtTgl(formData.tanggalSurat)),
@@ -1435,8 +1435,8 @@ export default function AdminSuratNikah({
           height: '297mm',
           padding: '20mm',
           fontFamily: letterFont, 
-          fontSize: '12pt', 
-          lineHeight: '1.3',
+          fontSize: '11.5pt', 
+          lineHeight: '1.15',
           position: 'relative',
           boxSizing: 'border-box'
         }}
@@ -2130,15 +2130,15 @@ export default function AdminSuratNikah({
               >
                 <div 
                   style={{
-                    width: `${794 * previewZoom}px`,
-                    height: `${1123 * previewZoom}px`,
+                    width: `${210 * previewZoom}mm`,
+                    height: `${297 * previewZoom}mm`,
                     overflow: 'hidden',
                     position: 'relative',
                     boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
                     borderRadius: '12px',
                     transition: 'width 0.2s ease-out, height 0.2s ease-out'
                   }}
-                  className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
+                  className="bg-white dark:bg-slate-900 m-auto shrink-0 relative w-[210mm] h-[297mm] min-h-[297mm] aspect-[210/297] max-w-[210mm]"
                 >
                   {/* Visual Crop Marks */}
                   <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
@@ -2147,16 +2147,17 @@ export default function AdminSuratNikah({
                   <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
 
                   <div 
-                    className="bg-white dark:bg-slate-900 shrink-0"
+                    className="bg-white dark:bg-slate-900 shrink-0 w-[210mm] h-[297mm] min-h-[297mm] aspect-[210/297]"
                     style={{ 
-                      width: '794px', 
-                      height: '1123px', 
-                      padding: '56px 75px',
+                      width: '210mm', 
+                      height: '297mm', 
+                      minHeight: '297mm', 
+                      padding: '32px 40px',
                       transform: `scale(${previewZoom})`,
                       transformOrigin: 'top left',
                       fontFamily: letterFont,
-                      fontSize: '12pt',
-                      lineHeight: '1.3',
+                      fontSize: '11.5pt',
+                      lineHeight: '1.15',
                       position: 'relative',
                       boxSizing: 'border-box',
                       color: 'black'

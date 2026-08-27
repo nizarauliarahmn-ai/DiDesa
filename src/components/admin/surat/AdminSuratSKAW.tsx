@@ -1018,25 +1018,25 @@ export default function AdminSuratSKAW({
               </div>
             </div>
 
-<div 
-  {...dragProps}
-  className="bg-slate-200/70 dark:bg-slate-950 p-4 rounded-2xl overflow-auto max-h-[750px] flex justify-center w-full max-w-[210mm] aspect-[1/1.414] border border-slate-200 dark:border-slate-800 shadow-inner cursor-grab active:cursor-grabbing"
->
-  <div>
-    <div
-      style={{
-        transform: `scale(${previewZoom})`,
-        transformOrigin: 'top center',
-        fontFamily: letterFont,
-        fontSize: 13px,
-        lineHeight: 1.4,
-        boxSizing: 'border-box',
-        position: 'relative'
-      }}
-      dangerouslySetInnerHTML={{ __html: generateHTML() }}
-    />
-  </div>
-</div>
+            <div 
+              {...dragProps}
+              className="bg-slate-200/70 dark:bg-slate-950 p-4 rounded-2xl overflow-auto max-h-[750px] flex justify-center border border-slate-200 dark:border-slate-800 shadow-inner cursor-grab active:cursor-grabbing"
+            >
+              <div 
+                style={{
+                  transform: `scale(${previewZoom})`,
+                  transformOrigin: 'top center',
+                  width: '210mm',
+                  minHeight: '297mm',
+                  padding: '56px 75px',
+                  backgroundColor: 'white',
+                  color: 'black',
+                  boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                  fontFamily: letterFont,
+                  boxSizing: 'border-box',
+                  position: 'relative'
+                }}
+                dangerouslySetInnerHTML={{ __html: generateHTML() }}
               />
             </div>
           </div>
