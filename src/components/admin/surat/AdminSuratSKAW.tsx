@@ -34,6 +34,10 @@ interface Resident {
   desa: string;
   fatherName: string;
   motherName: string;
+  noKk?: string;
+  familyRelation?: string;
+  religion?: string;
+  rt_rw?: string;
 }
 
 interface RtRwEntry { no: string; name: string; }
@@ -45,6 +49,11 @@ interface HeirRow {
   nik: string;
   ttl: string;
   pekerjaan: string;
+}
+
+interface FamilyMemberCandidate {
+  resident: Resident;
+  included: boolean;
 }
 
 export default function AdminSuratSKAW({ 
@@ -111,6 +120,57 @@ export default function AdminSuratSKAW({
     fetchResidents();
   }, []);
 
+  useEffect(() => {
+    const fetchFamilyMembers = async () => {
+      if (!formData.nikAlmarhum || formData.nikAlmarhum.length < 16) {
+        setFamilyMembers([]);
+        setSelectedFamilyMembers(new Set());
+        return;
+      }
+
+      const selectedResident = residents.find(r => r.nik === formData.nikAlmarhum);
+      if (!selectedResident || !selectedResident.noKk) {
+        setFamilyMembers([]);
+        setSelectedFamilyMembers(new Set());
+        return;
+      }
+
+      setLoadingFamily(true);
+      try {
+        const res = await fetchResidentsCached(true);
+        if (!res.ok) throw new Error();
+        const data: Resident[] = await res.json();
+        
+        const family = data
+          .filter(r => r.noKk === selectedResident.noKk && r.nik !== formData.nikAlmarhum)
+          .sort((a, b) => {
+            const priority = (rel: string = '') => {
+              const r = (rel || '').toLowerCase();
+              if (r.includes('istri') || r.includes('suami') || r.includes('kepala')) return 1;
+              if (r.includes('anak')) return 2;
+              return 3;
+            };
+            return priority(a.familyRelation || '') - priority(b.familyRelation || '');
+          });
+
+        const candidates: FamilyMemberCandidate[] = family.map(r => ({
+          resident: r,
+          included: true,
+        }));
+
+        setFamilyMembers(candidates);
+        setSelectedFamilyMembers(new Set(candidates.map(c => c.resident.nik)));
+      } catch (e) {
+        setFamilyMembers([]);
+        setSelectedFamilyMembers(new Set());
+      } finally {
+        setLoadingFamily(false);
+      }
+    };
+
+    fetchFamilyMembers();
+  }, [formData.nikAlmarhum, residents]);
+
   const [formData, setFormData] = useState({
     nomorSurat: '',
     
@@ -149,6 +209,10 @@ export default function AdminSuratSKAW({
     { id: 1, nama: '', hubungan: 'Anak', nik: '', ttl: '', pekerjaan: '' },
   ]);
 
+  const [familyMembers, setFamilyMembers] = useState<FamilyMemberCandidate[]>([]);
+  const [loadingFamily, setLoadingFamily] = useState(false);
+  const [selectedFamilyMembers, setSelectedFamilyMembers] = useState<Set<string>>(new Set());
+
   const addHeirRow = () => {
     setHeirRows(prev => [...prev, { id: Date.now(), nama: '', hubungan: 'Anak', nik: '', ttl: '', pekerjaan: '' }]);
   };
@@ -160,6 +224,37 @@ export default function AdminSuratSKAW({
 
   const updateHeirRow = (id: number, field: keyof HeirRow, value: string) => {
     setHeirRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
+  };
+
+  const mapFamilyRelation = (relation: string, gender: string): string => {
+    const r = (relation || '').toLowerCase();
+    if (r.includes('istri')) return 'Istri';
+    if (r.includes('suami')) return 'Suami';
+    if (r.includes('anak')) return 'Anak';
+    if (r.includes('kepala')) return gender === 'Laki-Laki' ? 'Suami' : 'Istri';
+    if (r.includes('ayah') || r.includes('bapak')) return 'Ayah';
+    if (r.includes('ibu')) return 'Ibu';
+    return 'Lainnya';
+  };
+
+  const toggleFamilyMember = (nik: string) => {
+    setSelectedFamilyMembers(prev => {
+      const next = new Set(prev);
+      if (next.has(nik)) {
+        next.delete(nik);
+      } else {
+        next.add(nik);
+      }
+      return next;
+    });
+  };
+
+  const toggleAllFamilyMembers = () => {
+    if (selectedFamilyMembers.size === familyMembers.length) {
+      setSelectedFamilyMembers(new Set());
+    } else {
+      setSelectedFamilyMembers(new Set(familyMembers.map(m => m.resident.nik)));
+    }
   };
 
   const [previewZoom, setPreviewZoom] = useState(0.45);
@@ -198,6 +293,25 @@ export default function AdminSuratSKAW({
       alamatAlmarhum: capitalizeResidentFields(res).address,
     }));
     setSearchQuery('');
+  };
+
+  const getAllHeirs = (): HeirRow[] => {
+    const familyHeirs: HeirRow[] = familyMembers
+      .filter(m => selectedFamilyMembers.has(m.resident.nik))
+      .map((m, i) => ({
+        id: parseInt(`1000${i}`),
+        nama: m.resident.name || '',
+        hubungan: mapFamilyRelation(m.resident.familyRelation || '', m.resident.gender || ''),
+        nik: m.resident.nik || '',
+        ttl: m.resident.birthPlace && m.resident.birthDate 
+          ? `${m.resident.birthPlace}, ${m.resident.birthDate}`
+          : '',
+        pekerjaan: m.resident.job || '',
+      }));
+    
+    const manualHeirs = heirRows.filter(r => r.nama.trim() !== '');
+    
+    return [...familyHeirs, ...manualHeirs];
   };
 
   const handlePrint = async () => {
@@ -302,13 +416,14 @@ export default function AdminSuratSKAW({
       }
     }, 500);
 
+    const allHeirs = getAllHeirs();
     const updatedFields = {
       nomor: formData.nomorSurat,
       nik: formData.nikAlmarhum,
       nama: formData.namaAlmarhum,
       keperluan: formData.keperluan,
       data: formData,
-      heirRows
+      heirRows: allHeirs
     };
 
     if (editLetterId) {
@@ -329,7 +444,7 @@ export default function AdminSuratSKAW({
       nomor: formData.nomorSurat,
       tanggal: isBackdate ? new Date(tanggalSurat).toISOString() : new Date().toISOString(),
       data: formData,
-      heirRows
+      heirRows: allHeirs
     };
     const updatedRiwayat = [newEntry, ...riwayat].slice(0, 50);
     setRiwayat(updatedRiwayat);
@@ -355,7 +470,8 @@ export default function AdminSuratSKAW({
       } catch (e) { return d; }
     };
 
-    const heirRowsHTML = heirRows.map((row, i) => `
+    const allHeirs = getAllHeirs();
+    const heirRowsHTML = allHeirs.map((row, i) => `
       <tr>
         <td style="padding:6px 8px;border:1px solid #ccc;text-align:center;">${i + 1}</td>
         <td style="padding:6px 8px;border:1px solid #ccc;text-transform:uppercase;">${v(row.nama)}</td>
@@ -672,15 +788,93 @@ export default function AdminSuratSKAW({
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-bold transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Tambah
+                Tambah Manual
               </button>
             </div>
-            
+
+            {/* Loading State */}
+            {loadingFamily && (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+                <span className="ml-3 text-sm text-slate-500">Memuat data anggota keluarga...</span>
+              </div>
+            )}
+
+            {/* Family Members from Database */}
+            {!loadingFamily && familyMembers.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                    Anggota Keluarga dari KK yang Sama ({familyMembers.length} orang)
+                  </p>
+                  <button
+                    type="button"
+                    onClick={toggleAllFamilyMembers}
+                    className="text-xs font-bold text-emerald-600 hover:text-emerald-700"
+                  >
+                    {selectedFamilyMembers.size === familyMembers.length ? 'Batal Pilih Semua' : 'Pilih Semua'}
+                  </button>
+                </div>
+                
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-200 dark:divide-slate-700">
+                  {familyMembers.map((candidate) => {
+                    const res = candidate.resident;
+                    const isSelected = selectedFamilyMembers.has(res.nik);
+                    const relation = mapFamilyRelation(res.familyRelation || '', res.gender || '');
+                    const ttl = res.birthPlace && res.birthDate 
+                      ? `${res.birthPlace}, ${new Date(res.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`
+                      : '-';
+                    
+                    return (
+                      <label
+                        key={res.nik}
+                        className={`flex items-center gap-4 p-3 cursor-pointer transition-colors ${
+                          isSelected ? 'bg-emerald-50/50 dark:bg-emerald-900/20' : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleFamilyMember(res.nik)}
+                          className="w-4 h-4 text-emerald-600 bg-white border-slate-300 rounded focus:ring-emerald-500"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate">{res.name}</p>
+                            <span className="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-full">
+                              {relation}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                            NIK: {res.nik} &bull; {ttl}
+                          </p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+                
+                <p className="text-[10px] text-emerald-600 font-medium italic">
+                  * Centang anggota keluarga yang akan dimasukkan sebagai ahli waris dalam surat.
+                </p>
+              </div>
+            )}
+
+            {/* Manual Input Section */}
+            {!loadingFamily && familyMembers.length === 0 && formData.nikAlmarhum && (
+              <div className="bg-amber-50/50 dark:bg-amber-900/20 rounded-xl border border-amber-200/50 dark:border-amber-800/50 p-4 mb-4">
+                <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
+                  Tidak ditemukan data anggota keluarga untuk NIK ini. Silakan tambahkan ahli waris secara manual.
+                </p>
+              </div>
+            )}
+
+            {/* Manual Heir Rows */}
             <div className="space-y-4">
               {heirRows.map((row, index) => (
                 <div key={row.id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Ahli Waris #{index + 1}</span>
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Ahli Waris Manual #{index + 1}</span>
                     {heirRows.length > 1 && (
                       <button
                         type="button"
