@@ -5,7 +5,7 @@ import { resolveKadesName } from '../../../utils/letterOfficers';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import React, { useState, useEffect, useRef } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, Save, Printer, Trash2, ZoomIn, ZoomOut, Users } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Save, Printer, Trash2, ZoomIn, ZoomOut, Users } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -92,6 +92,9 @@ export default function AdminSuratNikah({
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(1);
   const [activeDoc, setActiveDoc] = useState('n1_suami');
+
+  const DOC_ORDER = ['biodata_suami', 'biodata_istri', 'n1_suami', 'n1_istri', 'n2_suami', 'n2_istri', 'n3', 'n4_suami', 'n4_istri', 'n6_suami', 'n6_istri'];
+
   const [showRiwayat, setShowRiwayat] = useState(false);
   const [riwayat, setRiwayat] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -258,6 +261,18 @@ export default function AdminSuratNikah({
     if (/_(istri)$/.test(t.id)) return !!formData.wargaIstri;
     return true;
   });
+
+  const handlePrevDoc = () => {
+    const visible = visibleDocTabs.map(t => t.id);
+    const idx = visible.indexOf(activeDoc);
+    if (idx > 0) setActiveDoc(visible[idx - 1]);
+  };
+
+  const handleNextDoc = () => {
+    const visible = visibleDocTabs.map(t => t.id);
+    const idx = visible.indexOf(activeDoc);
+    if (idx < visible.length - 1) setActiveDoc(visible[idx + 1]);
+  };
 
   // Mode pemilihan warga berdomisili di tahap 1
   const domMode: 'suami' | 'istri' | 'keduanya' =
@@ -2065,16 +2080,32 @@ export default function AdminSuratNikah({
 
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pilih Dokumen</label>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-col w-full gap-1.5">
                     {visibleDocTabs.map(tab => (
                       <button 
                         key={tab.id}
                         onClick={() => setActiveDoc(tab.id)}
-                        className={`px-3 py-2 rounded-lg text-xs font-bold border transition-all ${activeDoc === tab.id ? 'bg-emerald-600 text-white border-emerald-600 shadow-md dark:shadow-none shadow-emerald-600/20 scale-105' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300'}`}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold border transition-all ${activeDoc === tab.id ? 'bg-emerald-600 text-white border-emerald-600 shadow-md dark:shadow-none shadow-emerald-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300'}`}
                       >
                         {tab.label}
                       </button>
                     ))}
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={handlePrevDoc}
+                      disabled={visibleDocTabs.map(t => t.id).indexOf(activeDoc) <= 0}
+                      className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ArrowUp size={14} /> Sebelumnya
+                    </button>
+                    <button
+                      onClick={handleNextDoc}
+                      disabled={visibleDocTabs.map(t => t.id).indexOf(activeDoc) >= visibleDocTabs.length - 1}
+                      className="flex-1 flex justify-center items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      Selanjutnya <ArrowDown size={14} />
+                    </button>
                   </div>
                 </div>
 
