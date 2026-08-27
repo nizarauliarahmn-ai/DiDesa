@@ -844,7 +844,7 @@ export default function AdminSuratSKAW({
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px]">
+            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-lg flex flex-col h-[650px] sticky top-[170px]">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -887,7 +887,7 @@ export default function AdminSuratSKAW({
                 onMouseUp={dragProps.onMouseUp}
                 onMouseMove={dragProps.onMouseMove}
                 style={{ ...dragProps.style }}
-                className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
+                className="flex-1 bg-slate-100/60 dark:bg-slate-800/40 overflow-auto relative flex p-6"
               >
                 <div 
                   style={{
@@ -895,8 +895,8 @@ export default function AdminSuratSKAW({
                     height: `${1123 * previewZoom}px`,
                     overflow: 'hidden',
                     position: 'relative',
-                    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                    borderRadius: '12px',
+                    boxShadow: '0 4px 24px -4px rgb(0 0 0 / 0.12)',
+                    borderRadius: '2px',
                     transition: 'width 0.2s ease-out, height 0.2s ease-out'
                   }}
                   className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
