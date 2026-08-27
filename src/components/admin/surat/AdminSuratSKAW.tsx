@@ -380,19 +380,13 @@ export default function AdminSuratSKAW({
             }
             .page { 
               width: 210mm; 
-              height: 297mm; 
               margin: 0; 
               box-sizing: border-box; 
               background: white; 
               position: relative; 
-              overflow: hidden;
             }
             .printable-area {
-              position: absolute !important;
-              left: 0 !important;
-              top: 0 !important;
               width: 210mm !important;
-              height: 297mm !important;
               margin: 0 !important;
               padding: 56px 75px !important;
               box-sizing: border-box !important;
@@ -413,10 +407,11 @@ export default function AdminSuratSKAW({
             .crop-mark { 
               display: none !important; 
             }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; }
             @media print {
               body, .page { 
                 width: 210mm; 
-                height: 297mm; 
               }
               .nomor-surat-cetak { text-transform: uppercase !important; }
             }
@@ -558,6 +553,7 @@ export default function AdminSuratSKAW({
           ${heirRowsHTML}
         </tbody>
       </table>
+      ${allHeirs.length > 8 ? `<p style="text-align:center;font-size:11px;color:#666;font-style:italic;margin-top:-10px;margin-bottom:15px;">* Menampilkan ${allHeirs.length} ahli waris - halaman akan otomatis bertambah saat dicetak</p>` : ''}
 
       <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Surat keterangan ini diberikan atas dasar permohonan yang bersangkutan untuk dipergunakan sebagai kelengkapan persyaratan administrasi <strong>${v(formData.keperluan)}</strong>.
