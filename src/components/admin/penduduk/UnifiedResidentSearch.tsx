@@ -11,9 +11,23 @@ interface UnifiedResidentSearchProps {
   setFormData: (data: any) => void;
   residents: any[];
   onOpenQuickAdd: (nik?: string, name?: string) => void;
+  namaFieldName?: string;
+  nikFieldName?: string;
+  namaLabel?: string;
+  nikLabel?: string;
+  placeholderNama?: string;
+  placeholderNik?: string;
 }
 
-export function UnifiedResidentSearch({ formData, setFormData, residents, onOpenQuickAdd }: UnifiedResidentSearchProps) {
+export function UnifiedResidentSearch({ 
+  formData, setFormData, residents, onOpenQuickAdd,
+  namaFieldName = 'nama',
+  nikFieldName = 'nik',
+  namaLabel = 'Nama Lengkap',
+  nikLabel = 'NIK',
+  placeholderNama = 'Ketik nama warga...',
+  placeholderNik = 'Ketik NIK warga...',
+}: UnifiedResidentSearchProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeField, setActiveField] = useState<'nama' | 'nik' | null>(null);
   const [showKtpScanner, setShowKtpScanner] = useState(false);
@@ -36,8 +50,8 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
 
     setFormData((prev: any) => ({
       ...prev,
-      nama: capitalizeResidentFields(res).name,
-      nik: res.nik,
+      [namaFieldName]: capitalizeResidentFields(res).name,
+      [nikFieldName]: res.nik,
       tempatLahir: capitalizeResidentFields(res).birthPlace,
       tanggalLahir: res.birthDate,
       jenisKelamin: res.gender || 'Laki-Laki',
@@ -63,8 +77,8 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
       const [rt, rw] = rtRw.split('/');
       setFormData((prev: any) => ({
         ...prev,
-        nama: result.nama || prev?.nama || '',
-        nik: result.nik || prev?.nik || '',
+        [namaFieldName]: result.nama || prev?.[namaFieldName] || '',
+        [nikFieldName]: result.nik || prev?.[nikFieldName] || '',
         tempatLahir: result.tempatLahir || prev?.tempatLahir || '',
         tanggalLahir: result.tanggalLahir || prev?.tanggalLahir || '',
         jenisKelamin: result.jenisKelamin || prev?.jenisKelamin || 'Laki-Laki',
@@ -81,7 +95,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
 
   const getFilteredResidents = () => {
     if (!activeField) return [];
-    const query = (activeField === 'nama' ? formData.nama : formData.nik) || '';
+    const query = (activeField === 'nama' ? formData[namaFieldName] : formData[nikFieldName]) || '';
     if (!query) return [];
     
     return residents.filter((r: any) => {
@@ -97,7 +111,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
   const filteredResidents = getFilteredResidents();
 
   const renderDropdown = (field: 'nama' | 'nik') => {
-    const queryVal = field === 'nama' ? formData.nama : formData.nik;
+    const queryVal = field === 'nama' ? formData[namaFieldName] : formData[nikFieldName];
     if (!showDropdown || activeField !== field || !queryVal) return null;
 
     return (
@@ -150,7 +164,7 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
       <div className="space-y-4 col-span-full w-full">
       <div className="space-y-2 relative" ref={activeField === 'nama' ? dropdownRef : null}>
         <div className="flex justify-between items-center mb-1">
-          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">{namaLabel}</label>
           <button
             type="button"
             onClick={() => setShowKtpScanner(true)}
@@ -164,17 +178,17 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
           <input 
             type="text"
             className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-            placeholder="Ketik nama warga..."
-            value={formData.nama || ''}
+            placeholder={placeholderNama}
+            value={formData[namaFieldName] || ''}
             onChange={(e) => {
               const val = e.target.value;
-              setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nama: val}) : {...formData, nama: val});
+              setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, [namaFieldName]: val}) : {...formData, [namaFieldName]: val});
               setActiveField('nama');
               setShowDropdown(true);
             }}
             onFocus={() => {
               setActiveField('nama');
-              if (formData.nama) setShowDropdown(true);
+              if (formData[namaFieldName]) setShowDropdown(true);
             }}
           />
         </div>
@@ -183,30 +197,30 @@ export function UnifiedResidentSearch({ formData, setFormData, residents, onOpen
 
       <div className="space-y-2 relative" ref={activeField === 'nik' ? dropdownRef : null}>
         <div className="flex items-center h-8">
-          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+          <label className="text-sm font-bold text-slate-700 dark:text-slate-300">{nikLabel}</label>
         </div>
         <div className="relative w-full">
           <input 
             type="text"
             className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
-            placeholder="Ketik NIK warga..."
-            value={formData.nik || ''}
+            placeholder={placeholderNik}
+            value={formData[nikFieldName] || ''}
             onChange={(e) => {
               const val = e.target.value;
-              setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, nik: val}) : {...formData, nik: val});
+              setFormData(typeof setFormData === 'function' ? (prev: any) => ({...prev, [nikFieldName]: val}) : {...formData, [nikFieldName]: val});
               setActiveField('nik');
               setShowDropdown(true);
             }}
             onFocus={() => {
               setActiveField('nik');
-              if (formData.nik) setShowDropdown(true);
+              if (formData[nikFieldName]) setShowDropdown(true);
             }}
           />
         </div>
         {renderDropdown('nik')}
         <ResidentStatusBadge
-          nik={formData.nik}
-          name={formData.nama}
+          nik={formData[nikFieldName]}
+          name={formData[namaFieldName]}
         />
       </div>
       </div>

@@ -532,6 +532,12 @@ export default function AdminSuratSKAW({
                 formData={formData}
                 setFormData={setFormData}
                 residents={residents}
+                namaFieldName="namaAlmarhum"
+                nikFieldName="nikAlmarhum"
+                namaLabel="Nama Almarhum/ah"
+                nikLabel="NIK Almarhum"
+                placeholderNama="Ketik nama almarhum..."
+                placeholderNik="Ketik NIK almarhum..."
                 onOpenQuickAdd={(nik, name) => {
                   setQuickAddInitialData({ nik: nik || formData.nikAlmarhum, name: name || formData.namaAlmarhum });
                   setShowQuickAddModal(true);
