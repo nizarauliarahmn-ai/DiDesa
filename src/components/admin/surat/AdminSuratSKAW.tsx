@@ -504,7 +504,7 @@ export default function AdminSuratSKAW({
 
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
         {/* Form Column */}
-        <div className="lg:col-span-8 2xl:col-span-9 space-y-6 w-full min-w-0">
+        <div className="lg:col-span-7 space-y-6">
 
           <BackdateConfig
             prefix={kodeKlasifikasiSKAW}
@@ -831,8 +831,8 @@ export default function AdminSuratSKAW({
         </div>
 
         {/* Preview Column */}
-        <div className="lg:col-span-4 2xl:col-span-3 w-full">
-          <div className="sticky top-6 space-y-6">
+        <div className="lg:col-span-5 space-y-6">
+          <div className="sticky top-[170px] space-y-6">
             <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               <div>
