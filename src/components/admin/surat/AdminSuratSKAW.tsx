@@ -97,6 +97,20 @@ export default function AdminSuratSKAW({
     }
   }, [editData]);
 
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const res = await fetchResidentsCached();
+        if (res.ok) {
+          const data = await res.json();
+          setResidents(data);
+        }
+      } catch (e) {}
+    };
+
+    fetchResidents();
+  }, []);
+
   const [formData, setFormData] = useState({
     nomorSurat: '',
     
