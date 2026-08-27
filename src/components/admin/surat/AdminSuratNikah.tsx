@@ -808,7 +808,7 @@ export default function AdminSuratNikah({
                 transform: none !important;
                 visibility: visible !important;
                 font-family: ${letterFont}, serif;
-                font-size: 13px;
+                font-size: 12pt;
                 line-height: 1.35;
               }
               .printable-area * {
@@ -1010,7 +1010,7 @@ export default function AdminSuratNikah({
 
       html = `
         ${kopHtml()}
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">BIODATA CALON PENGANTIN</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">BIODATA CALON PENGANTIN</h3>
         ${dtTable([
           ['NIK', v(P.nik)],
           ['NO. KK', v(P.noKK)],
@@ -1052,7 +1052,7 @@ export default function AdminSuratNikah({
             <div>${v(formData.namaKabupaten, 'HULU SUNGAI SELATAN').replace(/^pemerintah\s+kabupaten\s+/i, '').replace(/^(kabupaten|kota)\s+/i, '').toUpperCase()}</div>
           </div>
         </div>
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:6px 0 2px;">SURAT PENGANTAR PERKAWINAN</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:6px 0 2px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
         <p>Yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
@@ -1183,7 +1183,7 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n3') {
       html = `
         ${lampiranHtml('N3')}
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 16px;">SURAT PERSETUJUAN MEMPELAI</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 16px;">SURAT PERSETUJUAN MEMPELAI</h3>
         <p>Yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;margin:8px 0 2px 0;">A. Calon Suami:</p>
         ${dtTable([
@@ -1247,7 +1247,7 @@ export default function AdminSuratNikah({
 
       html = `
         ${lampiranHtml('N4')}
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT IZIN ORANG TUA</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT IZIN ORANG TUA</h3>
         <p>Yang bertanda tangan di bawah ini:</p>
         <p style="font-weight:700;">A. AYAH</p>
         ${dtTable([
@@ -1306,7 +1306,7 @@ export default function AdminSuratNikah({
       };
       html = `
         ${lampiranHtml('N6')}
-        <h3 style="text-align:center;font-size:14pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT KETERANGAN KEMATIAN ${relasi.toUpperCase()}</h3>
+        <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:12px 0 3px;">SURAT KETERANGAN KEMATIAN ${relasi.toUpperCase()}</h3>
         <p>Yang bertanda tangan di bawah ini menerangkan dengan sesungguhnya bahwa orang yang namanya tersebut di bawah ini:</p>
         ${dtTable([
           ['Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(almarhum)}</span>`],
@@ -2188,7 +2188,7 @@ export default function AdminSuratNikah({
                       transform: `scale(${previewZoom})`,
                       transformOrigin: 'top left',
                       fontFamily: letterFont,
-                      fontSize: '13px',
+                      fontSize: '12pt',
                       lineHeight: '1.35',
                       position: 'relative',
                       color: 'black',
