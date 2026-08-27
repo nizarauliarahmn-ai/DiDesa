@@ -890,7 +890,7 @@ export default function AdminSuratSKAW({
                     {Math.round(previewZoom * 100)}%
                   </span>
                   <button 
-                    onClick={() => setPreviewZoom(prev => Math.min(1.2, prev + 0.05))} 
+                    onClick={() => setPreviewZoom(prev => Math.min(1.5, prev + 0.05))} 
                     className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors"
                     title="Zoom In"
                   >
@@ -918,13 +918,13 @@ export default function AdminSuratSKAW({
               >
                 <div 
                   style={{
-                    width: `${Math.min(794 * previewZoom, 420)}px`,
-                    aspectRatio: '210 / 297',
+                    width: `${794 * previewZoom}px`,
+                    height: `${1123 * previewZoom}px`,
                     overflow: 'hidden',
                     position: 'relative',
                     boxShadow: '0 4px 24px -4px rgb(0 0 0 / 0.12)',
                     borderRadius: '2px',
-                    transition: 'width 0.2s ease-out'
+                    transition: 'width 0.2s ease-out, height 0.2s ease-out'
                   }}
                   className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
                 >
