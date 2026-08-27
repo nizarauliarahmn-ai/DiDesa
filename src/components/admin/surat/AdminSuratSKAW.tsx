@@ -803,14 +803,6 @@ export default function AdminSuratSKAW({
                 </div>
                 <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Daftar Ahli Waris</h3>
               </div>
-              <button
-                type="button"
-                onClick={addHeirRow}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-bold transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Tambah Manual
-              </button>
             </div>
 
             {/* Loading State */}
@@ -964,6 +956,15 @@ export default function AdminSuratSKAW({
                   </div>
                 </div>
               ))}
+              
+              <button
+                type="button"
+                onClick={addHeirRow}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-bold transition-colors border-2 border-dashed border-emerald-200"
+              >
+                <Plus className="w-4 h-4" />
+                Tambah Ahli Waris Manual
+              </button>
             </div>
           </div>
 
