@@ -17,6 +17,16 @@ interface UnifiedResidentSearchProps {
   nikLabel?: string;
   placeholderNama?: string;
   placeholderNik?: string;
+  fieldMappings?: {
+    tempatLahir?: string;
+    tanggalLahir?: string;
+    jenisKelamin?: string;
+    agama?: string;
+    pekerjaan?: string;
+    alamat?: string;
+    rt?: string;
+    rw?: string;
+  };
 }
 
 export function UnifiedResidentSearch({ 
@@ -27,6 +37,7 @@ export function UnifiedResidentSearch({
   nikLabel = 'NIK',
   placeholderNama = 'Ketik nama warga...',
   placeholderNik = 'Ketik NIK warga...',
+  fieldMappings = {},
 }: UnifiedResidentSearchProps) {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeField, setActiveField] = useState<'nama' | 'nik' | null>(null);
@@ -52,14 +63,14 @@ export function UnifiedResidentSearch({
       ...prev,
       [namaFieldName]: capitalizeResidentFields(res).name,
       [nikFieldName]: res.nik,
-      tempatLahir: capitalizeResidentFields(res).birthPlace,
-      tanggalLahir: res.birthDate,
-      jenisKelamin: res.gender || 'Laki-Laki',
-      agama: res.religion || 'Islam',
-      pekerjaan: res.job || 'Wiraswasta',
-      alamat: capitalizeResidentFields(res).address,
-      rt: rt || '001',
-      rw: rw || '001',
+      [fieldMappings.tempatLahir || 'tempatLahir']: capitalizeResidentFields(res).birthPlace,
+      [fieldMappings.tanggalLahir || 'tanggalLahir']: res.birthDate,
+      [fieldMappings.jenisKelamin || 'jenisKelamin']: res.gender || 'Laki-Laki',
+      [fieldMappings.agama || 'agama']: res.religion || 'Islam',
+      [fieldMappings.pekerjaan || 'pekerjaan']: res.job || 'Wiraswasta',
+      [fieldMappings.alamat || 'alamat']: capitalizeResidentFields(res).address,
+      [fieldMappings.rt || 'rt']: rt || '001',
+      [fieldMappings.rw || 'rw']: rw || '001',
     }));
     setShowDropdown(false);
     setActiveField(null);
@@ -79,14 +90,14 @@ export function UnifiedResidentSearch({
         ...prev,
         [namaFieldName]: result.nama || prev?.[namaFieldName] || '',
         [nikFieldName]: result.nik || prev?.[nikFieldName] || '',
-        tempatLahir: result.tempatLahir || prev?.tempatLahir || '',
-        tanggalLahir: result.tanggalLahir || prev?.tanggalLahir || '',
-        jenisKelamin: result.jenisKelamin || prev?.jenisKelamin || 'Laki-Laki',
-        agama: result.agama || prev?.agama || 'Islam',
-        pekerjaan: result.pekerjaan || prev?.pekerjaan || 'Wiraswasta',
-        alamat: result.alamat || prev?.alamat || '',
-        rt: rt || prev?.rt || '001',
-        rw: rw || prev?.rw || '001',
+        [fieldMappings.tempatLahir || 'tempatLahir']: result.tempatLahir || prev?.[fieldMappings.tempatLahir || 'tempatLahir'] || '',
+        [fieldMappings.tanggalLahir || 'tanggalLahir']: result.tanggalLahir || prev?.[fieldMappings.tanggalLahir || 'tanggalLahir'] || '',
+        [fieldMappings.jenisKelamin || 'jenisKelamin']: result.jenisKelamin || prev?.[fieldMappings.jenisKelamin || 'jenisKelamin'] || 'Laki-Laki',
+        [fieldMappings.agama || 'agama']: result.agama || prev?.[fieldMappings.agama || 'agama'] || 'Islam',
+        [fieldMappings.pekerjaan || 'pekerjaan']: result.pekerjaan || prev?.[fieldMappings.pekerjaan || 'pekerjaan'] || 'Wiraswasta',
+        [fieldMappings.alamat || 'alamat']: result.alamat || prev?.[fieldMappings.alamat || 'alamat'] || '',
+        [fieldMappings.rt || 'rt']: rt || prev?.[fieldMappings.rt || 'rt'] || '001',
+        [fieldMappings.rw || 'rw']: rw || prev?.[fieldMappings.rw || 'rw'] || '001',
       }));
       showToast(`NIK ${result.nik} tidak ditemukan di database. Data OCR terisi, silakan daftarkan sebagai warga baru.`, 'info');
       onOpenQuickAdd(result.nik, result.nama);

@@ -552,6 +552,13 @@ export default function AdminSuratSKAW({
                 nikLabel="NIK Almarhum"
                 placeholderNama="Ketik nama almarhum..."
                 placeholderNik="Ketik NIK almarhum..."
+                fieldMappings={{
+                  tempatLahir: 'tempatLahirAlmarhum',
+                  tanggalLahir: 'tanggalLahirAlmarhum',
+                  jenisKelamin: 'jenisKelaminAlmarhum',
+                  pekerjaan: 'pekerjaanAlmarhum',
+                  alamat: 'alamatAlmarhum',
+                }}
                 onOpenQuickAdd={(nik, name) => {
                   setQuickAddInitialData({ nik: nik || formData.nikAlmarhum, name: name || formData.namaAlmarhum });
                   setShowQuickAddModal(true);
