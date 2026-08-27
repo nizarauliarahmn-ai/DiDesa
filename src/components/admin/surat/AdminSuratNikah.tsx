@@ -1456,10 +1456,10 @@ export default function AdminSuratNikah({
         style={{ 
           width: '794px',
           height: 'auto',
-          padding: '20mm',
+          padding: '40px 60px',
           fontFamily: letterFont, 
-          fontSize: '11px', 
-          lineHeight: '1.2',
+          fontSize: '12pt', 
+          lineHeight: '1.35',
           position: 'relative',
           boxSizing: 'border-box'
         }}
