@@ -118,6 +118,33 @@ export default function AdminSuratSKAW({
     };
 
     fetchResidents();
+
+    const configs = getLetterClassifications();
+    const skaw = configs.find(c => c.klasifikasi === 'SKAW') || { klasifikasi: 'SKAW', kodeKlasifikasi: '500' };
+    
+    if (!editData) {
+      generateLetterNumberAsync(skaw.klasifikasi, skaw.kodeKlasifikasi || '500', isBackdate ? new Date(tanggalSurat) : undefined)
+        .then(generatedNo => setFormData(prev => ({
+          ...prev,
+          nomorSurat: generatedNo
+        })))
+        .catch(err => console.error('Gagal generate nomor surat:', err));
+    }
+
+    const savedRiwayat = localStorage.getItem('riwayat_surat_skaw');
+    if (savedRiwayat) setRiwayat(JSON.parse(savedRiwayat));
+
+    const activePejabat = resolveKadesName() || '';
+    try {
+      const stored = localStorage.getItem('village_officers');
+      if (stored) {
+        const list = JSON.parse(stored);
+        const found = list.find((o: any) => o.name === activePejabat);
+        if (found) {
+          setFormData(prev => ({ ...prev, jabatanPejabat: found.role }));
+        }
+      }
+    } catch (e) {}
   }, []);
 
   const [formData, setFormData] = useState({
