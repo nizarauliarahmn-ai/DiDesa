@@ -1069,7 +1069,8 @@ export default function AdminSuratNikah({
           ['5. Alamat', v(P.alamatOrtu)]
         ])}
         <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
-        <p style="text-align:justify;margin-top:4px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
+        <p style="text-align:justify;margin-top:8px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
+        <div class="mt-auto pt-6">
         ${getPrintSignatureHTML(
           formData.namaDesa,
           v(fmtTgl(formData.tanggalSurat)),
@@ -1088,6 +1089,7 @@ export default function AdminSuratNikah({
         useEsignature,
         formData.nomorSurat
       )}
+        </div>
       `;
     }
     else if (targetDoc === 'n2_suami' || targetDoc === 'n2_istri') {
@@ -2140,24 +2142,18 @@ export default function AdminSuratNikah({
                   }}
                   className="w-full h-max bg-white dark:bg-slate-900 m-auto shadow-md relative"
                 >
-                  {/* Visual Crop Marks */}
-                  <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                  <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                  <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                  <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-
                   <div 
-                    className="w-full h-max bg-white dark:bg-slate-900 shadow-md relative text-[11px] leading-tight"
+                    className="w-[210mm] min-h-[297mm] bg-white dark:bg-slate-900 relative flex flex-col p-8"
                     style={{ 
-                      width: '794px', 
-                      height: 'auto', 
-                       
-                      padding: '24px 32px',
+                      width: '210mm', 
+                      minHeight: '297mm',
+
+                      padding: '32px',
                       transform: `scale(${previewZoom})`,
                       transformOrigin: 'top left',
                       fontFamily: letterFont,
-                      fontSize: '11px',
-                      lineHeight: '1.2',
+                      fontSize: '12pt',
+                      lineHeight: '1.4',
                       position: 'relative',
                       boxSizing: 'border-box',
                       color: 'black'
