@@ -1450,18 +1450,20 @@ export default function AdminSuratNikah({
 
   return (
     <div className="w-full bg-white dark:bg-slate-900 min-h-screen text-slate-900 dark:text-white pb-20 print:bg-white print:pb-0">
-      {/* Dedicated Print Block */}
+      {/* Dedicated Print Block - must match web preview exactly */}
       <div 
         className="hidden print:block printable-area" 
         style={{ 
           width: '794px',
-          height: 'auto',
+          height: '1123px',
           padding: '40px 60px',
           fontFamily: letterFont, 
           fontSize: '12pt', 
           lineHeight: '1.35',
           position: 'relative',
-          boxSizing: 'border-box'
+          color: 'black',
+          boxSizing: 'border-box',
+          background: 'white'
         }}
         dangerouslySetInnerHTML={{ __html: getDocHtml() }}
       />
@@ -2180,7 +2182,7 @@ export default function AdminSuratNikah({
                   className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
                 >
                   <div 
-                    className="bg-white dark:bg-slate-900 shrink-0"
+                    className="bg-white dark:bg-slate-900 shrink-0 printable-area"
                     style={{ 
                       width: '794px', 
                       height: '1123px', 
@@ -2190,7 +2192,9 @@ export default function AdminSuratNikah({
                       fontFamily: letterFont,
                       fontSize: '12pt',
                       lineHeight: '1.35',
-                      position: 'relative',
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
                       color: 'black',
                       boxSizing: 'border-box'
                     }}
