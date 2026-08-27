@@ -1274,7 +1274,7 @@ export default function AdminSuratNikah({
         <div style="margin-top:20px;display:flex;justify-content:flex-end;">
           <div style="text-align:center;width:230px;">
             <div style="margin-bottom:45px;">${tempatTgl()}<br>Wali,</div>
-            <span style="font-weight:700;">${vn(anak.ayah)}</span>
+            <span style="font-weight:700;">${(formData.namaWali && formData.namaWali.trim()) ? formData.namaWali.toUpperCase() : (formData.namaAyahIstri || '').toUpperCase()}</span>
           </div>
         </div>
       `;
