@@ -798,7 +798,7 @@ export default function AdminSuratNikah({
               .printable-area * {
                 visibility: visible !important;
               }
-              .printable-area p { margin: 5px 0; }
+              .printable-area p { margin: 3px 0; }
               .crop-mark { 
                 display: none !important; 
               }
@@ -1019,7 +1019,7 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
       html = `
         ${lampiranHtml('N1')}
-        <div style="font-size:8pt;line-height:1.2;margin-bottom:12px;text-transform:uppercase;">
+        <div style="font-size:8pt;line-height:1.2;margin-bottom:8px;text-transform:uppercase;">
           <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;">
             <div style="white-space:nowrap;">KANTOR DESA/KELURAHAN</div>
             <div>:</div>
@@ -1069,7 +1069,7 @@ export default function AdminSuratNikah({
           ['5. Alamat', v(P.alamatOrtu)]
         ])}
         <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
-        <p style="text-align:justify;margin-top:12px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
+        <p style="text-align:justify;margin-top:4px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
         ${getPrintSignatureHTML(
           formData.namaDesa,
           v(fmtTgl(formData.tanggalSurat)),
@@ -1431,12 +1431,12 @@ export default function AdminSuratNikah({
       <div 
         className="hidden print:block printable-area" 
         style={{ 
-          width: '210mm',
-          height: '297mm',
+          width: '794px',
+          height: 'auto',
           padding: '20mm',
           fontFamily: letterFont, 
-          fontSize: '11.5pt', 
-          lineHeight: '1.15',
+          fontSize: '11px', 
+          lineHeight: '1.2',
           position: 'relative',
           boxSizing: 'border-box'
         }}
@@ -2130,15 +2130,15 @@ export default function AdminSuratNikah({
               >
                 <div 
                   style={{
-                    width: `${210 * previewZoom}mm`,
-                    height: `${297 * previewZoom}mm`,
+                    width: `${794 * previewZoom}px`,
+                    height: 'auto',
                     overflow: 'hidden',
                     position: 'relative',
                     boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
                     borderRadius: '12px',
                     transition: 'width 0.2s ease-out, height 0.2s ease-out'
                   }}
-                  className="bg-white dark:bg-slate-900 m-auto shrink-0 relative w-[210mm] h-[297mm] min-h-[297mm] aspect-[210/297] max-w-[210mm]"
+                  className="w-full h-max bg-white dark:bg-slate-900 m-auto shadow-md relative"
                 >
                   {/* Visual Crop Marks */}
                   <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
@@ -2147,17 +2147,17 @@ export default function AdminSuratNikah({
                   <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
 
                   <div 
-                    className="bg-white dark:bg-slate-900 shrink-0 w-[210mm] h-[297mm] min-h-[297mm] aspect-[210/297]"
+                    className="w-full h-max bg-white dark:bg-slate-900 shadow-md relative text-[11px] leading-tight"
                     style={{ 
-                      width: '210mm', 
-                      height: '297mm', 
-                      minHeight: '297mm', 
-                      padding: '32px 40px',
+                      width: '794px', 
+                      height: 'auto', 
+                       
+                      padding: '24px 32px',
                       transform: `scale(${previewZoom})`,
                       transformOrigin: 'top left',
                       fontFamily: letterFont,
-                      fontSize: '11.5pt',
-                      lineHeight: '1.15',
+                      fontSize: '11px',
+                      lineHeight: '1.2',
                       position: 'relative',
                       boxSizing: 'border-box',
                       color: 'black'
