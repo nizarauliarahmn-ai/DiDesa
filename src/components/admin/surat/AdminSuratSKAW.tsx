@@ -844,35 +844,35 @@ export default function AdminSuratSKAW({
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden shadow-lg flex flex-col h-[650px] sticky top-[170px]">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
+            <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-2xl overflow-hidden shadow-md flex flex-col h-[650px] sticky top-[170px]">
+              <div className="px-5 py-3 border-b border-slate-100/60 dark:border-slate-800/60 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+                  <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 tracking-wider uppercase">LIVE A4 ENGINE</span>
                 </div>
                 
-                <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-1.5 bg-white/60 dark:bg-slate-800/60 p-1 rounded-lg border border-slate-100/40 dark:border-slate-800/40">
                   <button 
                     onClick={() => setPreviewZoom(prev => Math.max(0.3, prev - 0.05))} 
-                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
+                    className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors"
                     title="Zoom Out"
                   >
-                    <ZoomOut size={16} />
+                    <ZoomOut size={14} />
                   </button>
-                  <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 px-2 w-14 text-center">
+                  <span className="text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400 px-1.5 w-12 text-center">
                     {Math.round(previewZoom * 100)}%
                   </span>
                   <button 
                     onClick={() => setPreviewZoom(prev => Math.min(1.2, prev + 0.05))} 
-                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors"
+                    className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors"
                     title="Zoom In"
                   >
-                    <ZoomIn size={16} />
+                    <ZoomIn size={14} />
                   </button>
-                  <div className="w-px h-5 bg-slate-200 mx-1"></div>
+                  <div className="w-px h-4 bg-slate-200/60 mx-0.5"></div>
                   <button 
                     onClick={() => setPreviewZoom(0.45)} 
-                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg transition-colors text-[10px] font-bold"
+                    className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors text-[10px] font-bold"
                     title="Reset Zoom"
                   >
                     Reset
