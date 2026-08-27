@@ -120,6 +120,48 @@ export default function AdminSuratSKAW({
     fetchResidents();
   }, []);
 
+  const [formData, setFormData] = useState({
+    nomorSurat: '',
+    
+    // Data Almarhum
+    namaAlmarhum: '',
+    nikAlmarhum: '',
+    tempatLahirAlmarhum: '',
+    tanggalLahirAlmarhum: '',
+    jenisKelaminAlmarhum: 'Laki-Laki',
+    pekerjaanAlmarhum: '',
+    alamatAlmarhum: '',
+    tanggalWafatAlmarhum: '',
+    
+    // Data Pasangan
+    namaPasangan: '',
+    nikPasangan: '',
+    
+    // Keperluan
+    keperluan: 'Ahli Waris',
+    
+    // Pejabat
+    namaPejabat: resolveKadesName() || '',
+    jabatanPejabat: 'Kepala Desa',
+    includeCamat: false,
+    
+    // Kop Settings
+    namaDesa: localStorage.getItem('kop_desa') || '',
+    namaKecamatan: localStorage.getItem('kop_kecamatan') || '',
+    namaKabupaten: localStorage.getItem('kop_kabupaten') || '',
+    namaProvinsi: localStorage.getItem('kop_provinsi') || '',
+    alamatKantor: localStorage.getItem('kop_alamat') || '',
+    kontakKantor: localStorage.getItem('kop_kontak') || '',
+  });
+
+  const [heirRows, setHeirRows] = useState<HeirRow[]>([
+    { id: 1, nama: '', hubungan: 'Anak', nik: '', ttl: '', pekerjaan: '' },
+  ]);
+
+  const [familyMembers, setFamilyMembers] = useState<FamilyMemberCandidate[]>([]);
+  const [loadingFamily, setLoadingFamily] = useState(false);
+  const [selectedFamilyMembers, setSelectedFamilyMembers] = useState<Set<string>>(new Set());
+
   useEffect(() => {
     const fetchFamilyMembers = async () => {
       if (!formData.nikAlmarhum || formData.nikAlmarhum.length < 16) {
@@ -170,48 +212,6 @@ export default function AdminSuratSKAW({
 
     fetchFamilyMembers();
   }, [formData.nikAlmarhum, residents]);
-
-  const [formData, setFormData] = useState({
-    nomorSurat: '',
-    
-    // Data Almarhum
-    namaAlmarhum: '',
-    nikAlmarhum: '',
-    tempatLahirAlmarhum: '',
-    tanggalLahirAlmarhum: '',
-    jenisKelaminAlmarhum: 'Laki-Laki',
-    pekerjaanAlmarhum: '',
-    alamatAlmarhum: '',
-    tanggalWafatAlmarhum: '',
-    
-    // Data Pasangan
-    namaPasangan: '',
-    nikPasangan: '',
-    
-    // Keperluan
-    keperluan: 'Ahli Waris',
-    
-    // Pejabat
-    namaPejabat: resolveKadesName() || '',
-    jabatanPejabat: 'Kepala Desa',
-    includeCamat: false,
-    
-    // Kop Settings
-    namaDesa: localStorage.getItem('kop_desa') || '',
-    namaKecamatan: localStorage.getItem('kop_kecamatan') || '',
-    namaKabupaten: localStorage.getItem('kop_kabupaten') || '',
-    namaProvinsi: localStorage.getItem('kop_provinsi') || '',
-    alamatKantor: localStorage.getItem('kop_alamat') || '',
-    kontakKantor: localStorage.getItem('kop_kontak') || '',
-  });
-
-  const [heirRows, setHeirRows] = useState<HeirRow[]>([
-    { id: 1, nama: '', hubungan: 'Anak', nik: '', ttl: '', pekerjaan: '' },
-  ]);
-
-  const [familyMembers, setFamilyMembers] = useState<FamilyMemberCandidate[]>([]);
-  const [loadingFamily, setLoadingFamily] = useState(false);
-  const [selectedFamilyMembers, setSelectedFamilyMembers] = useState<Set<string>>(new Set());
 
   const addHeirRow = () => {
     setHeirRows(prev => [...prev, { id: Date.now(), nama: '', hubungan: 'Anak', nik: '', ttl: '', pekerjaan: '' }]);
