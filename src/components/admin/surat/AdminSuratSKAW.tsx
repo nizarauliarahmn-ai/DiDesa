@@ -898,8 +898,8 @@ export default function AdminSuratSKAW({
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="md:col-span-2 space-y-2">
                       <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
                       <input 
                         type="text"
@@ -926,16 +926,6 @@ export default function AdminSuratSKAW({
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-                      <input 
-                        type="text"
-                        placeholder="NIK ahli waris"
-                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                        value={row.nik}
-                        onChange={(e) => updateHeirRow(row.id, 'nik', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
                       <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat, Tanggal Lahir</label>
                       <input 
                         type="text"
@@ -945,12 +935,14 @@ export default function AdminSuratSKAW({
                         onChange={(e) => updateHeirRow(row.id, 'ttl', e.target.value)}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                      <SuggestCombobox
-                        value={row.pekerjaan}
-                        onChange={(v) => updateHeirRow(row.id, 'pekerjaan', v)}
-                        options={jobs}
+                    <div className="md:col-start-4 space-y-2">
+                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                      <input 
+                        type="text"
+                        placeholder="NIK ahli waris"
+                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                        value={row.nik}
+                        onChange={(e) => updateHeirRow(row.id, 'nik', e.target.value)}
                       />
                     </div>
                   </div>
