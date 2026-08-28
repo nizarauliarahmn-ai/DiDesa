@@ -967,8 +967,11 @@ export default function AdminSuratNikah({
     const fontStyle = `font-family: ${letterFont};`;
 
     // Normalisasi nama KUA: selalu KUA uppercase, tanpa duplikasi "Kecamatan".
+    // Jika tempatMenikah mengandung "KUA", gunakan nama KUA dari situ untuk N2 TTD.
     const normKUA = () => {
-      let s = String(formData.namaKUA || '').trim();
+      const tempat = String(formData.tempatMenikah || '').trim();
+      const isKUAtempat = /\bkua\b/i.test(tempat);
+      let s = isKUAtempat ? tempat : String(formData.namaKUA || '').trim();
       if (!s) s = 'KUA Kecamatan ' + String(formData.namaKecamatan || '').trim();
       return s
         .replace(/^kepala\s+/i, '')
