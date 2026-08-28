@@ -196,6 +196,13 @@ export default function AdminSuratNikah({
     rwIstri: '',
     namaWali: '',
     hubunganWali: 'Ayah Kandung',
+
+    saksi1Nama: '',
+    saksi1Sebagai: '',
+    saksi2Nama: '',
+    saksi2Sebagai: '',
+    saksi3Nama: '',
+    saksi3Sebagai: '',
   });
   const [useEsignature, setUseEsignature] = useState(true);
 
@@ -204,7 +211,8 @@ export default function AdminSuratNikah({
     { n: 2, label: 'Data Pasangan' },
     { n: 3, label: 'Data Orang Tua' },
     { n: 4, label: 'Wali & Pejabat' },
-    { n: 5, label: 'Preview & Cetak' },
+    { n: 5, label: 'Surat Pernyataan' },
+    { n: 6, label: 'Preview & Cetak' },
   ];
 
   const REQUIRED: Record<number, string[]> = {
@@ -1415,30 +1423,30 @@ export default function AdminSuratNikah({
         </table>
         <div style="margin-top:24px;">
           <p style="margin:0 0 8px;font-weight:700;">SAKSI-SAKSI:</p>
-          <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
+          <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;border:1px solid #000;">
             <tr>
-              <td style="width:5%;padding:4px 0;font-weight:bold;"></td>
-              <td style="width:40%;padding:4px 0;font-weight:bold;">Nama</td>
-              <td style="width:30%;padding:4px 0;font-weight:bold;">Sebagai</td>
-              <td style="width:25%;padding:4px 0;font-weight:bold;text-align:center;">Tanda Tangan</td>
+              <td style="width:5%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;"></td>
+              <td style="width:40%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;">Nama</td>
+              <td style="width:30%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;">Sebagai</td>
+              <td style="width:25%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;text-align:center;">Tanda Tangan</td>
             </tr>
             <tr>
-              <td style="width:5%;padding:6px 0;vertical-align:top;">1.</td>
-              <td style="width:40%;padding:6px 0;vertical-align:top;">........................................</td>
-              <td style="width:30%;padding:6px 0;vertical-align:top;">........................................</td>
-              <td style="width:25%;padding:6px 0;vertical-align:top;text-align:center;">........................................</td>
+              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;">1.</td>
+              <td style="width:40%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi1Nama ? vn(formData.saksi1Nama) : '........................................'}</td>
+              <td style="width:30%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi1Sebagai ? v(formData.saksi1Sebagai) : '........................................'}</td>
+              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">........................................</td>
             </tr>
             <tr>
-              <td style="width:5%;padding:6px 0;vertical-align:top;">2.</td>
-              <td style="width:40%;padding:6px 0;vertical-align:top;">........................................</td>
-              <td style="width:30%;padding:6px 0;vertical-align:top;">........................................</td>
-              <td style="width:25%;padding:6px 0;vertical-align:top;text-align:center;">........................................</td>
+              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;">2.</td>
+              <td style="width:40%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Nama ? vn(formData.saksi2Nama) : '........................................'}</td>
+              <td style="width:30%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Sebagai ? v(formData.saksi2Sebagai) : '........................................'}</td>
+              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">........................................</td>
             </tr>
             <tr>
-              <td style="width:5%;padding:6px 0;vertical-align:top;">3.</td>
-              <td style="width:40%;padding:6px 0;vertical-align:top;">........................................</td>
-              <td style="width:30%;padding:6px 0;vertical-align:top;">........................................</td>
-              <td style="width:25%;padding:6px 0;vertical-align:top;text-align:center;">........................................</td>
+              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;">3.</td>
+              <td style="width:40%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi3Nama ? vn(formData.saksi3Nama) : '........................................'}</td>
+              <td style="width:30%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi3Sebagai ? v(formData.saksi3Sebagai) : '........................................'}</td>
+              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">........................................</td>
             </tr>
           </table>
         </div>
@@ -2148,19 +2156,108 @@ export default function AdminSuratNikah({
             
             <div className="mt-8 flex justify-between">
               <button onClick={() => setStep(3)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
-              <button onClick={() => setStep(5)} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700">Lihat & Cetak &rarr;</button>
+              <button onClick={() => setStep(5)} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700">Surat Pernyataan &rarr;</button>
             </div>
           </div>
         )}
 
         {step === 5 && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none print:hidden">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6">5. Surat Pernyataan Belum Menikah</h2>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">Isi data saksi-saksi untuk Surat Pernyataan Belum Menikah. Dokumen ini hanya aktif jika calon mempelai berstatus Jejaka/Perawan.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Saksi 1 */}
+              <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <h4 className="font-bold text-slate-700 dark:text-slate-300 text-sm">Saksi 1</h4>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Nama Lengkap</label>
+                  <input 
+                    type="text" 
+                    value={formData.saksi1Nama} 
+                    onChange={(e) => setFormData(prev => ({ ...prev, saksi1Nama: e.target.value }))}
+                    placeholder="Nama saksi 1"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sebagai</label>
+                  <input 
+                    type="text" 
+                    value={formData.saksi1Sebagai} 
+                    onChange={(e) => setFormData(prev => ({ ...prev, saksi1Sebagai: e.target.value }))}
+                    placeholder="Contoh: Wali, Ketua RT, Tetangga"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Saksi 2 */}
+              <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <h4 className="font-bold text-slate-700 dark:text-slate-300 text-sm">Saksi 2</h4>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Nama Lengkap</label>
+                  <input 
+                    type="text" 
+                    value={formData.saksi2Nama} 
+                    onChange={(e) => setFormData(prev => ({ ...prev, saksi2Nama: e.target.value }))}
+                    placeholder="Nama saksi 2"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sebagai</label>
+                  <input 
+                    type="text" 
+                    value={formData.saksi2Sebagai} 
+                    onChange={(e) => setFormData(prev => ({ ...prev, saksi2Sebagai: e.target.value }))}
+                    placeholder="Contoh: Ketua RT, Masyarakat"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Saksi 3 */}
+              <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+                <h4 className="font-bold text-slate-700 dark:text-slate-300 text-sm">Saksi 3</h4>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Nama Lengkap</label>
+                  <input 
+                    type="text" 
+                    value={formData.saksi3Nama} 
+                    onChange={(e) => setFormData(prev => ({ ...prev, saksi3Nama: e.target.value }))}
+                    placeholder="Nama saksi 3"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sebagai</label>
+                  <input 
+                    type="text" 
+                    value={formData.saksi3Sebagai} 
+                    onChange={(e) => setFormData(prev => ({ ...prev, saksi3Sebagai: e.target.value }))}
+                    placeholder="Contoh: Keluarga, Tetangga"
+                    className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-between">
+              <button onClick={() => setStep(4)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
+              <button onClick={() => setStep(6)} className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700">Lihat & Cetak &rarr;</button>
+            </div>
+          </div>
+        )}
+
+        {step === 6 && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none print:hidden">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               
               {/* KIRI: KONTROL & TABS */}
               <div className="lg:col-span-5 flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
-                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">5. Preview & Cetak</h2>
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">6. Preview & Cetak</h2>
                   <div className="flex gap-2">
                     <button onClick={saveToRiwayat} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 transition-colors">
                       <Save className="w-5 h-5" /> Simpan 
@@ -2311,7 +2408,7 @@ export default function AdminSuratNikah({
             </div>
 
             <div className="mt-8">
-              <button onClick={() => setStep(4)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
+              <button onClick={() => setStep(5)} className="px-6 py-2 border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-800">&larr; Kembali</button>
             </div>
           </div>
         )}
