@@ -2075,7 +2075,7 @@ export default function AdminSuratNikah({
                       <Save className="w-5 h-5" /> Simpan 
                     </button>
                     <button onClick={() => handlePrint(true)} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 shadow-md dark:shadow-none shadow-teal-600/20 transition-all active:scale-95">
-                      <Printer className="w-6 h-6" /> Cetak Semua
+                      <Printer className="w-5 h-5" /> Cetak Semua
                     </button>
                     <button onClick={() => handlePrint()} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-md dark:shadow-none shadow-emerald-600/20 transition-all active:scale-95">
                       <Printer className="w-5 h-5" /> Cetak
