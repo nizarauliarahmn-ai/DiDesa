@@ -1386,8 +1386,8 @@ export default function AdminSuratNikah({
           ['Pekerjaan', v(calon.pekerjaan)],
           ['Alamat', v(calon.alamat)]
         ])}
-        <p style="margin:12px 0;">Menyatakan dengan sebenarnya bahwa Saya belum pernah <strong>MENIKAH/KAWIN</strong>. Surat keterangan ini dibuat untuk memenuhi persyaratan "memenuhi kelengkapan berkas pernikahan".</p>
-        <p style="margin:0 0 20px;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
+        <p style="margin:12px 0;text-align:justify;">Menyatakan dengan sebenarnya bahwa Saya belum pernah <strong>MENIKAH/KAWIN</strong>. Surat keterangan ini dibuat untuk memenuhi persyaratan "memenuhi kelengkapan berkas pernikahan".</p>
+        <p style="margin:0 0 20px;text-align:justify;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
         <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
           <tr>
             <td style="width:50%;vertical-align:top;padding:0 12px 0 0;">
