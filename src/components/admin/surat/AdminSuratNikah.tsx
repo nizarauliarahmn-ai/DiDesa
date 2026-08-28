@@ -2372,32 +2372,37 @@ export default function AdminSuratNikah({
               >
                 <div 
                   style={{
-                    width: `${794 * previewZoom}px`,
-                    height: `${1123 * previewZoom}px`,
+                    width: '210mm',
+                    height: '296.9mm',
                     overflow: 'hidden',
                     position: 'relative',
                     boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
                     borderRadius: '12px',
-                    transition: 'width 0.2s ease-out, height 0.2s ease-out'
+                    zoom: String(previewZoom)
                   }}
                   className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
                 >
                   <div 
                     className="bg-white dark:bg-slate-900 shrink-0 printable-area"
                     style={{ 
-                      width: '794px', 
-                      height: '1123px', 
-                      padding: '40px 60px',
-                      transform: `scale(${previewZoom})`,
-                      transformOrigin: 'top left',
-                      fontFamily: letterFont,
-                      fontSize: '12pt',
-                      lineHeight: '1.35',
                       position: 'absolute',
                       left: 0,
                       top: 0,
-                      color: 'black',
+                      width: '210mm', 
+                      height: '296.9mm', 
+                      margin: 0,
+                      padding: '40px 60px',
                       boxSizing: 'border-box',
+                      background: 'white',
+                      color: 'black',
+                      boxShadow: 'none',
+                      border: 'none',
+                      display: 'block',
+                      transform: 'none',
+                      visibility: 'visible',
+                      fontFamily: `${letterFont}, serif`,
+                      fontSize: '12pt',
+                      lineHeight: '1.35',
                       overflow: 'hidden'
                     }}
                     dangerouslySetInnerHTML={{ __html: getDocHtml() }}
