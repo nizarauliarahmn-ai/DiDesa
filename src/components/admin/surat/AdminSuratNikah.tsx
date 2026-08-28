@@ -1161,7 +1161,7 @@ export default function AdminSuratNikah({
         <p style="text-align:right;margin:0 0 10px 0;">${tempatTgl()}</p>
         <p style="margin:0 0 8px 0;">Perihal: Permohonan Kehendak Perkawinan</p>
         <p style="margin:0 0 18px 0;line-height:1.2;">Kepada Yth.<br>Kepala ${normKUA()}<br>di -<br><span style="display:inline-block;padding-left:24px;">Tempat</span></p>
-        <p style="text-align:justify;margin:0 0 2px 0;">Dengan hormat, Kami mengajukan permohonan kehendak perkawinan untuk dan atas nama Kami:</p>
+        <p style="text-align:justify;margin:0 0 2px 0;">Dengan hormat, kami mengajukan permohonan kehendak perkawinan untuk diri kami sendiri:</p>
         <div style="margin-left:32px;">
         ${dtTableN2([
           ['Calon Suami', `<span style="font-weight:700;text-transform:uppercase;">${vn(formData.namaSuami)}</span>`],
