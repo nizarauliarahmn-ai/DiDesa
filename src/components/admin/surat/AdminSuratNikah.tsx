@@ -2397,7 +2397,8 @@ export default function AdminSuratNikah({
                       left: 0,
                       top: 0,
                       color: 'black',
-                      boxSizing: 'border-box'
+                      boxSizing: 'border-box',
+                      overflow: 'hidden'
                     }}
                     dangerouslySetInnerHTML={{ __html: getDocHtml() }}
                   />
