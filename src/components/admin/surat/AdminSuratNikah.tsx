@@ -1396,7 +1396,7 @@ export default function AdminSuratNikah({
           <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">h. Alamat</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.alamat)} ${calon.rt ? `RT. ${v(calon.rt)} RW. ${v(calon.rw)}` : ''}</td></tr>
         </table>
         <p style="margin:12px 0;text-align:justify;">Menyatakan dengan sebenarnya bahwa Saya <strong>BELUM PERNAH MENIKAH/KAWIN</strong>. Surat keterangan ini dibuat untuk "memenuhi kelengkapan berkas pernikahan".</p>
-        <p style="margin:0 0 20px;text-align:justify;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
+        <p style="margin:0 0 40px;text-align:justify;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
         <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
           <tr>
             <td style="width:50%;vertical-align:top;padding:0 12px 0 0;">
