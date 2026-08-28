@@ -2072,13 +2072,13 @@ export default function AdminSuratNikah({
                   <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">5. Preview & Cetak</h2>
                   <div className="flex gap-2">
                     <button onClick={saveToRiwayat} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-200 transition-colors">
-                      <Save className="w-4 h-4" /> Simpan 
+                      <Save className="w-5 h-5" /> Simpan 
                     </button>
                     <button onClick={() => handlePrint(true)} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-teal-600 text-white rounded-xl font-bold hover:bg-teal-700 shadow-md dark:shadow-none shadow-teal-600/20 transition-all active:scale-95">
-                      <Printer className="w-4 h-4" /> Cetak Semua
+                      <Printer className="w-5 h-5" /> Cetak Semua
                     </button>
                     <button onClick={() => handlePrint()} className="flex-1 flex justify-center items-center gap-2 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 shadow-md dark:shadow-none shadow-emerald-600/20 transition-all active:scale-95">
-                      <Printer className="w-4 h-4" /> Cetak
+                      <Printer className="w-5 h-5" /> Cetak
                     </button>
                   </div>
                 </div>
