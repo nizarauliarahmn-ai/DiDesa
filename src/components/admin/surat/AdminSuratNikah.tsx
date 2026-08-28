@@ -188,8 +188,12 @@ export default function AdminSuratNikah({
 
     kewarganegaraanSuami: 'Indonesia',
     statusSuami: 'Jejaka',
+    rtSuami: '',
+    rwSuami: '',
     kewarganegaraanIstri: 'Indonesia',
     statusIstri: 'Perawan',
+    rtIstri: '',
+    rwIstri: '',
     namaWali: '',
     hubunganWali: 'Ayah Kandung',
   });
@@ -545,6 +549,8 @@ export default function AdminSuratNikah({
         pekerjaanSuami: isMale ? (res.job || '') : prev.pekerjaanSuami,
         pendidikanSuami: isMale ? (res.education || '') : prev.pendidikanSuami,
         alamatSuami: isMale ? (res.address || '') : prev.alamatSuami,
+        rtSuami: isMale ? (res.rt || '') : prev.rtSuami,
+        rwSuami: isMale ? (res.rw || '') : prev.rwSuami,
 
         namaIstri: !isMale ? res.name : prev.namaIstri,
         nikIstri: !isMale ? res.nik : prev.nikIstri,
@@ -555,6 +561,8 @@ export default function AdminSuratNikah({
         pekerjaanIstri: !isMale ? (res.job || '') : prev.pekerjaanIstri,
         pendidikanIstri: !isMale ? (res.education || '') : prev.pendidikanIstri,
         alamatIstri: !isMale ? (res.address || '') : prev.alamatIstri,
+        rtIstri: !isMale ? (res.rt || '') : prev.rtIstri,
+        rwIstri: !isMale ? (res.rw || '') : prev.rwIstri,
 
         ...ortuSuami,
         ...ortuIstri,
@@ -1365,11 +1373,13 @@ export default function AdminSuratNikah({
         tempatLahir: formData.tempatLahirSuami, tanggalLahir: formData.tanggalLahirSuami,
         kewarganegaraan: formData.kewarganegaraanSuami, agama: formData.agamaSuami,
         pekerjaan: formData.pekerjaanSuami, alamat: formData.alamatSuami,
+        rt: formData.rtSuami, rw: formData.rwSuami,
       } : {
         nama: formData.namaIstri, nik: formData.nikIstri, jk: 'Perempuan',
         tempatLahir: formData.tempatLahirIstri, tanggalLahir: formData.tanggalLahirIstri,
         kewarganegaraan: formData.kewarganegaraanIstri, agama: formData.agamaIstri,
         pekerjaan: formData.pekerjaanIstri, alamat: formData.alamatIstri,
+        rt: formData.rtIstri, rw: formData.rwIstri,
       };
       const namaDesaUpper = (formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, '').toUpperCase();
       html = `
@@ -1383,7 +1393,7 @@ export default function AdminSuratNikah({
           <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">e. Kewarganegaraan</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.kewarganegaraan)}</td></tr>
           <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">f. Agama</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.agama)}</td></tr>
           <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">g. Pekerjaan</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.pekerjaan)}</td></tr>
-          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">h. Alamat</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.alamat)}</td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">h. Alamat</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.alamat)} ${calon.rt ? `RT. ${v(calon.rt)} RW. ${v(calon.rw)}` : ''}</td></tr>
         </table>
         <p style="margin:12px 0;text-align:justify;">Menyatakan dengan sebenarnya bahwa Saya <strong>BELUM PERNAH MENIKAH/KAWIN</strong>. Surat keterangan ini dibuat untuk "memenuhi kelengkapan berkas pernikahan".</p>
         <p style="margin:0 0 20px;text-align:justify;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
