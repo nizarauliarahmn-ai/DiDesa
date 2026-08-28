@@ -1434,19 +1434,19 @@ export default function AdminSuratNikah({
               <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">1.</td>
               <td style="width:45%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi1Nama ? vn(formData.saksi1Nama) : '........................................'}</td>
               <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi1Sebagai ? v(formData.saksi1Sebagai) : '........................................'}</td>
-              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="font-size:8px;color:#999;">1</span> <span style="font-size:8px;">..................................</span></td>
+              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="font-size:8px;color:#999;">1</span> <span style="font-size:8px;">......................</span></td>
             </tr>
             <tr>
               <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">2.</td>
               <td style="width:45%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Nama ? vn(formData.saksi2Nama) : '........................................'}</td>
               <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Sebagai ? v(formData.saksi2Sebagai) : '........................................'}</td>
-              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="font-size:8px;color:#999;padding-left:40px;">2</span> <span style="font-size:8px;">..................................</span></td>
+              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="font-size:8px;color:#999;padding-left:40px;">2</span> <span style="font-size:8px;">......................</span></td>
             </tr>
             <tr>
               <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">3.</td>
               <td style="width:45%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi3Nama ? vn(formData.saksi3Nama) : '........................................'}</td>
               <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi3Sebagai ? v(formData.saksi3Sebagai) : '........................................'}</td>
-              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="font-size:8px;color:#999;">3</span> <span style="font-size:8px;">..................................</span></td>
+              <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="font-size:8px;color:#999;">3</span> <span style="font-size:8px;">......................</span></td>
             </tr>
           </table>
         </div>
