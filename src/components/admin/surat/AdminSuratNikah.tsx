@@ -138,99 +138,6 @@ export default function AdminSuratNikah({
     }
   }, [editData]);
 
-  // Render preview content into isolated iframe for pixel-perfect parity with print engine
-  useEffect(() => {
-    const iframe = previewIframeRef.current;
-    if (!iframe) return;
-    const doc = iframe.contentWindow?.document;
-    if (!doc) return;
-    const content = getDocHtml();
-    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map(el => el.outerHTML)
-      .join('\n');
-    doc.open();
-    doc.write(`
-      <html>
-        <head>
-          ${styles}
-          <style>
-            @page { size: A4 portrait; margin: 0 !important; }
-            body {
-              margin: 0;
-              padding: 0;
-              background: white;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
-            }
-            .page, .print-page {
-              width: 210mm;
-              height: 296.9mm;
-              margin: 0;
-              box-sizing: border-box;
-              background: white;
-              position: relative;
-              overflow: hidden;
-              color: black;
-              page-break-inside: avoid;
-            }
-            .printable-area {
-              position: absolute !important;
-              left: 0 !important;
-              top: 0 !important;
-              width: 210mm !important;
-              height: 296.9mm !important;
-              margin: 0 !important;
-              padding: 40px 60px !important;
-              box-sizing: border-box !important;
-              background: white !important;
-              color: black !important;
-              box-shadow: none !important;
-              border: none !important;
-              display: block !important;
-              transform: none !important;
-              visibility: visible !important;
-              font-family: ${letterFont}, serif;
-              font-size: 12pt;
-              line-height: 1.35;
-            }
-            .printable-area * {
-              visibility: visible !important;
-            }
-            .printable-area p { margin: 3px 0; }
-            .crop-mark { display: none !important; }
-            @media print {
-              body, .page, .print-page {
-                width: 210mm;
-                height: 296.9mm;
-              }
-              body * { visibility: hidden; }
-              .print-container, .print-container * { visibility: visible; }
-              .print-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-              }
-              .print-page {
-                page-break-after: always;
-                break-after: page;
-              }
-              .nomor-surat-cetak { text-transform: uppercase !important; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="page">
-            <div class="printable-area bg-white text-black">
-              ${content}
-            </div>
-          </div>
-        </body>
-      </html>
-    `);
-    doc.close();
-  }, [activeDoc, formData]);
-
   // Default state from localStorage (village profile)
   const defaultDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
   const defaultKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
@@ -1557,6 +1464,103 @@ export default function AdminSuratNikah({
       return `<div style="color:red;padding:20px;border:1px solid red;">Gagal memuat pratinjau. Silakan periksa kembali data yang diinput.</div>`;
     }
   };
+
+  // Render preview content into isolated iframe for pixel-perfect parity with print engine
+  useEffect(() => {
+    const iframe = previewIframeRef.current;
+    if (!iframe) return;
+    try {
+      const doc = iframe.contentWindow?.document;
+      if (!doc) return;
+      const content = getDocHtml();
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(el => el.outerHTML)
+        .join('\n');
+      doc.open();
+      doc.write(`
+        <html>
+          <head>
+            ${styles}
+            <style>
+              @page { size: A4 portrait; margin: 0 !important; }
+              body {
+                margin: 0;
+                padding: 0;
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              .page, .print-page {
+                width: 210mm;
+                height: 296.9mm;
+                margin: 0;
+                box-sizing: border-box;
+                background: white;
+                position: relative;
+                overflow: hidden;
+                color: black;
+                page-break-inside: avoid;
+              }
+              .printable-area {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 210mm !important;
+                height: 296.9mm !important;
+                margin: 0 !important;
+                padding: 40px 60px !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+                transform: none !important;
+                visibility: visible !important;
+                font-family: ${letterFont}, serif;
+                font-size: 12pt;
+                line-height: 1.35;
+              }
+              .printable-area * {
+                visibility: visible !important;
+              }
+              .printable-area p { margin: 3px 0; }
+              .crop-mark { display: none !important; }
+              @media print {
+                body, .page, .print-page {
+                  width: 210mm;
+                  height: 296.9mm;
+                }
+                body * { visibility: hidden; }
+                .print-container, .print-container * { visibility: visible; }
+                .print-container {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 100%;
+                }
+                .print-page {
+                  page-break-after: always;
+                  break-after: page;
+                }
+                .nomor-surat-cetak { text-transform: uppercase !important; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="page">
+              <div class="printable-area bg-white text-black">
+                ${content}
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      doc.close();
+    } catch (e) {
+      console.error('Preview iframe error:', e);
+    }
+  }, [activeDoc, formData]);
 
   if (showRiwayat) {
     return (
