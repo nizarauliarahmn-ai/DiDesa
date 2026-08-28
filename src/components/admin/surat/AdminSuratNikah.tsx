@@ -1375,16 +1375,16 @@ export default function AdminSuratNikah({
       html = `
         <h3 style="text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;margin:0 0 20px;">SURAT PERNYATAAN BELUM MENIKAH</h3>
         <p style="margin:0 0 10px;">Saya yang bertanda tangan di bawah ini :</p>
-        ${dtTable([
-          ['a. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(calon.nama)}</span>`],
-          ['b. Nomor Induk Kependudukan (NIK)', v(calon.nik)],
-          ['c. Jenis Kelamin', calon.jk],
-          ['d. Tempat dan tanggal lahir', `${v(calon.tempatLahir)}, ${v(fmtTgl(calon.tanggalLahir))}`],
-          ['e. Kewarganegaraan', v(calon.kewarganegaraan)],
-          ['f. Agama', v(calon.agama)],
-          ['g. Pekerjaan', v(calon.pekerjaan)],
-          ['h. Alamat', v(calon.alamat)]
-        ])}
+        <table style="width:100%;border-collapse:collapse;margin:3px 0;font-family:${letterFont};">
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">a. Nama</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;"><span style="font-weight:700;text-transform:uppercase;">${vn(calon.nama)}</span></td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;white-space:nowrap;">b. Nomor Induk Kependudukan (NIK)</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;white-space:nowrap;">${v(calon.nik)}</td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">c. Jenis Kelamin</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${calon.jk}</td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">d. Tempat dan tanggal lahir</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.tempatLahir)}, ${v(fmtTgl(calon.tanggalLahir))}</td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">e. Kewarganegaraan</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.kewarganegaraan)}</td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">f. Agama</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.agama)}</td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">g. Pekerjaan</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.pekerjaan)}</td></tr>
+          <tr><td style="width:220px;padding:1.5px 3px;vertical-align:top;">h. Alamat</td><td style="width:12px;padding:1.5px 3px;vertical-align:top;">:</td><td style="padding:1.5px 3px;vertical-align:top;">${v(calon.alamat)}</td></tr>
+        </table>
         <p style="margin:12px 0;text-align:justify;">Menyatakan dengan sebenarnya bahwa Saya belum pernah <strong>MENIKAH/KAWIN</strong>. Surat keterangan ini dibuat untuk memenuhi persyaratan "memenuhi kelengkapan berkas pernikahan".</p>
         <p style="margin:0 0 20px;text-align:justify;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
         <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
