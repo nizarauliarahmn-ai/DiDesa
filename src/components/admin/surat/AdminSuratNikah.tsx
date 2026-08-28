@@ -1401,16 +1401,15 @@ export default function AdminSuratNikah({
           <tr>
             <td style="width:50%;vertical-align:top;padding:0 12px 0 0;">
               <p style="margin:0 0 5px;">Mengetahui,</p>
-              <p style="margin:0 0 5px;">Kepala Desa ${vn(formData.namaDesa)}</p>
+              <p style="margin:0 0 5px;">Kepala Desa ${v(formData.namaDesa)}</p>
               <div style="height:70px;"></div>
-              <p style="margin:0;text-transform:uppercase;font-weight:700;text-decoration:underline;">${vn(formData.namaPejabat)}</p>
-              <p style="margin:0;font-size:9pt;">NIP. ${(() => { try { const o = JSON.parse(localStorage.getItem('village_officers') || '[]'); const f = o.find((x: any) => x.name === formData.namaPejabat); return f?.nip || '....................'; } catch(e) { return '....................'; } })()}</p>
+              <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(formData.namaPejabat)}</p>
             </td>
             <td style="width:50%;vertical-align:top;padding:0 0 0 12px;">
-              <p style="margin:0;">${namaDesaUpper}, ${v(fmtTgl(formData.tanggalSurat))}</p>
+              <p style="margin:0;">${v(formData.namaDesa)}, ${v(fmtTgl(formData.tanggalSurat))}</p>
               <p style="margin:0 0 5px;">yang membuat pernyataan,</p>
               <div style="height:70px;"></div>
-              <p style="margin:0;text-transform:uppercase;font-weight:700;text-decoration:underline;">${vn(calon.nama)}</p>
+              <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(calon.nama)}</p>
             </td>
           </tr>
         </table>
