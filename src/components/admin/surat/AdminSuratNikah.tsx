@@ -1440,7 +1440,7 @@ export default function AdminSuratNikah({
               <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">2.</td>
               <td style="width:35%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Nama ? vn(formData.saksi2Nama) : '........................................'}</td>
               <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Sebagai ? v(formData.saksi2Sebagai) : '........................................'}</td>
-              <td style="width:35%;padding:8px;border:1px solid #000;vertical-align:top;padding-left:80px;">2 ..........</td>
+              <td style="width:35%;padding:8px;border:1px solid #000;vertical-align:top;padding-left:80px;">2 ...............</td>
             </tr>
             <tr>
               <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">3.</td>
