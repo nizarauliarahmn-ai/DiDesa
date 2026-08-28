@@ -1373,8 +1373,7 @@ export default function AdminSuratNikah({
       };
       const namaDesaUpper = (formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, '').toUpperCase();
       html = `
-        <h3 style="text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;margin:0 0 16px;">SURAT PERNYATAAN</h3>
-        <h4 style="text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;margin:0 0 20px;">BELUM MENIKAH</h4>
+        <h3 style="text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;margin:0 0 20px;">SURAT PERNYATAAN BELUM MENIKAH</h3>
         <p style="margin:0 0 10px;">Saya yang bertanda tangan di bawah ini :</p>
         ${dtTable([
           ['Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(calon.nama)}</span>`],
