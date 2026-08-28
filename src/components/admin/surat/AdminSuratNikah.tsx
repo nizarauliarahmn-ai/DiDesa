@@ -1425,25 +1425,25 @@ export default function AdminSuratNikah({
           <p style="margin:0 0 8px;font-weight:700;">SAKSI-SAKSI:</p>
           <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;border:1px solid #000;">
             <tr>
-              <td style="width:5%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;"></td>
-              <td style="width:40%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;">Nama</td>
-              <td style="width:25%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;">Sebagai</td>
+              <td style="width:5%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;text-align:center;">No</td>
+              <td style="width:40%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;text-align:center;">Nama</td>
+              <td style="width:25%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;text-align:center;">Sebagai</td>
               <td style="width:30%;padding:6px 8px;font-weight:bold;border:1px solid #000;background:#f0f0f0;text-align:center;">Tanda Tangan</td>
             </tr>
             <tr>
-              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;">1.</td>
+              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">1.</td>
               <td style="width:40%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi1Nama ? vn(formData.saksi1Nama) : '........................................'}</td>
               <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi1Sebagai ? v(formData.saksi1Sebagai) : '........................................'}</td>
               <td style="width:30%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="display:inline-block;padding-left:10px;font-size:9px;color:#666;">1</span><br/><span style="display:inline-block;padding-left:10px;border-bottom:1px dotted #000;width:85%;">.........................................................</span></td>
             </tr>
             <tr>
-              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;">2.</td>
+              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">2.</td>
               <td style="width:40%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Nama ? vn(formData.saksi2Nama) : '........................................'}</td>
               <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi2Sebagai ? v(formData.saksi2Sebagai) : '........................................'}</td>
               <td style="width:30%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="display:inline-block;padding-left:50px;font-size:9px;color:#666;">2</span><br/><span style="display:inline-block;padding-left:50px;border-bottom:1px dotted #000;width:60%;">.........................................................</span></td>
             </tr>
             <tr>
-              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;">3.</td>
+              <td style="width:5%;padding:8px;border:1px solid #000;vertical-align:top;text-align:center;">3.</td>
               <td style="width:40%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi3Nama ? vn(formData.saksi3Nama) : '........................................'}</td>
               <td style="width:25%;padding:8px;border:1px solid #000;vertical-align:top;">${formData.saksi3Sebagai ? v(formData.saksi3Sebagai) : '........................................'}</td>
               <td style="width:30%;padding:8px;border:1px solid #000;vertical-align:top;"><span style="display:inline-block;padding-left:10px;font-size:9px;color:#666;">3</span><br/><span style="display:inline-block;padding-left:10px;border-bottom:1px dotted #000;width:85%;">.........................................................</span></td>
