@@ -1376,14 +1376,14 @@ export default function AdminSuratNikah({
         <h3 style="text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;margin:0 0 20px;">SURAT PERNYATAAN BELUM MENIKAH</h3>
         <p style="margin:0 0 10px;">Saya yang bertanda tangan di bawah ini :</p>
         ${dtTable([
-          ['Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(calon.nama)}</span>`],
-          ['Nomor Induk Kependudukan (NIK)', v(calon.nik)],
-          ['Jenis Kelamin', calon.jk],
-          ['Tempat dan tanggal lahir', `${v(calon.tempatLahir)}, ${v(fmtTgl(calon.tanggalLahir))}`],
-          ['Kewarganegaraan', v(calon.kewarganegaraan)],
-          ['Agama', v(calon.agama)],
-          ['Pekerjaan', v(calon.pekerjaan)],
-          ['Alamat', v(calon.alamat)]
+          ['a. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(calon.nama)}</span>`],
+          ['b. Nomor Induk Kependudukan (NIK)', v(calon.nik)],
+          ['c. Jenis Kelamin', calon.jk],
+          ['d. Tempat dan tanggal lahir', `${v(calon.tempatLahir)}, ${v(fmtTgl(calon.tanggalLahir))}`],
+          ['e. Kewarganegaraan', v(calon.kewarganegaraan)],
+          ['f. Agama', v(calon.agama)],
+          ['g. Pekerjaan', v(calon.pekerjaan)],
+          ['h. Alamat', v(calon.alamat)]
         ])}
         <p style="margin:12px 0;text-align:justify;">Menyatakan dengan sebenarnya bahwa Saya belum pernah <strong>MENIKAH/KAWIN</strong>. Surat keterangan ini dibuat untuk memenuhi persyaratan "memenuhi kelengkapan berkas pernikahan".</p>
         <p style="margin:0 0 20px;text-align:justify;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
