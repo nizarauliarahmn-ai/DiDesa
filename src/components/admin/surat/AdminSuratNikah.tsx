@@ -1417,16 +1417,22 @@ export default function AdminSuratNikah({
           <p style="margin:0 0 8px;font-weight:700;">SAKSI-SAKSI:</p>
           <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
             <tr>
-              <td style="width:50%;padding:4px 0;">1. (Nama Wali) (Jabatan)</td>
-              <td style="width:50%;padding:4px 0;">........................................</td>
+              <td style="width:5%;padding:6px 0;vertical-align:top;">1.</td>
+              <td style="width:40%;padding:6px 0;vertical-align:top;">........................................</td>
+              <td style="width:30%;padding:6px 0;vertical-align:top;">........................................</td>
+              <td style="width:25%;padding:6px 0;vertical-align:top;text-align:center;">........................................</td>
             </tr>
             <tr>
-              <td style="width:50%;padding:4px 0;">2. (Nama Ketua RT) (domisili calon) (Jabatan)</td>
-              <td style="width:50%;padding:4px 0;">........................................</td>
+              <td style="width:5%;padding:6px 0;vertical-align:top;">2.</td>
+              <td style="width:40%;padding:6px 0;vertical-align:top;">........................................</td>
+              <td style="width:30%;padding:6px 0;vertical-align:top;">........................................</td>
+              <td style="width:25%;padding:6px 0;vertical-align:top;text-align:center;">........................................</td>
             </tr>
             <tr>
-              <td style="width:50%;padding:4px 0;">3. (Nama Keluarga) (jabatan di keluarga)</td>
-              <td style="width:50%;padding:4px 0;">........................................</td>
+              <td style="width:5%;padding:6px 0;vertical-align:top;">3.</td>
+              <td style="width:40%;padding:6px 0;vertical-align:top;">........................................</td>
+              <td style="width:30%;padding:6px 0;vertical-align:top;">........................................</td>
+              <td style="width:25%;padding:6px 0;vertical-align:top;text-align:center;">........................................</td>
             </tr>
           </table>
         </div>
