@@ -1417,6 +1417,12 @@ export default function AdminSuratNikah({
           <p style="margin:0 0 8px;font-weight:700;">SAKSI-SAKSI:</p>
           <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
             <tr>
+              <td style="width:5%;padding:4px 0;font-weight:bold;"></td>
+              <td style="width:40%;padding:4px 0;font-weight:bold;">Nama</td>
+              <td style="width:30%;padding:4px 0;font-weight:bold;">Sebagai</td>
+              <td style="width:25%;padding:4px 0;font-weight:bold;text-align:center;">Tanda Tangan</td>
+            </tr>
+            <tr>
               <td style="width:5%;padding:6px 0;vertical-align:top;">1.</td>
               <td style="width:40%;padding:6px 0;vertical-align:top;">........................................</td>
               <td style="width:30%;padding:6px 0;vertical-align:top;">........................................</td>
