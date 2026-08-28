@@ -498,8 +498,8 @@ export default function AdminSuratSKAW({
         <td style="padding:6px 8px;border:1px solid #ccc;text-align:center;">${i + 1}</td>
         <td style="padding:6px 8px;border:1px solid #ccc;text-transform:uppercase;">${v(row.nama)}</td>
         <td style="padding:6px 8px;border:1px solid #ccc;text-align:center;">${v(row.hubungan)}</td>
-        <td style="padding:6px 8px;border:1px solid #ccc;">${v(row.nik)}</td>
         <td style="padding:6px 8px;border:1px solid #ccc;">${v(row.ttl)}</td>
+        <td style="padding:6px 8px;border:1px solid #ccc;">${v(row.nik)}</td>
       </tr>
     `).join('');
 
@@ -545,8 +545,8 @@ export default function AdminSuratSKAW({
             <th style="padding:6px 8px;border:1px solid #ccc;width:5%;">No</th>
             <th style="padding:6px 8px;border:1px solid #ccc;width:25%;">Nama</th>
             <th style="padding:6px 8px;border:1px solid #ccc;width:15%;">Hubungan</th>
-            <th style="padding:6px 8px;border:1px solid #ccc;width:18%;">NIK</th>
             <th style="padding:6px 8px;border:1px solid #ccc;width:37%;">Tempat, Tanggal Lahir</th>
+            <th style="padding:6px 8px;border:1px solid #ccc;width:18%;">NIK</th>
           </tr>
         </thead>
         <tbody>
