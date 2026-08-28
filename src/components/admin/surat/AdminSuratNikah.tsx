@@ -93,7 +93,7 @@ export default function AdminSuratNikah({
   const [step, setStep] = useState(1);
   const [activeDoc, setActiveDoc] = useState('n1_suami');
 
-  const DOC_ORDER = ['biodata_suami', 'biodata_istri', 'n1_suami', 'n1_istri', 'n2_suami', 'n2_istri', 'n3', 'n4_suami', 'n4_istri', 'n6_suami', 'n6_istri'];
+  const DOC_ORDER = ['biodata_suami', 'biodata_istri', 'n1_suami', 'n1_istri', 'n2_suami', 'n2_istri', 'n3', 'n4_suami', 'n4_istri', 'n6_suami', 'n6_istri', 'belum_menikah'];
 
   const [showRiwayat, setShowRiwayat] = useState(false);
   const [riwayat, setRiwayat] = useState<any[]>([]);
@@ -246,6 +246,7 @@ export default function AdminSuratNikah({
     { id: 'n4_istri', label: 'N4 - Izin Ortu Istri' },
     { id: 'n6_suami', label: 'N6 - Kematian Istri Terdahulu' },
     { id: 'n6_istri', label: 'N6 - Kematian Suami Terdahulu' },
+    { id: 'belum_menikah', label: 'Surat Pernyataan Belum Menikah' },
   ];
 
   // Berdasarkan siapa yang berdomisili, munculkan dokumen yang relevan saja.
@@ -261,6 +262,9 @@ export default function AdminSuratNikah({
     if (/_(istri)$/.test(t.id)) return !!formData.wargaIstri;
     return true;
   });
+
+  // Surat Pernyataan Belum Menikah hanya aktif jika minimal satu calon berstatus Jejaka/Perawan
+  const isBelumMenikahDisabled = !['jejaka', 'perawan'].includes((formData.statusSuami || '').toLowerCase()) && !['jejaka', 'perawan'].includes((formData.statusIstri || '').toLowerCase());
 
   const handlePrevDoc = () => {
     const visible = visibleDocTabs.map(t => t.id);
@@ -723,9 +727,11 @@ export default function AdminSuratNikah({
       n3: 40,
       n4_suami: 50, n4_istri: 50,
       n6_suami: 60, n6_istri: 60,
+      belum_menikah: 70,
     };
     const pages = printAll
       ? visibleDocTabs
+          .filter(t => !(t.id === 'belum_menikah' && isBelumMenikahDisabled))
           .slice()
           .sort((a, b) =>
             (PRINT_RANK[a.id] ?? 99) - (PRINT_RANK[b.id] ?? 99) ||
@@ -1351,6 +1357,71 @@ export default function AdminSuratNikah({
           useEsignature,
           formData.nomorSurat
         )}
+      `;
+    }
+    else if (targetDoc === 'belum_menikah') {
+      const calon = formData.wargaSuami ? {
+        nama: formData.namaSuami, nik: formData.nikSuami, jk: 'Laki-Laki',
+        tempatLahir: formData.tempatLahirSuami, tanggalLahir: formData.tanggalLahirSuami,
+        kewarganegaraan: formData.kewarganegaraanSuami, agama: formData.agamaSuami,
+        pekerjaan: formData.pekerjaanSuami, alamat: formData.alamatSuami,
+      } : {
+        nama: formData.namaIstri, nik: formData.nikIstri, jk: 'Perempuan',
+        tempatLahir: formData.tempatLahirIstri, tanggalLahir: formData.tanggalLahirIstri,
+        kewarganegaraan: formData.kewarganegaraanIstri, agama: formData.agamaIstri,
+        pekerjaan: formData.pekerjaanIstri, alamat: formData.alamatIstri,
+      };
+      const namaDesaUpper = (formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, '').toUpperCase();
+      html = `
+        <h3 style="text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;margin:0 0 16px;">SURAT PERNYATAAN</h3>
+        <h4 style="text-align:center;font-size:12pt;font-weight:bold;text-transform:uppercase;margin:0 0 20px;">BELUM MENIKAH</h4>
+        <p style="margin:0 0 10px;">Saya yang bertanda tangan di bawah ini :</p>
+        ${dtTable([
+          ['Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(calon.nama)}</span>`],
+          ['Nomor Induk Kependudukan (NIK)', v(calon.nik)],
+          ['Jenis Kelamin', calon.jk],
+          ['Tempat dan tanggal lahir', `${v(calon.tempatLahir)}, ${v(fmtTgl(calon.tanggalLahir))}`],
+          ['Kewarganegaraan', v(calon.kewarganegaraan)],
+          ['Agama', v(calon.agama)],
+          ['Pekerjaan', v(calon.pekerjaan)],
+          ['Alamat', v(calon.alamat)]
+        ])}
+        <p style="margin:12px 0;">Menyatakan dengan sebenarnya bahwa Saya belum pernah <strong>MENIKAH/KAWIN</strong>. Surat keterangan ini dibuat untuk memenuhi persyaratan "memenuhi kelengkapan berkas pernikahan".</p>
+        <p style="margin:0 0 20px;">Demikian surat pernyataan ini dibuat dengan sebenarnya dalam keadaan sadar, tanpa ada unsur paksa dari pihak mana pun, dan untuk dipergunakan sebagaimana mestinya.</p>
+        <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
+          <tr>
+            <td style="width:50%;vertical-align:top;padding:0 12px 0 0;">
+              <p style="margin:0 0 5px;">Mengetahui,</p>
+              <p style="margin:0 0 5px;">Kepala Desa ${vn(formData.namaDesa)}</p>
+              <div style="height:70px;"></div>
+              <p style="margin:0;text-transform:uppercase;font-weight:700;text-decoration:underline;">${vn(formData.namaPejabat)}</p>
+              <p style="margin:0;font-size:9pt;">NIP. ${(() => { try { const o = JSON.parse(localStorage.getItem('village_officers') || '[]'); const f = o.find((x: any) => x.name === formData.namaPejabat); return f?.nip || '....................'; } catch(e) { return '....................'; } })()}</p>
+            </td>
+            <td style="width:50%;vertical-align:top;padding:0 0 0 12px;">
+              <p style="margin:0;">${namaDesaUpper}, ${v(fmtTgl(formData.tanggalSurat))}</p>
+              <p style="margin:0 0 5px;">yang membuat pernyataan,</p>
+              <div style="height:70px;"></div>
+              <p style="margin:0;text-transform:uppercase;font-weight:700;text-decoration:underline;">${vn(calon.nama)}</p>
+            </td>
+          </tr>
+        </table>
+        <div style="margin-top:24px;">
+          <p style="margin:0 0 8px;font-weight:700;">SAKSI-SAKSI:</p>
+          <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
+            <tr>
+              <td style="width:50%;padding:4px 0;">1. (Nama Wali) (Jabatan)</td>
+              <td style="width:50%;padding:4px 0;">........................................</td>
+            </tr>
+            <tr>
+              <td style="width:50%;padding:4px 0;">2. (Nama Ketua RT) (domisili calon) (Jabatan)</td>
+              <td style="width:50%;padding:4px 0;">........................................</td>
+            </tr>
+            <tr>
+              <td style="width:50%;padding:4px 0;">3. (Nama Keluarga) (jabatan di keluarga)</td>
+              <td style="width:50%;padding:4px 0;">........................................</td>
+            </tr>
+          </table>
+        </div>
       `;
     }
     
@@ -2086,15 +2157,25 @@ export default function AdminSuratNikah({
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Pilih Dokumen</label>
                   <div className="flex flex-col w-full gap-1.5">
-                    {visibleDocTabs.map(tab => (
-                      <button 
-                        key={tab.id}
-                        onClick={() => setActiveDoc(tab.id)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold border transition-all ${activeDoc === tab.id ? 'bg-emerald-600 text-white border-emerald-600 shadow-md dark:shadow-none shadow-emerald-600/20' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300'}`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
+                    {visibleDocTabs.map(tab => {
+                      const isDisabled = tab.id === 'belum_menikah' && isBelumMenikahDisabled;
+                      return (
+                        <button 
+                          key={tab.id}
+                          onClick={() => !isDisabled && setActiveDoc(tab.id)}
+                          disabled={isDisabled}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold border transition-all ${
+                            isDisabled 
+                              ? 'bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 border-gray-200 dark:border-slate-700 cursor-not-allowed opacity-60' 
+                              : activeDoc === tab.id 
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md dark:shadow-none shadow-emerald-600/20' 
+                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      );
+                    })}
                   </div>
                   <div className="flex gap-2 mt-1">
                     <button
