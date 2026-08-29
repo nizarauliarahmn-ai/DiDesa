@@ -354,7 +354,14 @@ export default function AdminSuratSKAW({
     }
     setLoading(true);
 
-    const content = generateHTML();
+    const pages = generateHTML();
+    const content = pages.map((pageHtml, i) => `
+      <div class="print-page" style="${i < pages.length - 1 ? 'page-break-after:always;break-after:page;' : ''}">
+        <div class="printable-area bg-white dark:bg-slate-900 text-black">
+          ${pageHtml}
+        </div>
+      </div>
+    `).join('');
     const iframe = iframeRef.current;
     if (!iframe) return;
 
@@ -389,6 +396,7 @@ export default function AdminSuratSKAW({
             }
             .printable-area {
               width: 210mm !important;
+              height: 296.9mm !important;
               margin: 0 !important;
               padding: 56px 75px !important;
               box-sizing: border-box !important;
@@ -411,19 +419,40 @@ export default function AdminSuratSKAW({
             }
             table { page-break-inside: auto; }
             tr { page-break-inside: avoid; }
+            .print-page {
+              page-break-after: always;
+              break-after: page;
+              width: 210mm;
+              height: 296.9mm;
+              position: relative;
+              overflow: hidden;
+              background: white;
+            }
+            .print-page:last-child {
+              page-break-after: auto;
+              break-after: auto;
+            }
             @media print {
-              body, .page { 
+              body { 
                 width: 210mm; 
+              }
+              .print-page {
+                width: 210mm;
+                height: 296.9mm;
+                page-break-after: always;
+                break-after: page;
+              }
+              .print-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
               }
               .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
         </head>
         <body>
-          <div class="page">
-            <div class="printable-area bg-white dark:bg-slate-900 text-black">
-              ${content}
-            </div>
+          <div class="print-container">
+            ${content}
           </div>
         </body>
       </html>
@@ -479,7 +508,7 @@ export default function AdminSuratSKAW({
 
   const v = (val: string, fallback = '-') => (val && val.trim() !== '' ? capitalizeWords(val) : fallback);
   
-  const generateHTML = () => {
+  const generateHTML = (): string[] => {
     const today = new Date();
     const printDate = isBackdate ? new Date(tanggalSurat) : today;
     const tglFormatted = printDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -495,6 +524,9 @@ export default function AdminSuratSKAW({
     };
 
     const allHeirs = getAllHeirs();
+    const MAX_HEIRS_PER_PAGE = 8;
+    const needsPage2 = allHeirs.length > MAX_HEIRS_PER_PAGE;
+
     const heirRowsHTML = allHeirs.map((row, i) => `
       <tr>
         <td style="padding:6px 8px;border:1px solid #ccc;text-align:center;">${i + 1}</td>
@@ -505,7 +537,43 @@ export default function AdminSuratSKAW({
       </tr>
     `).join('');
 
-    return `
+    const heirTableHTML = (rows: string) => `
+      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:15px;margin-left:40px;line-height:1.5;font-size:13px;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th style="padding:6px 8px;border:1px solid #ccc;width:5%;">No</th>
+            <th style="padding:6px 8px;border:1px solid #ccc;width:25%;">Nama</th>
+            <th style="padding:6px 8px;border:1px solid #ccc;width:15%;">Hubungan</th>
+            <th style="padding:6px 8px;border:1px solid #ccc;width:37%;">Tempat, Tanggal Lahir</th>
+            <th style="padding:6px 8px;border:1px solid #ccc;width:18%;">NIK</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `;
+
+    const signatureHTML = getPrintSignatureHTML(
+      formData.namaDesa,
+      tglFormatted,
+      formData.namaPejabat,
+      formData.jabatanPejabat,
+      (() => {
+        try {
+          const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+          const found = officersList.find((o: any) => o.name === formData.namaPejabat);
+          return found?.nip || '-';
+        } catch(e) {
+          return '-';
+        }
+      })(),
+      formData.includeCamat,
+      useEsignature,
+      formData.nomorSurat
+    );
+
+    const page1Content = `
       ${generateKopSuratHTML()}
 
       <div style="text-align:center;margin-bottom:15px;">
@@ -541,21 +609,16 @@ export default function AdminSuratSKAW({
         Adapun ahli waris dari almarhum/almarhumah tersebut adalah sebagai berikut:
       </p>
 
-      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:15px;margin-left:40px;line-height:1.5;font-size:13px;">
-        <thead>
-          <tr style="background:#f0f0f0;">
-            <th style="padding:6px 8px;border:1px solid #ccc;width:5%;">No</th>
-            <th style="padding:6px 8px;border:1px solid #ccc;width:25%;">Nama</th>
-            <th style="padding:6px 8px;border:1px solid #ccc;width:15%;">Hubungan</th>
-            <th style="padding:6px 8px;border:1px solid #ccc;width:37%;">Tempat, Tanggal Lahir</th>
-            <th style="padding:6px 8px;border:1px solid #ccc;width:18%;">NIK</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${heirRowsHTML}
-        </tbody>
-      </table>
-      ${allHeirs.length > 8 ? `<p style="text-align:center;font-size:11px;color:#666;font-style:italic;margin-top:-10px;margin-bottom:15px;">* Menampilkan ${allHeirs.length} ahli waris - halaman akan otomatis bertambah saat dicetak</p>` : ''}
+      ${needsPage2
+        ? heirTableHTML(`
+            <tr>
+              <td colspan="5" style="padding:8px;border:1px solid #ccc;text-align:center;font-style:italic;color:#555;">
+                Daftar ahli waris terlampir pada halaman berikutnya
+              </td>
+            </tr>
+          `)
+        : heirTableHTML(heirRowsHTML)
+      }
 
       <p style="text-indent:40px;text-align:justify;line-height:1.15;margin-bottom:8px;font-size:14px;">
         Surat keterangan ini diberikan atas dasar permohonan yang bersangkutan untuk dipergunakan sebagai kelengkapan persyaratan administrasi <strong>${v(formData.keperluan)}</strong>.
@@ -565,28 +628,30 @@ export default function AdminSuratSKAW({
         Demikian surat keterangan ini dibuat dengan sebenarnya untuk dapat dipergunakan sebagaimana mestinya.
       </p>
 
-      ${getPrintSignatureHTML(
-        formData.namaDesa,
-        tglFormatted,
-        formData.namaPejabat,
-        formData.jabatanPejabat,
-        (() => {
-          try {
-            const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-            const found = officersList.find((o: any) => o.name === formData.namaPejabat);
-            return found?.nip || '-';
-          } catch(e) {
-            return '-';
-          }
-        })(),
-        formData.includeCamat,
-        useEsignature,
-        formData.nomorSurat
-      )}
+      ${signatureHTML}
       <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
         ${SAAS_CONFIG.globalFooterHTML}
       </div>
     `;
+
+    const pages: string[] = [page1Content];
+
+    if (needsPage2) {
+      const page2Content = `
+        <p style="font-size:11px;color:#666;font-style:italic;margin-bottom:15px;padding:6px 10px;background:#f9f9f9;border:1px dashed #ccc;border-radius:4px;">
+          Dokumen ini merupakan kelanjutan dari Surat Keterangan Ahli Waris pada halaman sebelumnya.
+        </p>
+
+        <div style="text-align:center;margin-bottom:15px;">
+          <h3 style="text-decoration:underline;margin:0;font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">DAFTAR AHLI WARIS (LANJUTAN)</h3>
+        </div>
+
+        ${heirTableHTML(heirRowsHTML)}
+      `;
+      pages.push(page2Content);
+    }
+
+    return pages;
   };
 
   // Render preview content into isolated iframe for pixel-perfect parity with print engine
@@ -596,7 +661,14 @@ export default function AdminSuratSKAW({
     try {
       const doc = iframe.contentWindow?.document;
       if (!doc) return;
-      const content = generateHTML();
+      const pages = generateHTML();
+      const content = pages.map((pageHtml, i) => `
+        <div class="print-page" style="${i < pages.length - 1 ? 'page-break-after:always;break-after:page;' : ''}">
+          <div class="printable-area bg-white text-black">
+            ${pageHtml}
+          </div>
+        </div>
+      `).join('');
       const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
         .map(el => el.outerHTML)
         .join('\n');
@@ -614,8 +686,6 @@ export default function AdminSuratSKAW({
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
                 width: 794px;
-                height: 1123px;
-                overflow: hidden;
               }
               .page, .print-page {
                 width: 794px;
@@ -680,10 +750,8 @@ export default function AdminSuratSKAW({
             </style>
           </head>
           <body>
-            <div class="page">
-              <div class="printable-area bg-white text-black">
-                ${content}
-              </div>
+            <div class="print-container">
+              ${content}
             </div>
           </body>
         </html>
