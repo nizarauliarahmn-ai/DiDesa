@@ -2476,36 +2476,34 @@ export default function AdminSuratNikah({
                 style={{ ...dragProps.style }}
                 className="flex-1 bg-slate-200/40 overflow-auto relative flex items-start justify-center p-8"
               >
-                <div style={{ width: `${794 * previewZoom}px`, height: `${1123 * previewZoom}px`, overflow: 'hidden', flexShrink: 0 }}>
-                  <div 
-                    style={{
-                      width: '794px',
-                      height: '1123px',
-                      overflow: 'hidden',
-                      position: 'relative',
-                      boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                      borderRadius: '12px',
-                      transform: `scale(${previewZoom})`,
-                      transformOrigin: 'top left'
+                <div 
+                  style={{
+                    width: '794px',
+                    height: '1123px',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                    borderRadius: '12px',
+                    transform: `scale(${previewZoom})`,
+                    transformOrigin: 'top center'
+                  }}
+                  className="m-auto shrink-0 relative bg-white"
+                >
+                  <iframe 
+                    ref={(el) => {
+                      (previewIframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = el;
+                      if (el) setPreviewIframeReady(true);
                     }}
-                    className="bg-white"
-                  >
-                    <iframe 
-                      ref={(el) => {
-                        (previewIframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = el;
-                        if (el) setPreviewIframeReady(true);
-                      }}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                        display: 'block',
-                        background: 'white'
-                      }}
-                      title="Live A4 Preview"
-                      sandbox="allow-same-origin"
-                    />
-                  </div>
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      display: 'block',
+                      background: 'white'
+                    }}
+                    title="Live A4 Preview"
+                    sandbox="allow-same-origin"
+                  />
                 </div>
               </div>
             </div>
