@@ -2478,13 +2478,14 @@ export default function AdminSuratNikah({
               >
                 <div 
                   style={{
-                    width: `${794 * previewZoom}px`,
-                    height: `${1123 * previewZoom}px`,
+                    width: '794px',
+                    height: '1123px',
                     overflow: 'hidden',
                     position: 'relative',
                     boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
                     borderRadius: '12px',
-                    transition: 'width 0.2s ease-out, height 0.2s ease-out'
+                    transform: `scale(${previewZoom})`,
+                    transformOrigin: 'top center'
                   }}
                   className="m-auto shrink-0 relative bg-white"
                 >
