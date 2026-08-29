@@ -465,7 +465,7 @@ export default function AdminSuratSKH({
         <tr><td>e. Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
         <tr><td>f. Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
         <tr><td>g. Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
-        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
+        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}, Kab. ${cleanStr(v(formData.namaKabupaten), /^(pemerintah\s+)?(kabupaten|kota)\s+/i)}</td></tr>
       </table>
 
 
