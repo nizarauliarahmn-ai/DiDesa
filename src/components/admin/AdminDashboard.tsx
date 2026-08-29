@@ -501,17 +501,6 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
 
         <div className="relative z-10 flex flex-col lg:flex-row justify-between lg:items-center gap-8">
           <div className="max-w-2xl space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
-                Pusat Operasional Administrasi
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
-                <Building2 className="w-3.5 h-3.5 text-indigo-300" />
-                {desaName}
-              </span>
-            </div>
-
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight">
               Selamat Datang Kembali, <br className="hidden sm:inline" />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 via-teal-200 to-amber-300">
