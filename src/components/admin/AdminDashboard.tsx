@@ -521,14 +521,6 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
                 <FileText className="w-4 h-4" />
                 <span>Buat Surat Baru</span>
               </button>
-              
-              <button
-                onClick={() => setActiveTab?.('penduduk')}
-                className="w-full sm:w-auto px-5 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl font-bold text-xs sm:text-sm backdrop-blur-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-              >
-                <Users className="w-4 h-4 text-emerald-300" />
-                <span>Data Penduduk ({totalResidents})</span>
-              </button>
 
               <button
                 onClick={() => {
