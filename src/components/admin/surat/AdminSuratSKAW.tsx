@@ -637,16 +637,23 @@ export default function AdminSuratSKAW({
     const pages: string[] = [page1Content];
 
     if (needsPage2) {
+      const nomorSurat = v(formData.nomorSurat, '... / ... / ... / ' + (typeof printDate !== 'undefined' ? printDate : new Date()).getFullYear()).toUpperCase();
       const page2Content = `
-        <p style="font-size:11px;color:#666;font-style:italic;margin-bottom:15px;padding:6px 10px;background:#f9f9f9;border:1px dashed #ccc;border-radius:4px;">
-          Dokumen ini merupakan kelanjutan dari Surat Keterangan Ahli Waris pada halaman sebelumnya.
-        </p>
+        <div style="text-align:center;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #333;">
+          <p style="margin:0;font-size:13px;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">LAMPIRAN</p>
+          <p style="margin:4px 0 0 0;font-size:12px;text-transform:uppercase;">Nomor: ${nomorSurat}</p>
+          <p style="margin:2px 0 0 0;font-size:12px;text-transform:uppercase;">Surat Keterangan Ahli Waris</p>
+        </div>
 
         <div style="text-align:center;margin-bottom:15px;">
-          <h3 style="text-decoration:underline;margin:0;font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">DAFTAR AHLI WARIS (LANJUTAN)</h3>
+          <h3 style="text-decoration:underline;margin:0;font-size:14px;text-transform:uppercase;letter-spacing:1px;font-weight:bold;">DAFTAR AHLI WARIS</h3>
         </div>
 
         ${heirTableHTML(heirRowsHTML)}
+
+        <p style="font-size:11px;color:#666;font-style:italic;margin-top:10px;padding:6px 10px;background:#f9f9f9;border:1px dashed #ccc;border-radius:4px;">
+          Dokumen ini merupakan kelanjutan dari Surat Keterangan Ahli Waris pada halaman sebelumnya.
+        </p>
       `;
       pages.push(page2Content);
     }
@@ -682,13 +689,22 @@ export default function AdminSuratSKAW({
               html, body {
                 margin: 0;
                 padding: 0;
-                background: white;
+                background: #e5e7eb;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
                 width: 794px;
+                overflow: hidden;
               }
-              .page, .print-page {
+              .print-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 24px;
+                padding: 24px 0;
+              }
+              .print-page {
                 width: 794px;
+                min-width: 794px;
                 height: 1123px;
                 margin: 0;
                 padding: 0;
@@ -697,6 +713,9 @@ export default function AdminSuratSKAW({
                 position: relative;
                 overflow: hidden;
                 color: black;
+                box-shadow: 0 4px 24px -4px rgb(0 0 0 / 0.15);
+                border-radius: 4px;
+                flex-shrink: 0;
               }
               .printable-area {
                 position: absolute !important;
@@ -725,9 +744,31 @@ export default function AdminSuratSKAW({
               table { page-break-inside: auto; }
               tr { page-break-inside: avoid; }
               @media print {
-                html, body, .page, .print-page {
+                html, body {
                   width: 210mm;
+                  background: white;
+                  overflow: visible;
+                }
+                .print-container {
+                  gap: 0;
+                  padding: 0;
+                }
+                .print-page {
+                  width: 210mm;
+                  min-width: 210mm;
                   height: 296.9mm;
+                  box-shadow: none;
+                  border-radius: 0;
+                  page-break-after: always;
+                  break-after: page;
+                }
+                .print-page:last-child {
+                  page-break-after: auto;
+                  break-after: auto;
+                }
+                .printable-area {
+                  width: 210mm !important;
+                  height: 296.9mm !important;
                 }
                 body * { visibility: hidden; }
                 .print-container, .print-container * { visibility: visible; }
@@ -736,14 +777,6 @@ export default function AdminSuratSKAW({
                   left: 0;
                   top: 0;
                   width: 100%;
-                }
-                .printable-area {
-                  width: 210mm !important;
-                  height: 296.9mm !important;
-                }
-                .print-page {
-                  page-break-after: always;
-                  break-after: page;
                 }
                 .nomor-surat-cetak { text-transform: uppercase !important; }
               }
@@ -757,6 +790,11 @@ export default function AdminSuratSKAW({
         </html>
       `);
       doc.close();
+
+      // Auto-resize iframe height based on page count
+      const pageCount = pages.length;
+      const totalHeight = pageCount * 1123 + (pageCount - 1) * 24 + 48; // pages + gaps + padding
+      iframe.style.height = totalHeight + 'px';
     } catch (e) {
       console.error('Preview iframe error:', e);
     }
@@ -1299,18 +1337,12 @@ export default function AdminSuratSKAW({
                 style={{ ...dragProps.style }}
                 className="bg-slate-100/60 dark:bg-slate-800/40 overflow-auto relative flex p-6 justify-center"
               >
-                <div 
+                <div id="preview-scaler" 
                   style={{
-                    width: '794px',
-                    height: '1123px',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                    borderRadius: '12px',
                     transform: `scale(${previewZoom})`,
                     transformOrigin: 'top center'
                   }}
-                  className="m-auto shrink-0 relative bg-white"
+                  className="m-auto shrink-0 relative"
                 >
                   <iframe 
                     ref={(el) => {
@@ -1318,11 +1350,11 @@ export default function AdminSuratSKAW({
                       if (el) setPreviewIframeReady(true);
                     }}
                     style={{
-                      width: '100%',
-                      height: '100%',
+                      width: '794px',
+                      height: '1123px',
                       border: 'none',
                       display: 'block',
-                      background: 'white'
+                      background: '#e5e7eb'
                     }}
                     title="Live A4 Preview"
                     sandbox="allow-same-origin"
