@@ -665,77 +665,6 @@ export default function AdminSuratSKL({
 
           {/* Form Detail */}
           <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
-            {/* Data Bayi / Anak */}
-            <div className="bg-emerald-50/30 -mx-8 px-8 py-6 border-y border-emerald-100">
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-emerald-200/50">
-                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <Baby className="w-4 h-4 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-emerald-900 uppercase tracking-wide">Data Bayi / Anak</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-emerald-900">Nama Lengkap Bayi</label>
-                  <input 
-                    type="text"
-                    placeholder="Nama anak..."
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500"
-                    value={anakData.nama}
-                    onChange={(e) => setAnakData({...anakData, nama: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Jenis Kelamin</label>
-                  <select 
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.jenisKelamin}
-                    onChange={(e) => setAnakData({...anakData, jenisKelamin: e.target.value})}
-                  >
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Anak Ke-</label>
-                  <input 
-                    type="number"
-                    placeholder="Misal: 1"
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.anakKe}
-                    onChange={(e) => setAnakData({...anakData, anakKe: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Tempat Lahir</label>
-                  <input 
-                    type="text"
-                    placeholder="Kota/Kab"
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.tempatLahir}
-                    onChange={(e) => setAnakData({...anakData, tempatLahir: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Tanggal Lahir</label>
-                  <input 
-                    type="date"
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.tanggalLahir}
-                    onChange={(e) => setAnakData({...anakData, tanggalLahir: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-emerald-900">Jam Lahir (Opsional)</label>
-                  <input 
-                    type="time"
-                    className="w-full md:w-1/2 px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.jamLahir}
-                    onChange={(e) => setAnakData({...anakData, jamLahir: e.target.value})}
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* Data Ayah */}
             <div>
               <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -855,6 +784,77 @@ export default function AdminSuratSKL({
 onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
                   />
                   </div>
+              </div>
+            </div>
+
+            {/* Data Bayi / Anak */}
+            <div className="bg-emerald-50/30 -mx-8 px-8 py-6 border-y border-emerald-100">
+              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-emerald-200/50">
+                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                  <Baby className="w-4 h-4 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-emerald-900 uppercase tracking-wide">Data Bayi / Anak</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-bold text-emerald-900">Nama Lengkap Bayi</label>
+                  <input 
+                    type="text"
+                    placeholder="Nama anak..."
+                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500"
+                    value={anakData.nama}
+                    onChange={(e) => setAnakData({...anakData, nama: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-emerald-900">Jenis Kelamin</label>
+                  <select 
+                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
+                    value={anakData.jenisKelamin}
+                    onChange={(e) => setAnakData({...anakData, jenisKelamin: e.target.value})}
+                  >
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-emerald-900">Anak Ke-</label>
+                  <input 
+                    type="number"
+                    placeholder="Misal: 1"
+                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
+                    value={anakData.anakKe}
+                    onChange={(e) => setAnakData({...anakData, anakKe: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-emerald-900">Tempat Lahir</label>
+                  <input 
+                    type="text"
+                    placeholder="Kota/Kab"
+                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
+                    value={anakData.tempatLahir}
+                    onChange={(e) => setAnakData({...anakData, tempatLahir: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-emerald-900">Tanggal Lahir</label>
+                  <input 
+                    type="date"
+                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
+                    value={anakData.tanggalLahir}
+                    onChange={(e) => setAnakData({...anakData, tanggalLahir: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-bold text-emerald-900">Jam Lahir (Opsional)</label>
+                  <input 
+                    type="time"
+                    className="w-full md:w-1/2 px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
+                    value={anakData.jamLahir}
+                    onChange={(e) => setAnakData({...anakData, jamLahir: e.target.value})}
+                  />
+                </div>
               </div>
             </div>
 
