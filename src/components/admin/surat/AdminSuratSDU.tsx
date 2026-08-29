@@ -141,6 +141,9 @@ export default function AdminSuratSDU({
     namaProvinsi: localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan',
     alamatKantor: localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261',
     kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com',
+    tampilkanDesa: true,
+    tampilkanKecamatan: true,
+    tampilkanKabupaten: true,
   });
 
   const [previewZoom, setPreviewZoom] = useState(0.45);
@@ -519,7 +522,7 @@ export default function AdminSuratSDU({
         <tr><td style="vertical-align:top;">d. Tempat, Tgl Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.tempatLahir)}, ${fmtDate(formData.tanggalLahir)}</td></tr>
         <tr><td style="vertical-align:top;">e. Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.pekerjaan)}</td></tr>
         <tr><td style="vertical-align:top;">f. Agama</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.agama)}</td></tr>
-        <tr><td style="vertical-align:top;">g. Alamat</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}, Kab. ${cleanStr(v(formData.namaKabupaten), /^(pemerintah\s+)?(kabupaten|kota)\s+/i)}</td></tr>
+        <tr><td style="vertical-align:top;">g. Alamat</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}${formData.tampilkanDesa || formData.tampilkanKecamatan || formData.tampilkanKabupaten ? `<br/>${formData.tampilkanDesa ? `Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)}` : ''}${formData.tampilkanDesa && formData.tampilkanKecamatan ? ' ' : ''}${formData.tampilkanKecamatan ? `Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}` : ''}${formData.tampilkanKecamatan && formData.tampilkanKabupaten ? ', ' : formData.tampilkanDesa && !formData.tampilkanKecamatan && formData.tampilkanKabupaten ? ', ' : ''}${formData.tampilkanKabupaten ? `Kab. ${cleanStr(v(formData.namaKabupaten), /^(pemerintah\s+)?(kabupaten|kota)\s+/i)}` : ''}` : ''}</td></tr>
       </table>
 
             <!-- PERNYATAAN -->
@@ -927,6 +930,20 @@ export default function AdminSuratSDU({
     }));
   }}
                   />
+                </div>
+                <div className="md:col-span-2 flex flex-wrap gap-4 mt-1">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.tampilkanDesa} onChange={(e) => setFormData(prev => ({ ...prev, tampilkanDesa: e.target.checked }))} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    Tampilkan "Desa ..."
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.tampilkanKecamatan} onChange={(e) => setFormData(prev => ({ ...prev, tampilkanKecamatan: e.target.checked }))} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    Tampilkan "Kecamatan ..."
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.tampilkanKabupaten} onChange={(e) => setFormData(prev => ({ ...prev, tampilkanKabupaten: e.target.checked }))} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    Tampilkan "Kab. ..."
+                  </label>
                 </div>
                 <div className="md:col-span-1 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kewarganegaraan</label>
