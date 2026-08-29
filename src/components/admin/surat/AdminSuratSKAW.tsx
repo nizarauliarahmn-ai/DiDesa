@@ -692,7 +692,7 @@ export default function AdminSuratSKAW({
     } catch (e) {
       console.error('Preview iframe error:', e);
     }
-  }, [formData, previewIframeReady, familyMembers, selectedFamilyMembers]);
+  }, [formData, previewIframeReady, familyMembers, selectedFamilyMembers, heirRows]);
 
   const filteredResidents = residents.filter(r => 
     (r.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || 
