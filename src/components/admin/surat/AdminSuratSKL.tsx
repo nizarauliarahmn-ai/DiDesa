@@ -136,7 +136,7 @@ export default function AdminSuratSKL({
   const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
   const kontakKantor = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
 
-  const [previewZoom, setPreviewZoom] = useState(0.38);
+  const [previewZoom, setPreviewZoom] = useState(0.45);
   const dragProps = useDragScroll();
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
   const iframeRef = useRef<HTMLIFrameElement>(null);
