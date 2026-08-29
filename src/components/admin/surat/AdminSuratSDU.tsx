@@ -519,7 +519,7 @@ export default function AdminSuratSDU({
         <tr><td style="vertical-align:top;">d. Tempat, Tgl Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.tempatLahir)}, ${fmtDate(formData.tanggalLahir)}</td></tr>
         <tr><td style="vertical-align:top;">e. Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.pekerjaan)}</td></tr>
         <tr><td style="vertical-align:top;">f. Agama</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.agama)}</td></tr>
-        <tr><td style="vertical-align:top;">g. Alamat</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}, Kab. ${cleanStr(v(formData.namaKabupaten), /^(kabupaten|kota)\s+/i)}</td></tr>
+        <tr><td style="vertical-align:top;">g. Alamat</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}, Kab. ${cleanStr(v(formData.namaKabupaten), /^(pemerintah\s+)?(kabupaten|kota)\s+/i)}</td></tr>
       </table>
 
             <!-- PERNYATAAN -->
