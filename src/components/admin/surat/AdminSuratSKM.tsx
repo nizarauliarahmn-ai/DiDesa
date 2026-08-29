@@ -927,7 +927,7 @@ export default function AdminSuratSKM({
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[600px] sticky top-[170px]">
+          <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[700px] sticky top-[170px]">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -970,7 +970,7 @@ export default function AdminSuratSKM({
               onMouseUp={dragProps.onMouseUp}
               onMouseMove={dragProps.onMouseMove}
               style={{ ...dragProps.style }}
-              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
+              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-6 justify-center items-start"
             >
               <div 
                 style={{
