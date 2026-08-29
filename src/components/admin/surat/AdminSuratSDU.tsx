@@ -147,6 +147,8 @@ export default function AdminSuratSDU({
   const dragProps = useDragScroll();
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const [previewIframeReady, setPreviewIframeReady] = useState(false);
 
   const jobs = [
     'Belum/Tidak Bekerja', 'Mengurus Rumah Tangga', 'Pelajar/Mahasiswa', 'Pensiunan',
@@ -558,6 +560,105 @@ export default function AdminSuratSDU({
       </div>
     `;
   };
+
+  // Render preview content into isolated iframe for pixel-perfect parity with print engine
+  useEffect(() => {
+    const iframe = previewIframeRef.current;
+    if (!iframe) return;
+    try {
+      const doc = iframe.contentWindow?.document;
+      if (!doc) return;
+      const content = generateHTML();
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(el => el.outerHTML)
+        .join('\n');
+      doc.open();
+      doc.write(`
+        <html>
+          <head>
+            ${styles}
+            <style>
+              @page { size: A4 portrait; margin: 0 !important; }
+              html, body {
+                margin: 0;
+                padding: 0;
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                width: 794px;
+                height: 1123px;
+                overflow: hidden;
+              }
+              .page, .print-page {
+                width: 794px;
+                height: 1123px;
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                background: white;
+                position: relative;
+                overflow: hidden;
+                color: black;
+              }
+              .printable-area {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 794px !important;
+                height: 1123px !important;
+                margin: 0 !important;
+                padding: 56px 75px !important;
+                box-sizing: border-box !important;
+                background: white !important;
+                color: black !important;
+                box-shadow: none !important;
+                border: none !important;
+                display: block !important;
+                transform: none !important;
+                visibility: visible !important;
+                font-family: ${letterFont};
+                font-size: 13px;
+                line-height: 1.5;
+              }
+              .printable-area * {
+                visibility: visible !important;
+              }
+              .crop-mark { display: none !important; }
+              @media print {
+                html, body, .page, .print-page {
+                  width: 210mm;
+                  height: 297mm;
+                }
+                body * { visibility: hidden; }
+                .print-container, .print-container * { visibility: visible; }
+                .print-container {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: 100%;
+                }
+                .printable-area {
+                  width: 210mm !important;
+                  height: 297mm !important;
+                }
+                .nomor-surat-cetak { text-transform: uppercase !important; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="page">
+              <div class="printable-area bg-white text-black">
+                ${content}
+              </div>
+            </div>
+          </body>
+        </html>
+      `);
+      doc.close();
+    } catch (e) {
+      console.error('Preview iframe error:', e);
+    }
+  }, [formData, previewIframeReady]);
 
   const filteredResidents = residents.filter(r => 
     (r.name || '').toLowerCase().includes((searchQuery || '').toLowerCase()) || 
@@ -1046,42 +1147,35 @@ export default function AdminSuratSDU({
               style={{ ...dragProps.style }}
               className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
             >
-              <div 
-                style={{
-                  width: `${794 * previewZoom}px`,
-                  height: `${1123 * previewZoom}px`,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
-                  borderRadius: '12px',
-                  transition: 'width 0.2s ease-out, height 0.2s ease-out'
-                }}
-                className="bg-white dark:bg-slate-900 m-auto shrink-0 relative"
-              >
-                {/* Visual Crop Marks */}
-                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-slate-300 dark:border-slate-600 pointer-events-none z-10"></div>
-
                 <div 
-                  className="bg-white dark:bg-slate-900 shrink-0"
-                  style={{ 
-                    width: '794px', 
-                    height: '1123px', 
-                    padding: '56px 75px',
-                    transform: `scale(${previewZoom})`,
-                    transformOrigin: 'top left',
-                    fontFamily: letterFont,
-                    fontSize: '13px',
-                    lineHeight: '1.45',
+                  style={{
+                    width: '794px',
+                    height: '1123px',
+                    overflow: 'hidden',
                     position: 'relative',
-                    color: 'black',
-                    boxSizing: 'border-box'
+                    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
+                    borderRadius: '12px',
+                    transform: `scale(${previewZoom})`,
+                    transformOrigin: 'top center'
                   }}
-                  dangerouslySetInnerHTML={{ __html: generateHTML() }}
-                />
-              </div>
+                  className="m-auto shrink-0 relative bg-white"
+                >
+                  <iframe 
+                    ref={(el) => {
+                      (previewIframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = el;
+                      if (el) setPreviewIframeReady(true);
+                    }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      display: 'block',
+                      background: 'white'
+                    }}
+                    title="Live A4 Preview"
+                    sandbox="allow-same-origin"
+                  />
+                </div>
             </div>
           </div>
         </div>
