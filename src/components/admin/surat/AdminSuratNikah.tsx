@@ -105,6 +105,7 @@ export default function AdminSuratNikah({
   const dragProps = useDragScroll();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const [previewIframeReady, setPreviewIframeReady] = useState(false);
   const archivedRef = useRef(false);
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
 
@@ -1560,7 +1561,7 @@ export default function AdminSuratNikah({
     } catch (e) {
       console.error('Preview iframe error:', e);
     }
-  }, [activeDoc, formData]);
+  }, [activeDoc, formData, previewIframeReady]);
 
   if (showRiwayat) {
     return (
@@ -2482,7 +2483,10 @@ export default function AdminSuratNikah({
                   className="m-auto shrink-0 relative"
                 >
                   <iframe 
-                    ref={previewIframeRef}
+                    ref={(el) => {
+                      (previewIframeRef as React.MutableRefObject<HTMLIFrameElement | null>).current = el;
+                      if (el) setPreviewIframeReady(true);
+                    }}
                     style={{
                       width: '210mm',
                       height: '296.9mm',
