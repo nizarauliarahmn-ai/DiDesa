@@ -91,7 +91,7 @@ export default function AdminSuratNikah({
 
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(1);
-  const [activeDoc, setActiveDoc] = useState('n1_suami');
+  const [activeDoc, setActiveDoc] = useState('biodata_suami');
 
   const DOC_ORDER = ['biodata_suami', 'biodata_istri', 'n1_suami', 'n1_istri', 'n2_suami', 'n2_istri', 'n3', 'n4_suami', 'n4_istri', 'n6_suami', 'n6_istri', 'belum_menikah'];
 
