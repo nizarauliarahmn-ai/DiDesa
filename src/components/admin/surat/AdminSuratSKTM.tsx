@@ -117,6 +117,9 @@ export default function AdminSuratSKTM({
     namaProvinsi: localStorage.getItem('kop_provinsi') || '',
     alamatKantor: localStorage.getItem('kop_alamat') || '',
     kontakKantor: localStorage.getItem('kop_kontak') || '',
+    tampilkanDesa: true,
+    tampilkanKecamatan: true,
+    tampilkanKabupaten: true,
   });
 
   const [previewZoom, setPreviewZoom] = useState(0.45);
@@ -461,7 +464,7 @@ export default function AdminSuratSKTM({
         <tr><td>e. Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
         <tr><td>f. Pekerjaan</td><td>:</td><td>${v(formData.pekerjaan)}</td></tr>
         <tr><td>g. Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
-        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}</td></tr>
+        <tr><td style="vertical-align:top;">h. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}${formData.tampilkanDesa || formData.tampilkanKecamatan || formData.tampilkanKabupaten ? `<br/>${formData.tampilkanDesa ? `Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)}` : ''}${formData.tampilkanDesa && formData.tampilkanKecamatan ? ' ' : ''}${formData.tampilkanKecamatan ? `Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}` : ''}${formData.tampilkanKecamatan && formData.tampilkanKabupaten ? ', ' : formData.tampilkanDesa && !formData.tampilkanKecamatan && formData.tampilkanKabupaten ? ', ' : ''}${formData.tampilkanKabupaten ? `Kab. ${cleanStr(v(formData.namaKabupaten), /^(pemerintah\s+)?(kabupaten|kota)\s+/i)}` : ''}` : ''}</td></tr>
       </table>
 
 
@@ -708,6 +711,20 @@ export default function AdminSuratSKTM({
     />
   </div>
 </div>
+                <div className="md:col-span-2 flex flex-wrap gap-4 mt-1">
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.tampilkanDesa} onChange={(e) => setFormData(prev => ({ ...prev, tampilkanDesa: e.target.checked }))} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    Tampilkan "Desa ..."
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.tampilkanKecamatan} onChange={(e) => setFormData(prev => ({ ...prev, tampilkanKecamatan: e.target.checked }))} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    Tampilkan "Kecamatan ..."
+                  </label>
+                  <label className="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+                    <input type="checkbox" checked={formData.tampilkanKabupaten} onChange={(e) => setFormData(prev => ({ ...prev, tampilkanKabupaten: e.target.checked }))} className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+                    Tampilkan "Kab. ..."
+                  </label>
+                </div>
             </div>
           </div>
 
