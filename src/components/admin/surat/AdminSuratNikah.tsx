@@ -1484,30 +1484,33 @@ export default function AdminSuratNikah({
             ${styles}
             <style>
               @page { size: A4 portrait; margin: 0 !important; }
-              body {
+              html, body {
                 margin: 0;
                 padding: 0;
                 background: white;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                width: 794px;
+                height: 1123px;
+                overflow: hidden;
               }
               .page, .print-page {
-                width: 210mm;
-                height: 296.9mm;
+                width: 794px;
+                height: 1123px;
                 margin: 0;
+                padding: 0;
                 box-sizing: border-box;
                 background: white;
                 position: relative;
                 overflow: hidden;
                 color: black;
-                page-break-inside: avoid;
               }
               .printable-area {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
-                width: 210mm !important;
-                height: 296.9mm !important;
+                width: 794px !important;
+                height: 1123px !important;
                 margin: 0 !important;
                 padding: 40px 60px !important;
                 box-sizing: border-box !important;
@@ -1528,7 +1531,7 @@ export default function AdminSuratNikah({
               .printable-area p { margin: 3px 0; }
               .crop-mark { display: none !important; }
               @media print {
-                body, .page, .print-page {
+                html, body, .page, .print-page {
                   width: 210mm;
                   height: 296.9mm;
                 }
@@ -1539,6 +1542,10 @@ export default function AdminSuratNikah({
                   left: 0;
                   top: 0;
                   width: 100%;
+                }
+                .printable-area {
+                  width: 210mm !important;
+                  height: 296.9mm !important;
                 }
                 .print-page {
                   page-break-after: always;
@@ -2471,16 +2478,15 @@ export default function AdminSuratNikah({
               >
                 <div 
                   style={{
-                    width: '210mm',
-                    height: '296.9mm',
+                    width: `${794 * previewZoom}px`,
+                    height: `${1123 * previewZoom}px`,
                     overflow: 'hidden',
                     position: 'relative',
                     boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)',
                     borderRadius: '12px',
-                    transform: `scale(${previewZoom})`,
-                    transformOrigin: 'top center'
+                    transition: 'width 0.2s ease-out, height 0.2s ease-out'
                   }}
-                  className="m-auto shrink-0 relative"
+                  className="m-auto shrink-0 relative bg-white"
                 >
                   <iframe 
                     ref={(el) => {
@@ -2488,8 +2494,8 @@ export default function AdminSuratNikah({
                       if (el) setPreviewIframeReady(true);
                     }}
                     style={{
-                      width: '210mm',
-                      height: '296.9mm',
+                      width: '100%',
+                      height: '100%',
                       border: 'none',
                       display: 'block',
                       background: 'white'
