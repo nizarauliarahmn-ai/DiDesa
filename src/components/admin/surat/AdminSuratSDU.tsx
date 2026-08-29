@@ -1145,7 +1145,7 @@ export default function AdminSuratSDU({
               onMouseUp={dragProps.onMouseUp}
               onMouseMove={dragProps.onMouseMove}
               style={{ ...dragProps.style }}
-              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-8"
+              className="flex-1 bg-slate-200/40 overflow-auto relative flex p-6 justify-center items-start"
             >
                 <div 
                   style={{
