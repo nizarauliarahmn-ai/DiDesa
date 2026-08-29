@@ -507,8 +507,8 @@ export default function AdminSuratSDP({
         <tr><td>f. Kewarganegaraan</td><td>:</td><td>${v(formData.kewarganegaraan)}</td></tr>
         <tr><td>g. Status Perkawinan</td><td>:</td><td>${v(formData.statusPerkawinan)}</td></tr>
         <tr><td>h. Agama</td><td>:</td><td>${v(formData.agama)}</td></tr>
-        <tr><td style="vertical-align:top;">i. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}, Kab. ${cleanStr(v(formData.namaKabupaten), /^(kabupaten|kota)\s+/i)}</td></tr>
-        <tr><td style="vertical-align:top;">j. Alamat Sekarang</td><td style="vertical-align:top;">:</td><td>${v(formData.alamatSekarang)} RT.${v(formData.rtSekarang)} RW.${v(formData.rwSekarang)}<br/>Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)}, Kab. ${cleanStr(activeKabupaten, /^(kabupaten|kota)\s+/i)}</td></tr>
+        <tr><td style="vertical-align:top;">i. Alamat</td><td style="vertical-align:top;">:</td><td>${v(formData.alamat)} RT.${v(formData.rt)} RW.${v(formData.rw)}<br/>Desa ${cleanStr(v(formData.namaDesa), /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(v(formData.namaKecamatan), /^kecamatan\s+/i)}, Kab. ${cleanStr(v(formData.namaKabupaten), /^(pemerintah\s+)?(kabupaten|kota)\s+/i)}</td></tr>
+        <tr><td style="vertical-align:top;">j. Alamat Sekarang</td><td style="vertical-align:top;">:</td><td>${v(formData.alamatSekarang)} RT.${v(formData.rtSekarang)} RW.${v(formData.rwSekarang)}<br/>Desa ${cleanStr(activeDesa, /^(desa|kelurahan)\s+/i)} Kecamatan ${cleanStr(activeKecamatan, /^kecamatan\s+/i)}, Kab. ${cleanStr(activeKabupaten, /^(pemerintah\s+)?(kabupaten|kota)\s+/i)}</td></tr>
         <tr><td style="vertical-align:top;">k. Sifat Domisili</td><td style="vertical-align:top;">:</td><td><strong style="text-transform:uppercase;">${v(formData.sifatDomisili, 'Menetap')}</strong></td></tr>
       </table>
 
