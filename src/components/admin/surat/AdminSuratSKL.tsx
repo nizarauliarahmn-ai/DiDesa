@@ -663,373 +663,369 @@ export default function AdminSuratSKL({
             onCustomNomorSurat={handleCustomNomorSurat}
           />      
 
-          {/* Form Detail */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none space-y-8">
-            {/* Data Ayah */}
-            <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                  <Users className="w-4 h-4 text-blue-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Ayah</h3>
+          {/* Data Ayah */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Users className="w-4 h-4 text-blue-600" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ayah</label>
-                  <input 
-                    type="text"
-                    placeholder="16 digit NIK"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ayahData.nik}
-                    onChange={(e) => setAyahData({...ayahData, nik: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ayah</label>
-                  <input 
-                    type="text"
-                    placeholder="Nama lengkap"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ayahData.nama}
-                    onChange={(e) => setAyahData({...ayahData, nama: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tempatLahir} onChange={(e) => setAyahData({...ayahData, tempatLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                  <input type="text" placeholder="Misal: 01 Maret 1967" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tanggalLahir} onChange={(e) => setAyahData({...ayahData, tanggalLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <input 
-                    type="text"
-                    placeholder="Pekerjaan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ayahData.pekerjaan}
-                    onChange={(e) => setAyahData({...ayahData, pekerjaan: e.target.value})}
-                  />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Ayah</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ayah</label>
+                <input 
+                  type="text"
+                  placeholder="16 digit NIK"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={ayahData.nik}
+                  onChange={(e) => setAyahData({...ayahData, nik: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ayah</label>
+                <input 
+                  type="text"
+                  placeholder="Nama lengkap"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={ayahData.nama}
+                  onChange={(e) => setAyahData({...ayahData, nama: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tempatLahir} onChange={(e) => setAyahData({...ayahData, tempatLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                <input type="text" placeholder="Misal: 01 Maret 1967" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tanggalLahir} onChange={(e) => setAyahData({...ayahData, tanggalLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <input 
+                  type="text"
+                  placeholder="Pekerjaan"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={ayahData.pekerjaan}
+                  onChange={(e) => setAyahData({...ayahData, pekerjaan: e.target.value})}
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
 <textarea
-                    rows={2}
-                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={ayahData.alamat}
-                    onChange={(e) => setAyahData({...ayahData, alamat: e.target.value})}
-                    onBlur={(e) => handleAyahAlamatBlur(e.target.value)}
-                  />
-                </div>
+                  rows={2}
+                  placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  value={ayahData.alamat}
+                  onChange={(e) => setAyahData({...ayahData, alamat: e.target.value})}
+                  onBlur={(e) => handleAyahAlamatBlur(e.target.value)}
+                />
               </div>
             </div>
+          </section>
 
-            {/* Data Ibu */}
-            <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center">
-                  <Users className="w-4 h-4 text-pink-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Ibu</h3>
+          {/* Data Ibu */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center">
+                <Users className="w-4 h-4 text-pink-600" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ibu</label>
-                  <input 
-                    type="text"
-                    placeholder="16 digit NIK"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ibuData.nik}
-                    onChange={(e) => setIbuData({...ibuData, nik: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ibu</label>
-                  <input 
-                    type="text"
-                    placeholder="Nama lengkap"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ibuData.nama}
-                    onChange={(e) => setIbuData({...ibuData, nama: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tempatLahir} onChange={(e) => setIbuData({...ibuData, tempatLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                  <input type="text" placeholder="Misal: 02 April 1971" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tanggalLahir} onChange={(e) => setIbuData({...ibuData, tanggalLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <input 
-                    type="text"
-                    placeholder="Pekerjaan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                    value={ibuData.pekerjaan}
-                    onChange={(e) => setIbuData({...ibuData, pekerjaan: e.target.value})}
-                  />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Ibu</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ibu</label>
+                <input 
+                  type="text"
+                  placeholder="16 digit NIK"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={ibuData.nik}
+                  onChange={(e) => setIbuData({...ibuData, nik: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ibu</label>
+                <input 
+                  type="text"
+                  placeholder="Nama lengkap"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={ibuData.nama}
+                  onChange={(e) => setIbuData({...ibuData, nama: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tempatLahir} onChange={(e) => setIbuData({...ibuData, tempatLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                <input type="text" placeholder="Misal: 02 April 1971" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tanggalLahir} onChange={(e) => setIbuData({...ibuData, tanggalLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <input 
+                  type="text"
+                  placeholder="Pekerjaan"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={ibuData.pekerjaan}
+                  onChange={(e) => setIbuData({...ibuData, pekerjaan: e.target.value})}
+                />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
 <textarea
-                    rows={2}
-                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={ibuData.alamat}
-                    onChange={(e) => setIbuData(prev => ({ ...prev, alamat: e.target.value }))}
+                  rows={2}
+                  placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  value={ibuData.alamat}
+                  onChange={(e) => setIbuData(prev => ({ ...prev, alamat: e.target.value }))}
 onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
-                  />
-                  </div>
+                />
               </div>
             </div>
+          </section>
 
-            {/* Data Bayi / Anak */}
-            <div className="bg-emerald-50/30 -mx-8 px-8 py-6 border-y border-emerald-100">
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-emerald-200/50">
-                <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                  <Baby className="w-4 h-4 text-emerald-600" />
-                </div>
-                <h3 className="font-bold text-emerald-900 uppercase tracking-wide">Data Bayi / Anak</h3>
+          {/* Data Bayi / Anak */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <Baby className="w-4 h-4 text-emerald-600" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-emerald-900">Nama Lengkap Bayi</label>
-                  <input 
-                    type="text"
-                    placeholder="Nama anak..."
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500"
-                    value={anakData.nama}
-                    onChange={(e) => setAnakData({...anakData, nama: e.target.value})}
-                  />
-                </div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Data Bayi / Anak</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap Bayi</label>
+                <input 
+                  type="text"
+                  placeholder="Nama anak..."
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500"
+                  value={anakData.nama}
+                  onChange={(e) => setAnakData({...anakData, nama: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
+                <select 
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={anakData.jenisKelamin}
+                  onChange={(e) => setAnakData({...anakData, jenisKelamin: e.target.value})}
+                >
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Anak Ke-</label>
+                <input 
+                  type="number"
+                  placeholder="Misal: 1"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={anakData.anakKe}
+                  onChange={(e) => setAnakData({...anakData, anakKe: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                <input 
+                  type="text"
+                  placeholder="Kota/Kab"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={anakData.tempatLahir}
+                  onChange={(e) => setAnakData({...anakData, tempatLahir: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                <input 
+                  type="date"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={anakData.tanggalLahir}
+                  onChange={(e) => setAnakData({...anakData, tanggalLahir: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jam Lahir (Opsional)</label>
+                <input 
+                  type="time"
+                  className="w-full md:w-1/2 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  value={anakData.jamLahir}
+                  onChange={(e) => setAnakData({...anakData, jamLahir: e.target.value})}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Saksi 1 */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                <Activity className="w-4 h-4 text-orange-600" />
+              </div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Saksi 1</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nik} onChange={(e) => setSaksi1Data({...saksi1Data, nik: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+                <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nama} onChange={(e) => setSaksi1Data({...saksi1Data, nama: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tempatLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tempatLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                <input type="text" placeholder="Misal: 05 Maret 1988" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tanggalLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tanggalLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.pekerjaan} onChange={(e) => setSaksi1Data({...saksi1Data, pekerjaan: e.target.value})} />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
+                <textarea
+                  rows={2}
+                  placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  value={saksi1Data.alamat}
+                  onChange={(e) => setSaksi1Data(prev => ({ ...prev, alamat: e.target.value }))}
+                  onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi1Data)}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Saksi 2 */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Activity className="w-4 h-4 text-blue-600" />
+              </div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Saksi 2</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nik} onChange={(e) => setSaksi2Data({...saksi2Data, nik: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+                <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nama} onChange={(e) => setSaksi2Data({...saksi2Data, nama: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tempatLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tempatLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                <input type="text" placeholder="Misal: 12 Januari 1991" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tanggalLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tanggalLahir: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.pekerjaan} onChange={(e) => setSaksi2Data({...saksi2Data, pekerjaan: e.target.value})} />
+              </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
+                <textarea
+                  rows={2}
+                  placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  value={saksi2Data.alamat}
+                  onChange={(e) => setSaksi2Data(prev => ({ ...prev, alamat: e.target.value }))}
+                  onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi2Data)}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Pejabat Penandatangan */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+            <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                <FileSignature className="w-4 h-4 text-amber-600" />
+              </div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Pejabat Penandatangan</h3>
+            </div>
+            <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Jenis Kelamin</label>
+                  <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
                   <select 
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.jenisKelamin}
-                    onChange={(e) => setAnakData({...anakData, jenisKelamin: e.target.value})}
+                    className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                    value={namaPejabat}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setNamaPejabat(name);
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          const found = list.find((o: any) => o.name === name);
+                          if (found) setJabatanPejabat(found.role);
+                        }
+                      } catch (e) {}
+                    }}
                   >
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
+                    {(() => {
+                      try {
+                        const stored = localStorage.getItem('village_officers');
+                        if (stored) {
+                          const list = JSON.parse(stored);
+                          return list.map((o: any, i: number) => (
+                            <option key={i} value={o.name}>{o.name} ({o.role})</option>
+                          ));
+                        }
+                      } catch (e) {}
+                      return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
+                    })()}
                   </select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Anak Ke-</label>
-                  <input 
-                    type="number"
-                    placeholder="Misal: 1"
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.anakKe}
-                    onChange={(e) => setAnakData({...anakData, anakKe: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Tempat Lahir</label>
-                  <input 
-                    type="text"
-                    placeholder="Kota/Kab"
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.tempatLahir}
-                    onChange={(e) => setAnakData({...anakData, tempatLahir: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-emerald-900">Tanggal Lahir</label>
-                  <input 
-                    type="date"
-                    className="w-full px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.tanggalLahir}
-                    onChange={(e) => setAnakData({...anakData, tanggalLahir: e.target.value})}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-emerald-900">Jam Lahir (Opsional)</label>
-                  <input 
-                    type="time"
-                    className="w-full md:w-1/2 px-4 py-3 bg-white border border-emerald-200 rounded-xl outline-none"
-                    value={anakData.jamLahir}
-                    onChange={(e) => setAnakData({...anakData, jamLahir: e.target.value})}
-                  />
-                </div>
+              
               </div>
-            </div>
-
-            
-            {/* Saksi 1 */}
-            <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
-                  <Activity className="w-4 h-4 text-orange-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Saksi 1</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-                  <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nik} onChange={(e) => setSaksi1Data({...saksi1Data, nik: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-                  <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nama} onChange={(e) => setSaksi1Data({...saksi1Data, nama: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tempatLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tempatLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                  <input type="text" placeholder="Misal: 05 Maret 1988" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tanggalLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tanggalLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.pekerjaan} onChange={(e) => setSaksi1Data({...saksi1Data, pekerjaan: e.target.value})} />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
-                  <textarea
-                    rows={2}
-                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={saksi1Data.alamat}
-                    onChange={(e) => setSaksi1Data(prev => ({ ...prev, alamat: e.target.value }))}
-                    onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi1Data)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Saksi 2 */}
-            <div>
-              <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                  <Activity className="w-4 h-4 text-blue-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide">Saksi 2</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-                  <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nik} onChange={(e) => setSaksi2Data({...saksi2Data, nik: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-                  <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nama} onChange={(e) => setSaksi2Data({...saksi2Data, nama: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                  <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tempatLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tempatLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                  <input type="text" placeholder="Misal: 12 Januari 1991" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tanggalLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tanggalLahir: e.target.value})} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                  <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.pekerjaan} onChange={(e) => setSaksi2Data({...saksi2Data, pekerjaan: e.target.value})} />
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
-                  <textarea
-                    rows={2}
-                    placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={saksi2Data.alamat}
-                    onChange={(e) => setSaksi2Data(prev => ({ ...prev, alamat: e.target.value }))}
-                    onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi2Data)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Pejabat Penandatangan */}
-            <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
-                  <FileSignature className="w-4 h-4 text-amber-600" />
-                </div>
-                <h3 className="font-bold text-slate-800 dark:text-slate-100">Pejabat Penandatangan</h3>
-              </div>
-              <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100/50">
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-amber-900">Nama Pejabat</label>
-                    <select 
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
-                      value={namaPejabat}
-                      onChange={(e) => {
-                        const name = e.target.value;
-                        setNamaPejabat(name);
-                        try {
-                          const stored = localStorage.getItem('village_officers');
-                          if (stored) {
-                            const list = JSON.parse(stored);
-                            const found = list.find((o: any) => o.name === name);
-                            if (found) setJabatanPejabat(found.role);
-                          }
-                        } catch (e) {}
-                      }}
-                    >
-                      {(() => {
-                        try {
-                          const stored = localStorage.getItem('village_officers');
-                          if (stored) {
-                            const list = JSON.parse(stored);
-                            return list.map((o: any, i: number) => (
-                              <option key={i} value={o.name}>{o.name} ({o.role})</option>
-                            ));
-                          }
-                        } catch (e) {}
-                        return <option value={resolveKadesName() || 'Kepala Desa'}>{resolveKadesName() || 'Kepala Desa'} (Kepala Desa)</option>;
-                      })()}
-                    </select>
+              
+              <div className="mt-6 pt-6 border-t border-amber-100 space-y-3">
+                {/* Toggle TTE / QR Code */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
                   </div>
-                
-                </div>
-                
-                <div className="mt-6 pt-6 border-t border-amber-100 space-y-3">
-                  {/* Toggle TTE / QR Code */}
-                  <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
-                    <div className="space-y-0.5 pr-4">
-                      <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input 
-                        type="checkbox" 
-                        checked={useEsignature} 
-                        onChange={(e) => setUseEsignature(e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
-                    </div>
-                  </label>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={useEsignature} 
+                      onChange={(e) => setUseEsignature(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
 
-                  {/* Toggle Mengetahui Camat */}
-                  <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
-                    <div className="space-y-0.5 pr-4">
-                      <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input 
-                        type="checkbox" 
-                        checked={includeCamat} 
-                        onChange={(e) => setIncludeCamat(e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
-                    </div>
-                  </label>
-                </div>
-
-                <p className="mt-4 text-[10px] text-amber-700 font-medium italic">
-                  * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
-                </p>
+                {/* Toggle Mengetahui Camat */}
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={includeCamat} 
+                      onChange={(e) => setIncludeCamat(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
+                  </div>
+                </label>
               </div>
+
+              <p className="mt-4 text-[10px] text-amber-700 font-medium italic">
+                * Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.
+              </p>
             </div>
           </section>
         </div>
