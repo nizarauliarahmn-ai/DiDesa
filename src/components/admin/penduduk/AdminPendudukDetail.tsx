@@ -4,6 +4,7 @@ import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
 import { fetchResidentLettersAsync, LetterHistory, getLetterFullData } from '../../../utils/letterHistory';
+import { getLetterClassifications } from '../../../utils/letterClassifications';
 import ConfirmModal from '../../common/ConfirmModal';
 import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../../utils/supabase';
@@ -39,6 +40,18 @@ const STATUS_KEBERADAAN_OPTIONS = [
 ];
 const HUBUNGAN_OPTIONS = ['Kepala Keluarga', 'Istri', 'Anak', 'Menantu', 'Cucu', 'Orang Tua', 'Mertua', 'Famili Lain', 'Lainnya'];
 const GOLDAR_OPTIONS = ['A', 'B', 'AB', 'O', 'Tidak Diketahui'];
+
+const getFullLetterName = (jenis: string): string => {
+  const classifications = getLetterClassifications();
+  const clean = (jenis || '').trim();
+  const cleanUpper = clean.toUpperCase();
+  const found = classifications.find(c => c.klasifikasi.toUpperCase() === cleanUpper || c.jenis.toUpperCase() === cleanUpper);
+  if (found) {
+    return `${found.klasifikasi} - ${found.jenis}`;
+  }
+  return clean;
+};
+
 const PEKERJAAN_OPTIONS = [
   'Belum / Tidak Bekerja',
   'Mengurus Rumah Tangga',
@@ -1810,7 +1823,7 @@ export default function AdminPendudukDetail({
                   {residentLetters.map((letter) => (
                     <tr key={letter.id} className="border-b border-gray-50 dark:border-slate-800/60 hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition-colors">
                       <td className="px-3 py-3 font-mono text-xs font-bold text-gray-900 dark:text-white uppercase">{letter.nomor.toUpperCase() || '-'}</td>
-                      <td className="px-3 py-3 text-xs text-gray-700 dark:text-slate-300">{letter.jenis}</td>
+                      <td className="px-3 py-3 text-xs text-gray-700 dark:text-slate-300">{getFullLetterName(letter.jenis)}</td>
                       <td className="px-3 py-3 text-xs text-gray-500 dark:text-slate-400">{letter.tanggal}</td>
                       <td className="px-3 py-3">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${
