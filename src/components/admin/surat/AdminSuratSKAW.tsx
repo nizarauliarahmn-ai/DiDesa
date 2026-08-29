@@ -538,13 +538,13 @@ export default function AdminSuratSKAW({
     `).join('');
 
     const heirTableHTML = (rows: string) => `
-      <table style="width:calc(100% - 40px);border-collapse:collapse;margin-bottom:15px;margin-left:40px;line-height:1.5;font-size:13px;">
+      <table style="width:100%;border-collapse:collapse;margin-bottom:15px;line-height:1.5;font-size:13px;">
         <thead>
           <tr style="background:#f0f0f0;">
             <th style="padding:6px 8px;border:1px solid #ccc;width:5%;">No</th>
-            <th style="padding:6px 8px;border:1px solid #ccc;width:25%;">Nama</th>
+            <th style="padding:6px 8px;border:1px solid #ccc;width:35%;">Nama</th>
             <th style="padding:6px 8px;border:1px solid #ccc;width:15%;">Hubungan</th>
-            <th style="padding:6px 8px;border:1px solid #ccc;width:37%;">Tempat, Tanggal Lahir</th>
+            <th style="padding:6px 8px;border:1px solid #ccc;width:27%;">Tempat, Tanggal Lahir</th>
             <th style="padding:6px 8px;border:1px solid #ccc;width:18%;">NIK</th>
           </tr>
         </thead>
