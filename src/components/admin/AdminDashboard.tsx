@@ -509,7 +509,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             </h1>
 
             <p className="text-sm sm:text-base text-emerald-100/90 leading-relaxed max-w-xl font-medium">
-              Kelola layanan surat, data kependudukan, dan aspirasi warga {desaName} secara terpadu, cepat, dan transparan dari satu dasbor operasional.
+              Kelola layanan surat, data kependudukan, dan aspirasi warga secara terpadu, cepat, dan transparan dari satu dasbor operasional.
             </p>
 
             {/* Quick Action Buttons Grid */}
