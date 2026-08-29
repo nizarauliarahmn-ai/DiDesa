@@ -67,8 +67,8 @@ const formatMonthYearInIndonesian = (monthYearStr: string): string => {
   return monthYearStr;
 };
 
-export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSKD, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD, onOpenSKKT, onOpenUndangan, onOpenSKAW }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
-  onOpenSKD?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void, onOpenSKKT?: () => void, onOpenUndangan?: () => void, onOpenSKAW?: () => void }) {
+export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSDP, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD, onOpenSKKT, onOpenUndangan, onOpenSKAW }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
+  onOpenSDP?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void, onOpenSKKT?: () => void, onOpenUndangan?: () => void, onOpenSKAW?: () => void }) {
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
@@ -799,7 +799,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const getTemplateIcon = (klasifikasi: string, jenis: string) => {
     const k = klasifikasi.toUpperCase();
     const j = jenis.toUpperCase();
-    if (k === 'SKD') return <Home className="w-6 h-6 text-emerald-700 animate-pulse" />;
+    if (k === 'SDP') return <Home className="w-6 h-6 text-emerald-700 animate-pulse" />;
     if (k === 'SKU') return <Store className="w-6 h-6 text-emerald-700 animate-pulse" />;
     if (k === 'SKTM') return <Frown className="w-6 h-6 text-emerald-700" />;
     if (k === 'SKAW') return <Users className="w-6 h-6 text-emerald-700" />;
@@ -965,8 +965,8 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           if (onOpenSKPH) onOpenSKPH();
                           return;
                         }
-                      if (t.klasifikasi === 'SKD' || t.klasifikasi === 'SKDPR' || t.klasifikasi === 'SDP') {
-                        if (onOpenSKD) onOpenSKD();
+                      if (t.klasifikasi === 'SDP') {
+                        if (onOpenSDP) onOpenSDP();
                         return;
                       }
                       if (t.klasifikasi === 'SDU') {
@@ -1943,12 +1943,12 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                           </div>
                         );
                         middleParagraph = `Surat keterangan ahli waris ini dibuat untuk melengkapi administrasi waris, peralihan hak, atau keperluan legalitas lainnya:`;
-                                            } else if (selectedTemplate === 'SKD' || selectedTemplate === 'SKDPR' || selectedTemplate === 'SDP') {
+                                            } else if (selectedTemplate === 'SDP') {
                         middleParagraph = `Berdasarkan surat pernyataan dan keterangan yang dibuat oleh yang bersangkutan, nama tersebut di atas menyatakan dengan sadar bahwa ia memang berstatus DOMISILI MENETAP / SEMENTARA di alamat sekarang tersebut. Surat keterangan ini diterbitkan untuk dipergunakan sebagaimana mestinya:`;
                         specificContent = (
                           <div className="my-6 space-y-2 pl-4 border-l-2 border-emerald-600/30">
                             <p className="font-bold uppercase text-[12px] tracking-wide text-emerald-950 mb-2">ALAMAT DOMISILI SEKARANG:</p>
-                            <p className="font-medium text-emerald-900 italic">Belum diisi - (Akan diisi di Form Pembuatan SKD)</p>
+                            <p className="font-medium text-emerald-900 italic">Belum diisi - (Akan diisi di Form Pembuatan SDP)</p>
                           </div>
                         );
                       } else if (selectedTemplate === 'SKTM') {

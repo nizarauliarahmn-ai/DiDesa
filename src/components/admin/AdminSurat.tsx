@@ -11,7 +11,7 @@ import AdminSuratSKL from './surat/AdminSuratSKL';
 import AdminSuratSKM from './surat/AdminSuratSKM';
 import AdminSuratSKU from './surat/AdminSuratSKU';
 import AdminSuratSKPH from './surat/AdminSuratSKPH';
-import AdminSuratSKD from './surat/AdminSuratSKD';
+import AdminSuratSDP from './surat/AdminSuratSDP';
 import AdminSuratSKP from './surat/AdminSuratSKP';
 import AdminSuratSKAW from './surat/AdminSuratSKAW';
 import AdminSuratSDU from './surat/AdminSuratSDU';
@@ -245,7 +245,7 @@ export default function AdminSurat({
             onOpenSKM={() => changeTab('skm')}
             onOpenSKU={() => changeTab('sku')}
             onOpenSKPH={() => changeTab('skph')}
-            onOpenSKD={() => changeTab('skd')}
+            onOpenSDP={() => changeTab('skd')}
             onOpenSKP={() => changeTab('skp')}
             onOpenSKH={() => changeTab('skh')}
             onOpenSKL={() => changeTab('skl')}
@@ -329,7 +329,7 @@ export default function AdminSurat({
           />
         )}
         {activeTab === 'skd' && (
-          <AdminSuratSKD 
+          <AdminSuratSDP 
             presetResident={localPresetResident || presetResident}
             editData={editData}
             editLetterId={editLetterId}

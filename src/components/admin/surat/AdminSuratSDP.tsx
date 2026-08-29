@@ -38,7 +38,7 @@ interface Resident {
   motherName: string;
 }
 
-export default function AdminSuratSKD({ 
+export default function AdminSuratSDP({ 
   onBack, 
   presetResident,
   editData,
@@ -50,9 +50,9 @@ export default function AdminSuratSKD({
   editLetterId?: string | null
 }) {
   const [tanggalSurat, setTanggalSurat] = useState(new Date().toISOString().split('T')[0]);
-  const skdClassification = getLetterClassifications().find(c => c.id === '5' || c.klasifikasi === 'SDP' || c.klasifikasi === 'SKD' || c.klasifikasi === 'SKDPR') || { klasifikasi: 'SDP', kodeKlasifikasi: '145' };
+  const skdClassification = getLetterClassifications().find(c => c.klasifikasi === 'SDP') || { klasifikasi: 'SDP', kodeKlasifikasi: '145' };
   const kodeKlasifikasiSKD = skdClassification.kodeKlasifikasi || '145';
-  const suffixSKD = `WHI-${skdClassification.klasifikasi || 'SKD'}`;
+  const suffixSKD = `WHI-${skdClassification.klasifikasi || 'SDP'}`;
   const { isBackdate, setIsBackdate } = useBackdateNumber(tanggalSurat, skdClassification.klasifikasi, kodeKlasifikasiSKD);
   const [manualSequence, setManualSequence] = useState('');
 
@@ -73,7 +73,7 @@ export default function AdminSuratSKD({
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
   const [useEsignature, setUseEsignature] = useState(true);
-  const templateKode = useLetterKode('SKD');
+  const templateKode = useLetterKode('SDP');
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -211,8 +211,8 @@ export default function AdminSuratSKD({
         body: JSON.stringify({
           title: existing ? 'Data Penduduk Diperbarui' : 'Penduduk Baru Terdaftar',
           message: existing 
-            ? `Data penduduk atas nama ${data.name} (NIK: ${nik}) telah diperbarui secara otomatis melalui pembuatan SKD.`
-            : `Penduduk baru atas nama ${data.name} (NIK: ${nik}) telah ditambahkan ke database dengan status ${residentData.domicileStatus} secara otomatis melalui pembuatan SKD.`,
+            ? `Data penduduk atas nama ${data.name} (NIK: ${nik}) telah diperbarui secara otomatis melalui pembuatan SDP.`
+            : `Penduduk baru atas nama ${data.name} (NIK: ${nik}) telah ditambahkan ke database dengan status ${residentData.domicileStatus} secara otomatis melalui pembuatan SDP.`,
           category: 'Residents'
         })
       });
@@ -235,9 +235,9 @@ export default function AdminSuratSKD({
     fetchResidents();
 
     const configs = getLetterClassifications();
-    let sktm = configs.find(c => (c.klasifikasi === 'SDP' || c.klasifikasi === 'SKD' || c.klasifikasi === 'SKDPR'));
+    let sktm = configs.find(c => (c.klasifikasi === 'SDP'));
     if (!sktm) {
-      sktm = { id: 'fallback_sdp', jenis: 'SK DOMISILI PERORANGAN', klasifikasi: 'SKD', kodeKlasifikasi: '145', noUrutTerakhir: 0 };
+      sktm = { id: 'fallback_sdp', jenis: 'SK DOMISILI PERORANGAN', klasifikasi: 'SDP', kodeKlasifikasi: '145', noUrutTerakhir: 0 };
     }
     
     
@@ -335,7 +335,7 @@ export default function AdminSuratSKD({
     doc.write(`
       <html>
         <head>
-          <title>Cetak SKD - ${formData.nama}</title>
+          <title>Cetak SDP - ${formData.nama}</title>
           ${styles}
           <style>
             @page { size: A4; margin: 0 !important; }
@@ -424,12 +424,12 @@ export default function AdminSuratSKD({
     } else {
       addLetterHistory({
         ...updatedFields,
-        jenis: 'SKD',
+        jenis: 'SDP',
         tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
         status: 'Selesai'
       });
       const configs = getLetterClassifications();
-      const skdConfig = configs.find(c => (c.klasifikasi === 'SKD' || c.klasifikasi === 'SDP' || c.klasifikasi === 'SKDPR')) || { klasifikasi: 'SKD' };
+      const skdConfig = configs.find(c => (c.klasifikasi === 'SDP')) || { klasifikasi: 'SDP' };
       if (!isBackdate) incrementSequenceNumber(skdConfig.klasifikasi);
     }
 
@@ -559,7 +559,7 @@ export default function AdminSuratSKD({
   const activeClassification = React.useMemo(() => {
     try {
       const cls = getLetterClassifications();
-      const found = cls.find(c => c.id === '5' || c.klasifikasi === 'SDP' || c.klasifikasi === 'SKD' || c.klasifikasi === 'SKDPR');
+      const found = cls.find(c => c.klasifikasi === 'SDP');
       if (found) return found;
     } catch(e) {}
     return { klasifikasi: 'SDP', jenis: 'SK DOMISILI PERORANGAN', kodeKlasifikasi: '145' };
@@ -571,7 +571,7 @@ export default function AdminSuratSKD({
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
       <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKD', { kode: '145', jenis: 'Surat Keterangan Domisili', deskripsi: 'Surat Keterangan Domisili Perorangan (SKD)', nomorSurat: formData.nomorSurat })}
+          template={getLetterHeaderTemplate('SDP', { kode: '145', jenis: 'Surat Keterangan Domisili Perorangan', deskripsi: 'Surat Keterangan Domisili Perorangan (SDP)', nomorSurat: formData.nomorSurat })}
           icon={<Home className="w-5 h-5" />}
           onBack={onBack}
           onPrint={handlePrint}
@@ -589,7 +589,7 @@ export default function AdminSuratSKD({
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <History className="w-4 h-4 text-emerald-600" />
-                Riwayat Pembuatan SKD
+                Riwayat Pembuatan SDP
               </h2>
               <button 
                 onClick={() => {
