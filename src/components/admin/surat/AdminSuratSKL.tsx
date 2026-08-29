@@ -193,16 +193,6 @@ export default function AdminSuratSKL({
     } catch (e) {}
   }, []);
 
-  const handleAlamatBlur = (val: string) => {
-    const parsed = parseAddress(val);
-    setFormData(prev => ({
-      ...prev,
-      alamat: parsed.cleanAddress,
-      ...(parsed.rt ? { rt: parsed.rt } : {}),
-      ...(parsed.rw ? { rw: parsed.rw } : {})
-    }));
-  };
-
   const handleAyahAlamatBlur = (val: string) => {
     const parsed = parseAddress(val);
     setAyahData(prev => ({
@@ -799,9 +789,9 @@ export default function AdminSuratSKL({
                     rows={2}
                     placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
-                    value={formData.alamat}
-                    onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
-                    onBlur={(e) => handleAlamatBlur(e.target.value)}
+                    value={ayahData.alamat}
+                    onChange={(e) => setAyahData({...ayahData, alamat: e.target.value})}
+                    onBlur={(e) => handleAyahAlamatBlur(e.target.value)}
                   />
                 </div>
               </div>
