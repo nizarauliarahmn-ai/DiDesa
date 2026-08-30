@@ -67,7 +67,7 @@ export default function AdminSuratSKKT({
   const [searchSaksi3, setSearchSaksi3] = useState('');
 
   const [showMapModal, setShowMapModal] = useState(false);
-  const [previewZoom, setPreviewZoom] = useState(0.50);
+  const [previewZoom, setPreviewZoom] = useState(0.45);
   const dragProps = useDragScroll();
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -1027,7 +1027,7 @@ export default function AdminSuratSKKT({
               <span className="text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400 min-w-[36px] text-center">{Math.round(previewZoom * 100)}%</span>
               <button onClick={() => setPreviewZoom(z => Math.min(1.5, z + 0.05))} className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors" title="Zoom In"><ZoomIn size={14} /></button>
               <div className="w-px h-4 bg-slate-200/60 mx-0.5"></div>
-              <button onClick={() => setPreviewZoom(0.50)} className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors text-[10px] font-bold" title="Reset Zoom">Reset</button>
+              <button onClick={() => setPreviewZoom(0.45)} className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors text-[10px] font-bold" title="Reset Zoom">Reset</button>
             </div>
           </div>
 
