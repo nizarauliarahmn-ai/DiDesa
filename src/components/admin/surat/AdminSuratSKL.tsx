@@ -889,7 +889,11 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.pekerjaan} onChange={(e) => setSaksi1Data({...saksi1Data, pekerjaan: e.target.value})} />
+                <SuggestCombobox
+                  value={saksi1Data.pekerjaan}
+                  onChange={(v) => setSaksi1Data({...saksi1Data, pekerjaan: v})}
+                  options={jobs}
+                />
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
@@ -932,7 +936,11 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                <input type="text" placeholder="Pekerjaan" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.pekerjaan} onChange={(e) => setSaksi2Data({...saksi2Data, pekerjaan: e.target.value})} />
+                <SuggestCombobox
+                  value={saksi2Data.pekerjaan}
+                  onChange={(v) => setSaksi2Data({...saksi2Data, pekerjaan: v})}
+                  options={jobs}
+                />
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
