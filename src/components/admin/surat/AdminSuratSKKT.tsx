@@ -75,12 +75,12 @@ export default function AdminSuratSKKT({
 
   const [formData, setFormData] = useState({
     nomorSurat: '',
-    nama: 'SAMSUL BAHRI',
-    nik: '6306061903680001',
-    tempatLahir: 'WASAH HILIR',
-    tanggalLahir: '19/03/1968',
-    pekerjaan: 'Perdagangan',
-    alamat: 'Jl. Bukhari, RT.02 RW.01 Desa Wasah Hilir Kec. Simpur',
+    nama: '',
+    nik: '',
+    tempatLahir: '',
+    tanggalLahir: '',
+    pekerjaan: '',
+    alamat: '',
 
     // Objek Tanah
     lokasiTanah: 'Jalan Bukhari',
@@ -744,27 +744,27 @@ export default function AdminSuratSKKT({
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nama Pemohon</label>
-                <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="Nama Lengkap Pemohon" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIK Pemohon</label>
-                <input type="text" value={formData.nik} onChange={e => setFormData({ ...formData, nik: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" placeholder="6303..." value={formData.nik} onChange={e => setFormData({ ...formData, nik: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Tempat Lahir</label>
-                <input type="text" value={formData.tempatLahir} onChange={e => setFormData({ ...formData, tempatLahir: e.target.value.toUpperCase() })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="Tempat Lahir" value={formData.tempatLahir} onChange={e => setFormData({ ...formData, tempatLahir: e.target.value.toUpperCase() })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Tanggal Lahir</label>
-                <input type="text" placeholder="Ketik..." value={formData.tanggalLahir} onChange={e => setFormData({ ...formData, tanggalLahir: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="dd/mm/tttt" value={formData.tanggalLahir} onChange={e => setFormData({ ...formData, tanggalLahir: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pekerjaan</label>
-                <input type="text" value={formData.pekerjaan} onChange={e => setFormData({ ...formData, pekerjaan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="Ketik..." value={formData.pekerjaan} onChange={e => setFormData({ ...formData, pekerjaan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Alamat Lengkap</label>
-                <input type="text" value={formData.alamat} onChange={e => setFormData({ ...formData, alamat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir" value={formData.alamat} onChange={e => setFormData({ ...formData, alamat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
             </div>
           </div>
