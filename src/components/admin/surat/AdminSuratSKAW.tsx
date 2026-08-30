@@ -1381,7 +1381,6 @@ export default function AdminSuratSKAW({
             </div>
           </div>
         </div>
-      </div>
 
       <iframe 
         ref={iframeRef} 
