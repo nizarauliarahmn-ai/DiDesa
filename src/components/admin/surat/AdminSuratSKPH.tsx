@@ -648,7 +648,7 @@ export default function AdminSuratSKPH({
                   }}
                 />
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.jenisKelamin}
@@ -659,7 +659,7 @@ export default function AdminSuratSKPH({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.agama}
@@ -674,7 +674,7 @@ export default function AdminSuratSKPH({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan<span className="text-emerald-500 ml-0.5">*</span></label>
                   <SuggestCombobox
                     value={formData.pekerjaan}
                     onChange={(v) => setFormData({...formData, pekerjaan: v})}
@@ -682,7 +682,7 @@ export default function AdminSuratSKPH({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.statusPerkawinan}
@@ -695,7 +695,7 @@ export default function AdminSuratSKPH({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
                     type="text"
                     placeholder="Kandangan"
@@ -705,7 +705,7 @@ export default function AdminSuratSKPH({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
                     type="date"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
@@ -715,7 +715,7 @@ export default function AdminSuratSKPH({
                 </div>
 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:col-span-2">
                   <div className="md:col-span-2 space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap<span className="text-emerald-500 ml-0.5">*</span></label>
                     <textarea
                       rows={2}
                       placeholder="Jl. Keramat, Desa Wasah Hilir"
@@ -773,7 +773,7 @@ export default function AdminSuratSKPH({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sumber Penghasilan / Pekerjaan Rill</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sumber Penghasilan / Pekerjaan Rill<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
                     type="text"
                     placeholder="Bertani Padi / Wiraswasta Kelontong"
@@ -783,7 +783,7 @@ export default function AdminSuratSKPH({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rata-rata Penghasilan Bulanan (Rp)</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rata-rata Penghasilan Bulanan (Rp)<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
                     type="text"
                     placeholder="1.500.000"
@@ -801,7 +801,7 @@ export default function AdminSuratSKPH({
                   <p className="mt-1 text-[10px] text-emerald-600 font-medium">Terformat otomatis. Hanya menerima angka.</p>
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat (Diberikan Untuk...)</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat (Diberikan Untuk...)<span className="text-emerald-500 ml-0.5">*</span></label>
                   <SuggestCombobox
                     value={formData.keperluan}
                     onChange={(v) => setFormData({...formData, keperluan: v})}
