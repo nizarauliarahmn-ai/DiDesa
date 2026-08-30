@@ -468,6 +468,14 @@ export default function AdminSuratSKL({
   };
 
   const v = (val: any, fallback = '_______________________') => val ? capitalizeWords(String(val)) : fallback;
+  const fmtDate = (d: string) => {
+    if (!d) return '';
+    try {
+      const date = new Date(d);
+      if (isNaN(date.getTime())) return d;
+      return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) { return d; }
+  };
   
     const generateHTML = () => {
     const today = new Date();
@@ -513,7 +521,7 @@ export default function AdminSuratSKL({
         <table style="width:100%; border-collapse:collapse; margin-bottom:8px; margin-left:10px; line-height:1.3; font-size:12px;">
           <tr><td style="width:4%;vertical-align:top;">a.</td><td style="width:25%;vertical-align:top;">Nama Lengkap</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(ayahData.nama)}</strong></td></tr>
           <tr><td style="vertical-align:top;">b.</td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ayahData.nik)}</td></tr>
-          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ayahData.tempatLahir)}, ${v(ayahData.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ayahData.tempatLahir)}, ${fmtDate(ayahData.tanggalLahir)}</td></tr>
           <tr><td style="vertical-align:top;">d.</td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ayahData.pekerjaan)}</td></tr>
           <tr><td style="vertical-align:top;">e.</td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;">${v(ayahData.alamat)}</td></tr>
         </table>
@@ -522,7 +530,7 @@ export default function AdminSuratSKL({
         <table style="width:100%; border-collapse:collapse; margin-bottom:8px; margin-left:10px; line-height:1.3; font-size:12px;">
           <tr><td style="width:4%;vertical-align:top;">a.</td><td style="width:25%;vertical-align:top;">Nama Lengkap</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(ibuData.nama)}</strong></td></tr>
           <tr><td style="vertical-align:top;">b.</td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ibuData.nik)}</td></tr>
-          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ibuData.tempatLahir)}, ${v(ibuData.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tempat, Tanggal Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ibuData.tempatLahir)}, ${fmtDate(ibuData.tanggalLahir)}</td></tr>
           <tr><td style="vertical-align:top;">d.</td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(ibuData.pekerjaan)}</td></tr>
           <tr><td style="vertical-align:top;">e.</td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;">${v(ibuData.alamat)}</td></tr>
         </table>
@@ -532,7 +540,7 @@ export default function AdminSuratSKL({
         <table style="width:100%; border-collapse:collapse; margin-bottom:8px; margin-left:10px; line-height:1.3; font-size:12px;">
           <tr><td style="width:4%;vertical-align:top;">a.</td><td style="width:25%;vertical-align:top;">Anak Ke-</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.anakKe)} (${terbilang(anakData.anakKe)})</td></tr>
           <tr><td style="vertical-align:top;">b.</td><td style="vertical-align:top;">Jenis Kelamin</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.jenisKelamin)}</td></tr>
-          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tanggal / Jam Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.tanggalLahir)} / ${v(anakData.jamLahir)} WITA</td></tr>
+          <tr><td style="vertical-align:top;">c.</td><td style="vertical-align:top;">Tanggal / Jam Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${fmtDate(anakData.tanggalLahir)} / ${v(anakData.jamLahir)} WITA</td></tr>
           <tr><td style="vertical-align:top;">d.</td><td style="vertical-align:top;">Tempat Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(anakData.tempatLahir)}</td></tr>
           <tr><td style="vertical-align:top;">e.</td><td style="vertical-align:top;">Diberi Nama</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(anakData.nama)}</strong></td></tr>
         </table>
@@ -541,13 +549,13 @@ export default function AdminSuratSKL({
         <table style="width:100%; border-collapse:collapse; margin-bottom:10px; margin-left:10px; line-height:1.3; font-size:12px;">
           <tr><td style="width:4%;vertical-align:top;">1.</td><td style="width:25%;vertical-align:top;">Nama Lengkap</td><td style="width:2%;vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(saksi1Data.nama)}</strong></td></tr>
           <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi1Data.nik)}</td></tr>
-          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Tempat, Tgl Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi1Data.tempatLahir)}, ${v(saksi1Data.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Tempat, Tgl Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi1Data.tempatLahir)}, ${fmtDate(saksi1Data.tanggalLahir)}</td></tr>
           <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi1Data.pekerjaan)}</td></tr>
           <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;padding-bottom:6px;">${v(saksi1Data.alamat)}</td></tr>
 
           <tr><td style="vertical-align:top;">2.</td><td style="vertical-align:top;">Nama Lengkap</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;"><strong style="text-transform:uppercase;">${v(saksi2Data.nama)}</strong></td></tr>
           <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">NIK</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi2Data.nik)}</td></tr>
-          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Tempat, Tgl Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi2Data.tempatLahir)}, ${v(saksi2Data.tanggalLahir)}</td></tr>
+          <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Tempat, Tgl Lahir</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi2Data.tempatLahir)}, ${fmtDate(saksi2Data.tanggalLahir)}</td></tr>
           <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Pekerjaan</td><td style="vertical-align:top;">:</td><td style="vertical-align:top;">${v(saksi2Data.pekerjaan)}</td></tr>
           <tr><td style="vertical-align:top;"></td><td style="vertical-align:top;">Alamat</td><td style="vertical-align:top;">:</td><td style="text-align:justify;vertical-align:top;">${v(saksi2Data.alamat)}</td></tr>
         </table>
@@ -708,7 +716,7 @@ export default function AdminSuratSKL({
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="text" placeholder="Misal: 01 Maret 1967" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tanggalLahir} onChange={(e) => setAyahData({...ayahData, tanggalLahir: e.target.value})} />
+                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tanggalLahir} onChange={(e) => setAyahData({...ayahData, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
@@ -767,7 +775,7 @@ export default function AdminSuratSKL({
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="text" placeholder="Misal: 02 April 1971" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tanggalLahir} onChange={(e) => setIbuData({...ibuData, tanggalLahir: e.target.value})} />
+                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tanggalLahir} onChange={(e) => setIbuData({...ibuData, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
@@ -885,7 +893,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="text" placeholder="Misal: 05 Maret 1988" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tanggalLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tanggalLahir: e.target.value})} />
+                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tanggalLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
@@ -932,7 +940,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="text" placeholder="Misal: 12 Januari 1991" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tanggalLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tanggalLahir: e.target.value})} />
+                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tanggalLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
