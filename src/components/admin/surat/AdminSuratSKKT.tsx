@@ -744,27 +744,27 @@ export default function AdminSuratSKKT({
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Nama Pemohon</label>
-                <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-slate-800 font-semibold" />
+                <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value.toUpperCase() })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIK Pemohon</label>
-                <input type="text" value={formData.nik} onChange={e => setFormData({ ...formData, nik: e.target.value })} className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-slate-800 font-mono" />
+                <input type="text" value={formData.nik} onChange={e => setFormData({ ...formData, nik: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Tempat Lahir</label>
-                <input type="text" value={formData.tempatLahir} onChange={e => setFormData({ ...formData, tempatLahir: e.target.value.toUpperCase() })} className="w-full p-2 border rounded-lg" />
+                <input type="text" value={formData.tempatLahir} onChange={e => setFormData({ ...formData, tempatLahir: e.target.value.toUpperCase() })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Tanggal Lahir</label>
-                <input type="text" placeholder="dd/mm/yyyy" value={formData.tanggalLahir} onChange={e => setFormData({ ...formData, tanggalLahir: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="dd/mm/yyyy" value={formData.tanggalLahir} onChange={e => setFormData({ ...formData, tanggalLahir: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pekerjaan</label>
-                <input type="text" value={formData.pekerjaan} onChange={e => setFormData({ ...formData, pekerjaan: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" value={formData.pekerjaan} onChange={e => setFormData({ ...formData, pekerjaan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Alamat Lengkap</label>
-                <input type="text" value={formData.alamat} onChange={e => setFormData({ ...formData, alamat: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" value={formData.alamat} onChange={e => setFormData({ ...formData, alamat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
             </div>
           </div>
@@ -778,30 +778,30 @@ export default function AdminSuratSKKT({
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Lokasi Jalan / Dusun</label>
-                <input type="text" placeholder="Nama Jalan" value={formData.lokasiTanah} onChange={e => setFormData({ ...formData, lokasiTanah: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="Nama Jalan" value={formData.lokasiTanah} onChange={e => setFormData({ ...formData, lokasiTanah: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RT / RW</label>
-                <input type="text" placeholder="00 / 00" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="00 / 00" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Luas Tanah (m²)</label>
-                <input type="text" placeholder="42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 font-semibold" />
+                <input type="text" placeholder="42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIB</label>
-                <input type="text" placeholder="-" value={formData.nib} onChange={e => setFormData({ ...formData, nib: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="-" value={formData.nib} onChange={e => setFormData({ ...formData, nib: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Di pergunakan</label>
-                <input type="text" placeholder="Pribadi / Perdagangan / Usaha" value={formData.diPergunakan} onChange={e => setFormData({ ...formData, diPergunakan: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="Pribadi / Perdagangan / Usaha" value={formData.diPergunakan} onChange={e => setFormData({ ...formData, diPergunakan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
             </div>
 
 
             <div className="text-xs">
               <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Asal Perolehan Tanah</label>
-              <textarea rows={2} value={formData.asalPerolehan} onChange={e => setFormData({ ...formData, asalPerolehan: e.target.value })} className="w-full p-2 border rounded-lg text-xs" />
+              <textarea rows={2} value={formData.asalPerolehan} onChange={e => setFormData({ ...formData, asalPerolehan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs" />
             </div>
 
             {/* Batas-Batas & Ukuran Meter */}
@@ -810,23 +810,23 @@ export default function AdminSuratSKKT({
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <span className="text-gray-500 block text-[10px]">Utara (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="6 Meter" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="Nama Pemilik" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="6 Meter" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Selatan (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="6.5 Meter" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="Nama Pemilik" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="6.5 Meter" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Timur (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="7 Meter" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="Nama Pemilik" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="7 Meter" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Barat (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="7 Meter" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="Nama Pemilik" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="7 Meter" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
               </div>
             </div>
@@ -842,7 +842,7 @@ export default function AdminSuratSKKT({
                       placeholder="Klik tombol map untuk menggambar" 
                       value={formData.polygonPoints?.length > 0 ? `${formData.polygonPoints.length} Titik Terukur` : ''} 
                       disabled
-                      className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-slate-800 text-emerald-700 font-bold" 
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-emerald-700 font-bold" 
                     />
                     <button 
                       onClick={() => setShowMapModal(true)}
@@ -872,7 +872,7 @@ export default function AdminSuratSKKT({
                   placeholder="Cari Saksi 1..."
                   value={searchSaksi1}
                   onChange={(e) => setSearchSaksi1(e.target.value)}
-                  className="w-full p-2 border rounded-lg bg-white dark:bg-slate-900"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                 />
                 {filteredSaksi1.length > 0 && (
                   <div className="absolute left-0 right-0 z-20 mt-1 bg-white dark:bg-slate-900 border rounded-xl shadow-xl max-h-36 overflow-y-auto">
@@ -885,8 +885,8 @@ export default function AdminSuratSKKT({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Nama Saksi 1" value={formData.saksi1Nama} onChange={e => setFormData({ ...formData, saksi1Nama: e.target.value })} className="p-2 border rounded-lg" />
-                <input type="text" placeholder="NIK Saksi 1" value={formData.saksi1Nik} onChange={e => setFormData({ ...formData, saksi1Nik: e.target.value })} className="p-2 border rounded-lg font-mono" />
+                <input type="text" placeholder="Nama Saksi 1" value={formData.saksi1Nama} onChange={e => setFormData({ ...formData, saksi1Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="NIK Saksi 1" value={formData.saksi1Nik} onChange={e => setFormData({ ...formData, saksi1Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
@@ -899,7 +899,7 @@ export default function AdminSuratSKKT({
                   placeholder="Cari Saksi 2..."
                   value={searchSaksi2}
                   onChange={(e) => setSearchSaksi2(e.target.value)}
-                  className="w-full p-2 border rounded-lg bg-white dark:bg-slate-900"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                 />
                 {filteredSaksi2.length > 0 && (
                   <div className="absolute left-0 right-0 z-20 mt-1 bg-white dark:bg-slate-900 border rounded-xl shadow-xl max-h-36 overflow-y-auto">
@@ -912,8 +912,8 @@ export default function AdminSuratSKKT({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Nama Saksi 2" value={formData.saksi2Nama} onChange={e => setFormData({ ...formData, saksi2Nama: e.target.value })} className="p-2 border rounded-lg" />
-                <input type="text" placeholder="NIK Saksi 2" value={formData.saksi2Nik} onChange={e => setFormData({ ...formData, saksi2Nik: e.target.value })} className="p-2 border rounded-lg font-mono" />
+                <input type="text" placeholder="Nama Saksi 2" value={formData.saksi2Nama} onChange={e => setFormData({ ...formData, saksi2Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="NIK Saksi 2" value={formData.saksi2Nik} onChange={e => setFormData({ ...formData, saksi2Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
@@ -926,7 +926,7 @@ export default function AdminSuratSKKT({
                   placeholder="Cari Saksi 3..."
                   value={searchSaksi3}
                   onChange={(e) => setSearchSaksi3(e.target.value)}
-                  className="w-full p-2 border rounded-lg bg-white dark:bg-slate-900"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                 />
                 {filteredSaksi3.length > 0 && (
                   <div className="absolute left-0 right-0 z-20 mt-1 bg-white dark:bg-slate-900 border rounded-xl shadow-xl max-h-36 overflow-y-auto">
@@ -939,8 +939,8 @@ export default function AdminSuratSKKT({
                 )}
 </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Nama Saksi 3" value={formData.saksi3Nama} onChange={e => setFormData({ ...formData, saksi3Nama: e.target.value })} className="p-2 border rounded-lg" />
-                <input type="text" placeholder="NIK Saksi 3" value={formData.saksi3Nik} onChange={e => setFormData({ ...formData, saksi3Nik: e.target.value })} className="p-2 border rounded-lg font-mono" />
+                <input type="text" placeholder="Nama Saksi 3" value={formData.saksi3Nama} onChange={e => setFormData({ ...formData, saksi3Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="NIK Saksi 3" value={formData.saksi3Nik} onChange={e => setFormData({ ...formData, saksi3Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
