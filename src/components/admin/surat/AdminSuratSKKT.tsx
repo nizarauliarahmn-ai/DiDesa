@@ -173,6 +173,15 @@ export default function AdminSuratSKKT({
       } catch (e) {}
     }, []);
 
+  useEffect(() => {
+    const container = dragProps.ref.current;
+    if (container) {
+      setTimeout(() => {
+        container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2;
+      }, 100);
+    }
+  }, []);
+
   const filteredResidents = searchQuery.trim() === '' ? [] : residents.filter(r => 
     r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.nik.includes(searchQuery)
   );
