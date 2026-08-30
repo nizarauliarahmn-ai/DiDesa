@@ -647,7 +647,7 @@ export default function AdminSuratSKL({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Column */}
-        <div className="lg:col-span-7 bg-slate-100 dark:bg-slate-800 rounded-2xl p-4 space-y-4">
+        <div className="lg:col-span-7 bg-slate-200/60 dark:bg-slate-800 rounded-2xl p-5 space-y-5">
 
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
