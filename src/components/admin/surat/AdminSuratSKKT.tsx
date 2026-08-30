@@ -756,7 +756,7 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Tanggal Lahir</label>
-                <input type="text" placeholder="19/03/1968" value={formData.tanggalLahir} onChange={e => setFormData({ ...formData, tanggalLahir: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="dd/mm/yyyy" value={formData.tanggalLahir} onChange={e => setFormData({ ...formData, tanggalLahir: e.target.value })} className="w-full p-2 border rounded-lg" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pekerjaan</label>
@@ -778,15 +778,15 @@ export default function AdminSuratSKKT({
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Lokasi Jalan / Dusun</label>
-                <input type="text" placeholder="Jalan Bukhari" value={formData.lokasiTanah} onChange={e => setFormData({ ...formData, lokasiTanah: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="Nama Jalan" value={formData.lokasiTanah} onChange={e => setFormData({ ...formData, lokasiTanah: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RT / RW</label>
-                <input type="text" placeholder="02 / 01" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
+                <input type="text" placeholder="00 / 00" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Luas Tanah (m²)</label>
-                <input type="text" placeholder="Contoh: 42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 font-semibold" />
+                <input type="text" placeholder="42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value })} className="w-full p-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500 font-semibold" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIB</label>
@@ -794,7 +794,7 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Di pergunakan</label>
-                <input type="text" placeholder="Pribadi" value={formData.diPergunakan} onChange={e => setFormData({ ...formData, diPergunakan: e.target.value })} className="w-full p-2 border rounded-lg" />
+                <input type="text" placeholder="Pribadi / Perdagangan / Usaha" value={formData.diPergunakan} onChange={e => setFormData({ ...formData, diPergunakan: e.target.value })} className="w-full p-2 border rounded-lg" />
               </div>
             </div>
 
@@ -811,22 +811,22 @@ export default function AdminSuratSKKT({
                 <div>
                   <span className="text-gray-500 block text-[10px]">Utara (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="Ukuran (misal 6 Meter)" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="6 Meter" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Selatan (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="Ukuran (misal 6.5 Meter)" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="6.5 Meter" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Timur (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="Ukuran (misal 7 Meter)" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="7 Meter" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Barat (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full p-1.5 border rounded-lg mb-1" />
-                  <input type="text" placeholder="Ukuran (misal 7 Meter)" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
+                  <input type="text" placeholder="7 Meter" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value })} className="w-full p-1.5 border rounded-lg font-mono text-[11px]" />
                 </div>
               </div>
             </div>
