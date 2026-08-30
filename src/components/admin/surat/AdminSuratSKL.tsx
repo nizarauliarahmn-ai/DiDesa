@@ -18,6 +18,7 @@ import { capitalizeResidentFields, capitalizeWords } from '../../../utils/textUt
 import { parseAddress } from '../../../utils/addressParser';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import { autoSyncResidentFromLetter } from '../../../utils/residentSync';
+import { SuggestCombobox } from './SuggestCombobox';
 
 interface Resident {
   nik: string;
@@ -137,6 +138,15 @@ export default function AdminSuratSKL({
   const kontakKantor = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
 
   const [previewZoom, setPreviewZoom] = useState(0.45);
+
+  const jobs = [
+    'Belum/Tidak Bekerja', 'Mengurus Rumah Tangga', 'Pelajar/Mahasiswa', 'Pensiunan',
+    'Petani/Pekebun', 'Buruh Tani/Perkebunan', 'Peternak', 'Nelayan/Perikanan', 'Buruh Nelayan/Perikanan',
+    'Buruh Harian Lepas', 'Pedagang', 'Wiraswasta', 'Karyawan Swasta', 'Karyawan BUMN/BUMD',
+    'Sopir/Ojek', 'Tukang (Kayu/Batu/Las/Jahit, dll)', 'Mekanik', 'Pembantu Rumah Tangga',
+    'Guru', 'Bidan', 'Perawat', 'Ustadz/Mubaligh',
+    'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)', 'PPPK (Pegawai Pemerintah dengan Perjanjian Kerja)'
+  ];
   const dragProps = useDragScroll();
   const letterFont = localStorage.getItem('village_letter_font') || 'Arial, sans-serif';
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -702,12 +712,10 @@ export default function AdminSuratSKL({
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                <input 
-                  type="text"
-                  placeholder="Pekerjaan"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                <SuggestCombobox
                   value={ayahData.pekerjaan}
-                  onChange={(e) => setAyahData({...ayahData, pekerjaan: e.target.value})}
+                  onChange={(v) => setAyahData({...ayahData, pekerjaan: v})}
+                  options={jobs}
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
@@ -763,12 +771,10 @@ export default function AdminSuratSKL({
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
-                <input 
-                  type="text"
-                  placeholder="Pekerjaan"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                <SuggestCombobox
                   value={ibuData.pekerjaan}
-                  onChange={(e) => setIbuData({...ibuData, pekerjaan: e.target.value})}
+                  onChange={(v) => setIbuData({...ibuData, pekerjaan: v})}
+                  options={jobs}
                 />
               </div>
               <div className="md:col-span-2 space-y-2">
