@@ -81,7 +81,7 @@ export default function SuratEditorHeader({
 }: SuratEditorHeaderProps) {
   const { title, description, kode, classificationCode, sequenceNo } = template;
   return (
-    <div className="sticky top-20 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none mb-6">
+    <div className="sticky top-20 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm shadow-slate-200/50 dark:shadow-none mb-6">
       <div className="flex items-center gap-4 min-w-0">
         <button
           onClick={onBack}
@@ -98,23 +98,6 @@ export default function SuratEditorHeader({
         )}
 
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            {kode && (
-              <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold rounded">
-                {kode}
-              </span>
-            )}
-            {classificationCode && (
-              <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-semibold font-mono rounded border border-slate-200/60 dark:border-slate-700/60">
-                Kode: {classificationCode}
-              </span>
-            )}
-            {sequenceNo && (
-              <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[11px] font-semibold font-mono rounded">
-                No: {sequenceNo}
-              </span>
-            )}
-          </div>
           <h1 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white leading-snug truncate">
             {title}
           </h1>
