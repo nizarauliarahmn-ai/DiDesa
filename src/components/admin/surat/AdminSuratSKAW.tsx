@@ -937,7 +937,7 @@ export default function AdminSuratSKAW({
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
                 <input 
                   type="text"
-                  placeholder="Contoh: Kandangan"
+                  placeholder="Kandangan"
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   value={formData.tempatLahirAlmarhum}
                   onChange={(e) => setFormData({...formData, tempatLahirAlmarhum: e.target.value})}
@@ -965,7 +965,7 @@ export default function AdminSuratSKAW({
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
                 <textarea
                   rows={2}
-                  placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                  placeholder="Jl. Keramat, Desa Wasah Hilir"
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                   value={formData.alamatAlmarhum}
                   onChange={(e) => setFormData(prev => ({ ...prev, alamatAlmarhum: e.target.value }))}
@@ -1142,7 +1142,7 @@ export default function AdminSuratSKAW({
                       <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat, Tanggal Lahir</label>
                       <input 
                         type="text"
-                        placeholder="Contoh: Kandangan, 01-01-1990"
+                        placeholder="Kandangan, 01-01-1990"
                         className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                         value={row.ttl}
                         onChange={(e) => updateHeirRow(row.id, 'ttl', e.target.value)}
@@ -1187,7 +1187,7 @@ export default function AdminSuratSKAW({
                 value={formData.keperluan}
                 onChange={(v) => setFormData({...formData, keperluan: v})}
                 options={KEPERLUAN_OPTIONS}
-                placeholder="Contoh: Pembagian Harta Waris"
+                placeholder="Pembagian Harta Waris"
               />
               <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
             </div>
