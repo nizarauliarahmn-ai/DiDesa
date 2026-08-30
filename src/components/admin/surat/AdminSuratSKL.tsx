@@ -647,7 +647,7 @@ export default function AdminSuratSKL({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Column */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-8">
 
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
@@ -664,7 +664,7 @@ export default function AdminSuratSKL({
           />      
 
           {/* Data Ayah */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-slate-800/30">
             <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
                 <Users className="w-4 h-4 text-blue-600" />
@@ -725,7 +725,7 @@ export default function AdminSuratSKL({
           </section>
 
           {/* Data Ibu */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-slate-800/30">
             <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center">
                 <Users className="w-4 h-4 text-pink-600" />
@@ -786,7 +786,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
           </section>
 
           {/* Data Bayi / Anak */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-slate-800/30">
             <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
                 <Baby className="w-4 h-4 text-emerald-600" />
@@ -857,7 +857,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
           </section>
 
           {/* Saksi 1 */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-slate-800/30">
             <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
                 <Activity className="w-4 h-4 text-orange-600" />
@@ -900,7 +900,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
           </section>
 
           {/* Saksi 2 */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-slate-800/30">
             <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
                 <Activity className="w-4 h-4 text-blue-600" />
@@ -943,7 +943,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
           </section>
 
           {/* Pejabat Penandatangan */}
-          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-md dark:shadow-slate-800/30">
             <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
                 <FileSignature className="w-4 h-4 text-amber-600" />
