@@ -762,8 +762,10 @@ export default function AdminSuratSKPH({
                 </div>
               </div>
             </div>
+          </section>
 
-            {/* Informasi Detail Penghasilan */}
+          {/* Informasi Detail Penghasilan */}
+          <section className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-none">
             <div>
               <div className="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
