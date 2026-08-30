@@ -698,7 +698,7 @@ export default function AdminSuratSKPH({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
                   <input 
                     type="text"
-                    placeholder="Contoh: Kandangan"
+                    placeholder="Kandangan"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.tempatLahir}
                     onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
@@ -718,7 +718,7 @@ export default function AdminSuratSKPH({
                     <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
                     <textarea
                       rows={2}
-                      placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
+                      placeholder="Jl. Keramat, Desa Wasah Hilir"
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
                       value={formData.alamat}
                       onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
@@ -730,7 +730,7 @@ export default function AdminSuratSKPH({
                     <input
                       type="text"
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      placeholder="Contoh: 001"
+                      placeholder="001"
                       value={formData.rt}
                       onChange={(e) => setFormData({...formData, rt: e.target.value})}
                     />
@@ -740,7 +740,7 @@ export default function AdminSuratSKPH({
                     <input
                       type="text"
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                      placeholder="Contoh: 002"
+                      placeholder="002"
                       value={formData.rw}
                       onChange={(e) => setFormData({...formData, rw: e.target.value})}
                     />
@@ -776,7 +776,7 @@ export default function AdminSuratSKPH({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sumber Penghasilan / Pekerjaan Rill</label>
                   <input 
                     type="text"
-                    placeholder="Contoh: Bertani Padi / Wiraswasta Kelontong"
+                    placeholder="Bertani Padi / Wiraswasta Kelontong"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     value={formData.sumberPenghasilan}
                     onChange={(e) => setFormData({...formData, sumberPenghasilan: e.target.value})}
@@ -786,7 +786,7 @@ export default function AdminSuratSKPH({
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rata-rata Penghasilan Bulanan (Rp)</label>
                   <input 
                     type="text"
-                    placeholder="Contoh: 1.500.000"
+                    placeholder="1.500.000"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                     value={formData.jumlahPenghasilan}
                     onChange={(e) => {
@@ -806,7 +806,7 @@ export default function AdminSuratSKPH({
                     value={formData.keperluan}
                     onChange={(v) => setFormData({...formData, keperluan: v})}
                     options={KEPERLUAN_OPTIONS}
-                    placeholder="Contoh: Persyaratan pengajuan kredit bank"
+                    placeholder="Persyaratan pengajuan kredit bank"
                   />
                   <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
                 </div>
