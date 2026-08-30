@@ -302,11 +302,40 @@ export default function AdminSuratSDP({
     setSearchQuery('');
   };
 
-  const handlePrint = async (skipCheck = false) => {
-    if (!formData.nama || !formData.nama.trim()) {
-      showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
-      return;
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+  const requiredFields = [
+    { key: 'jenisKelamin', id: 'sdp-jenisKelamin' },
+    { key: 'agama', id: 'sdp-agama' },
+    { key: 'pekerjaan', id: 'sdp-pekerjaan' },
+    { key: 'statusPerkawinan', id: 'sdp-statusPerkawinan' },
+    { key: 'tempatLahir', id: 'sdp-tempatLahir' },
+    { key: 'tanggalLahir', id: 'sdp-tanggalLahir' },
+    { key: 'alamat', id: 'sdp-alamat' },
+    { key: 'kewarganegaraan', id: 'sdp-kewarganegaraan' },
+    { key: 'alamatSekarang', id: 'sdp-alamatSekarang' },
+    { key: 'desaSekarang', id: 'sdp-desaSekarang' },
+    { key: 'kecamatanSekarang', id: 'sdp-kecamatanSekarang' },
+    { key: 'kabupatenSekarang', id: 'sdp-kabupatenSekarang' },
+    { key: 'provinsiSekarang', id: 'sdp-provinsiSekarang' },
+    { key: 'sifatDomisili', id: 'sdp-sifatDomisili' },
+  ];
+
+  const validateRequired = (): boolean => {
+    const empty = requiredFields.filter(f => !(formData as any)[f.key]?.trim());
+    if (empty.length === 0) {
+      setInvalidFields([]);
+      return true;
     }
+    setInvalidFields(empty.map(f => f.id));
+    const first = document.getElementById(empty[0].id);
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast(`Mohon lengkapi ${empty.length} kolom wajib yang masih kosong.`, 'error');
+    return false;
+  };
+
+  const handlePrint = async (skipCheck = false) => {
+    if (!validateRequired()) return;
     if (isBackdate && !(manualSequence || '').trim()) {
       showToast('Mohon isi nomor urut surat sisipan.', 'error');
       return;
@@ -672,7 +701,8 @@ export default function AdminSuratSDP({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    id="sdp-jenisKelamin"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-jenisKelamin') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.jenisKelamin}
                     onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
                   >
@@ -683,7 +713,8 @@ export default function AdminSuratSDP({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    id="sdp-agama"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-agama') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.agama}
                     onChange={(e) => setFormData({...formData, agama: e.target.value})}
                   >
@@ -697,16 +728,19 @@ export default function AdminSuratSDP({
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <div id="sdp-pekerjaan">
                   <SuggestCombobox
                     value={formData.pekerjaan}
                     onChange={(v) => setFormData({...formData, pekerjaan: v})}
                     options={jobs}
                   />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    id="sdp-statusPerkawinan"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-statusPerkawinan') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.statusPerkawinan}
                     onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
                   >
@@ -719,9 +753,10 @@ export default function AdminSuratSDP({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
+                    id="sdp-tempatLahir"
                     type="text"
-                    placeholder="Contoh: Kandangan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    placeholder="Kandangan"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-tempatLahir') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.tempatLahir}
                     onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
                   />
@@ -729,8 +764,9 @@ export default function AdminSuratSDP({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
+                    id="sdp-tanggalLahir"
                     type="date"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-tanggalLahir') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.tanggalLahir}
                     onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                   />
@@ -740,9 +776,10 @@ export default function AdminSuratSDP({
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap<span className="text-emerald-500 ml-0.5">*</span></label>
                     <textarea
+                      id="sdp-alamat"
                       rows={2}
                       placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                      className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('sdp-alamat') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                       value={formData.alamat}
                       onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
                       onBlur={(e) => handleAlamatBlur(e.target.value)}
@@ -788,7 +825,8 @@ export default function AdminSuratSDP({
               <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kewarganegaraan<span className="text-emerald-500 ml-0.5">*</span></label>
                 <select
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none appearance-none"
+                  id="sdp-kewarganegaraan"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none appearance-none ${invalidFields.includes('sdp-kewarganegaraan') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.kewarganegaraan}
                   onChange={(e) => setFormData({...formData, kewarganegaraan: e.target.value})}
                 >
@@ -808,8 +846,9 @@ export default function AdminSuratSDP({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jalan / Nama Tempat (Sekarang)<span className="text-emerald-500 ml-0.5">*</span></label>
                   <textarea 
+                    id="sdp-alamatSekarang"
                     rows={2}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('sdp-alamatSekarang') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.alamatSekarang}
                     onChange={(e) => {
   const val = e.target.value;
@@ -850,8 +889,9 @@ export default function AdminSuratSDP({
               <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Desa / Kelurahan (Sekarang)<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
+                  id="sdp-desaSekarang"
                   type="text"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-desaSekarang') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.desaSekarang}
                   onChange={(e) => setFormData({...formData, desaSekarang: e.target.value})}
                   placeholder="Contoh: Sukamakmur"
@@ -860,8 +900,9 @@ export default function AdminSuratSDP({
               <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kecamatan (Sekarang)<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
+                  id="sdp-kecamatanSekarang"
                   type="text"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-kecamatanSekarang') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.kecamatanSekarang}
                   onChange={(e) => setFormData({...formData, kecamatanSekarang: e.target.value})}
                   placeholder="Contoh: Simpur"
@@ -870,8 +911,9 @@ export default function AdminSuratSDP({
               <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kabupaten / Kota (Sekarang)<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
+                  id="sdp-kabupatenSekarang"
                   type="text"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-kabupatenSekarang') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.kabupatenSekarang}
                   onChange={(e) => setFormData({...formData, kabupatenSekarang: e.target.value})}
                   placeholder="Contoh: Hulu Sungai Selatan"
@@ -880,8 +922,9 @@ export default function AdminSuratSDP({
               <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Provinsi (Sekarang)<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
+                  id="sdp-provinsiSekarang"
                   type="text"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('sdp-provinsiSekarang') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.provinsiSekarang}
                   onChange={(e) => setFormData({...formData, provinsiSekarang: e.target.value})}
                   placeholder="Contoh: Kalimantan Selatan"
@@ -890,7 +933,8 @@ export default function AdminSuratSDP({
               <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sifat Domisili<span className="text-emerald-500 ml-0.5">*</span></label>
                 <select 
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none appearance-none"
+                  id="sdp-sifatDomisili"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none appearance-none ${invalidFields.includes('sdp-sifatDomisili') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.sifatDomisili}
                   onChange={(e) => setFormData({...formData, sifatDomisili: e.target.value})}
                 >
