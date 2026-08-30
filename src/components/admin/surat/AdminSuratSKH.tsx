@@ -259,11 +259,34 @@ export default function AdminSuratSKH({
     setSearchQuery('');
   };
 
-  const handlePrint = async (skipCheck = false) => {
-    if (!formData.nama || !formData.nama.trim()) {
-      showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
-      return;
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+  const requiredFields = [
+    { key: 'jenisKelamin', id: 'skh-jenisKelamin' },
+    { key: 'agama', id: 'skh-agama' },
+    { key: 'pekerjaan', id: 'skh-pekerjaan' },
+    { key: 'statusPerkawinan', id: 'skh-statusPerkawinan' },
+    { key: 'tempatLahir', id: 'skh-tempatLahir' },
+    { key: 'tanggalLahir', id: 'skh-tanggalLahir' },
+    { key: 'alamat', id: 'skh-alamat' },
+    { key: 'keperluan', id: 'skh-keperluan' },
+  ];
+
+  const validateRequired = (): boolean => {
+    const empty = requiredFields.filter(f => !(formData as any)[f.key]?.trim());
+    if (empty.length === 0) {
+      setInvalidFields([]);
+      return true;
     }
+    setInvalidFields(empty.map(f => f.id));
+    const first = document.getElementById(empty[0].id);
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast(`Mohon lengkapi ${empty.length} kolom wajib yang masih kosong.`, 'error');
+    return false;
+  };
+
+  const handlePrint = async (skipCheck = false) => {
+    if (!validateRequired()) return;
     if (isBackdate && !(manualSequence || '').trim()) {
       showToast('Mohon isi nomor urut surat sisipan.', 'error');
       return;
@@ -625,9 +648,10 @@ export default function AdminSuratSKH({
                 }}
               />
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
-                <select 
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <select 
+                    id="skh-jenisKelamin"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skh-jenisKelamin') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.jenisKelamin}
                   onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
                 >
@@ -636,9 +660,10 @@ export default function AdminSuratSKH({
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama<span className="text-emerald-500 ml-0.5">*</span></label>
-                <select 
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <select 
+                    id="skh-agama"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skh-agama') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.agama}
                   onChange={(e) => setFormData({...formData, agama: e.target.value})}
                 >
@@ -651,17 +676,20 @@ export default function AdminSuratSKH({
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan<span className="text-emerald-500 ml-0.5">*</span></label>
-                <SuggestCombobox
-                  value={formData.pekerjaan}
-                  onChange={(v) => setFormData({...formData, pekerjaan: v})}
-                  options={jobs}
-                />
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <div id="skh-pekerjaan">
+                  <SuggestCombobox
+                    value={formData.pekerjaan}
+                    onChange={(v) => setFormData({...formData, pekerjaan: v})}
+                    options={jobs}
+                  />
+                  </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan<span className="text-emerald-500 ml-0.5">*</span></label>
-                <select 
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <select 
+                    id="skh-statusPerkawinan"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skh-statusPerkawinan') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.statusPerkawinan}
                   onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
                 >
@@ -672,20 +700,22 @@ export default function AdminSuratSKH({
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
-                <input 
-                  type="text"
-                  placeholder="Contoh: Kandangan"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <input 
+                    id="skh-tempatLahir"
+                    type="text"
+                    placeholder="Kandangan"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skh-tempatLahir') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.tempatLahir}
                   onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
-                <input 
-                  type="date"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <input 
+                    id="skh-tanggalLahir"
+                    type="date"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skh-tanggalLahir') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={formData.tanggalLahir}
                   onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                 />
@@ -694,9 +724,10 @@ export default function AdminSuratSKH({
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap<span className="text-emerald-500 ml-0.5">*</span></label>
                     <textarea
+                      id="skh-alamat"
                       rows={2}
-                      placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                      placeholder="Jl. Keramat, Desa Wasah Hilir"
+                      className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('skh-alamat') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                       value={formData.alamat}
                       onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
                       onBlur={(e) => handleAlamatBlur(e.target.value)}
@@ -739,12 +770,14 @@ export default function AdminSuratSKH({
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat<span className="text-emerald-500 ml-0.5">*</span></label>
+                <div id="skh-keperluan">
                 <SuggestCombobox
                   value={formData.keperluan}
                   onChange={(v) => setFormData({...formData, keperluan: v})}
                   options={KEPERLUAN_OPTIONS}
                   placeholder="Contoh: Persyaratan pembuatan KTP baru"
                 />
+                </div>
                 <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan tujuan pembuatan surat ini secara spesifik.</p>
               </div>
             </div>
