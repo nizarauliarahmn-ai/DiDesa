@@ -188,6 +188,7 @@ export default function AdminSuratSKAW({
   const [familyMembers, setFamilyMembers] = useState<FamilyMemberCandidate[]>([]);
   const [loadingFamily, setLoadingFamily] = useState(false);
   const [selectedFamilyMembers, setSelectedFamilyMembers] = useState<Set<string>>(new Set());
+  const [showManualHeirs, setShowManualHeirs] = useState(false);
 
   useEffect(() => {
     const fetchFamilyMembers = async () => {
@@ -1095,82 +1096,110 @@ export default function AdminSuratSKAW({
               </div>
             )}
 
-            {/* Manual Heir Rows */}
-            <div className="space-y-4">
-              {heirRows.map((row, index) => (
-                <div key={row.id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Ahli Waris Manual #{index + 1}</span>
-                    {heirRows.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeHeirRow(row.id)}
-                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+            {/* Indicator: Belum ada ahli waris */}
+            {!loadingFamily && familyMembers.length === 0 && !formData.nikAlmarhum && (
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 p-6 text-center">
+                <Users className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Pilih data almarhum terlebih dahulu untuk melihat anggota keluarga yang bisa dipilih sebagai ahli waris.
+                </p>
+              </div>
+            )}
+
+            {/* Manual Heir Rows - Collapsible */}
+            {!loadingFamily && (
+              <div className="space-y-4">
+                <button
+                  type="button"
+                  onClick={() => setShowManualHeirs(!showManualHeirs)}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold transition-colors border-2 ${
+                    showManualHeirs 
+                      ? 'bg-emerald-100 text-emerald-700 border-emerald-300' 
+                      : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-dashed border-emerald-200'
+                  }`}
+                >
+                  <Plus className={`w-4 h-4 transition-transform ${showManualHeirs ? 'rotate-45' : ''}`} />
+                  {showManualHeirs ? 'Tutup Form Manual' : 'Tambah Ahli Waris Manual'}
+                </button>
+
+                {showManualHeirs && (
+                  <div className="space-y-4">
+                    {heirRows.map((row, index) => (
+                      <div key={row.id} className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-bold text-slate-600 dark:text-slate-400">Ahli Waris Manual #{index + 1}</span>
+                          {heirRows.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeHeirRow(row.id)}
+                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
+                            <input 
+                              type="text"
+                              placeholder="Nama ahli waris"
+                              className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                              value={row.nama}
+                              onChange={(e) => updateHeirRow(row.id, 'nama', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Hubungan</label>
+                            <select 
+                              className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                              value={row.hubungan}
+                              onChange={(e) => updateHeirRow(row.id, 'hubungan', e.target.value)}
+                            >
+                              <option value="Anak">Anak</option>
+                              <option value="Istri">Istri</option>
+                              <option value="Suami">Suami</option>
+                              <option value="Orang Tua">Orang Tua</option>
+                              <option value="Saudara">Saudara</option>
+                              <option value="Cucu">Cucu</option>
+                              <option value="Lainnya">Lainnya</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat, Tanggal Lahir</label>
+                            <input 
+                              type="text"
+                              placeholder="Kandangan, 01-01-1990"
+                              className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                              value={row.ttl}
+                              onChange={(e) => updateHeirRow(row.id, 'ttl', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
+                            <input 
+                              type="text"
+                              placeholder="NIK ahli waris"
+                              className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                              value={row.nik}
+                              onChange={(e) => updateHeirRow(row.id, 'nik', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addHeirRow}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-bold transition-colors border-2 border-dashed border-emerald-200"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Tambah Ahli Waris Lagi
+                    </button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-                      <input 
-                        type="text"
-                        placeholder="Nama ahli waris"
-                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                        value={row.nama}
-                        onChange={(e) => updateHeirRow(row.id, 'nama', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Hubungan</label>
-                      <select 
-                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                        value={row.hubungan}
-                        onChange={(e) => updateHeirRow(row.id, 'hubungan', e.target.value)}
-                      >
-                        <option value="Anak">Anak</option>
-                        <option value="Istri">Istri</option>
-                        <option value="Suami">Suami</option>
-                        <option value="Orang Tua">Orang Tua</option>
-                        <option value="Saudara">Saudara</option>
-                        <option value="Cucu">Cucu</option>
-                        <option value="Lainnya">Lainnya</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat, Tanggal Lahir</label>
-                      <input 
-                        type="text"
-                        placeholder="Kandangan, 01-01-1990"
-                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                        value={row.ttl}
-                        onChange={(e) => updateHeirRow(row.id, 'ttl', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-                      <input 
-                        type="text"
-                        placeholder="NIK ahli waris"
-                        className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-                        value={row.nik}
-                        onChange={(e) => updateHeirRow(row.id, 'nik', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              <button
-                type="button"
-                onClick={addHeirRow}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-bold transition-colors border-2 border-dashed border-emerald-200"
-              >
-                <Plus className="w-4 h-4" />
-                Tambah Ahli Waris Manual
-              </button>
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Card: Keperluan Surat */}
