@@ -1047,7 +1047,7 @@ export default function AdminSuratSKKT({
             onMouseUp={dragProps.onMouseUp}
             onMouseMove={dragProps.onMouseMove}
             style={{ ...dragProps.style }}
-            className="bg-slate-100/60 dark:bg-slate-800/40 overflow-auto relative py-8 min-h-0"
+            className="bg-slate-100/60 dark:bg-slate-800/40 overflow-auto relative pt-8 pb-2 min-h-0"
           >
             <div style={{ margin: '0 auto', display: 'inline-flex', gap: '32px', padding: '0 200px' }}>
             {generateHTML().map((pageHtml, index) => (
