@@ -143,7 +143,7 @@ export default function AdminSuratSDP({
     'Buruh Harian Lepas', 'Pedagang', 'Wiraswasta', 'Karyawan Swasta', 'Karyawan BUMN/BUMD',
     'Sopir/Ojek', 'Tukang (Kayu/Batu/Las/Jahit, dll)', 'Mekanik', 'Pembantu Rumah Tangga',
     'Guru', 'Bidan', 'Perawat', 'Ustadz/Mubaligh',
-    'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)'
+    'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)', 'PPPK (Pegawai Pemerintah dengan Perjanjian Kerja)'
   ];
 
   const handleAlamatBlur = (val: string) => {
