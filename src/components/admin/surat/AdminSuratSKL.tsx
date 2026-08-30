@@ -280,11 +280,61 @@ export default function AdminSuratSKL({
     setSearchQuery('');
   };
 
-  const handlePrint = async () => {
-    if (!anakData.nama || !ayahData.nama || !ibuData.nama) {
-      showToast("Data Anak, Ayah, dan Ibu wajib diisi", "error");
-      return;
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+  const requiredFields = [
+    { key: 'nik', data: 'ayahData', id: 'skl-nikAyah' },
+    { key: 'nama', data: 'ayahData', id: 'skl-namaAyah' },
+    { key: 'tempatLahir', data: 'ayahData', id: 'skl-tempatLahirAyah' },
+    { key: 'tanggalLahir', data: 'ayahData', id: 'skl-tanggalLahirAyah' },
+    { key: 'pekerjaan', data: 'ayahData', id: 'skl-pekerjaanAyah' },
+    { key: 'alamat', data: 'ayahData', id: 'skl-alamatAyah' },
+    { key: 'nik', data: 'ibuData', id: 'skl-nikIbu' },
+    { key: 'nama', data: 'ibuData', id: 'skl-namaIbu' },
+    { key: 'tempatLahir', data: 'ibuData', id: 'skl-tempatLahirIbu' },
+    { key: 'tanggalLahir', data: 'ibuData', id: 'skl-tanggalLahirIbu' },
+    { key: 'pekerjaan', data: 'ibuData', id: 'skl-pekerjaanIbu' },
+    { key: 'alamat', data: 'ibuData', id: 'skl-alamatIbu' },
+    { key: 'nama', data: 'anakData', id: 'skl-namaBayi' },
+    { key: 'jenisKelamin', data: 'anakData', id: 'skl-jenisKelamin' },
+    { key: 'anakKe', data: 'anakData', id: 'skl-anakKe' },
+    { key: 'nik', data: 'saksi1Data', id: 'skl-nikSaksi1' },
+    { key: 'nama', data: 'saksi1Data', id: 'skl-namaSaksi1' },
+    { key: 'tempatLahir', data: 'saksi1Data', id: 'skl-tempatLahirSaksi1' },
+    { key: 'tanggalLahir', data: 'saksi1Data', id: 'skl-tanggalLahirSaksi1' },
+    { key: 'pekerjaan', data: 'saksi1Data', id: 'skl-pekerjaanSaksi1' },
+    { key: 'alamat', data: 'saksi1Data', id: 'skl-alamatSaksi1' },
+    { key: 'nik', data: 'saksi2Data', id: 'skl-nikSaksi2' },
+    { key: 'nama', data: 'saksi2Data', id: 'skl-namaSaksi2' },
+    { key: 'tempatLahir', data: 'saksi2Data', id: 'skl-tempatLahirSaksi2' },
+    { key: 'tanggalLahir', data: 'saksi2Data', id: 'skl-tanggalLahirSaksi2' },
+    { key: 'pekerjaan', data: 'saksi2Data', id: 'skl-pekerjaanSaksi2' },
+    { key: 'alamat', data: 'saksi2Data', id: 'skl-alamatSaksi2' },
+  ];
+
+  const getDataValue = (dataName: string, key: string) => {
+    const data = dataName === 'ayahData' ? ayahData : dataName === 'ibuData' ? ibuData : dataName === 'anakData' ? anakData : dataName === 'saksi1Data' ? saksi1Data : saksi2Data;
+    return (data as any)[key];
+  };
+
+  const validateRequired = (): boolean => {
+    const empty = requiredFields.filter(f => {
+      const val = getDataValue(f.data, f.key);
+      return !val?.trim?.() && !String(val || '').trim();
+    });
+    if (empty.length === 0) {
+      setInvalidFields([]);
+      return true;
     }
+    setInvalidFields(empty.map(f => f.id));
+    const first = document.getElementById(empty[0].id);
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast(`Mohon lengkapi ${empty.length} kolom wajib yang masih kosong.`, 'error');
+    return false;
+  };
+
+  const handlePrint = async () => {
+    if (!validateRequired()) return;
     if (isBackdate && !(manualSequence || '').trim()) {
       showToast('Mohon isi nomor urut surat sisipan.', 'error');
       return;
@@ -693,9 +743,10 @@ export default function AdminSuratSKL({
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ayah<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
+                  id="skl-nikAyah"
                   type="text"
-                  placeholder="16 digit NIK"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  placeholder="6303..."
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-nikAyah') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={ayahData.nik}
                   onChange={(e) => setAyahData({...ayahData, nik: e.target.value})}
                 />
@@ -703,35 +754,39 @@ export default function AdminSuratSKL({
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ayah<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
+                  id="skl-namaAyah"
                   type="text"
-                  placeholder="Nama lengkap"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  placeholder="Masukkan nama ayah"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-namaAyah') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={ayahData.nama}
                   onChange={(e) => setAyahData({...ayahData, nama: e.target.value})}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tempatLahir} onChange={(e) => setAyahData({...ayahData, tempatLahir: e.target.value})} />
+                <input id="skl-tempatLahirAyah" type="text" placeholder="Tempat Lahir" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tempatLahirAyah') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={ayahData.tempatLahir} onChange={(e) => setAyahData({...ayahData, tempatLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ayahData.tanggalLahir} onChange={(e) => setAyahData({...ayahData, tanggalLahir: e.target.value})} />
+                <input id="skl-tanggalLahirAyah" type="date" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tanggalLahirAyah') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={ayahData.tanggalLahir} onChange={(e) => setAyahData({...ayahData, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <div id="skl-pekerjaanAyah">
                 <SuggestCombobox
                   value={ayahData.pekerjaan}
                   onChange={(v) => setAyahData({...ayahData, pekerjaan: v})}
                   options={jobs}
                 />
+                </div>
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
 <textarea
+                  id="skl-alamatAyah"
                   rows={2}
                   placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('skl-alamatAyah') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={ayahData.alamat}
                   onChange={(e) => setAyahData({...ayahData, alamat: e.target.value})}
                   onBlur={(e) => handleAyahAlamatBlur(e.target.value)}
@@ -771,26 +826,29 @@ export default function AdminSuratSKL({
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tempatLahir} onChange={(e) => setIbuData({...ibuData, tempatLahir: e.target.value})} />
+                <input id="skl-tempatLahirIbu" type="text" placeholder="Tempat Lahir" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tempatLahirIbu') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={ibuData.tempatLahir} onChange={(e) => setIbuData({...ibuData, tempatLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={ibuData.tanggalLahir} onChange={(e) => setIbuData({...ibuData, tanggalLahir: e.target.value})} />
+                <input id="skl-tanggalLahirIbu" type="date" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tanggalLahirIbu') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={ibuData.tanggalLahir} onChange={(e) => setIbuData({...ibuData, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <div id="skl-pekerjaanIbu">
                 <SuggestCombobox
                   value={ibuData.pekerjaan}
                   onChange={(v) => setIbuData({...ibuData, pekerjaan: v})}
                   options={jobs}
                 />
+                </div>
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
 <textarea
+                  id="skl-alamatIbu"
                   rows={2}
                   placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('skl-alamatIbu') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={ibuData.alamat}
                   onChange={(e) => setIbuData(prev => ({ ...prev, alamat: e.target.value }))}
 onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
@@ -832,9 +890,10 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Anak Ke-<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
+                  id="skl-anakKe"
                   type="number"
                   placeholder="Misal: 1"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-anakKe') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={anakData.anakKe}
                   onChange={(e) => setAnakData({...anakData, anakKe: e.target.value})}
                 />
@@ -881,34 +940,37 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-                <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nik} onChange={(e) => setSaksi1Data({...saksi1Data, nik: e.target.value})} />
+                <input id="skl-nikSaksi1" type="text" placeholder="16 digit NIK" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-nikSaksi1') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi1Data.nik} onChange={(e) => setSaksi1Data({...saksi1Data, nik: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-                <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.nama} onChange={(e) => setSaksi1Data({...saksi1Data, nama: e.target.value})} />
+                <input id="skl-namaSaksi1" type="text" placeholder="Nama lengkap" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-namaSaksi1') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi1Data.nama} onChange={(e) => setSaksi1Data({...saksi1Data, nama: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tempatLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tempatLahir: e.target.value})} />
+                <input id="skl-tempatLahirSaksi1" type="text" placeholder="Tempat Lahir" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tempatLahirSaksi1') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi1Data.tempatLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tempatLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi1Data.tanggalLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tanggalLahir: e.target.value})} />
+                <input id="skl-tanggalLahirSaksi1" type="date" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tanggalLahirSaksi1') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi1Data.tanggalLahir} onChange={(e) => setSaksi1Data({...saksi1Data, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <div id="skl-pekerjaanSaksi1">
                 <SuggestCombobox
                   value={saksi1Data.pekerjaan}
                   onChange={(v) => setSaksi1Data({...saksi1Data, pekerjaan: v})}
                   options={jobs}
                 />
+                </div>
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
                 <textarea
+                  id="skl-alamatSaksi1"
                   rows={2}
                   placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('skl-alamatSaksi1') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={saksi1Data.alamat}
                   onChange={(e) => setSaksi1Data(prev => ({ ...prev, alamat: e.target.value }))}
                   onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi1Data)}
@@ -928,34 +990,37 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK</label>
-                <input type="text" placeholder="16 digit NIK" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nik} onChange={(e) => setSaksi2Data({...saksi2Data, nik: e.target.value})} />
+                <input id="skl-nikSaksi2" type="text" placeholder="16 digit NIK" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-nikSaksi2') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi2Data.nik} onChange={(e) => setSaksi2Data({...saksi2Data, nik: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap</label>
-                <input type="text" placeholder="Nama lengkap" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.nama} onChange={(e) => setSaksi2Data({...saksi2Data, nama: e.target.value})} />
+                <input id="skl-namaSaksi2" type="text" placeholder="Nama lengkap" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-namaSaksi2') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi2Data.nama} onChange={(e) => setSaksi2Data({...saksi2Data, nama: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
-                <input type="text" placeholder="Tempat Lahir" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tempatLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tempatLahir: e.target.value})} />
+                <input id="skl-tempatLahirSaksi2" type="text" placeholder="Tempat Lahir" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tempatLahirSaksi2') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi2Data.tempatLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tempatLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
-                <input type="date" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" value={saksi2Data.tanggalLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tanggalLahir: e.target.value})} />
+                <input id="skl-tanggalLahirSaksi2" type="date" className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skl-tanggalLahirSaksi2') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`} value={saksi2Data.tanggalLahir} onChange={(e) => setSaksi2Data({...saksi2Data, tanggalLahir: e.target.value})} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <div id="skl-pekerjaanSaksi2">
                 <SuggestCombobox
                   value={saksi2Data.pekerjaan}
                   onChange={(v) => setSaksi2Data({...saksi2Data, pekerjaan: v})}
                   options={jobs}
                 />
+                </div>
               </div>
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat</label>
                 <textarea
+                  id="skl-alamatSaksi2"
                   rows={2}
                   placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
-                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                  className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('skl-alamatSaksi2') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                   value={saksi2Data.alamat}
                   onChange={(e) => setSaksi2Data(prev => ({ ...prev, alamat: e.target.value }))}
                   onBlur={(e) => handleSaksiAlamatBlur(e.target.value, setSaksi2Data)}
