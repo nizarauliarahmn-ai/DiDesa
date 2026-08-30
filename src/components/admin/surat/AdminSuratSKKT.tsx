@@ -101,10 +101,10 @@ export default function AdminSuratSKKT({
     ukuranBarat: '',
 
     // Saksi-Saksi (3 Orang)
-    saksi1Nama: 'H. Abdul Mukhlis',
-    saksi1Nik: '6306062501670002',
-    saksi2Nama: 'Badrul Kamal',
-    saksi2Nik: '6306062612770001',
+    saksi1Nama: '',
+    saksi1Nik: '',
+    saksi2Nama: '',
+    saksi2Nik: '',
     saksi3Nama: '',
     saksi3Nik: '',
 
@@ -885,8 +885,8 @@ export default function AdminSuratSKKT({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Ketik..." value={formData.saksi1Nama} onChange={e => setFormData({ ...formData, saksi1Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
-                <input type="text" placeholder="Ketik..." value={formData.saksi1Nik} onChange={e => setFormData({ ...formData, saksi1Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" placeholder="Nama Lengkap Saksi 1" value={formData.saksi1Nama} onChange={e => setFormData({ ...formData, saksi1Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="6303..." value={formData.saksi1Nik} onChange={e => setFormData({ ...formData, saksi1Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
@@ -912,8 +912,8 @@ export default function AdminSuratSKKT({
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Ketik..." value={formData.saksi2Nama} onChange={e => setFormData({ ...formData, saksi2Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
-                <input type="text" placeholder="Ketik..." value={formData.saksi2Nik} onChange={e => setFormData({ ...formData, saksi2Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" placeholder="Nama Lengkap Saksi 2" value={formData.saksi2Nama} onChange={e => setFormData({ ...formData, saksi2Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="6303..." value={formData.saksi2Nik} onChange={e => setFormData({ ...formData, saksi2Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
@@ -939,8 +939,8 @@ export default function AdminSuratSKKT({
                 )}
 </div>
               <div className="grid grid-cols-2 gap-2">
-                <input type="text" placeholder="Ketik..." value={formData.saksi3Nama} onChange={e => setFormData({ ...formData, saksi3Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
-                <input type="text" placeholder="Ketik..." value={formData.saksi3Nik} onChange={e => setFormData({ ...formData, saksi3Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" placeholder="Nama Lengkap Saksi 3" value={formData.saksi3Nama} onChange={e => setFormData({ ...formData, saksi3Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" placeholder="6303..." value={formData.saksi3Nik} onChange={e => setFormData({ ...formData, saksi3Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
