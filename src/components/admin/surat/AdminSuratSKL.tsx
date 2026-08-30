@@ -691,7 +691,7 @@ export default function AdminSuratSKL({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ayah</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ayah<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="16 digit NIK"
@@ -701,7 +701,7 @@ export default function AdminSuratSKL({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ayah</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ayah<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="Nama lengkap"
@@ -750,7 +750,7 @@ export default function AdminSuratSKL({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ibu</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">NIK Ibu<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="16 digit NIK"
@@ -760,7 +760,7 @@ export default function AdminSuratSKL({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ibu</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Ibu<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="Nama lengkap"
@@ -809,7 +809,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap Bayi</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Lengkap Bayi<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="Nama anak..."
@@ -819,7 +819,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
                 <select 
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   value={anakData.jenisKelamin}
@@ -830,7 +830,7 @@ onBlur={(e) => handleIbuAlamatBlur(e.target.value)}
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Anak Ke-</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Anak Ke-<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="number"
                   placeholder="Misal: 1"

@@ -625,7 +625,7 @@ export default function AdminSuratSKH({
                 }}
               />
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
                 <select 
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   value={formData.jenisKelamin}
@@ -636,7 +636,7 @@ export default function AdminSuratSKH({
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama<span className="text-emerald-500 ml-0.5">*</span></label>
                 <select 
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   value={formData.agama}
@@ -651,7 +651,7 @@ export default function AdminSuratSKH({
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan<span className="text-emerald-500 ml-0.5">*</span></label>
                 <SuggestCombobox
                   value={formData.pekerjaan}
                   onChange={(v) => setFormData({...formData, pekerjaan: v})}
@@ -659,7 +659,7 @@ export default function AdminSuratSKH({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan<span className="text-emerald-500 ml-0.5">*</span></label>
                 <select 
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   value={formData.statusPerkawinan}
@@ -672,7 +672,7 @@ export default function AdminSuratSKH({
                 </select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="Contoh: Kandangan"
@@ -682,7 +682,7 @@ export default function AdminSuratSKH({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="date"
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
@@ -692,7 +692,7 @@ export default function AdminSuratSKH({
               </div>
 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:col-span-2">
                   <div className="md:col-span-2 space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap<span className="text-emerald-500 ml-0.5">*</span></label>
                     <textarea
                       rows={2}
                       placeholder="Contoh: Jl. Keramat, Desa Wasah Hilir"
@@ -738,7 +738,7 @@ export default function AdminSuratSKH({
                 </label>
               </div>
               <div className="md:col-span-2 space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat<span className="text-emerald-500 ml-0.5">*</span></label>
                 <SuggestCombobox
                   value={formData.keperluan}
                   onChange={(v) => setFormData({...formData, keperluan: v})}
@@ -754,7 +754,7 @@ export default function AdminSuratSKH({
           <CardWrapper title="Detail Keterangan Kehilangan" icon={AlertCircle}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2 space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Barang / Dokumen yang Hilang</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Barang / Dokumen yang Hilang<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="Contoh: KTP, Kartu ATM BRI, Buku Tabungan"
@@ -765,7 +765,7 @@ export default function AdminSuratSKH({
                 <p className="mt-1 text-[10px] text-rose-500 font-medium">* Wajib diisi. Pisahkan dengan koma jika lebih dari satu barang.</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Kehilangan</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Kehilangan<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="date"
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
@@ -774,7 +774,7 @@ export default function AdminSuratSKH({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Kehilangan</label>
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Kehilangan<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
                   placeholder="Contoh: Perjalanan dari Sukamakmur ke Kandangan"

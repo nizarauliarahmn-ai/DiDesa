@@ -758,7 +758,7 @@ export default function AdminSuratSDU({
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Perusahaan / Usaha</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Nama Perusahaan / Usaha<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
                     type="text"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
@@ -767,7 +767,7 @@ export default function AdminSuratSDU({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Bidang Usaha</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Bidang Usaha<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={BUSINESS_CATEGORIES.includes(formData.bidangUsaha) ? formData.bidangUsaha : (formData.bidangUsaha ? "Lainnya (Tulis Kustom...)" : "")}
@@ -797,7 +797,7 @@ export default function AdminSuratSDU({
                   )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Usaha</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Usaha<span className="text-emerald-500 ml-0.5">*</span></label>
                   <textarea 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-y min-h-[80px]"
                     value={formData.alamatUsaha || ''}
@@ -826,7 +826,7 @@ export default function AdminSuratSDU({
                   }}
                 />
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.jenisKelamin}
@@ -837,7 +837,7 @@ export default function AdminSuratSDU({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.agama}
@@ -852,7 +852,7 @@ export default function AdminSuratSDU({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan<span className="text-emerald-500 ml-0.5">*</span></label>
                   <SuggestCombobox
                     value={formData.pekerjaan}
                     onChange={(v) => setFormData({...formData, pekerjaan: v})}
@@ -860,7 +860,7 @@ export default function AdminSuratSDU({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                     value={formData.statusPerkawinan}
@@ -873,7 +873,7 @@ export default function AdminSuratSDU({
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
                     type="text"
                     placeholder="Contoh: Kandangan"
@@ -883,7 +883,7 @@ export default function AdminSuratSDU({
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
                     type="date"
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
@@ -912,7 +912,7 @@ export default function AdminSuratSDU({
                   </div>
                 </div>
 <div className="md:col-span-2 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap<span className="text-emerald-500 ml-0.5">*</span></label>
                   <textarea 
                     rows={2}
                     placeholder="Contoh: Jl. Keramat, RT.001 RW.002, Desa Wasah Hilir"
@@ -946,7 +946,7 @@ export default function AdminSuratSDU({
                   </label>
                 </div>
                 <div className="md:col-span-1 space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kewarganegaraan</label>
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Kewarganegaraan<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none appearance-none"
                     value={formData.kewarganegaraan}
@@ -959,7 +959,7 @@ export default function AdminSuratSDU({
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-2 space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jalan / Nama Tempat (Sekarang)</label>
+                      <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jalan / Nama Tempat (Sekarang)<span className="text-emerald-500 ml-0.5">*</span></label>
                       <textarea 
                         rows={2}
                         className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
@@ -1001,7 +1001,7 @@ export default function AdminSuratSDU({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sifat Domisili</label>
+                    <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sifat Domisili<span className="text-emerald-500 ml-0.5">*</span></label>
                     <select 
                       className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none appearance-none"
                       value={formData.sifatDomisili}
