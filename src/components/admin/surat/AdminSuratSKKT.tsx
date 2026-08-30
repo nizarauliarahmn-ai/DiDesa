@@ -1016,13 +1016,18 @@ export default function AdminSuratSKKT({
         </div>
 
         {/* Live Preview Side */}
-        <div className="lg:col-span-6 bg-gray-100 dark:bg-slate-800/50 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 space-y-4 sticky top-6">
-          <div className="flex items-center justify-between px-2">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Pratinjau Lembar Surat (2 Halaman A4)</span>
+        <div className="lg:col-span-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[700px] sticky top-[170px]">
+          <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
             <div className="flex items-center gap-2">
-              <button onClick={() => setPreviewZoom(z => Math.max(0.3, z - 0.05))} className="p-1 text-gray-500 hover:bg-gray-200 rounded"><ZoomOut className="w-4 h-4" /></button>
-              <span className="text-xs font-mono font-bold text-gray-600">{Math.round(previewZoom * 100)}%</span>
-              <button onClick={() => setPreviewZoom(z => Math.min(1.0, z + 0.05))} className="p-1 text-gray-500 hover:bg-gray-200 rounded"><ZoomIn className="w-4 h-4" /></button>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 tracking-wide uppercase">LIVE A4 ENGINE PREVIEW</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
+              <button onClick={() => setPreviewZoom(z => Math.max(0.3, z - 0.05))} className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors" title="Zoom Out"><ZoomOut size={14} /></button>
+              <span className="text-[11px] font-mono font-semibold text-slate-500 dark:text-slate-400 min-w-[36px] text-center">{Math.round(previewZoom * 100)}%</span>
+              <button onClick={() => setPreviewZoom(z => Math.min(1.5, z + 0.05))} className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors" title="Zoom In"><ZoomIn size={14} /></button>
+              <div className="w-px h-4 bg-slate-200/60 mx-0.5"></div>
+              <button onClick={() => setPreviewZoom(0.45)} className="p-1.5 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-md transition-colors text-[10px] font-bold" title="Reset Zoom">Reset</button>
             </div>
           </div>
 
@@ -1033,7 +1038,7 @@ export default function AdminSuratSKKT({
             onMouseUp={dragProps.onMouseUp}
             onMouseMove={dragProps.onMouseMove}
             style={{ ...dragProps.style }}
-            className="flex-1 bg-slate-200/40 overflow-auto relative flex flex-col items-center gap-8 p-8 max-h-[85vh]"
+            className="bg-slate-100/60 dark:bg-slate-800/40 overflow-auto relative flex p-6 justify-center"
           >
             {generateHTML().map((pageHtml, index) => (
               <div 
