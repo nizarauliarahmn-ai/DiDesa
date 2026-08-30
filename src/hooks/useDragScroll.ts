@@ -14,10 +14,7 @@ export function useDragScroll() {
     const container = containerRef.current;
     if (!container) return;
 
-    // Only allow left-clicks
     if (e.button !== 0) return;
-
-    // Prevent default browser behavior (text selection, image dragging ghosting)
     e.preventDefault();
 
     dragStatus.current = {
@@ -56,8 +53,8 @@ export function useDragScroll() {
     if (!container || !dragStatus.current.isDown) return;
     e.preventDefault();
 
-    const walkX = (e.clientX - dragStatus.current.startX) * 1.5; // Drag speed multiplier
-    const walkY = (e.clientY - dragStatus.current.startY) * 1.5;
+    const walkX = (e.clientX - dragStatus.current.startX) * 2;
+    const walkY = (e.clientY - dragStatus.current.startY) * 2;
 
     container.scrollLeft = dragStatus.current.scrollLeft - walkX;
     container.scrollTop = dragStatus.current.scrollTop - walkY;
@@ -69,6 +66,6 @@ export function useDragScroll() {
     onMouseLeave,
     onMouseUp,
     onMouseMove,
-    style: { cursor: 'grab' }
+    style: { cursor: 'grab' as const }
   };
 }
