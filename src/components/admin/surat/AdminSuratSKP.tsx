@@ -1500,17 +1500,6 @@ formData.nomorSurat
 
         {/* Preview Column */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-            <div>
-              <h4 className="font-bold text-emerald-900 text-xs">Informasi Penting & Cetak</h4>
-              <p className="text-[11px] text-emerald-700 mt-1 leading-relaxed">
-                Pastikan data penduduk asal dan wilayah tujuan pindah sudah sesuai dengan KTP/KK terbaru. 
-                Gunakan fitur pencarian untuk meminimalkan kesalahan pengetikan. Jika tombol cetak tidak merespon, silakan gunakan menu <strong>Buka di Tab Baru</strong>.
-              </p>
-            </div>
-          </div>
-
           <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col h-[700px] sticky top-[170px]">
             <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
               <div className="flex items-center gap-2">

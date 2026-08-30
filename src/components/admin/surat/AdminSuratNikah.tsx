@@ -2418,15 +2418,6 @@ export default function AdminSuratNikah({
                   </div>
                 </div>
 
-                <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex items-start gap-3">
-                  <span className="text-emerald-600 shrink-0 mt-0.5 font-bold">💡</span>
-                  <div>
-                    <h4 className="font-bold text-emerald-900 text-xs">Informasi Penting & Cetak</h4>
-                    <p className="text-[11px] text-emerald-700 mt-1.5 leading-relaxed">
-                      Pastikan biodata kedua calon mempelai dan saksi sudah lengkap sesuai berkas persyaratan N1-N4 KUA. Jika tombol cetak tidak merespon, silakan gunakan menu <strong>Buka di Tab Baru</strong>.
-                    </p>
-                  </div>
-                </div>
               </div>
 
               {/* KANAN: PREVIEW A4 */}

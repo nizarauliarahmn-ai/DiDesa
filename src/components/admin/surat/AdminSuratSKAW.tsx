@@ -1281,17 +1281,6 @@ export default function AdminSuratSKAW({
         {/* Preview Column */}
         <div className="lg:col-span-5 space-y-6">
           <div className="sticky top-[170px] space-y-6">
-            <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-bold text-emerald-900 text-xs">Informasi Penting & Cetak</h4>
-                <p className="text-[11px] text-emerald-700 mt-1 leading-relaxed">
-                  Pastikan data almarhum dan ahli waris sudah sesuai. 
-                  Gunakan fitur pencarian untuk meminimalkan kesalahan pengetikan. Jika tombol cetak tidak merespon, silakan gunakan menu <strong>Buka di Tab Baru</strong>.
-                </p>
-              </div>
-            </div>
-
             <div className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm rounded-2xl overflow-hidden shadow-md flex flex-col sticky top-[170px]">
               <div className="px-5 py-3 border-b border-slate-100/60 dark:border-slate-800/60 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
