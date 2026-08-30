@@ -257,11 +257,36 @@ export default function AdminSuratSKPH({
     setSearchQuery('');
   };
 
-  const handlePrint = async (skipCheck = false) => {
-    if (!formData.nama || !formData.nama.trim()) {
-      showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
-      return;
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+  const requiredFields = [
+    { key: 'jenisKelamin', id: 'skph-jenisKelamin' },
+    { key: 'agama', id: 'skph-agama' },
+    { key: 'pekerjaan', id: 'skph-pekerjaan' },
+    { key: 'statusPerkawinan', id: 'skph-statusPerkawinan' },
+    { key: 'tempatLahir', id: 'skph-tempatLahir' },
+    { key: 'tanggalLahir', id: 'skph-tanggalLahir' },
+    { key: 'alamat', id: 'skph-alamat' },
+    { key: 'sumberPenghasilan', id: 'skph-sumberPenghasilan' },
+    { key: 'jumlahPenghasilan', id: 'skph-jumlahPenghasilan' },
+    { key: 'keperluan', id: 'skph-keperluan' },
+  ];
+
+  const validateRequired = (): boolean => {
+    const empty = requiredFields.filter(f => !(formData as any)[f.key]?.trim());
+    if (empty.length === 0) {
+      setInvalidFields([]);
+      return true;
     }
+    setInvalidFields(empty.map(f => f.id));
+    const first = document.getElementById(empty[0].id);
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast(`Mohon lengkapi ${empty.length} kolom wajib yang masih kosong.`, 'error');
+    return false;
+  };
+
+  const handlePrint = async (skipCheck = false) => {
+    if (!validateRequired()) return;
     if (isBackdate && !(manualSequence || '').trim()) {
       showToast('Mohon isi nomor urut surat sisipan.', 'error');
       return;
@@ -650,7 +675,8 @@ export default function AdminSuratSKPH({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Jenis Kelamin<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    id="skph-jenisKelamin"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skph-jenisKelamin') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.jenisKelamin}
                     onChange={(e) => setFormData({...formData, jenisKelamin: e.target.value})}
                   >
@@ -661,7 +687,8 @@ export default function AdminSuratSKPH({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Agama<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    id="skph-agama"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skph-agama') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.agama}
                     onChange={(e) => setFormData({...formData, agama: e.target.value})}
                   >
@@ -675,16 +702,19 @@ export default function AdminSuratSKPH({
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Pekerjaan<span className="text-emerald-500 ml-0.5">*</span></label>
+                  <div id="skph-pekerjaan">
                   <SuggestCombobox
                     value={formData.pekerjaan}
                     onChange={(v) => setFormData({...formData, pekerjaan: v})}
                     options={jobs}
                   />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Status Perkawinan<span className="text-emerald-500 ml-0.5">*</span></label>
                   <select 
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    id="skph-statusPerkawinan"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skph-statusPerkawinan') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.statusPerkawinan}
                     onChange={(e) => setFormData({...formData, statusPerkawinan: e.target.value})}
                   >
@@ -697,9 +727,10 @@ export default function AdminSuratSKPH({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
+                    id="skph-tempatLahir"
                     type="text"
                     placeholder="Kandangan"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skph-tempatLahir') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.tempatLahir}
                     onChange={(e) => setFormData({...formData, tempatLahir: e.target.value})}
                   />
@@ -707,8 +738,9 @@ export default function AdminSuratSKPH({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tanggal Lahir<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
+                    id="skph-tanggalLahir"
                     type="date"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none ${invalidFields.includes('skph-tanggalLahir') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.tanggalLahir}
                     onChange={(e) => setFormData({...formData, tanggalLahir: e.target.value})}
                   />
@@ -717,9 +749,10 @@ export default function AdminSuratSKPH({
                   <div className="md:col-span-2 space-y-2">
                     <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Alamat Lengkap<span className="text-emerald-500 ml-0.5">*</span></label>
                     <textarea
+                      id="skph-alamat"
                       rows={2}
                       placeholder="Jl. Keramat, Desa Wasah Hilir"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none resize-none"
+                      className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none resize-none ${invalidFields.includes('skph-alamat') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                       value={formData.alamat}
                       onChange={(e) => setFormData(prev => ({ ...prev, alamat: e.target.value }))}
                       onBlur={(e) => handleAlamatBlur(e.target.value)}
@@ -777,9 +810,10 @@ export default function AdminSuratSKPH({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Sumber Penghasilan / Pekerjaan Rill<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
+                    id="skph-sumberPenghasilan"
                     type="text"
                     placeholder="Bertani Padi / Wiraswasta Kelontong"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${invalidFields.includes('skph-sumberPenghasilan') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.sumberPenghasilan}
                     onChange={(e) => setFormData({...formData, sumberPenghasilan: e.target.value})}
                   />
@@ -787,9 +821,10 @@ export default function AdminSuratSKPH({
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Rata-rata Penghasilan Bulanan (Rp)<span className="text-emerald-500 ml-0.5">*</span></label>
                   <input 
+                    id="skph-jumlahPenghasilan"
                     type="text"
                     placeholder="1.500.000"
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                    className={`w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition-all ${invalidFields.includes('skph-jumlahPenghasilan') ? 'border-red-500 ring-2 ring-red-200' : 'border-slate-200 dark:border-slate-700'}`}
                     value={formData.jumlahPenghasilan}
                     onChange={(e) => {
                       const rawValue = e.target.value.replace(/[^0-9]/g, '');
@@ -804,12 +839,14 @@ export default function AdminSuratSKPH({
                 </div>
                 <div className="md:col-span-2 space-y-2">
                   <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Keperluan Surat (Diberikan Untuk...)<span className="text-emerald-500 ml-0.5">*</span></label>
-                  <SuggestCombobox
-                    value={formData.keperluan}
-                    onChange={(v) => setFormData({...formData, keperluan: v})}
-                    options={KEPERLUAN_OPTIONS}
-                    placeholder="Persyaratan pengajuan kredit bank"
-                  />
+                  <div id="skph-keperluan">
+                    <SuggestCombobox
+                      value={formData.keperluan}
+                      onChange={(v) => setFormData({...formData, keperluan: v})}
+                      options={KEPERLUAN_OPTIONS}
+                      placeholder="Persyaratan pengajuan kredit bank"
+                    />
+                  </div>
                   <p className="mt-1 text-[10px] text-emerald-600 font-medium">* Tuliskan secara spesifik tujuan pembuatan surat ini.</p>
                 </div>
               </div>
