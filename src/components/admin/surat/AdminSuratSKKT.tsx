@@ -1038,7 +1038,7 @@ export default function AdminSuratSKKT({
             onMouseUp={dragProps.onMouseUp}
             onMouseMove={dragProps.onMouseMove}
             style={{ ...dragProps.style }}
-            className="bg-slate-100/60 dark:bg-slate-800/40 overflow-auto relative flex p-6 justify-center"
+            className="bg-slate-100/60 dark:bg-slate-800/40 overflow-auto relative flex gap-8 p-6 justify-center items-start"
           >
             {generateHTML().map((pageHtml, index) => (
               <div 
