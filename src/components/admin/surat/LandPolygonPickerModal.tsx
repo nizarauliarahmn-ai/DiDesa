@@ -17,6 +17,10 @@ export interface PolygonData {
   batasSelatan: string;
   batasTimur: string;
   batasBarat: string;
+  ukuranUtara: string;
+  ukuranSelatan: string;
+  ukuranTimur: string;
+  ukuranBarat: string;
 }
 
 export function LandPolygonPickerModal({
@@ -47,6 +51,10 @@ export function LandPolygonPickerModal({
   const [batasSelatan, setBatasSelatan] = useState('');
   const [batasTimur, setBatasTimur] = useState('');
   const [batasBarat, setBatasBarat] = useState('');
+  const [ukuranUtara, setUkuranUtara] = useState('');
+  const [ukuranSelatan, setUkuranSelatan] = useState('');
+  const [ukuranTimur, setUkuranTimur] = useState('');
+  const [ukuranBarat, setUkuranBarat] = useState('');
 
   const tileUrls = {
     satellite: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
@@ -281,6 +289,10 @@ export function LandPolygonPickerModal({
       batasSelatan,
       batasTimur,
       batasBarat,
+      ukuranUtara,
+      ukuranSelatan,
+      ukuranTimur,
+      ukuranBarat,
     });
   };
 
@@ -360,12 +372,24 @@ export function LandPolygonPickerModal({
             )}
 
             <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Nama Pemilik Batas</p>
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Nama Pemilik Batas & Ukuran (Meter)</p>
               <div className="space-y-1.5">
-                <input type="text" placeholder="Utara" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
-                <input type="text" placeholder="Selatan" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
-                <input type="text" placeholder="Timur" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
-                <input type="text" placeholder="Barat" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                <div className="flex gap-1.5">
+                  <input type="text" placeholder="Utara" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} className="flex-1 px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                  <input type="text" inputMode="decimal" placeholder="m" value={ukuranUtara} onChange={e => setUkuranUtara(e.target.value.replace(/[^0-9.]/g, ''))} className="w-16 px-2 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-center" />
+                </div>
+                <div className="flex gap-1.5">
+                  <input type="text" placeholder="Selatan" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} className="flex-1 px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                  <input type="text" inputMode="decimal" placeholder="m" value={ukuranSelatan} onChange={e => setUkuranSelatan(e.target.value.replace(/[^0-9.]/g, ''))} className="w-16 px-2 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-center" />
+                </div>
+                <div className="flex gap-1.5">
+                  <input type="text" placeholder="Timur" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} className="flex-1 px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                  <input type="text" inputMode="decimal" placeholder="m" value={ukuranTimur} onChange={e => setUkuranTimur(e.target.value.replace(/[^0-9.]/g, ''))} className="w-16 px-2 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-center" />
+                </div>
+                <div className="flex gap-1.5">
+                  <input type="text" placeholder="Barat" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} className="flex-1 px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                  <input type="text" inputMode="decimal" placeholder="m" value={ukuranBarat} onChange={e => setUkuranBarat(e.target.value.replace(/[^0-9.]/g, ''))} className="w-16 px-2 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500 font-mono text-center" />
+                </div>
               </div>
             </div>
           </div>
