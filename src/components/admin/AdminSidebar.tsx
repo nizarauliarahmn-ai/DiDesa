@@ -280,7 +280,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem collapsed={isCollapsed} icon={<Gift size={18} />} label="Bantuan Sosial" active={activeTab === 'bantuan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('bantuan'); }} />
             
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Produk Hukum</p>}
-            <NavItem collapsed={isCollapsed} icon={<Scale className="w-5 h-5 transition-colors" strokeWidth={1.75} />} label="Penomoran SK & Perdes" active={activeTab === 'produk_hukum'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('produk_hukum'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Scale className="w-5 h-5 transition-colors" strokeWidth={1.75} />} label="Produk Hukum" active={activeTab === 'produk_hukum'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('produk_hukum'); }} />
             
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pelayanan Publik</p>}
             <NavItem id="tour-surat" collapsed={isCollapsed} icon={<FileSignature className="w-5 h-5 transition-colors" strokeWidth={1.75} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
