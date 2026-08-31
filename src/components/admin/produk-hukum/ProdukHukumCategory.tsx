@@ -264,7 +264,10 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
       </table>
     </body></html>`);
     printWindow.document.close();
-    setTimeout(() => printWindow.print(), 500);
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.onafterprint = function() { printWindow.close(); };
+    }, 500);
   };
 
   return (
