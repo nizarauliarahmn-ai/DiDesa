@@ -13,6 +13,7 @@ import { useDragScroll } from '../../../hooks/useDragScroll';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
+import { getRwForRt } from '../../../utils/rtRwMapping';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 
@@ -863,9 +864,53 @@ export default function AdminSuratSKKT({
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Lokasi Jalan / Dusun</label>
                 <input type="text" placeholder="Nama Jalan atau Dusun" value={formData.lokasiTanah} onChange={e => setFormData({ ...formData, lokasiTanah: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
-              <div>
-                <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RT / RW</label>
-                <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="001 / 001" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value.replace(/[^0-9/]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RT</label>
+                  <input 
+                    type="text" 
+                    inputMode="numeric" 
+                    pattern="[0-9]*" 
+                    placeholder="cth: 01" 
+                    value={formData.nomorRt} 
+                    onChange={e => {
+                      const rtVal = e.target.value.replace(/[^0-9]/g, '');
+                      const rwMapping = getRwForRt(rtVal);
+                      const newRw = rwMapping || formData.rtRw.split('/')[1]?.trim() || '';
+                      let autoName = formData.namaKetuaRt;
+                      try {
+                        const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+                        const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtVal) || o.role.toLowerCase().includes('rt.' + rtVal) || o.role.toLowerCase().includes('rt. ' + rtVal));
+                        if (rtOfficer) autoName = rtOfficer.name;
+                      } catch (err) {}
+                      setFormData({ 
+                        ...formData, 
+                        nomorRt: rtVal, 
+                        rtRw: newRw ? `${rtVal} / ${newRw}` : rtVal,
+                        namaKetuaRt: autoName.toUpperCase()
+                      });
+                    }}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" 
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RW</label>
+                  <input 
+                    type="text" 
+                    inputMode="numeric" 
+                    pattern="[0-9]*" 
+                    placeholder="cth: 01" 
+                    value={formData.rtRw.split('/')[1]?.trim() || ''} 
+                    onChange={e => {
+                      const rwVal = e.target.value.replace(/[^0-9]/g, '');
+                      setFormData({ 
+                        ...formData, 
+                        rtRw: `${formData.nomorRt} / ${rwVal}`
+                      });
+                    }}
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" 
+                  />
+                </div>
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIB</label>

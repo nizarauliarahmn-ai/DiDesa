@@ -6,8 +6,10 @@ import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { 
   Building2, MapPin, Save, Image as ImageIcon, Bot, Upload,
-  Palette, Settings, FileText, Cloud, FolderOpen, Link2, Loader2
+  Palette, Settings, FileText, Cloud, FolderOpen, Link2, Loader2,
+  Plus, Trash2, Edit3, Check, X, Users
 } from 'lucide-react';
+import { getRtRwMapping, addRtRwEntry, removeRtRwEntry, type RtRwEntry } from '../../utils/rtRwMapping';
 import VillageMapModal from '../common/VillageMapModal';
 import VillageMapPreview from '../common/VillageMapPreview';
 import { testGoogleDriveFolder } from '../../utils/googleDriveUpload';
@@ -40,6 +42,12 @@ export default function AdminPengaturan() {
   const [googleDriveFolderId, setGoogleDriveFolderId] = useState(() => localStorage.getItem('google_drive_folder_id') || '');
   const [gdriveTesting, setGdriveTesting] = useState(false);
   const [gdriveTestResult, setGdriveTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const [rtRwEntries, setRtRwEntries] = useState<RtRwEntry[]>(() => getRtRwMapping());
+  const [newRt, setNewRt] = useState('');
+  const [newRw, setNewRw] = useState('');
+  const [editingRt, setEditingRt] = useState<string | null>(null);
+  const [editRw, setEditRw] = useState('');
 
   // Fetch settings from Supabase on mount to keep device-agnostic sync
   useEffect(() => {
@@ -663,6 +671,142 @@ export default function AdminPengaturan() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mapping RT/RW */}
+      <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
+          <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+            <Users className="w-5 h-5 text-emerald-600" />
+            Mapping RT / RW
+          </h3>
+          <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-1">
+            Atur koneksi RT ke RW. Ketika warga memilih RT, RW otomatis terisi sesuai mapping ini.
+          </p>
+        </div>
+        <div className="p-5 space-y-4">
+          {/* Add new mapping */}
+          <div className="flex gap-2 items-end">
+            <div className="space-y-1">
+              <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">RT</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="01"
+                value={newRt}
+                onChange={e => setNewRt(e.target.value.replace(/[^0-9]/g, ''))}
+                className="w-20 px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">RW</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                placeholder="01"
+                value={newRw}
+                onChange={e => setNewRw(e.target.value.replace(/[^0-9]/g, ''))}
+                className="w-20 px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800"
+              />
+            </div>
+            <button
+              onClick={() => {
+                if (!newRt.trim() || !newRw.trim()) return;
+                addRtRwEntry(newRt.trim(), newRw.trim());
+                setRtRwEntries(getRtRwMapping());
+                setNewRt('');
+                setNewRw('');
+              }}
+              disabled={!newRt.trim() || !newRw.trim()}
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+            >
+              <Plus className="w-3 h-3" /> Tambah
+            </button>
+          </div>
+
+          {/* Mapping table */}
+          {rtRwEntries.length === 0 ? (
+            <p className="text-xs text-gray-400 dark:text-slate-500 italic text-center py-4">
+              Belum ada mapping RT/RW. Tambahkan mapping di atas.
+            </p>
+          ) : (
+            <div className="border border-gray-100 dark:border-slate-800 rounded-xl overflow-hidden">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-slate-800">
+                    <th className="px-4 py-2 text-left font-bold text-gray-500 dark:text-slate-400 w-20">RT</th>
+                    <th className="px-4 py-2 text-left font-bold text-gray-500 dark:text-slate-400 w-20">RW</th>
+                    <th className="px-4 py-2 text-right font-bold text-gray-500 dark:text-slate-400 w-24">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
+                  {rtRwEntries.map((entry) => (
+                    <tr key={entry.rt} className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="px-4 py-2 font-mono font-bold text-gray-900 dark:text-white">RT {entry.rt}</td>
+                      <td className="px-4 py-2">
+                        {editingRt === entry.rt ? (
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={editRw}
+                            onChange={e => setEditRw(e.target.value.replace(/[^0-9]/g, ''))}
+                            className="w-16 px-2 py-1 rounded-lg border border-emerald-300 dark:border-emerald-700 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800"
+                            autoFocus
+                          />
+                        ) : (
+                          <span className="font-mono text-gray-700 dark:text-slate-300">RW {entry.rw}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        {editingRt === entry.rt ? (
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => {
+                                if (editRw.trim()) {
+                                  addRtRwEntry(entry.rt, editRw.trim());
+                                  setRtRwEntries(getRtRwMapping());
+                                }
+                                setEditingRt(null);
+                                setEditRw('');
+                              }}
+                              className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => { setEditingRt(null); setEditRw(''); }}
+                              className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => { setEditingRt(entry.rt); setEditRw(entry.rw); }}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                removeRtRwEntry(entry.rt);
+                                setRtRwEntries(getRtRwMapping());
+                              }}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
