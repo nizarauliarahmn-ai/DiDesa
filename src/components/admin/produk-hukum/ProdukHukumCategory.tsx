@@ -223,7 +223,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         colgroup .col-uraian{width:48%}
         colgroup .col-tanggal{width:18%}
         colgroup .col-jenis{width:18%}
-        tfoot td{padding-top:10px;font-size:8px;color:#64748b;border-top:1px solid #e2e8f0;border-left:none;border-right:none;border-bottom:none;line-height:1.4}
+        tfoot td{padding-top:1cm;padding-bottom:1.5cm;font-size:8px;color:#64748b;border-top:1px solid #cbd5e1;border-left:none;border-right:none;border-bottom:none;line-height:1.4}
       </style></head><body>
       <div class="header">
         <h2>DATA ${label.toUpperCase()}</h2>
