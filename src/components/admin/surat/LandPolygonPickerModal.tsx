@@ -182,6 +182,23 @@ export function LandPolygonPickerModal({
     setPoints(prev => prev.slice(0, -1));
   };
 
+  const handleFlyToAddress = async () => {
+    if (!initialAddress || !mapInstanceRef.current) return;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(initialAddress)}&format=json&limit=1`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        mapInstanceRef.current.flyTo([lat, lng], 19, { duration: 1.5 });
+      } else {
+        showToast('Lokasi tidak ditemukan di peta', 'error');
+      }
+    } catch {
+      showToast('Gagal mencari lokasi', 'error');
+    }
+  };
+
   const handleClear = () => {
     if (window.confirm('Hapus semua titik?')) {
       setPoints([]);
@@ -290,10 +307,14 @@ export function LandPolygonPickerModal({
           <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
           
           {initialAddress && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-emerald-700/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg z-[10] flex items-center gap-2 max-w-[90%]">
+            <button 
+              onClick={handleFlyToAddress}
+              className="absolute top-4 left-1/2 -translate-x-1/2 bg-emerald-700/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg z-[10] flex items-center gap-2 max-w-[90%] hover:bg-emerald-800 transition-colors cursor-pointer active:scale-95"
+              title="Klik untuk terbang ke lokasi ini"
+            >
               <MapPin className="w-4 h-4 text-emerald-200 shrink-0" />
               <span className="text-white text-xs font-bold truncate">{initialAddress}</span>
-            </div>
+            </button>
           )}
 
           <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg z-[10] border border-emerald-100 min-w-[200px] max-w-[220px] mt-[52px]">
