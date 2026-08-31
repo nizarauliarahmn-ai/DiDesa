@@ -2361,7 +2361,7 @@ export default function AdminSuratNikah({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               
               {/* KIRI: KONTROL & TABS */}
-              <div className="lg:col-span-5 flex flex-col gap-6" onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}>
+              <div className="lg:col-span-5 flex flex-col gap-6" onKeyDownCapture={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } }}>
                 <div className="flex flex-col gap-4">
                   <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">6. Preview & Cetak</h2>
                   <div className="flex gap-2">
