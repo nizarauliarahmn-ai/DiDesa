@@ -187,7 +187,7 @@ export function LandPolygonPickerModal({
     try {
       const vLat = parseFloat(localStorage.getItem('village_lat') || initialLat);
       const vLng = parseFloat(localStorage.getItem('village_lng') || initialLng);
-      const delta = 0.05;
+      const delta = 0.1;
       const viewbox = `${vLng - delta},${vLat + delta},${vLng + delta},${vLat - delta}`;
       const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(initialAddress)}&format=json&limit=1&viewbox=${viewbox}&bounded=1`);
       const data = await res.json();
