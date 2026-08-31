@@ -221,6 +221,13 @@ export function LandPolygonPickerModal({
     }
   };
 
+  const handleResetToVillage = () => {
+    if (!mapInstanceRef.current) return;
+    const vLat = parseFloat(localStorage.getItem('village_lat') || initialLat);
+    const vLng = parseFloat(localStorage.getItem('village_lng') || initialLng);
+    mapInstanceRef.current.flyTo([vLat, vLng], 17, { duration: 1.2 });
+  };
+
   const handleClear = () => {
     if (window.confirm('Hapus semua titik?')) {
       setPoints([]);
@@ -316,6 +323,9 @@ export function LandPolygonPickerModal({
           </div>
 
           <div className="flex items-center gap-1.5">
+            <button onClick={handleResetToVillage} className="px-3 py-1.5 bg-blue-50 text-blue-700 font-bold rounded-xl border border-blue-200 hover:bg-blue-100 transition-all flex items-center gap-1" title="Kembali ke kantor desa">
+              <MapPin className="w-3.5 h-3.5" /> Kantor Desa
+            </button>
             <button onClick={handleUndo} disabled={points.length === 0} className="px-3 py-1.5 bg-yellow-50 text-yellow-700 font-bold rounded-xl border border-yellow-200 hover:bg-yellow-100 transition-all flex items-center gap-1 disabled:opacity-50">
               <Undo className="w-3.5 h-3.5" /> Undo
             </button>
