@@ -826,6 +826,53 @@ export default function AdminSuratSKKT({
               <textarea rows={2} placeholder="cth: Warisan peninggalan orang tua yang sampai saat ini saya kuasai secara terus menerus" value={formData.asalPerolehan} onChange={e => setFormData({ ...formData, asalPerolehan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs" />
             </div>
 
+            {/* Koordinat Poligon & Satelit — BEFORE Batas */}
+            <div className="p-5 bg-emerald-50/60 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-emerald-200 dark:border-slate-600 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center shrink-0">
+                  <MapPin className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-emerald-800 dark:text-emerald-200">Koordinat Poligon & Satelit <span className="text-red-500">*</span></h4>
+                  <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/60">Gambar batas tanah melalui peta untuk menghitung ukuran otomatis</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-[10px] text-emerald-700 dark:text-emerald-300">
+                <div className="flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/40 rounded-lg px-2.5 py-1.5 border border-emerald-100 dark:border-slate-700">
+                  <span className="w-4 h-4 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[9px] font-bold shrink-0">1</span>
+                  <span>Klik "Buka Peta"</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/40 rounded-lg px-2.5 py-1.5 border border-emerald-100 dark:border-slate-700">
+                  <span className="w-4 h-4 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[9px] font-bold shrink-0">2</span>
+                  <span>Gambar titik batas</span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/70 dark:bg-slate-900/40 rounded-lg px-2.5 py-1.5 border border-emerald-100 dark:border-slate-700">
+                  <span className="w-4 h-4 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[9px] font-bold shrink-0">3</span>
+                  <span>Ukuran terisi otomatis</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {formData.polygonPoints?.length > 0 ? (
+                  <div className="flex-1 px-4 py-3 bg-emerald-100 dark:bg-emerald-900/30 border border-emerald-300 dark:border-emerald-700 rounded-xl text-emerald-700 dark:text-emerald-300 font-bold text-sm flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    {formData.polygonPoints.length} Titik Terukur
+                  </div>
+                ) : (
+                  <div className="flex-1 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-dashed border-emerald-200 dark:border-slate-600 rounded-xl text-gray-400 text-sm italic">
+                    Belum ada titik — buka peta untuk memulai
+                  </div>
+                )}
+                <button 
+                  onClick={() => setShowMapModal(true)}
+                  className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-2 whitespace-nowrap shadow-md hover:shadow-lg transition-all"
+                >
+                  <MapPin className="w-4 h-4" /> Buka Peta
+                </button>
+              </div>
+            </div>
+
             {/* Batas-Batas & Ukuran Meter */}
             <div className="space-y-3 pt-2">
               <p className="font-bold text-xs text-gray-700 dark:text-slate-300">Batas & Panjang Sisi Tanah (Meter):</p>
@@ -861,31 +908,6 @@ export default function AdminSuratSKKT({
                     <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Geo Coordinate Picker */}
-            <div className="p-4 bg-emerald-50/50 dark:bg-slate-800/50 rounded-xl border border-emerald-100 dark:border-slate-700 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Koordinat Poligon & Satelit <span className="text-red-500">*</span></label>
-                  <div className="flex items-center gap-2">
-                    <input 
-                      type="text" 
-                      placeholder="Klik tombol map untuk menggambar" 
-                      value={formData.polygonPoints?.length > 0 ? `${formData.polygonPoints.length} Titik Terukur` : ''} 
-                      disabled
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-emerald-700 font-bold" 
-                    />
-                    <button 
-                      onClick={() => setShowMapModal(true)}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg flex items-center gap-2 whitespace-nowrap shadow-sm"
-                    >
-                      <MapPin className="w-4 h-4" /> Buka Peta
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-gray-500 mt-1">Gunakan peta satelit interaktif untuk menggambar batas tanah dan menghitung luas otomatis.</p>
                 </div>
               </div>
             </div>
