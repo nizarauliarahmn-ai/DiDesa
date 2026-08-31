@@ -185,14 +185,18 @@ export function LandPolygonPickerModal({
   const handleFlyToAddress = async () => {
     if (!initialAddress || !mapInstanceRef.current) return;
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(initialAddress)}&format=json&limit=1`);
+      const vLat = parseFloat(localStorage.getItem('village_lat') || initialLat);
+      const vLng = parseFloat(localStorage.getItem('village_lng') || initialLng);
+      const delta = 0.05;
+      const viewbox = `${vLng - delta},${vLat + delta},${vLng + delta},${vLat - delta}`;
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(initialAddress)}&format=json&limit=1&viewbox=${viewbox}&bounded=1`);
       const data = await res.json();
       if (data && data.length > 0) {
         const lat = parseFloat(data[0].lat);
         const lng = parseFloat(data[0].lon);
         mapInstanceRef.current.flyTo([lat, lng], 19, { duration: 1.5 });
       } else {
-        showToast('Lokasi tidak ditemukan di peta', 'error');
+        showToast('Lokasi tidak ditemukan di wilayah desa', 'error');
       }
     } catch {
       showToast('Gagal mencari lokasi', 'error');
