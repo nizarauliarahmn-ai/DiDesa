@@ -134,6 +134,10 @@ export default function AdminSuratSKKT({
   const activeKecamatan = localStorage.getItem('kop_kecamatan') || formData.namaKecamatan || 'Simpur';
   const activeDesa = cleanStr(localStorage.getItem('kop_desa') || formData.namaDesa || 'Wasah Hilir', /^(desa|kelurahan)\s+/i);
   const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || '';
+  const diPergunakanOptions = [
+    'Pribadi', 'Usaha', 'Sewa', 'Warisan', 'Hadiah', 'Jaminan', 'Lainnya'
+  ];
+
   const activeKontak = localStorage.getItem('kop_kontak') || formData.kontakKantor || '';
 
   const jobs = [
@@ -808,7 +812,11 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Di pergunakan</label>
-                <input type="text" placeholder="cth: Pribadi" value={formData.diPergunakan} onChange={e => setFormData({ ...formData, diPergunakan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <SuggestCombobox
+                  value={formData.diPergunakan}
+                  onChange={(v) => setFormData({...formData, diPergunakan: v})}
+                  options={diPergunakanOptions}
+                />
               </div>
             </div>
 
