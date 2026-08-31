@@ -1174,6 +1174,10 @@ export default function AdminSuratSKKT({
               ukuranSelatan: data.southDistance > 0 ? `${data.southDistance.toFixed(1)} Meter` : prev.ukuranSelatan,
               ukuranTimur: data.eastDistance > 0 ? `${data.eastDistance.toFixed(1)} Meter` : prev.ukuranTimur,
               ukuranBarat: data.westDistance > 0 ? `${data.westDistance.toFixed(1)} Meter` : prev.ukuranBarat,
+              batasUtara: data.batasUtara || prev.batasUtara,
+              batasSelatan: data.batasSelatan || prev.batasSelatan,
+              batasTimur: data.batasTimur || prev.batasTimur,
+              batasBarat: data.batasBarat || prev.batasBarat,
             }));
             showToast(`Area berhasil diukur: ${data.area.toFixed(2)} m²`, 'success');
             setShowMapModal(false);

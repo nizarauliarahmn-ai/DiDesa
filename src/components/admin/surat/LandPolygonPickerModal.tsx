@@ -13,6 +13,10 @@ export interface PolygonData {
   eastDistance: number;
   westDistance: number;
   points: { lat: number, lng: number }[];
+  batasUtara: string;
+  batasSelatan: string;
+  batasTimur: string;
+  batasBarat: string;
 }
 
 export function LandPolygonPickerModal({
@@ -35,6 +39,10 @@ export function LandPolygonPickerModal({
   const [mapType, setMapType] = useState<'satellite' | 'street'>('satellite');
   const [points, setPoints] = useState<L.LatLng[]>([]);
   const [area, setArea] = useState<number>(0);
+  const [batasUtara, setBatasUtara] = useState('');
+  const [batasSelatan, setBatasSelatan] = useState('');
+  const [batasTimur, setBatasTimur] = useState('');
+  const [batasBarat, setBatasBarat] = useState('');
 
   const tileUrls = {
     satellite: 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
@@ -199,7 +207,11 @@ export function LandPolygonPickerModal({
       southDistance: southDist,
       eastDistance: eastDist,
       westDistance: westDist,
-      points: points.map(p => ({ lat: p.lat, lng: p.lng }))
+      points: points.map(p => ({ lat: p.lat, lng: p.lng })),
+      batasUtara,
+      batasSelatan,
+      batasTimur,
+      batasBarat,
     });
   };
 
@@ -243,7 +255,7 @@ export function LandPolygonPickerModal({
         <div className="relative w-full h-[500px] bg-slate-200">
           <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
           
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg z-[10] border border-emerald-100 pointer-events-none min-w-[200px]">
+          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg z-[10] border border-emerald-100 min-w-[200px] max-w-[220px]">
             <h4 className="font-bold text-gray-800 mb-2 border-b pb-1">Hasil Pengukuran</h4>
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between"><span className="text-gray-500">Jumlah Titik:</span> <span className="font-bold">{points.length}</span></div>
@@ -252,6 +264,16 @@ export function LandPolygonPickerModal({
             {points.length < 3 && (
               <p className="text-[10px] text-orange-600 mt-2 italic">* Minimal 3 titik untuk hitung luas</p>
             )}
+
+            <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
+              <p className="text-[10px] font-bold text-gray-600 uppercase tracking-wider">Nama Pemilik Batas</p>
+              <div className="space-y-1.5">
+                <input type="text" placeholder="Utara" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                <input type="text" placeholder="Selatan" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                <input type="text" placeholder="Timur" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+                <input type="text" placeholder="Barat" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} className="w-full px-2.5 py-1.5 text-[11px] bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg outline-none focus:ring-1 focus:ring-emerald-500" />
+              </div>
+            </div>
           </div>
         </div>
 
