@@ -127,8 +127,21 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     return result;
   }, [items, searchQuery, filterJenis, filterTahun, filterArsip]);
 
-  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
-  const paginatedItems = filteredItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const itemsWithNumbers = useMemo(() => {
+    let yearCounter = 0;
+    let lastYear = '';
+    return filteredItems.map((item) => {
+      if (item.tahun !== lastYear) {
+        yearCounter = 0;
+        lastYear = item.tahun;
+      }
+      yearCounter++;
+      return { ...item, displayNo: yearCounter };
+    });
+  }, [filteredItems]);
+
+  const totalPages = Math.ceil(itemsWithNumbers.length / ITEMS_PER_PAGE);
+  const paginatedItems = itemsWithNumbers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   useEffect(() => { setCurrentPage(1); }, [searchQuery, filterJenis, filterTahun, filterArsip]);
 
@@ -266,7 +279,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
               <tbody>
                 {paginatedItems.map((item) => (
                   <tr key={item.id} className="border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">{item.no}</td>
+                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">{item.displayNo}</td>
                     <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
                     <td className="px-4 py-3">
                       <div className="max-w-[300px]">
@@ -324,7 +337,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         )}
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
-            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, filteredItems.length)} dari {filteredItems.length} data</span>
+            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}
                 className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed font-semibold transition-colors">
