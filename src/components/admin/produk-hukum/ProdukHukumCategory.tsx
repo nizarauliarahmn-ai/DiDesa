@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import ImportModal from './ImportModal';
 
@@ -12,7 +12,6 @@ interface ProdukHukumItem {
   tanggalDiundangkan: string;
   jenisDokumen: string;
   arsip: boolean;
-  linkFile: string;
   ketArsip: string;
   ketLain: string;
   createdAt: string;
@@ -113,7 +112,6 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         i.uraian.toLowerCase().includes(q) ||
         i.no.toString().includes(q) ||
         i.tahun.includes(q) ||
-        i.linkFile.toLowerCase().includes(q) ||
         i.ketLain.toLowerCase().includes(q)
       );
     }
@@ -152,7 +150,6 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
       tanggalDiundangkan: row.tanggalDiundangkan || '',
       jenisDokumen: row.jenisDokumen || '',
       arsip: row.arsip ?? true,
-      linkFile: row.linkFile || '',
       ketArsip: row.ketArsip || '',
       ketLain: row.ketLain || '',
       createdAt: new Date().toISOString(),
@@ -383,7 +380,6 @@ function ModalCategory({ item, items, jenisOptions, label, onSave, onClose }: {
   const [tanggalDiundangkan, setTanggalDiundangkan] = useState(item?.tanggalDiundangkan || '');
   const [jenisDokumen, setJenisDokumen] = useState(item?.jenisDokumen || (jenisOptions[0] || ''));
   const [arsip, setArsip] = useState(item?.arsip ?? true);
-  const [linkFile, setLinkFile] = useState(item?.linkFile || '');
   const [ketArsip, setKetArsip] = useState(item?.ketArsip || 'ASLI');
   const [ketLain, setKetLain] = useState(item?.ketLain || '');
 
@@ -398,7 +394,7 @@ function ModalCategory({ item, items, jenisOptions, label, onSave, onClose }: {
     onSave({
       no: parseInt(no) || getNoUrut(items, tahun),
       tahun, uraian: uraian.trim(), tanggal, tanggalDiundangkan,
-      jenisDokumen, arsip, linkFile: linkFile.trim(), ketArsip, ketLain: ketLain.trim(),
+      jenisDokumen, arsip, ketArsip, ketLain: ketLain.trim(),
     });
   };
 
@@ -468,11 +464,6 @@ function ModalCategory({ item, items, jenisOptions, label, onSave, onClose }: {
                 <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${arsip ? 'translate-x-5' : ''}`} />
               </button>
             </div>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Link File</label>
-            <input type="text" value={linkFile} onChange={(e) => setLinkFile(e.target.value)} placeholder="cth: filename.pdf"
-              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Keterangan Lain</label>

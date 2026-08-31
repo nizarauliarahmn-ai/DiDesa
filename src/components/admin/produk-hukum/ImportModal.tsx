@@ -15,7 +15,6 @@ interface MappedData {
   tanggalDiundangkan: string;
   jenisDokumen: string;
   arsip: boolean;
-  linkFile: string;
   ketArsip: string;
   ketLain: string;
   [key: string]: any;
@@ -29,7 +28,6 @@ interface ColumnMapping {
   tanggalDiundangkan: string;
   jenisDokumen: string;
   arsip: string;
-  linkFile: string;
   ketArsip: string;
   ketLain: string;
 }
@@ -42,7 +40,6 @@ const DEFAULT_MAPPING: ColumnMapping = {
   tanggalDiundangkan: '',
   jenisDokumen: '',
   arsip: '',
-  linkFile: '',
   ketArsip: '',
   ketLain: '',
 };
@@ -55,7 +52,6 @@ const FIELD_LABELS: Record<keyof ColumnMapping, string> = {
   tanggalDiundangkan: 'Tgl Diundangkan',
   jenisDokumen: 'Jenis Dokumen',
   arsip: 'Arsip (TRUE/FALSE)',
-  linkFile: 'Link File',
   ketArsip: 'Ket Arsip',
   ketLain: 'Ket Lain',
 };
@@ -81,7 +77,6 @@ function guessMapping(headers: string[]): ColumnMapping {
   mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit']);
   mapping.jenisDokumen = findHeader(['jenis dokumen', 'jenis', 'type', 'kategori', 'category']);
   mapping.arsip = findHeader(['arsip', 'archive']);
-  mapping.linkFile = findHeader(['link file', 'link', 'file', 'dokumen', 'document']);
   mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip']);
   mapping.ketLain = findHeader(['ket lain', 'keterangan lain', 'catatan', 'note', 'remark']);
 
@@ -232,7 +227,6 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
       tanggalDiundangkan: mapping.tanggalDiundangkan ? String(row[mapping.tanggalDiundangkan] || '') : '',
       jenisDokumen: mapping.jenisDokumen ? String(row[mapping.jenisDokumen] || '') : '',
       arsip: mapping.arsip ? parseArsipValue(row[mapping.arsip]) : true,
-      linkFile: mapping.linkFile ? String(row[mapping.linkFile] || '') : '',
       ketArsip: mapping.ketArsip ? String(row[mapping.ketArsip] || '') : '',
       ketLain: mapping.ketLain ? String(row[mapping.ketLain] || '') : '',
     }));

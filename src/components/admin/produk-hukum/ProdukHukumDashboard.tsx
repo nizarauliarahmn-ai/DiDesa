@@ -12,7 +12,6 @@ interface ProdukHukumItem {
   tanggalDiundangkan: string;
   jenisDokumen: string;
   arsip: boolean;
-  linkFile: string;
   ketArsip: string;
   ketLain: string;
   createdAt: string;

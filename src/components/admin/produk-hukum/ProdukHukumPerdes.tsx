@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo, useEffect } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import ImportModal from './ImportModal';
 import DocumentViewerModal from './DocumentViewerModal';
@@ -14,7 +14,6 @@ interface ProdukHukumItem {
   tanggalDiundangkan: string;
   jenisDokumen: string;
   arsip: boolean;
-  linkFile: string;
   ketArsip: string;
   ketLain: string;
   documentData: string | null;
@@ -119,7 +118,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         i.uraian.toLowerCase().includes(q) ||
         i.no.toString().includes(q) ||
         i.tahun.includes(q) ||
-        i.linkFile.toLowerCase().includes(q) ||
         i.ketLain.toLowerCase().includes(q)
       );
     }
@@ -158,7 +156,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       tanggalDiundangkan: row.tanggalDiundangkan || '',
       jenisDokumen: row.jenisDokumen || '',
       arsip: row.arsip ?? true,
-      linkFile: row.linkFile || '',
       ketArsip: row.ketArsip || '',
       ketLain: row.ketLain || '',
       documentData: null,
@@ -273,7 +270,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Tgl Diundangkan</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Jenis</th>
                   <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Arsip</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Link File</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Ket Arsip</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Ket Lain</th>
                   <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
@@ -305,16 +301,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-slate-700">
                           <Circle size={12} /> Tidak
                         </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {item.linkFile ? (
-                        <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-xs">
-                          <Link2 size={12} />
-                          <span className="max-w-[150px] truncate" title={item.linkFile}>{item.linkFile}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 dark:text-slate-600 text-xs">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
@@ -429,7 +415,6 @@ function ModalPerdes({ item, items, onSave, onClose }: {
   const [tanggalDiundangkan, setTanggalDiundangkan] = useState(item?.tanggalDiundangkan || '');
   const [jenisDokumen, setJenisDokumen] = useState(item?.jenisDokumen || 'APBDES MURNI');
   const [arsip, setArsip] = useState(item?.arsip ?? true);
-  const [linkFile, setLinkFile] = useState(item?.linkFile || '');
   const [ketArsip, setKetArsip] = useState(item?.ketArsip || 'ASLI');
   const [ketLain, setKetLain] = useState(item?.ketLain || '');
   const [documentData, setDocumentData] = useState<string | null>(item?.documentData || null);
@@ -446,7 +431,7 @@ function ModalPerdes({ item, items, onSave, onClose }: {
     onSave({
       no: parseInt(no) || getNoUrut(items, tahun),
       tahun, uraian: uraian.trim(), tanggal, tanggalDiundangkan,
-      jenisDokumen, arsip, linkFile: linkFile.trim(), ketArsip, ketLain: ketLain.trim(),
+      jenisDokumen, arsip, ketArsip, ketLain: ketLain.trim(),
       documentData, documentName,
     });
   };
@@ -515,11 +500,6 @@ function ModalPerdes({ item, items, onSave, onClose }: {
               className={`relative w-11 h-6 rounded-full transition-colors ${arsip ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-slate-600'}`}>
               <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${arsip ? 'translate-x-5' : ''}`} />
             </button>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Link File</label>
-            <input type="text" value={linkFile} onChange={(e) => setLinkFile(e.target.value)} placeholder="cth: PERDES No 07 Th 2024 APBDesa.pdf"
-              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Keterangan Lain</label>
