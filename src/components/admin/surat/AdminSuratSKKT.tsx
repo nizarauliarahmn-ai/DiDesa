@@ -1,5 +1,6 @@
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
+import { SuggestCombobox } from './SuggestCombobox';
 import { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
@@ -134,6 +135,15 @@ export default function AdminSuratSKKT({
   const activeDesa = cleanStr(localStorage.getItem('kop_desa') || formData.namaDesa || 'Wasah Hilir', /^(desa|kelurahan)\s+/i);
   const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || '';
   const activeKontak = localStorage.getItem('kop_kontak') || formData.kontakKantor || '';
+
+  const jobs = [
+    'Belum/Tidak Bekerja', 'Mengurus Rumah Tangga', 'Pelajar/Mahasiswa', 'Pensiunan',
+    'Petani/Pekebun', 'Buruh Tani/Perkebunan', 'Peternak', 'Nelayan/Perikanan', 'Buruh Nelayan/Perikanan',
+    'Buruh Harian Lepas', 'Pedagang', 'Wiraswasta', 'Karyawan Swasta', 'Karyawan BUMN/BUMD',
+    'Sopir/Ojek', 'Tukang (Kayu/Batu/Las/Jahit, dll)', 'Mekanik', 'Pembantu Rumah Tangga',
+    'Guru', 'Bidan', 'Perawat', 'Ustadz/Mubaligh',
+    'Perangkat Desa', 'Kepala Desa', 'ASN (Aparatur Sipil Negara)', 'PPPK (Pegawai Pemerintah dengan Perjanjian Kerja)'
+  ];
 
   useEffect(() => {
     if (editData) {
@@ -760,7 +770,11 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Pekerjaan</label>
-                <input type="text" placeholder="Ketik..." value={formData.pekerjaan} onChange={e => setFormData({ ...formData, pekerjaan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <SuggestCombobox
+                  value={formData.pekerjaan}
+                  onChange={(v) => setFormData({...formData, pekerjaan: v})}
+                  options={jobs}
+                />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Alamat Lengkap</label>
