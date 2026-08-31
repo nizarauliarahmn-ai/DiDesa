@@ -188,7 +188,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank', 'width=1400,height=800');
+    const printWindow = window.open('', '_blank', 'width=900,height=800');
     if (!printWindow) return;
     const rows = itemsWithNumbers.map((item) => `
       <tr>
@@ -196,41 +196,42 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         <td style="text-align:center;font-weight:600">${item.tahun}</td>
         <td style="font-weight:500">${item.uraian || 'TANPA KETERANGAN'}</td>
         <td style="text-align:center">${formatDateDisplay(item.tanggal)}</td>
-        <td style="text-align:center"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">${item.jenisDokumen || '-'}</span></td>
+        <td style="text-align:center"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700">${item.jenisDokumen || '-'}</span></td>
       </tr>
     `).join('');
     const now = new Date();
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data ${label}</title>
       <style>
-        @page{size:portrait;margin:0}
-        *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-        @media print{html,body{margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;padding:12mm 15mm}}
-        @media screen{body{font-family:Arial,sans-serif;margin:20px;font-size:12px}}
-        .header{text-align:center;margin-bottom:12px}
-        .header h2{margin:0 0 2px;font-size:16px}
-        .header .subtitle{color:#666;margin:0;font-size:12px}
-        table{width:100%;border-collapse:collapse;margin-top:8px}
-        th,td{border:1px solid #ccc;padding:6px 5px;font-size:10.5px;white-space:nowrap}
-        th{background:#f0fdf4;font-weight:700;text-align:center;font-size:11px}
-        td{vertical-align:middle}
+        @page{size:A4 portrait;margin:15mm 12mm 20mm 12mm}
+        *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
+        html,body{margin:0;padding:0;width:210mm}
+        body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#333}
+        @media screen{body{margin:0 auto;padding:15mm 12mm 20mm 12mm;max-width:210mm;box-shadow:0 0 10px rgba(0,0,0,0.1)}}
+        .header{text-align:center;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #059669}
+        .header h2{margin:0;font-size:14px;color:#1a1a1a;letter-spacing:0.5px}
+        .header .subtitle{color:#666;margin:4px 0 0;font-size:10px}
+        table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9.5px}
+        thead{display:table-header-group}
+        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:9.5px;padding:6px 4px;border:1px solid #d1d5db;page-break-after:avoid}
+        td{padding:5px 4px;border:1px solid #d1d5db;white-space:nowrap;vertical-align:middle;page-break-inside:avoid}
         tr:nth-child(even){background:#f9fafb}
-        .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:8px;border-top:1px solid #ddd;font-size:10px;color:#888}
+        .footer-fixed{position:fixed;bottom:0;left:0;right:0;padding:8px 12mm;font-size:8px;color:#999;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;background:white}
+        @media print{.footer-fixed{position:fixed;bottom:0;left:0;right:0}}
       </style></head><body>
       <div class="header">
         <h2>DATA ${label.toUpperCase()}</h2>
-        <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen | Dicetak: ${tglCetak}</p>
+        <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen &bull; Dicetak: ${tglCetak}</p>
       </div>
       <table><thead><tr>
-        <th style="width:40px">No</th>
-        <th style="width:50px">Tahun</th>
+        <th style="width:30px">No</th>
+        <th style="width:38px">Tahun</th>
         <th>Uraian</th>
         <th style="width:100px">Tanggal</th>
         <th style="width:110px">Jenis</th>
       </tr></thead><tbody>${rows}</tbody></table>
-      <div class="footer">
-        <span>Desa... Kecamatan... Kabupaten...</span>
-        <span>Halaman 1 dari 1</span>
+      <div class="footer-fixed">
+        <span>Desa.......... Kecamatan.......... Kabupaten..........</span>
         <span>Dicetak melalui DiDesa</span>
       </div>
     </body></html>`);
