@@ -83,7 +83,7 @@ export function LandPolygonPickerModal({
       const map = L.map(mapContainerRef.current, {
         center: [parseLat, parseLng],
         zoom: 19,
-        zoomControl: true,
+        zoomControl: false,
       });
 
       const tileLayer = L.tileLayer(tileUrls[mapType], {
