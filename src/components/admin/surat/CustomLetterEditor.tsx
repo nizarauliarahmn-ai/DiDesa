@@ -1,10 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  List, ListOrdered, Table, Type, Minus, ArrowLeft, Eye, Printer, Save,
-  Undo2, Redo2, Indent, Outdent, RemoveFormatting
+  List, ListOrdered, Table, Type, Minus, ArrowLeft, Printer, Save,
+  Undo2, Redo2, Indent, Outdent, RemoveFormatting, Hash, User, Calendar
 } from 'lucide-react';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
+import { getLetterClassifications, generateLetterNumberAsync } from '../../../utils/letterClassifications';
+import { resolveKadesName, getOfficerOptions } from '../../../utils/letterOfficers';
 import TemplatePickerModal, { type LetterTemplate } from './TemplatePickerModal';
 import { addLetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
@@ -26,6 +28,10 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
   const [showPicker, setShowPicker] = useState(true);
   const [activeTemplate, setActiveTemplate] = useState<LetterTemplate | null>(null);
   const [letterTitle, setLetterTitle] = useState('');
+  const [nomorSurat, setNomorSurat] = useState('');
+  const [tanggalSurat, setTanggalSurat] = useState(() => new Date().toISOString().split('T')[0]);
+  const [pejabatName, setPejabatName] = useState(() => localStorage.getItem('village_super_admin') || resolveKadesName() || '');
+  const [pejabatJabatan, setPejabatJabatan] = useState(() => localStorage.getItem('village_super_admin_role') || 'Kepala Desa');
   const [currentFont, setCurrentFont] = useState('Arial, sans-serif');
   const [currentFontSize, setCurrentFontSize] = useState('12');
   const editorRef = useRef<HTMLDivElement>(null);
@@ -73,6 +79,16 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
     return () => { if (historyTimerRef.current) clearTimeout(historyTimerRef.current); };
   }, []);
 
+  useEffect(() => {
+    const configs = getLetterClassifications();
+    const custom = configs.find(c => c.klasifikasi === 'UND' || c.klasifikasi === '005') || configs[0];
+    if (custom) {
+      generateLetterNumberAsync(custom.klasifikasi, custom.kodeKlasifikasi || '005')
+        .then(generatedNo => setNomorSurat(generatedNo))
+        .catch(() => setNomorSurat(`001/005/${new Date().getFullYear()}`));
+    }
+  }, []);
+
   const handleSelectTemplate = (tpl: LetterTemplate) => {
     setActiveTemplate(tpl);
     setLetterTitle(tpl.label);
@@ -110,6 +126,8 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
     const globalFooter = localStorage.getItem('global_print_footer') ||
       'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     const letterFont = localStorage.getItem('village_letter_font') || currentFont;
+    const tglFormatted = new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const desaName = (localStorage.getItem('kop_desa') || 'Desa').replace(/^(desa|kelurahan)\s+/i, '').trim();
 
     const doc = printFrameRef.current.contentDocument;
     if (!doc) return;
@@ -134,9 +152,27 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
         em,i{font-style:italic}
         u{text-decoration:underline}
         hr{border:none;border-top:1px solid #d1d5db;margin:12px 0}
+        .meta-line{margin:0 0 4px 0;font-size:12pt}
       </style></head><body>
       ${kopSurat}
+      <p class="meta-line" style="text-align:center;font-weight:bold;text-decoration:underline;font-size:14pt;text-transform:uppercase;margin-bottom:4px;">${letterTitle || 'SURAT'}</p>
+      <p class="meta-line" style="text-align:center;margin-bottom:16px;">Nomor: ${nomorSurat}</p>
       <div class="letter-content">${content}</div>
+      <div style="margin-top:24px;">
+        <table style="width:100%;border-collapse:collapse;border:none;">
+          <tr>
+            <td style="width:50%;vertical-align:top;border:none;padding:0;">
+              <p style="margin:0;">Mengetahui,</p>
+              <p style="margin:60px 0 0 0;font-weight:bold;text-decoration:underline;text-align:center;">Ketua RT</p>
+            </td>
+            <td style="width:50%;vertical-align:top;border:none;padding:0;">
+              <p style="margin:0;">${desaName}, ${tglFormatted}</p>
+              <p style="margin:0;">${pejabatJabatan},</p>
+              <p style="margin:60px 0 0 0;font-weight:bold;text-decoration:underline;text-align:center;text-transform:uppercase;">${pejabatName}</p>
+            </td>
+          </tr>
+        </table>
+      </div>
       <div class="global-footer">${globalFooter}</div>
     </body></html>`);
     doc.close();
@@ -154,18 +190,22 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
       title: letterTitle || 'Surat Tanpa Judul',
       content,
       templateId: activeTemplate?.id || 'blank',
+      nomorSurat,
+      tanggalSurat,
+      pejabatName,
+      pejabatJabatan,
       createdAt: new Date().toISOString(),
     };
     const drafts = JSON.parse(localStorage.getItem('custom_letter_drafts') || '[]');
     drafts.push(draft);
     localStorage.setItem('custom_letter_drafts', JSON.stringify(drafts));
     addLetterHistory({
-      nomor: `-/${letterTitle?.substring(0, 20).replace(/\s+/g, '-') || 'draft'}/${new Date().getFullYear()}`,
-      jenis: 'Surat Manual',
+      nomor: nomorSurat || `draft/${new Date().getFullYear()}`,
+      jenis: letterTitle || 'Surat Manual',
       penerima: '',
       status: 'draft',
       tanggal: new Date().toISOString(),
-      data: { title: letterTitle, content },
+      data: { title: letterTitle, content, nomorSurat, pejabatName, pejabatJabatan },
     });
     showToast('Draft surat berhasil disimpan!', 'success');
   };
@@ -187,6 +227,10 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
   );
 
   const ToolbarSep = () => <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-1" />;
+
+  const desaName = (localStorage.getItem('kop_desa') || 'Desa').replace(/^(desa|kelurahan)\s+/i, '').trim();
+  const kecamatan = (localStorage.getItem('kop_kecamatan') || 'Kecamatan').replace(/^kecamatan\s+/i, '').trim();
+  const tglFormatted = new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <div className="space-y-4">
@@ -224,6 +268,62 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                 <Printer className="w-3.5 h-3.5" /> Cetak
               </button>
             </div>
+          </div>
+
+          {/* Metadata Fields */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-4 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <Hash className="w-3 h-3" /> Nomor Surat
+                </label>
+                <input
+                  type="text"
+                  value={nomorSurat}
+                  onChange={e => setNomorSurat(e.target.value)}
+                  placeholder="001/005/2026"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <Calendar className="w-3 h-3" /> Tanggal
+                </label>
+                <input
+                  type="date"
+                  value={tanggalSurat}
+                  onChange={e => setTanggalSurat(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <User className="w-3 h-3" /> Pejabat Penandatangan
+                </label>
+                <select
+                  value={pejabatName}
+                  onChange={e => setPejabatName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800"
+                >
+                  <option value="">{pejabatName || 'Pilih Pejabat'}</option>
+                  {getOfficerOptions().map((opt: string) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jabatan</label>
+                <input
+                  type="text"
+                  value={pejabatJabatan}
+                  onChange={e => setPejabatJabatan(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800"
+                />
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-2">
+              {desaName} Kec. {kecamatan} • Tanggal Cetak: {tglFormatted}
+            </p>
           </div>
 
           {/* Toolbar */}
@@ -303,6 +403,8 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
           <div className="flex justify-center bg-gray-100 dark:bg-slate-800 rounded-2xl p-6 min-h-[600px]">
             <div className="bg-white shadow-2xl" style={{ width: '210mm', minHeight: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}>
               <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
+              <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', marginBottom: '4px' }}>{letterTitle || 'SURAT'}</p>
+              <p style={{ textAlign: 'center', marginBottom: '16px' }}>Nomor: {nomorSurat}</p>
               <div
                 ref={editorRef}
                 contentEditable
@@ -317,6 +419,23 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                   }
                 }}
               />
+              <div style={{ marginTop: '24px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0 }}>
+                        <p style={{ margin: 0 }}>Mengetahui,</p>
+                        <p style={{ margin: '60px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textAlign: 'center' }}>Ketua RT</p>
+                      </td>
+                      <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0 }}>
+                        <p style={{ margin: 0 }}>{desaName}, {tglFormatted}</p>
+                        <p style={{ margin: 0 }}>{pejabatJabatan},</p>
+                        <p style={{ margin: '60px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textAlign: 'center', textTransform: 'uppercase' }}>{pejabatName}</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
               <div className="mt-6 pt-3 border-t border-gray-300">
                 <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
                   __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
