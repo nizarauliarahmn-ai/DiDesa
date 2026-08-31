@@ -213,6 +213,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         .header .subtitle{color:#666;margin:4px 0 0;font-size:11px}
         table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}
         thead{display:table-header-group}
+        tfoot{display:table-footer-group}
         th{background:#ecfdf5;font-weight:700;text-align:center;font-size:11px;padding:10px 8px;border:1px solid #d1d5db;page-break-after:avoid}
         td{padding:10px 8px;border:1px solid #d1d5db;white-space:nowrap;vertical-align:middle;page-break-inside:avoid;line-height:1.5}
         tr{border-bottom:1px solid #e2e8f0}
@@ -222,7 +223,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         colgroup .col-uraian{width:48%}
         colgroup .col-tanggal{width:18%}
         colgroup .col-jenis{width:18%}
-        .saas-global-footer{border-top:0.5px solid #cbd5e1;padding-top:6px;margin-top:16px;font-family:'Inter',sans-serif;line-height:1.5;font-size:8px;color:#94a3b8;text-align:left;page-break-inside:avoid}
+        tfoot td{padding-top:12px;font-size:9px;color:#64748b;border-top:1px solid #e2e8f0;border-left:none;border-right:none;border-bottom:none;line-height:1.5}
         @media screen{body{margin:0 auto;box-shadow:0 0 10px rgba(0,0,0,0.1)}}
       </style></head><body>
       <div class="header">
@@ -245,8 +246,8 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
           <th>Jenis</th>
         </tr></thead>
         <tbody>${rows}</tbody>
+        <tfoot><tr><td colspan="5">${globalFooter}</td></tr></tfoot>
       </table>
-      <div class="saas-global-footer">${globalFooter}</div>
     </body></html>`);
     printWindow.document.close();
     setTimeout(() => printWindow.print(), 500);
