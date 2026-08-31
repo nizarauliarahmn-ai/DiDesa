@@ -258,7 +258,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Link File</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Ket Arsip</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Ket Lain</th>
-                  <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24">Aksi</th>
+                  <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -313,7 +313,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                         <p className="text-gray-500 dark:text-slate-400 text-xs line-clamp-1" title={item.ketLain}>{item.ketLain || '-'}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => { setEditingItem(item); setShowModal(true); }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Edit">
