@@ -803,10 +803,6 @@ export default function AdminSuratSKKT({
                 <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="001 / 001" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value.replace(/[^0-9/]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
-                <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Luas Tanah (m²)</label>
-                <input type="text" inputMode="decimal" placeholder="cth: 42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
-              </div>
-              <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIB</label>
                 <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Nomor Identifikasi Bidang" value={formData.nib} onChange={e => setFormData({ ...formData, nib: e.target.value.replace(/[^0-9]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
@@ -876,6 +872,10 @@ export default function AdminSuratSKKT({
             {/* Batas-Batas & Ukuran Meter - muncul setelah gambar poligon */}
             {formData.polygonPoints && formData.polygonPoints.length > 0 && (
             <div className="space-y-3 pt-2">
+              <div>
+                <label className="font-bold text-xs text-gray-700 dark:text-slate-300 block mb-1">Luas Tanah (m²)</label>
+                <input type="text" inputMode="decimal" placeholder="cth: 42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+              </div>
               <p className="font-bold text-xs text-gray-700 dark:text-slate-300">Batas & Panjang Sisi Tanah (Meter):</p>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
