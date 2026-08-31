@@ -301,14 +301,12 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                     <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">{item.displayNo}</td>
                     <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
                     <td className="px-4 py-3">
-                      <div className="max-w-[300px]">
-                        <p className="text-gray-900 dark:text-white font-medium leading-snug line-clamp-2">{item.uraian || 'TANPA KETERANGAN'}</p>
-                      </div>
+                      <p className="text-gray-900 dark:text-white font-medium whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
                     </td>
                     <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap">{formatDateDisplay(item.tanggal)}</td>
                     <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap">{formatDateDisplay(item.tanggalDiundangkan)}</td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50">
+                      <span className="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         {item.jenisDokumen || '-'}
                       </span>
                     </td>
