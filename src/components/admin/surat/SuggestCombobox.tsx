@@ -92,9 +92,10 @@ export function SuggestCombobox({ value, onChange, options, placeholder }: Sugge
       {showDropdown && suggestions.length > 0 && (
         <div ref={listRef} className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-y-auto max-h-60">
           {suggestions.map((opt, index) => (
-            <button
+            <div
               key={opt}
-              type="button"
+              role="option"
+              aria-selected={index === highlightedIndex}
               onClick={() => selectOption(opt)}
               onMouseEnter={() => setHighlightedIndex(index)}
               className={`w-full py-2 px-3 flex items-center text-left text-sm transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0 cursor-pointer ${
@@ -104,7 +105,7 @@ export function SuggestCombobox({ value, onChange, options, placeholder }: Sugge
               }`}
             >
               {opt}
-            </button>
+            </div>
           ))}
         </div>
       )}
