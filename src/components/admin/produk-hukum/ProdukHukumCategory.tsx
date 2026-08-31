@@ -252,7 +252,15 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
           </tr>
         </thead>
         <tbody>${rows}</tbody>
-        <tfoot><tr><td colspan="5">${globalFooter}</td></tr></tfoot>
+        <tfoot>
+          <tr style="border:none">
+            <td colspan="5" style="border:none;padding-top:1cm;padding-bottom:1.5cm">
+              <div style="border-top:1px solid #cbd5e1;padding-top:10px;text-align:left">
+                <span style="font-size:9pt;color:#64748b">${globalFooter}</span>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
       </table>
     </body></html>`);
     printWindow.document.close();
