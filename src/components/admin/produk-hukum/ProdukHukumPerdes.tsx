@@ -220,7 +220,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         .header h2{margin:0 0 2px;font-size:16px}
         .header .subtitle{color:#666;margin:0;font-size:12px}
         table{width:100%;border-collapse:collapse;margin-top:8px}
-        th,td{border:1px solid #ccc;padding:6px 5px;font-size:10.5px}
+        th,td{border:1px solid #ccc;padding:6px 5px;font-size:10.5px;white-space:nowrap}
         th{background:#f0fdf4;font-weight:700;text-align:center;font-size:11px}
         td{vertical-align:middle}
         tr:nth-child(even){background:#f9fafb}
