@@ -354,9 +354,9 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                     <td className="px-4 py-3">
                       <p className="text-gray-900 dark:text-white font-medium whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap">{formatDateDisplay(item.tanggal)}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap">{formatDateDisplay(item.tanggalDiundangkan)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap min-w-[130px]">{formatDateDisplay(item.tanggal)}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap min-w-[130px]">{formatDateDisplay(item.tanggalDiundangkan)}</td>
+                    <td className="px-4 py-3 min-w-[130px]">
                       <span className="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         {item.jenisDokumen || '-'}
                       </span>
