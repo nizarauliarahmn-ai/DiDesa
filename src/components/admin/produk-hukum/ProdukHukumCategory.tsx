@@ -188,8 +188,17 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank', 'width=900,height=800');
-    if (!printWindow) return;
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    iframe.style.visibility = 'hidden';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) { document.body.removeChild(iframe); return; }
     const globalFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     const rows = itemsWithNumbers.map((item) => `
       <tr>
@@ -202,7 +211,8 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     `).join('');
     const now = new Date();
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
-    printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data ${label}</title>
+    doc.open();
+    doc.write(`<!DOCTYPE html><html><head><title>Cetak Data ${label}</title>
       <style>
         @page{size:A4 portrait;margin:0}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
@@ -231,41 +241,22 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
       </div>
       <table>
         <colgroup>
-          <col class="col-no">
-          <col class="col-tahun">
-          <col class="col-uraian">
-          <col class="col-tanggal">
-          <col class="col-jenis">
+          <col class="col-no"><col class="col-tahun"><col class="col-uraian"><col class="col-tanggal"><col class="col-jenis">
         </colgroup>
         <thead>
-          <tr>
-            <th colSpan="5" style="padding:0;margin:0;border:none;background:white">
-              <div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white">&nbsp;</div>
-            </th>
-          </tr>
-          <tr>
-            <th>No</th>
-            <th>Tahun</th>
-            <th>Uraian</th>
-            <th>Tanggal</th>
-            <th>Jenis</th>
-          </tr>
+          <tr><th colSpan="5" style="padding:0;margin:0;border:none;background:white"><div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white">&nbsp;</div></th></tr>
+          <tr><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Jenis</th></tr>
         </thead>
         <tbody>${rows}</tbody>
-        <tfoot>
-          <tr style="border:none">
-            <td colspan="5" style="border:none;padding-top:1cm;padding-bottom:1.5cm">
-              <div style="border-top:1px solid #cbd5e1;padding-top:10px;text-align:left">
-                <span style="font-size:9pt;color:#64748b">${globalFooter}</span>
-              </div>
-            </td>
-          </tr>
-        </tfoot>
+        <tfoot><tr style="border:none"><td colspan="5" style="border:none;padding-top:1cm;padding-bottom:1.5cm"><div style="border-top:1px solid #cbd5e1;padding-top:10px;text-align:left"><span style="font-size:9pt;color:#64748b">${globalFooter}</span></div></td></tr></tfoot>
       </table>
     </body></html>`);
-    printWindow.document.close();
-    printWindow.addEventListener('afterprint', () => { printWindow.close(); });
-    setTimeout(() => { printWindow.focus(); printWindow.print(); }, 500);
+    doc.close();
+    setTimeout(() => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => { document.body.removeChild(iframe); }, 1000);
+    }, 500);
   };
 
   return (
