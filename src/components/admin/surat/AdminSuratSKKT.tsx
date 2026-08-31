@@ -243,6 +243,19 @@ export default function AdminSuratSKKT({
     }
   }, []);
 
+  useEffect(() => {
+    const rtPart = (formData.rtRw || '').split('/')[0]?.trim();
+    if (rtPart && rtPart !== formData.nomorRt) {
+      let autoName = formData.namaKetuaRt;
+      try {
+        const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
+        const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtPart) || o.role.toLowerCase().includes('rt.' + rtPart) || o.role.toLowerCase().includes('rt. ' + rtPart));
+        if (rtOfficer) autoName = rtOfficer.name;
+      } catch (err) {}
+      setFormData(prev => ({ ...prev, nomorRt: rtPart, namaKetuaRt: autoName.toUpperCase() }));
+    }
+  }, [formData.rtRw]);
+
   const filteredResidents = searchQuery.trim() === '' ? [] : residents.filter(r => 
     r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.nik.includes(searchQuery)
   );
