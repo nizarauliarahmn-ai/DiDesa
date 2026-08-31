@@ -1,7 +1,9 @@
-﻿import { useState, useMemo } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload } from 'lucide-react';
+﻿import { useState, useMemo, useEffect } from 'react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import ImportModal from './ImportModal';
+import DocumentViewerModal from './DocumentViewerModal';
+import DocumentUpload from './DocumentUpload';
 
 interface ProdukHukumItem {
   id: string;
@@ -15,6 +17,8 @@ interface ProdukHukumItem {
   linkFile: string;
   ketArsip: string;
   ketLain: string;
+  documentData: string | null;
+  documentName: string;
   createdAt: string;
 }
 
@@ -89,6 +93,18 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [showViewer, setShowViewer] = useState(false);
+  const [viewerData, setViewerData] = useState<{ data: string | null; name: string }>({ data: null, name: '' });
+
+  // Listen for open_document_viewer events
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      setViewerData({ data: e.detail.data, name: e.detail.name });
+      setShowViewer(true);
+    };
+    window.addEventListener('open_document_viewer', handler as EventListener);
+    return () => window.removeEventListener('open_document_viewer', handler as EventListener);
+  }, []);
 
   const availableYears = useMemo(() => {
     const years = new Set(items.map(i => i.tahun).filter(Boolean));
@@ -145,6 +161,8 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       linkFile: row.linkFile || '',
       ketArsip: row.ketArsip || '',
       ketLain: row.ketLain || '',
+      documentData: null,
+      documentName: '',
       createdAt: new Date().toISOString(),
     }));
     const updated = [...items, ...newItems];
@@ -315,6 +333,12 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                     </td>
                     <td className="px-4 py-3 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-center gap-1">
+                        {item.documentData && (
+                          <button onClick={() => { setViewerData({ data: item.documentData, name: item.documentName }); setShowViewer(true); }}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Lihat Dokumen">
+                            <Eye size={14} />
+                          </button>
+                        )}
                         <button onClick={() => { setEditingItem(item); setShowModal(true); }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Edit">
                           <Edit3 size={14} />
@@ -350,6 +374,15 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         onClose={() => setShowImportModal(false)}
         onImport={handleImport}
         kategoriLabel="Perdes"
+      />
+
+      {/* Document Viewer Modal */}
+      <DocumentViewerModal
+        isOpen={showViewer}
+        onClose={() => setShowViewer(false)}
+        documentData={viewerData.data}
+        documentName={viewerData.name}
+        documentType=""
       />
 
       {/* Delete Confirm */}
@@ -399,6 +432,8 @@ function ModalPerdes({ item, items, onSave, onClose }: {
   const [linkFile, setLinkFile] = useState(item?.linkFile || '');
   const [ketArsip, setKetArsip] = useState(item?.ketArsip || 'ASLI');
   const [ketLain, setKetLain] = useState(item?.ketLain || '');
+  const [documentData, setDocumentData] = useState<string | null>(item?.documentData || null);
+  const [documentName, setDocumentName] = useState(item?.documentName || '');
 
   const handleTahunChange = (val: string) => {
     setTahun(val);
@@ -412,6 +447,7 @@ function ModalPerdes({ item, items, onSave, onClose }: {
       no: parseInt(no) || getNoUrut(items, tahun),
       tahun, uraian: uraian.trim(), tanggal, tanggalDiundangkan,
       jenisDokumen, arsip, linkFile: linkFile.trim(), ketArsip, ketLain: ketLain.trim(),
+      documentData, documentName,
     });
   };
 
@@ -489,6 +525,13 @@ function ModalPerdes({ item, items, onSave, onClose }: {
             <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Keterangan Lain</label>
             <input type="text" value={ketLain} onChange={(e) => setKetLain(e.target.value)} placeholder="Catatan tambahan (opsional)"
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
+          </div>
+          <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
+            <DocumentUpload
+              value={documentData}
+              onChange={(data, name) => { setDocumentData(data); setDocumentName(name); }}
+              label="Dokumen Perdes (Scan/Upload)"
+            />
           </div>
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose}
