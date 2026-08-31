@@ -248,19 +248,19 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
             </div>
           </div>
         ) : (
-          <div>
-            <table className="min-w-full text-sm">
+          <div className="overflow-x-auto w-full">
+            <table className="min-w-[1000px] w-full text-sm">
               <thead>
-                <tr className="border-b-2 border-gray-200 dark:border-slate-700">
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">No</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Tahun</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px] bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Uraian</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Tanggal</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Jenis</th>
-                  <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Arsip</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Ket Arsip</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Ket Lain</th>
-                  <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24 bg-gray-50 dark:bg-slate-800 sticky top-16 z-20 sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
+                <tr className="border-b-2 border-slate-200 dark:border-slate-700">
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">No</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Tahun</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px] whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Uraian</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Tanggal</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Jenis</th>
+                  <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Arsip</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Ket Arsip</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20">Ket Lain</th>
+                  <th className="text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24 whitespace-nowrap bg-gray-50 dark:bg-slate-800 sticky top-16 z-20 sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
                 </tr>
               </thead>
               <tbody>
