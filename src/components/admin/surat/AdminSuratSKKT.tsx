@@ -417,7 +417,7 @@ export default function AdminSuratSKKT({
           <tr><td>Sebelah Barat</td><td>:</td><td>Berbatasan dengan ${v(formData.batasBarat)}</td></tr>
         </table>
 
-        <p style="margin-bottom:10px;">Luas Tanah di maksud : <strong>± ${v(formData.luasTanah)} Meter</strong></p>
+        <p style="margin-bottom:10px;">Luas Tanah di maksud : <strong>± ${v(formData.luasTanah)} m²</strong></p>
 
         <p style="text-align:justify; margin-bottom:8px; line-height:1.4;">
           Bidang tanah tersebut saya peroleh dari ${v(formData.asalPerolehan, 'warisan peninggalan orang tua yang sampai saat ini saya kuasai secara terus menerus')} , tidak di jadikan / menjadi jaminan suatu hutang dan tidak dalam sengketa , dengan saksi – saksi sebagai berikut :
@@ -502,7 +502,7 @@ export default function AdminSuratSKKT({
         <table style="width:100%; border-collapse:collapse; margin-bottom:8px; font-size:12px;">
           <tr><td style="width:100px;">MILIK</td><td style="width:12px;">:</td><td style="text-transform:uppercase; font-weight:bold;">${v(formData.nama)}</td></tr>
           <tr><td>LOKASI</td><td>:</td><td>${v(formData.lokasiTanah)} RT. ${v(formData.nomorRt, '2')} RW. 1 Desa ${activeDesa} Kec. ${activeKecamatan}</td></tr>
-          <tr><td>LUAS</td><td>:</td><td>± ${v(formData.luasTanah)} Meter</td></tr>
+          <tr><td>LUAS</td><td>:</td><td>± ${v(formData.luasTanah)} m²</td></tr>
         </table>
 
         <!-- PETA BUTA POLIGON TANAH (HITAM PUTIH MURNI DENGAN BINGKAI KOTAK) -->
