@@ -16,6 +16,48 @@ import { capitalizeWords } from '../../../utils/textUtils';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 
+function terbilang(num: number): string {
+  if (num === 0) return 'nol';
+  const satuan = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+  const sections = [
+    ['', 'ribu', 'juta', 'miliar', 'triliun'],
+  ];
+  const convertBelowThousand = (n: number): string => {
+    if (n === 0) return '';
+    if (n < 12) return satuan[n];
+    if (n < 20) return satuan[n - 10] + ' belas';
+    if (n < 100) return satuan[Math.floor(n / 10)] + ' puluh' + (n % 10 ? ' ' + satuan[n % 10] : '');
+    const rest = n % 100;
+    return satuan[Math.floor(n / 100)] + ' ratus' + (rest ? ' ' + convertBelowThousand(rest) : '');
+  };
+  const intPart = Math.floor(Math.abs(num));
+  const decPart = Math.round((Math.abs(num) - intPart) * 100);
+  let result = '';
+  let str = intPart.toString();
+  let groups: number[] = [];
+  while (str.length > 0) {
+    groups.unshift(parseInt(str.slice(-3)));
+    str = str.slice(0, -3);
+  }
+  const suffixes = ['ribu', 'juta', 'miliar', 'triliun'];
+  const words: string[] = [];
+  groups.forEach((g, i) => {
+    if (g === 0) return;
+    const idx = groups.length - 1 - i;
+    const suffix = idx > 0 ? suffixes[Math.min(idx - 1, suffixes.length - 1)] : '';
+    words.push(convertBelowThousand(g) + (suffix ? ' ' + suffix : ''));
+  });
+  result = words.join(' ');
+  if (decPart > 0) {
+    result += ' koma';
+    const decStr = decPart.toString();
+    for (const ch of decStr) {
+      result += ' ' + satuan[parseInt(ch)];
+    }
+  }
+  return result.trim();
+}
+
 interface Resident {
   nik: string;
   name: string;
@@ -417,7 +459,7 @@ export default function AdminSuratSKKT({
           <tr><td>Sebelah Barat</td><td>:</td><td>Berbatasan dengan ${v(formData.batasBarat)}</td></tr>
         </table>
 
-        <p style="margin-bottom:10px;">Luas Tanah di maksud : <strong>± ${v(formData.luasTanah)} m²</strong></p>
+        <p style="margin-bottom:10px;">Luas Tanah di maksud : <strong>± ${v(formData.luasTanah)} m²</strong> <em>(${formData.luasTanah ? terbilang(parseFloat(formData.luasTanah)) + ' meter persegi' : ''})</em></p>
 
         <p style="text-align:justify; margin-bottom:8px; line-height:1.4;">
           Bidang tanah tersebut saya peroleh dari ${v(formData.asalPerolehan, 'warisan peninggalan orang tua yang sampai saat ini saya kuasai secara terus menerus')} , tidak di jadikan / menjadi jaminan suatu hutang dan tidak dalam sengketa , dengan saksi – saksi sebagai berikut :
