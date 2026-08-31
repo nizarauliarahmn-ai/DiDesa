@@ -873,7 +873,8 @@ export default function AdminSuratSKKT({
               </div>
             </div>
 
-            {/* Batas-Batas & Ukuran Meter */}
+            {/* Batas-Batas & Ukuran Meter - hanya muncul setelah gambar poligon */}
+            {formData.polygonPoints && formData.polygonPoints.length > 0 && (
             <div className="space-y-3 pt-2">
               <p className="font-bold text-xs text-gray-700 dark:text-slate-300">Batas & Panjang Sisi Tanah (Meter):</p>
               <div className="grid grid-cols-2 gap-3 text-xs">
@@ -911,6 +912,7 @@ export default function AdminSuratSKKT({
                 </div>
               </div>
             </div>
+            )}
           </div>
 
           {/* Section 3: Data Saksi-Saksi (3 Orang) */}
