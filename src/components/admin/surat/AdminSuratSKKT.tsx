@@ -2,7 +2,7 @@ import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { SuggestCombobox } from './SuggestCombobox';
 import { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark, Pencil, Check } from 'lucide-react';
+import { Search, MapPin, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark, Pencil, Check, Calculator } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { getLetterClassifications, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { resolveKadesName } from '../../../utils/letterOfficers';
@@ -69,6 +69,10 @@ export default function AdminSuratSKKT({
 
   const [showMapModal, setShowMapModal] = useState(false);
   const [isEditingBatas, setIsEditingBatas] = useState(false);
+  const [showLuasCalc, setShowLuasCalc] = useState(false);
+  const [calcMode, setCalcMode] = useState<'borongan' | 'meter'>('borongan');
+  const [calcVal1, setCalcVal1] = useState('');
+  const [calcVal2, setCalcVal2] = useState('');
   const [previewZoom, setPreviewZoom] = useState(0.45);
   const dragProps = useDragScroll();
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -885,7 +889,12 @@ export default function AdminSuratSKKT({
               </div>
 
               <div>
-                <label className="font-bold text-xs text-gray-700 dark:text-slate-300 block mb-1">Luas Tanah (m²)</label>
+                <div className="flex items-center gap-2 mb-1">
+                  <label className="font-bold text-xs text-gray-700 dark:text-slate-300">Luas Tanah (m²)</label>
+                  <button type="button" onClick={() => setShowLuasCalc(true)} className="p-1 bg-amber-50 text-amber-600 rounded-md border border-amber-200 hover:bg-amber-100 transition-all" title="Konversi satuan tanah">
+                    <Calculator className="w-3 h-3" />
+                  </button>
+                </div>
                 <input
                   type="text"
                   inputMode="decimal"
@@ -1258,6 +1267,76 @@ export default function AdminSuratSKKT({
         }}
         initialData={formData}
       />
+
+      {/* Calculator Modal - Konversi Luas Tanah */}
+      {showLuasCalc && (
+        <div className="fixed inset-0 z-[300] bg-black/50 flex items-center justify-center p-4" onClick={() => setShowLuasCalc(false)}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm p-5 space-y-4" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                <Calculator className="w-4 h-4 text-amber-500" /> Konversi Luas Tanah
+              </h3>
+              <button onClick={() => setShowLuasCalc(false)} className="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+            </div>
+
+            <div className="flex gap-1.5 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
+              <button onClick={() => { setCalcMode('borongan'); setCalcVal1(''); setCalcVal2(''); }} className={`flex-1 py-1.5 text-[11px] font-bold rounded-lg transition-all ${calcMode === 'borongan' ? 'bg-amber-500 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>
+                Borongan → m²
+              </button>
+              <button onClick={() => { setCalcMode('meter'); setCalcVal1(''); setCalcVal2(''); }} className={`flex-1 py-1.5 text-[11px] font-bold rounded-lg transition-all ${calcMode === 'meter' ? 'bg-amber-500 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}>
+                Meter → m²
+              </button>
+            </div>
+
+            {calcMode === 'borongan' ? (
+              <div className="space-y-2">
+                <p className="text-[10px] text-gray-500">1 Borongan = 289 m² (standar Kalsel)</p>
+                <input type="text" inputMode="decimal" placeholder="Jumlah borongan" value={calcVal1} onChange={e => setCalcVal1(e.target.value.replace(/[^0-9.]/g, ''))} className="w-full px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                {calcVal1 && parseFloat(calcVal1) > 0 && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 text-center">
+                    <p className="text-[10px] text-amber-600 mb-1">Hasil konversi</p>
+                    <p className="text-lg font-bold text-amber-700">{(parseFloat(calcVal1) * 289).toFixed(2)} m²</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-[10px] text-gray-500">Masukkan panjang × lebar dalam meter</p>
+                <div className="flex gap-2">
+                  <input type="text" inputMode="decimal" placeholder="Panjang (m)" value={calcVal1} onChange={e => setCalcVal1(e.target.value.replace(/[^0-9.]/g, ''))} className="flex-1 px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                  <span className="text-gray-400 self-center font-bold">×</span>
+                  <input type="text" inputMode="decimal" placeholder="Lebar (m)" value={calcVal2} onChange={e => setCalcVal2(e.target.value.replace(/[^0-9.]/g, ''))} className="flex-1 px-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                </div>
+                {calcVal1 && calcVal2 && parseFloat(calcVal1) > 0 && parseFloat(calcVal2) > 0 && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-3 text-center">
+                    <p className="text-[10px] text-amber-600 mb-1">Hasil konversi</p>
+                    <p className="text-lg font-bold text-amber-700">{(parseFloat(calcVal1) * parseFloat(calcVal2)).toFixed(2)} m²</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <button
+              onClick={() => {
+                let result = '';
+                if (calcMode === 'borongan' && calcVal1 && parseFloat(calcVal1) > 0) {
+                  result = (parseFloat(calcVal1) * 289).toFixed(2);
+                } else if (calcMode === 'meter' && calcVal1 && calcVal2 && parseFloat(calcVal1) > 0 && parseFloat(calcVal2) > 0) {
+                  result = (parseFloat(calcVal1) * parseFloat(calcVal2)).toFixed(2);
+                }
+                if (result) {
+                  setFormData(prev => ({ ...prev, luasTanah: result }));
+                  setShowLuasCalc(false);
+                }
+              }}
+              disabled={(calcMode === 'borongan' && (!calcVal1 || parseFloat(calcVal1) <= 0)) || (calcMode === 'meter' && (!calcVal1 || !calcVal2 || parseFloat(calcVal1) <= 0 || parseFloat(calcVal2) <= 0))}
+              className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all"
+            >
+              Gunakan Hasil Ini
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
