@@ -206,9 +206,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         <td style="text-align:center">${formatDateDisplay(item.tanggal)}</td>
         <td style="text-align:center">${formatDateDisplay(item.tanggalDiundangkan)}</td>
         <td style="text-align:center"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">${item.jenisDokumen || '-'}</span></td>
-        <td style="text-align:center">${item.arsip ? '<span style="background:#ecfdf5;color:#047857;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">Ya</span>' : '<span style="background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">Tidak</span>'}</td>
-        <td style="text-align:center">${item.ketArsip || '-'}</td>
-        <td style="text-align:center">${item.ketLain || '-'}</td>
       </tr>
     `).join('');
     const now = new Date();
@@ -237,12 +234,9 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         <th style="width:40px">No</th>
         <th style="width:50px">Tahun</th>
         <th>Uraian</th>
-        <th style="width:90px">Tanggal</th>
-        <th style="width:100px">Tgl Diundangkan</th>
-        <th style="width:100px">Jenis</th>
-        <th style="width:50px">Arsip</th>
-        <th style="width:70px">Ket Arsip</th>
-        <th style="width:100px">Ket Lain</th>
+        <th style="width:100px">Tanggal</th>
+        <th style="width:110px">Tgl Diundangkan</th>
+        <th style="width:110px">Jenis</th>
       </tr></thead><tbody>${rows}</tbody></table>
       <div class="footer">
         <span>Desa... Kecamatan... Kabupaten...</span>
@@ -315,12 +309,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             <option value="">Semua Jenis</option>
             {JENIS_DOKUMEN_PERDES.map(j => <option key={j} value={j}>{j}</option>)}
           </select>
-          <select value={filterArsip} onChange={(e) => setFilterArsip(e.target.value as any)}
-            className="px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
-            <option value="semua">Semua Arsip</option>
-            <option value="true">Bersifat Arsip</option>
-            <option value="false">Non-Arsip</option>
-          </select>
         </div>
       </div>
 
@@ -346,7 +334,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
           </div>
         ) : (
           <div className="w-full overflow-auto max-h-[calc(100vh-300px)] border border-gray-100 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 relative">
-            <table className="w-full min-w-[1000px] text-sm border-collapse">
+            <table className="w-full min-w-[700px] text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">No</th>
@@ -355,9 +343,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Tanggal</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Tgl Diundangkan</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Jenis</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Arsip</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Ket Arsip</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Ket Lain</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
                 </tr>
               </thead>
@@ -375,31 +360,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                       <span className="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         {item.jenisDokumen || '-'}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      {item.arsip ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/50">
-                          <CheckCircle2 size={12} /> Ya
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-slate-700">
-                          <Circle size={12} /> Tidak
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-bold ${
-                        item.ketArsip === 'ASLI' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800/50'
-                          : item.ketArsip === 'FOTOKOPI' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-100 dark:border-amber-800/50'
-                          : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border border-gray-200 dark:border-slate-700'
-                      }`}>
-                        {item.ketArsip || '-'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="max-w-[150px]">
-                        <p className="text-gray-500 dark:text-slate-400 text-xs line-clamp-1" title={item.ketLain}>{item.ketLain || '-'}</p>
-                      </div>
                     </td>
                     <td className="px-4 py-3 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-center gap-1">
