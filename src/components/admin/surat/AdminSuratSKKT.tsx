@@ -713,7 +713,7 @@ export default function AdminSuratSKKT({
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Form Input Side */}
-        <div className="lg:col-span-6 space-y-6" onKeyDownCapture={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } }}>
+        <div className="lg:col-span-6 space-y-6" onKeyDownCapture={e => { if (e.key === 'Enter' && !(e.target as HTMLElement)?.closest('[data-suggest]')) { e.preventDefault(); e.stopPropagation(); } }}>
           {/* Section 0: Meta Surat — Tanggal & Nomor Surat */}
           <BackdateConfig
             prefix={kodeKlasifikasiSKKT}

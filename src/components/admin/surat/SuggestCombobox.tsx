@@ -73,7 +73,7 @@ export function SuggestCombobox({ value, onChange, options, placeholder }: Sugge
   };
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className="relative w-full" ref={dropdownRef} data-suggest>
       <input
         type="text"
         data-no-cap

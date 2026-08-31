@@ -940,7 +940,7 @@ formData.nomorSurat
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Column */}
-        <div className="lg:col-span-7 space-y-6" onKeyDownCapture={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); } }}>
+        <div className="lg:col-span-7 space-y-6" onKeyDownCapture={e => { if (e.key === 'Enter' && !(e.target as HTMLElement)?.closest('[data-suggest]')) { e.preventDefault(); e.stopPropagation(); } }}>
 
           {/* Backdate Config - Paling Atas Form */}
           <BackdateConfig
