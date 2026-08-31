@@ -1036,8 +1036,47 @@ export default function AdminSuratSKKT({
                       value={formData.namaKetuaRt} 
                       onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} 
                     />
+            </div>
+
+            {/* Batas-Batas & Ukuran Meter */}
+            <div className="space-y-3 pt-2">
+              <p className="font-bold text-xs text-gray-700 dark:text-slate-300">Batas & Panjang Sisi Tanah (Meter):</p>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span className="text-gray-500 block text-[10px]">Utara (Pemilik / Ukuran)</span>
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 6" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
                   </div>
                 </div>
+                <div>
+                  <span className="text-gray-500 block text-[10px]">Selatan (Pemilik / Ukuran)</span>
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 6.5" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-[10px]">Timur (Pemilik / Ukuran)</span>
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-[10px]">Barat (Pemilik / Ukuran)</span>
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
               </div>
             </div>
           </div>
@@ -1132,10 +1171,10 @@ export default function AdminSuratSKKT({
               lng: data.centerLng,
               polygonPoints: data.points,
               luasTanah: data.area.toFixed(2),
-              ukuranUtara: data.ukuranUtara || (data.northDistance > 0 ? `${data.northDistance.toFixed(1)} Meter` : prev.ukuranUtara),
-              ukuranSelatan: data.ukuranSelatan || (data.southDistance > 0 ? `${data.southDistance.toFixed(1)} Meter` : prev.ukuranSelatan),
-              ukuranTimur: data.ukuranTimur || (data.eastDistance > 0 ? `${data.eastDistance.toFixed(1)} Meter` : prev.ukuranTimur),
-              ukuranBarat: data.ukuranBarat || (data.westDistance > 0 ? `${data.westDistance.toFixed(1)} Meter` : prev.ukuranBarat),
+              ukuranUtara: data.northDistance > 0 ? `${data.northDistance.toFixed(1)} Meter` : prev.ukuranUtara,
+              ukuranSelatan: data.southDistance > 0 ? `${data.southDistance.toFixed(1)} Meter` : prev.ukuranSelatan,
+              ukuranTimur: data.eastDistance > 0 ? `${data.eastDistance.toFixed(1)} Meter` : prev.ukuranTimur,
+              ukuranBarat: data.westDistance > 0 ? `${data.westDistance.toFixed(1)} Meter` : prev.ukuranBarat,
               batasUtara: data.batasUtara || prev.batasUtara,
               batasSelatan: data.batasSelatan || prev.batasSelatan,
               batasTimur: data.batasTimur || prev.batasTimur,
