@@ -1161,8 +1161,9 @@ export default function AdminSuratSKKT({
       {/* Interactive Satellite Map Picker Modal */}
       {showMapModal && (
         <LandPolygonPickerModal
-          initialLat={formData.lat}
-          initialLng={formData.lng}
+          initialLat={formData.lat || localStorage.getItem('village_lat') || '-2.797806'}
+          initialLng={formData.lng || localStorage.getItem('village_lng') || '115.227889'}
+          initialAddress={[formData.lokasiTanah, formData.rtRw].filter(Boolean).join(', ') || localStorage.getItem('kop_alamat') || ''}
           onSave={(data: PolygonData) => {
             setFormData(prev => ({ 
               ...prev, 

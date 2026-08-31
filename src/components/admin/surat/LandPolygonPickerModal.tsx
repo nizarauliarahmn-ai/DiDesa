@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapIcon, Layers, Compass, MapPin, Trash2, Undo } from 'lucide-react';
+import { MapIcon, Layers, Compass, MapPin, Trash2, Undo, MousePointer2, Hand } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { showToast } from '../../../utils/toast';
@@ -22,11 +22,13 @@ export interface PolygonData {
 export function LandPolygonPickerModal({
   initialLat,
   initialLng,
+  initialAddress,
   onSave,
   onClose
 }: {
   initialLat: string;
   initialLng: string;
+  initialAddress?: string;
   onSave: (data: PolygonData) => void;
   onClose: () => void;
 }) {
@@ -39,6 +41,8 @@ export function LandPolygonPickerModal({
   const [mapType, setMapType] = useState<'satellite' | 'street'>('satellite');
   const [points, setPoints] = useState<L.LatLng[]>([]);
   const [area, setArea] = useState<number>(0);
+  const [cursorMode, setCursorMode] = useState<'point' | 'pan'>('point');
+  const cursorModeRef = useRef<'point' | 'pan'>('point');
   const [batasUtara, setBatasUtara] = useState('');
   const [batasSelatan, setBatasSelatan] = useState('');
   const [batasTimur, setBatasTimur] = useState('');
@@ -93,7 +97,9 @@ export function LandPolygonPickerModal({
       polygonLayerRef.current = L.polygon([], { color: '#10b981', fillColor: '#34d399', fillOpacity: 0.4, weight: 3 }).addTo(map);
 
       map.on('click', (e: L.LeafletMouseEvent) => {
-        setPoints(prev => [...prev, e.latlng]);
+        if (cursorModeRef.current === 'point') {
+          setPoints(prev => [...prev, e.latlng]);
+        }
       });
 
       mapInstanceRef.current = map;
@@ -119,6 +125,19 @@ export function LandPolygonPickerModal({
   }, [mapType]);
 
   useEffect(() => {
+    cursorModeRef.current = cursorMode;
+    if (!mapInstanceRef.current) return;
+    const container = mapInstanceRef.current.getContainer();
+    if (cursorMode === 'point') {
+      container.style.cursor = 'crosshair';
+      mapInstanceRef.current.dragging.disable();
+    } else {
+      container.style.cursor = 'grab';
+      mapInstanceRef.current.dragging.enable();
+    }
+  }, [cursorMode]);
+
+  useEffect(() => {
     if (!mapInstanceRef.current || !polygonLayerRef.current || !markersGroupRef.current) return;
     
     markersGroupRef.current.clearLayers();
@@ -130,7 +149,8 @@ export function LandPolygonPickerModal({
         .addTo(markersGroupRef.current!);
     });
 
-    // Draw distance labels on edges
+    // Draw distance + name labels on edges
+    const batasNames = [batasUtara, batasSelatan, batasTimur, batasBarat];
     if (points.length > 1) {
       for (let i = 0; i < points.length; i++) {
         if (points.length === 2 && i === 1) break;
@@ -142,9 +162,12 @@ export function LandPolygonPickerModal({
         const midLat = (p1.lat + p2.lat) / 2;
         const midLng = (p1.lng + p2.lng) / 2;
 
+        const name = batasNames[i] || '';
+        const nameHtml = name ? `<div style="background: #059669; color: white; padding: 1px 5px; border-radius: 3px; font-size: 9px; font-weight: bold; white-space: nowrap; margin-bottom: 2px; text-align: center;">${name}</div>` : '';
+        
         const icon = L.divIcon({
           className: 'custom-dist-label',
-          html: `<div style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; font-weight: bold; color: black; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transform: translate(-50%, -50%);">${dist.toFixed(1)} m</div>`,
+          html: `<div style="display: flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); pointer-events: none;">${nameHtml}<div style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 10px; font-weight: bold; color: black; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${dist.toFixed(1)} m</div></div>`,
           iconSize: [0, 0]
         });
         L.marker([midLat, midLng], { icon }).addTo(markersGroupRef.current!);
@@ -153,7 +176,7 @@ export function LandPolygonPickerModal({
 
     setArea(calculateSphericalArea(points));
 
-  }, [points]);
+  }, [points, batasUtara, batasSelatan, batasTimur, batasBarat]);
 
   const handleUndo = () => {
     setPoints(prev => prev.slice(0, -1));
@@ -231,7 +254,7 @@ export function LandPolygonPickerModal({
         </div>
 
         <div className="p-4 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
             <button
               onClick={() => setMapType('satellite')}
               className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${mapType === 'satellite' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
@@ -242,7 +265,18 @@ export function LandPolygonPickerModal({
             ><Compass className="w-3.5 h-3.5" /> Peta Jalan</button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 bg-gray-100 dark:bg-slate-800 p-1 rounded-xl">
+            <button
+              onClick={() => setCursorMode('point')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${cursorMode === 'point' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+            ><MousePointer2 className="w-3.5 h-3.5" /> Titik</button>
+            <button
+              onClick={() => setCursorMode('pan')}
+              className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${cursorMode === 'pan' ? 'bg-emerald-700 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+            ><Hand className="w-3.5 h-3.5" /> Geser</button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
             <button onClick={handleUndo} disabled={points.length === 0} className="px-3 py-1.5 bg-yellow-50 text-yellow-700 font-bold rounded-xl border border-yellow-200 hover:bg-yellow-100 transition-all flex items-center gap-1 disabled:opacity-50">
               <Undo className="w-3.5 h-3.5" /> Undo
             </button>
@@ -255,7 +289,14 @@ export function LandPolygonPickerModal({
         <div className="relative w-full h-[500px] bg-slate-200">
           <div ref={mapContainerRef} className="w-full h-full z-0 cursor-crosshair" />
           
-          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg z-[10] border border-emerald-100 min-w-[200px] max-w-[220px]">
+          {initialAddress && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-emerald-700/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg z-[10] flex items-center gap-2 max-w-[90%]">
+              <MapPin className="w-4 h-4 text-emerald-200 shrink-0" />
+              <span className="text-white text-xs font-bold truncate">{initialAddress}</span>
+            </div>
+          )}
+
+          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-lg z-[10] border border-emerald-100 min-w-[200px] max-w-[220px] mt-[52px]">
             <h4 className="font-bold text-gray-800 mb-2 border-b pb-1">Hasil Pengukuran</h4>
             <div className="space-y-1.5 text-xs">
               <div className="flex justify-between"><span className="text-gray-500">Jumlah Titik:</span> <span className="font-bold">{points.length}</span></div>
