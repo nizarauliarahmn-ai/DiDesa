@@ -344,7 +344,43 @@ export default function AdminSuratSKAW({
     return [...familyHeirs, ...manualHeirs];
   };
 
-  const handlePrint = async () => {
+  
+  const handleSave = async () => {
+    if (!formData.nama || !formData.nama.trim()) {
+      showToast('Mohon lengkapi nama pemohon terlebih dahulu.', 'error');
+      return;
+    }
+    setLoading(true);
+    
+    const updatedFields = {
+      nomor: formData.nomorSurat,
+      nik: formData.nik,
+      nama: formData.nama,
+      keperluan: formData.keperluan,
+      data: formData
+    };
+
+    try {
+      if (editLetterId) {
+        await updateLetterHistory(editLetterId, updatedFields);
+        showToast('Surat berhasil diperbarui!', 'success');
+      } else {
+        await addLetterHistory({
+          ...updatedFields,
+          jenis: 'SKAW',
+          tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          status: 'Selesai'
+        });
+        if (!isBackdate) incrementSequenceNumber('SKAW');
+        showToast('Surat berhasil disimpan ke Arsip!', 'success');
+      }
+    } catch (err) {
+      showToast('Gagal menyimpan surat: ' + (err as Error).message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+const handlePrint = async () => {
     if (!formData.namaAlmarhum || !formData.namaAlmarhum.trim()) {
       showToast("Mohon lengkapi Nama Almarhum terlebih dahulu sebelum mencetak surat.", 'error');
       return;
@@ -808,10 +844,11 @@ export default function AdminSuratSKAW({
 
   return (
     <div className="w-full flex-1 min-w-0 space-y-6 pb-20">
-      <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKAW', { kode: '500', jenis: 'Surat Keterangan Ahli Waris', deskripsi: 'Surat Keterangan Ahli Waris', nomorSurat: formData.nomorSurat })}
+      <SuratEditorHeader template={getLetterHeaderTemplate('SKAW', { kode: '500', jenis: 'Surat Keterangan Ahli Waris', deskripsi: 'Surat Keterangan Ahli Waris', nomorSurat: formData.nomorSurat })}
           icon={<Frown className="w-5 h-5" />}
           onBack={onBack}
+          onSave={handleSave}
+          isSaving={loading}
           onPrint={handlePrint}
           printLabel="Cetak Surat"
         />

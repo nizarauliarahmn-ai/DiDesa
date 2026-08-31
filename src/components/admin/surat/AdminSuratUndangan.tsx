@@ -596,11 +596,11 @@ export default function AdminSuratUndangan({
   return (
     <div className="space-y-6 pb-24">
       {/* Top Bar (Reusable Standard Header) */}
-      <SuratEditorHeader 
-        template={getLetterHeaderTemplate('UND', { kode: '005', jenis: 'Surat Undangan', deskripsi: 'Undangan Pertemuan Koordinasi / Permohonan Resmi', nomorSurat: nomorSurat })}
+      <SuratEditorHeader template={getLetterHeaderTemplate('UND', { kode: '005', jenis: 'Surat Undangan', deskripsi: 'Undangan Pertemuan Koordinasi / Permohonan Resmi', nomorSurat: nomorSurat })}
         icon={<Mail className="w-5 h-5" />}
         onBack={onBack}
-        onPrint={handlePrint}
+        onSave={handleSave}
+          onPrint={handlePrint}
         printLabel="Cetak / Download PDF"
       />
 

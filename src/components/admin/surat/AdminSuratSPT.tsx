@@ -356,7 +356,43 @@ export default function AdminSuratSPT({
   };
 
   // ─── Print ───
-  const handlePrint = async () => {
+  
+  const handleSave = async () => {
+    if (!formData.nama || !formData.nama.trim()) {
+      showToast('Mohon lengkapi nama pemohon terlebih dahulu.', 'error');
+      return;
+    }
+    setLoading(true);
+    
+    const updatedFields = {
+      nomor: formData.nomorSurat,
+      nik: formData.nik,
+      nama: formData.nama,
+      keperluan: formData.keperluan,
+      data: formData
+    };
+
+    try {
+      if (editLetterId) {
+        await updateLetterHistory(editLetterId, updatedFields);
+        showToast('Surat berhasil diperbarui!', 'success');
+      } else {
+        await addLetterHistory({
+          ...updatedFields,
+          jenis: 'SPT',
+          tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          status: 'Selesai'
+        });
+        if (!isBackdate) incrementSequenceNumber('SPT');
+        showToast('Surat berhasil disimpan ke Arsip!', 'success');
+      }
+    } catch (err) {
+      showToast('Gagal menyimpan surat: ' + (err as Error).message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+const handlePrint = async () => {
     if (!selectedPewaris) {
       showToast('Pilih pewaris terlebih dahulu dari data penduduk.', 'error');
       return;
@@ -709,11 +745,12 @@ export default function AdminSuratSPT({
   return (
     <div className="space-y-5 pb-20">
       {/* 📜 Header 📜 */}
-      <SuratEditorHeader 
-        template={getLetterHeaderTemplate('SPT', { kode: '474', jenis: 'Surat Pernyataan Taspen', deskripsi: 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk', nomorSurat: formData.nomorSurat })}
+      <SuratEditorHeader template={getLetterHeaderTemplate('SPT', { kode: '474', jenis: 'Surat Pernyataan Taspen', deskripsi: 'Surat Kuasa & Pernyataan Waris · Terintegrasi Data Penduduk', nomorSurat: formData.nomorSurat })}
         icon={<ShieldCheck className="w-5 h-5" />}
         onBack={onBack}
-        onPrint={handlePrint}
+        onSave={handleSave}
+          isSaving={loading}
+          onPrint={handlePrint}
         printLabel="Cetak Surat"
       >
         <button

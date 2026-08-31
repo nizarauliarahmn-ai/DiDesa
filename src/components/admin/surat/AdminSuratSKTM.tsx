@@ -254,7 +254,43 @@ export default function AdminSuratSKTM({
     setSearchQuery('');
   };
 
-  const handlePrint = async () => {
+  
+  const handleSave = async () => {
+    if (!formData.nama || !formData.nama.trim()) {
+      showToast('Mohon lengkapi nama pemohon terlebih dahulu.', 'error');
+      return;
+    }
+    setLoading(true);
+    
+    const updatedFields = {
+      nomor: formData.nomorSurat,
+      nik: formData.nik,
+      nama: formData.nama,
+      keperluan: formData.keperluan,
+      data: formData
+    };
+
+    try {
+      if (editLetterId) {
+        await updateLetterHistory(editLetterId, updatedFields);
+        showToast('Surat berhasil diperbarui!', 'success');
+      } else {
+        await addLetterHistory({
+          ...updatedFields,
+          jenis: 'SKTM',
+          tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          status: 'Selesai'
+        });
+        if (!isBackdate) incrementSequenceNumber('SKTM');
+        showToast('Surat berhasil disimpan ke Arsip!', 'success');
+      }
+    } catch (err) {
+      showToast('Gagal menyimpan surat: ' + (err as Error).message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+const handlePrint = async () => {
     if (!formData.nama || !formData.nama.trim()) {
       showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
       return;
@@ -515,10 +551,11 @@ export default function AdminSuratSKTM({
   return (
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
-      <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKTM', { kode: '400', jenis: 'Surat Keterangan Tidak Mampu', deskripsi: 'Surat Keterangan Tidak Mampu (Siswa / Sekolah)', nomorSurat: formData.nomorSurat })}
+      <SuratEditorHeader template={getLetterHeaderTemplate('SKTM', { kode: '400', jenis: 'Surat Keterangan Tidak Mampu', deskripsi: 'Surat Keterangan Tidak Mampu (Siswa / Sekolah)', nomorSurat: formData.nomorSurat })}
           icon={<Frown className="w-5 h-5" />}
           onBack={onBack}
+          onSave={handleSave}
+          isSaving={loading}
           onPrint={handlePrint}
           printLabel="Cetak Surat"
         />

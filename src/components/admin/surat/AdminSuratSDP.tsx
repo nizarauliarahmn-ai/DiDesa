@@ -334,7 +334,43 @@ export default function AdminSuratSDP({
     return false;
   };
 
-  const handlePrint = async (skipCheck = false) => {
+  
+  const handleSave = async () => {
+    if (!formData.nama || !formData.nama.trim()) {
+      showToast('Mohon lengkapi nama pemohon terlebih dahulu.', 'error');
+      return;
+    }
+    setLoading(true);
+    
+    const updatedFields = {
+      nomor: formData.nomorSurat,
+      nik: formData.nik,
+      nama: formData.nama,
+      keperluan: formData.keperluan,
+      data: formData
+    };
+
+    try {
+      if (editLetterId) {
+        await updateLetterHistory(editLetterId, updatedFields);
+        showToast('Surat berhasil diperbarui!', 'success');
+      } else {
+        await addLetterHistory({
+          ...updatedFields,
+          jenis: 'SDP',
+          tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          status: 'Selesai'
+        });
+        if (!isBackdate) incrementSequenceNumber('SDP');
+        showToast('Surat berhasil disimpan ke Arsip!', 'success');
+      }
+    } catch (err) {
+      showToast('Gagal menyimpan surat: ' + (err as Error).message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+const handlePrint = async (skipCheck = false) => {
     if (!validateRequired()) return;
     if (isBackdate && !(manualSequence || '').trim()) {
       showToast('Mohon isi nomor urut surat sisipan.', 'error');
@@ -602,10 +638,11 @@ export default function AdminSuratSDP({
   return (
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
-      <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SDP', { kode: '145', jenis: 'Surat Keterangan Domisili Perorangan', deskripsi: 'Surat Keterangan Domisili Perorangan (SDP)', nomorSurat: formData.nomorSurat })}
+      <SuratEditorHeader template={getLetterHeaderTemplate('SDP', { kode: '145', jenis: 'Surat Keterangan Domisili Perorangan', deskripsi: 'Surat Keterangan Domisili Perorangan (SDP)', nomorSurat: formData.nomorSurat })}
           icon={<Home className="w-5 h-5" />}
           onBack={onBack}
+          onSave={handleSave}
+          isSaving={loading}
           onPrint={handlePrint}
           printLabel="Cetak Surat"
         />

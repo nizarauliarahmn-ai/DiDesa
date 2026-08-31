@@ -333,7 +333,42 @@ export default function AdminSuratSKL({
     return false;
   };
 
-  const handlePrint = async () => {
+  
+  const handleSave = async () => {
+    if (!formData.namaIbu || !formData.namaAyah) {
+      showToast('Mohon lengkapi nama ibu dan nama ayah.', 'error');
+      return;
+    }
+    setLoading(true);
+    
+    const updatedFields = {
+      nomor: nomorSurat,
+      nik: formData.nik,
+      nama: formData.nama,
+      data: formData
+    };
+
+    try {
+      if (editLetterId) {
+        await updateLetterHistory(editLetterId, updatedFields);
+        showToast('Surat berhasil diperbarui!', 'success');
+      } else {
+        await addLetterHistory({
+          ...updatedFields,
+          jenis: 'SKL',
+          tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          status: 'Selesai'
+        });
+        if (!isBackdate) incrementSequenceNumber('SKL');
+        showToast('Surat berhasil disimpan ke Arsip!', 'success');
+      }
+    } catch (err) {
+      showToast('Gagal menyimpan surat: ' + (err as Error).message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+const handlePrint = async () => {
     if (!validateRequired()) return;
     if (isBackdate && !(manualSequence || '').trim()) {
       showToast('Mohon isi nomor urut surat sisipan.', 'error');
@@ -644,10 +679,11 @@ export default function AdminSuratSKL({
   return (
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
-      <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKL', { kode: '474.1', jenis: 'Surat Keterangan Kelahiran', deskripsi: 'Surat Keterangan Kelahiran (SKL)', nomorSurat: noSurat })}
+      <SuratEditorHeader template={getLetterHeaderTemplate('SKL', { kode: '474.1', jenis: 'Surat Keterangan Kelahiran', deskripsi: 'Surat Keterangan Kelahiran (SKL)', nomorSurat: noSurat })}
           icon={<Baby className="w-5 h-5" />}
           onBack={onBack}
+          onSave={handleSave}
+          isSaving={loading}
           onPrint={handlePrint}
           printLabel="Cetak Surat"
         />

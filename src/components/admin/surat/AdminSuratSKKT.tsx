@@ -742,7 +742,11 @@ export default function AdminSuratSKKT({
     } finally {
       setLoading(false);
     }
+  }
+  const handlePrint = async () => {
+    await handleSave();
   };
+;
 
   return (
     <div className="space-y-6 relative">
@@ -755,7 +759,8 @@ export default function AdminSuratSKKT({
           onBack={onBack}
           onSave={handleSave}
           isSaving={loading}
-          printLabel="Simpan & Cetak"
+          onPrint={handlePrint}
+          printLabel="Cetak"
         />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

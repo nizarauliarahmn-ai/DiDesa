@@ -264,7 +264,43 @@ export default function AdminSuratSKM({
     setSearchQuery('');
   };
 
-  const handlePrint = async (skipCheck = false) => {
+  
+  const handleSave = async () => {
+    if (!formData.nama || !formData.nama.trim()) {
+      showToast('Mohon lengkapi nama pemohon terlebih dahulu.', 'error');
+      return;
+    }
+    setLoading(true);
+    
+    const updatedFields = {
+      nomor: formData.nomorSurat,
+      nik: formData.nik,
+      nama: formData.nama,
+      keperluan: formData.keperluan,
+      data: formData
+    };
+
+    try {
+      if (editLetterId) {
+        await updateLetterHistory(editLetterId, updatedFields);
+        showToast('Surat berhasil diperbarui!', 'success');
+      } else {
+        await addLetterHistory({
+          ...updatedFields,
+          jenis: 'SKM',
+          tanggal: isBackdate ? new Date(tanggalSurat).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
+          status: 'Selesai'
+        });
+        if (!isBackdate) incrementSequenceNumber('SKM');
+        showToast('Surat berhasil disimpan ke Arsip!', 'success');
+      }
+    } catch (err) {
+      showToast('Gagal menyimpan surat: ' + (err as Error).message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+const handlePrint = async (skipCheck = false) => {
     if (!formData.nama || !formData.nama.trim()) {
       showToast("Mohon lengkapi Nama Pemohon terlebih dahulu sebelum mencetak surat.", 'error');
       return;
@@ -547,10 +583,11 @@ export default function AdminSuratSKM({
   return (
     <div className="space-y-6 pb-20">
       {/* Header (Reusable Standard Header) */}
-      <SuratEditorHeader 
-          template={getLetterHeaderTemplate('SKM', { kode: '400', jenis: 'Surat Keterangan Kematian', deskripsi: 'Surat Keterangan Kematian (SKM)', nomorSurat: formData.nomorSurat })}
+      <SuratEditorHeader template={getLetterHeaderTemplate('SKM', { kode: '400', jenis: 'Surat Keterangan Kematian', deskripsi: 'Surat Keterangan Kematian (SKM)', nomorSurat: formData.nomorSurat })}
           icon={<Heart className="w-5 h-5" />}
           onBack={onBack}
+          onSave={handleSave}
+          isSaving={loading}
           onPrint={handlePrint}
           printLabel="Cetak Surat"
         />
