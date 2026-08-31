@@ -889,22 +889,26 @@ export default function AdminSuratSKKT({
               </div>
 
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <label className="font-bold text-xs text-gray-700 dark:text-slate-300">Luas Tanah</label>
-                  <select value={luasSatuan} onChange={e => { setLuasSatuan(e.target.value as any); setCalcBorongan(''); setCalcPanjang(''); setCalcLebar(''); }} className="text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-2 py-0.5 outline-none cursor-pointer">
-                    <option value="m2">m²</option>
-                    <option value="borongan">Borongan</option>
-                    <option value="meter">Meter</option>
-                  </select>
-                </div>
+                <label className="font-bold text-xs text-gray-700 dark:text-slate-300 block mb-1">Luas Tanah</label>
                 {luasSatuan === 'm2' && (
-                  <input type="text" inputMode="decimal" placeholder="cth: 42" value={formData.luasTanah} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, luasTanah: e.target.value.replace(/[^0-9.]/g, '') })} className={`w-full px-4 py-3 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
+                  <div className={`relative flex items-center rounded-xl transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent'}`}>
+                    <input type="text" inputMode="decimal" placeholder="cth: 42" value={formData.luasTanah} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, luasTanah: e.target.value.replace(/[^0-9.]/g, '') })} className={`flex-1 px-4 py-3 rounded-l-xl outline-none font-mono text-[11px] bg-transparent ${isEditingBatas ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
+                    <select value={luasSatuan} disabled={!isEditingBatas} onChange={e => { setLuasSatuan(e.target.value as any); setCalcBorongan(''); setCalcPanjang(''); setCalcLebar(''); }} className={`px-2 py-3 pr-3 text-[10px] font-bold rounded-r-xl border-l border-slate-200 dark:border-slate-600 outline-none ${isEditingBatas ? 'bg-amber-50 text-amber-700 cursor-pointer' : 'bg-gray-100 dark:bg-slate-700 text-gray-400 cursor-not-allowed'}`}>
+                      <option value="m2">m²</option>
+                      <option value="borongan">Borong</option>
+                      <option value="meter">Meter</option>
+                    </select>
+                  </div>
                 )}
                 {luasSatuan === 'borongan' && (
                   <div className="space-y-1.5">
-                    <div className="relative">
-                      <input type="text" inputMode="decimal" placeholder="Jumlah borongan" value={calcBorongan} onChange={e => { const v = e.target.value.replace(/[^0-9.]/g, ''); setCalcBorongan(v); if (v && parseFloat(v) > 0) setFormData(prev => ({ ...prev, luasTanah: (parseFloat(v) * 289).toFixed(2) })); else setFormData(prev => ({ ...prev, luasTanah: '' })); }} className={`w-full px-4 py-3 pr-20 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-amber-600 font-bold pointer-events-none">borongan</span>
+                    <div className={`relative flex items-center rounded-xl transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent'}`}>
+                      <input type="text" inputMode="decimal" placeholder="Jumlah borongan" value={calcBorongan} readOnly={!isEditingBatas} onChange={e => { const v = e.target.value.replace(/[^0-9.]/g, ''); setCalcBorongan(v); if (v && parseFloat(v) > 0) setFormData(prev => ({ ...prev, luasTanah: (parseFloat(v) * 289).toFixed(2) })); else setFormData(prev => ({ ...prev, luasTanah: '' })); }} className={`flex-1 px-4 py-3 rounded-l-xl outline-none font-mono text-[11px] bg-transparent ${isEditingBatas ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
+                      <select value={luasSatuan} disabled={!isEditingBatas} onChange={e => { setLuasSatuan(e.target.value as any); setCalcBorongan(''); setCalcPanjang(''); setCalcLebar(''); }} className={`px-2 py-3 pr-3 text-[10px] font-bold rounded-r-xl border-l border-slate-200 dark:border-slate-600 outline-none ${isEditingBatas ? 'bg-amber-50 text-amber-700 cursor-pointer' : 'bg-gray-100 dark:bg-slate-700 text-gray-400 cursor-not-allowed'}`}>
+                        <option value="m2">m²</option>
+                        <option value="borongan">Borong</option>
+                        <option value="meter">Meter</option>
+                      </select>
                     </div>
                     {calcBorongan && parseFloat(calcBorongan) > 0 && (
                       <p className="text-[10px] text-amber-600 font-bold">= {formData.luasTanah} m² <span className="text-gray-400 font-normal">(1 borong = 289 m²)</span></p>
@@ -914,9 +918,20 @@ export default function AdminSuratSKKT({
                 {luasSatuan === 'meter' && (
                   <div className="space-y-1.5">
                     <div className="flex gap-2 items-center">
-                      <input type="text" inputMode="decimal" placeholder="Panjang (m)" value={calcPanjang} onChange={e => { const v = e.target.value.replace(/[^0-9.]/g, ''); setCalcPanjang(v); if (v && calcLebar && parseFloat(v) > 0 && parseFloat(calcLebar) > 0) setFormData(prev => ({ ...prev, luasTanah: (parseFloat(v) * parseFloat(calcLebar)).toFixed(2) })); }} className={`flex-1 px-3 py-2.5 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
+                      <div className={`relative flex-1 flex items-center rounded-xl transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent'}`}>
+                        <input type="text" inputMode="decimal" placeholder="Panjang (m)" value={calcPanjang} readOnly={!isEditingBatas} onChange={e => { const v = e.target.value.replace(/[^0-9.]/g, ''); setCalcPanjang(v); if (v && calcLebar && parseFloat(v) > 0 && parseFloat(calcLebar) > 0) setFormData(prev => ({ ...prev, luasTanah: (parseFloat(v) * parseFloat(calcLebar)).toFixed(2) })); }} className={`flex-1 px-3 py-2.5 rounded-l-xl outline-none font-mono text-[11px] bg-transparent ${isEditingBatas ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
+                        <span className="absolute right-2 text-[10px] text-gray-400 font-bold pointer-events-none">m</span>
+                      </div>
                       <span className="text-gray-400 font-bold text-xs">×</span>
-                      <input type="text" inputMode="decimal" placeholder="Lebar (m)" value={calcLebar} onChange={e => { const v = e.target.value.replace(/[^0-9.]/g, ''); setCalcLebar(v); if (calcPanjang && v && parseFloat(calcPanjang) > 0 && parseFloat(v) > 0) setFormData(prev => ({ ...prev, luasTanah: (parseFloat(calcPanjang) * parseFloat(v)).toFixed(2) })); }} className={`flex-1 px-3 py-2.5 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
+                      <div className={`relative flex-1 flex items-center rounded-xl transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent'}`}>
+                        <input type="text" inputMode="decimal" placeholder="Lebar (m)" value={calcLebar} readOnly={!isEditingBatas} onChange={e => { const v = e.target.value.replace(/[^0-9.]/g, ''); setCalcLebar(v); if (calcPanjang && v && parseFloat(calcPanjang) > 0 && parseFloat(v) > 0) setFormData(prev => ({ ...prev, luasTanah: (parseFloat(calcPanjang) * parseFloat(v)).toFixed(2) })); }} className={`flex-1 px-3 py-2.5 rounded-l-xl outline-none font-mono text-[11px] bg-transparent ${isEditingBatas ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
+                        <span className="absolute right-2 text-[10px] text-gray-400 font-bold pointer-events-none">m</span>
+                      </div>
+                      <select value={luasSatuan} disabled={!isEditingBatas} onChange={e => { setLuasSatuan(e.target.value as any); setCalcBorongan(''); setCalcPanjang(''); setCalcLebar(''); }} className={`px-2 py-2.5 pr-3 text-[10px] font-bold rounded-xl border-l border-slate-200 dark:border-slate-600 outline-none ${isEditingBatas ? 'bg-amber-50 text-amber-700 cursor-pointer' : 'bg-gray-100 dark:bg-slate-700 text-gray-400 cursor-not-allowed'}`}>
+                        <option value="m2">m²</option>
+                        <option value="borongan">Borong</option>
+                        <option value="meter">Meter</option>
+                      </select>
                     </div>
                     {calcPanjang && calcLebar && parseFloat(calcPanjang) > 0 && parseFloat(calcLebar) > 0 && (
                       <p className="text-[10px] text-amber-600 font-bold">= {formData.luasTanah} m² <span className="text-gray-400 font-normal">({calcPanjang} × {calcLebar})</span></p>
