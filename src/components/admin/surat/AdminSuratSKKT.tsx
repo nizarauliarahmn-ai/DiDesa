@@ -833,22 +833,34 @@ export default function AdminSuratSKKT({
                 <div>
                   <span className="text-gray-500 block text-[10px]">Utara (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" inputMode="decimal" placeholder="cth: 6 Meter" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 6" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Selatan (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" inputMode="decimal" placeholder="cth: 6.5 Meter" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 6.5" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Timur (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" inputMode="decimal" placeholder="cth: 7 Meter" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
+                  </div>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Barat (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" inputMode="decimal" placeholder="cth: 7 Meter" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <div className="relative">
+                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
+                  </div>
                 </div>
               </div>
             </div>
