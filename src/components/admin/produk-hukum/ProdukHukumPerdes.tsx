@@ -213,10 +213,10 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data Perdes</title>
       <style>
-        @page{size:A4 portrait;margin:1.5cm}
+        @page{size:A4 portrait;margin:0}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
         html,body{margin:0;padding:0}
-        body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#333}
+        body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#333;padding:1.5cm 1.5cm 1cm 1.5cm}
         .header{text-align:center;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #059669}
         .header h2{margin:0;font-size:14px;color:#1a1a1a;letter-spacing:0.5px}
         .header .subtitle{color:#666;margin:3px 0 0;font-size:10px}
