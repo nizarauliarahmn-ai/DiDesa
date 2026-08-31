@@ -78,8 +78,14 @@ export default function AdminPengaturan() {
           set('app_theme', setAppTheme);
           set('village_letter_font', setLetterFont);
           set('google_drive_folder_id', setGoogleDriveFolderId);
-          if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
-          if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
+          if (map['village_lat']) {
+            setVillageLat(parseFloat(map['village_lat']));
+            localStorage.setItem('village_lat', map['village_lat']);
+          }
+          if (map['village_lng']) {
+            setVillageLng(parseFloat(map['village_lng']));
+            localStorage.setItem('village_lng', map['village_lng']);
+          }
           window.dispatchEvent(new Event('village_settings_updated'));
           window.dispatchEvent(new Event('app_theme_updated'));
         }
