@@ -195,9 +195,9 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
       <tr>
         <td style="text-align:center;font-weight:bold;font-size:11px">${item.displayNo}</td>
         <td style="text-align:center;font-weight:600;font-size:11px">${item.tahun}</td>
-        <td style="font-weight:500;font-size:11px">${item.uraian || 'TANPA KETERANGAN'}</td>
-        <td style="text-align:center;font-size:11px">${formatDateDisplay(item.tanggal)}</td>
-        <td style="text-align:center;font-size:11px"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700">${item.jenisDokumen || '-'}</span></td>
+        <td style="font-weight:500;font-size:11px;line-height:1.5">${item.uraian || 'TANPA KETERANGAN'}</td>
+        <td style="font-size:11px">${formatDateDisplay(item.tanggal)}</td>
+        <td style="text-align:center;font-size:11px"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap">${item.jenisDokumen || '-'}</span></td>
       </tr>
     `).join('');
     const now = new Date();
@@ -206,33 +206,46 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
       <style>
         @page{size:A4 portrait;margin:0!important}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
-        html,body{margin:0;padding:0;width:210mm;height:297mm}
-        body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;color:#333;padding:15mm 20mm}
-        .header{text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #059669}
+        html,body{margin:0;padding:0;width:210mm}
+        body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;color:#333;padding:15mm 20mm 25mm 20mm}
+        .header{text-align:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #059669}
         .header h2{margin:0;font-size:16px;color:#1a1a1a;letter-spacing:0.5px}
         .header .subtitle{color:#666;margin:4px 0 0;font-size:11px}
-        table{width:100%;border-collapse:collapse;margin-top:8px}
+        table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}
         thead{display:table-header-group}
-        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:11px;padding:8px 6px;border:1px solid #d1d5db;page-break-after:avoid}
-        td{padding:7px 6px;border:1px solid #d1d5db;white-space:nowrap;vertical-align:middle;page-break-inside:avoid}
+        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:11px;padding:10px 8px;border:1px solid #d1d5db;page-break-after:avoid}
+        td{padding:10px 8px;border:1px solid #d1d5db;white-space:nowrap;vertical-align:middle;page-break-inside:avoid;line-height:1.5}
+        tr{border-bottom:1px solid #e2e8f0}
         tr:nth-child(even){background:#f9fafb}
-        .saas-global-footer{position:fixed!important;bottom:15mm!important;left:20mm!important;right:20mm!important;background:white!important;border-top:0.5px solid #cbd5e1!important;padding-top:6px!important;padding-bottom:5mm!important;font-family:'Inter',sans-serif;line-height:1.5;font-size:8px;color:#94a3b8;text-align:left}
-        .content-wrapper{padding-bottom:35mm!important}
+        colgroup .col-no{width:6%}
+        colgroup .col-tahun{width:10%}
+        colgroup .col-uraian{width:48%}
+        colgroup .col-tanggal{width:18%}
+        colgroup .col-jenis{width:18%}
+        .saas-global-footer{border-top:0.5px solid #cbd5e1;padding-top:6px;margin-top:16px;font-family:'Inter',sans-serif;line-height:1.5;font-size:8px;color:#94a3b8;text-align:left;page-break-inside:avoid}
         @media screen{body{margin:0 auto;box-shadow:0 0 10px rgba(0,0,0,0.1)}}
       </style></head><body>
-      <div class="content-wrapper">
-        <div class="header">
-          <h2>DATA ${label.toUpperCase()}</h2>
-          <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen &bull; Dicetak: ${tglCetak}</p>
-        </div>
-        <table><thead><tr>
-          <th style="width:32px">No</th>
-          <th style="width:42px">Tahun</th>
-          <th>Uraian</th>
-          <th style="width:100px">Tanggal</th>
-          <th style="width:110px">Jenis</th>
-        </tr></thead><tbody>${rows}</tbody></table>
+      <div class="header">
+        <h2>DATA ${label.toUpperCase()}</h2>
+        <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen &bull; Dicetak: ${tglCetak}</p>
       </div>
+      <table>
+        <colgroup>
+          <col class="col-no">
+          <col class="col-tahun">
+          <col class="col-uraian">
+          <col class="col-tanggal">
+          <col class="col-jenis">
+        </colgroup>
+        <thead><tr>
+          <th>No</th>
+          <th>Tahun</th>
+          <th>Uraian</th>
+          <th>Tanggal</th>
+          <th>Jenis</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
       <div class="saas-global-footer">${globalFooter}</div>
     </body></html>`);
     printWindow.document.close();
