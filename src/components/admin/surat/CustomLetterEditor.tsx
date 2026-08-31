@@ -351,19 +351,17 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
     >{icon}</button>
   );
 
-  const ToolbarSep = () => <div className="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-1" />;
-
   const desaName = (localStorage.getItem('kop_desa') || 'Desa').replace(/^(desa|kelurahan)\s+/i, '').trim();
   const kecamatan = (localStorage.getItem('kop_kecamatan') || 'Kecamatan').replace(/^kecamatan\s+/i, '').trim();
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full">
       <TemplatePickerModal isOpen={showPicker} onClose={() => {}} onSelect={handleSelectTemplate} />
 
       {!showPicker && (
         <>
           {/* Header */}
-          <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-3 shadow-sm">
+          <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-3 shadow-sm mb-3">
             <div className="flex items-center gap-3">
               <button onClick={onBack} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors">
                 <ArrowLeft className="w-5 h-5 text-gray-500" />
@@ -379,150 +377,166 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
             </div>
           </div>
 
-          {/* Metadata */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-4 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><Hash className="w-3 h-3" /> Nomor Surat</label>
-                <input type="text" value={nomorSurat} onChange={e => setNomorSurat(e.target.value)} placeholder="001/005/2026"
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-mono outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><Calendar className="w-3 h-3" /> Tanggal</label>
-                <input type="date" value={tanggalSurat} onChange={e => setTanggalSurat(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><FileSignature className="w-3 h-3" /> Layout Tanda Tangan</label>
-                <select value={sigLayout} onChange={e => setSigLayout(e.target.value as SignatureLayout)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800">
-                  {LAYOUT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><User className="w-3 h-3" /> Kepala Desa</label>
-                <select value={kadesName} onChange={e => setKadesName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800">
-                  <option value="">{kadesName || 'Pilih'}</option>
-                  {getOfficerOptions().map(o => <option key={o.name} value={o.name}>{o.name} ({o.role})</option>)}
-                </select>
-              </div>
-            </div>
+          {/* Main: Sidebar + Canvas */}
+          <div className="flex gap-4 flex-1 min-h-0">
 
-            {/* Signature config fields */}
-            {sigLayout !== 'kades_only' && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-slate-800">
-                {(sigLayout === 'kades_rt' || sigLayout === 'kades_rw_rt') && (
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ketua RT</label>
-                    <input type="text" value={rtName} onChange={e => setRtName(e.target.value)} placeholder="Nama Ketua RT"
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-                  </div>
-                )}
-                {(sigLayout === 'kades_rw' || sigLayout === 'kades_rw_rt') && (
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ketua RW</label>
-                    <input type="text" value={rwName} onChange={e => setRwName(e.target.value)} placeholder="Nama Ketua RW"
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-                  </div>
-                )}
-                {sigLayout === 'kades_bpd' && (
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ketua BPD</label>
-                    <input type="text" value={bpdName} onChange={e => setBpdName(e.target.value)} placeholder="Nama Ketua BPD"
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-                  </div>
-                )}
-                {sigLayout === 'custom' && (
-                  <>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jabatan 1</label>
-                      <input type="text" value={custom1Label} onChange={e => setCustom1Label(e.target.value)} placeholder="cth: Sekretaris Desa"
-                        className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-                      <input type="text" value={custom1Name} onChange={e => setCustom1Name(e.target.value)} placeholder="Nama"
-                        className="w-full px-3 py-2 mt-1 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jabatan 2</label>
-                      <input type="text" value={custom2Label} onChange={e => setCustom2Label(e.target.value)} placeholder="cth: Bendahara Desa"
-                        className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-                      <input type="text" value={custom2Name} onChange={e => setCustom2Name(e.target.value)} placeholder="Nama"
-                        className="w-full px-3 py-2 mt-1 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-            <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-2">{desaName} Kec. {kecamatan}</p>
-          </div>
-
-          {/* Toolbar */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-3 py-2 shadow-sm flex flex-wrap items-center gap-0.5">
-            <ToolbarButton icon={<Undo2 className="w-4 h-4" />} title="Undo" onClick={handleUndo} />
-            <ToolbarButton icon={<Redo2 className="w-4 h-4" />} title="Redo" onClick={handleRedo} />
-            <ToolbarSep />
-            <select value={currentFont} onChange={e => { setCurrentFont(e.target.value); execCmd('fontName', e.target.value); recordChange(); }}
-              className="px-2 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 outline-none cursor-pointer">
-              {FONT_FAMILIES.map(f => <option key={f} value={f}>{f.split(',')[0]}</option>)}
-            </select>
-            <select value={currentFontSize} onChange={e => { setCurrentFontSize(e.target.value); execCmd('fontSize', '4'); recordChange(); }}
-              className="w-14 px-2 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 outline-none cursor-pointer">
-              {FONT_SIZES.map(s => <option key={s} value={s}>{s}pt</option>)}
-            </select>
-            <ToolbarSep />
-            <ToolbarButton cmd="bold" icon={<Bold className="w-4 h-4" />} title="Bold" />
-            <ToolbarButton cmd="italic" icon={<Italic className="w-4 h-4" />} title="Italic" />
-            <ToolbarButton cmd="underline" icon={<Underline className="w-4 h-4" />} title="Underline" />
-            <ToolbarSep />
-            <ToolbarButton cmd="justifyLeft" icon={<AlignLeft className="w-4 h-4" />} title="Rata Kiri" />
-            <ToolbarButton cmd="justifyCenter" icon={<AlignCenter className="w-4 h-4" />} title="Rata Tengah" />
-            <ToolbarButton cmd="justifyRight" icon={<AlignRight className="w-4 h-4" />} title="Rata Kanan" />
-            <ToolbarButton cmd="justifyFull" icon={<AlignJustify className="w-4 h-4" />} title="Rata Kiri-Kanan" />
-            <ToolbarSep />
-            <ToolbarButton cmd="insertUnorderedList" icon={<List className="w-4 h-4" />} title="Bullet List" />
-            <ToolbarButton cmd="insertOrderedList" icon={<ListOrdered className="w-4 h-4" />} title="Numbering" />
-            <ToolbarButton cmd="indent" icon={<Indent className="w-4 h-4" />} title="Indent" />
-            <ToolbarButton cmd="outdent" icon={<Outdent className="w-4 h-4" />} title="Outdent" />
-            <ToolbarSep />
-            <ToolbarButton icon={<Minus className="w-4 h-4" />} title="Garis Horizontal" onClick={() => { execCmd('insertHTML', '<hr style="border:none;border-top:1px solid #d1d5db;margin:12px 0;" /><p>&nbsp;</p>'); recordChange(); }} />
-            <div className="relative">
-              <ToolbarButton icon={<Table className="w-4 h-4" />} title="Tabel" onClick={() => setShowTableGrid(!showTableGrid)} />
-              {showTableGrid && (
-                <div className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 z-50">
-                  <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 mb-2">Ukuran Tabel</p>
-                  <div className="grid grid-cols-5 gap-1 mb-2">
-                    {Array(5).fill(0).map((_, r) => Array(5).fill(0).map((_, c) => (
-                      <button key={`${r}-${c}`} onMouseEnter={() => setTableGridSize({ rows: r + 1, cols: c + 1 })}
-                        onClick={() => insertTable(r + 1, c + 1)}
-                        className={`w-5 h-5 rounded border transition-colors ${r < tableGridSize.rows && c < tableGridSize.cols ? 'bg-emerald-400 border-emerald-500' : 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:bg-emerald-100'}`} />
-                    )))}
-                  </div>
-                  <p className="text-[10px] text-center text-gray-400">{tableGridSize.rows} × {tableGridSize.cols}</p>
+            {/* ─── Sidebar Kiri ─── */}
+            <div className="w-72 flex-shrink-0 flex flex-col gap-3">
+              {/* Metadata */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-4 py-3 shadow-sm space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><Hash className="w-3 h-3" /> Nomor Surat</label>
+                  <input type="text" value={nomorSurat} onChange={e => setNomorSurat(e.target.value)} placeholder="001/005/2026"
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-mono outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
                 </div>
-              )}
-            </div>
-            <ToolbarSep />
-            <ToolbarButton cmd="removeFormat" icon={<RemoveFormatting className="w-4 h-4" />} title="Hapus Format" />
-          </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><Calendar className="w-3 h-3" /> Tanggal</label>
+                  <input type="date" value={tanggalSurat} onChange={e => setTanggalSurat(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><FileSignature className="w-3 h-3" /> Layout Tanda Tangan</label>
+                  <select value={sigLayout} onChange={e => setSigLayout(e.target.value as SignatureLayout)}
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800">
+                    {LAYOUT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1"><User className="w-3 h-3" /> Pejabat Penandatangan</label>
+                  <select value={kadesName} onChange={e => setKadesName(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800">
+                    <option value="">{kadesName || 'Pilih'}</option>
+                    {getOfficerOptions().map(o => <option key={o.name} value={o.name}>{o.name} ({o.role})</option>)}
+                  </select>
+                </div>
 
-          {/* A4 Canvas */}
-          <div className="flex justify-center bg-gray-100 dark:bg-slate-800 rounded-2xl p-6 min-h-[600px]">
-            <div className="bg-white shadow-2xl" style={{ width: '210mm', minHeight: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}>
-              <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
-              <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
-              <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
-              <div ref={editorRef} contentEditable suppressContentEditableWarning
-                className="outline-none min-h-[200mm] prose prose-sm max-w-none"
-                style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
-                onInput={recordChange}
-                onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
-              {buildSignatureBlockCanvas()}
-              <div className="mt-6 pt-3 border-t border-gray-300">
-                <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
-                  __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
-                }} />
+                {/* Signature config fields */}
+                {sigLayout !== 'kades_only' && (
+                  <div className="space-y-3 pt-3 border-t border-gray-100 dark:border-slate-800">
+                    {(sigLayout === 'kades_rt' || sigLayout === 'kades_rw_rt') && (
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ketua RT</label>
+                        <input type="text" value={rtName} onChange={e => setRtName(e.target.value)} placeholder="Nama Ketua RT"
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                      </div>
+                    )}
+                    {(sigLayout === 'kades_rw' || sigLayout === 'kades_rw_rt') && (
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ketua RW</label>
+                        <input type="text" value={rwName} onChange={e => setRwName(e.target.value)} placeholder="Nama Ketua RW"
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                      </div>
+                    )}
+                    {sigLayout === 'kades_bpd' && (
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Ketua BPD</label>
+                        <input type="text" value={bpdName} onChange={e => setBpdName(e.target.value)} placeholder="Nama Ketua BPD"
+                          className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                      </div>
+                    )}
+                    {sigLayout === 'custom' && (
+                      <>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jabatan 1</label>
+                          <input type="text" value={custom1Label} onChange={e => setCustom1Label(e.target.value)} placeholder="cth: Sekretaris Desa"
+                            className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                          <input type="text" value={custom1Name} onChange={e => setCustom1Name(e.target.value)} placeholder="Nama"
+                            className="w-full px-2.5 py-1.5 mt-1 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jabatan 2</label>
+                          <input type="text" value={custom2Label} onChange={e => setCustom2Label(e.target.value)} placeholder="cth: Bendahara Desa"
+                            className="w-full px-2.5 py-1.5 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                          <input type="text" value={custom2Name} onChange={e => setCustom2Name(e.target.value)} placeholder="Nama"
+                            className="w-full px-2.5 py-1.5 mt-1 rounded-xl border border-gray-200 dark:border-slate-700 text-[11px] font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800" />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+                <p className="text-[10px] text-gray-400 dark:text-slate-500">{desaName} Kec. {kecamatan}</p>
+              </div>
+
+              {/* Toolbar — vertical stack */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-2 py-2 shadow-sm flex flex-col gap-0.5">
+                <div className="flex items-center gap-0.5">
+                  <ToolbarButton icon={<Undo2 className="w-4 h-4" />} title="Undo" onClick={handleUndo} />
+                  <ToolbarButton icon={<Redo2 className="w-4 h-4" />} title="Redo" onClick={handleRedo} />
+                </div>
+                <div className="flex items-center gap-0.5">
+                  <select value={currentFont} onChange={e => { setCurrentFont(e.target.value); execCmd('fontName', e.target.value); recordChange(); }}
+                    className="flex-1 min-w-0 px-2 py-1.5 text-[11px] font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 outline-none cursor-pointer">
+                    {FONT_FAMILIES.map(f => <option key={f} value={f}>{f.split(',')[0]}</option>)}
+                  </select>
+                  <select value={currentFontSize} onChange={e => { setCurrentFontSize(e.target.value); execCmd('fontSize', '4'); recordChange(); }}
+                    className="w-14 px-1 py-1.5 text-[11px] font-medium rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 outline-none cursor-pointer">
+                    {FONT_SIZES.map(s => <option key={s} value={s}>{s}pt</option>)}
+                  </select>
+                </div>
+                <div className="h-px bg-gray-100 dark:bg-slate-800 my-0.5" />
+                <div className="flex items-center gap-0.5">
+                  <ToolbarButton cmd="bold" icon={<Bold className="w-4 h-4" />} title="Bold" />
+                  <ToolbarButton cmd="italic" icon={<Italic className="w-4 h-4" />} title="Italic" />
+                  <ToolbarButton cmd="underline" icon={<Underline className="w-4 h-4" />} title="Underline" />
+                </div>
+                <div className="h-px bg-gray-100 dark:bg-slate-800 my-0.5" />
+                <div className="flex items-center gap-0.5">
+                  <ToolbarButton cmd="justifyLeft" icon={<AlignLeft className="w-4 h-4" />} title="Rata Kiri" />
+                  <ToolbarButton cmd="justifyCenter" icon={<AlignCenter className="w-4 h-4" />} title="Rata Tengah" />
+                  <ToolbarButton cmd="justifyRight" icon={<AlignRight className="w-4 h-4" />} title="Rata Kanan" />
+                  <ToolbarButton cmd="justifyFull" icon={<AlignJustify className="w-4 h-4" />} title="Rata Kiri-Kanan" />
+                </div>
+                <div className="h-px bg-gray-100 dark:bg-slate-800 my-0.5" />
+                <div className="flex items-center gap-0.5">
+                  <ToolbarButton cmd="insertUnorderedList" icon={<List className="w-4 h-4" />} title="Bullet List" />
+                  <ToolbarButton cmd="insertOrderedList" icon={<ListOrdered className="w-4 h-4" />} title="Numbering" />
+                  <ToolbarButton cmd="indent" icon={<Indent className="w-4 h-4" />} title="Indent" />
+                  <ToolbarButton cmd="outdent" icon={<Outdent className="w-4 h-4" />} title="Outdent" />
+                </div>
+                <div className="h-px bg-gray-100 dark:bg-slate-800 my-0.5" />
+                <div className="flex items-center gap-0.5">
+                  <ToolbarButton icon={<Minus className="w-4 h-4" />} title="Garis Horizontal" onClick={() => { execCmd('insertHTML', '<hr style="border:none;border-top:1px solid #d1d5db;margin:12px 0;" /><p>&nbsp;</p>'); recordChange(); }} />
+                  <div className="relative">
+                    <ToolbarButton icon={<Table className="w-4 h-4" />} title="Tabel" onClick={() => setShowTableGrid(!showTableGrid)} />
+                    {showTableGrid && (
+                      <div className="absolute left-full top-0 ml-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 z-50">
+                        <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 mb-2">Ukuran Tabel</p>
+                        <div className="grid grid-cols-5 gap-1 mb-2">
+                          {Array(5).fill(0).map((_, r) => Array(5).fill(0).map((_, c) => (
+                            <button key={`${r}-${c}`} onMouseEnter={() => setTableGridSize({ rows: r + 1, cols: c + 1 })}
+                              onClick={() => insertTable(r + 1, c + 1)}
+                              className={`w-5 h-5 rounded border transition-colors ${r < tableGridSize.rows && c < tableGridSize.cols ? 'bg-emerald-400 border-emerald-500' : 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:bg-emerald-100'}`} />
+                          )))}
+                        </div>
+                        <p className="text-[10px] text-center text-gray-400">{tableGridSize.rows} × {tableGridSize.cols}</p>
+                      </div>
+                    )}
+                  </div>
+                  <ToolbarButton cmd="removeFormat" icon={<RemoveFormatting className="w-4 h-4" />} title="Hapus Format" />
+                </div>
               </div>
             </div>
+
+            {/* ─── A4 Canvas Kanan ─── */}
+            <div className="flex-1 flex justify-center bg-gray-100 dark:bg-slate-800 rounded-2xl p-6 min-h-[600px] overflow-auto">
+              <div className="bg-white shadow-2xl" style={{ width: '210mm', minHeight: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}>
+                <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
+                <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
+                <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
+                <div ref={editorRef} contentEditable suppressContentEditableWarning
+                  className="outline-none min-h-[200mm] prose prose-sm max-w-none"
+                  style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
+                  onInput={recordChange}
+                  onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
+                {buildSignatureBlockCanvas()}
+                <div className="mt-6 pt-3 border-t border-gray-300">
+                  <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
+                    __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
+                  }} />
+                </div>
+              </div>
+            </div>
+
           </div>
         </>
       )}
