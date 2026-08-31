@@ -212,7 +212,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data Perdes</title>
       <style>
-        @page{size:landscape;margin:0}
+        @page{size:portrait;margin:0}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
         @media print{html,body{margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;padding:12mm 15mm}}
         @media screen{body{font-family:Arial,sans-serif;margin:20px;font-size:12px}}
@@ -241,7 +241,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       <div class="footer">
         <span>Desa... Kecamatan... Kabupaten...</span>
         <span>Halaman 1 dari 1</span>
-        <span>Menampilkan ${itemsWithNumbers.length} dari ${itemsWithNumbers.length} data</span>
+        <span>Dicetak melalui DiDesa</span>
       </div>
     </body></html>`);
     printWindow.document.close();
