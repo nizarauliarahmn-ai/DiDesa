@@ -19,6 +19,7 @@ import AdminSuratSPT from './surat/AdminSuratSPPD';
 import AdminSuratSPPD from './surat/AdminSuratSPPD';
 import AdminSuratSKKT from './surat/AdminSuratSKKT';
 import AdminSuratUndangan from './surat/AdminSuratUndangan';
+import CustomLetterEditor from './surat/CustomLetterEditor';
 import { getLetterFullData } from '../../utils/letterHistory';
 import { fetchResidentsCached } from '../../utils/apiCache';
 import { TambahTamuModal, TambahPermohonanModal } from './surat/AdminSuratQuickActions';
@@ -36,7 +37,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'skaw' | 'master_template'>(() => {
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'custom' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'skaw' | 'master_template'>(() => {
     // Dukungan deep-link: /?admin_tab=surat&surat_form=skn langsung membuka form tertentu.
     // Memakai singkatan surat resmi, dengan alias tab lama untuk kompatibilitas.
     const suratFormAlias: Record<string, any> = {
@@ -255,6 +256,7 @@ export default function AdminSurat({
             onOpenSKKT={() => changeTab('skkt')}
             onOpenUndangan={() => changeTab('undangan')}
             onOpenSKAW={() => changeTab('skaw')}
+            onOpenCustom={() => changeTab('custom')}
           />
         )}
         {activeTab === 'skkt' && (
@@ -380,6 +382,9 @@ export default function AdminSurat({
             editLetterId={editLetterId}
             onBack={() => changeTab(returnTab)} 
           />
+        )}
+        {activeTab === 'custom' && (
+          <CustomLetterEditor onBack={() => changeTab(returnTab)} />
         )}
         {activeTab === 'penomoran' && <AdminSuratPenomoran />}
       </div>

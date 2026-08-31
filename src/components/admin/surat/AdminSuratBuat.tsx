@@ -6,7 +6,7 @@ import WANumberInputModal from '../../common/WANumberInputModal';
 import { 
   Home, Store, Frown, FileText, Users, Search, Printer, Archive, ZoomIn, ZoomOut,
   Mail, Heart, Landmark, FileCheck, Award, Calendar, AlertCircle, UserPlus, Sparkles, CheckCircle2, Monitor,
-  Scan, MessageCircle, Timer
+  Scan, MessageCircle, Timer, FileSignature
 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
@@ -67,8 +67,8 @@ const formatMonthYearInIndonesian = (monthYearStr: string): string => {
   return monthYearStr;
 };
 
-export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSDP, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD, onOpenSKKT, onOpenUndangan, onOpenSKAW }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
-  onOpenSDP?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void, onOpenSKKT?: () => void, onOpenUndangan?: () => void, onOpenSKAW?: () => void }) {
+export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, onOpenSKTM, onOpenSKBM, onOpenSKU, onOpenSKPH, onOpenSDP, onOpenSKM, onOpenSKP, onOpenSKH, onOpenSKL, onOpenSDU, onOpenSPT, onOpenSPPD, onOpenSKKT, onOpenUndangan, onOpenSKAW, onOpenCustom }: { onBack: () => void, presetResident?: any, onOpenNikah?: () => void, onOpenSKTM?: () => void, onOpenSKBM?: () => void, onOpenSKU?: () => void, onOpenSKPH?: () => void,
+  onOpenSDP?: () => void, onOpenSKM?: () => void, onOpenSKP?: () => void, onOpenSKH?: () => void, onOpenSKL?: () => void, onOpenSDU?: () => void, onOpenSPT?: () => void, onOpenSPPD?: () => void, onOpenSKKT?: () => void, onOpenUndangan?: () => void, onOpenSKAW?: () => void, onOpenCustom?: () => void }) {
   const [step, setStep] = useState(1);
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [searchLetterQuery, setSearchLetterQuery] = useState('');
@@ -1118,6 +1118,19 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
                       )}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {(searchLetterQuery !== '' ? uniqueClassifications : remaining).map(renderTemplateCard)}
+                        {/* Custom Letter Card */}
+                        <div
+                          onClick={() => { if (onOpenCustom) onOpenCustom(); }}
+                          className="flex items-center p-3.5 bg-white dark:bg-slate-900 border border-dashed border-2 border-emerald-300 dark:border-emerald-700 rounded-xl transition-all text-left gap-3 relative hover:border-emerald-600 hover:bg-emerald-50/50 group cursor-pointer"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform">
+                            <FileSignature className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-gray-900 dark:text-white text-xs truncate">Surat Manual / Custom</h4>
+                            <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate">Buat surat bebas dengan editor WYSIWYG</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </>
