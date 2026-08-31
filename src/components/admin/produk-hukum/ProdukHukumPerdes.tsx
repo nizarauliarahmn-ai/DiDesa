@@ -246,7 +246,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none">
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mb-4">
@@ -266,7 +266,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             </div>
           </div>
         ) : (
-          <div className="overflow-auto max-h-[600px]">
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.3)]">
