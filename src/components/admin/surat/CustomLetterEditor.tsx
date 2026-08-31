@@ -306,8 +306,8 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 dark:bg-slate-800"
                 >
                   <option value="">{pejabatName || 'Pilih Pejabat'}</option>
-                  {getOfficerOptions().map((opt: string) => (
-                    <option key={opt} value={opt}>{opt}</option>
+                  {getOfficerOptions().map((opt) => (
+                    <option key={opt.name} value={opt.name}>{opt.name} ({opt.role})</option>
                   ))}
                 </select>
               </div>
