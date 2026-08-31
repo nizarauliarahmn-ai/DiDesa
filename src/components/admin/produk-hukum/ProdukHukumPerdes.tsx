@@ -196,9 +196,9 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   };
 
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+    const printWindow = window.open('', '_blank', 'width=1400,height=800');
     if (!printWindow) return;
-    const rows = filteredItems.map((item, i) => `
+    const rows = itemsWithNumbers.map((item) => `
       <tr>
         <td style="text-align:center;font-weight:bold">${item.displayNo}</td>
         <td style="text-align:center;font-weight:600">${item.tahun}</td>
@@ -211,22 +211,44 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         <td style="text-align:center">${item.ketLain || '-'}</td>
       </tr>
     `).join('');
+    const now = new Date();
+    const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data Perdes</title>
       <style>
-        body{font-family:Arial,sans-serif;margin:20px;font-size:12px}
-        h2{text-align:center;margin-bottom:4px}
-        .subtitle{text-align:center;color:#666;margin-bottom:16px;font-size:13px}
-        table{width:100%;border-collapse:collapse}
-        th,td{border:1px solid #ddd;padding:8px 6px}
-        th{background:#f0fdf4;font-weight:700;text-align:center}
+        @page{size:landscape;margin:12mm 15mm}
+        *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+        @media print{html,body{margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px}}
+        @media screen{body{font-family:Arial,sans-serif;margin:20px;font-size:12px}}
+        .header{text-align:center;margin-bottom:12px}
+        .header h2{margin:0 0 2px;font-size:16px}
+        .header .subtitle{color:#666;margin:0;font-size:12px}
+        table{width:100%;border-collapse:collapse;margin-top:8px}
+        th,td{border:1px solid #ccc;padding:6px 5px;font-size:10.5px}
+        th{background:#f0fdf4;font-weight:700;text-align:center;font-size:11px}
+        td{vertical-align:middle}
         tr:nth-child(even){background:#f9fafb}
-        @media print{body{margin:10px}}
+        .footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:8px;border-top:1px solid #ddd;font-size:10px;color:#888}
       </style></head><body>
-      <h2>DATA PERATURAN DESA (PERDES)</h2>
-      <p class="subtitle">Total: ${filteredItems.length} dokumen</p>
+      <div class="header">
+        <h2>DATA PERATURAN DESA (PERDES)</h2>
+        <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen | Dicetak: ${tglCetak}</p>
+      </div>
       <table><thead><tr>
-        <th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Tgl Diundangkan</th><th>Jenis</th><th>Arsip</th><th>Ket Arsip</th><th>Ket Lain</th>
+        <th style="width:40px">No</th>
+        <th style="width:50px">Tahun</th>
+        <th>Uraian</th>
+        <th style="width:90px">Tanggal</th>
+        <th style="width:100px">Tgl Diundangkan</th>
+        <th style="width:100px">Jenis</th>
+        <th style="width:50px">Arsip</th>
+        <th style="width:70px">Ket Arsip</th>
+        <th style="width:100px">Ket Lain</th>
       </tr></thead><tbody>${rows}</tbody></table>
+      <div class="footer">
+        <span>Desa... Kecamatan... Kabupaten...</span>
+        <span>Halaman 1 dari 1</span>
+        <span>Menampilkan ${itemsWithNumbers.length} dari ${itemsWithNumbers.length} data</span>
+      </div>
     </body></html>`);
     printWindow.document.close();
     setTimeout(() => printWindow.print(), 500);
