@@ -518,14 +518,14 @@ export default function AdminSuratSKKT({
           <!-- KETUA RT (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
-            <p style="margin-bottom:28px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:60px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
 
           <!-- KEPALA DESA (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
-            <p style="margin-bottom:28px;">${kadesRoleHTML}</p>
+            <p style="margin-bottom:60px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
         </div>
@@ -598,14 +598,14 @@ export default function AdminSuratSKKT({
           <!-- KEPALA DESA (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
-            <p style="margin-bottom:28px;">${kadesRoleHTML}</p>
+            <p style="margin-bottom:60px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
-            <p style="margin-bottom:28px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
+            <p style="margin-bottom:60px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
         </div>
