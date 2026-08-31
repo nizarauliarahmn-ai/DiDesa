@@ -266,12 +266,12 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             </div>
           </div>
         ) : (
-          <div>
+          <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-16 z-20 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.3)]">
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">No</th>
-                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Tahun</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider sticky left-0 bg-white dark:bg-slate-900 z-30">No</th>
+                  <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider sticky left-[52px] bg-white dark:bg-slate-900 z-30">Tahun</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px]">Uraian</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Tanggal</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Tgl Diundangkan</th>
@@ -285,8 +285,8 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
               <tbody>
                 {paginatedItems.map((item) => (
                   <tr key={item.id} className="border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">{item.no}</td>
-                    <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
+                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white sticky left-0 bg-white dark:bg-slate-900 z-10">{item.no}</td>
+                    <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold sticky left-[52px] bg-white dark:bg-slate-900 z-10">{item.tahun}</td>
                     <td className="px-4 py-3">
                       <div className="max-w-[300px]">
                         <p className="text-gray-900 dark:text-white font-medium leading-snug line-clamp-2">{item.uraian || 'TANPA KETERANGAN'}</p>
