@@ -190,50 +190,50 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
   const handlePrint = () => {
     const printWindow = window.open('', '_blank', 'width=900,height=800');
     if (!printWindow) return;
+    const globalFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     const rows = itemsWithNumbers.map((item) => `
       <tr>
-        <td style="text-align:center;font-weight:bold">${item.displayNo}</td>
-        <td style="text-align:center;font-weight:600">${item.tahun}</td>
-        <td style="font-weight:500">${item.uraian || 'TANPA KETERANGAN'}</td>
-        <td style="text-align:center">${formatDateDisplay(item.tanggal)}</td>
-        <td style="text-align:center"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700">${item.jenisDokumen || '-'}</span></td>
+        <td style="text-align:center;font-weight:bold;font-size:11px">${item.displayNo}</td>
+        <td style="text-align:center;font-weight:600;font-size:11px">${item.tahun}</td>
+        <td style="font-weight:500;font-size:11px">${item.uraian || 'TANPA KETERANGAN'}</td>
+        <td style="text-align:center;font-size:11px">${formatDateDisplay(item.tanggal)}</td>
+        <td style="text-align:center;font-size:11px"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700">${item.jenisDokumen || '-'}</span></td>
       </tr>
     `).join('');
     const now = new Date();
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data ${label}</title>
       <style>
-        @page{size:A4 portrait;margin:15mm 12mm 20mm 12mm}
+        @page{size:A4 portrait;margin:0!important}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
-        html,body{margin:0;padding:0;width:210mm}
-        body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#333}
-        @media screen{body{margin:0 auto;padding:15mm 12mm 20mm 12mm;max-width:210mm;box-shadow:0 0 10px rgba(0,0,0,0.1)}}
-        .header{text-align:center;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #059669}
-        .header h2{margin:0;font-size:14px;color:#1a1a1a;letter-spacing:0.5px}
-        .header .subtitle{color:#666;margin:4px 0 0;font-size:10px}
-        table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9.5px}
+        html,body{margin:0;padding:0;width:210mm;height:297mm}
+        body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;color:#333;padding:15mm 20mm}
+        .header{text-align:center;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid #059669}
+        .header h2{margin:0;font-size:16px;color:#1a1a1a;letter-spacing:0.5px}
+        .header .subtitle{color:#666;margin:4px 0 0;font-size:11px}
+        table{width:100%;border-collapse:collapse;margin-top:8px}
         thead{display:table-header-group}
-        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:9.5px;padding:6px 4px;border:1px solid #d1d5db;page-break-after:avoid}
-        td{padding:5px 4px;border:1px solid #d1d5db;white-space:nowrap;vertical-align:middle;page-break-inside:avoid}
+        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:11px;padding:8px 6px;border:1px solid #d1d5db;page-break-after:avoid}
+        td{padding:7px 6px;border:1px solid #d1d5db;white-space:nowrap;vertical-align:middle;page-break-inside:avoid}
         tr:nth-child(even){background:#f9fafb}
-        .footer-fixed{position:fixed;bottom:0;left:0;right:0;padding:8px 12mm;font-size:8px;color:#999;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;background:white}
-        @media print{.footer-fixed{position:fixed;bottom:0;left:0;right:0}}
+        .saas-global-footer{position:fixed!important;bottom:15mm!important;left:20mm!important;right:20mm!important;background:white!important;border-top:0.5px solid #cbd5e1!important;padding-top:6px!important;padding-bottom:5mm!important;font-family:'Inter',sans-serif;line-height:1.5;font-size:8px;color:#94a3b8;text-align:left}
+        .content-wrapper{padding-bottom:35mm!important}
+        @media screen{body{margin:0 auto;box-shadow:0 0 10px rgba(0,0,0,0.1)}}
       </style></head><body>
-      <div class="header">
-        <h2>DATA ${label.toUpperCase()}</h2>
-        <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen &bull; Dicetak: ${tglCetak}</p>
+      <div class="content-wrapper">
+        <div class="header">
+          <h2>DATA ${label.toUpperCase()}</h2>
+          <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen &bull; Dicetak: ${tglCetak}</p>
+        </div>
+        <table><thead><tr>
+          <th style="width:32px">No</th>
+          <th style="width:42px">Tahun</th>
+          <th>Uraian</th>
+          <th style="width:100px">Tanggal</th>
+          <th style="width:110px">Jenis</th>
+        </tr></thead><tbody>${rows}</tbody></table>
       </div>
-      <table><thead><tr>
-        <th style="width:30px">No</th>
-        <th style="width:38px">Tahun</th>
-        <th>Uraian</th>
-        <th style="width:100px">Tanggal</th>
-        <th style="width:110px">Jenis</th>
-      </tr></thead><tbody>${rows}</tbody></table>
-      <div class="footer-fixed">
-        <span>Desa.......... Kecamatan.......... Kabupaten..........</span>
-        <span>Dicetak melalui DiDesa</span>
-      </div>
+      <div class="saas-global-footer">${globalFooter}</div>
     </body></html>`);
     printWindow.document.close();
     setTimeout(() => printWindow.print(), 500);
