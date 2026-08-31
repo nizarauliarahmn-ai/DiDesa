@@ -1,6 +1,7 @@
 ﻿import { useState, useMemo } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import ImportModal from './ImportModal';
 
 interface ProdukHukumItem {
   id: string;
@@ -85,6 +86,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
@@ -130,6 +132,26 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     setEditingItem(null);
   };
 
+  const handleImport = (importedData: any[]) => {
+    const newItems: ProdukHukumItem[] = importedData.map(row => ({
+      id: generateId(),
+      no: row.no || 0,
+      tahun: row.tahun || new Date().getFullYear().toString(),
+      uraian: row.uraian || '',
+      tanggal: row.tanggal || '',
+      tanggalDiundangkan: row.tanggalDiundangkan || '',
+      jenisDokumen: row.jenisDokumen || '',
+      arsip: row.arsip ?? true,
+      linkFile: row.linkFile || '',
+      ketArsip: row.ketArsip || '',
+      ketLain: row.ketLain || '',
+      createdAt: new Date().toISOString(),
+    }));
+    const updated = [...items, ...newItems];
+    setItems(updated);
+    saveData(updated);
+  };
+
   const handleDelete = (id: string) => {
     const newItems = items.filter(i => i.id !== id);
     setItems(newItems);
@@ -151,13 +173,22 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Peraturan Desa ({items.length} dokumen)</p>
           </div>
         </div>
-        <button
-          onClick={() => { setEditingItem(null); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none"
-        >
-          <PlusCircle size={18} />
-          <span>Tambah Perdes</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm dark:shadow-none"
+          >
+            <Upload size={18} />
+            <span>Import</span>
+          </button>
+          <button
+            onClick={() => { setEditingItem(null); setShowModal(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none"
+          >
+            <PlusCircle size={18} />
+            <span>Tambah Perdes</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter Bar */}
@@ -200,11 +231,17 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
               <FileText size={28} />
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data Perdes</h3>
-            <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Klik &quot;Tambah Perdes&quot; untuk menambahkan data pertama</p>
-            <button onClick={() => { setEditingItem(null); setShowModal(true); }}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors">
-              <PlusCircle size={16} /> Tambah Perdes
-            </button>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Tambahkan data secara manual atau import dari file</p>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors">
+                <Upload size={16} /> Import
+              </button>
+              <button onClick={() => { setEditingItem(null); setShowModal(true); }}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors">
+                <PlusCircle size={16} /> Tambah Manual
+              </button>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -306,6 +343,14 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       {showModal && (
         <ModalPerdes item={editingItem} items={items} onSave={handleSave} onClose={() => { setShowModal(false); setEditingItem(null); }} />
       )}
+
+      {/* Import Modal */}
+      <ImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImport}
+        kategoriLabel="Perdes"
+      />
 
       {/* Delete Confirm */}
       {showDeleteConfirm && (

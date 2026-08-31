@@ -1,6 +1,7 @@
 ﻿import { useState, useMemo } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, Link2, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import ImportModal from './ImportModal';
 
 interface ProdukHukumItem {
   id: string;
@@ -95,6 +96,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
@@ -140,6 +142,26 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     setEditingItem(null);
   };
 
+  const handleImport = (importedData: any[]) => {
+    const newItems: ProdukHukumItem[] = importedData.map(row => ({
+      id: generateId(),
+      no: row.no || 0,
+      tahun: row.tahun || new Date().getFullYear().toString(),
+      uraian: row.uraian || '',
+      tanggal: row.tanggal || '',
+      tanggalDiundangkan: row.tanggalDiundangkan || '',
+      jenisDokumen: row.jenisDokumen || '',
+      arsip: row.arsip ?? true,
+      linkFile: row.linkFile || '',
+      ketArsip: row.ketArsip || '',
+      ketLain: row.ketLain || '',
+      createdAt: new Date().toISOString(),
+    }));
+    const updated = [...items, ...newItems];
+    setItems(updated);
+    saveData(kategori, updated);
+  };
+
   const handleDelete = (id: string) => {
     const newItems = items.filter(i => i.id !== id);
     setItems(newItems);
@@ -160,11 +182,18 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
             <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{items.length} dokumen</p>
           </div>
         </div>
-        <button onClick={() => { setEditingItem(null); setShowModal(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none">
-          <PlusCircle size={18} />
-          <span>Tambah {label}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowImportModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm dark:shadow-none">
+            <Upload size={18} />
+            <span>Import</span>
+          </button>
+          <button onClick={() => { setEditingItem(null); setShowModal(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none">
+            <PlusCircle size={18} />
+            <span>Tambah {label}</span>
+          </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none p-4">
@@ -202,11 +231,17 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
               <FileText size={28} />
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data {label}</h3>
-            <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Klik &quot;Tambah {label}&quot; untuk menambahkan data pertama</p>
-            <button onClick={() => { setEditingItem(null); setShowModal(true); }}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors">
-              <PlusCircle size={16} /> Tambah {label}
-            </button>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Tambahkan data secara manual atau import dari file</p>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors">
+                <Upload size={16} /> Import
+              </button>
+              <button onClick={() => { setEditingItem(null); setShowModal(true); }}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 transition-colors">
+                <PlusCircle size={16} /> Tambah Manual
+              </button>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -295,6 +330,13 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         <ModalCategory item={editingItem} items={items} jenisOptions={jenisOptions} label={label} onSave={handleSave}
           onClose={() => { setShowModal(false); setEditingItem(null); }} />
       )}
+
+      <ImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImport}
+        kategoriLabel={label}
+      />
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowDeleteConfirm(null)}>
