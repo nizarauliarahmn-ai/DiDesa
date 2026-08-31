@@ -193,11 +193,11 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     const globalFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     const rows = itemsWithNumbers.map((item) => `
       <tr>
-        <td style="text-align:center;font-weight:bold;font-size:11px">${item.displayNo}</td>
-        <td style="text-align:center;font-weight:600;font-size:11px">${item.tahun}</td>
-        <td style="font-weight:500;font-size:11px;line-height:1.5">${item.uraian || 'TANPA KETERANGAN'}</td>
-        <td style="font-size:11px">${formatDateDisplay(item.tanggal)}</td>
-        <td style="text-align:center;font-size:11px"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;white-space:nowrap">${item.jenisDokumen || '-'}</span></td>
+        <td style="text-align:center;font-weight:bold;font-size:12px">${item.displayNo}</td>
+        <td style="text-align:center;font-weight:600;font-size:12px">${item.tahun}</td>
+        <td style="font-weight:500;font-size:12px;line-height:1.5">${item.uraian || 'TANPA KETERANGAN'}</td>
+        <td style="font-size:12px;line-height:1.5">${formatDateDisplay(item.tanggal)}</td>
+        <td style="text-align:center;font-size:12px">${item.jenisDokumen || '-'}</td>
       </tr>
     `).join('');
     const now = new Date();
@@ -207,15 +207,15 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         @page{size:A4 portrait;margin:0!important}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
         html,body{margin:0;padding:0;width:210mm}
-        body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;color:#333;padding:15mm 20mm 25mm 20mm}
-        .header{text-align:center;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #059669}
+        body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#333;padding:15mm 15mm 25mm 15mm}
+        .header{text-align:center;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #059669}
         .header h2{margin:0;font-size:16px;color:#1a1a1a;letter-spacing:0.5px}
-        .header .subtitle{color:#666;margin:4px 0 0;font-size:11px}
+        .header .subtitle{color:#666;margin:3px 0 0;font-size:11px}
         table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}
         thead{display:table-header-group}
         tfoot{display:table-footer-group}
-        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:11px;padding:10px 8px;border:1px solid #d1d5db;page-break-after:avoid}
-        td{padding:10px 8px;border:1px solid #d1d5db;white-space:nowrap;vertical-align:middle;page-break-inside:avoid;line-height:1.5}
+        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:12px;padding:10px 8px;border:1px solid #d1d5db;page-break-after:avoid}
+        td{padding:8px 10px;border:1px solid #d1d5db;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;vertical-align:top;page-break-inside:avoid;line-height:1.5}
         tr{border-bottom:1px solid #e2e8f0}
         tr:nth-child(even){background:#f9fafb}
         colgroup .col-no{width:6%}
