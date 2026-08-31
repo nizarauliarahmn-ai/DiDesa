@@ -2,7 +2,7 @@ import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import { SuggestCombobox } from './SuggestCombobox';
 import { useState, useEffect, useRef } from 'react';
-import { Search, MapPin, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark } from 'lucide-react';
+import { Search, MapPin, ZoomIn, ZoomOut, UserCheck, FileSignature, Landmark, Pencil, Check } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { getLetterClassifications, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { resolveKadesName } from '../../../utils/letterOfficers';
@@ -68,6 +68,7 @@ export default function AdminSuratSKKT({
   const [searchSaksi3, setSearchSaksi3] = useState('');
 
   const [showMapModal, setShowMapModal] = useState(false);
+  const [isEditingBatas, setIsEditingBatas] = useState(false);
   const [previewZoom, setPreviewZoom] = useState(0.45);
   const dragProps = useDragScroll();
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -869,44 +870,64 @@ export default function AdminSuratSKKT({
               </div>
             </div>
 
-            {/* Batas-Batas & Ukuran Meter - muncul setelah gambar poligon */}
+            {/* Hasil Pengukuran - muncul setelah gambar poligon */}
             {formData.polygonPoints && formData.polygonPoints.length > 0 && (
             <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <p className="font-bold text-xs text-gray-700 dark:text-slate-300">Hasil Pengukuran</p>
+                <button
+                  type="button"
+                  onClick={() => setIsEditingBatas(!isEditingBatas)}
+                  className={`px-3 py-1.5 text-[10px] font-bold rounded-lg flex items-center gap-1.5 transition-all ${isEditingBatas ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'}`}
+                >
+                  {isEditingBatas ? <><Check className="w-3 h-3" /> Simpan Edit</> : <><Pencil className="w-3 h-3" /> Edit Data</>}
+                </button>
+              </div>
+
               <div>
                 <label className="font-bold text-xs text-gray-700 dark:text-slate-300 block mb-1">Luas Tanah (m²)</label>
-                <input type="text" inputMode="decimal" placeholder="cth: 42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="cth: 42"
+                  value={formData.luasTanah}
+                  readOnly={!isEditingBatas}
+                  onChange={e => setFormData({ ...formData, luasTanah: e.target.value.replace(/[^0-9.]/g, '') })}
+                  className={`w-full px-4 py-3 rounded-xl outline-none transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`}
+                />
               </div>
+
               <p className="font-bold text-xs text-gray-700 dark:text-slate-300">Batas & Panjang Sisi Tanah (Meter):</p>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <span className="text-gray-500 block text-[10px]">Utara (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasUtara} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className={`w-full px-4 py-3 rounded-xl outline-none mb-1 transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                   <div className="relative">
-                    <input type="text" inputMode="decimal" placeholder="cth: 6" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <input type="text" inputMode="decimal" placeholder="cth: 6" value={formData.ukuranUtara} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value.replace(/[^0-9.]/g, '') })} className={`w-full px-4 py-3 pr-14 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Selatan (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasSelatan} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className={`w-full px-4 py-3 rounded-xl outline-none mb-1 transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                   <div className="relative">
-                    <input type="text" inputMode="decimal" placeholder="cth: 6.5" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <input type="text" inputMode="decimal" placeholder="cth: 6.5" value={formData.ukuranSelatan} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value.replace(/[^0-9.]/g, '') })} className={`w-full px-4 py-3 pr-14 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Timur (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasTimur} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className={`w-full px-4 py-3 rounded-xl outline-none mb-1 transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                   <div className="relative">
-                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranTimur} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value.replace(/[^0-9.]/g, '') })} className={`w-full px-4 py-3 pr-14 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
                   </div>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Barat (Pemilik / Ukuran)</span>
-                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
+                  <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasBarat} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className={`w-full px-4 py-3 rounded-xl outline-none mb-1 transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                   <div className="relative">
-                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 pr-14 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                    <input type="text" inputMode="decimal" placeholder="cth: 7" value={formData.ukuranBarat} readOnly={!isEditingBatas} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value.replace(/[^0-9.]/g, '') })} className={`w-full px-4 py-3 pr-14 rounded-xl outline-none font-mono text-[11px] transition-all ${isEditingBatas ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700' : 'bg-gray-100 dark:bg-slate-700 border border-transparent text-gray-700 dark:text-slate-200 font-bold cursor-not-allowed'}`} />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 font-medium pointer-events-none">meter</span>
                   </div>
                 </div>
