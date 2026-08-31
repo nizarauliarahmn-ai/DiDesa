@@ -193,29 +193,29 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     const globalFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     const rows = itemsWithNumbers.map((item) => `
       <tr>
-        <td style="text-align:center;font-weight:bold;font-size:12px">${item.displayNo}</td>
-        <td style="text-align:center;font-weight:600;font-size:12px">${item.tahun}</td>
-        <td style="font-weight:500;font-size:12px;line-height:1.5">${item.uraian || 'TANPA KETERANGAN'}</td>
-        <td style="font-size:12px;line-height:1.5">${formatDateDisplay(item.tanggal)}</td>
-        <td style="text-align:center;font-size:12px">${item.jenisDokumen || '-'}</td>
+        <td style="text-align:center;font-weight:bold;font-size:10px">${item.displayNo}</td>
+        <td style="text-align:center;font-weight:600;font-size:10px">${item.tahun}</td>
+        <td style="font-weight:500;font-size:10px;line-height:1.3">${item.uraian || 'TANPA KETERANGAN'}</td>
+        <td style="font-size:10px;line-height:1.3">${formatDateDisplay(item.tanggal)}</td>
+        <td style="text-align:center;font-size:10px">${item.jenisDokumen || '-'}</td>
       </tr>
     `).join('');
     const now = new Date();
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data ${label}</title>
       <style>
-        @page{size:A4 portrait;margin:0!important}
+        @page{size:A4 portrait;margin:1.5cm}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
-        html,body{margin:0;padding:0;width:210mm}
-        body{font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#333;padding:15mm 15mm 25mm 15mm}
-        .header{text-align:center;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #059669}
-        .header h2{margin:0;font-size:16px;color:#1a1a1a;letter-spacing:0.5px}
-        .header .subtitle{color:#666;margin:3px 0 0;font-size:11px}
-        table{width:100%;border-collapse:collapse;margin-top:8px;table-layout:fixed}
+        html,body{margin:0;padding:0}
+        body{font-family:'Segoe UI',Arial,sans-serif;font-size:10px;color:#333}
+        .header{text-align:center;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #059669}
+        .header h2{margin:0;font-size:14px;color:#1a1a1a;letter-spacing:0.5px}
+        .header .subtitle{color:#666;margin:3px 0 0;font-size:10px}
+        table{width:100%;border-collapse:collapse;margin-top:6px;table-layout:fixed}
         thead{display:table-header-group}
         tfoot{display:table-footer-group}
-        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:12px;padding:10px 8px;border:1px solid #d1d5db;page-break-after:avoid}
-        td{padding:8px 10px;border:1px solid #d1d5db;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;vertical-align:top;page-break-inside:avoid;line-height:1.5}
+        th{background:#ecfdf5;font-weight:700;text-align:center;font-size:10px;padding:7px 5px;border:1px solid #d1d5db;page-break-after:avoid}
+        td{padding:6px 8px;border:1px solid #d1d5db;white-space:normal;vertical-align:top;page-break-inside:avoid;line-height:1.3}
         tr{border-bottom:1px solid #e2e8f0}
         tr:nth-child(even){background:#f9fafb}
         colgroup .col-no{width:6%}
@@ -223,8 +223,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         colgroup .col-uraian{width:48%}
         colgroup .col-tanggal{width:18%}
         colgroup .col-jenis{width:18%}
-        tfoot td{padding-top:12px;font-size:9px;color:#64748b;border-top:1px solid #e2e8f0;border-left:none;border-right:none;border-bottom:none;line-height:1.5}
-        @media screen{body{margin:0 auto;box-shadow:0 0 10px rgba(0,0,0,0.1)}}
+        tfoot td{padding-top:10px;font-size:8px;color:#64748b;border-top:1px solid #e2e8f0;border-left:none;border-right:none;border-bottom:none;line-height:1.4}
       </style></head><body>
       <div class="header">
         <h2>DATA ${label.toUpperCase()}</h2>
