@@ -237,13 +237,20 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
           <col class="col-tanggal">
           <col class="col-jenis">
         </colgroup>
-        <thead><tr>
-          <th>No</th>
-          <th>Tahun</th>
-          <th>Uraian</th>
-          <th>Tanggal</th>
-          <th>Jenis</th>
-        </tr></thead>
+        <thead>
+          <tr>
+            <th colSpan="5" style="padding:0;margin:0;border:none;background:white">
+              <div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white">&nbsp;</div>
+            </th>
+          </tr>
+          <tr>
+            <th>No</th>
+            <th>Tahun</th>
+            <th>Uraian</th>
+            <th>Tanggal</th>
+            <th>Jenis</th>
+          </tr>
+        </thead>
         <tbody>${rows}</tbody>
         <tfoot><tr><td colspan="5">${globalFooter}</td></tr></tfoot>
       </table>
