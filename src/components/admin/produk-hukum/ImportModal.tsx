@@ -68,7 +68,7 @@ function guessMapping(headers: string[]): ColumnMapping {
 
   const findHeader = (patterns: string[]): string => {
     for (const pattern of patterns) {
-      const idx = lowerHeaders.findIndex(h => h.includes(pattern));
+      const idx = lowerHeaders.findIndex(h => h === pattern || h.includes(pattern));
       if (idx !== -1) return headers[idx];
     }
     return '';
@@ -78,10 +78,10 @@ function guessMapping(headers: string[]): ColumnMapping {
   mapping.tahun = findHeader(['tahun', 'year']);
   mapping.uraian = findHeader(['uraian', 'judul', 'deskripsi', 'description', 'title']);
   mapping.tanggal = findHeader(['tanggal', 'date', 'tgl']);
-  mapping.tanggalDiundangkan = findHeader(['diundangkan', 'undang', 'publish', 'terbit']);
-  mapping.jenisDokumen = findHeader(['jenis', 'type', 'kategori', 'category']);
+  mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit']);
+  mapping.jenisDokumen = findHeader(['jenis dokumen', 'jenis', 'type', 'kategori', 'category']);
   mapping.arsip = findHeader(['arsip', 'archive']);
-  mapping.linkFile = findHeader(['link', 'file', 'dokumen', 'document']);
+  mapping.linkFile = findHeader(['link file', 'link', 'file', 'dokumen', 'document']);
   mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip']);
   mapping.ketLain = findHeader(['ket lain', 'keterangan lain', 'catatan', 'note', 'remark']);
 
@@ -145,14 +145,43 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
           return;
         }
 
-        const headers = (jsonData[0] as any[]).map(h => String(h || '').trim()).filter(Boolean);
-        const rows = jsonData.slice(1).filter((row: any) => {
-          return row && row.some((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
-        }).map((row: any) => {
-          const obj: ParsedRow = {};
-          headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
-          return obj;
-        });
+        // Cari baris header yang mengandung kata kunci yang dikenal
+        const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
+        let headerRowIndex = -1;
+
+        for (let i = 0; i < Math.min(jsonData.length, 10); i++) {
+          const row = jsonData[i] as any[];
+          if (!row) continue;
+          const rowText = row.map(c => String(c || '').toLowerCase().trim()).join(' ');
+          const matchCount = headerKeywords.filter(kw => rowText.includes(kw)).length;
+          if (matchCount >= 3) {
+            headerRowIndex = i;
+            break;
+          }
+        }
+
+        if (headerRowIndex === -1) {
+          showToast('Tidak dapat menemukan baris header di file!', 'error');
+          setIsProcessing(false);
+          return;
+        }
+
+        const rawHeaders = (jsonData[headerRowIndex] as any[]).map(h => String(h || '').trim());
+        
+        // Filter kolom kosong di akhir
+        let lastNonEmpty = rawHeaders.length - 1;
+        while (lastNonEmpty >= 0 && !rawHeaders[lastNonEmpty]) lastNonEmpty--;
+        const headers = rawHeaders.slice(0, lastNonEmpty + 1);
+
+        const rows = jsonData.slice(headerRowIndex + 1)
+          .filter((row: any) => {
+            return row && row.some((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
+          })
+          .map((row: any) => {
+            const obj: ParsedRow = {};
+            headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
+            return obj;
+          });
 
         setRawHeaders(headers);
         setRawRows(rows);
