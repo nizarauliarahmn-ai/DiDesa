@@ -96,6 +96,24 @@ export function LandPolygonPickerModal({
       markersGroupRef.current = L.layerGroup().addTo(map);
       polygonLayerRef.current = L.polygon([], { color: '#10b981', fillColor: '#34d399', fillOpacity: 0.4, weight: 3 }).addTo(map);
 
+      const villageBoundaryLayer = L.layerGroup().addTo(map);
+
+      const villageName = localStorage.getItem('village_name') || '';
+      const villageLat = parseFloat(localStorage.getItem('village_lat') || '0');
+      const villageLng = parseFloat(localStorage.getItem('village_lng') || '0');
+      if (villageName && villageLat && villageLng) {
+        const query = `[out:json];(relation["name"~"${villageName}","i"]["admin_level"~"^(6|7|8)$"](around:5000,${villageLat},${villageLng});way["name"~"${villageName}","i"]["admin_level"~"^(6|7|8)$"](around:5000,${villageLat},${villageLng}););out body;>;out skel qt;`;
+        fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`)
+          .then(r => r.json())
+          .then(data => {
+            const layers = L.geoJSON(data as any, {
+              style: { color: '#059669', fillColor: '#10b981', fillOpacity: 0.12, weight: 2, dashArray: '6 3' }
+            });
+            villageBoundaryLayer.addLayer(layers);
+          })
+          .catch(() => {});
+      }
+
       map.on('click', (e: L.LeafletMouseEvent) => {
         if (cursorModeRef.current === 'point') {
           setPoints(prev => [...prev, e.latlng]);
