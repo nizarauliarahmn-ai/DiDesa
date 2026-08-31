@@ -203,9 +203,9 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data ${label}</title>
       <style>
-        @page{size:landscape;margin:12mm 15mm}
+        @page{size:landscape;margin:0}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-        @media print{html,body{margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px}}
+        @media print{html,body{margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:11px;padding:12mm 15mm}}
         @media screen{body{font-family:Arial,sans-serif;margin:20px;font-size:12px}}
         .header{text-align:center;margin-bottom:12px}
         .header h2{margin:0 0 2px;font-size:16px}
