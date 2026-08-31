@@ -762,7 +762,7 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIK Pemohon</label>
-                <input type="text" placeholder="6303..." value={formData.nik} onChange={e => setFormData({ ...formData, nik: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="6303..." value={formData.nik} onChange={e => setFormData({ ...formData, nik: e.target.value.replace(/[^0-9]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Tempat Lahir</label>
@@ -800,15 +800,15 @@ export default function AdminSuratSKKT({
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RT / RW</label>
-                <input type="text" placeholder="001 / 001" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="001 / 001" value={formData.rtRw} onChange={e => setFormData({ ...formData, rtRw: e.target.value.replace(/[^0-9/]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Luas Tanah (m²)</label>
-                <input type="text" placeholder="cth: 42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" inputMode="decimal" placeholder="cth: 42" value={formData.luasTanah} onChange={e => setFormData({ ...formData, luasTanah: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">NIB</label>
-                <input type="text" placeholder="Nomor Identifikasi Bidang" value={formData.nib} onChange={e => setFormData({ ...formData, nib: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
+                <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="Nomor Identifikasi Bidang" value={formData.nib} onChange={e => setFormData({ ...formData, nib: e.target.value.replace(/[^0-9]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
               </div>
               <div>
                 <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">Di pergunakan</label>
@@ -833,22 +833,22 @@ export default function AdminSuratSKKT({
                 <div>
                   <span className="text-gray-500 block text-[10px]">Utara (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasUtara} onChange={e => setFormData({ ...formData, batasUtara: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" placeholder="cth: 6 Meter" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <input type="text" inputMode="decimal" placeholder="cth: 6 Meter" value={formData.ukuranUtara} onChange={e => setFormData({ ...formData, ukuranUtara: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Selatan (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasSelatan} onChange={e => setFormData({ ...formData, batasSelatan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" placeholder="cth: 6.5 Meter" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <input type="text" inputMode="decimal" placeholder="cth: 6.5 Meter" value={formData.ukuranSelatan} onChange={e => setFormData({ ...formData, ukuranSelatan: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Timur (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasTimur} onChange={e => setFormData({ ...formData, batasTimur: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" placeholder="cth: 7 Meter" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <input type="text" inputMode="decimal" placeholder="cth: 7 Meter" value={formData.ukuranTimur} onChange={e => setFormData({ ...formData, ukuranTimur: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px]">Barat (Pemilik / Ukuran)</span>
                   <input type="text" placeholder="Nama Pemilik Batas" value={formData.batasBarat} onChange={e => setFormData({ ...formData, batasBarat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none mb-1" />
-                  <input type="text" placeholder="cth: 7 Meter" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
+                  <input type="text" inputMode="decimal" placeholder="cth: 7 Meter" value={formData.ukuranBarat} onChange={e => setFormData({ ...formData, ukuranBarat: e.target.value.replace(/[^0-9.]/g, '') })} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono text-[11px]" />
                 </div>
               </div>
             </div>
@@ -908,7 +908,7 @@ export default function AdminSuratSKKT({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <input type="text" placeholder="Nama Lengkap Saksi 1" value={formData.saksi1Nama} onChange={e => setFormData({ ...formData, saksi1Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
-                <input type="text" placeholder="6303..." value={formData.saksi1Nik} onChange={e => setFormData({ ...formData, saksi1Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="6303..." value={formData.saksi1Nik} onChange={e => setFormData({ ...formData, saksi1Nik: e.target.value.replace(/[^0-9]/g, '') })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
@@ -935,7 +935,7 @@ export default function AdminSuratSKKT({
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <input type="text" placeholder="Nama Lengkap Saksi 2" value={formData.saksi2Nama} onChange={e => setFormData({ ...formData, saksi2Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
-                <input type="text" placeholder="6303..." value={formData.saksi2Nik} onChange={e => setFormData({ ...formData, saksi2Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="6303..." value={formData.saksi2Nik} onChange={e => setFormData({ ...formData, saksi2Nik: e.target.value.replace(/[^0-9]/g, '') })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
 
@@ -962,7 +962,7 @@ export default function AdminSuratSKKT({
 </div>
               <div className="grid grid-cols-2 gap-2">
                 <input type="text" placeholder="Nama Lengkap Saksi 3" value={formData.saksi3Nama} onChange={e => setFormData({ ...formData, saksi3Nama: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none" />
-                <input type="text" placeholder="6303..." value={formData.saksi3Nik} onChange={e => setFormData({ ...formData, saksi3Nik: e.target.value })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
+                <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="6303..." value={formData.saksi3Nik} onChange={e => setFormData({ ...formData, saksi3Nik: e.target.value.replace(/[^0-9]/g, '') })} className="px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" />
               </div>
             </div>
           </div>
