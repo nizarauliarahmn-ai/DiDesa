@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo, useEffect } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Printer } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import ImportModal from './ImportModal';
 
@@ -187,6 +187,42 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     showToast('Data berhasil dihapus!', 'success');
   };
 
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank', 'width=1200,height=800');
+    if (!printWindow) return;
+    const rows = filteredItems.map((item) => `
+      <tr>
+        <td style="text-align:center;font-weight:bold">${item.displayNo}</td>
+        <td style="text-align:center;font-weight:600">${item.tahun}</td>
+        <td style="font-weight:500">${item.uraian || 'TANPA KETERANGAN'}</td>
+        <td style="text-align:center">${formatDateDisplay(item.tanggal)}</td>
+        <td style="text-align:center"><span style="background:#eff6ff;color:#1d4ed8;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">${item.jenisDokumen || '-'}</span></td>
+        <td style="text-align:center">${item.arsip ? '<span style="background:#ecfdf5;color:#047857;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">Ya</span>' : '<span style="background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700">Tidak</span>'}</td>
+        <td style="text-align:center">${item.ketArsip || '-'}</td>
+        <td style="text-align:center">${item.ketLain || '-'}</td>
+      </tr>
+    `).join('');
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Cetak Data ${label}</title>
+      <style>
+        body{font-family:Arial,sans-serif;margin:20px;font-size:12px}
+        h2{text-align:center;margin-bottom:4px}
+        .subtitle{text-align:center;color:#666;margin-bottom:16px;font-size:13px}
+        table{width:100%;border-collapse:collapse}
+        th,td{border:1px solid #ddd;padding:8px 6px}
+        th{background:#f0fdf4;font-weight:700;text-align:center}
+        tr:nth-child(even){background:#f9fafb}
+        @media print{body{margin:10px}}
+      </style></head><body>
+      <h2>DATA ${label.toUpperCase()}</h2>
+      <p class="subtitle">Total: ${filteredItems.length} dokumen</p>
+      <table><thead><tr>
+        <th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Jenis</th><th>Arsip</th><th>Ket Arsip</th><th>Ket Lain</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+    </body></html>`);
+    printWindow.document.close();
+    setTimeout(() => printWindow.print(), 500);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -209,6 +245,11 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none">
             <PlusCircle size={18} />
             <span>Tambah {label}</span>
+          </button>
+          <button onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2.5 bg-violet-600 text-white font-bold rounded-xl hover:bg-violet-700 transition-colors shadow-sm dark:shadow-none">
+            <Printer size={18} />
+            <span>Cetak</span>
           </button>
         </div>
       </div>
