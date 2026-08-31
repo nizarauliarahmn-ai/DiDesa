@@ -266,10 +266,10 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             </div>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div>
+            <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.3)]">
+                <tr className="border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-16 z-20 shadow-[0_2px_4px_-2px_rgba(0,0,0,0.1)] dark:shadow-[0_2px_4px_-2px_rgba(0,0,0,0.3)]">
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">No</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider">Tahun</th>
                   <th className="text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px]">Uraian</th>
