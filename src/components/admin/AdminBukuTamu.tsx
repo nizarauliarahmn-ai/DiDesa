@@ -274,12 +274,14 @@ export default function AdminBukuTamu() {
             @media print {
               @page { size: A4 landscape; margin: 0 !important; }
               .thead-spacer { display: table-row !important; }
+              .page-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 1.5cm; border-top: 1px solid #cbd5e1; background: white; z-index: 999; }
             }
             @media screen {
               .thead-spacer { display: none !important; }
+              .page-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 8px 1.5cm; border-top: 1px solid #cbd5e1; background: white; }
             }
-            body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; }
-            .content-wrapper { padding: 1.5cm; }
+            body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 50px; }
+            .content-wrapper { padding: 1.5cm; padding-bottom: 60px; }
             .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 15px; }
             .title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px; }
             .subtitle { font-size: 14px; margin: 0; color: #333; }
@@ -292,12 +294,11 @@ export default function AdminBukuTamu() {
         </head>
         <body>
           <div class="content-wrapper">
-            <div style="min-height:100vh;display:flex;flex-direction:column;">
             <div class="header">
             <h1 class="title">LAPORAN BUKU TAMU DIGITAL</h1>
             <p class="subtitle">${desaName.toUpperCase()} - ${printStartDate || printEndDate ? `Periode ${printStartDate || 'Awal'} s/d ${printEndDate || 'Sekarang'}` : 'Semua Riwayat'}</p>
           </div>
-          <table style="flex:1;">
+          <table>
             <thead>
               <tr class="thead-spacer">
                 <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
@@ -328,9 +329,9 @@ export default function AdminBukuTamu() {
               `).join('')}
             </tbody>
           </table>
-          <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;width:100%;margin-top:auto;">
-            <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br/>Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
           </div>
+          <div class="page-footer">
+            <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong> &mdash; Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
           </div>
         </body>
       </html>
