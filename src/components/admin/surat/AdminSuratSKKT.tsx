@@ -14,6 +14,8 @@ import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { getRwForRt } from '../../../utils/rtRwMapping';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 
@@ -119,6 +121,8 @@ export default function AdminSuratSKKT({
   const [previewZoom, setPreviewZoom] = useState(0.45);
   const dragProps = useDragScroll();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [rtListData, setRtListData] = useState<{no:string;name:string;role:string}[]>([]);
+  const [rwListData, setRwListData] = useState<{no:string;name:string;role:string}[]>([]);
 
   const cleanStr = (s: string, regex: RegExp) => (s || "").replace(regex, "");
 
@@ -245,18 +249,35 @@ export default function AdminSuratSKKT({
   }, []);
 
   useEffect(() => {
+    (async () => {
+      try {
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+        const { data } = await supabase.from('saas_settings').select('key,value').eq('tenant_id', tid);
+        if (data) {
+          data.forEach(item => {
+            if (item.key === 'village_rt_list' && item.value) {
+              try { setRtListData(JSON.parse(item.value)); localStorage.setItem('village_rt_list', item.value); } catch {}
+            }
+            if (item.key === 'village_rw_list' && item.value) {
+              try { setRwListData(JSON.parse(item.value)); localStorage.setItem('village_rw_list', item.value); } catch {}
+            }
+          });
+        }
+      } catch {}
+    })();
+  }, []);
+
+  useEffect(() => {
     const rtPart = (formData.rtRw || '').split('/')[0]?.trim();
     if (rtPart && rtPart !== formData.nomorRt) {
       let autoName = formData.namaKetuaRt;
-      try {
-        const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
-        const cleanRt = rtPart.replace(/^0+/, '') || rtPart;
-        const rtEntry = rtList.find((r: any) => {
-          const no = (r.no || '').replace(/^0+/, '') || r.no;
-          return no === cleanRt || r.no === rtPart;
-        });
-        if (rtEntry?.name) autoName = rtEntry.name;
-      } catch (err) {}
+      const cleanRt = rtPart.replace(/^0+/, '') || rtPart;
+      const rtEntry = rtListData.find(r => {
+        const no = (r.no || '').replace(/^0+/, '') || r.no;
+        return no === cleanRt || r.no === rtPart;
+      });
+      if (rtEntry?.name) autoName = rtEntry.name;
       setFormData(prev => ({ ...prev, nomorRt: rtPart, namaKetuaRt: autoName.toUpperCase() }));
     }
   }, [formData.rtRw]);
@@ -281,14 +302,11 @@ export default function AdminSuratSKKT({
     const cleanRt = rt ? rt.replace(/^0+/, '') : '';
     
     let foundRtName = '';
-    try {
-      const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
-      const rtEntry = rtList.find((r: any) => {
-        const no = (r.no || '').replace(/^0+/, '') || r.no;
-        return no === cleanRt || r.no === rt;
-      });
-      if (rtEntry?.name) foundRtName = rtEntry.name;
-    } catch (e) {}
+    const rtEntry = rtListData.find((r: any) => {
+      const no = (r.no || '').replace(/^0+/, '') || r.no;
+      return no === cleanRt || r.no === rt;
+    });
+    if (rtEntry?.name) foundRtName = rtEntry.name;
 
     setFormData(prev => ({
       ...prev,
@@ -878,19 +896,11 @@ export default function AdminSuratSKKT({
                     value={formData.nomorRt} 
                     onChange={e => {
                       const rtVal = e.target.value;
-                      // auto-fill RW dari village_rw_list (kalau cuma 1 RW)
                       let autoRw = formData.rtRw.split('/')[1]?.trim() || '';
-                      try {
-                        const rwList = JSON.parse(localStorage.getItem('village_rw_list') || '[]');
-                        if (rwList.length === 1) autoRw = rwList[0].no;
-                      } catch {}
-                      // auto-fill nama ketua RT dari village_rt_list
+                      if (rwListData.length === 1) autoRw = rwListData[0].no;
                       let autoName = formData.namaKetuaRt;
-                      try {
-                        const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
-                        const rtEntry = rtList.find((r: any) => r.no === rtVal);
-                        if (rtEntry?.name) autoName = rtEntry.name;
-                      } catch (err) {}
+                      const rtEntry = rtListData.find(r => r.no === rtVal);
+                      if (rtEntry?.name) autoName = rtEntry.name;
                       setFormData({ 
                         ...formData, 
                         nomorRt: rtVal, 
@@ -901,14 +911,9 @@ export default function AdminSuratSKKT({
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono"
                   >
                     <option value="">Pilih RT</option>
-                    {(() => {
-                      try {
-                        const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
-                        return rtList.map((r: any) => (
-                          <option key={r.no} value={r.no}>RT {r.no}</option>
-                        ));
-                      } catch { return null; }
-                    })()}
+                    {rtListData.map(r => (
+                      <option key={r.no} value={r.no}>RT {r.no}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -1241,15 +1246,12 @@ export default function AdminSuratSKKT({
                         const rwMapping = getRwForRt(rtVal);
                         const newRw = rwMapping || formData.rtRw.split('/')[1]?.trim() || '';
                         let autoName = formData.namaKetuaRt;
-                        try {
-                          const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
-                          const cleanRt = rtVal.replace(/^0+/, '') || rtVal;
-                          const rtEntry = rtList.find((r: any) => {
-                            const no = (r.no || '').replace(/^0+/, '') || r.no;
-                            return no === cleanRt || r.no === rtVal;
-                          });
-                          if (rtEntry?.name) autoName = rtEntry.name;
-                        } catch (err) {}
+                        const cleanRt = rtVal.replace(/^0+/, '') || rtVal;
+                        const rtEntry = rtListData.find((r: any) => {
+                          const no = (r.no || '').replace(/^0+/, '') || r.no;
+                          return no === cleanRt || r.no === rtVal;
+                        });
+                        if (rtEntry?.name) autoName = rtEntry.name;
                         setFormData({ 
                           ...formData, 
                           nomorRt: rtVal, 
