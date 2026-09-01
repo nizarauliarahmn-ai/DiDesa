@@ -228,6 +228,76 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
     return `<div style="margin-top:24px;"><table style="width:100%;border-collapse:collapse;border:none;"><tr>${leftCells}${kadesCol}</tr></table></div>`;
   };
 
+  const buildSignatureBlockCanvas = () => {
+    const tgl = formatDateID(tanggalSurat);
+    const desaName = (localStorage.getItem('kop_desa') || 'Desa').replace(/^(desa|kelurahan)\s+/i, '').trim();
+
+    const sigCell = (label: string, name: string) => (
+      <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
+        <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
+        <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textTransform: 'uppercase' }}>{label}</p>
+        <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{name || '................................'}</p>
+      </td>
+    );
+
+    const kadesCell = (width = '50%') => (
+      <td style={{ width, verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
+        <p style={{ margin: 0 }}>{desaName}, {tgl}</p>
+        <p style={{ margin: 0 }}>{kadesJabatan},</p>
+        <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textTransform: 'uppercase' }}>{kadesName}</p>
+      </td>
+    );
+
+    if (sigLayout === 'kades_only') {
+      return <div style={{ marginTop: '24px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{kadesCell('100%')}</tr></tbody></table></div>;
+    }
+
+    const buildLeft = () => {
+      switch (sigLayout) {
+        case 'kades_rt': return sigCell('Ketua RT', rtName);
+        case 'kades_bpd': return sigCell('Ketua BPD', bpdName);
+        case 'kades_rw': return sigCell('Ketua RW', rwName);
+        case 'kades_rw_rt':
+          return (
+            <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>
+                <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
+                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>Ketua RW</p>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{rwName || '................................'}</p>
+                </td>
+                <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
+                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>Ketua RT</p>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{rtName || '................................'}</p>
+                </td>
+              </tr></tbody></table>
+            </td>
+          );
+        case 'custom':
+          return (
+            <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>
+                {custom1Label && <td style={{ width: custom2Label ? '50%' : '100%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
+                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>{custom1Label}</p>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{custom1Name || '................................'}</p>
+                </td>}
+                {custom2Label && <td style={{ width: custom1Label ? '50%' : '100%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
+                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>{custom2Label}</p>
+                  <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{custom2Name || '................................'}</p>
+                </td>}
+              </tr></tbody></table>
+            </td>
+          );
+        default: return null;
+      }
+    };
+
+    return <div style={{ marginTop: '24px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{buildLeft()}{kadesCell()}</tr></tbody></table></div>;
+  };
+
   const handlePrint = () => {
     const content = editorRef.current?.innerHTML;
     if (!content || !printFrameRef.current) return;
@@ -507,6 +577,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                       style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
                       onInput={recordChange}
                       onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
+                    {buildSignatureBlockCanvas()}
                     <div className="mt-6 pt-3 border-t border-gray-300">
                       <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
                         __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
@@ -607,6 +678,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                     style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
                     onInput={recordChange}
                     onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
+                  {buildSignatureBlockCanvas()}
                   <div className="mt-6 pt-3 border-t border-gray-300">
                     <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
                       __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
