@@ -1479,10 +1479,12 @@ export default function AdminSuratNikah({
   useEffect(() => {
     const iframe = previewIframeRef.current;
     if (!iframe) return;
+    const timer = setTimeout(() => {
     try {
       const doc = iframe.contentWindow?.document;
       if (!doc) return;
       const content = getDocHtml();
+      if (!content) return;
       const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
         .map(el => el.outerHTML)
         .join('\n');
@@ -1577,6 +1579,8 @@ export default function AdminSuratNikah({
     } catch (e) {
       console.error('Preview iframe error:', e);
     }
+    }, 150);
+    return () => clearTimeout(timer);
   }, [activeDoc, formData, previewIframeReady]);
 
   if (showRiwayat) {
