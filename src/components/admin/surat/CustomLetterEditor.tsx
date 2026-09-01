@@ -170,7 +170,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
     const col = (label: string, name: string) => `
       <td style="width:50%;vertical-align:top;border:none;padding:0;text-align:center;">
         <p style="margin:0 0 4px 0;">Mengetahui,</p>
-        <p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;text-transform:uppercase;">${label}</p>
+        <p style="margin:24px 0 0 0;font-weight:bold;text-decoration:underline;text-transform:uppercase;">${label}</p>
         <p style="margin:2px 0 0 0;font-size:10pt;">${name || '................................'}</p>
       </td>`;
 
@@ -178,15 +178,15 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
       <td style="width:50%;vertical-align:top;border:none;padding:0;text-align:center;">
         <p style="margin:0;">${desaName}, ${tgl}</p>
         <p style="margin:0;">${kadesJabatan},</p>
-        <p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;text-transform:uppercase;">${kadesName}</p>
+        <p style="margin:24px 0 0 0;font-weight:bold;text-decoration:underline;text-transform:uppercase;">${kadesName}</p>
       </td>`;
 
     if (sigLayout === 'kades_only') {
-      return `<div style="margin-top:24px;"><table style="width:100%;border-collapse:collapse;border:none;"><tr>
+      return `<div style="margin-top:16px;"><table style="width:100%;border-collapse:collapse;border:none;"><tr>
         <td style="width:100%;vertical-align:top;border:none;padding:0;text-align:center;">
           <p style="margin:0;">${desaName}, ${tgl}</p>
           <p style="margin:0;">${kadesJabatan},</p>
-          <p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;text-transform:uppercase;">${kadesName}</p>
+          <p style="margin:24px 0 0 0;font-weight:bold;text-decoration:underline;text-transform:uppercase;">${kadesName}</p>
         </td>
       </tr></table></div>`;
     }
@@ -201,12 +201,12 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
           <table style="width:100%;border-collapse:collapse;border:none;"><tr>
             <td style="width:50%;vertical-align:top;border:none;padding:0;text-align:center;">
               <p style="margin:0 0 4px 0;">Mengetahui,</p>
-              <p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">Ketua RW</p>
+              <p style="margin:24px 0 0 0;font-weight:bold;text-decoration:underline;">Ketua RW</p>
               <p style="margin:2px 0 0 0;font-size:10pt;">${rwName || '................................'}</p>
             </td>
             <td style="width:50%;vertical-align:top;border:none;padding:0;text-align:center;">
               <p style="margin:0 0 4px 0;">Mengetahui,</p>
-              <p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">Ketua RT</p>
+              <p style="margin:24px 0 0 0;font-weight:bold;text-decoration:underline;">Ketua RT</p>
               <p style="margin:2px 0 0 0;font-size:10pt;">${rtName || '................................'}</p>
             </td>
           </tr></table></td>`;
@@ -215,11 +215,11 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
         const parts: string[] = [];
         if (custom1Label) parts.push(`<td style="width:${custom2Label ? '50' : '100'}%;vertical-align:top;border:none;padding:0;text-align:center;">
           <p style="margin:0 0 4px 0;">Mengetahui,</p>
-          <p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">${custom1Label}</p>
+          <p style="margin:24px 0 0 0;font-weight:bold;text-decoration:underline;">${custom1Label}</p>
           <p style="margin:2px 0 0 0;font-size:10pt;">${custom1Name || '................................'}</p></td>`);
         if (custom2Label) parts.push(`<td style="width:${custom1Label ? '50' : '100'}%;vertical-align:top;border:none;padding:0;text-align:center;">
           <p style="margin:0 0 4px 0;">Mengetahui,</p>
-          <p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">${custom2Label}</p>
+          <p style="margin:24px 0 0 0;font-weight:bold;text-decoration:underline;">${custom2Label}</p>
           <p style="margin:2px 0 0 0;font-size:10pt;">${custom2Name || '................................'}</p></td>`);
         leftCells = parts.length > 0 ? `<td style="width:50%;vertical-align:top;border:none;padding:0;"><table style="width:100%;border-collapse:collapse;border:none;"><tr>${parts.join('')}</tr></table></td>` : '';
         break;
@@ -235,7 +235,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
     const sigCell = (label: string, name: string) => (
       <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
         <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
-        <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textTransform: 'uppercase' }}>{label}</p>
+        <p style={{ margin: '24px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textTransform: 'uppercase' }}>{label}</p>
         <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{name || '................................'}</p>
       </td>
     );
@@ -244,12 +244,12 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
       <td style={{ width, verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
         <p style={{ margin: 0 }}>{desaName}, {tgl}</p>
         <p style={{ margin: 0 }}>{kadesJabatan},</p>
-        <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textTransform: 'uppercase' }}>{kadesName}</p>
+        <p style={{ margin: '24px 0 0 0', fontWeight: 'bold', textDecoration: 'underline', textTransform: 'uppercase' }}>{kadesName}</p>
       </td>
     );
 
     if (sigLayout === 'kades_only') {
-      return <div style={{ marginTop: '24px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{kadesCell('100%')}</tr></tbody></table></div>;
+      return <div style={{ marginTop: '16px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{kadesCell('100%')}</tr></tbody></table></div>;
     }
 
     const buildLeft = () => {
@@ -263,12 +263,12 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
               <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>
                 <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
                   <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
-                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>Ketua RW</p>
+                  <p style={{ margin: '24px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>Ketua RW</p>
                   <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{rwName || '................................'}</p>
                 </td>
                 <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
                   <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
-                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>Ketua RT</p>
+                  <p style={{ margin: '24px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>Ketua RT</p>
                   <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{rtName || '................................'}</p>
                 </td>
               </tr></tbody></table>
@@ -280,12 +280,12 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
               <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>
                 {custom1Label && <td style={{ width: custom2Label ? '50%' : '100%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
                   <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
-                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>{custom1Label}</p>
+                  <p style={{ margin: '24px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>{custom1Label}</p>
                   <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{custom1Name || '................................'}</p>
                 </td>}
                 {custom2Label && <td style={{ width: custom1Label ? '50%' : '100%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
                   <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
-                  <p style={{ margin: '40px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>{custom2Label}</p>
+                  <p style={{ margin: '24px 0 0 0', fontWeight: 'bold', textDecoration: 'underline' }}>{custom2Label}</p>
                   <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{custom2Name || '................................'}</p>
                 </td>}
               </tr></tbody></table>
@@ -295,7 +295,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
       }
     };
 
-    return <div style={{ marginTop: '24px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{buildLeft()}{kadesCell()}</tr></tbody></table></div>;
+    return <div style={{ marginTop: '16px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{buildLeft()}{kadesCell()}</tr></tbody></table></div>;
   };
 
   const handlePrint = () => {
@@ -568,7 +568,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                 {/* Scrollable canvas */}
                 <div className="flex-1 flex justify-center bg-gray-100 dark:bg-slate-800 rounded-2xl p-6 overflow-auto min-h-0">
                   <div style={{ width: `${210 * zoom / 100}mm`, height: `${297 * zoom / 100}mm`, flexShrink: 0 }}>
-                    <div className="bg-white shadow-2xl" style={{ width: '210mm', height: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transformOrigin: 'top left', transform: `scale(${zoom / 100})` }}>
+                    <div className="bg-white shadow-2xl" style={{ width: '210mm', height: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transformOrigin: 'top left', transform: `scale(${zoom / 100})`, overflow: 'hidden' }}>
                       <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
                       <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
                       <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
@@ -578,11 +578,10 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                         onInput={recordChange}
                         onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
                       {buildSignatureBlockCanvas()}
-                      <div className="mt-6 pt-3 border-t border-gray-300">
-                        <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
-                          __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
-                        }} />
-                      </div>
+                    <div className="mt-3 pt-2 border-t border-gray-300">
+                      <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
+                        __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
+                      }} />
                     </div>
                   </div>
                 </div>
@@ -670,7 +669,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
               {/* Canvas */}
               <div className="flex-1 flex justify-center bg-gray-100 dark:bg-slate-800 rounded-2xl p-6 overflow-auto min-h-0">
                 <div style={{ width: `${210 * zoom / 100}mm`, height: `${297 * zoom / 100}mm`, flexShrink: 0 }}>
-                  <div className="bg-white shadow-2xl" style={{ width: '210mm', height: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transformOrigin: 'top left', transform: `scale(${zoom / 100})` }}>
+                  <div className="bg-white shadow-2xl" style={{ width: '210mm', height: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transformOrigin: 'top left', transform: `scale(${zoom / 100})`, overflow: 'hidden' }}>
                     <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
                     <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
                     <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
@@ -680,11 +679,11 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                       onInput={recordChange}
                       onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
                     {buildSignatureBlockCanvas()}
-                    <div className="mt-6 pt-3 border-t border-gray-300">
-                      <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
-                        __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
-                      }} />
-                    </div>
+                  <div className="mt-3 pt-2 border-t border-gray-300">
+                    <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
+                      __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
+                    }} />
+                  </div>
                   </div>
                 </div>
               </div>
