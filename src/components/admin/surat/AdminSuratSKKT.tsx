@@ -167,6 +167,7 @@ export default function AdminSuratSKKT({
     namaPejabat: localStorage.getItem('village_super_admin') || resolveKadesName() || '',
     jabatanPejabat: localStorage.getItem('village_super_admin_role') || 'Kepala Desa',
     includeCamat: false,
+    includeTtdRt: true,
     namaDesa: localStorage.getItem('kop_desa') || 'Wasah Hilir',
     namaKecamatan: localStorage.getItem('kop_kecamatan') || 'Simpur',
     namaKabupaten: localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan',
@@ -554,15 +555,17 @@ export default function AdminSuratSKKT({
         </div>
 
         <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:flex-start;">
+          ${formData.includeTtdRt ? `
           <!-- KETUA RT (KIRI) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
             <p style="margin-bottom:60px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
+          ` : ''}
 
           <!-- KEPALA DESA (KANAN) -->
-          <div style="width:48%; text-align:center;">
+          <div style="width:${formData.includeTtdRt ? '48' : '100'}%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
             <p style="margin-bottom:60px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
@@ -635,18 +638,20 @@ export default function AdminSuratSKKT({
         <!-- TANDA TANGAN PAGE 2 -->
         <div style="display:flex; justify-content:space-between; margin-top:8px; align-items:flex-start;">
           <!-- KEPALA DESA (KIRI) -->
-          <div style="width:48%; text-align:center;">
+          <div style="width:${formData.includeTtdRt ? '48' : '100'}%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
             <p style="margin-bottom:60px;">${kadesRoleHTML}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaPejabat)}</p>
           </div>
 
+          ${formData.includeTtdRt ? `
           <!-- KETUA RT (KANAN) -->
           <div style="width:48%; text-align:center;">
             <p style="margin-bottom:2px;">Mengetahui,</p>
             <p style="margin-bottom:60px;">Ketua RT ${v(formData.nomorRt, '-')}</p>
             <p style="font-weight:bold; text-transform:uppercase;">${v(formData.namaKetuaRt, '...........................')}</p>
           </div>
+          ` : ''}
         </div>
 
       </div>
@@ -1233,33 +1238,42 @@ export default function AdminSuratSKKT({
               </div>
 
               <div className="mt-6 pt-6 border-t border-amber-100">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-[auto_1fr_1fr_1.5fr] gap-3 items-end">
+                  <div className="flex flex-col items-center gap-1 pb-0.5">
+                    <label className="text-[10px] font-bold text-amber-900 uppercase">TTD RT</label>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, includeTtdRt: !formData.includeTtdRt })}
+                      className={`relative w-11 h-6 rounded-full transition-colors ${formData.includeTtdRt ? 'bg-emerald-500' : 'bg-gray-300'}`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${formData.includeTtdRt ? 'translate-x-5' : ''}`} />
+                    </button>
+                  </div>
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-amber-900">Nomor RT</label>
-                    <input 
-                      type="text" 
-                      placeholder="02" 
+                    <select 
                       value={formData.nomorRt} 
-                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold text-center"
                       onChange={e => {
-                        const rtVal = e.target.value.replace(/[^0-9]/g, '');
-                        const rwMapping = getRwForRt(rtVal);
-                        const newRw = rwMapping || formData.rtRw.split('/')[1]?.trim() || '';
+                        const rtVal = e.target.value;
+                        let autoRw = formData.rtRw.split('/')[1]?.trim() || '';
+                        if (rwListData.length === 1) autoRw = rwListData[0].no;
                         let autoName = formData.namaKetuaRt;
-                        const cleanRt = rtVal.replace(/^0+/, '') || rtVal;
-                        const rtEntry = rtListData.find((r: any) => {
-                          const no = (r.no || '').replace(/^0+/, '') || r.no;
-                          return no === cleanRt || r.no === rtVal;
-                        });
+                        const rtEntry = rtListData.find(r => r.no === rtVal);
                         if (rtEntry?.name) autoName = rtEntry.name;
                         setFormData({ 
                           ...formData, 
                           nomorRt: rtVal, 
-                          rtRw: newRw ? `${rtVal} / ${newRw}` : rtVal,
-                          namaKetuaRt: autoName.toUpperCase() 
+                          rtRw: `${rtVal} / ${autoRw}`,
+                          namaKetuaRt: autoName.toUpperCase()
                         });
-                      }} 
-                    />
+                      }}
+                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-mono"
+                    >
+                      <option value="">Pilih RT</option>
+                      {rtListData.map(r => (
+                        <option key={r.no} value={r.no}>RT {r.no}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-amber-900">RW</label>
@@ -1267,11 +1281,8 @@ export default function AdminSuratSKKT({
                       type="text" 
                       placeholder="01" 
                       value={formData.rtRw.split('/')[1]?.trim() || ''} 
-                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold text-center"
-                      onChange={e => {
-                        const rwVal = e.target.value.replace(/[^0-9]/g, '');
-                        setFormData({ ...formData, rtRw: `${formData.nomorRt} / ${rwVal}` });
-                      }} 
+                      className="w-full px-3 py-2.5 bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg outline-none font-mono text-gray-500 dark:text-slate-400 cursor-not-allowed" 
+                      readOnly
                     />
                   </div>
                   <div className="space-y-1">
