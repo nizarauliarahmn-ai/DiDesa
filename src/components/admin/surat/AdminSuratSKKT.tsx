@@ -13,7 +13,7 @@ import { useDragScroll } from '../../../hooks/useDragScroll';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
-import { getRtRwMapping, getRwForRt } from '../../../utils/rtRwMapping';
+import { getRwForRt } from '../../../utils/rtRwMapping';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 
@@ -879,7 +879,8 @@ export default function AdminSuratSKKT({
                     onChange={e => {
                       const rtVal = e.target.value;
                       const rwMapping = getRwForRt(rtVal);
-                      const newRw = rwMapping || '';
+                      const oldRw = formData.rtRw.split('/')[1]?.trim() || '';
+                      const newRw = rwMapping || oldRw;
                       let autoName = formData.namaKetuaRt;
                       try {
                         const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
@@ -900,9 +901,14 @@ export default function AdminSuratSKKT({
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono"
                   >
                     <option value="">Pilih RT</option>
-                    {getRtRwMapping().map((entry, i) => (
-                      <option key={i} value={entry.rt}>RT {entry.rt}</option>
-                    ))}
+                    {(() => {
+                      try {
+                        const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
+                        return rtList.map((r: any) => (
+                          <option key={r.no} value={r.no}>RT {r.no}</option>
+                        ));
+                      } catch { return null; }
+                    })()}
                   </select>
                 </div>
                 <div>
