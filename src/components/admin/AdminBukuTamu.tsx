@@ -273,23 +273,13 @@ export default function AdminBukuTamu() {
           <style>
             @media print {
               @page { size: landscape; margin: 0 !important; }
-              .saas-global-footer {
-                position: fixed !important;
-                bottom: 15mm !important;
-                left: 15mm !important;
-                right: 15mm !important;
-                background: white !important;
-              }
-              .content-wrapper {
-                padding-bottom: 25mm !important;
-              }
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; }
             .content-wrapper { padding: 1.5cm; }
             .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 15px; }
             .title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px; }
             .subtitle { font-size: 14px; margin: 0; color: #333; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
             th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .meta { font-size: 10px; color: #666; margin-top: 3px; display: block; }
@@ -303,6 +293,11 @@ export default function AdminBukuTamu() {
           </div>
           <table>
             <thead>
+              <tr style="display:table-row;">
+                <th colSpan={6} style="padding:0;margin:0;border:none;">
+                  <div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;">&nbsp;</div>
+                </th>
+              </tr>
               <tr>
                 <th style="width: 5%">No</th>
                 <th style="width: 25%">Nama Lengkap / NIK</th>
@@ -326,9 +321,17 @@ export default function AdminBukuTamu() {
                 </tr>
               `).join('')}
             </tbody>
+            <tfoot style="display:table-footer-group;">
+              <tr>
+                <td colSpan={6} style="border:none;padding-top:8pt;padding-bottom:1.5cm;">
+                  <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;">
+                    <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br/>Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
           </table>
           </div>
-          ${SAAS_CONFIG.globalFooterHTML}
         </body>
       </html>
     `;
