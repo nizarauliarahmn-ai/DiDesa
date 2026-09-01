@@ -272,7 +272,7 @@ export default function AdminBukuTamu() {
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @media print {
-              @page { size: A4 portrait; margin: 0 !important; }
+              @page { size: A4 landscape; margin: 0 !important; }
               .thead-spacer { display: table-row !important; }
               .tfoot-footer { display: table-footer-group !important; }
             }
@@ -305,12 +305,12 @@ export default function AdminBukuTamu() {
                 </th>
               </tr>
               <tr>
-                <th style="width: 5%">No</th>
-                <th style="width: 25%">Nama Lengkap / NIK</th>
-                <th style="width: 15%">Instansi / Asal</th>
-                <th style="width: 20%">Keperluan & Tujuan</th>
-                <th style="width: 20%">Waktu Kunjungan</th>
-                <th style="width: 15%">Tanda Tangan</th>
+                <th style="width: 3%">No</th>
+                <th style="width: 27%">Nama Lengkap / NIK</th>
+                <th style="width: 12%">Instansi / Asal</th>
+                <th style="width: 22%">Keperluan & Tujuan</th>
+                <th style="width: 18%">Waktu Kunjungan</th>
+                <th style="width: 18%">Tanda Tangan</th>
               </tr>
             </thead>
             <tbody>
