@@ -280,8 +280,8 @@ export default function AdminBukuTamu() {
               .thead-spacer { display: none !important; }
               .page-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 1.5cm; border-top: 1px solid #cbd5e1; background: white; }
             }
-            body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 40px; }
-            .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 50px; }
+            body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 60px; }
+            .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 60px; }
             .header { text-align: center; margin: 0; padding: 0; border-bottom: 2px solid black; line-height: 1; }
             .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 0; padding: 0; letter-spacing: 1px; line-height: 1; }
             .subtitle { font-size: 12px; margin: 0; padding: 0; color: #333; line-height: 1; }
@@ -301,7 +301,7 @@ export default function AdminBukuTamu() {
             <thead>
               <tr class="thead-spacer">
                 <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
-                  <div style="height:2mm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
+                  <div style="height:5mm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
                 </th>
               </tr>
               <tr>
