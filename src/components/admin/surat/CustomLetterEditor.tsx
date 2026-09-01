@@ -567,21 +567,22 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                 </div>
                 {/* Scrollable canvas */}
                 <div className="flex-1 flex justify-center bg-gray-100 dark:bg-slate-800 rounded-2xl p-6 overflow-auto min-h-0">
-                  <div className="bg-white shadow-2xl origin-top transition-transform duration-200"
-                    style={{ width: '210mm', minHeight: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transform: `scale(${zoom / 100})` }}>
-                    <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
-                    <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
-                    <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
-                    <div ref={editorRef} contentEditable suppressContentEditableWarning
-                      className="outline-none min-h-[200mm] prose prose-sm max-w-none"
-                      style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
-                      onInput={recordChange}
-                      onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
-                    {buildSignatureBlockCanvas()}
-                    <div className="mt-6 pt-3 border-t border-gray-300">
-                      <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
-                        __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
-                      }} />
+                  <div style={{ width: `${210 * zoom / 100}mm`, height: `${297 * zoom / 100}mm`, flexShrink: 0 }}>
+                    <div className="bg-white shadow-2xl" style={{ width: '210mm', height: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transformOrigin: 'top left', transform: `scale(${zoom / 100})` }}>
+                      <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
+                      <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
+                      <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
+                      <div ref={editorRef} contentEditable suppressContentEditableWarning
+                        className="outline-none min-h-[200mm] prose prose-sm max-w-none"
+                        style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
+                        onInput={recordChange}
+                        onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
+                      {buildSignatureBlockCanvas()}
+                      <div className="mt-6 pt-3 border-t border-gray-300">
+                        <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
+                          __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
+                        }} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -668,21 +669,22 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
 
               {/* Canvas */}
               <div className="flex-1 flex justify-center bg-gray-100 dark:bg-slate-800 rounded-2xl p-6 overflow-auto min-h-0">
-                <div className="bg-white shadow-2xl origin-top transition-transform duration-200"
-                  style={{ width: '210mm', minHeight: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transform: `scale(${zoom / 100})` }}>
-                  <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
-                  <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
-                  <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
-                  <div ref={editorRef} contentEditable suppressContentEditableWarning
-                    className="outline-none min-h-[200mm] prose prose-sm max-w-none"
-                    style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
-                    onInput={recordChange}
-                    onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
-                  {buildSignatureBlockCanvas()}
-                  <div className="mt-6 pt-3 border-t border-gray-300">
-                    <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
-                      __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
-                    }} />
+                <div style={{ width: `${210 * zoom / 100}mm`, height: `${297 * zoom / 100}mm`, flexShrink: 0 }}>
+                  <div className="bg-white shadow-2xl" style={{ width: '210mm', height: '297mm', padding: '2cm 2.5cm', boxSizing: 'border-box', fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6, transformOrigin: 'top left', transform: `scale(${zoom / 100})` }}>
+                    <div dangerouslySetInnerHTML={{ __html: generateKopSuratHTML() }} />
+                    <p style={{ textAlign: 'center', fontWeight: 'bold', textDecoration: 'underline', fontSize: '14pt', textTransform: 'uppercase', margin: '0 0 4px 0' }}>{letterTitle || 'SURAT'}</p>
+                    <p style={{ textAlign: 'center', margin: '0 0 16px 0' }}>Nomor: {nomorSurat}</p>
+                    <div ref={editorRef} contentEditable suppressContentEditableWarning
+                      className="outline-none min-h-[200mm] prose prose-sm max-w-none"
+                      style={{ fontFamily: currentFont, fontSize: `${currentFontSize}pt`, lineHeight: 1.6 }}
+                      onInput={recordChange}
+                      onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); execCmd('insertHTML', '&emsp;&emsp;'); } }} />
+                    {buildSignatureBlockCanvas()}
+                    <div className="mt-6 pt-3 border-t border-gray-300">
+                      <p className="text-[8px] text-gray-400 leading-relaxed" dangerouslySetInnerHTML={{
+                        __html: localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia'
+                      }} />
+                    </div>
                   </div>
                 </div>
               </div>
