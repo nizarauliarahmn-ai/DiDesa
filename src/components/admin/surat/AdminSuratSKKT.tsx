@@ -878,7 +878,11 @@ export default function AdminSuratSKKT({
                     value={formData.nomorRt} 
                     onChange={e => {
                       const rtVal = e.target.value;
+                      console.log('[SKKT RT Dropdown] selected:', rtVal);
+                      console.log('[SKKT RT Dropdown] village_rt_rw_mapping:', localStorage.getItem('village_rt_rw_mapping'));
+                      console.log('[SKKT RT Dropdown] village_rt_list:', localStorage.getItem('village_rt_list'));
                       const rwMapping = getRwForRt(rtVal);
+                      console.log('[SKKT RT Dropdown] rwMapping result:', rwMapping);
                       const oldRw = formData.rtRw.split('/')[1]?.trim() || '';
                       const newRw = rwMapping || oldRw;
                       let autoName = formData.namaKetuaRt;

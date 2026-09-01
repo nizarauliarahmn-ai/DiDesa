@@ -22,7 +22,9 @@ export function saveRtRwMapping(entries: RtRwEntry[]): void {
 export function getRwForRt(rt: string): string {
   const cleanRt = rt.replace(/^0+/, '') || '0';
   const entries = getRtRwMapping();
+  console.log('[getRwForRt] input:', rt, '| cleanRt:', cleanRt, '| entries:', entries);
   const found = entries.find(e => (e.rt.replace(/^0+/, '') || '0') === cleanRt);
+  console.log('[getRwForRt] found:', found);
   return found ? found.rw : '';
 }
 
