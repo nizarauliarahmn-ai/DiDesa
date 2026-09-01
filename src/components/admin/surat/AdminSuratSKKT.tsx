@@ -1226,14 +1226,21 @@ export default function AdminSuratSKKT({
                       value={formData.nomorRt} 
                       className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
                       onChange={e => {
-                        const rtVal = e.target.value;
+                        const rtVal = e.target.value.replace(/[^0-9]/g, '');
+                        const rwMapping = getRwForRt(rtVal);
+                        const newRw = rwMapping || formData.rtRw.split('/')[1]?.trim() || '';
                         let autoName = formData.namaKetuaRt;
                         try {
                           const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
                           const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtVal) || o.role.toLowerCase().includes('rt.' + rtVal) || o.role.toLowerCase().includes('rt. ' + rtVal));
                           if (rtOfficer) autoName = rtOfficer.name;
                         } catch (err) {}
-                        setFormData({ ...formData, nomorRt: rtVal, namaKetuaRt: autoName.toUpperCase() });
+                        setFormData({ 
+                          ...formData, 
+                          nomorRt: rtVal, 
+                          rtRw: newRw ? `${rtVal} / ${newRw}` : rtVal,
+                          namaKetuaRt: autoName.toUpperCase() 
+                        });
                       }} 
                     />
                   </div>
@@ -1246,8 +1253,8 @@ export default function AdminSuratSKKT({
                       value={formData.namaKetuaRt} 
                       onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} 
                     />
-            </div>
-          </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
