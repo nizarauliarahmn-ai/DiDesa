@@ -274,11 +274,9 @@ export default function AdminBukuTamu() {
             @media print {
               @page { size: A4 landscape; margin: 0 !important; margin-bottom: 10mm !important; }
               .thead-spacer { display: table-row !important; }
-              .page-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 1.5cm; border-top: 1px solid #cbd5e1; background: white; z-index: 999; }
             }
             @media screen {
               .thead-spacer { display: none !important; }
-              .page-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 1.5cm; border-top: 1px solid #cbd5e1; background: white; }
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 35px; }
             .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 35px; }
@@ -327,10 +325,19 @@ export default function AdminBukuTamu() {
                 </tr>
               `).join('')}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan="6" style="border:none;padding:0;margin:0;background:white;font-size:1px;line-height:1px;color:transparent;">&nbsp;</td>
+              </tr>
+              <tr>
+                <td colSpan="6" style="border:none;padding:0 0 1.5cm 0;margin:0;">
+                  <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;">
+                    <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong> &mdash; Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
           </table>
-          </div>
-          <div class="page-footer">
-            <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong> &mdash; Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
           </div>
         </body>
       </html>
