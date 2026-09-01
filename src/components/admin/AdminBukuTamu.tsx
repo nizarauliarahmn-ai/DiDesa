@@ -301,7 +301,7 @@ export default function AdminBukuTamu() {
             <thead>
               <tr class="thead-spacer">
                 <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
-                  <div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
+                  <div style="height:2mm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
                 </th>
               </tr>
               <tr>
