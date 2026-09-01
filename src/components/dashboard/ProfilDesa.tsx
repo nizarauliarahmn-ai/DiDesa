@@ -2,9 +2,16 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, MapPin, Building, ShieldCheck, ChevronRight, X } from 'lucide-react';
 import UserPlaceholder from '../common/UserPlaceholder';
+import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 export default function ProfilDesa() {
   const [selectedLembaga, setSelectedLembaga] = useState<typeof lembagaDesa[0] | null>(null);
+
+  const [luasWilayah, setLuasWilayah] = useState('-');
+  const [totalPenduduk, setTotalPenduduk] = useState(0);
+  const [ketinggian, setKetinggian] = useState('-');
+  const [batasUtara, setBatasUtara] = useState('-');
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -39,6 +46,29 @@ export default function ProfilDesa() {
         console.error('Failed to parse village officers', e);
       }
     }
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+        // Load village profile settings
+        const { data } = await supabase.from('saas_settings').select('key,value').eq('tenant_id', tid);
+        if (data) {
+          const map: Record<string, string> = {};
+          data.forEach(r => { map[r.key] = r.value; });
+          if (map['village_luas_wilayah']) setLuasWilayah(map['village_luas_wilayah']);
+          if (map['village_ketinggian']) setKetinggian(map['village_ketinggian']);
+          if (map['village_batas_utara']) setBatasUtara(map['village_batas_utara']);
+        }
+        // Count residents
+        const { count } = await supabase.from('village_residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tid);
+        if (count !== null) setTotalPenduduk(count);
+      } catch (e) {
+        console.error('Failed to load village profile:', e);
+      }
+    })();
   }, []);
 
   const lembagaDesa = [
@@ -99,19 +129,19 @@ export default function ProfilDesa() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Luas Wilayah</p>
-                <p className="text-xl font-black text-gray-900 dark:text-white">4.5 <span className="text-sm font-medium text-gray-500 dark:text-slate-400">km²</span></p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">{luasWilayah} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">km²</span></p>
               </div>
               <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Total Penduduk</p>
-                <p className="text-xl font-black text-gray-900 dark:text-white">1,245 <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Jiwa</span></p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">{totalPenduduk.toLocaleString('id-ID')} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Jiwa</span></p>
               </div>
               <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Ketinggian</p>
-                <p className="text-xl font-black text-gray-900 dark:text-white">45 <span className="text-sm font-medium text-gray-500 dark:text-slate-400">mdpl</span></p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">{ketinggian} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">mdpl</span></p>
               </div>
               <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Batas Utara</p>
-                <p className="text-sm font-black text-gray-900 dark:text-white">Desa Sukamaju</p>
+                <p className="text-sm font-black text-gray-900 dark:text-white">{batasUtara}</p>
               </div>
             </div>
             

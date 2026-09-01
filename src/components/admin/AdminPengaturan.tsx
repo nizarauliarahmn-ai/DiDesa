@@ -39,6 +39,13 @@ export default function AdminPengaturan() {
   const [appTheme, setAppTheme] = useState(() => localStorage.getItem('app_theme') || 'light');
   const [letterFont, setLetterFont] = useState(() => localStorage.getItem('village_letter_font') || 'Arial, sans-serif');
 
+  const [luasWilayah, setLuasWilayah] = useState(() => localStorage.getItem('village_luas_wilayah') || '');
+  const [ketinggian, setKetinggian] = useState(() => localStorage.getItem('village_ketinggian') || '');
+  const [batasUtara, setBatasUtara] = useState(() => localStorage.getItem('village_batas_utara') || '');
+  const [batasSelatan, setBatasSelatan] = useState(() => localStorage.getItem('village_batas_selatan') || '');
+  const [batasTimur, setBatasTimur] = useState(() => localStorage.getItem('village_batas_timur') || '');
+  const [batasBarat, setBatasBarat] = useState(() => localStorage.getItem('village_batas_barat') || '');
+
   const [googleDriveFolderId, setGoogleDriveFolderId] = useState(() => localStorage.getItem('google_drive_folder_id') || '');
   const [gdriveTesting, setGdriveTesting] = useState(false);
   const [gdriveTestResult, setGdriveTestResult] = useState<{ ok: boolean; message: string } | null>(null);
@@ -86,6 +93,12 @@ export default function AdminPengaturan() {
           set('app_theme', setAppTheme);
           set('village_letter_font', setLetterFont);
           set('google_drive_folder_id', setGoogleDriveFolderId);
+          set('village_luas_wilayah', setLuasWilayah);
+          set('village_ketinggian', setKetinggian);
+          set('village_batas_utara', setBatasUtara);
+          set('village_batas_selatan', setBatasSelatan);
+          set('village_batas_timur', setBatasTimur);
+          set('village_batas_barat', setBatasBarat);
           if (map['village_lat']) {
             setVillageLat(parseFloat(map['village_lat']));
             localStorage.setItem('village_lat', map['village_lat']);
@@ -183,6 +196,12 @@ export default function AdminPengaturan() {
       app_theme: appTheme,
       village_letter_font: letterFont,
       google_drive_folder_id: googleDriveFolderId,
+      village_luas_wilayah: luasWilayah,
+      village_ketinggian: ketinggian,
+      village_batas_utara: batasUtara,
+      village_batas_selatan: batasSelatan,
+      village_batas_timur: batasTimur,
+      village_batas_barat: batasBarat,
     };
     Object.entries(localMap).forEach(([key, value]) => localStorage.setItem(key, value));
 
@@ -507,8 +526,43 @@ export default function AdminPengaturan() {
                   <div className="col-span-1 flex items-center gap-2 text-xs">
                     <label className="text-gray-500 dark:text-slate-400 font-bold">Zoom (%):</label>
                     <input type="range" min="100" max="200" value={welcomeBannerZoom} onChange={(e) => setWelcomeBannerZoom(e.target.value)} className="flex-1" />
+              </div>
+
+              {/* Profil Desa - Geografi */}
+              <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-700/50">
+                <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Profil Desa (Data Geografi)</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Luas Wilayah (km²)</label>
+                    <input type="text" value={luasWilayah} onChange={e => setLuasWilayah(e.target.value)} placeholder="cth: 4.5" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Ketinggian (mdpl)</label>
+                    <input type="text" value={ketinggian} onChange={e => setKetinggian(e.target.value)} placeholder="cth: 45" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Utara</label>
+                    <input type="text" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} placeholder="cth: Desa Sukamaju" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Selatan</label>
+                    <input type="text" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} placeholder="cth: Desa Baru" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Timur</label>
+                    <input type="text" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} placeholder="cth: Sungai Barito" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Barat</label>
+                    <input type="text" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} placeholder="cth: Hutan Lindung" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
               </div>
             </div>
           </div>
