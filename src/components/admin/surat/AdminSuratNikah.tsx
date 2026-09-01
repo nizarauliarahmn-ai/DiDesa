@@ -1397,7 +1397,7 @@ export default function AdminSuratNikah({
       const belumMenikahRoleLabel = isKades
         ? `Kepala Desa ${v(formData.namaDesa)}`
         : belumMenikahRoleText.replace(/^a\.n\.\s*Kepala Desa,?\s*/i, '').trim();
-      const belumMenikahPrefix = isKades ? '' : 'a.n. Kepala Desa,<br>';
+      const belumMenikahPrefixLine = isKades ? '' : 'a.n. Kepala Desa,';
       html = `
         <h3 style="text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;margin:0 0 20px;">SURAT PERNYATAAN BELUM MENIKAH</h3>
         <p style="margin:0 0 10px;">Saya yang bertanda tangan di bawah ini :</p>
@@ -1417,7 +1417,10 @@ export default function AdminSuratNikah({
           <tr>
             <td style="width:50%;vertical-align:top;padding:0 12px 0 0;">
               <p style="margin:0 0 5px;">Mengetahui,</p>
-              <p style="margin:0 0 5px;">${belumMenikahPrefix}${belumMenikahRoleLabel}</p>
+              ${isKades
+                ? `<p style="margin:0 0 5px;">${belumMenikahRoleLabel}</p>`
+                : `<p style="margin:0 0 5px;">${belumMenikahPrefixLine}</p><p style="margin:0 0 5px;">${belumMenikahRoleLabel}</p>`
+              }
               <div style="height:70px;"></div>
               <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(formData.namaPejabat)}</p>
             </td>
