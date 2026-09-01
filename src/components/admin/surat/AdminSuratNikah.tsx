@@ -1416,16 +1416,16 @@ export default function AdminSuratNikah({
         <table style="width:100%;border-collapse:collapse;font-family:${letterFont};margin:0;">
           <tr>
             <td style="width:50%;vertical-align:top;padding:0 12px 0 0;">
-              <p style="margin:0 0 5px;">Mengetahui,</p>
+              <p style="margin:0;">Mengetahui,</p>
               ${isKades
-                ? `<p style="margin:0 0 5px;">${belumMenikahRoleLabel}</p>`
-                : `<p style="margin:0 0 5px;">${belumMenikahPrefixLine}</p><p style="margin:0;">${belumMenikahRoleLabel}</p>`
+                ? `<p style="margin:0;">${belumMenikahRoleLabel}</p>`
+                : `<p style="margin:0;">${belumMenikahPrefixLine}</p><p style="margin:0;">${belumMenikahRoleLabel}</p>`
               }
-              <div style="height:${isKades ? '70px' : '54px'};"></div>
+              <div style="height:${isKades ? '70px' : '52px'};"></div>
               <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(formData.namaPejabat)}</p>
             </td>
             <td style="width:50%;vertical-align:top;padding:0 0 0 12px;">
-              <p style="margin:0;">${v(formData.namaDesa)}, ${v(fmtTgl(formData.tanggalSurat))}</p>
+              <p style="margin:0;">${v(formData.namaDesa).replace(/^Desa\s+/i, '')}, ${v(fmtTgl(formData.tanggalSurat))}</p>
               <p style="margin:0;">yang membuat pernyataan,</p>
               <div style="height:70px;"></div>
               <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(calon.nama)}</p>
