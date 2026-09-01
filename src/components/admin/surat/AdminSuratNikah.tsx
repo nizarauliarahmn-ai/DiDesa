@@ -1421,7 +1421,7 @@ export default function AdminSuratNikah({
                 ? `<p style="margin:0 0 5px;">${belumMenikahRoleLabel}</p>`
                 : `<p style="margin:0 0 5px;">${belumMenikahPrefixLine}</p><p style="margin:0 0 5px;">${belumMenikahRoleLabel}</p>`
               }
-              <div style="height:70px;"></div>
+              <div style="height:${isKades ? '70px' : '50px'};"></div>
               <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(formData.namaPejabat)}</p>
             </td>
             <td style="width:50%;vertical-align:top;padding:0 0 0 12px;">
