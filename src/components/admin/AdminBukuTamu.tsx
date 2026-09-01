@@ -282,10 +282,10 @@ export default function AdminBukuTamu() {
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 50px; }
             .content-wrapper { padding: 1.5cm; padding-bottom: 60px; }
-            .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 15px; }
+            .header { text-align: center; margin-bottom: 8px; border-bottom: 3px solid black; padding-bottom: 10px; }
             .title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px; }
             .subtitle { font-size: 14px; margin: 0; color: #333; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
             .col-no { width: 28px; text-align: center; }
             th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
