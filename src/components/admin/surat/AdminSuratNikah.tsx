@@ -9,7 +9,7 @@ import { ArrowLeft, ArrowUp, ArrowDown, Save, Printer, Trash2, ZoomIn, ZoomOut, 
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
-import { getPrintSignatureHTML } from '../../../utils/signature';
+import { getPrintSignatureHTML, resolveSignatureRoleText } from '../../../utils/signature';
 import { showToast } from '../../../utils/toast';
 import { capitalizeWords } from '../../../utils/textUtils';
 import { useDragScroll } from '../../../hooks/useDragScroll';
@@ -1392,6 +1392,12 @@ export default function AdminSuratNikah({
         rt: formData.rtIstri, rw: formData.rwIstri,
       };
       const namaDesaUpper = (formData.namaDesa || '').replace(/^(desa|kelurahan)\s+/i, '').toUpperCase();
+      const belumMenikahRoleText = resolveSignatureRoleText(formData.namaPejabat, formData.jabatanPejabat);
+      const isKades = !belumMenikahRoleText.includes('a.n.');
+      const belumMenikahRoleLabel = isKades
+        ? `Kepala Desa ${v(formData.namaDesa)}`
+        : belumMenikahRoleText.replace(/^a\.n\.\s*Kepala Desa,?\s*/i, '').trim();
+      const belumMenikahPrefix = isKades ? '' : 'a.n. Kepala Desa,<br>';
       html = `
         <h3 style="text-align:center;font-size:13pt;font-weight:bold;text-decoration:underline;letter-spacing:1px;margin:0 0 20px;">SURAT PERNYATAAN BELUM MENIKAH</h3>
         <p style="margin:0 0 10px;">Saya yang bertanda tangan di bawah ini :</p>
@@ -1411,7 +1417,7 @@ export default function AdminSuratNikah({
           <tr>
             <td style="width:50%;vertical-align:top;padding:0 12px 0 0;">
               <p style="margin:0 0 5px;">Mengetahui,</p>
-              <p style="margin:0 0 5px;">Kepala Desa ${v(formData.namaDesa)}</p>
+              <p style="margin:0 0 5px;">${belumMenikahPrefix}${belumMenikahRoleLabel}</p>
               <div style="height:70px;"></div>
               <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(formData.namaPejabat)}</p>
             </td>
