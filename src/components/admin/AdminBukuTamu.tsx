@@ -281,11 +281,11 @@ export default function AdminBukuTamu() {
               .page-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 6px 1.5cm; border-top: 1px solid #cbd5e1; background: white; }
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 40px; }
-            .content-wrapper { padding: 1cm 1.5cm; padding-bottom: 50px; }
-            .header { text-align: center; margin-bottom: 4px; border-bottom: 3px solid black; padding-bottom: 6px; }
-            .title { font-size: 20px; font-weight: bold; text-transform: uppercase; margin: 0 0 3px 0; letter-spacing: 1px; }
-            .subtitle { font-size: 13px; margin: 0; color: #333; }
-            table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+            .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 50px; }
+            .header { text-align: center; margin-bottom: 2px; border-bottom: 2px solid black; padding-bottom: 4px; }
+            .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 0 0 2px 0; letter-spacing: 1px; }
+            .subtitle { font-size: 12px; margin: 0; color: #333; }
+            table { width: 100%; border-collapse: collapse; margin-top: 2px; }
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
             .col-no { width: 28px; text-align: center; }
             th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
