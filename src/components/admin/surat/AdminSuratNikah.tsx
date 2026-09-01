@@ -1111,14 +1111,14 @@ export default function AdminSuratNikah({
           ['4. Pekerjaan', v(P.kerjaIbu)],
           ['5. Alamat', v(P.alamatOrtu)]
         ])}
-        <p style="margin:4px 0;">Wali dari calon pengantin wanita:</p>
+        <p style="margin:4px 0;">Wali dari calon pengantin:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${(formData.namaWali && formData.namaWali.trim()) ? formData.namaWali.toUpperCase() : ((formData.wargaSuami && !formData.wargaIstri) ? (formData.namaAyahSuami || '') : (formData.namaAyahIstri || '')).toUpperCase()}</span>`],
           ['2. Hubungan', `${formData.hubunganWali || 'Ayah Kandung'}`]
         ])}
         <p style="margin:2px 0;">Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
         <p style="text-align:justify;margin-top:2px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
-        <div class="mt-2 pt-2">
+        <div>
         ${getPrintSignatureHTML(
           formData.namaDesa,
           v(fmtTgl(formData.tanggalSurat)),
