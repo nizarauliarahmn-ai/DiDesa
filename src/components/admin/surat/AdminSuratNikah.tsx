@@ -2505,10 +2505,15 @@ export default function AdminSuratNikah({
                       height: '100%',
                       border: 'none',
                       display: 'block',
-                      background: 'white'
+                      background: 'white',
+                      pointerEvents: 'none'
                     }}
                     title="Live A4 Preview"
                     sandbox="allow-same-origin"
+                  />
+                  <div 
+                    onMouseDown={dragProps.onMouseDown}
+                    style={{ position: 'absolute', inset: 0, zIndex: 10, cursor: 'grab' }}
                   />
                 </div>
               </div>
