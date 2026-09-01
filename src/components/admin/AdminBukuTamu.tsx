@@ -282,7 +282,7 @@ export default function AdminBukuTamu() {
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 40px; }
             .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 50px; }
-            .header { text-align: center; margin-bottom: 0; border-bottom: 2px solid black; padding-bottom: 4px; }
+            .header { text-align: center; margin-bottom: 0; border-bottom: 2px solid black; padding-bottom: 0; }
             .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 0 0 2px 0; letter-spacing: 1px; }
             .subtitle { font-size: 12px; margin: 0; color: #333; }
             table { width: 100%; border-collapse: collapse; margin-top: 0; }
