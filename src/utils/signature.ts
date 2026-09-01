@@ -150,7 +150,7 @@ export function getPrintSignatureHTML(
       </div>
     </div>
   ` : `
-    <div style="height:55px;"></div>
+    <div style="height:35px;"></div>
     <p style="font-weight:bold;margin:0;${nameDecoration}">${formattedNamaPejabat}</p>
     ${nipPejabat && nipPejabat !== '-' && nipPejabat !== '' ? `<p style="margin:2px 0 0 0;font-family:monospace;font-size:11px;">NIP. ${nipPejabat}</p>` : ''}
   `;
@@ -179,7 +179,7 @@ export function getPrintSignatureHTML(
             <div style="min-height:35px;line-height:1.4;white-space:pre-line;">
               ${sigLeftRole}
             </div>
-            <div style="height:55px;"></div>
+            <div style="height:35px;"></div>
             <p style="font-weight:bold;margin:0;${nameDecoration}">${sigLeftName}</p>
             ${sigLeftPangkat ? `<p style="margin:2px 0 0 0;font-size:13px;">${sigLeftPangkat}</p>` : ''}
             ${sigLeftNip && sigLeftNip !== '-' && sigLeftNip !== '' ? `<p style="margin:2px 0 0 0;font-size:13px;">NIP : ${sigLeftNip}</p>` : ''}
