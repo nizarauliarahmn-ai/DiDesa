@@ -282,10 +282,10 @@ export default function AdminBukuTamu() {
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 40px; }
             .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 50px; }
-            .header { text-align: center; margin-bottom: 0; border-bottom: 2px solid black; padding-bottom: 0; }
-            .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 0 0 2px 0; letter-spacing: 1px; }
-            .subtitle { font-size: 12px; margin: 0; color: #333; }
-            table { width: 100%; border-collapse: collapse; margin-top: 0; }
+            .header { text-align: center; margin: 0; padding: 0; border-bottom: 2px solid black; line-height: 1; }
+            .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 0; padding: 0; letter-spacing: 1px; line-height: 1; }
+            .subtitle { font-size: 12px; margin: 0; padding: 0; color: #333; line-height: 1; }
+            table { width: 100%; border-collapse: collapse; margin: 0; padding: 0; }
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
             .col-no { width: 28px; text-align: center; }
             th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -297,8 +297,7 @@ export default function AdminBukuTamu() {
             <div class="header">
             <h1 class="title">LAPORAN BUKU TAMU DIGITAL</h1>
             <p class="subtitle">${desaName.toUpperCase()} - ${printStartDate || printEndDate ? `Periode ${printStartDate || 'Awal'} s/d ${printEndDate || 'Sekarang'}` : 'Semua Riwayat'}</p>
-          </div>
-          <table>
+          </div><table>
             <thead>
               <tr class="thead-spacer">
                 <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
