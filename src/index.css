@@ -180,6 +180,18 @@
   .print\:block {
     display: block !important;
   }
+
+  /* Global footer pinned to bottom of every page */
+  .page-footer {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    padding: 6px 1.5cm !important;
+    border-top: 1px solid #cbd5e1 !important;
+    background: white !important;
+    z-index: 999 !important;
+  }
   
   /* Preserve colors and logos on high-quality prints but print safely */
   * {
