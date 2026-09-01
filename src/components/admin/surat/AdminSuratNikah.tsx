@@ -5,7 +5,7 @@ import { resolveKadesName } from '../../../utils/letterOfficers';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import React, { useState, useEffect, useRef } from 'react';
 import PrintSuccessDialog from './PrintSuccessDialog';
-import { ArrowLeft, ArrowUp, ArrowDown, Save, Printer, Trash2, ZoomIn, ZoomOut, Users } from 'lucide-react';
+import { ArrowLeft, ArrowUp, ArrowDown, Save, Printer, Trash2, ZoomIn, ZoomOut, Users, ShieldCheck } from 'lucide-react';
 import { addLetterHistory, updateLetterHistory } from '../../../utils/letterHistory';
 import { getLetterClassifications, incrementSequenceNumber, generateLetterNumberAsync } from '../../../utils/letterClassifications';
 import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
@@ -2223,24 +2223,15 @@ export default function AdminSuratNikah({
                 <p className="text-[10px] text-emerald-700 font-medium">* Daftar pejabat dapat disesuaikan pada Menu Pengaturan Desa</p>
               </div>
 
-              <div className="md:col-span-2 mt-4 pt-4 border-t border-emerald-100 space-y-3">
-                {/* Toggle TTE / QR Code */}
-                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-50/50 transition-all">
-                  <div className="space-y-0.5 pr-4">
-                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
+              <div className="md:col-span-2 mt-4 pt-4 border-t border-emerald-100">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div className="relative inline-flex items-center shrink-0">
+                    <input type="checkbox" checked={useEsignature} onChange={(e) => setUseEsignature(e.target.checked)} className="sr-only peer" />
+                    <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
                   </div>
-                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input 
-                      type="checkbox" 
-                      checked={useEsignature} 
-                      onChange={(e) => setUseEsignature(e.target.checked)}
-                      className="sr-only peer" 
-                    />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
-                  </div>
+                  <ShieldCheck className={`w-4 h-4 ${useEsignature ? 'text-emerald-600' : 'text-slate-400'}`} />
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">TTE / QR Code</span>
                 </label>
-
               </div>
             </div>
             
