@@ -272,7 +272,13 @@ export default function AdminBukuTamu() {
           <script src="https://cdn.tailwindcss.com"></script>
           <style>
             @media print {
-              @page { size: landscape; margin: 0 !important; }
+              @page { size: A4 portrait; margin: 0 !important; }
+              .thead-spacer { display: table-row !important; }
+              .tfoot-footer { display: table-footer-group !important; }
+            }
+            @media screen {
+              .thead-spacer { display: none !important; }
+              .tfoot-footer { display: none !important; }
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; }
             .content-wrapper { padding: 1.5cm; }
@@ -293,9 +299,9 @@ export default function AdminBukuTamu() {
           </div>
           <table>
             <thead>
-              <tr style="display:table-row;">
-                <th colSpan={6} style="padding:0;margin:0;border:none;">
-                  <div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;">&nbsp;</div>
+              <tr class="thead-spacer">
+                <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
+                  <div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
                 </th>
               </tr>
               <tr>
@@ -321,10 +327,10 @@ export default function AdminBukuTamu() {
                 </tr>
               `).join('')}
             </tbody>
-            <tfoot style="display:table-footer-group;">
+            <tfoot class="tfoot-footer">
               <tr>
-                <td colSpan={6} style="border:none;padding-top:8pt;padding-bottom:1.5cm;">
-                  <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;">
+                <td colSpan="6" style="border:none;padding-top:8pt;padding-bottom:1.5cm;">
+                  <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;width:100%;">
                     <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br/>Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
                   </div>
                 </td>
