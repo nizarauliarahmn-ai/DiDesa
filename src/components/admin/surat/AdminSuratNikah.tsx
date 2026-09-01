@@ -1748,21 +1748,6 @@ export default function AdminSuratNikah({
 
       {/* Form Area - Hidden on Print */}
       <div className="print:hidden px-8 max-w-5xl mx-auto">
-        {/* Backdate Config - Paling Atas Form */}
-        <div className="mb-6">
-          <BackdateConfig
-            prefix={kodeKlasifikasiSKN}
-            suffix="WHI-SKN"
-            tanggalSurat={tanggalSurat}
-            onTanggalSuratChange={handleTanggalSuratChange}
-            isBackdate={isBackdate}
-            onBackdateChange={setIsBackdate}
-            manualSequence={manualSequence}
-            onManualSequenceChange={setManualSequence}
-            normalNomor={formData.nomorSurat}
-            onCustomNomorSurat={handleCustomNomorSurat}
-          />
-        </div>
         {step === 1 && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none">
             <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">1. Pilih Mempelai (Warga Desa)</h2>
@@ -2388,6 +2373,20 @@ export default function AdminSuratNikah({
 
         {step === 6 && (
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm dark:shadow-none print:hidden">
+            <div className="mb-6">
+              <BackdateConfig
+                prefix={kodeKlasifikasiSKN}
+                suffix="WHI-SKN"
+                tanggalSurat={tanggalSurat}
+                onTanggalSuratChange={handleTanggalSuratChange}
+                isBackdate={isBackdate}
+                onBackdateChange={setIsBackdate}
+                manualSequence={manualSequence}
+                onManualSequenceChange={setManualSequence}
+                normalNomor={formData.nomorSurat}
+                onCustomNomorSurat={handleCustomNomorSurat}
+              />
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               
               {/* KIRI: KONTROL & TABS */}
