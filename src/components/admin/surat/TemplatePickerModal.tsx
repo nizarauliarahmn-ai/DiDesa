@@ -36,11 +36,7 @@ export const LETTER_TEMPLATES: LetterTemplate[] = [
 </table>
 <p style="margin-bottom:8px;text-indent:36px;">Mengingat pentingnya rapat tersebut di atas, kami harapkan kehadiran Bapak/Ibu/Saudara/i tepat pada waktunya.</p>
 <p style="margin-bottom:8px;text-indent:36px;">Atas perhatian dan kehadirannya, kami ucapkan terima kasih.</p>
-<p style="margin-bottom:48px;text-align:right;">&nbsp;</p>
-<table style="margin-left:auto;width:280px;border-collapse:collapse;">
-<tr><td style="text-align:center;vertical-align:top;width:50%;padding:0 8px;"><p style="margin:0;">Yang mengetahui,</p><p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">Ketua RT</p></td>
-<td style="text-align:center;vertical-align:top;width:50%;padding:0 8px;"><p style="margin:0;">Mengetahui,</p><p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">Kepala Desa</p></td></tr>
-</table>`,
+<p style="margin-bottom:48px;text-align:right;">&nbsp;</p>`,
   },
   {
     id: 'keterangan',
@@ -67,11 +63,7 @@ export const LETTER_TEMPLATES: LetterTemplate[] = [
 <p style="margin-bottom:8px;text-indent:36px;">....................................../........................................................................................................................................</p>
 <p style="margin-bottom:8px;text-indent:36px;">Surat keterangan ini dibuat berdasarkan keterangan yang sebenarnya dan dapat dipergunakan sebagaimana mestinya.</p>
 <p style="margin-bottom:8px;text-indent:36px;">Apabila di kemudian hari terbukti bahwa keterangan tersebut di atas tidak benar, maka yang bersangkutan siap menanggung segala akibat hukum yang timbul.</p>
-<p style="margin-bottom:48px;text-align:right;">&nbsp;</p>
-<table style="margin-left:auto;width:280px;border-collapse:collapse;">
-<tr><td style="text-align:center;vertical-align:top;width:50%;padding:0 8px;"><p style="margin:0;">Mengetahui,</p><p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">Ketua RT</p></td>
-<td style="text-align:center;vertical-align:top;width:50%;padding:0 8px;"><p style="margin:0;">Kepala Desa,</p><p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">.........................</p></td></tr>
-</table>`,
+<p style="margin-bottom:48px;text-align:right;">&nbsp;</p>`,
   },
   {
     id: 'himbauan',
@@ -90,11 +82,7 @@ export const LETTER_TEMPLATES: LetterTemplate[] = [
 <p style="margin-bottom:8px;padding-left:54px;">2. ........................................................................................................................................</p>
 <p style="margin-bottom:8px;padding-left:54px;">3. ........................................................................................................................................</p>
 <p style="margin-bottom:16px;">Demikian himbauan ini kami sampaikan. Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.</p>
-<p style="margin-bottom:48px;text-align:right;">&nbsp;</p>
-<table style="margin-left:auto;width:280px;border-collapse:collapse;">
-<tr><td style="text-align:center;vertical-align:top;width:50%;padding:0 8px;"><p style="margin:0;">Mengetahui,</p><p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">Ketua RT</p></td>
-<td style="text-align:center;vertical-align:top;width:50%;padding:0 8px;"><p style="margin:0;">Kepala Desa,</p><p style="margin:40px 0 0 0;font-weight:bold;text-decoration:underline;">.........................</p></td></tr>
-</table>`,
+<p style="margin-bottom:48px;text-align:right;">&nbsp;</p>`,
   },
 ];
 
