@@ -274,9 +274,11 @@ export default function AdminBukuTamu() {
             @media print {
               @page { size: A4 landscape; margin: 0 !important; margin-bottom: 10mm !important; }
               .thead-spacer { display: table-row !important; }
+              .page-footer-print { position: fixed; bottom: 0; left: 0; right: 0; padding: 0 1.5cm 1cm 1.5cm; background: white; z-index: 50; }
             }
             @media screen {
               .thead-spacer { display: none !important; }
+              .page-footer-print { display: none !important; }
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 35px; }
             .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 35px; }
@@ -299,7 +301,7 @@ export default function AdminBukuTamu() {
             <thead>
               <tr class="thead-spacer">
                 <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
-                  <div style="height:3mm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
+                  <div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
                 </th>
               </tr>
               <tr>
@@ -327,17 +329,17 @@ export default function AdminBukuTamu() {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan="6" style="border:none;padding:0;margin:0;background:white;font-size:1px;line-height:1px;color:transparent;">&nbsp;</td>
-              </tr>
-              <tr>
-                <td colSpan="6" style="border:none;padding:0 0 1.5cm 0;margin:0;">
-                  <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;">
-                    <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong> &mdash; Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
-                  </div>
+                <td colSpan="6" style="border:none;padding:0;margin:0;">
+                  <div style="height:2.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white;">&nbsp;</div>
                 </td>
               </tr>
             </tfoot>
           </table>
+          <div class="page-footer-print">
+            <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;">
+              <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong> &mdash; Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
+            </div>
+          </div>
           </div>
         </body>
       </html>
