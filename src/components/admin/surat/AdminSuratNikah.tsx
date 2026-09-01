@@ -1477,9 +1477,10 @@ export default function AdminSuratNikah({
 
   // Render preview content into isolated iframe for pixel-perfect parity with print engine
   useEffect(() => {
+    if (step !== 6) return;
     const iframe = previewIframeRef.current;
     if (!iframe) return;
-    const timer = setTimeout(() => {
+    const renderPreview = () => {
     try {
       const doc = iframe.contentWindow?.document;
       if (!doc) return;
@@ -1579,9 +1580,10 @@ export default function AdminSuratNikah({
     } catch (e) {
       console.error('Preview iframe error:', e);
     }
-    }, 150);
-    return () => clearTimeout(timer);
-  }, [activeDoc, formData, previewIframeReady]);
+    };
+    const raf = requestAnimationFrame(() => { renderPreview(); });
+    return () => cancelAnimationFrame(raf);
+  }, [activeDoc, formData, previewIframeReady, step]);
 
   if (showRiwayat) {
     return (
