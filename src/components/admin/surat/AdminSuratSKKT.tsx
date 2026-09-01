@@ -250,7 +250,11 @@ export default function AdminSuratSKKT({
       let autoName = formData.namaKetuaRt;
       try {
         const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-        const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtPart) || o.role.toLowerCase().includes('rt.' + rtPart) || o.role.toLowerCase().includes('rt. ' + rtPart));
+        const rtOfficer = officersList.find((o: any) => {
+          const role = (o.role || '').toLowerCase();
+          const num = rtPart.replace(/^0+/, '') || rtPart;
+          return role.includes('rt ' + num) || role.includes('rt.' + num) || role.includes('rt. ' + num) || role.includes('rt 0' + num) || role === 'rt ' + rtPart;
+        });
         if (rtOfficer) autoName = rtOfficer.name;
       } catch (err) {}
       setFormData(prev => ({ ...prev, nomorRt: rtPart, namaKetuaRt: autoName.toUpperCase() }));
@@ -880,7 +884,11 @@ export default function AdminSuratSKKT({
                       let autoName = formData.namaKetuaRt;
                       try {
                         const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-                        const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtVal) || o.role.toLowerCase().includes('rt.' + rtVal) || o.role.toLowerCase().includes('rt. ' + rtVal));
+                        const rtOfficer = officersList.find((o: any) => {
+                          const role = (o.role || '').toLowerCase();
+                          const num = rtVal.replace(/^0+/, '') || rtVal;
+                          return role.includes('rt ' + num) || role.includes('rt.' + num) || role.includes('rt. ' + num) || role.includes('rt 0' + num) || role === 'rt ' + rtVal;
+                        });
                         if (rtOfficer) autoName = rtOfficer.name;
                       } catch (err) {}
                       setFormData({ 
@@ -1216,15 +1224,15 @@ export default function AdminSuratSKKT({
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-amber-100 space-y-3">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-amber-900">Nomor RT</label>
+              <div className="mt-6 pt-6 border-t border-amber-100">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-amber-900">Nomor RT</label>
                     <input 
                       type="text" 
-                      placeholder="cth: 02" 
+                      placeholder="02" 
                       value={formData.nomorRt} 
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold text-center"
                       onChange={e => {
                         const rtVal = e.target.value.replace(/[^0-9]/g, '');
                         const rwMapping = getRwForRt(rtVal);
@@ -1232,7 +1240,11 @@ export default function AdminSuratSKKT({
                         let autoName = formData.namaKetuaRt;
                         try {
                           const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-                          const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + rtVal) || o.role.toLowerCase().includes('rt.' + rtVal) || o.role.toLowerCase().includes('rt. ' + rtVal));
+                          const rtOfficer = officersList.find((o: any) => {
+                            const role = (o.role || '').toLowerCase();
+                            const num = rtVal.replace(/^0+/, '') || rtVal;
+                            return role.includes('rt ' + num) || role.includes('rt.' + num) || role.includes('rt. ' + num) || role.includes('rt 0' + num) || role === 'rt ' + rtVal;
+                          });
                           if (rtOfficer) autoName = rtOfficer.name;
                         } catch (err) {}
                         setFormData({ 
@@ -1244,12 +1256,25 @@ export default function AdminSuratSKKT({
                       }} 
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-amber-900">Nama Ketua RT</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-amber-900">RW</label>
                     <input 
                       type="text" 
-                      placeholder="Nama Ketua RT" 
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-amber-200 rounded-xl outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                      placeholder="01" 
+                      value={formData.rtRw.split('/')[1]?.trim() || ''} 
+                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold text-center"
+                      onChange={e => {
+                        const rwVal = e.target.value.replace(/[^0-9]/g, '');
+                        setFormData({ ...formData, rtRw: `${formData.nomorRt} / ${rwVal}` });
+                      }} 
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-amber-900">Nama Ketua RT</label>
+                    <input 
+                      type="text" 
+                      placeholder="Ketua RT" 
+                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
                       value={formData.namaKetuaRt} 
                       onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} 
                     />
