@@ -2241,22 +2241,6 @@ export default function AdminSuratNikah({
                   </div>
                 </label>
 
-                {/* Toggle Mengetahui Camat */}
-                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-50/50 transition-all">
-                  <div className="space-y-0.5 pr-4">
-                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">Gunakan format 2 tanda tangan (Camat di sebelah kiri)</div>
-                  </div>
-                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input 
-                      type="checkbox" 
-                      checked={formData.includeCamat} 
-                      onChange={(e) => setFormData(prev => ({ ...prev, includeCamat: e.target.checked }))}
-                      className="sr-only peer" 
-                    />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
-                  </div>
-                </label>
               </div>
             </div>
             
