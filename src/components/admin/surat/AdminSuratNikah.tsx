@@ -1062,18 +1062,18 @@ export default function AdminSuratNikah({
     else if (targetDoc === 'n1_suami' || targetDoc === 'n1_istri') {
       html = `
         ${lampiranHtml('N1')}
-        <div style="font-size:8pt;line-height:1.2;margin-bottom:12px;text-transform:uppercase;">
+        <div style="font-size:8pt;line-height:1.15;margin-bottom:6px;text-transform:uppercase;">
           <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;">
             <div style="white-space:nowrap;">KANTOR DESA/KELURAHAN</div>
             <div>:</div>
             <div>${v(formData.namaDesa, 'WASAH HILIR').replace(/^desa\s+/i, '').toUpperCase()}</div>
           </div>
-          <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;margin-top:4px;">
+          <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;margin-top:2px;">
             <div style="white-space:nowrap;">KECAMATAN</div>
             <div>:</div>
             <div>${v(formData.namaKecamatan, 'SIMPUR').replace(/^kecamatan\s+/i, '').toUpperCase()}</div>
           </div>
-          <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;margin-top:4px;">
+          <div style="display:grid;grid-template-columns:180px 10px 1fr;align-items:center;margin-top:2px;">
             <div style="white-space:nowrap;">KABUPATEN/KOTA</div>
             <div>:</div>
             <div>${v(formData.namaKabupaten, 'HULU SUNGAI SELATAN').replace(/^pemerintah\s+kabupaten\s+/i, '').replace(/^(kabupaten|kota)\s+/i, '').toUpperCase()}</div>
@@ -1081,7 +1081,7 @@ export default function AdminSuratNikah({
         </div>
         <h3 style="text-align:center;font-size:12pt;font-weight:bold;letter-spacing:1px;text-decoration:underline;margin:6px 0 2px;">SURAT PENGANTAR PERKAWINAN</h3>
         <p class="nomor-surat-cetak" style="text-align:center;margin-top:-6px;text-transform:uppercase;">Nomor: ${v(formData.nomorSurat).toUpperCase()}</p>
-        <p>Yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
+        <p style="margin:4px 0;">Yang bertanda tangan di bawah ini menjelaskan dengan sesungguhnya bahwa:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(P.nama)}</span>`],
           ['2. NIK', v(P.nik)],
@@ -1095,7 +1095,7 @@ export default function AdminSuratNikah({
           ['10. Status Perkawinan', v(P.status)],
           ['11. ' + P.labelPasanganTerdahulu, P.pasanganTerdahulu]
         ])}
-        <p>adalah benar anak kandung dari perkawinan seorang pria:</p>
+        <p style="margin:4px 0;">adalah benar anak kandung dari perkawinan seorang pria:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(P.ayah)}</span>`],
           ['2. NIK', v(P.nikAyah)],
@@ -1103,7 +1103,7 @@ export default function AdminSuratNikah({
           ['4. Pekerjaan', v(P.kerjaAyah)],
           ['5. Alamat', v(P.alamatOrtu)]
         ])}
-        <p>dengan seorang wanita:</p>
+        <p style="margin:4px 0;">dengan seorang wanita:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${vn(P.ibu)}</span>`],
           ['2. NIK', v(P.nikIbu)],
@@ -1111,14 +1111,14 @@ export default function AdminSuratNikah({
           ['4. Pekerjaan', v(P.kerjaIbu)],
           ['5. Alamat', v(P.alamatOrtu)]
         ])}
-        <p>Wali dari calon pengantin wanita:</p>
+        <p style="margin:4px 0;">Wali dari calon pengantin wanita:</p>
         ${dtTable([
           ['1. Nama', `<span style="font-weight:700;text-transform:uppercase;">${(formData.namaWali && formData.namaWali.trim()) ? formData.namaWali.toUpperCase() : ((formData.wargaSuami && !formData.wargaIstri) ? (formData.namaAyahSuami || '') : (formData.namaAyahIstri || '')).toUpperCase()}</span>`],
           ['2. Hubungan', `${formData.hubunganWali || 'Ayah Kandung'}`]
         ])}
-        <p>Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
-        <p style="text-align:justify;margin-top:8px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
-        <div class="mt-auto pt-6">
+        <p style="margin:2px 0;">Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
+        <p style="text-align:justify;margin-top:2px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
+        <div class="mt-auto pt-2">
         ${getPrintSignatureHTML(
           formData.namaDesa,
           v(fmtTgl(formData.tanggalSurat)),
