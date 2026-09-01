@@ -1419,14 +1419,14 @@ export default function AdminSuratNikah({
               <p style="margin:0 0 5px;">Mengetahui,</p>
               ${isKades
                 ? `<p style="margin:0 0 5px;">${belumMenikahRoleLabel}</p>`
-                : `<p style="margin:0 0 5px;">${belumMenikahPrefixLine}</p><p style="margin:0 0 5px;">${belumMenikahRoleLabel}</p>`
+                : `<p style="margin:0 0 5px;">${belumMenikahPrefixLine}</p><p style="margin:0;">${belumMenikahRoleLabel}</p>`
               }
-              <div style="height:${isKades ? '70px' : '50px'};"></div>
+              <div style="height:${isKades ? '70px' : '54px'};"></div>
               <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(formData.namaPejabat)}</p>
             </td>
             <td style="width:50%;vertical-align:top;padding:0 0 0 12px;">
               <p style="margin:0;">${v(formData.namaDesa)}, ${v(fmtTgl(formData.tanggalSurat))}</p>
-              <p style="margin:0 0 5px;">yang membuat pernyataan,</p>
+              <p style="margin:0;">yang membuat pernyataan,</p>
               <div style="height:70px;"></div>
               <p style="margin:0;text-transform:uppercase;font-weight:700;">${vn(calon.nama)}</p>
             </td>
