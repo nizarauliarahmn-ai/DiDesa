@@ -2307,7 +2307,7 @@ export default function AdminSuratNikah({
                     type="text" 
                     value={formData.saksi1Sebagai} 
                     onChange={(e) => setFormData(prev => ({ ...prev, saksi1Sebagai: e.target.value }))}
-                    placeholder="Contoh: Wali, Ketua RT, Tetangga"
+                    placeholder="Cth: Wali, Ketua RT, Tetangga"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
                   />
                 </div>
@@ -2332,7 +2332,7 @@ export default function AdminSuratNikah({
                     type="text" 
                     value={formData.saksi2Sebagai} 
                     onChange={(e) => setFormData(prev => ({ ...prev, saksi2Sebagai: e.target.value }))}
-                    placeholder="Contoh: Ketua RT, Masyarakat"
+                    placeholder="Cth: Ketua RT, Masyarakat"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
                   />
                 </div>
@@ -2357,7 +2357,7 @@ export default function AdminSuratNikah({
                     type="text" 
                     value={formData.saksi3Sebagai} 
                     onChange={(e) => setFormData(prev => ({ ...prev, saksi3Sebagai: e.target.value }))}
-                    placeholder="Contoh: Keluarga, Tetangga"
+                    placeholder="Cth: Keluarga, Tetangga"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
                   />
                 </div>
