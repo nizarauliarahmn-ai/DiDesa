@@ -2183,7 +2183,7 @@ export default function AdminSuratNikah({
                 <select name="hubunganWali" value={formData.hubunganWali} onChange={handleChange} className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-900 font-medium">
                   <option>Ayah Kandung</option><option>Saudara Laki-laki Kandung</option><option>Wali Hakim</option>
                 </select>
-                <p className="text-[10px] text-emerald-700 font-medium">* Hubungan kekerabatan wali nikah dengan calon pengantin wanita</p>
+                <p className="text-[10px] text-emerald-700 font-medium">* Hubungan kekerabatan wali nikah dengan calon pengantin</p>
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Pilih Pejabat Penandatangan</label>
