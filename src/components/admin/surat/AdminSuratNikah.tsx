@@ -1118,7 +1118,7 @@ export default function AdminSuratNikah({
         ])}
         <p style="margin:2px 0;">Rencana akad nikah: ${v(formData.hariMenikah)}, ${v(fmtTgl(formData.tanggalMenikah))} Pukul ${fmtJam(formData.jamMenikah)} di ${v(formData.tempatMenikah)}.</p>
         <p style="text-align:justify;margin-top:2px;">Demikian surat pengantar ini dibuat dengan mengingat sumpah jabatan dan untuk dipergunakan sebagaimana mestinya.</p>
-        <div class="mt-auto pt-2">
+        <div class="mt-2 pt-2">
         ${getPrintSignatureHTML(
           formData.namaDesa,
           v(fmtTgl(formData.tanggalSurat)),
