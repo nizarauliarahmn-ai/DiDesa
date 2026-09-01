@@ -249,13 +249,13 @@ export default function AdminSuratSKKT({
     if (rtPart && rtPart !== formData.nomorRt) {
       let autoName = formData.namaKetuaRt;
       try {
-        const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-        const rtOfficer = officersList.find((o: any) => {
-          const role = (o.role || '').toLowerCase();
-          const num = rtPart.replace(/^0+/, '') || rtPart;
-          return role.includes('rt ' + num) || role.includes('rt.' + num) || role.includes('rt. ' + num) || role.includes('rt 0' + num) || role === 'rt ' + rtPart;
+        const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
+        const cleanRt = rtPart.replace(/^0+/, '') || rtPart;
+        const rtEntry = rtList.find((r: any) => {
+          const no = (r.no || '').replace(/^0+/, '') || r.no;
+          return no === cleanRt || r.no === rtPart;
         });
-        if (rtOfficer) autoName = rtOfficer.name;
+        if (rtEntry?.name) autoName = rtEntry.name;
       } catch (err) {}
       setFormData(prev => ({ ...prev, nomorRt: rtPart, namaKetuaRt: autoName.toUpperCase() }));
     }
@@ -282,9 +282,12 @@ export default function AdminSuratSKKT({
     
     let foundRtName = '';
     try {
-      const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-      const rtOfficer = officersList.find((o: any) => o.role.toLowerCase().includes('rt ' + cleanRt) || o.role.toLowerCase().includes('rt.' + cleanRt) || o.role.toLowerCase().includes('rt. ' + cleanRt) || o.role.toLowerCase() === 'rt ' + cleanRt);
-      if (rtOfficer) foundRtName = rtOfficer.name;
+      const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
+      const rtEntry = rtList.find((r: any) => {
+        const no = (r.no || '').replace(/^0+/, '') || r.no;
+        return no === cleanRt || r.no === rt;
+      });
+      if (rtEntry?.name) foundRtName = rtEntry.name;
     } catch (e) {}
 
     setFormData(prev => ({
@@ -883,13 +886,13 @@ export default function AdminSuratSKKT({
                       const newRw = rwMapping || formData.rtRw.split('/')[1]?.trim() || '';
                       let autoName = formData.namaKetuaRt;
                       try {
-                        const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-                        const rtOfficer = officersList.find((o: any) => {
-                          const role = (o.role || '').toLowerCase();
-                          const num = rtVal.replace(/^0+/, '') || rtVal;
-                          return role.includes('rt ' + num) || role.includes('rt.' + num) || role.includes('rt. ' + num) || role.includes('rt 0' + num) || role === 'rt ' + rtVal;
+                        const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
+                        const cleanRt = rtVal.replace(/^0+/, '') || rtVal;
+                        const rtEntry = rtList.find((r: any) => {
+                          const no = (r.no || '').replace(/^0+/, '') || r.no;
+                          return no === cleanRt || r.no === rtVal;
                         });
-                        if (rtOfficer) autoName = rtOfficer.name;
+                        if (rtEntry?.name) autoName = rtEntry.name;
                       } catch (err) {}
                       setFormData({ 
                         ...formData, 
@@ -1239,13 +1242,13 @@ export default function AdminSuratSKKT({
                         const newRw = rwMapping || formData.rtRw.split('/')[1]?.trim() || '';
                         let autoName = formData.namaKetuaRt;
                         try {
-                          const officersList = JSON.parse(localStorage.getItem('village_officers') || '[]');
-                          const rtOfficer = officersList.find((o: any) => {
-                            const role = (o.role || '').toLowerCase();
-                            const num = rtVal.replace(/^0+/, '') || rtVal;
-                            return role.includes('rt ' + num) || role.includes('rt.' + num) || role.includes('rt. ' + num) || role.includes('rt 0' + num) || role === 'rt ' + rtVal;
+                          const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
+                          const cleanRt = rtVal.replace(/^0+/, '') || rtVal;
+                          const rtEntry = rtList.find((r: any) => {
+                            const no = (r.no || '').replace(/^0+/, '') || r.no;
+                            return no === cleanRt || r.no === rtVal;
                           });
-                          if (rtOfficer) autoName = rtOfficer.name;
+                          if (rtEntry?.name) autoName = rtEntry.name;
                         } catch (err) {}
                         setFormData({ 
                           ...formData, 
