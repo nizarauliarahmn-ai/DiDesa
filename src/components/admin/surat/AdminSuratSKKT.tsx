@@ -13,7 +13,7 @@ import { useDragScroll } from '../../../hooks/useDragScroll';
 import { generateKopSuratHTML } from '../../../utils/letterFormat';
 import { LandPolygonPickerModal, PolygonData } from './LandPolygonPickerModal';
 import { capitalizeWords } from '../../../utils/textUtils';
-import { getRwForRt } from '../../../utils/rtRwMapping';
+import { getRtRwMapping, getRwForRt } from '../../../utils/rtRwMapping';
 import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
 
@@ -874,17 +874,12 @@ export default function AdminSuratSKKT({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RT</label>
-                  <input 
-                    type="text" 
-                    inputMode="numeric" 
-                    pattern="[0-9]*" 
-                    placeholder="cth: 01" 
+                  <select 
                     value={formData.nomorRt} 
                     onChange={e => {
-                      const rtVal = e.target.value.replace(/[^0-9]/g, '');
+                      const rtVal = e.target.value;
                       const rwMapping = getRwForRt(rtVal);
-                      const oldRw = formData.rtRw.split('/')[1]?.trim() || '';
-                      const newRw = rwMapping || oldRw;
+                      const newRw = rwMapping || '';
                       let autoName = formData.namaKetuaRt;
                       try {
                         const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
@@ -902,26 +897,24 @@ export default function AdminSuratSKKT({
                         namaKetuaRt: autoName.toUpperCase()
                       });
                     }}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" 
-                  />
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono"
+                  >
+                    <option value="">Pilih RT</option>
+                    {getRtRwMapping().map((entry, i) => (
+                      <option key={i} value={entry.rt}>RT {entry.rt}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="font-bold text-gray-600 dark:text-slate-400 block mb-1">RW</label>
                   <input 
                     type="text" 
-                    inputMode="numeric" 
-                    pattern="[0-9]*" 
-                    placeholder="cth: 01" 
+                    readOnly
+                    placeholder="-" 
                     value={formData.rtRw.split('/')[1]?.trim() || ''} 
-                    onChange={e => {
-                      const rwVal = e.target.value.replace(/[^0-9]/g, '');
-                      setFormData({ 
-                        ...formData, 
-                        rtRw: `${formData.nomorRt} / ${rwVal}`
-                      });
-                    }}
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-mono" 
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl outline-none font-mono text-gray-500 dark:text-slate-400 cursor-not-allowed" 
                   />
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 italic">Otomatis dari mapping RT/RW</p>
                 </div>
               </div>
               <div>
