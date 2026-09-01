@@ -883,7 +883,8 @@ export default function AdminSuratSKKT({
                     onChange={e => {
                       const rtVal = e.target.value.replace(/[^0-9]/g, '');
                       const rwMapping = getRwForRt(rtVal);
-                      const newRw = rwMapping || formData.rtRw.split('/')[1]?.trim() || '';
+                      const oldRw = formData.rtRw.split('/')[1]?.trim() || '';
+                      const newRw = rwMapping || oldRw;
                       let autoName = formData.namaKetuaRt;
                       try {
                         const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
@@ -897,7 +898,7 @@ export default function AdminSuratSKKT({
                       setFormData({ 
                         ...formData, 
                         nomorRt: rtVal, 
-                        rtRw: newRw ? `${rtVal} / ${newRw}` : rtVal,
+                        rtRw: `${rtVal} / ${newRw}`,
                         namaKetuaRt: autoName.toUpperCase()
                       });
                     }}
