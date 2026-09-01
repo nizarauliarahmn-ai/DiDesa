@@ -878,27 +878,23 @@ export default function AdminSuratSKKT({
                     value={formData.nomorRt} 
                     onChange={e => {
                       const rtVal = e.target.value;
-                      console.log('[SKKT RT Dropdown] selected:', rtVal);
-                      console.log('[SKKT RT Dropdown] village_rt_rw_mapping:', localStorage.getItem('village_rt_rw_mapping'));
-                      console.log('[SKKT RT Dropdown] village_rt_list:', localStorage.getItem('village_rt_list'));
-                      const rwMapping = getRwForRt(rtVal);
-                      console.log('[SKKT RT Dropdown] rwMapping result:', rwMapping);
-                      const oldRw = formData.rtRw.split('/')[1]?.trim() || '';
-                      const newRw = rwMapping || oldRw;
+                      // auto-fill RW dari village_rw_list (kalau cuma 1 RW)
+                      let autoRw = formData.rtRw.split('/')[1]?.trim() || '';
+                      try {
+                        const rwList = JSON.parse(localStorage.getItem('village_rw_list') || '[]');
+                        if (rwList.length === 1) autoRw = rwList[0].no;
+                      } catch {}
+                      // auto-fill nama ketua RT dari village_rt_list
                       let autoName = formData.namaKetuaRt;
                       try {
                         const rtList = JSON.parse(localStorage.getItem('village_rt_list') || '[]');
-                        const cleanRt = rtVal.replace(/^0+/, '') || rtVal;
-                        const rtEntry = rtList.find((r: any) => {
-                          const no = (r.no || '').replace(/^0+/, '') || r.no;
-                          return no === cleanRt || r.no === rtVal;
-                        });
+                        const rtEntry = rtList.find((r: any) => r.no === rtVal);
                         if (rtEntry?.name) autoName = rtEntry.name;
                       } catch (err) {}
                       setFormData({ 
                         ...formData, 
                         nomorRt: rtVal, 
-                        rtRw: `${rtVal} / ${newRw}`,
+                        rtRw: `${rtVal} / ${autoRw}`,
                         namaKetuaRt: autoName.toUpperCase()
                       });
                     }}
@@ -924,7 +920,7 @@ export default function AdminSuratSKKT({
                     value={formData.rtRw.split('/')[1]?.trim() || ''} 
                     className="w-full px-4 py-3 bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl outline-none font-mono text-gray-500 dark:text-slate-400 cursor-not-allowed" 
                   />
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 italic">Otomatis dari mapping RT/RW</p>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 italic">Otomatis dari daftar RW</p>
                 </div>
               </div>
               <div>
