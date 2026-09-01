@@ -63,7 +63,7 @@ export default function ProfilDesa() {
           if (map['village_batas_utara']) setBatasUtara(map['village_batas_utara']);
         }
         // Count residents
-        const { count } = await supabase.from('village_residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tid);
+        const { count } = await supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tid);
         if (count !== null) setTotalPenduduk(count);
       } catch (e) {
         console.error('Failed to load village profile:', e);
