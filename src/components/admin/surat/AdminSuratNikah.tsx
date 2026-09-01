@@ -2303,13 +2303,18 @@ export default function AdminSuratNikah({
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sebagai</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={formData.saksi1Sebagai} 
                     onChange={(e) => setFormData(prev => ({ ...prev, saksi1Sebagai: e.target.value }))}
-                    placeholder="Cth: Wali, Ketua RT, Tetangga"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
-                  />
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="Wali">Wali</option>
+                    <option value="Ketua RT">Ketua RT</option>
+                    <option value="Ketua RW">Ketua RW</option>
+                    <option value="Tetangga">Tetangga</option>
+                    <option value="Keluarga">Keluarga</option>
+                  </select>
                 </div>
               </div>
 
@@ -2328,13 +2333,18 @@ export default function AdminSuratNikah({
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sebagai</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={formData.saksi2Sebagai} 
                     onChange={(e) => setFormData(prev => ({ ...prev, saksi2Sebagai: e.target.value }))}
-                    placeholder="Cth: Ketua RT, Masyarakat"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
-                  />
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="Wali">Wali</option>
+                    <option value="Ketua RT">Ketua RT</option>
+                    <option value="Ketua RW">Ketua RW</option>
+                    <option value="Tetangga">Tetangga</option>
+                    <option value="Keluarga">Keluarga</option>
+                  </select>
                 </div>
               </div>
 
@@ -2353,13 +2363,18 @@ export default function AdminSuratNikah({
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sebagai</label>
-                  <input 
-                    type="text" 
+                  <select 
                     value={formData.saksi3Sebagai} 
                     onChange={(e) => setFormData(prev => ({ ...prev, saksi3Sebagai: e.target.value }))}
-                    placeholder="Cth: Keluarga, Tetangga"
                     className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm"
-                  />
+                  >
+                    <option value="">Pilih...</option>
+                    <option value="Wali">Wali</option>
+                    <option value="Ketua RT">Ketua RT</option>
+                    <option value="Ketua RW">Ketua RW</option>
+                    <option value="Tetangga">Tetangga</option>
+                    <option value="Keluarga">Keluarga</option>
+                  </select>
                 </div>
               </div>
             </div>
