@@ -282,9 +282,6 @@ export default function AdminBukuTamu() {
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; padding-bottom: 35px; }
             .content-wrapper { padding: 0.8cm 1.5cm; padding-bottom: 35px; }
-            .header { text-align: center; margin: 0; padding: 0; border-bottom: 2px solid black; line-height: 1; }
-            .title { font-size: 18px; font-weight: bold; text-transform: uppercase; margin: 0; padding: 0; letter-spacing: 1px; line-height: 1; }
-            .subtitle { font-size: 12px; margin: 0; padding: 0; color: #333; line-height: 1; }
             table { width: 100%; border-collapse: collapse; margin: 0; padding: 0; }
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
             .col-no { width: 28px; text-align: center; }
@@ -294,10 +291,11 @@ export default function AdminBukuTamu() {
         </head>
         <body>
           <div class="content-wrapper">
-            <div class="header">
-            <h1 class="title">LAPORAN BUKU TAMU DIGITAL</h1>
-            <p class="subtitle">${desaName.toUpperCase()} - ${printStartDate || printEndDate ? `Periode ${printStartDate || 'Awal'} s/d ${printEndDate || 'Sekarang'}` : 'Semua Riwayat'}</p>
-          </div><table>
+            <div class="w-full text-center" style="padding:0;margin:0;">
+              <h2 style="font-size:18px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;color:black;margin:0;padding:0;line-height:1.2;">LAPORAN BUKU TAMU DIGITAL</h2>
+              <p style="font-size:11pt;color:black;margin:2px 0 0 0;padding:0;font-weight:normal;">${desaName.toUpperCase()} &mdash; ${printStartDate || printEndDate ? `Periode ${printStartDate || 'Awal'} s/d ${printEndDate || 'Sekarang'}` : 'Semua Riwayat'}</p>
+              <div style="width:100%;border-bottom:2px solid black;margin-top:8px;"></div>
+            </div><table style="width:100%;border-collapse:collapse;margin:0;padding:0;margin-top:-1cm;">
             <thead>
               <tr class="thead-spacer">
                 <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
