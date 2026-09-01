@@ -1238,62 +1238,65 @@ export default function AdminSuratSKKT({
               </div>
 
               <div className="mt-6 pt-6 border-t border-amber-100">
-                <div className="grid grid-cols-[auto_1fr_1fr_1.5fr] gap-3 items-end">
-                  <div className="flex flex-col items-center gap-1 pb-0.5">
-                    <label className="text-[10px] font-bold text-amber-900 uppercase">TTD RT</label>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, includeTtdRt: !formData.includeTtdRt })}
-                      className={`relative w-11 h-6 rounded-full transition-colors ${formData.includeTtdRt ? 'bg-emerald-500' : 'bg-gray-300'}`}
-                    >
-                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${formData.includeTtdRt ? 'translate-x-5' : ''}`} />
-                    </button>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-amber-900">Nomor RT</label>
-                    <select 
-                      value={formData.nomorRt} 
-                      onChange={e => {
-                        const rtVal = e.target.value;
-                        let autoRw = formData.rtRw.split('/')[1]?.trim() || '';
-                        if (rwListData.length === 1) autoRw = rwListData[0].no;
-                        let autoName = formData.namaKetuaRt;
-                        const rtEntry = rtListData.find(r => r.no === rtVal);
-                        if (rtEntry?.name) autoName = rtEntry.name;
-                        setFormData({ 
-                          ...formData, 
-                          nomorRt: rtVal, 
-                          rtRw: `${rtVal} / ${autoRw}`,
-                          namaKetuaRt: autoName.toUpperCase()
-                        });
-                      }}
-                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-mono"
-                    >
-                      <option value="">Pilih RT</option>
-                      {rtListData.map(r => (
-                        <option key={r.no} value={r.no}>RT {r.no}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-amber-900">RW</label>
-                    <input 
-                      type="text" 
-                      placeholder="01" 
-                      value={formData.rtRw.split('/')[1]?.trim() || ''} 
-                      className="w-full px-3 py-2.5 bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg outline-none font-mono text-gray-500 dark:text-slate-400 cursor-not-allowed" 
-                      readOnly
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-amber-900">Nama Ketua RT</label>
-                    <input 
-                      type="text" 
-                      placeholder="Ketua RT" 
-                      className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
-                      value={formData.namaKetuaRt} 
-                      onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} 
-                    />
+                <div className="bg-amber-50/60 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/30 rounded-xl p-4 space-y-3">
+                  <p className="text-[11px] font-extrabold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Tanda Tangan Ketua RT</p>
+                  <div className="grid grid-cols-[auto_1fr_1fr_1.5fr] gap-3 items-end">
+                    <div className="flex flex-col items-center gap-1 pb-0.5">
+                      <label className="text-[10px] font-bold text-amber-900 uppercase">TTD RT</label>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, includeTtdRt: !formData.includeTtdRt })}
+                        className={`relative w-11 h-6 rounded-full transition-colors ${formData.includeTtdRt ? 'bg-emerald-500' : 'bg-gray-300'}`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${formData.includeTtdRt ? 'translate-x-5' : ''}`} />
+                      </button>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-amber-900">Nomor RT</label>
+                      <select 
+                        value={formData.nomorRt} 
+                        onChange={e => {
+                          const rtVal = e.target.value;
+                          let autoRw = formData.rtRw.split('/')[1]?.trim() || '';
+                          if (rwListData.length === 1) autoRw = rwListData[0].no;
+                          let autoName = formData.namaKetuaRt;
+                          const rtEntry = rtListData.find(r => r.no === rtVal);
+                          if (rtEntry?.name) autoName = rtEntry.name;
+                          setFormData({ 
+                            ...formData, 
+                            nomorRt: rtVal, 
+                            rtRw: `${rtVal} / ${autoRw}`,
+                            namaKetuaRt: autoName.toUpperCase()
+                          });
+                        }}
+                        className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-mono"
+                      >
+                        <option value="">Pilih RT</option>
+                        {rtListData.map(r => (
+                          <option key={r.no} value={r.no}>RT {r.no}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-amber-900">RW</label>
+                      <input 
+                        type="text" 
+                        placeholder="Otomatis" 
+                        value={formData.rtRw.split('/')[1]?.trim() || ''} 
+                        className="w-full px-3 py-2.5 bg-gray-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg outline-none font-mono text-gray-500 dark:text-slate-400 cursor-not-allowed" 
+                        readOnly
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-amber-900">Nama Ketua RT</label>
+                      <input 
+                        type="text" 
+                        placeholder="Ketua RT" 
+                        className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-amber-200 rounded-lg outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 transition-all font-bold"
+                        value={formData.namaKetuaRt} 
+                        onChange={e => setFormData({ ...formData, namaKetuaRt: e.target.value.toUpperCase() })} 
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
