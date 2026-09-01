@@ -274,30 +274,30 @@ export default function AdminBukuTamu() {
             @media print {
               @page { size: A4 landscape; margin: 0 !important; }
               .thead-spacer { display: table-row !important; }
-              .tfoot-footer { display: table-footer-group !important; }
             }
             @media screen {
               .thead-spacer { display: none !important; }
-              .tfoot-footer { display: none !important; }
             }
             body { font-family: Arial, sans-serif; color: black; background: white; margin: 0; }
             .content-wrapper { padding: 1.5cm; }
             .header { text-align: center; margin-bottom: 20px; border-bottom: 3px solid black; padding-bottom: 15px; }
             .title { font-size: 22px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px; }
             .subtitle { font-size: 14px; margin: 0; color: #333; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
             th, td { border: 1px solid #000; padding: 10px 12px; font-size: 12px; text-align: left; vertical-align: top; }
+            .col-no { width: 28px; text-align: center; }
             th { background: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 11px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .meta { font-size: 10px; color: #666; margin-top: 3px; display: block; }
           </style>
         </head>
         <body>
           <div class="content-wrapper">
+            <div style="min-height:100vh;display:flex;flex-direction:column;">
             <div class="header">
             <h1 class="title">LAPORAN BUKU TAMU DIGITAL</h1>
             <p class="subtitle">${desaName.toUpperCase()} - ${printStartDate || printEndDate ? `Periode ${printStartDate || 'Awal'} s/d ${printEndDate || 'Sekarang'}` : 'Semua Riwayat'}</p>
           </div>
-          <table>
+          <table style="flex:1;">
             <thead>
               <tr class="thead-spacer">
                 <th colSpan="6" style="padding:0;margin:0;border:none;background:white;">
@@ -305,7 +305,7 @@ export default function AdminBukuTamu() {
                 </th>
               </tr>
               <tr>
-                <th style="width: 3%">No</th>
+                <th class="col-no">No</th>
                 <th style="width: 27%">Nama Lengkap / NIK</th>
                 <th style="width: 12%">Instansi / Asal</th>
                 <th style="width: 22%">Keperluan & Tujuan</th>
@@ -316,7 +316,7 @@ export default function AdminBukuTamu() {
             <tbody>
               ${printData.map((e, i) => `
                 <tr>
-                  <td>${i + 1}</td>
+                  <td class="col-no">${i + 1}</td>
                   <td><strong>${e.nama}</strong><span class="meta">NIK: ${e.nik || '-'}</span></td>
                   <td>${e.instansi || '-'}</td>
                   <td>${e.keperluan}</td>
@@ -327,16 +327,10 @@ export default function AdminBukuTamu() {
                 </tr>
               `).join('')}
             </tbody>
-            <tfoot class="tfoot-footer">
-              <tr>
-                <td colSpan="6" style="border:none;padding-top:8pt;padding-bottom:1.5cm;">
-                  <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;width:100%;">
-                    <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br/>Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
-                  </div>
-                </td>
-              </tr>
-            </tfoot>
           </table>
+          <div style="border-top:1px solid #cbd5e1;padding-top:8px;text-align:left;width:100%;margin-top:auto;">
+            <span style="font-size:9pt;color:#64748b;">Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br/>Solusi Administrasi &amp; Digitalisasi Desa Modern Indonesia</span>
+          </div>
           </div>
         </body>
       </html>
