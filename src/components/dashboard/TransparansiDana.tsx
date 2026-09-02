@@ -102,8 +102,6 @@ export default function TransparansiDana() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Transparansi Anggaran Pendapatan & Belanja Desa</h2>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Laporan pertanggungjawaban dana publik secara transparan, akuntabel, dan terbuka.</p>
         </div>
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-emerald-700" />
