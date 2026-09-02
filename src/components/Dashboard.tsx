@@ -4,7 +4,6 @@ import LayananMandiri from './dashboard/LayananMandiri';
 import ProfilDesa from './dashboard/ProfilDesa';
 import TransparansiDana from './dashboard/TransparansiDana';
 import BeritaDesa from './dashboard/BeritaDesa';
-import AspirasiWarga from './dashboard/AspirasiWarga';
 
 export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: string) => void }) {
   return (
@@ -54,18 +53,6 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
           </div>
         </div>
         <BeritaDesa />
-      </div>
-
-      {/* 7. Aspirasi & Pengaduan Warga 24/7 */}
-      <div id="section-aspirasi" className="scroll-mt-24 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-8 bg-rose-600 rounded-full"></div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kios Aspirasi & Pengaduan Warga</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Kirim masukan, keluhan, atau ide pembangunan desa secara cepat</p>
-          </div>
-        </div>
-        <AspirasiWarga />
       </div>
     </div>
   );

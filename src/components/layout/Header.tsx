@@ -43,7 +43,6 @@ export default function Header({
     { id: 'profil_desa', label: 'Profil Desa' },
     { id: 'transparansi', label: 'Transparansi' },
     { id: 'berita', label: 'Berita' },
-    { id: 'aspirasi', label: 'Aspirasi' },
   ];
 
   const handleNavClick = (id: string) => {

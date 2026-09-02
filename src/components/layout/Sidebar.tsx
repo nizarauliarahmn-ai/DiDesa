@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, PieChart, Newspaper, Map, ShieldCheck, Building2, LogOut, MessageSquareText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, PieChart, Newspaper, ShieldCheck, Building2, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { X } from 'lucide-react';
 
@@ -140,12 +140,6 @@ export default function Sidebar({
            label="Layanan Mandiri" 
            active={activeTab === 'layanan_mandiri'} 
            onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('layanan_mandiri'); }} 
-        />
-        <NavItem 
-           collapsed={isCollapsed} id="tour-public-aspirasi" icon={<MessageSquareText size={20} />} 
-           label="Aspirasi Warga" 
-           active={activeTab === 'aspirasi'} 
-           onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} 
         />
       </nav>
 
