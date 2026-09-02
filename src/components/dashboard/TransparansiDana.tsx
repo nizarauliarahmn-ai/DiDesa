@@ -100,19 +100,18 @@ export default function TransparansiDana() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-emerald-700" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Transparansi Anggaran & Dana Desa (APBD)</h2>
+        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-700/40 shrink-0">
+          <Calendar className="w-3.5 h-3.5" />
           <select 
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 px-3 py-2 rounded-xl text-sm font-bold shadow-sm dark:shadow-none focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="bg-transparent border-none outline-none text-xs font-bold text-emerald-700 dark:text-emerald-400 cursor-pointer pr-1"
           >
-            <option value={new Date().getFullYear().toString()}>Tahun Anggaran {new Date().getFullYear()}</option>
-            <option value={(new Date().getFullYear() - 1).toString()}>Tahun Anggaran {new Date().getFullYear() - 1}</option>
-            <option value={(new Date().getFullYear() - 2).toString()}>Tahun Anggaran {new Date().getFullYear() - 2}</option>
+            <option value={new Date().getFullYear().toString()}>Tahun {new Date().getFullYear()}</option>
+            <option value={(new Date().getFullYear() - 1).toString()}>Tahun {new Date().getFullYear() - 1}</option>
+            <option value={(new Date().getFullYear() - 2).toString()}>Tahun {new Date().getFullYear() - 2}</option>
           </select>
         </div>
       </div>
