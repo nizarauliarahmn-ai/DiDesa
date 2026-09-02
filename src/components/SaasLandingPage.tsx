@@ -412,9 +412,6 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold mb-3">
-                <Building2 size={14} /> Ekosistem Desa Terintegrasi
-              </div>
               <h2 className="text-3xl md:text-4xl font-black">Desa-Desa Pengguna DiDesa</h2>
               <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-xl">Bergabung bersama desa-desa mandiri di Indonesia yang telah mendigitalisasi pelayanan publik & persuratan warga.</p>
             </div>
