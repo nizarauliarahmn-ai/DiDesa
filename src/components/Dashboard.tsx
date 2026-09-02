@@ -1,6 +1,6 @@
 import WelcomeBanner from './dashboard/WelcomeBanner';
 import StatCards from './dashboard/StatCards';
-import LayananMandiri from './dashboard/LayananMandiri';
+import ServiceCards from './dashboard/ServiceCards';
 import ProfilDesa from './dashboard/ProfilDesa';
 import TransparansiDana from './dashboard/TransparansiDana';
 import BeritaDesa from './dashboard/BeritaDesa';
@@ -14,16 +14,16 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
         <WelcomeBanner onTabChange={setPublicTab} />
       </div>
 
-      {/* 2. Layanan Mandiri & Kios Surat Digital */}
+      {/* 2. Akses Cepat Layanan */}
       <div id="section-layanan_mandiri" className="scroll-mt-24">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-2.5 h-8 bg-emerald-600 rounded-full"></div>
           <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Persuratan Mandiri & Kios Digital</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Pengajuan & cetak surat mandiri online 24 jam dengan TTE Digital</p>
+            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Layanan Digital Desa</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Akses cepat layanan pemerintahan desa secara online</p>
           </div>
         </div>
-        <LayananMandiri />
+        <ServiceCards />
       </div>
 
       {/* 3. Profil & Statistik Kependudukan */}
