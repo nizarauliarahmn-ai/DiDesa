@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Smartphone, ArrowRight, Search } from 'lucide-react';
+import React from 'react';
+import { motion } from 'motion/react';
+import { ArrowRight, Shield } from 'lucide-react';
 
 export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: string) => void }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
-  const [searchQuery, setSearchQuery] = useState('');
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
@@ -21,67 +21,51 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    const query = searchQuery.toLowerCase();
-    if (query.includes('surat') || query.includes('layanan') || query.includes('sktm') || query.includes('sku')) {
-      handleNav('layanan_mandiri');
-    } else if (query.includes('apbd') || query.includes('dana') || query.includes('anggaran')) {
-      handleNav('transparansi');
-    } else if (query.includes('berita') || query.includes('pengumuman')) {
-      handleNav('berita');
-    } else if (query.includes('peta') || query.includes('wilayah')) {
-      handleNav('peta_wilayah');
-    } else {
-      handleNav('aspirasi');
-    }
-  };
-
   return (
-    <section className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-emerald-950 p-6 sm:p-8 shadow-xl border border-slate-800 text-white">
-      <div className="relative z-10 max-w-2xl space-y-5">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold tracking-wide">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          Portal Resmi {desaName}
-        </div>
-
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight">
-          Pusat Pelayanan &{' '}
-          <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">
-            Digitalisasi Desa Modern
-          </span>
-        </h1>
-
-        <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-lg">
-          Persuratan mandiri 24/7, transparansi APBD, peta GIS, dan aspirasi publik untuk masyarakat <strong>{cleanDesaName}</strong>.
-        </p>
-
-        <form onSubmit={handleSearchSubmit} className="relative max-w-lg">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Cari layanan, berita, atau informasi..."
-            className="w-full pl-10 pr-20 py-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder-slate-400 text-sm outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
-          />
-          <button
-            type="submit"
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-lg transition-all cursor-pointer"
-          >
-            Cari
-          </button>
-        </form>
-
-        <button
-          onClick={() => handleNav('layanan_mandiri')}
-          className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl px-5 py-3 font-black text-sm transition-all shadow-lg shadow-emerald-500/25 active:scale-95 flex items-center gap-2 cursor-pointer group"
+    <section className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-10">
+      <div className="max-w-2xl space-y-5">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[11px] font-bold tracking-wide"
         >
-          <Smartphone className="w-4 h-4 group-hover:scale-110 transition-transform" />
-          Mulai Layanan Mandiri
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </button>
+          <Shield className="w-3.5 h-3.5" />
+          Portal Resmi {desaName}
+        </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight"
+        >
+          Pusat Pelayanan &{' '}
+          <span className="text-emerald-700">Digitalisasi Desa</span>
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-slate-500 text-sm font-medium leading-relaxed max-w-lg"
+        >
+          Layanan persuratan, transparansi anggaran, dan aspirasi warga {cleanDesaName} secara digital — kapan saja, di mana saja.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <button
+            onClick={() => handleNav('layanan_mandiri')}
+            className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl px-5 py-3 font-bold text-sm transition-all shadow-sm active:scale-95 flex items-center gap-2 cursor-pointer group"
+          >
+            Mulai Layanan Mandiri
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </motion.div>
       </div>
     </section>
   );
