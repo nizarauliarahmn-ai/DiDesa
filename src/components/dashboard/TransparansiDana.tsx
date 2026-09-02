@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { TrendingUp, ArrowDownRight, ArrowUpRight, CheckCircle, Search, Calendar } from 'lucide-react';
 
 interface BudgetLineItem {
@@ -119,7 +120,13 @@ export default function TransparansiDana() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Pendapatan */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.45, delay: 0 }}
+          className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group"
+        >
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">TOTAL PENDAPATAN ({selectedYear})</p>
             <h3 className="text-2xl font-bold text-emerald-700 tracking-tight">{formatRupiah(summary.pendapatanRealized)}</h3>
@@ -128,10 +135,16 @@ export default function TransparansiDana() {
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 group-hover:scale-110 transition-transform">
             <ArrowUpRight className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Belanja */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.45, delay: 0.1 }}
+          className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group"
+        >
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">TOTAL BELANJA ({selectedYear})</p>
             <h3 className="text-2xl font-bold text-rose-600 tracking-tight">{formatRupiah(summary.belanjaRealized)}</h3>
@@ -140,10 +153,16 @@ export default function TransparansiDana() {
           <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 shrink-0 group-hover:scale-110 transition-transform">
             <ArrowDownRight className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
 
         {/* Realisasi & SILPA */}
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.45, delay: 0.2 }}
+          className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group"
+        >
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">REBOISASI / SILPA / REALISASI</p>
             <h3 className="text-2xl font-bold text-amber-600 tracking-tight">{formatRupiah(summary.silpa)}</h3>
@@ -154,7 +173,7 @@ export default function TransparansiDana() {
           <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0 group-hover:scale-110 transition-transform">
             <TrendingUp className="w-6 h-6" />
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Sektoral Realization Progress Bars */}

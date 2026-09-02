@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { Search, Calendar, User, ArrowRight, X, Heart, MessageSquare, Share2, Send, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { getRelativeDateString } from '../../utils/dateHelper';
@@ -111,6 +112,7 @@ const sanitizeNewsList = (rawList: NewsItem[]): NewsItem[] => {
 };
 
 export default function BeritaDesa() {
+  const [loading, setLoading] = useState(true);
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [news, setNews] = useState<NewsItem[]>(() => {
     const saved = localStorage.getItem('didesa_news_list');
@@ -150,6 +152,8 @@ export default function BeritaDesa() {
         }
       } catch (err) {
         console.warn('Error fetching news:', err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
     };
     fetchNews();
@@ -409,20 +413,38 @@ export default function BeritaDesa() {
 
       {/* Grid of News */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredNews.length > 0 ? (
-          filteredNews.map(item => (
-            <div 
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 animate-pulse">
+              <div className="h-48 bg-slate-200 dark:bg-slate-700" />
+              <div className="p-5 space-y-3">
+                <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-4 w-full bg-slate-200 dark:bg-slate-700 rounded-lg" />
+                <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+                <div className="h-3 w-full bg-slate-200 dark:bg-slate-700 rounded-lg" />
+                <div className="h-3 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-lg" />
+              </div>
+            </div>
+          ))
+        ) : filteredNews.length > 0 ? (
+          filteredNews.map((item, i) => (
+            <motion.div
               key={item.id}
-              onClick={() => {
-                setSelectedNews(item);
-                // Pre-populate user name if logged in
-                const auth = localStorage.getItem('didesa_auth_user');
-                if (auth) {
-                  setCommentName(JSON.parse(auth).name);
-                }
-              }}
-              className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none hover:shadow-md hover:translate-y-[-4px] transition-all duration-300 group cursor-pointer flex flex-col h-full"
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.45, delay: i * 0.08, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
+              <div 
+                onClick={() => {
+                  setSelectedNews(item);
+                  const auth = localStorage.getItem('didesa_auth_user');
+                  if (auth) {
+                    setCommentName(JSON.parse(auth).name);
+                  }
+                }}
+                className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none hover:shadow-md hover:translate-y-[-4px] transition-all duration-300 group cursor-pointer flex flex-col h-full"
+              >
               <div className="h-48 bg-cover bg-center overflow-hidden relative">
                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span className={`absolute top-4 left-4 inline-block px-2.5 py-1 text-[9px] font-bold rounded-lg tracking-wider border shadow-sm dark:shadow-none ${item.tagColor}`}>
@@ -463,6 +485,7 @@ export default function BeritaDesa() {
                 </div>
               </div>
             </div>
+            </motion.div>
           ))
         ) : (
           <div className="col-span-full py-16 text-center bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-3xl">

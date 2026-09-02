@@ -1,3 +1,4 @@
+import { motion } from 'motion/react';
 import WelcomeBanner from './dashboard/WelcomeBanner';
 import StatCards from './dashboard/StatCards';
 import ServiceCards from './dashboard/ServiceCards';
@@ -5,6 +6,11 @@ import ProfilDesa from './dashboard/ProfilDesa';
 import TransparansiDana from './dashboard/TransparansiDana';
 import BeritaDesa from './dashboard/BeritaDesa';
 import AspirasiWarga from './dashboard/AspirasiWarga';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: string) => void }) {
   return (
@@ -16,56 +22,128 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
 
       {/* 2. Akses Cepat Layanan */}
       <div id="section-layanan_mandiri" className="scroll-mt-24">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-2.5 h-8 bg-emerald-600 rounded-full"></div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Layanan Digital Desa</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Akses cepat layanan pemerintahan desa secara online</p>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-2.5 h-8 bg-emerald-600 rounded-full"></div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Layanan Digital Desa</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Akses cepat layanan pemerintahan desa secara online</p>
+            </div>
           </div>
-        </div>
+        </motion.div>
         <ServiceCards />
       </div>
 
       {/* 3. Profil & Statistik Kependudukan */}
       <div id="section-profil_desa" className="scroll-mt-24 space-y-8">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-8 bg-teal-600 rounded-full"></div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Profil & Demografi Kependudukan</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Data kependudukan & statistik perkembangan wilayah desa</p>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-8 bg-teal-600 rounded-full"></div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Profil & Demografi Kependudukan</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Data kependudukan & statistik perkembangan wilayah desa</p>
+            </div>
           </div>
-        </div>
-        <StatCards />
-        <ProfilDesa />
+        </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <StatCards />
+        </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.25 }}
+        >
+          <ProfilDesa />
+        </motion.div>
       </div>
 
       {/* 4. Transparansi APBD & Keuangan Desa */}
       <div id="section-transparansi" className="scroll-mt-24 space-y-6">
-        <TransparansiDana />
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5 }}
+        >
+          <TransparansiDana />
+        </motion.div>
       </div>
 
       {/* 5. Berita & Informasi Kegiatan Desa */}
       <div id="section-berita" className="scroll-mt-24 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-8 bg-amber-500 rounded-full"></div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Berita & Pengumuman Desa</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Kabar kegiatan, proyek Dana Desa, dan informasi resmi pemerintah desa</p>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-8 bg-amber-500 rounded-full"></div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Berita & Pengumuman Desa</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Kabar kegiatan, proyek Dana Desa, dan informasi resmi pemerintah desa</p>
+            </div>
           </div>
-        </div>
-        <BeritaDesa />
+        </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <BeritaDesa />
+        </motion.div>
       </div>
 
       {/* 6. Aspirasi & Pengaduan Warga */}
       <div id="section-aspirasi" className="scroll-mt-24 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-8 bg-rose-600 rounded-full"></div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kios Aspirasi & Pengaduan Warga</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Kirim masukan, keluhan, atau ide pembangunan desa secara cepat</p>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-8 bg-rose-600 rounded-full"></div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Kios Aspirasi & Pengaduan Warga</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Kirim masukan, keluhan, atau ide pembangunan desa secara cepat</p>
+            </div>
           </div>
-        </div>
-        <AspirasiWarga />
+        </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <AspirasiWarga />
+        </motion.div>
       </div>
     </div>
   );

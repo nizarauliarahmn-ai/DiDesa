@@ -1,9 +1,11 @@
 import { fetchResidentsCached } from '../../utils/apiCache';
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { getCurrentMonthYear } from '../../utils/dateHelper';
 import { Users, User, UserCheck, CreditCard, TrendingUp } from 'lucide-react';
 
 export default function StatCards() {
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
     male: 0,
@@ -19,7 +21,6 @@ export default function StatCards() {
         const male = data.filter(r => r.gender === 'Laki-laki').length;
         const female = data.filter(r => r.gender === 'Perempuan').length;
         
-        // Count unique KK numbers
         const kkSet = new Set();
         data.forEach(r => {
           if (r.noKk) kkSet.add(r.noKk);
@@ -28,7 +29,8 @@ export default function StatCards() {
 
         setStats({ total, male, female, kk });
       })
-      .catch(err => console.error("Error fetching stats:", err));
+      .catch(err => console.error("Error fetching stats:", err))
+      .finally(() => setLoading(false));
   }, []);
 
   const malePercentage = stats.total > 0 ? ((stats.male / stats.total) * 100).toFixed(1) : '0';
@@ -48,37 +50,34 @@ export default function StatCards() {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard 
-          title="Total Penduduk" 
-          value={stats.total.toLocaleString('id-ID')} 
-          subtext="Jiwa tercatat di database" 
-          subtextColor="text-emerald-700 dark:text-emerald-400 font-bold" 
-          valueColor="text-emerald-800 dark:text-emerald-300"
-          icon={<Users className="w-6 h-6 text-white" />}
-          iconBg="bg-gradient-to-tr from-emerald-600 to-teal-500"
-        />
-        <StatCard 
-          title="Laki-laki" 
-          value={stats.male.toLocaleString('id-ID')} 
-          subtext={`${malePercentage}% dari populasi`} 
-          icon={<User className="w-6 h-6 text-white" />}
-          iconBg="bg-gradient-to-tr from-sky-600 to-blue-500"
-        />
-        <StatCard 
-          title="Perempuan" 
-          value={stats.female.toLocaleString('id-ID')} 
-          subtext={`${femalePercentage}% dari populasi`} 
-          icon={<UserCheck className="w-6 h-6 text-white" />}
-          iconBg="bg-gradient-to-tr from-rose-500 to-pink-500"
-        />
-        <StatCard 
-          title="Kartu Keluarga" 
-          value={stats.kk.toLocaleString('id-ID')} 
-          subtext={`Rasio ${ratioKK} jiwa/KK`} 
-          valueColor="text-amber-700 dark:text-amber-300" 
-          icon={<CreditCard className="w-6 h-6 text-white" />}
-          iconBg="bg-gradient-to-tr from-amber-500 to-orange-500"
-        />
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 animate-pulse">
+              <div className="flex items-center justify-between mb-4">
+                <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 rounded-2xl" />
+              </div>
+              <div className="h-9 w-24 bg-slate-200 dark:bg-slate-700 rounded-lg mb-2" />
+              <div className="h-3 w-32 bg-slate-200 dark:bg-slate-700 rounded-full" />
+            </div>
+          ))
+        ) : (
+          { title: "Total Penduduk", value: stats.total.toLocaleString('id-ID'), subtext: "Jiwa tercatat di database", subtextColor: "text-emerald-700 dark:text-emerald-400 font-bold", valueColor: "text-emerald-800 dark:text-emerald-300", icon: <Users className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-emerald-600 to-teal-500" },
+          { title: "Laki-laki", value: stats.male.toLocaleString('id-ID'), subtext: `${malePercentage}% dari populasi`, icon: <User className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-sky-600 to-blue-500" },
+          { title: "Perempuan", value: stats.female.toLocaleString('id-ID'), subtext: `${femalePercentage}% dari populasi`, icon: <UserCheck className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-rose-500 to-pink-500" },
+          { title: "Kartu Keluarga", value: stats.kk.toLocaleString('id-ID'), subtext: `Rasio ${ratioKK} jiwa/KK`, valueColor: "text-amber-700 dark:text-amber-300", icon: <CreditCard className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-amber-500 to-orange-500" },
+        ].map((card, i) => (
+          <motion.div
+            key={card.title}
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.45, delay: i * 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            <StatCard {...card} />
+          </motion.div>
+        ))}
+        )}
       </div>
     </section>
   );
