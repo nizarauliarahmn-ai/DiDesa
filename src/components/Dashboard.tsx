@@ -42,13 +42,6 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
 
       {/* 4. Transparansi APBD & Keuangan Desa */}
       <div id="section-transparansi" className="scroll-mt-24 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-8 bg-sky-600 rounded-full"></div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Transparansi Anggaran & Dana Desa (APBD)</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Publikasi realisasi pendapatan & belanja desa secara terbuka</p>
-          </div>
-        </div>
         <TransparansiDana />
       </div>
 
