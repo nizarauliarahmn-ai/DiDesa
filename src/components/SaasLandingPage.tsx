@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin, Zap, Wallet, Layers, LineChart } from 'lucide-react';
 import { supabase } from '../utils/supabase';
 import UserPlaceholder from './common/UserPlaceholder';
@@ -303,74 +304,117 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
       </main>
 
       {/* Features Section */}
-      <section id="fitur" className="py-24 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800">
+      <motion.section 
+        id="fitur" 
+        className="py-24 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-black mb-4">Sistem Terpadu Untuk Seluruh Kebutuhan Desa</h2>
             <p className="text-slate-500 dark:text-slate-400">Dirancang khusus sesuai standar administrasi pemerintahan desa di Indonesia, dengan antarmuka yang sangat mudah dipahami.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard 
-              icon={<FileText size={28} className="text-blue-500" />}
-              title="Persuratan Otomatis & TTE"
-              desc="Generasi surat keterangan dengan KOP resmi dan Tanda Tangan Elektronik ber-QR Code otomatis."
-              bg="bg-blue-50 dark:bg-blue-900/10"
-            />
-            <FeatureCard 
-              icon={<PieChart size={28} className="text-emerald-500" />}
-              title="Buku Keuangan & Bansos"
-              desc="Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran."
-              bg="bg-emerald-50 dark:bg-emerald-900/10"
-            />
-            <FeatureCard 
-              icon={<ShieldCheck size={28} className="text-rose-500" />}
-              title="Layanan Mandiri & Kiosk"
-              desc="Portal mandiri (Kiosk) bagi warga untuk cetak surat, buku tamu, hingga lapor aspirasi secara swadaya."
-              bg="bg-rose-50 dark:bg-rose-900/10"
-            />
-          </div>
+          <motion.div 
+            className="grid md:grid-cols-3 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={{
+              visible: { transition: { staggerChildren: 0.15 } }
+            }}
+          >
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
+              <FeatureCard 
+                icon={<FileText size={28} className="text-blue-500" />}
+                title="Persuratan Otomatis & TTE"
+                desc="Generasi surat keterangan dengan KOP resmi dan Tanda Tangan Elektronik ber-QR Code otomatis."
+                bg="bg-blue-50 dark:bg-blue-900/10"
+              />
+            </motion.div>
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
+              <FeatureCard 
+                icon={<PieChart size={28} className="text-emerald-500" />}
+                title="Buku Keuangan & Bansos"
+                desc="Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran."
+                bg="bg-emerald-50 dark:bg-emerald-900/10"
+              />
+            </motion.div>
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
+              <FeatureCard 
+                icon={<ShieldCheck size={28} className="text-rose-500" />}
+                title="Layanan Mandiri & Kiosk"
+                desc="Portal mandiri (Kiosk) bagi warga untuk cetak surat, buku tamu, hingga lapor aspirasi secara swadaya."
+                bg="bg-rose-50 dark:bg-rose-900/10"
+              />
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Keunggulan Section */}
-      <section id="keunggulan" className="py-24 bg-slate-100/50 dark:bg-slate-800/40 border-t border-gray-150 dark:border-slate-800">
+      <motion.section 
+        id="keunggulan" 
+        className="py-24 bg-slate-100/50 dark:bg-slate-800/40 border-t border-gray-150 dark:border-slate-800"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-black mb-4">Mengapa Desa Memilih DiDesa?</h2>
             <p className="text-slate-500 dark:text-slate-400">Arsitektur Cloud Multi-Tenant modern yang menjamin keamanan data, transparansi publik, dan kecepatan pelayanan 24/7.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+          <motion.div 
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={{
+              visible: { transition: { staggerChildren: 0.1 } }
+            }}
+          >
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
               <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center text-emerald-600 mb-4 font-black">100%</div>
               <h3 className="font-bold text-lg mb-2">Cloud Multi-Tenant</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Setiap desa memiliki portal & domain independen tanpa mengganggu desa lain.</p>
-            </div>
+            </motion.div>
 
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
               <div className="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center text-teal-600 mb-4 font-black">TTE</div>
               <h3 className="font-bold text-lg mb-2">Resmi & Keabsahan</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Persuratan dilengkapi QR Code Verifikasi Keabsahan Dokumen secara real-time.</p>
-            </div>
+            </motion.div>
 
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-blue-600 mb-4 font-black">24/7</div>
               <h3 className="font-bold text-lg mb-2">Kiosk Anjungan Mandiri</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Warga dapat mengurus surat & melaporkan aspirasi secara mandiri di kantor desa.</p>
-            </div>
+            </motion.div>
 
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200/60 dark:border-slate-700 shadow-sm">
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-purple-600 mb-4 font-black">AI</div>
               <h3 className="font-bold text-lg mb-2">Asisten AI Desa <span className="bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300 text-[9px] font-black px-1.5 py-0.5 rounded-md align-middle">[DEV]</span></h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Kecerdasan Buatan bawaan untuk membantu analisa APBDes dan pembuatan dokumen.</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Integrasi Section */}
-      <section id="integrasi" className="py-20 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800">
+      <motion.section 
+        id="integrasi" 
+        className="py-20 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-2xl md:text-3xl font-black mb-4">Terintegrasi dengan Ekosistem Digital Nasional</h2>
           <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-10 text-sm">DiDesa mendukung format standar Kementrian Dalam Negeri, KemenDes PDTT, serta sistem keamanan data nasional.</p>
@@ -381,10 +425,16 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             <span className="font-mono text-sm font-bold bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700">OPEN-API READY</span>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Section */}
-      <section className="py-24 relative overflow-hidden">
+      <motion.section 
+        className="py-24 relative overflow-hidden"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="absolute inset-0 bg-emerald-900">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-400 via-transparent to-transparent" />
         </div>
@@ -405,10 +455,17 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
              </a>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Desa Terdaftar Section */}
-      <section id="desa-terdaftar" className="py-24 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800">
+      <motion.section 
+        id="desa-terdaftar" 
+        className="py-24 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
             <div>
@@ -481,10 +538,17 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* Program Afiliasi CTA Section */}
-      <section id="program-afiliasi" className="py-16 relative overflow-hidden bg-slate-100/50 dark:bg-slate-800/40">
+      <motion.section 
+        id="program-afiliasi" 
+        className="py-16 relative overflow-hidden bg-slate-100/50 dark:bg-slate-800/40"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl" />
           <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
@@ -533,7 +597,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer is already full width in the component, just render it */}
       <div className="bg-white dark:bg-slate-900 pt-10 border-t border-gray-200 dark:border-slate-800">
