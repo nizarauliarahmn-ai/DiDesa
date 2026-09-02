@@ -454,10 +454,6 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                             <Building2 className="text-white" size={24} />
                           )}
                         </div>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                          Aktif
-                        </span>
                       </div>
 
                       <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors">
