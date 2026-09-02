@@ -182,8 +182,8 @@ export default function ProfilDesa() {
         </motion.div>
       </div>
 
-      <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
             <Users className="w-6 h-6" />
           </div>
@@ -206,7 +206,7 @@ export default function ProfilDesa() {
             </motion.div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
         <div className="flex items-center gap-3 mb-6">
