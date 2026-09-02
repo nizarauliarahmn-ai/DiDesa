@@ -8,10 +8,12 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 export default function ProfilDesa() {
   const [selectedLembaga, setSelectedLembaga] = useState<typeof lembagaDesa[0] | null>(null);
 
-  const [luasWilayah, setLuasWilayah] = useState('-');
+  const [luasWilayah, setLuasWilayah] = useState(() => localStorage.getItem('village_luas_wilayah') || '-');
   const [totalPenduduk, setTotalPenduduk] = useState(0);
-  const [ketinggian, setKetinggian] = useState('-');
-  const [batasUtara, setBatasUtara] = useState('-');
+  const [ketinggian, setKetinggian] = useState(() => localStorage.getItem('village_ketinggian') || '-');
+  const [batasUtara, setBatasUtara] = useState(() => localStorage.getItem('village_batas_utara') || '-');
+  const [villageLat, setVillageLat] = useState(() => parseFloat(localStorage.getItem('village_lat') || '0'));
+  const [villageLng, setVillageLng] = useState(() => parseFloat(localStorage.getItem('village_lng') || '0'));
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -52,21 +54,38 @@ export default function ProfilDesa() {
     (async () => {
       try {
         const tid = await resolveCurrentTenant();
-        if (!tid) return;
+        if (!tid) {
+          // Fallback: load from localStorage
+          const count = parseInt(localStorage.getItem('village_total_penduduk') || '0');
+          if (count > 0) setTotalPenduduk(count);
+          return;
+        }
         // Load village profile settings
-        const { data } = await supabase.from('saas_settings').select('key,value').eq('tenant_id', tid);
+        const { data, error: settingsErr } = await supabase.from('saas_settings').select('key,value').eq('tenant_id', tid);
+        if (settingsErr) console.warn('[ProfilDesa] settings error:', settingsErr.message);
         if (data) {
           const map: Record<string, string> = {};
           data.forEach(r => { map[r.key] = r.value; });
           if (map['village_luas_wilayah']) setLuasWilayah(map['village_luas_wilayah']);
           if (map['village_ketinggian']) setKetinggian(map['village_ketinggian']);
           if (map['village_batas_utara']) setBatasUtara(map['village_batas_utara']);
+          if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
+          if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
         }
         // Count residents
-        const { count } = await supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tid);
-        if (count !== null) setTotalPenduduk(count);
+        const { count, error: countErr } = await supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tid);
+        if (countErr) console.warn('[ProfilDesa] count error:', countErr.message);
+        if (count !== null && count > 0) {
+          setTotalPenduduk(count);
+        } else {
+          // Fallback from localStorage
+          const fallback = parseInt(localStorage.getItem('village_total_penduduk') || '0');
+          if (fallback > 0) setTotalPenduduk(fallback);
+        }
       } catch (e) {
-        console.error('Failed to load village profile:', e);
+        console.error('[ProfilDesa] failed:', e);
+        const fallback = parseInt(localStorage.getItem('village_total_penduduk') || '0');
+        if (fallback > 0) setTotalPenduduk(fallback);
       }
     })();
   }, []);
@@ -145,10 +164,30 @@ export default function ProfilDesa() {
               </div>
             </div>
             
-            <div className="mt-4 bg-gray-100 dark:bg-slate-800 rounded-2xl h-32 overflow-hidden relative flex items-center justify-center border border-gray-200 dark:border-slate-700">
-               <span className="text-sm font-bold text-gray-400">Peta Interaktif Dimatikan</span>
-               <div className="absolute inset-0 bg-cover bg-center opacity-20" style={{backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")'}}></div>
-            </div>
+            {villageLat !== 0 && villageLng !== 0 ? (
+              <div className="mt-4 rounded-2xl h-40 overflow-hidden relative border border-gray-200 dark:border-slate-700">
+                <iframe
+                  title="Peta Desa"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${villageLng - 0.01}%2C${villageLat - 0.005}%2C${villageLng + 0.01}%2C${villageLat + 0.005}&layer=mapnik&marker=${villageLat}%2C${villageLng}`}
+                />
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${villageLat}&mlon=${villageLng}#map=14/${villageLat}/${villageLng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-2 right-2 bg-white/90 dark:bg-slate-800/90 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                >
+                  Buka Peta Penuh
+                </a>
+              </div>
+            ) : (
+              <div className="mt-4 bg-gray-100 dark:bg-slate-800 rounded-2xl h-32 overflow-hidden relative flex items-center justify-center border border-gray-200 dark:border-slate-700">
+                <span className="text-sm font-bold text-gray-400">Atur koordinat desa di Pengaturan untuk menampilkan peta</span>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
