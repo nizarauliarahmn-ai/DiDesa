@@ -97,21 +97,20 @@ export default function Header({
       
       {/* Desktop Horizontal Navigation Bar */}
       {setActiveTab && (
-        <nav className="hidden xl:flex items-center gap-1 bg-slate-100/70 dark:bg-slate-800/60 p-1 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
+        <nav className="hidden xl:flex items-center gap-6">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                className={`text-xs font-extrabold transition-all cursor-pointer py-1 border-b-2 ${
                   isActive 
-                    ? 'bg-emerald-700 text-white shadow-md shadow-emerald-700/20' 
-                    : 'text-slate-600 dark:text-slate-300 hover:text-emerald-800 dark:hover:text-emerald-400 hover:bg-white dark:hover:bg-slate-800'
+                    ? 'border-emerald-700 text-emerald-800 dark:text-emerald-400' 
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-400'
                 }`}
               >
-                <span className={isActive ? 'text-white' : 'text-slate-400'}>{item.icon}</span>
-                <span>{item.label}</span>
+                {item.label}
               </button>
             );
           })}
