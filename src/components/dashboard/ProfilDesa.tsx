@@ -198,7 +198,7 @@ export default function ProfilDesa() {
             <motion.div 
               key={idx}
               whileHover={{ y: -5 }}
-              className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center group transition-colors hover:bg-emerald-50 hover:border-emerald-100"
+              className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-gray-100 dark:border-slate-700 shadow-sm flex flex-col items-center text-center group transition-colors hover:bg-emerald-50 hover:border-emerald-200"
             >
               <UserPlaceholder className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-white shadow-sm dark:shadow-none mb-3 group-hover:border-emerald-200 transition-colors" iconClassName="w-2/5 h-2/5 text-slate-500 dark:text-slate-400" />
               <h4 className="font-bold text-gray-900 dark:text-white text-sm">{person.name}</h4>
