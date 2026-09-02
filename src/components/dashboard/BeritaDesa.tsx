@@ -132,7 +132,7 @@ export default function BeritaDesa() {
       try {
         const { data, error } = await supabase
           .from('saas_settings')
-          .select('value')
+          .select('key,value')
           .eq('tenant_id', tid)
           .eq('key', 'didesa_news_list')
           .single();

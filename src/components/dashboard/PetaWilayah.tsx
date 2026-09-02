@@ -101,7 +101,7 @@ export default function PetaWilayah() {
       if (tid) {
         const { data: pinsData } = await supabase
           .from('saas_settings')
-          .select('value')
+          .select('key,value')
           .eq('tenant_id', tid)
           .eq('key', 'map_custom_pins')
           .single();
