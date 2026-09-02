@@ -62,11 +62,12 @@ export default function StatCards() {
             </div>
           ))
         ) : (
+          [
           { title: "Total Penduduk", value: stats.total.toLocaleString('id-ID'), subtext: "Jiwa tercatat di database", subtextColor: "text-emerald-700 dark:text-emerald-400 font-bold", valueColor: "text-emerald-800 dark:text-emerald-300", icon: <Users className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-emerald-600 to-teal-500" },
           { title: "Laki-laki", value: stats.male.toLocaleString('id-ID'), subtext: `${malePercentage}% dari populasi`, icon: <User className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-sky-600 to-blue-500" },
           { title: "Perempuan", value: stats.female.toLocaleString('id-ID'), subtext: `${femalePercentage}% dari populasi`, icon: <UserCheck className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-rose-500 to-pink-500" },
           { title: "Kartu Keluarga", value: stats.kk.toLocaleString('id-ID'), subtext: `Rasio ${ratioKK} jiwa/KK`, valueColor: "text-amber-700 dark:text-amber-300", icon: <CreditCard className="w-6 h-6 text-white" />, iconBg: "bg-gradient-to-tr from-amber-500 to-orange-500" },
-        ].map((card, i) => (
+          ].map((card, i) => (
           <motion.div
             key={card.title}
             initial={{ opacity: 0, y: 25 }}
@@ -76,7 +77,7 @@ export default function StatCards() {
           >
             <StatCard {...card} />
           </motion.div>
-        ))}
+        ))
         )}
       </div>
     </section>
