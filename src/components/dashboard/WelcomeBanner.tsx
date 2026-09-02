@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Shield } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: string) => void }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
@@ -24,16 +24,6 @@ export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: str
   return (
     <section className="bg-white rounded-2xl border border-slate-100 p-8 sm:p-10">
       <div className="max-w-2xl space-y-5">
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[11px] font-bold tracking-wide"
-        >
-          <Shield className="w-3.5 h-3.5" />
-          Portal Resmi {desaName}
-        </motion.div>
-
         <motion.h1
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
