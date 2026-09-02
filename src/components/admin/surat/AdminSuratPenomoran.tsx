@@ -157,7 +157,7 @@ export default function AdminSuratPenomoran() {
       "Pemerintah Kabupaten Hulu Sungai Selatan";
 
     const getDesaInitial = (name: string) => {
-      if ((name || '').toLowerCase().includes("Ketupat")) return "WHI";
+      if ((name || '').toLowerCase().includes("ketupat")) return "KTP";
       if ((name || '').toLowerCase().includes("sukamaju")) return "DS-SKM";
       const words = name
         .replace(/desa|kelurahan/gi, "")
