@@ -79,35 +79,6 @@ export default function AspirasiWarga() {
 
   return (
     <div className="pb-24">
-      {/* Hero Section */}
-      <section className="relative h-[300px] md:h-[400px] w-full flex items-center overflow-hidden rounded-3xl mb-8 -mt-2 bg-slate-900">
-        <div className="absolute inset-0 z-0">
-          <img 
-            className="w-full h-full object-cover brightness-50 transition-all duration-300" 
-            src={bannerUrl} 
-            alt="Pemandangan Desa" 
-            style={{ 
-              objectPosition: `center ${aspirasiBannerYOffset}%`,
-              transform: `scale(${parseFloat(aspirasiBannerZoom || '100') / 100})`,
-              transformOrigin: 'center center'
-            }}
-          />
-        </div>
-        <div className="relative z-10 px-8 max-w-7xl mx-auto w-full text-white">
-          <div className="max-w-2xl">
-            <span className="bg-emerald-600/90 backdrop-blur-md text-emerald-50 px-4 py-1.5 rounded-full text-xs font-bold mb-4 inline-block tracking-wider uppercase shadow-sm dark:shadow-none">
-              Portal Aspirasi Digital
-            </span>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight leading-tight">
-              Suara Warga {villageName}
-            </h1>
-            <p className="text-lg opacity-90 leading-relaxed font-medium">
-              Sampaikan aspirasi, saran, kritik, atau laporan Anda secara langsung. Kami berkomitmen pada transparansi dan partisipasi aktif dalam pembangunan desa kita.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-20">
         {/* Left Side: Form Section (8 Columns) */}
