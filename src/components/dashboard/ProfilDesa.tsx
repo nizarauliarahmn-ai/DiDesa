@@ -4,6 +4,7 @@ import { Users, MapPin, Building, ShieldCheck, ChevronRight, X } from 'lucide-re
 import UserPlaceholder from '../common/UserPlaceholder';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { fetchResidentsCached } from '../../utils/apiCache';
 
 export default function ProfilDesa() {
   const [selectedLembaga, setSelectedLembaga] = useState<typeof lembagaDesa[0] | null>(null);
@@ -54,38 +55,27 @@ export default function ProfilDesa() {
     (async () => {
       try {
         const tid = await resolveCurrentTenant();
-        if (!tid) {
-          // Fallback: load from localStorage
-          const count = parseInt(localStorage.getItem('village_total_penduduk') || '0');
-          if (count > 0) setTotalPenduduk(count);
-          return;
+        // Load village profile settings from Supabase
+        if (tid) {
+          const { data } = await supabase.from('saas_settings').select('key,value').eq('tenant_id', tid);
+          if (data) {
+            const map: Record<string, string> = {};
+            data.forEach(r => { map[r.key] = r.value; });
+            if (map['village_luas_wilayah']) setLuasWilayah(map['village_luas_wilayah']);
+            if (map['village_ketinggian']) setKetinggian(map['village_ketinggian']);
+            if (map['village_batas_utara']) setBatasUtara(map['village_batas_utara']);
+            if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
+            if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
+          }
         }
-        // Load village profile settings
-        const { data, error: settingsErr } = await supabase.from('saas_settings').select('key,value').eq('tenant_id', tid);
-        if (settingsErr) console.warn('[ProfilDesa] settings error:', settingsErr.message);
-        if (data) {
-          const map: Record<string, string> = {};
-          data.forEach(r => { map[r.key] = r.value; });
-          if (map['village_luas_wilayah']) setLuasWilayah(map['village_luas_wilayah']);
-          if (map['village_ketinggian']) setKetinggian(map['village_ketinggian']);
-          if (map['village_batas_utara']) setBatasUtara(map['village_batas_utara']);
-          if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
-          if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
-        }
-        // Count residents
-        const { count, error: countErr } = await supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tid);
-        if (countErr) console.warn('[ProfilDesa] count error:', countErr.message);
-        if (count !== null && count > 0) {
-          setTotalPenduduk(count);
-        } else {
-          // Fallback from localStorage
-          const fallback = parseInt(localStorage.getItem('village_total_penduduk') || '0');
-          if (fallback > 0) setTotalPenduduk(fallback);
+        // Count residents using shared cache (same as StatCards)
+        const res = await fetchResidentsCached();
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setTotalPenduduk(data.length);
         }
       } catch (e) {
         console.error('[ProfilDesa] failed:', e);
-        const fallback = parseInt(localStorage.getItem('village_total_penduduk') || '0');
-        if (fallback > 0) setTotalPenduduk(fallback);
       }
     })();
   }, []);
