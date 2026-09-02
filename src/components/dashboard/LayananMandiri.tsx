@@ -238,9 +238,9 @@ export default function LayananMandiri() {
     const logoUrl = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const kabupatenName = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
     const kecamatanName = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
-    const desaName = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
+    const desaName = localStorage.getItem('kop_desa') || 'Desa Ketupat';
     const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261';
-    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
+    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdesKetupat@gmail.com';
     const namaKades = localStorage.getItem('kop_kades') || '';
 
     const rtRwStr = verifiedResident?.rtRw ? `RT/RW ${verifiedResident.rtRw}` : 'RT 02/01';
@@ -279,7 +279,7 @@ export default function LayananMandiri() {
           <div className="pl-8 space-y-2 text-xs">
             <div className="grid grid-cols-[140px_10px_1fr]"><span>Nama</span><span>:</span><span className="font-bold">{surat.nama}</span></div>
             <div className="grid grid-cols-[140px_10px_1fr]"><span>NIK</span><span>:</span><span className="font-mono font-bold">{surat.nik}</span></div>
-            <div className="grid grid-cols-[140px_10px_1fr]"><span>Tempat, Tgl Lahir</span><span>:</span><span>{verifiedResident?.birthPlace || 'Sukamakmur'}, {verifiedResident?.birthDate || '12-06-1985'}</span></div>
+            <div className="grid grid-cols-[140px_10px_1fr]"><span>Tempat, Tgl Lahir</span><span>:</span><span>{verifiedResident?.birthPlace || 'Ketupat'}, {verifiedResident?.birthDate || '12-06-1985'}</span></div>
             <div className="grid grid-cols-[140px_10px_1fr]"><span>Jenis Kelamin</span><span>:</span><span>{verifiedResident?.gender || 'Laki-laki'}</span></div>
             <div className="grid grid-cols-[140px_10px_1fr]"><span>Alamat / Domisili</span><span>:</span><span>{verifiedResident?.address || 'Dusun Krajan'} {rtRwStr}</span></div>
           </div>
@@ -608,7 +608,7 @@ export default function LayananMandiri() {
               <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-6">
                 <div>
                   <h4 className="text-base font-bold text-gray-900 dark:text-white mb-1">Aspirasi & Pengaduan Warga Desa</h4>
-                  <p className="text-xs text-gray-400 font-semibold">Ada aspirasi, keluhan infrastruktur, atau laporan pelayanan publik? Sampaikan secara langsung demi kemajuan bersama Desa Sukamakmur.</p>
+                  <p className="text-xs text-gray-400 font-semibold">Ada aspirasi, keluhan infrastruktur, atau laporan pelayanan publik? Sampaikan secara langsung demi kemajuan bersama Desa Ketupat.</p>
                 </div>
 
                 <form onSubmit={handleSendAspiration} className="space-y-4 max-w-2xl">

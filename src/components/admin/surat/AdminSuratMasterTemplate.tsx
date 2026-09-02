@@ -210,12 +210,12 @@ export default function AdminSuratMasterTemplate() {
     {
       nik: '3275010101700001',
       name: 'BUDI SANTOSO',
-      birthPlace: 'Sukamakmur',
+      birthPlace: 'Ketupat',
       birthDate: '12-06-1985',
       gender: 'Laki-laki',
       address: 'Dusun Krajan',
       rtRw: 'RT 02/RW 01',
-      village: 'Desa Sukamakmur',
+      village: 'Desa Ketupat',
       kecamatan: 'Kecamatan Simpur',
       kabupaten: 'Kabupaten Hulu Sungai Selatan'
     },
@@ -227,7 +227,7 @@ export default function AdminSuratMasterTemplate() {
       gender: 'Perempuan',
       address: 'Dusun Sejahtera',
       rtRw: 'RT 05/RW 02',
-      village: 'Desa Sukamakmur',
+      village: 'Desa Ketupat',
       kecamatan: 'Kecamatan Simpur',
       kabupaten: 'Kabupaten Hulu Sungai Selatan'
     }

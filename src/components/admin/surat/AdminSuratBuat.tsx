@@ -132,9 +132,9 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
   const [kabupatenName, setKabupatenName] = useState(() => localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [kecamatanName, setKecamatanName] = useState(() => localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur');
-  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Ketupat');
   const [alamatKantor, setAlamatKantor] = useState(() => localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261');
-  const [kontakKantor, setKontakKantor] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
+  const [kontakKantor, setKontakKantor] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdesKetupat@gmail.com');
   const [letterFont, setLetterFont] = useState(() => localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif');
   const [namaKades, setNamaKades] = useState(() => resolveKadesName());
   const [roleKades, setRoleKades] = useState(() => resolveKadesOfficer()?.role || 'Kepala Desa');
@@ -273,9 +273,9 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       setLogoUrl(localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
       setKabupatenName(localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
       setKecamatanName(localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur');
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Ketupat');
       setAlamatKantor(localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261');
-      setKontakKantor(localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
+      setKontakKantor(localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdesKetupat@gmail.com');
       setLetterFont(localStorage.getItem('village_letter_font') || localStorage.getItem('letter_font') || 'Arial, sans-serif');
       
       const currentActiveKades = resolveKadesName();
@@ -332,7 +332,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
       nomor: nomorSurat,
       jenis: letterType,
       nik: selectedResident?.nik || '',
-      nama: selectedResident?.name || 'Sukamakmur / Umum',
+      nama: selectedResident?.name || 'Ketupat / Umum',
       tanggal: currentDateFormatted(),
       keperluan: keperluan || 'Persyaratan administrasi kependudukan.',
       status: 'Selesai',
@@ -1856,7 +1856,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
 
                       const name = getLatest('name', 'Budi Santoso');
                       const nik = getLatest('nik', '3275010101700001');
-                      const birthPlace = getLatest('birthPlace', 'Sukamakmur');
+                      const birthPlace = getLatest('birthPlace', 'Ketupat');
                       const birthDate = getLatest('birthDate', '12-06-1985');
                       const gender = getLatest('gender', 'Laki-laki');
                       const address = getLatest('address', 'Dusun Krajan');

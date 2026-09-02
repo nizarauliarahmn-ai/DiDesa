@@ -17,11 +17,11 @@ import { getZonaWaktu, detectZonaWaktu, WAKTU_ZONA_OPTIONS, WAKTU_ZONA_LABEL, Zo
 
 export default function AdminPengaturan() {
   const [tenantId, setTenantId] = useState<string | null>(null);
-  const [villageName, setVillageName] = useState(() => localStorage.getItem('village_name') || 'Sukamakmur');
+  const [villageName, setVillageName] = useState(() => localStorage.getItem('village_name') || 'Ketupat');
   const [kecamatan, setKecamatan] = useState(() => localStorage.getItem('village_kecamatan') || 'Kecamatan Simpur');
   const [kabupaten, setKabupaten] = useState(() => localStorage.getItem('village_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
   const [alamat, setAlamat] = useState(() => localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
-  const [kontak, setKontak] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com');
+  const [kontak, setKontak] = useState(() => localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdesKetupat@gmail.com');
   const [zonaWaktu, setZonaWaktu] = useState<ZonaWaktu>(() => getZonaWaktu());
   const [logoUrl, setLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
   

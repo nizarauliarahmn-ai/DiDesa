@@ -17,13 +17,13 @@ export default function Header({
   onAdminLogin?: () => void;
   onLogout?: () => void;
 }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Ketupat');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Ketupat');
     };
     const handleBrandingUpdate = () => {
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');

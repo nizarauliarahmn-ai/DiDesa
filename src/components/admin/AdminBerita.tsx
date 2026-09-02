@@ -41,13 +41,13 @@ const INITIAL_NEWS: NewsItem[] = [
     tagColor: 'bg-emerald-50 text-emerald-700 border-emerald-100',
     title: 'Pembangunan Jembatan Tani di RW 03 Telah Selesai',
     excerpt: 'Infrastruktur baru ini diharapkan dapat mempermudah akses pengangkutan hasil panen warga...',
-    fullContent: `Pembangunan Jembatan Usaha Tani di wilayah RW 03 Desa Sukamakmur akhirnya rampung 100% dan telah diresmikan secara simbolis oleh Kepala Desa beserta tokoh masyarakat setempat pada hari Senin kemarin.\n\nProyek yang dibiayai dari alokasi Dana Desa (DD) Tahun Anggaran 2023 ini memakan waktu pengerjaan sekitar 45 hari kalender dengan melibatkan tenaga kerja lokal melalui sistem Padat Karya Tunai Desa (PKTD).\n\nJembatan baru dengan konstruksi beton bertulang ini memiliki bentang panjang 6 meter dan lebar 2.5 meter. Infrastruktur krusial ini dibangun khusus untuk menghubungkan jalan desa utama dengan lebih dari 80 hektar lahan persawahan produktif yang selama ini sulit diakses oleh armada pengangkut roda empat.\n\nDengan selesainya pembangunan jembatan tani ini, para petani tidak perlu lagi memikul hasil panen ratusan meter ke jalan besar. Kendaraan pengangkut kini bisa masuk langsung ke bibir persawahan, sehingga memotong ongkos transportasi hasil bumi hingga 40%.`,
+    fullContent: `Pembangunan Jembatan Usaha Tani di wilayah RW 03 Desa Ketupat akhirnya rampung 100% dan telah diresmikan secara simbolis oleh Kepala Desa beserta tokoh masyarakat setempat pada hari Senin kemarin.\n\nProyek yang dibiayai dari alokasi Dana Desa (DD) Tahun Anggaran 2023 ini memakan waktu pengerjaan sekitar 45 hari kalender dengan melibatkan tenaga kerja lokal melalui sistem Padat Karya Tunai Desa (PKTD).\n\nJembatan baru dengan konstruksi beton bertulang ini memiliki bentang panjang 6 meter dan lebar 2.5 meter. Infrastruktur krusial ini dibangun khusus untuk menghubungkan jalan desa utama dengan lebih dari 80 hektar lahan persawahan produktif yang selama ini sulit diakses oleh armada pengangkut roda empat.\n\nDengan selesainya pembangunan jembatan tani ini, para petani tidak perlu lagi memikul hasil panen ratusan meter ke jalan besar. Kendaraan pengangkut kini bisa masuk langsung ke bibir persawahan, sehingga memotong ongkos transportasi hasil bumi hingga 40%.`,
     date: '24 Okt 2023',
     author: 'Syarifuddin (Kasi Pembangunan)',
     likes: 0,
     comments: [
       { id: 'c1', name: 'Ahmad Bukhori', text: 'Alhamdulillah, jembatannya sangat kokoh dan membantu sekali untuk mengangkut padi saat panen!', date: '25 Okt 2023' },
-      { id: 'c2', name: 'Deddy Setiawan', text: 'Luar biasa Pemdes Sukamakmur. Pembangunan merata dan transparan.', date: '25 Okt 2023' }
+      { id: 'c2', name: 'Deddy Setiawan', text: 'Luar biasa Pemdes Ketupat. Pembangunan merata dan transparan.', date: '25 Okt 2023' }
     ],
     progressPhotos: [
       { id: 'p-0', stage: '0%', title: 'Titik Nol (Survei Lokasi & Persiapan)', imageUrl: 'https://images.unsplash.com/photo-1541888081156-fce1fa5427d6?auto=format&fit=crop&q=80&w=800' },
@@ -62,7 +62,7 @@ const INITIAL_NEWS: NewsItem[] = [
     tagColor: 'bg-amber-50 text-amber-700 border-amber-100',
     title: 'Jadwal Vaksinasi Booster ke-2 di Balai Desa',
     excerpt: 'Pemerintah desa memfasilitasi pelayanan kesehatan gratis untuk seluruh warga pada Sabtu mendatang.',
-    fullContent: `Dalam rangka meningkatkan imunitas warga dan menyukseskan program jaminan kesehatan nasional, Pemerintah Desa bekerja sama dengan Puskesmas Kecamatan Simpur akan mengadakan Pelayanan Vaksinasi Covid-19 Dosis Booster ke-2 (Vaksinasi ke-4).\n\nKegiatan ini akan dipusatkan di Aula Balai Desa Sukamakmur pada:\n- Hari/Tanggal: Sabtu, 28 Oktober 2023\n- Waktu: 08.00 s/d 12.00 WIB\n- Jenis Vaksin: Pfizer / Astrazeneca (menyesuaikan ketersediaan stok Puskesmas)\n\nPersyaratan Peserta:\n1. Membawa fotokopi KTP / Kartu Keluarga (KK)\n2. Berusia minimal 18 tahun ke atas\n3. Telah mendapatkan vaksinasi Booster ke-1 minimal 6 bulan sebelumnya\n4. Menunjukkan e-ticket vaksinasi di aplikasi SatuSehat\n\nPelayanan ini terbuka gratis bagi seluruh penduduk Desa Sukamakmur maupun warga sekitar yang berdomisili di sini. Mari bersama kita pelihara lingkungan desa yang sehat dan bebas penyakit!`,
+    fullContent: `Dalam rangka meningkatkan imunitas warga dan menyukseskan program jaminan kesehatan nasional, Pemerintah Desa bekerja sama dengan Puskesmas Kecamatan Simpur akan mengadakan Pelayanan Vaksinasi Covid-19 Dosis Booster ke-2 (Vaksinasi ke-4).\n\nKegiatan ini akan dipusatkan di Aula Balai Desa Ketupat pada:\n- Hari/Tanggal: Sabtu, 28 Oktober 2023\n- Waktu: 08.00 s/d 12.00 WIB\n- Jenis Vaksin: Pfizer / Astrazeneca (menyesuaikan ketersediaan stok Puskesmas)\n\nPersyaratan Peserta:\n1. Membawa fotokopi KTP / Kartu Keluarga (KK)\n2. Berusia minimal 18 tahun ke atas\n3. Telah mendapatkan vaksinasi Booster ke-1 minimal 6 bulan sebelumnya\n4. Menunjukkan e-ticket vaksinasi di aplikasi SatuSehat\n\nPelayanan ini terbuka gratis bagi seluruh penduduk Desa Ketupat maupun warga sekitar yang berdomisili di sini. Mari bersama kita pelihara lingkungan desa yang sehat dan bebas penyakit!`,
     date: '22 Okt 2023',
     author: 'Siti Aminah (Kader Poskesdes)',
     likes: 0,
@@ -75,7 +75,7 @@ const INITIAL_NEWS: NewsItem[] = [
     tagColor: 'bg-blue-50 text-blue-700 border-blue-100',
     title: 'Pelatihan Pengolahan Kompos Organik Kelompok Tani',
     excerpt: 'Langkah strategis desa menuju kemandirian pupuk organik guna menjaga kesuburan sawah.',
-    fullContent: `Untuk mengurangi ketergantungan para petani terhadap pupuk kimia yang harganya kian melambung tinggi, Dinas Pertanian Daerah bersama Gabungan Kelompok Tani (Gapoktan) Sukamakmur menyelenggarakan pelatihan pembuatan dan pemanfaatan pupuk kompos organik mandiri.\n\nPelatihan ini diselenggarakan selama dua hari berturut-turut dengan materi teori di kelas serta praktik langsung pembuatan pupuk di lapangan.\n\nBahan baku pembuatan kompos memanfaatkan potensi lokal yang melimpah ruah dan belum terkelola optimal, antara lain kotoran hewan ternak sapi/kambing, jerami sisa panen, serta dedaunan hijau dicampur dengan mikroorganisme pengurai EM4.\n\nKepala Desa mengharapkan melalui pelatihan ini, para petani Sukamakmur tidak lagi mengalami kepanikan saat pupuk subsidi langka, sekaligus secara bertahap memperbaiki ekosistem mikroba tanah pertanian agar tetap subur untuk generasi mendatang.`,
+    fullContent: `Untuk mengurangi ketergantungan para petani terhadap pupuk kimia yang harganya kian melambung tinggi, Dinas Pertanian Daerah bersama Gabungan Kelompok Tani (Gapoktan) Ketupat menyelenggarakan pelatihan pembuatan dan pemanfaatan pupuk kompos organik mandiri.\n\nPelatihan ini diselenggarakan selama dua hari berturut-turut dengan materi teori di kelas serta praktik langsung pembuatan pupuk di lapangan.\n\nBahan baku pembuatan kompos memanfaatkan potensi lokal yang melimpah ruah dan belum terkelola optimal, antara lain kotoran hewan ternak sapi/kambing, jerami sisa panen, serta dedaunan hijau dicampur dengan mikroorganisme pengurai EM4.\n\nKepala Desa mengharapkan melalui pelatihan ini, para petani Ketupat tidak lagi mengalami kepanikan saat pupuk subsidi langka, sekaligus secara bertahap memperbaiki ekosistem mikroba tanah pertanian agar tetap subur untuk generasi mendatang.`,
     date: '19 Okt 2023',
     author: 'Drs. Suprayitno (Penyuluh Pertanian)',
     likes: 0,
@@ -90,7 +90,7 @@ const INITIAL_NEWS: NewsItem[] = [
     tagColor: 'bg-purple-50 text-purple-700 border-purple-100',
     title: 'Penyaluran BLT Dana Desa Tahap IV Selesai Tersalurkan',
     excerpt: 'Sebanyak 75 Keluarga Penerima Manfaat (KPM) telah menerima bantuan langsung secara tertib.',
-    fullContent: `Pemerintah Desa Sukamakmur kembali menyalurkan Bantuan Langsung Tunai Dana Desa (BLT-DD) Tahap IV (alokasi bulan Oktober, November, Desember) tahun anggaran 2023. Penyaluran dilaksanakan secara tertib di Aula Kantor Desa.\n\nBantuan diserahkan langsung kepada 75 Keluarga Penerima Manfaat (KPM) yang telah divalidasi melalui forum Musyawarah Desa Khusus (Musdesus). Kriteria penerima manfaat diprioritaskan untuk warga lansia tunggal, penyandang disabilitas, penderita sakit menahun, serta keluarga prasejahtera ekstrem.\n\nMasing-masing KPM menerima bantuan tunai sebesar Rp 300.000 per bulan, sehingga total yang diterima secara rapel pada tahap ini adalah sebesar Rp 900.000.\n\n"Kami berharap bantuan stimulan ini dimanfaatkan sebaik mungkin untuk kebutuhan pokok keluarga, seperti membeli beras, minyak, telur, atau obat-obatan bagi yang lansia, bukan untuk keperluan konsumtif lainnya," pesan Kepala Desa saat memberikan pengantar sambutan.`,
+    fullContent: `Pemerintah Desa Ketupat kembali menyalurkan Bantuan Langsung Tunai Dana Desa (BLT-DD) Tahap IV (alokasi bulan Oktober, November, Desember) tahun anggaran 2023. Penyaluran dilaksanakan secara tertib di Aula Kantor Desa.\n\nBantuan diserahkan langsung kepada 75 Keluarga Penerima Manfaat (KPM) yang telah divalidasi melalui forum Musyawarah Desa Khusus (Musdesus). Kriteria penerima manfaat diprioritaskan untuk warga lansia tunggal, penyandang disabilitas, penderita sakit menahun, serta keluarga prasejahtera ekstrem.\n\nMasing-masing KPM menerima bantuan tunai sebesar Rp 300.000 per bulan, sehingga total yang diterima secara rapel pada tahap ini adalah sebesar Rp 900.000.\n\n"Kami berharap bantuan stimulan ini dimanfaatkan sebaik mungkin untuk kebutuhan pokok keluarga, seperti membeli beras, minyak, telur, atau obat-obatan bagi yang lansia, bukan untuk keperluan konsumtif lainnya," pesan Kepala Desa saat memberikan pengantar sambutan.`,
     date: '15 Okt 2023',
     author: 'Aris Munandar (Kaur Keuangan)',
     likes: 0,
@@ -170,7 +170,7 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
     return sanitizeNewsList(parsed);
   });
 
-  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Ketupat');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<NewsItem | null>(null);

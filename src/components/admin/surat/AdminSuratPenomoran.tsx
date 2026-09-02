@@ -149,7 +149,7 @@ export default function AdminSuratPenomoran() {
     const year = date.getFullYear();
     const year2D = String(year).slice(-2);
     const villageName =
-      localStorage.getItem("village_name") || "Desa Sukamakmur";
+      localStorage.getItem("village_name") || "Desa Ketupat";
     const kecamatan =
       localStorage.getItem("village_kecamatan") || "Kecamatan Simpur";
     const kabupaten =
@@ -157,7 +157,7 @@ export default function AdminSuratPenomoran() {
       "Pemerintah Kabupaten Hulu Sungai Selatan";
 
     const getDesaInitial = (name: string) => {
-      if ((name || '').toLowerCase().includes("Sukamakmur")) return "WHI";
+      if ((name || '').toLowerCase().includes("Ketupat")) return "WHI";
       if ((name || '').toLowerCase().includes("sukamaju")) return "DS-SKM";
       const words = name
         .replace(/desa|kelurahan/gi, "")

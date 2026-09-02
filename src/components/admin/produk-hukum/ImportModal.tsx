@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Upload, X, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, ArrowRight, ArrowLeft, Eye } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { showToast } from '../../../utils/toast';

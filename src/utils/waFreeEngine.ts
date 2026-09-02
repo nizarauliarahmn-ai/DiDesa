@@ -47,7 +47,7 @@ export function openFreeWhatsAppMessage({ phone, message }: { phone: string; mes
 // Template Pesan
 // ----------------------------------------------------------------------------
 
-/** Ambil nama desa dinamis (Sukamakmur/Wasah Hilir/dll) dari pengaturan kop surat. */
+/** Ambil nama desa dinamis (Ketupat/Wasah Hilir/dll) dari pengaturan kop surat. */
 export function getVillageName(): string {
   const rawDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
   return rawDesa.replace(/^(desa|kelurahan)\s+/i, '').trim() || 'Wasah Hilir';

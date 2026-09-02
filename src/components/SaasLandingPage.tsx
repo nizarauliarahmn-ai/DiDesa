@@ -13,7 +13,7 @@ function getKabupatenName(tenant: any): string {
     if (domain.includes('wasah') || name.includes('wasah')) {
       return 'Kabupaten Hulu Sungai Selatan';
     }
-    if (domain.includes('sukamakmur') || name.includes('sukamakmur')) {
+    if (domain.includes('Ketupat') || name.includes('Ketupat')) {
       return 'Kabupaten Bogor';
     }
     if (domain.includes('majusejahtera') || name.includes('maju')) {
@@ -246,7 +246,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                   <div className="w-3 h-3 rounded-full bg-emerald-400" />
                 </div>
                 <div className="mx-auto bg-white dark:bg-slate-800 h-6 px-3 rounded-md text-[10px] font-mono flex items-center text-slate-400 border border-gray-200 dark:border-slate-700">
-                  sukamakmur.sistemdidesa.id
+                  Ketupat.sistemdidesa.id
                 </div>
               </div>
 
@@ -269,7 +269,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                     </div>
                   )}
                   <div>
-                    <h3 className="font-bold text-lg text-slate-800 dark:text-white leading-tight">Desa Sukamakmur</h3>
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-white leading-tight">Desa Ketupat</h3>
                     <p className="text-xs font-bold tracking-wide" style={{ color: globalColor }}>PORTAL WARGA</p>
                   </div>
                 </div>
@@ -596,7 +596,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Ketik nama desa atau subdomain (misal: Sukamakmur)..."
+                  placeholder="Ketik nama desa atau subdomain (misal: Ketupat)..."
                   className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all font-medium text-slate-900 dark:text-white"
                 />
                 {searchQuery && (

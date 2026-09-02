@@ -15,7 +15,7 @@ import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
   const [residents, setResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+  const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Ketupat');
   const [aspirasiList, setAspirasiList] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [authUser, setAuthUser] = useState<any>(null);
@@ -60,7 +60,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
     }
 
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Ketupat');
     };
     const handleFeedbackUpdate = () => {
       fetchFeedbacksAsync().then(setFeedbacks);

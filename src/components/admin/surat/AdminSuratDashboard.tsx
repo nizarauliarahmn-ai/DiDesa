@@ -114,9 +114,9 @@ export default function AdminSuratDashboard({
     logoUrl: localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png',
     kabupaten: localStorage.getItem('kop_kabupaten') || localStorage.getItem('village_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan',
     kecamatan: localStorage.getItem('kop_kecamatan') || localStorage.getItem('village_kecamatan') || 'Kecamatan Simpur',
-    desa: localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur',
+    desa: localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Ketupat',
     alamat: localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261',
-    kontak: localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com',
+    kontak: localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdesKetupat@gmail.com',
   }));
 
   useEffect(() => {
@@ -148,9 +148,9 @@ export default function AdminSuratDashboard({
         logoUrl: localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png',
         kabupaten: localStorage.getItem('kop_kabupaten') || localStorage.getItem('village_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan',
         kecamatan: localStorage.getItem('kop_kecamatan') || localStorage.getItem('village_kecamatan') || 'Kecamatan Simpur',
-        desa: localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur',
+        desa: localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Ketupat',
         alamat: localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261',
-        kontak: localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com',
+        kontak: localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdesKetupat@gmail.com',
       });
     };
 
@@ -178,7 +178,7 @@ export default function AdminSuratDashboard({
     setShowPrintModal(false);
     setIsPrintingTable(true);
     const originalTitle = document.title;
-    document.title = "DAFTAR NOMOR SURAT Desa Sukamakmur";
+    document.title = "DAFTAR NOMOR SURAT Desa Ketupat";
     setTimeout(() => {
       try {
         window.print();
@@ -343,9 +343,9 @@ export default function AdminSuratDashboard({
     const logoUrl = localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png';
     const kabupatenName = localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan';
     const kecamatanName = localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur';
-    const desaName = localStorage.getItem('kop_desa') || 'Desa Sukamakmur';
+    const desaName = localStorage.getItem('kop_desa') || 'Desa Ketupat';
     const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat, Simpur, Hulu Sungai Selatan, Kalimantan Selatan 71261';
-    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdessukamakmur@gmail.com';
+    const kontakKantor = localStorage.getItem('kop_kontak') || '0813 4686 7519, pemdesKetupat@gmail.com';
     const namaKades = localStorage.getItem('kop_kades') || '';
 
     const renderReactSignature = (desaName: string, tglFormatted: string, namaPejabat: string, jabatanPejabat: string, nipPejabat?: string, includeCamatOverride?: boolean) => {

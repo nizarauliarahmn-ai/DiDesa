@@ -118,7 +118,7 @@ export function getActiveTenantId(): string {
   } catch {
     // ignore
   }
-  return 'sukamakmur';
+  return 'Ketupat';
 }
 
 export interface ParseInvitationResult {

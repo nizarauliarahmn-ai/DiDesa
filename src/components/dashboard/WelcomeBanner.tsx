@@ -3,11 +3,11 @@ import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 
 export default function WelcomeBanner({ onTabChange }: { onTabChange?: (tab: string) => void }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Ketupat');
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Ketupat');
     };
     window.addEventListener('village_settings_updated', handleSettingsUpdate);
     return () => window.removeEventListener('village_settings_updated', handleSettingsUpdate);

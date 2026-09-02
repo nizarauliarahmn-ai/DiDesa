@@ -12,7 +12,7 @@ export default function AdminAiAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [tenantId, setTenantId] = useState('sukamakmur');
+  const [tenantId, setTenantId] = useState('Ketupat');
   const [quotaInfo, setQuotaInfo] = useState<AiUsage | null>(null);
   const [globalDesiLogo, setGlobalDesiLogo] = useState(() => localStorage.getItem('global_desi_logo') || '');
   const messagesEndRef = useRef<HTMLDivElement>(null);

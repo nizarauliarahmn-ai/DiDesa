@@ -123,12 +123,12 @@ export default function AdminSuratSKH({
     includeCamat: false,
     
     // Kop Settings
-    namaDesa: localStorage.getItem('kop_desa') || 'Sukamakmur',
+    namaDesa: localStorage.getItem('kop_desa') || 'Ketupat',
     namaKecamatan: localStorage.getItem('kop_kecamatan') || 'Simpur',
     namaKabupaten: localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan',
     namaProvinsi: localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan',
     alamatKantor: localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261',
-    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com',
+    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesaKetupat@gmail.com',
     tampilkanDesa: true,
     tampilkanKecamatan: true,
     tampilkanKabupaten: true,
@@ -478,7 +478,7 @@ const handlePrint = async (skipCheck = false) => {
 
     const activeKabupaten = localStorage.getItem('kop_kabupaten') || formData.namaKabupaten || 'Hulu Sungai Selatan';
     const activeKecamatan = localStorage.getItem('kop_kecamatan') || formData.namaKecamatan || 'Simpur';
-    const activeDesa = localStorage.getItem('kop_desa') || formData.namaDesa || 'Sukamakmur';
+    const activeDesa = localStorage.getItem('kop_desa') || formData.namaDesa || 'Ketupat';
     const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
     const activeProvinsi = localStorage.getItem('kop_provinsi') || formData.namaProvinsi || 'Kalimantan Selatan';
 
@@ -847,7 +847,7 @@ const handlePrint = async (skipCheck = false) => {
                 <label className="text-sm font-bold text-slate-700 dark:text-slate-300">Tempat Kehilangan<span className="text-emerald-500 ml-0.5">*</span></label>
                 <input 
                   type="text"
-                  placeholder="Contoh: Perjalanan dari Sukamakmur ke Kandangan"
+                  placeholder="Contoh: Perjalanan dari Ketupat ke Kandangan"
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   value={formData.tempatKehilangan}
                   onChange={(e) => setFormData({...formData, tempatKehilangan: e.target.value})}

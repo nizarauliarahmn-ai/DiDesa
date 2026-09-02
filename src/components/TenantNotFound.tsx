@@ -152,7 +152,7 @@ export default function TenantNotFound() {
                       required
                       value={formData.desa}
                       onChange={e => setFormData({ ...formData, desa: e.target.value })}
-                      placeholder="Contoh: Desa Sukamakmur"
+                      placeholder="Contoh: Desa Ketupat"
                       className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-slate-900 dark:text-white"
                     />
                   </div>

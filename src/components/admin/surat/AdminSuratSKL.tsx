@@ -130,12 +130,12 @@ export default function AdminSuratSKL({
   const [useEsignature, setUseEsignature] = useState(true);
   
   // Kop Settings
-  const namaDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
+  const namaDesa = localStorage.getItem('kop_desa') || 'Ketupat';
   const namaKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
   const namaKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
   const namaProvinsi = localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan';
   const alamatKantor = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-  const kontakKantor = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
+  const kontakKantor = localStorage.getItem('kop_kontak') || '081346867519 | pemdesaKetupat@gmail.com';
 
   const [previewZoom, setPreviewZoom] = useState(0.45);
 

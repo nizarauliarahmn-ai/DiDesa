@@ -147,12 +147,12 @@ export default function AdminSuratSKU({
     includeCamat: false,
     
     // Kop Settings
-    namaDesa: localStorage.getItem('kop_desa') || 'Sukamakmur',
+    namaDesa: localStorage.getItem('kop_desa') || 'Ketupat',
     namaKecamatan: localStorage.getItem('kop_kecamatan') || 'Simpur',
     namaKabupaten: localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan',
     namaProvinsi: localStorage.getItem('kop_provinsi') || 'Kalimantan Selatan',
     alamatKantor: localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261',
-    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com',
+    kontakKantor: localStorage.getItem('kop_kontak') || '081346867519 | pemdesaKetupat@gmail.com',
     tampilkanDesa: true,
     tampilkanKecamatan: true,
     tampilkanKabupaten: true,
@@ -481,7 +481,7 @@ const handlePrint = async (skipCheck = false) => {
 
     const activeKabupaten = localStorage.getItem('kop_kabupaten') || formData.namaKabupaten || 'Hulu Sungai Selatan';
     const activeKecamatan = localStorage.getItem('kop_kecamatan') || formData.namaKecamatan || 'Simpur';
-    const activeDesa = localStorage.getItem('kop_desa') || formData.namaDesa || 'Sukamakmur';
+    const activeDesa = localStorage.getItem('kop_desa') || formData.namaDesa || 'Ketupat';
     const activeAlamat = localStorage.getItem('kop_alamat') || formData.alamatKantor || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
     const activeProvinsi = localStorage.getItem('kop_provinsi') || formData.namaProvinsi || 'Kalimantan Selatan';
 

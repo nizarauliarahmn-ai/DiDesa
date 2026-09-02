@@ -1,4 +1,4 @@
-﻿import { X, Download, Printer, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, FileText, Image, Maximize2 } from 'lucide-react';
+import { X, Download, Printer, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, FileText, Image, Maximize2 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface DocumentViewerModalProps {

@@ -59,7 +59,7 @@ export default function PetaWilayah() {
   const [residentsList, setResidentsList] = useState<any[]>([]);
 
   // Configured Village Coordinates
-  const [villageName, setVillageName] = useState(() => localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Sukamakmur');
+  const [villageName, setVillageName] = useState(() => localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Desa Ketupat');
   const [kadesName, setKadesName] = useState(() => localStorage.getItem('kop_kades') || 'Kepala Desa');
   const [villageAlamat, setVillageAlamat] = useState(() => localStorage.getItem('kop_alamat') || localStorage.getItem('village_alamat') || 'Jalan Keramat RT 02 RW 01, Simpur');
   const [villageLat, setVillageLat] = useState(() => parseFloat(localStorage.getItem('village_lat') || '-2.797806'));

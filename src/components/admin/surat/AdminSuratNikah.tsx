@@ -140,12 +140,12 @@ export default function AdminSuratNikah({
   }, [editData]);
 
   // Default state from localStorage (village profile)
-  const defaultDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
+  const defaultDesa = localStorage.getItem('kop_desa') || 'Ketupat';
   const defaultKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
   const defaultKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
   const defaultKUA = 'KUA Kecamatan ' + defaultKecamatan;
   const defaultAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-  const defaultKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
+  const defaultKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesaKetupat@gmail.com';
   const defaultPejabat = resolveKadesName() || '';
   const defaultJabatan = localStorage.getItem('kop_jabatan') || 'Kepala Desa';
 
@@ -439,11 +439,11 @@ export default function AdminSuratNikah({
   // Listen to live village settings and officer changes
   useEffect(() => {
     const handleSettingsUpdate = () => {
-      const activeDesa = localStorage.getItem('kop_desa') || 'Sukamakmur';
+      const activeDesa = localStorage.getItem('kop_desa') || 'Ketupat';
       const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
       const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
       const activeAlamat = localStorage.getItem('kop_alamat') || 'Jalan Keramat RT.002 RK.001 Kodepos 71261';
-      const activeKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesasukamakmur@gmail.com';
+      const activeKontak = localStorage.getItem('kop_kontak') || '081346867519 | pemdesaKetupat@gmail.com';
       const activePejabat = resolveKadesName() || '';
       
       let activeJabatan = 'Kepala Desa';

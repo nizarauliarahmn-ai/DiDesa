@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { Upload, Camera, FileText, X, Eye, Trash2, Image } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 
@@ -83,7 +83,7 @@ export default function DocumentUpload({ value, onChange, label = 'Dokumen' }: D
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{documentName || 'Dokumen'}</p>
                 <p className="text-[10px] text-gray-500 dark:text-slate-400">
-                  {isPDF ? 'PDF Document' : 'Image'} • {(value.length / 1024 / 1024).toFixed(2)} MB
+                  {isPDF ? 'PDF Document' : 'Image'} � {(value.length / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
             </div>

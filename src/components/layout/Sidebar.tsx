@@ -16,7 +16,7 @@ export default function Sidebar({
   isMobileMenuOpen?: boolean;
   setIsMobileMenuOpen?: (val: boolean) => void;
 }) {
-  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+  const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'Desa Ketupat');
   const [authUser, setAuthUser] = React.useState<{ name: string; email: string; avatar: string } | null>(null);
 
   // Global Branding
@@ -44,7 +44,7 @@ export default function Sidebar({
     loadAuthUser();
 
     const handleSettingsUpdate = () => {
-      setDesaName(localStorage.getItem('kop_desa') || 'Desa Sukamakmur');
+      setDesaName(localStorage.getItem('kop_desa') || 'Desa Ketupat');
     };
 
     const handleBrandingUpdate = () => {
@@ -156,7 +156,7 @@ export default function Sidebar({
           {!isCollapsed && (
           <div className="overflow-hidden flex-1">
             <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{authUser?.name || "Akses Publik"}</p>
-            <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate font-semibold">{authUser?.email || "warga@sukamakmur.desa.id"}</p>
+            <p className="text-[10px] text-gray-500 dark:text-slate-400 truncate font-semibold">{authUser?.email || "warga@Ketupat.desa.id"}</p>
           </div>
           )}
         </div>
