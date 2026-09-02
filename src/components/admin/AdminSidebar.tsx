@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
@@ -285,6 +285,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pelayanan Publik</p>}
             <NavItem id="tour-surat" collapsed={isCollapsed} icon={<FileSignature className="w-5 h-5 transition-colors" strokeWidth={1.75} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
             <NavItem collapsed={isCollapsed} icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} />
+            <NavItem collapsed={isCollapsed} icon={<ThumbsUp size={18} />} label="Indeks Kepuasan" active={activeTab === 'kepuasan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('kepuasan'); }} />
             <NavItem collapsed={isCollapsed} icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
               <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); }} />
             <NavItem collapsed={isCollapsed} icon={<ListChecks size={18} />} label="Usulan Desa" active={activeTab === 'usulan_desa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('usulan_desa'); }} />

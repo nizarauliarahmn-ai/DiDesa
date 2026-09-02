@@ -16,6 +16,7 @@ import AdminPengaturan from './components/admin/AdminPengaturan';
 import AdminNotifikasi from './components/admin/AdminNotifikasi';
 import AdminTenants from './components/admin/AdminTenants';
 import AdminAspirasi from './components/admin/AdminAspirasi';
+import AdminKepuasan from './components/admin/AdminKepuasan';
 import AdminBukuTamu from './components/admin/AdminBukuTamu';
 import AdminUsulanDesa from './components/admin/AdminUsulanDesa';
 import AdminBerita from './components/admin/AdminBerita';
@@ -608,6 +609,7 @@ export default function App() {
                     debouncedSearchQuery={debouncedSearch}
                   />
                 )}
+                {adminTab === 'kepuasan' && <AdminKepuasan />}
                 {adminTab === 'buku_tamu' && <AdminBukuTamu />}
                 {adminTab === 'usulan_desa' && <AdminUsulanDesa />}
                 {adminTab === 'berita' && (
