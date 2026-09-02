@@ -494,9 +494,6 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             <div className="absolute top-0 right-0 w-40 h-40 bg-amber-400/10 rounded-full -mr-10 -mt-10" />
             <div className="flex flex-col lg:flex-row lg:items-center gap-8">
               <div className="flex-1">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-black mb-5">
-                  <Zap size={14} /> PROGRAM KEMITRAAN
-                </div>
                 <h2 className="text-3xl md:text-4xl font-black tracking-tight">
                   Raih Komisi Nyata dengan Mendigitalisasi Desa
                 </h2>
