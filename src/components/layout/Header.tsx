@@ -55,7 +55,6 @@ export default function Header({
     { id: 'profil_desa', label: 'Profil Desa', icon: <Building2 size={15} /> },
     { id: 'transparansi', label: 'Transparansi', icon: <PieChart size={15} /> },
     { id: 'berita', label: 'Berita', icon: <Newspaper size={15} /> },
-    { id: 'peta_wilayah', label: 'Peta Wilayah', icon: <Map size={15} /> },
     { id: 'aspirasi', label: 'Aspirasi', icon: <MessageSquareText size={15} /> },
   ];
 

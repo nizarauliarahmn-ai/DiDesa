@@ -136,12 +136,6 @@ export default function Sidebar({
           onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }}
         />
         <NavItem 
-          collapsed={isCollapsed} icon={<Map size={20} />} 
-          label="Peta Wilayah" 
-          active={activeTab === 'peta_wilayah'} 
-          onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('peta_wilayah'); }}
-        />
-        <NavItem 
            collapsed={isCollapsed} id="tour-public-layanan" icon={<ShieldCheck size={20} />} 
            label="Layanan Mandiri" 
            active={activeTab === 'layanan_mandiri'} 

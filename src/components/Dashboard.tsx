@@ -4,7 +4,6 @@ import LayananMandiri from './dashboard/LayananMandiri';
 import ProfilDesa from './dashboard/ProfilDesa';
 import TransparansiDana from './dashboard/TransparansiDana';
 import BeritaDesa from './dashboard/BeritaDesa';
-import PetaWilayah from './dashboard/PetaWilayah';
 import AspirasiWarga from './dashboard/AspirasiWarga';
 
 export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: string) => void }) {
@@ -55,18 +54,6 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
           </div>
         </div>
         <BeritaDesa />
-      </div>
-
-      {/* 6. Peta GIS Interaktif Wilayah */}
-      <div id="section-peta_wilayah" className="scroll-mt-24 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-2.5 h-8 bg-indigo-600 rounded-full"></div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Peta GIS & Batas Wilayah Desa</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Pemetaan lokasi RT/RW, potensi desa, dan fasilitas umum</p>
-          </div>
-        </div>
-        <PetaWilayah />
       </div>
 
       {/* 7. Aspirasi & Pengaduan Warga 24/7 */}
