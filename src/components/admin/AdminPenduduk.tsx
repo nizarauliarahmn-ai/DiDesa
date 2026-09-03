@@ -1258,11 +1258,9 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
               </span>
             )}
           </div>
-          {name === kepalaKeluarga ? (
-            <span className="text-[10px] text-gray-400">Kepala Keluarga</span>
-          ) : kepalaKeluarga ? (
+          {kepalaKeluarga && (
             <span className="text-[10px] text-gray-400">KK: {kepalaKeluarga}</span>
-          ) : null}
+          )}
         </div>
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
