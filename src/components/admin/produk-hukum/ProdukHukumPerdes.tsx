@@ -130,23 +130,19 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     if (filterTahun) result = result.filter(i => i.tahun === filterTahun);
     if (filterArsip !== 'semua') result = result.filter(i => String(i.arsip) === filterArsip);
     result.sort((a, b) => {
-      if (a.tahun !== b.tahun) return b.tahun.localeCompare(a.tahun);
+      const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+      const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+      if (tglA !== tglB) return tglB - tglA;
       return a.no - b.no;
     });
     return result;
   }, [items, searchQuery, filterJenis, filterTahun, filterArsip]);
 
   const itemsWithNumbers = useMemo(() => {
-    let yearCounter = 0;
-    let lastYear = '';
-    return filteredItems.map((item) => {
-      if (item.tahun !== lastYear) {
-        yearCounter = 0;
-        lastYear = item.tahun;
-      }
-      yearCounter++;
-      return { ...item, displayNo: yearCounter };
-    });
+    return filteredItems.map((item, index) => ({
+      ...item,
+      displayNo: index + 1,
+    }));
   }, [filteredItems]);
 
   const totalPages = Math.ceil(itemsWithNumbers.length / ITEMS_PER_PAGE);
