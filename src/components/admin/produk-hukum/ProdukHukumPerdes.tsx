@@ -19,6 +19,7 @@ interface ProdukHukumItem {
   documentData: string | null;
   documentName: string;
   createdAt: string;
+  noManual?: boolean;
 }
 
 const JENIS_DOKUMEN_PERDES = [
@@ -60,12 +61,9 @@ function saveData(items: ProdukHukumItem[]) {
 }
 
 function getNoUrut(items: ProdukHukumItem[], tahun: string): number {
-  const filtered = items.filter(i => i.tahun === tahun);
+  const filtered = items.filter(i => i.tahun === tahun && !i.noManual);
   if (filtered.length === 0) return 1;
-  const used = new Set(filtered.map(i => i.no));
-  let next = 1;
-  while (used.has(next)) next++;
-  return next;
+  return Math.max(...filtered.map(i => i.no)) + 1;
 }
 
 function formatDateDisplay(dateStr: string): string {
@@ -186,6 +184,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       documentData: null,
       documentName: '',
       createdAt: new Date().toISOString(),
+      noManual: false,
     }));
     const updated = [...items, ...newItems];
     setItems(updated);
@@ -592,8 +591,15 @@ function ModalPerdes({ item, items, onSave, onClose }: {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!uraian.trim()) { showToast('Uraian wajib diisi!', 'error'); return; }
+    const itemsForAuto = isEdit ? items.filter(i => i.id !== item.id) : items;
+    const autoNo = getNoUrut(itemsForAuto, tahun);
+    const enteredNo = parseInt(no) || autoNo;
+    const isManualNo = isEdit
+      ? (enteredNo !== item.no ? true : (item.noManual ?? false))
+      : (enteredNo !== autoNo);
     onSave({
-      no: parseInt(no) || getNoUrut(items, tahun),
+      no: enteredNo,
+      noManual: isManualNo,
       tahun, uraian: uraian.trim(), tanggal, tanggalDiundangkan,
       jenisDokumen, arsip, ketArsip, ketLain: ketLain.trim(),
       documentData, documentName,
