@@ -1236,7 +1236,6 @@ const TableRow = React.memo(({ item, nik, noKk, initials, name, age, gender, gen
       <td className="px-6 py-3.5 whitespace-nowrap">
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-gray-900 dark:text-white font-mono group-hover:text-emerald-700 transition-colors">{nik}</span>
-          <span className="text-[10px] text-gray-400 font-mono">KK: {noKk || '-'}</span>
         </div>
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
@@ -1260,6 +1259,7 @@ const TableRow = React.memo(({ item, nik, noKk, initials, name, age, gender, gen
               </span>
             )}
           </div>
+          <span className="text-[10px] text-gray-400 font-mono">KK: {noKk || '-'}</span>
         </div>
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
