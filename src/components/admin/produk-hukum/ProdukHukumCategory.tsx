@@ -217,6 +217,16 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     }));
   }, [filteredItems]);
 
+  // Deteksi nomor ganda/sisipan per tahun
+  const duplicateMap = useMemo(() => {
+    const freq: Record<string, number> = {};
+    items.forEach(item => {
+      const key = `${item.tahun}_${item.no}`;
+      freq[key] = (freq[key] || 0) + 1;
+    });
+    return freq;
+  }, [items]);
+
   const totalPages = Math.ceil(itemsWithNumbers.length / ITEMS_PER_PAGE);
   const paginatedItems = itemsWithNumbers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
@@ -424,7 +434,16 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
               <tbody>
                 {paginatedItems.map((item) => (
                   <tr key={item.id} className="border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
-                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">{item.displayNo}</td>
+                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                      <div className="flex items-center">
+                        {item.displayNo}
+                        {duplicateMap[`${item.tahun}_${item.no}`] > 1 && (
+                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-200 print:hidden" title="Nomor dokumen ini ganda / sisipan">
+                            Sisipan
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
                     <td className="px-4 py-3">
                       <p className="text-gray-900 dark:text-white font-medium whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
