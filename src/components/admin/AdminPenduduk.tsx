@@ -1259,7 +1259,7 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
             )}
           </div>
           {name === kepalaKeluarga ? (
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">Kepala Keluarga</span>
+            <span className="text-[10px] text-gray-400">Kepala Keluarga</span>
           ) : kepalaKeluarga ? (
             <span className="text-[10px] text-gray-400">KK: {kepalaKeluarga}</span>
           ) : null}
