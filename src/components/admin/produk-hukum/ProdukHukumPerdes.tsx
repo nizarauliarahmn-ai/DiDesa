@@ -92,6 +92,8 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showViewer, setShowViewer] = useState(false);
   const [viewerData, setViewerData] = useState<{ data: string | null; name: string }>({ data: null, name: '' });
@@ -192,7 +194,33 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     setItems(newItems);
     saveData(newItems);
     setShowDeleteConfirm(null);
+    setSelectedIds(prev => { const n = new Set(prev); n.delete(id); return n; });
     showToast('Data berhasil dihapus!', 'success');
+  };
+
+  const handleBulkDelete = () => {
+    const newItems = items.filter(i => !selectedIds.has(i.id));
+    setItems(newItems);
+    saveData(newItems);
+    setSelectedIds(new Set());
+    setShowBulkDeleteConfirm(false);
+    showToast(`${selectedIds.size} data berhasil dihapus!`, 'success');
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === paginatedItems.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(paginatedItems.map(i => i.id)));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
   };
 
   const handlePrint = () => {
@@ -210,6 +238,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     const globalFooter = localStorage.getItem('global_print_footer') || 'Dokumen ini dibuat &amp; dicetak melalui <strong>Sistem DiDesa</strong><br>Solusi Administrasi Desa Modern Indonesia';
     const rows = itemsWithNumbers.map((item) => `
       <tr>
+        <td></td>
         <td style="text-align:center;font-weight:bold;font-size:10px">${item.displayNo}</td>
         <td style="text-align:center;font-weight:600;font-size:10px">${item.tahun}</td>
         <td style="font-weight:500;font-size:10px;line-height:1.3">${item.uraian || 'TANPA KETERANGAN'}</td>
@@ -251,14 +280,14 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       </div>
       <table>
         <colgroup>
-          <col class="col-no"><col class="col-tahun"><col class="col-uraian"><col class="col-tanggal"><col class="col-diundangkan"><col class="col-jenis">
+          <col class="col-ck" style="width:3%"><col class="col-no" style="width:4%"><col class="col-tahun" style="width:6%"><col class="col-uraian" style="width:33%"><col class="col-tanggal" style="width:21%"><col class="col-diundangkan" style="width:21%"><col class="col-jenis" style="width:10%">
         </colgroup>
         <thead>
-          <tr><th colSpan="6" style="padding:0;margin:0;border:none;background:white"><div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white">&nbsp;</div></th></tr>
-          <tr><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Tgl Diundangkan</th><th>Jenis</th></tr>
+          <tr><th colSpan="7" style="padding:0;margin:0;border:none;background:white"><div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white">&nbsp;</div></th></tr>
+          <tr><th></th><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Tgl Diundangkan</th><th>Jenis</th></tr>
         </thead>
         <tbody>${rows}</tbody>
-        <tfoot><tr style="border:none"><td colspan="6" style="border:none;padding-top:1cm;padding-bottom:1.5cm"><div style="border-top:1px solid #cbd5e1;padding-top:10px;text-align:left"><span style="font-size:9pt;color:#64748b">${globalFooter}</span></div></td></tr></tfoot>
+        <tfoot><tr style="border:none"><td colspan="7" style="border:none;padding-top:1cm;padding-bottom:1.5cm"><div style="border-top:1px solid #cbd5e1;padding-top:10px;text-align:left"><span style="font-size:9pt;color:#64748b">${globalFooter}</span></div></td></tr></tfoot>
       </table>
     </body></html>`);
     doc.close();
@@ -283,6 +312,15 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {selectedIds.size > 0 && (
+            <button
+              onClick={() => setShowBulkDeleteConfirm(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-sm dark:shadow-none"
+            >
+              <Trash2 size={18} />
+              <span>Hapus ({selectedIds.size})</span>
+            </button>
+          )}
           <button
             onClick={() => setShowImportModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm dark:shadow-none"
@@ -358,6 +396,14 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             <table className="w-full min-w-[900px] text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                 <tr>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-3 py-3 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={paginatedItems.length > 0 && selectedIds.size === paginatedItems.length}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    />
+                  </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">No</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Tahun</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px] whitespace-nowrap">Uraian</th>
@@ -369,7 +415,15 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
               </thead>
               <tbody>
                 {paginatedItems.map((item) => (
-                  <tr key={item.id} className="border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors">
+                  <tr key={item.id} className={`border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.has(item.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`}>
+                    <td className="px-3 py-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(item.id)}
+                        onChange={() => toggleSelect(item.id)}
+                        className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      />
+                    </td>
                     <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">{item.displayNo}</td>
                     <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
                     <td className="px-4 py-3">
@@ -408,7 +462,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         )}
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
-            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
+            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}ï¿½{Math.min(currentPage * ITEMS_PER_PAGE, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}
                 className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed font-semibold transition-colors">
@@ -450,6 +504,33 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         documentName={viewerData.name}
         documentType=""
       />
+
+      {/* Bulk Delete Confirm */}
+      {showBulkDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowBulkDeleteConfirm(false)}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-50 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+                <AlertTriangle size={20} className="text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 dark:text-white">Hapus Massal</h3>
+                <p className="text-xs text-gray-500 dark:text-slate-400">{selectedIds.size} data akan dihapus permanen</p>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-6">
+              <button onClick={() => setShowBulkDeleteConfirm(false)}
+                className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors text-sm">
+                Batal
+              </button>
+              <button onClick={handleBulkDelete}
+                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors text-sm">
+                Hapus Semua
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirm */}
       {showDeleteConfirm && (
