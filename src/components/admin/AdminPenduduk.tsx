@@ -1250,11 +1250,6 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
                 BARU
               </span>
             )}
-            {maritalStatus && (
-              <span className="bg-blue-100 text-blue-800 text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">
-                {maritalStatus}
-              </span>
-            )}
             {status === 'pending_approval' && (
               <span className="bg-amber-100 text-amber-800 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-200 shadow-sm dark:shadow-none shrink-0 uppercase tracking-wider">
                 Menunggu Konfirmasi
