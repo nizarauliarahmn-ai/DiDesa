@@ -129,7 +129,11 @@ export default function BeritaDesa() {
       const tid = await resolveCurrentTenant();
       if (!isMounted) return;
       setTenantId(tid);
-      if (!tid) return;
+      if (!tid) {
+        console.warn('[BeritaDesa] Tenant ID tidak ditemukan. Menggunakan berita default.');
+        if (isMounted) setLoading(false);
+        return;
+      }
 
       try {
         const { data, error } = await supabase
@@ -140,7 +144,8 @@ export default function BeritaDesa() {
           .single();
 
         if (error && error.code !== 'PGRST116') {
-          console.warn('Gagal memuat berita dari server:', error);
+          console.error('[BeritaDesa] Gagal memuat berita dari server:', error.message);
+          if (isMounted) setLoading(false);
           return;
         }
 
@@ -150,8 +155,8 @@ export default function BeritaDesa() {
           setNews(sanitized);
           localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
         }
-      } catch (err) {
-        console.warn('Error fetching news:', err);
+      } catch (err: any) {
+        console.error('[BeritaDesa] Error fetching news:', err?.message || err);
       } finally {
         if (isMounted) setLoading(false);
       }

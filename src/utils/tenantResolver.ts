@@ -5,6 +5,7 @@ let isResolving = false;
 
 export async function resolveCurrentTenant(): Promise<string | null> {
   if (cachedTenantId) {
+    console.log('[TenantResolver] Menggunakan cache:', cachedTenantId);
     persistActiveTenantId(cachedTenantId);
     return cachedTenantId;
   }
@@ -17,6 +18,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
   }
 
   isResolving = true;
+  console.log('[TenantResolver] Memulai resolusi tenant...');
 
   try {
     const urlParams = new URLSearchParams(window.location.search);
@@ -24,6 +26,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
     // 1. Parameter t_id (UUID langsung)
     const directId = urlParams.get('t_id');
     if (directId) {
+      console.log('[TenantResolver] Tenant dari t_id param:', directId);
       cachedTenantId = directId;
       persistActiveTenantId(directId);
       isResolving = false;
@@ -48,6 +51,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       const raw = targetDomain.toLowerCase().trim();
       const slug = raw.replace(/\s+/g, '').replace(/^https?:\/\//, '').split('.')[0];
 
+      console.log('[TenantResolver] Mencari tenant untuk domain:', slug);
       const { data, error } = await supabase
         .from('tenants')
         .select('id')
@@ -55,13 +59,13 @@ export async function resolveCurrentTenant(): Promise<string | null> {
         .maybeSingle();
         
       if (data && data.id) {
+        console.log('[TenantResolver] Tenant ditemukan:', data.id);
         cachedTenantId = data.id;
         persistActiveTenantId(data.id);
         isResolving = false;
         return data.id;
       } else {
-        // If an explicit target domain was provided but not found, DO NOT fallback.
-        // It means the subdomain is unregistered.
+        console.error('[TenantResolver] Domain tidak terdaftar:', slug);
         isResolving = false;
         return null;
       }
@@ -73,6 +77,7 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       try {
         const user = JSON.parse(localAuth);
         if (user && user.tenantId) {
+          console.log('[TenantResolver] Tenant dari auth session:', user.tenantId);
           cachedTenantId = user.tenantId;
           persistActiveTenantId(user.tenantId);
           isResolving = false;
@@ -81,12 +86,12 @@ export async function resolveCurrentTenant(): Promise<string | null> {
       } catch(e) {}
     }
 
-    console.warn("Tenant Resolver: No subdomain or auth found. Returning null.");
+    console.error("[TenantResolver] TIDAK DAPAT meresolusi tenant. Tidak ada subdomain, parameter, atau auth yang ditemukan.");
     isResolving = false;
     return null;
 
-  } catch (error) {
-    console.error("Failed to resolve tenant:", error);
+  } catch (error: any) {
+    console.error("[TenantResolver] Fatal error:", error?.message || error);
     isResolving = false;
     return null;
   }

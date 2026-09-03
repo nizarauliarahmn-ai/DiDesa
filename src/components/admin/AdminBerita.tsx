@@ -194,7 +194,11 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
       const tid = await resolveCurrentTenant();
       if (!isMounted) return;
       setTenantId(tid);
-      if (!tid) return;
+      if (!tid) {
+        console.error('[AdminBerita] Tenant ID tidak dapat diidentifikasi. Berita tidak akan disimpan ke server.');
+        showToast('Gagal mengidentifikasi Tenant Desa. Silakan muat ulang halaman.', 'error');
+        return;
+      }
 
       try {
         const { data, error } = await supabase
@@ -205,7 +209,8 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
           .single();
 
         if (error && error.code !== 'PGRST116') {
-          console.warn('Gagal memuat berita dari server:', error);
+          console.error('[AdminBerita] Gagal memuat berita dari server:', error.message);
+          showToast('Gagal memuat berita dari server: ' + error.message, 'error');
           return;
         }
 
@@ -215,8 +220,8 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
           setNews(sanitized);
           localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
         }
-      } catch (err) {
-        console.warn('Error fetching news:', err);
+      } catch (err: any) {
+        console.error('[AdminBerita] Error fetching news:', err?.message || err);
       }
     };
     fetchNews();
@@ -232,20 +237,40 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
     // Hindari loop tak berujung jika tidak ada perubahan struktural
     if (savedLocal === serialized) return;
 
+    // BLOKIR save jika tenantId belum resolved — cegah silent failure
+    if (!tenantId) {
+      console.warn('[AdminBerita] Tenant ID belum tersedia. Menunda save ke Supabase...');
+      return;
+    }
+
+    // Simpan ke localStorage dulu (optimistic)
     localStorage.setItem('didesa_news_list', serialized);
-    // Beri tahu komponen lain bahwa ada update
     window.dispatchEvent(new Event('didesa_news_updated'));
 
-    // Push ke Supabase
-    if (tenantId) {
-      supabase.from('saas_settings').upsert({
-        tenant_id: tenantId,
-        key: 'didesa_news_list',
-        value: serialized
-      }, { onConflict: 'tenant_id,key' }).then(({ error }) => {
-        if (error) console.error('Gagal menyimpan berita ke server:', error);
-      });
-    }
+    // Push ke Supabase dengan error handling ketat
+    const saveToSupabase = async () => {
+      try {
+        const { data, error } = await supabase.from('saas_settings').upsert({
+          tenant_id: tenantId,
+          key: 'didesa_news_list',
+          value: serialized
+        }, { onConflict: 'tenant_id,key' });
+
+        if (error) {
+          console.error('[AdminBerita] Gagal menyimpan berita ke server:', error.message, error);
+          showToast('Gagal menyimpan berita ke server: ' + error.message, 'error');
+          // Rollback localStorage jika Supabase gagal
+          localStorage.setItem('didesa_news_list', savedLocal || '[]');
+          return;
+        }
+
+        console.log('[AdminBerita] Berita berhasil disimpan ke Supabase untuk tenant:', tenantId);
+      } catch (err: any) {
+        console.error('[AdminBerita] Error saat save ke Supabase:', err?.message || err);
+        showToast('Terjadi kesalahan saat menyimpan berita. Data hanya tersimpan lokal.', 'error');
+      }
+    };
+    saveToSupabase();
   }, [news, tenantId]);
 
   // Sync real-time when citizens like or comment from Portal Warga (local event sync)
