@@ -158,8 +158,8 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
                 <ChevronRight size={14} className="text-gray-400" />
               </div>
               <p className="text-sm font-bold text-gray-900 dark:text-white">{kat.label}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{kat.count}</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400 leading-none">{kat.count}</span>
                 <span className="text-[10px] text-gray-500 dark:text-slate-400">dokumen</span>
               </div>
               {kat.arsipCount > 0 && (
