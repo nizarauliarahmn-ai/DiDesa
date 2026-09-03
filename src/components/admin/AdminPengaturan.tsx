@@ -12,7 +12,7 @@ import {
 import { getRtRwMapping, addRtRwEntry, removeRtRwEntry, type RtRwEntry } from '../../utils/rtRwMapping';
 import VillageMapModal from '../common/VillageMapModal';
 import VillageMapPreview from '../common/VillageMapPreview';
-import { testGoogleDriveFolder } from '../../utils/googleDriveUpload';
+import { testGoogleDriveFolder, getVillageGoogleDriveApiKey } from '../../utils/googleDriveUpload';
 import { getZonaWaktu, detectZonaWaktu, WAKTU_ZONA_OPTIONS, WAKTU_ZONA_LABEL, ZonaWaktu } from '../../utils/zonaWaktu';
 
 export default function AdminPengaturan() {
@@ -47,6 +47,7 @@ export default function AdminPengaturan() {
   const [batasBarat, setBatasBarat] = useState(() => localStorage.getItem('village_batas_barat') || '');
 
   const [googleDriveFolderId, setGoogleDriveFolderId] = useState(() => localStorage.getItem('google_drive_folder_id') || '');
+  const [googleDriveApiKey, setGoogleDriveApiKey] = useState(() => localStorage.getItem('google_drive_api_key') || '');
   const [gdriveTesting, setGdriveTesting] = useState(false);
   const [gdriveTestResult, setGdriveTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
@@ -93,6 +94,7 @@ export default function AdminPengaturan() {
           set('app_theme', setAppTheme);
           set('village_letter_font', setLetterFont);
           set('google_drive_folder_id', setGoogleDriveFolderId);
+          set('google_drive_api_key', setGoogleDriveApiKey);
           set('village_luas_wilayah', setLuasWilayah);
           set('village_ketinggian', setKetinggian);
           set('village_batas_utara', setBatasUtara);
@@ -196,6 +198,7 @@ export default function AdminPengaturan() {
       app_theme: appTheme,
       village_letter_font: letterFont,
       google_drive_folder_id: googleDriveFolderId,
+      google_drive_api_key: googleDriveApiKey,
       village_luas_wilayah: luasWilayah,
       village_ketinggian: ketinggian,
       village_batas_utara: batasUtara,
@@ -616,13 +619,28 @@ export default function AdminPengaturan() {
                   placeholder="Contoh: 1AbCdEfGhIjKlMnOpQrStUv"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono text-gray-900 dark:text-white transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                 />
-                <p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
-                  Masukkan ID Folder Google Drive Desa untuk menampung file lampiran foto usulan &amp; dokumen.
-                </p>
-              </div>
-              <button
-                onClick={handleTestGoogleDrive}
-                disabled={gdriveTesting}
+<p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
+                   Masukkan ID Folder Google Drive Desa untuk menampung file lampiran foto usulan &amp; dokumen.
+                 </p>
+               </div>
+               <div className="space-y-1.5">
+                 <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                   <span className="w-3 h-3 rounded bg-amber-500/20 flex items-center justify-center text-[8px] text-amber-500 font-black">K</span> API Key Google Drive
+                 </label>
+                 <input
+                   type="password"
+                   value={googleDriveApiKey}
+                   onChange={(e) => setGoogleDriveApiKey(e.target.value)}
+                   placeholder="AIzaSy..."
+                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono text-gray-900 dark:text-white transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
+                 />
+                 <p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
+                   Dapatkan dari Google Cloud Console (Cloud Drive API). Tanpa API Key, koneksi tidak dapat diuji atau diunggah.
+                 </p>
+               </div>
+               <button
+                 onClick={handleTestGoogleDrive}
+                 disabled={gdriveTesting}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors disabled:opacity-60 cursor-pointer"
               >
                 {gdriveTesting ? (
