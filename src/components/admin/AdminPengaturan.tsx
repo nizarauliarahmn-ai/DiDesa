@@ -12,7 +12,7 @@ import {
 import { getRtRwMapping, addRtRwEntry, removeRtRwEntry, type RtRwEntry } from '../../utils/rtRwMapping';
 import VillageMapModal from '../common/VillageMapModal';
 import VillageMapPreview from '../common/VillageMapPreview';
-import { testGoogleDriveFolder, getVillageGoogleDriveApiKey } from '../../utils/googleDriveUpload';
+import { uploadToSupabaseStorage, checkSupabaseStorageConfig } from '../../utils/googleDriveUpload';
 import { getZonaWaktu, detectZonaWaktu, WAKTU_ZONA_OPTIONS, WAKTU_ZONA_LABEL, ZonaWaktu } from '../../utils/zonaWaktu';
 
 export default function AdminPengaturan() {
@@ -45,11 +45,9 @@ export default function AdminPengaturan() {
   const [batasSelatan, setBatasSelatan] = useState(() => localStorage.getItem('village_batas_selatan') || '');
   const [batasTimur, setBatasTimur] = useState(() => localStorage.getItem('village_batas_timur') || '');
   const [batasBarat, setBatasBarat] = useState(() => localStorage.getItem('village_batas_barat') || '');
-
-  const [googleDriveFolderId, setGoogleDriveFolderId] = useState(() => localStorage.getItem('google_drive_folder_id') || '');
-  const [googleDriveApiKey, setGoogleDriveApiKey] = useState(() => localStorage.getItem('google_drive_api_key') || '');
-  const [gdriveTesting, setGdriveTesting] = useState(false);
-  const [gdriveTestResult, setGdriveTestResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const [storageBucketName, setStorageBucketName] = useState(() => localStorage.getItem('supabase_storage_bucket') || 'buku-tamu');
+  const [storageTesting, setStorageTesting] = useState(false);
+  const [storageTestResult, setStorageTestResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   const [rtRwEntries, setRtRwEntries] = useState<RtRwEntry[]>(() => getRtRwMapping());
   const [newRt, setNewRt] = useState('');
@@ -197,8 +195,7 @@ export default function AdminPengaturan() {
       village_lng: villageLng.toString(),
       app_theme: appTheme,
       village_letter_font: letterFont,
-      google_drive_folder_id: googleDriveFolderId,
-      google_drive_api_key: googleDriveApiKey,
+      supabase_storage_bucket: storageBucketName,
       village_luas_wilayah: luasWilayah,
       village_ketinggian: ketinggian,
       village_batas_utara: batasUtara,
@@ -261,18 +258,18 @@ export default function AdminPengaturan() {
     setIsSaving(false);
   };
 
-  const handleTestGoogleDrive = async () => {
-    setGdriveTesting(true);
-    setGdriveTestResult(null);
+  const handleTestSupabaseStorage = async () => {
+    setStorageTesting(true);
+    setStorageTestResult(null);
     try {
-      const result = await testGoogleDriveFolder(googleDriveFolderId.trim());
-      setGdriveTestResult(result);
+      const result = await checkSupabaseStorageConfig(storageBucketName.trim());
+      setStorageTestResult(result);
       showToast(result.message, result.ok ? 'success' : 'error');
     } catch (e: any) {
-      setGdriveTestResult({ ok: false, message: e?.message || 'Gagal menguji koneksi Google Drive.' });
-      showToast('Gagal menguji koneksi Google Drive.', 'error');
+      setStorageTestResult({ ok: false, message: e?.message || 'Gagal menguji koneksi Supabase Storage.' });
+      showToast('Gagal menguji koneksi Supabase Storage.', 'error');
     } finally {
-      setGdriveTesting(false);
+      setStorageTesting(false);
     }
   };
 
@@ -599,66 +596,51 @@ export default function AdminPengaturan() {
             </div>
           </div>
 
-          {/* Google Drive Desa */}
+          {/* Supabase Storage */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
               <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
                 <Cloud className="w-5 h-5 text-emerald-600" />
-                Google Drive Desa
+                Supabase Storage
               </h3>
             </div>
             <div className="p-5 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                  <FolderOpen className="w-3 h-3" /> ID Folder Google Drive
+                  <FolderOpen className="w-3 h-3" /> Nama Bucket
                 </label>
                 <input
                   type="text"
-                  value={googleDriveFolderId}
-                  onChange={(e) => setGoogleDriveFolderId(e.target.value)}
-                  placeholder="Contoh: 1AbCdEfGhIjKlMnOpQrStUv"
+                  value={storageBucketName}
+                  onChange={(e) => setStorageBucketName(e.target.value)}
+                  placeholder="buku-tamu"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono text-gray-900 dark:text-white transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
                 />
-<p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
-                   Masukkan ID Folder Google Drive Desa untuk menampung file lampiran foto usulan &amp; dokumen.
-                 </p>
-               </div>
-               <div className="space-y-1.5">
-                 <label className="text-[10px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                   <span className="w-3 h-3 rounded bg-amber-500/20 flex items-center justify-center text-[8px] text-amber-500 font-black">K</span> API Key Google Drive
-                 </label>
-                 <input
-                   type="password"
-                   value={googleDriveApiKey}
-                   onChange={(e) => setGoogleDriveApiKey(e.target.value)}
-                   placeholder="AIzaSy..."
-                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-xs font-mono text-gray-900 dark:text-white transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white"
-                 />
-                 <p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
-                   Dapatkan dari Google Cloud Console (Cloud Drive API). Tanpa API Key, koneksi tidak dapat diuji atau diunggah.
-                 </p>
-               </div>
-               <button
-                 onClick={handleTestGoogleDrive}
-                 disabled={gdriveTesting}
+                <p className="text-[10px] text-gray-400 dark:text-slate-500 leading-relaxed">
+                  Bucket Supabase Storage untuk menyimpan foto usulan &amp; dokumen. Pastikan bucket sudah dibuat dan di-set Public di Dashboard Supabase.
+                </p>
+              </div>
+              <button
+                onClick={handleTestSupabaseStorage}
+                disabled={storageTesting}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-colors disabled:opacity-60 cursor-pointer"
               >
-                {gdriveTesting ? (
+                {storageTesting ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" /> Menguji Koneksi...
                   </>
                 ) : (
                   <>
-                    <Link2 className="w-4 h-4" /> Uji Koneksi Google Drive
+                    <Link2 className="w-4 h-4" /> Uji Koneksi Storage
                   </>
                 )}
               </button>
-              {gdriveTestResult && (
-                <p className={`text-[11px] font-bold px-3 py-2 rounded-xl border ${gdriveTestResult.ok
+              {storageTestResult && (
+                <p className={`text-[11px] font-bold px-3 py-2 rounded-xl border ${storageTestResult.ok
                   ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                   : 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800'
                 }`}>
-                  {gdriveTestResult.message}
+                  {storageTestResult.message}
                 </p>
               )}
             </div>

@@ -161,7 +161,7 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
                     >
-                      <FolderOpen className="w-3.5 h-3.5" /> Buka di Google Drive Desa
+                      <FolderOpen className="w-3.5 h-3.5" /> Buka Lampiran
                     </a>
                   )}
                   {usulan.google_drive_download_url && (
@@ -175,7 +175,7 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
                     </a>
                   )}
                   {!usulan.google_drive_view_url && (
-                    <span className="text-[11px] text-gray-400">Tidak ada lampiran Google Drive.</span>
+                    <span className="text-[11px] text-gray-400">Tidak ada lampiran dokumen.</span>
                   )}
                 </div>
               </div>
