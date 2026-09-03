@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Scale, FileText, TrendingUp, Archive, Clock, ChevronRight } from 'lucide-react';
+import { Scale, FileText, TrendingUp, Archive, ChevronRight, FileCheck, ScrollText, Handshake, ClipboardList, Award } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 type SubTab = 'dashboard' | 'perdes' | 'sk_kades' | 'perkades' | 'mou_pks' | 'skb' | 'berita_acara' | 'piagam';
 
@@ -27,14 +28,14 @@ const KATEGORI_LABELS: Record<string, string> = {
   piagam: 'Piagam',
 };
 
-const KATEGORI_ICONS: Record<string, string> = {
-  sk_kades: '??',
-  perdes: '??',
-  perkades: '??',
-  mou_pks: '??',
-  skb: '??',
-  berita_acara: '??',
-  piagam: '??',
+const KATEGORI_ICONS: Record<string, LucideIcon> = {
+  sk_kades: FileCheck,
+  perdes: Scale,
+  perkades: ScrollText,
+  mou_pks: Handshake,
+  skb: ClipboardList,
+  berita_acara: ClipboardList,
+  piagam: Award,
 };
 
 const STORAGE_KEY = 'produk_hukum_data';
@@ -61,7 +62,6 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
     const perKategori = Object.entries(KATEGORI_LABELS).map(([key, label]) => ({
       key,
       label,
-      icon: KATEGORI_ICONS[key] || '??',
       count: (allData[key] || []).length,
       arsipCount: (allData[key] || []).filter(i => i.arsip).length,
     }));
@@ -154,7 +154,7 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">{kat.icon}</span>
+                {(() => { const Icon = KATEGORI_ICONS[kat.key]; return Icon ? <Icon size={24} className={kat.count > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 dark:text-slate-500'} /> : null; })()}
                 <ChevronRight size={14} className="text-gray-400" />
               </div>
               <p className="text-sm font-bold text-gray-900 dark:text-white">{kat.label}</p>
@@ -210,8 +210,8 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
                   onClick={() => onNavigate(item.kategori as SubTab)}
                   className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                 >
-                  <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-sm">
-                    {KATEGORI_ICONS[item.kategori] || '??'}
+                  <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+                    {(() => { const Icon = KATEGORI_ICONS[item.kategori]; return Icon ? <Icon size={16} className="text-emerald-600 dark:text-emerald-400" /> : null; })()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.uraian || 'TANPA KETERANGAN'}</p>
