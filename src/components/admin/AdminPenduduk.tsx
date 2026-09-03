@@ -1,7 +1,7 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle, MoreHorizontal } from 'lucide-react';
+import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, X } from 'lucide-react';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
@@ -865,8 +865,16 @@ export default function AdminPenduduk({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Masukkan NIK, No. KK, atau Nama Penduduk..." 
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-gray-800 dark:text-slate-100 placeholder:text-gray-400 outline-none transition-shadow"
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-gray-800 dark:text-slate-100 placeholder:text-gray-400 outline-none transition-shadow"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <select 
