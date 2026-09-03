@@ -217,7 +217,25 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     }));
   }, [filteredItems]);
 
-  // Deteksi nomor ganda/sisipan per tahun
+  // Deteksi dokumen original (pertama kali dibuat) untuk setiap kombinasi tahun_no
+  const originalDocsMap = useMemo(() => {
+    const map = new Map<string, string>();
+    items.forEach(item => {
+      const key = `${item.tahun}_${item.no}`;
+      const currentOldestId = map.get(key);
+      if (!currentOldestId) {
+        map.set(key, item.id);
+      } else {
+        const currentOldest = items.find(i => i.id === currentOldestId);
+        if (currentOldest && new Date(item.createdAt).getTime() < new Date(currentOldest.createdAt).getTime()) {
+          map.set(key, item.id);
+        }
+      }
+    });
+    return map;
+  }, [items]);
+
+  // Hitung frekuensi nomor per tahun untuk mendeteksi ganda
   const duplicateMap = useMemo(() => {
     const freq: Record<string, number> = {};
     items.forEach(item => {
@@ -437,7 +455,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
                     <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
                       <div className="flex items-center">
                         {item.displayNo}
-                        {duplicateMap[`${item.tahun}_${item.no}`] > 1 && (
+                        {duplicateMap[`${item.tahun}_${item.no}`] > 1 && originalDocsMap.get(`${item.tahun}_${item.no}`) !== item.id && (
                           <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-200 print:hidden" title="Nomor dokumen ini ganda / sisipan">
                             Sisipan
                           </span>
