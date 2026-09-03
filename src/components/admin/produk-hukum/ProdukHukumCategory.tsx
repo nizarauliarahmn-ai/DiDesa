@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Printer } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import ImportModal from './ImportModal';
 
 interface ProdukHukumItem {
@@ -90,6 +92,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
   const jenisOptions = JENIS_DOKUMEN_OPTIONS[kategori] || ['UMUM'];
 
   const [items, setItems] = useState<ProdukHukumItem[]>(() => loadData(kategori));
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
@@ -100,6 +103,84 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 15;
+
+  // Fetch data from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFromSupabase = async () => {
+      const tid = await resolveCurrentTenant();
+      if (!isMounted) return;
+      setTenantId(tid);
+      if (!tid) {
+        console.warn('[ProdukHukumCategory] Tenant ID tidak ditemukan. Data hanya tersimpan lokal.');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('tenant_id', tid)
+          .eq('key', STORAGE_KEY)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('[ProdukHukumCategory] Gagal memuat dari Supabase:', error.message);
+          return;
+        }
+
+        if (data && data.value && isMounted) {
+          const all = JSON.parse(data.value);
+          const serverItems = all[kategori] || [];
+          // Merge: prioritize server data, but keep any local-only items
+          const localItems = loadData(kategori);
+          const localIds = new Set(localItems.map(i => i.id));
+          const merged = [...serverItems, ...localItems.filter(i => !localIds.has(i.id))];
+          setItems(merged);
+          // Save merged back to localStorage
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const allData = raw ? JSON.parse(raw) : {};
+          allData[kategori] = merged;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+          console.log('[ProdukHukumCategory] Data synced dari Supabase. Kategori:', kategori, 'Total:', merged.length);
+        }
+      } catch (err: any) {
+        console.error('[ProdukHukumCategory] Error fetching:', err?.message || err);
+      }
+    };
+    fetchFromSupabase();
+    return () => { isMounted = false; };
+  }, [kategori]);
+
+  // Sync to Supabase whenever items change
+  useEffect(() => {
+    if (!tenantId || items.length === 0) return;
+
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const all = raw ? JSON.parse(raw) : {};
+    all[kategori] = items;
+    const serialized = JSON.stringify(all);
+
+    const saveToSupabase = async () => {
+      try {
+        const { error } = await supabase.from('saas_settings').upsert({
+          tenant_id: tenantId,
+          key: STORAGE_KEY,
+          value: serialized
+        }, { onConflict: 'tenant_id,key' });
+
+        if (error) {
+          console.error('[ProdukHukumCategory] Gagal sync ke Supabase:', error.message);
+          showToast('Gagal sinkronisasi ke server: ' + error.message, 'error');
+        } else {
+          console.log('[ProdukHukumCategory] Berhasil sync ke Supabase. Kategori:', kategori);
+        }
+      } catch (err: any) {
+        console.error('[ProdukHukumCategory] Error syncing:', err?.message || err);
+      }
+    };
+    saveToSupabase();
+  }, [items, tenantId, kategori]);
 
   const availableYears = useMemo(() => {
     const years = new Set(items.map(i => i.tahun).filter(Boolean));
@@ -378,7 +459,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
         )}
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
-            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
+            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}ï¿½{Math.min(currentPage * ITEMS_PER_PAGE, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}
                 className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed font-semibold transition-colors">

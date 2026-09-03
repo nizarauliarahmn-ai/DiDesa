@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye, Printer } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
+import { supabase } from '../../../utils/supabase';
+import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import ImportModal from './ImportModal';
 import DocumentViewerModal from './DocumentViewerModal';
 import DocumentUpload from './DocumentUpload';
@@ -85,6 +87,7 @@ interface PerdesProps {
 
 export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [items, setItems] = useState<ProdukHukumItem[]>(loadData);
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
@@ -109,6 +112,84 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     window.addEventListener('open_document_viewer', handler as EventListener);
     return () => window.removeEventListener('open_document_viewer', handler as EventListener);
   }, []);
+
+  // Fetch data from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFromSupabase = async () => {
+      const tid = await resolveCurrentTenant();
+      if (!isMounted) return;
+      setTenantId(tid);
+      if (!tid) {
+        console.warn('[ProdukHukumPerdes] Tenant ID tidak ditemukan. Data hanya tersimpan lokal.');
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('tenant_id', tid)
+          .eq('key', STORAGE_KEY)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('[ProdukHukumPerdes] Gagal memuat dari Supabase:', error.message);
+          return;
+        }
+
+        if (data && data.value && isMounted) {
+          const all = JSON.parse(data.value);
+          const serverItems = all[KATEGORI_KEY] || [];
+          // Merge: prioritize server data, but keep any local-only items
+          const localItems = loadData();
+          const localIds = new Set(localItems.map(i => i.id));
+          const merged = [...serverItems, ...localItems.filter(i => !localIds.has(i.id))];
+          setItems(merged);
+          // Save merged back to localStorage
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const allData = raw ? JSON.parse(raw) : {};
+          allData[KATEGORI_KEY] = merged;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+          console.log('[ProdukHukumPerdes] Data synced dari Supabase. Total:', merged.length);
+        }
+      } catch (err: any) {
+        console.error('[ProdukHukumPerdes] Error fetching:', err?.message || err);
+      }
+    };
+    fetchFromSupabase();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Sync to Supabase whenever items change
+  useEffect(() => {
+    if (!tenantId || items.length === 0) return;
+
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const all = raw ? JSON.parse(raw) : {};
+    all[KATEGORI_KEY] = items;
+    const serialized = JSON.stringify(all);
+
+    const saveToSupabase = async () => {
+      try {
+        const { error } = await supabase.from('saas_settings').upsert({
+          tenant_id: tenantId,
+          key: STORAGE_KEY,
+          value: serialized
+        }, { onConflict: 'tenant_id,key' });
+
+        if (error) {
+          console.error('[ProdukHukumPerdes] Gagal sync ke Supabase:', error.message);
+          showToast('Gagal sinkronisasi ke server: ' + error.message, 'error');
+        } else {
+          console.log('[ProdukHukumPerdes] Berhasil sync ke Supabase');
+        }
+      } catch (err: any) {
+        console.error('[ProdukHukumPerdes] Error syncing:', err?.message || err);
+      }
+    };
+    saveToSupabase();
+  }, [items, tenantId]);
 
   const availableYears = useMemo(() => {
     const years = new Set(items.map(i => i.tahun).filter(Boolean));
