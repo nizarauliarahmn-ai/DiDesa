@@ -932,7 +932,8 @@ export default function AdminPenduduk({
               <tr>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">NIK / No. KK</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Nama Lengkap / KK</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Status Kependudukan / Gender</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Status</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Gender</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Umur</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">RT/RW</th>
                 <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Bantuan Aktif</th>
@@ -967,6 +968,7 @@ export default function AdminPenduduk({
                     <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-24 mb-2"></div><div className="h-3 bg-gray-100 dark:bg-slate-800 rounded w-16"></div></td>
                     <td className="px-6 py-4"><div className="flex gap-2 mb-2"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-32"></div><div className="h-4 bg-gray-100 dark:bg-slate-800 rounded w-12"></div></div><div className="h-3 bg-gray-100 dark:bg-slate-800 rounded w-20"></div></td>
                     <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-16 mb-2"></div><div className="h-4 bg-gray-100 dark:bg-slate-800 rounded w-10"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-10"></div></td>
                     <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-10"></div></td>
                     <td className="px-6 py-4"><div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-12"></div></td>
                     <td className="px-6 py-4 hidden lg:table-cell"><div className="h-5 bg-gray-200 dark:bg-slate-700 rounded-full w-24"></div></td>
@@ -1262,7 +1264,6 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
         </div>
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
-        <div className="flex flex-col gap-1.5 items-start">
           {(() => {
             const s = (status || 'Aktif').trim().toLowerCase();
             if (s.includes('meninggal') || s === 'mati' || s === 'wafat') {
@@ -1276,10 +1277,11 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
             }
             return <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 leading-none">{s === 'aktif' ? 'Hidup' : (status || 'Hidup')}</span>;
           })()}
+      </td>
+      <td className="px-6 py-3.5 whitespace-nowrap">
           <span className={`text-[10px] px-2 py-1 rounded-md font-bold border whitespace-nowrap leading-none ${getBadgeColors(genderColor)}`}>
             {gender}
           </span>
-        </div>
       </td>
       <td className="px-6 py-3.5 text-sm font-medium text-gray-600 dark:text-slate-400 whitespace-nowrap">
         {age} Thn
