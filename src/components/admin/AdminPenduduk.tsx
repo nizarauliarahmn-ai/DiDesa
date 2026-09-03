@@ -982,6 +982,7 @@ export default function AdminPenduduk({
                       item={item}
                       nik={item.nik} 
                     noKk={item.noKk}
+                    kepalaKeluarga={residents.find(r => r.noKk === item.noKk && (r.familyRelation || '').toLowerCase().includes('kepala'))?.name || ''}
                     initials={item.initials} 
                     name={item.name} 
                     age={item.age}
@@ -1220,7 +1221,7 @@ export default function AdminPenduduk({
 }
 
 
-const TableRow = React.memo(({ item, nik, noKk, initials, name, age, gender, genderColor, rtRw, status, maritalStatus, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
+const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, maritalStatus, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
   const getBadgeColors = (color: string) => {
     switch (color) {
       case 'blue': return 'bg-blue-50 text-blue-700 border-blue-100';
@@ -1260,7 +1261,9 @@ const TableRow = React.memo(({ item, nik, noKk, initials, name, age, gender, gen
               </span>
             )}
           </div>
-          <span className="text-[10px] text-gray-400 font-mono">KK: {noKk || '-'}</span>
+          {kepalaKeluarga && name !== kepalaKeluarga && (
+            <span className="text-[10px] text-gray-400">KK: {kepalaKeluarga}</span>
+          )}
         </div>
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
