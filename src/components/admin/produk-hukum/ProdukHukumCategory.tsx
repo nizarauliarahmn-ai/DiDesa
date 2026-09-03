@@ -64,7 +64,7 @@ function saveData(kategori: string, items: ProdukHukumItem[]) {
 }
 
 function getNoUrut(items: ProdukHukumItem[], tahun: string): number {
-  const filtered = items.filter(i => i.tahun === tahun);
+  const filtered = items.filter(i => i.tahun === tahun && !i.noManual);
   if (filtered.length === 0) return 1;
   return Math.max(...filtered.map(i => i.no)) + 1;
 }
@@ -202,7 +202,9 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
     if (filterTahun) result = result.filter(i => i.tahun === filterTahun);
     if (filterArsip !== 'semua') result = result.filter(i => String(i.arsip) === filterArsip);
     result.sort((a, b) => {
-      if (a.tahun !== b.tahun) return b.tahun.localeCompare(a.tahun);
+      const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+      const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+      if (tglA !== tglB) return tglB - tglA;
       return a.no - b.no;
     });
     return result;
