@@ -220,9 +220,9 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   }, [items, searchQuery, filterJenis, filterTahun, filterArsip]);
 
   const itemsWithNumbers = useMemo(() => {
-    return filteredItems.map((item, index) => ({
+    return filteredItems.map((item) => ({
       ...item,
-      displayNo: index + 1,
+      displayNo: item.no,
     }));
   }, [filteredItems]);
 

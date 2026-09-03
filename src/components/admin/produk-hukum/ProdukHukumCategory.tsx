@@ -209,16 +209,10 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
   }, [items, searchQuery, filterJenis, filterTahun, filterArsip]);
 
   const itemsWithNumbers = useMemo(() => {
-    let yearCounter = 0;
-    let lastYear = '';
-    return filteredItems.map((item) => {
-      if (item.tahun !== lastYear) {
-        yearCounter = 0;
-        lastYear = item.tahun;
-      }
-      yearCounter++;
-      return { ...item, displayNo: yearCounter };
-    });
+    return filteredItems.map((item) => ({
+      ...item,
+      displayNo: item.no,
+    }));
   }, [filteredItems]);
 
   const totalPages = Math.ceil(itemsWithNumbers.length / ITEMS_PER_PAGE);
