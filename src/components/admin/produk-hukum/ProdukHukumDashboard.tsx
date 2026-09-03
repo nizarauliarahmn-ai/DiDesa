@@ -149,8 +149,8 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
               onClick={() => onNavigate(kat.key as SubTab)}
               className={`p-4 rounded-xl border text-left transition-all hover:shadow-md ${
                 kat.count > 0
-                  ? 'border-gray-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-700 bg-gray-50/50 dark:bg-slate-800/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20'
-                  : 'border-gray-100 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-800/30 opacity-60'
+                  ? 'border-gray-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700 bg-white dark:bg-slate-800 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20'
+                  : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
