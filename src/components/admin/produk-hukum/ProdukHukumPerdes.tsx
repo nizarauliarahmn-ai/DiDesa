@@ -62,7 +62,10 @@ function saveData(items: ProdukHukumItem[]) {
 function getNoUrut(items: ProdukHukumItem[], tahun: string): number {
   const filtered = items.filter(i => i.tahun === tahun);
   if (filtered.length === 0) return 1;
-  return Math.max(...filtered.map(i => i.no)) + 1;
+  const used = new Set(filtered.map(i => i.no));
+  let next = 1;
+  while (used.has(next)) next++;
+  return next;
 }
 
 function formatDateDisplay(dateStr: string): string {
