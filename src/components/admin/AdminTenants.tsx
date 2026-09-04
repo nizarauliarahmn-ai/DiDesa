@@ -80,7 +80,8 @@ export default function AdminTenants() {
     // ── Inject SEMUA data kop surat dari tenant ke localStorage ──
     // Ini memastikan pratinjau kop di Pengaturan selalu sesuai
     // dengan konfigurasi yang super admin atur per tenant
-    localStorage.setItem('kop_desa',       tenant.nama_desa || '');
+    const rawNamaDesa = tenant.nama_desa || '';
+    localStorage.setItem('kop_desa',       rawNamaDesa.toLowerCase().startsWith('desa') || rawNamaDesa.toLowerCase().startsWith('didesa') ? rawNamaDesa : `DiDesa ${rawNamaDesa}`);
     localStorage.setItem('village_name',   tenant.nama_desa || '');
     localStorage.setItem('kop_kecamatan',  tenant.kecamatan || tenant.nama_kecamatan || '');
     localStorage.setItem('village_kecamatan', tenant.kecamatan || tenant.nama_kecamatan || '');

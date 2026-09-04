@@ -164,8 +164,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           tenantId: matchingTenantKades.id,
           avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Kades'
         };
-        localStorage.setItem('kop_desa', matchingTenantKades.nama_desa);
-        localStorage.setItem('village_name', matchingTenantKades.nama_desa);
+        const kadesRawName = matchingTenantKades.nama_desa;
+        localStorage.setItem('kop_desa', kadesRawName.toLowerCase().startsWith('desa') || kadesRawName.toLowerCase().startsWith('didesa') ? kadesRawName : `DiDesa ${kadesRawName}`);
+        localStorage.setItem('village_name', kadesRawName);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
         
         // Strict Root Domain Routing
@@ -202,8 +203,9 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           tenantId: matchingTenantAdmin.id,
           avatar: 'https://api.dicebear.com/9.x/micah/svg?seed=Admin'
         };
-        localStorage.setItem('kop_desa', matchingTenantAdmin.nama_desa);
-        localStorage.setItem('village_name', matchingTenantAdmin.nama_desa);
+        const adminRawName = matchingTenantAdmin.nama_desa;
+        localStorage.setItem('kop_desa', adminRawName.toLowerCase().startsWith('desa') || adminRawName.toLowerCase().startsWith('didesa') ? adminRawName : `DiDesa ${adminRawName}`);
+        localStorage.setItem('village_name', adminRawName);
         localStorage.setItem('didesa_auth_user', JSON.stringify(loggedUser));
         
         // Strict Root Domain Routing
