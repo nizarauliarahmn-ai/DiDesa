@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, LogOut } from 'lucide-react';
+import { Globe, LogOut, User } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 
 export default function Header({ 
@@ -7,13 +7,19 @@ export default function Header({
   setActiveTab,
   user,
   onAdminLogin,
-  onLogout
+  onLogout,
+  residentUser,
+  onResidentLogin,
+  onResidentLogout
 }: { 
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
   user?: { role: string } | null;
   onAdminLogin?: () => void;
   onLogout?: () => void;
+  residentUser?: { nik: string; name: string } | null;
+  onResidentLogin?: () => void;
+  onResidentLogout?: () => void;
 }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'DiDesa');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
@@ -103,6 +109,25 @@ export default function Header({
         <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 hidden 2xl:block font-mono">
           {getFormattedDate()}
         </span>
+
+        {residentUser ? (
+          <div className="flex items-center gap-2">
+            <button onClick={() => { if (setActiveTab) setActiveTab('resident_dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer border border-emerald-200">
+              <User size={14} />
+              <span className="hidden sm:inline">{residentUser.name}</span>
+            </button>
+            <button onClick={onResidentLogout} title="Keluar" className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer">
+              <LogOut size={16} />
+            </button>
+          </div>
+        ) : onResidentLogin ? (
+          <button onClick={onResidentLogin}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-[11px] font-bold transition-all cursor-pointer active:scale-95">
+            <User size={14} />
+            <span className="hidden sm:inline">Masuk Warga</span>
+          </button>
+        ) : null}
 
         {onAdminLogin && (
           <button 

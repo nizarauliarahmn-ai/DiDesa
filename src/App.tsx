@@ -48,6 +48,8 @@ import AffiliateDashboard from './pages/AffiliateDashboard';
 import { subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant, clearTenantCache } from './utils/tenantResolver';
+import ResidentLogin from './components/portal/ResidentLogin';
+import ResidentDashboard from './components/portal/ResidentDashboard';
 import { performLazyCleanup } from './utils/cleanupService';
 import { useDynamicTitle } from './utils/useDynamicTitle';
 
@@ -160,6 +162,12 @@ export default function App() {
     const saved = localStorage.getItem('didesa_auth_user');
     return saved ? JSON.parse(saved) : null;
   });
+
+  const [residentUser, setResidentUser] = useState<{ nik: string; name: string; phone?: string; tenantId: string } | null>(() => {
+    const saved = localStorage.getItem('didesa_resident_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [showResidentLogin, setShowResidentLogin] = useState(false);
 
   const [view, setView] = useUrlSync<'public' | 'admin'>('mode', 'public', () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -681,20 +689,35 @@ export default function App() {
           activeTab={publicTab}
           setActiveTab={setPublicTab}
           onAdminLogin={() => setView('admin')}
+          residentUser={residentUser}
+          onResidentLogin={() => setShowResidentLogin(true)}
+          onResidentLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }}
         />
+        {showResidentLogin && (
+          <ResidentLogin
+            onLoginSuccess={(resident) => { setResidentUser(resident); setShowResidentLogin(false); setPublicTab('resident_dashboard'); }}
+            onBack={() => setShowResidentLogin(false)}
+          />
+        )}
         <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scroll-smooth transition-all duration-300 ease-in-out">
           <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-4 flex flex-col min-h-full">
             
             <div className="flex-1 w-full">
               <PageTransition pageKey={publicTab}>
-                {publicTab === 'dashboard' && <Dashboard setPublicTab={setPublicTab} />}
-                {publicTab === 'profil_desa' && <ProfilDesa />}
-                {publicTab === 'transparansi' && <TransparansiDana />}
-                {publicTab === 'berita' && <BeritaDesa />}
-                {publicTab === 'peta_wilayah' && <PetaWilayah />}
-                {publicTab === 'layanan_mandiri' && <LayananMandiri />}
-                {publicTab === 'aspirasi' && <AspirasiWarga />}
-                {publicTab === 'ai_assistant' && <AiAssistant />}
+                {publicTab === 'resident_dashboard' && residentUser ? (
+                  <ResidentDashboard onLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }} />
+                ) : (
+                  <>
+                    {publicTab === 'dashboard' && <Dashboard setPublicTab={setPublicTab} />}
+                    {publicTab === 'profil_desa' && <ProfilDesa />}
+                    {publicTab === 'transparansi' && <TransparansiDana />}
+                    {publicTab === 'berita' && <BeritaDesa />}
+                    {publicTab === 'peta_wilayah' && <PetaWilayah />}
+                    {publicTab === 'layanan_mandiri' && <LayananMandiri />}
+                    {publicTab === 'aspirasi' && <AspirasiWarga />}
+                    {publicTab === 'ai_assistant' && <AiAssistant />}
+                  </>
+                )}
               </PageTransition>
             </div>
             
