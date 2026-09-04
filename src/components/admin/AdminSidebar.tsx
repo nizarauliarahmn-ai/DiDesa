@@ -152,6 +152,34 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
     };
 
+    const markTabAsRead = async (tab: string) => {
+      try {
+        const { resolveCurrentTenant } = await import('../../utils/tenantResolver');
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+        const tables: Record<string, { table: string; readKey: string; setter: (n: number) => void }> = {
+          aspirasi: { table: 'aspirasi', readKey: `aspirasi_read_${tid}`, setter: setUnreadAspirasiCount },
+          kepuasan: { table: 'saas_settings', readKey: `kepuasan_read_${tid}`, setter: setUnreadKepuasanCount },
+          buku_tamu: { table: 'buku_tamu', readKey: `buku_tamu_read_${tid}`, setter: setUnreadBukuTamuCount },
+          usulan_desa: { table: 'usulan_desa', readKey: `usulan_read_${tid}`, setter: setUnreadUsulanCount },
+        };
+        const cfg = tables[tab];
+        if (!cfg) return;
+        let ids: string[] = [];
+        if (tab === 'kepuasan') {
+          const { data } = await supabase.from('saas_settings').select('value').eq('tenant_id', tid).eq('key', 'kepuasan_data').maybeSingle();
+          if (data?.value) ids = JSON.parse(data.value).map((k: any) => k.id);
+        } else {
+          const { data } = await supabase.from(cfg.table).select('id').eq('tenant_id', tid);
+          ids = (data || []).map((r: any) => r.id);
+        }
+        const existing = new Set(JSON.parse(localStorage.getItem(cfg.readKey) || '[]'));
+        ids.forEach(id => existing.add(id));
+        localStorage.setItem(cfg.readKey, JSON.stringify([...existing]));
+        cfg.setter(0);
+      } catch {}
+    };
+
     const handleFeedbackUpdate = async () => {
       const feedbacks = await fetchFeedbacksAsync();
       const seen = new Set(getFeedbackReadState());
@@ -355,11 +383,11 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Pelayanan Publik</p>}
             <NavItem id="tour-surat" collapsed={isCollapsed} icon={<FileSignature className="w-5 h-5 transition-colors" strokeWidth={1.75} />} label="Surat & Administrasi" active={activeTab === 'surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('surat'); }} />
-            <NavItem collapsed={isCollapsed} icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); }} badgeCount={activeTab === 'aspirasi' ? 0 : unreadAspirasiCount} />
-            <NavItem collapsed={isCollapsed} icon={<ThumbsUp size={18} />} label="Indeks Kepuasan" active={activeTab === 'kepuasan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('kepuasan'); }} badgeCount={activeTab === 'kepuasan' ? 0 : unreadKepuasanCount} />
+            <NavItem collapsed={isCollapsed} icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); markTabAsRead('aspirasi'); }} badgeCount={activeTab === 'aspirasi' ? 0 : unreadAspirasiCount} />
+            <NavItem collapsed={isCollapsed} icon={<ThumbsUp size={18} />} label="Indeks Kepuasan" active={activeTab === 'kepuasan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('kepuasan'); markTabAsRead('kepuasan'); }} badgeCount={activeTab === 'kepuasan' ? 0 : unreadKepuasanCount} />
             <NavItem collapsed={isCollapsed} icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
-              <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); }} badgeCount={activeTab === 'buku_tamu' ? 0 : unreadBukuTamuCount} />
-            <NavItem collapsed={isCollapsed} icon={<ListChecks size={18} />} label="Usulan Desa" active={activeTab === 'usulan_desa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('usulan_desa'); }} badgeCount={activeTab === 'usulan_desa' ? 0 : unreadUsulanCount} />
+              <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); markTabAsRead('buku_tamu'); }} badgeCount={activeTab === 'buku_tamu' ? 0 : unreadBukuTamuCount} />
+            <NavItem collapsed={isCollapsed} icon={<ListChecks size={18} />} label="Usulan Desa" active={activeTab === 'usulan_desa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('usulan_desa'); markTabAsRead('usulan_desa'); }} badgeCount={activeTab === 'usulan_desa' ? 0 : unreadUsulanCount} />
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Lainnya</p>}
             <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} className="text-emerald-600" />} label="Panduan & Tutorial" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
             {authUser?.role === 'kades' && <NavItem collapsed={isCollapsed} icon={<Settings size={18} />} label="Pengaturan" active={activeTab === 'pengaturan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pengaturan'); }} />}
