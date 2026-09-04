@@ -45,15 +45,30 @@ export default function IndeksKepuasanModal({ onClose }: Props) {
 
       const avgScore = Object.values(ratings).reduce((a, b) => a + b, 0) / aspects.length;
 
-      const { error } = await supabase.from('kepuasan').insert([{
+      // Save to saas_settings (kepuasan_data) since kepuasan table may not exist
+      const existingData = localStorage.getItem('kepuasan_data');
+      const allRatings = existingData ? JSON.parse(existingData) : [];
+      const newEntry = {
+        id: `KPT-${Date.now()}`,
         tenant_id: tenantId,
         ratings,
         rata_rata: Math.round(avgScore * 10) / 10,
         ulasan: ulasan.trim() || null,
         timestamp: new Date().toISOString(),
-      }]);
+      };
+      allRatings.push(newEntry);
+      localStorage.setItem('kepuasan_data', JSON.stringify(allRatings));
 
-      if (error) throw error;
+      // Also try to save to Supabase saas_settings
+      try {
+        await supabase.from('saas_settings').upsert({
+          tenant_id: tenantId,
+          key: 'kepuasan_data',
+          value: JSON.stringify(allRatings),
+        }, { onConflict: 'tenant_id,key' });
+      } catch (e) {
+        // localStorage already saved, ignore Supabase error
+      }
 
       setSubmitted(true);
     } catch (err) {

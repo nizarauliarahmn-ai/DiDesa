@@ -39,14 +39,17 @@ export default function AdminKepuasan() {
       const tenantId = await resolveCurrentTenant();
       if (!tenantId) { setLoading(false); return; }
 
-      const { data: records, error } = await supabase
-        .from('kepuasan')
-        .select('*')
+      // Read from saas_settings kepuasan_data
+      const { data: settings, error } = await supabase
+        .from('saas_settings')
+        .select('value')
         .eq('tenant_id', tenantId)
-        .order('timestamp', { ascending: false });
+        .eq('key', 'kepuasan_data')
+        .maybeSingle();
 
-      if (!error && records) {
-        setData(records as KepuasanRecord[]);
+      if (!error && settings?.value) {
+        const parsed = JSON.parse(settings.value);
+        setData(Array.isArray(parsed) ? parsed as KepuasanRecord[] : []);
       }
     } catch (err) {
       console.error('Gagal memuat data kepuasan:', err);
