@@ -87,6 +87,43 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
     });
   };
 
+  const markTabAsRead = useCallback(async (tab: string) => {
+    try {
+      const { resolveCurrentTenant } = await import('../../utils/tenantResolver');
+      const tid = await resolveCurrentTenant();
+      if (!tid) return;
+      let ids: string[] = [];
+      let readKey = '';
+      let setter: (n: number) => void = () => {};
+      if (tab === 'aspirasi') {
+        readKey = `aspirasi_read_${tid}`;
+        setter = setUnreadAspirasiCount;
+        const { data } = await supabase.from('aspirasi').select('id').eq('tenant_id', tid);
+        ids = (data || []).map((r: any) => r.id);
+      } else if (tab === 'kepuasan') {
+        readKey = `kepuasan_read_${tid}`;
+        setter = setUnreadKepuasanCount;
+        const { data } = await supabase.from('saas_settings').select('value').eq('tenant_id', tid).eq('key', 'kepuasan_data').maybeSingle();
+        if (data?.value) ids = JSON.parse(data.value).map((k: any) => k.id);
+      } else if (tab === 'buku_tamu') {
+        readKey = `buku_tamu_read_${tid}`;
+        setter = setUnreadBukuTamuCount;
+        const { data } = await supabase.from('guest_book').select('id').eq('tenant_id', tid);
+        ids = (data || []).map((r: any) => r.id);
+      } else if (tab === 'usulan_desa') {
+        readKey = `usulan_read_${tid}`;
+        setter = setUnreadUsulanCount;
+        const { data } = await supabase.from('usulan_desas').select('id').eq('tenant_id', tid);
+        ids = (data || []).map((r: any) => r.id);
+      }
+      if (!readKey) return;
+      const existing = new Set(JSON.parse(localStorage.getItem(readKey) || '[]'));
+      ids.forEach(id => existing.add(id));
+      localStorage.setItem(readKey, JSON.stringify([...existing]));
+      setter(0);
+    } catch {}
+  }, []);
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       if (!e.target.files || e.target.files.length === 0) return;
@@ -152,34 +189,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       setGlobalColor(localStorage.getItem('global_app_color') || '#047857');
     };
 
-    const markTabAsRead = async (tab: string) => {
-      try {
-        const { resolveCurrentTenant } = await import('../../utils/tenantResolver');
-        const tid = await resolveCurrentTenant();
-        if (!tid) return;
-        const tables: Record<string, { table: string; readKey: string; setter: (n: number) => void }> = {
-          aspirasi: { table: 'aspirasi', readKey: `aspirasi_read_${tid}`, setter: setUnreadAspirasiCount },
-          kepuasan: { table: 'saas_settings', readKey: `kepuasan_read_${tid}`, setter: setUnreadKepuasanCount },
-          buku_tamu: { table: 'guest_book', readKey: `buku_tamu_read_${tid}`, setter: setUnreadBukuTamuCount },
-          usulan_desa: { table: 'usulan_desas', readKey: `usulan_read_${tid}`, setter: setUnreadUsulanCount },
-        };
-        const cfg = tables[tab];
-        if (!cfg) return;
-        let ids: string[] = [];
-        if (tab === 'kepuasan') {
-          const { data } = await supabase.from('saas_settings').select('value').eq('tenant_id', tid).eq('key', 'kepuasan_data').maybeSingle();
-          if (data?.value) ids = JSON.parse(data.value).map((k: any) => k.id);
-        } else {
-          const { data } = await supabase.from(cfg.table).select('id').eq('tenant_id', tid);
-          ids = (data || []).map((r: any) => r.id);
-        }
-        const existing = new Set(JSON.parse(localStorage.getItem(cfg.readKey) || '[]'));
-        ids.forEach(id => existing.add(id));
-        localStorage.setItem(cfg.readKey, JSON.stringify([...existing]));
-        cfg.setter(0);
-      } catch {}
-    };
-
     const handleFeedbackUpdate = async () => {
       const feedbacks = await fetchFeedbacksAsync();
       const seen = new Set(getFeedbackReadState());
@@ -235,13 +244,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       }
     };
     handleAffiliatesUpdate();
-
-    const resolveTid = async () => {
-      try {
-        const { resolveCurrentTenant } = await import('../../utils/tenantResolver');
-        return await resolveCurrentTenant();
-      } catch { return null; }
-    };
 
     const handleAspirasiUpdate = async () => {
       try {
