@@ -125,12 +125,14 @@ export default function AdminBukuTamu() {
         event: 'incoming-guest',
         payload
       });
+      window.dispatchEvent(new Event('didesa_buku_tamu_updated'));
     } else {
       // Fallback
       const tempChannel = supabase.channel(`kiosk-notif-${tenantId}`);
       tempChannel.subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           tempChannel.send({ type: 'broadcast', event: 'incoming-guest', payload });
+          window.dispatchEvent(new Event('didesa_buku_tamu_updated'));
         }
         setTimeout(() => { supabase.removeChannel(tempChannel); }, 1000);
       });

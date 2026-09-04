@@ -387,6 +387,7 @@ export default function AdminUsulanDesa() {
         const { error } = await supabase.from('usulan_desas').insert(payload);
         if (error) throw error;
         showToast(`Usulan baru ${kode} berhasil disimpan.`, 'success');
+        window.dispatchEvent(new Event('didesa_usulan_updated'));
       }
 
       // Deteksi usulan serupa saat menambah/mengedit

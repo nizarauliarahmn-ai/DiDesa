@@ -160,8 +160,8 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         const tables: Record<string, { table: string; readKey: string; setter: (n: number) => void }> = {
           aspirasi: { table: 'aspirasi', readKey: `aspirasi_read_${tid}`, setter: setUnreadAspirasiCount },
           kepuasan: { table: 'saas_settings', readKey: `kepuasan_read_${tid}`, setter: setUnreadKepuasanCount },
-          buku_tamu: { table: 'buku_tamu', readKey: `buku_tamu_read_${tid}`, setter: setUnreadBukuTamuCount },
-          usulan_desa: { table: 'usulan_desa', readKey: `usulan_read_${tid}`, setter: setUnreadUsulanCount },
+          buku_tamu: { table: 'guest_book', readKey: `buku_tamu_read_${tid}`, setter: setUnreadBukuTamuCount },
+          usulan_desa: { table: 'usulan_desas', readKey: `usulan_read_${tid}`, setter: setUnreadUsulanCount },
         };
         const cfg = tables[tab];
         if (!cfg) return;
@@ -274,7 +274,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         if (!tid) return;
         const readKey = `buku_tamu_read_${tid}`;
         const readIds = new Set(JSON.parse(localStorage.getItem(readKey) || '[]'));
-        const { data } = await supabase.from('buku_tamu').select('id').eq('tenant_id', tid);
+        const { data } = await supabase.from('guest_book').select('id').eq('tenant_id', tid);
         setUnreadBukuTamuCount((data || []).filter((b: any) => !readIds.has(b.id)).length);
       } catch { setUnreadBukuTamuCount(0); }
     };
@@ -285,7 +285,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         if (!tid) return;
         const readKey = `usulan_read_${tid}`;
         const readIds = new Set(JSON.parse(localStorage.getItem(readKey) || '[]'));
-        const { data } = await supabase.from('usulan_desa').select('id').eq('tenant_id', tid);
+        const { data } = await supabase.from('usulan_desas').select('id').eq('tenant_id', tid);
         setUnreadUsulanCount((data || []).filter((u: any) => !readIds.has(u.id)).length);
       } catch { setUnreadUsulanCount(0); }
     };
@@ -321,7 +321,46 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       window.removeEventListener('didesa_kepuasan_updated', handleKepuasanUpdate);
       window.removeEventListener('didesa_buku_tamu_updated', handleBukuTamuUpdate);
       window.removeEventListener('didesa_usulan_updated', handleUsulanUpdate);
+      if (pollTimer) clearInterval(pollTimer);
     };
+  }, []);
+
+  // Real-time polling setiap 30 detik
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const { resolveCurrentTenant } = await import('../../utils/tenantResolver');
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+
+        // Aspirasi
+        const readKeyA = `aspirasi_read_${tid}`;
+        const readIdsA = new Set(JSON.parse(localStorage.getItem(readKeyA) || '[]'));
+        const { data: dA } = await supabase.from('aspirasi').select('id').eq('tenant_id', tid).eq('status', 'Baru');
+        setUnreadAspirasiCount((dA || []).filter((a: any) => !readIdsA.has(a.id)).length);
+
+        // Kepuasan
+        const { data: dk } = await supabase.from('saas_settings').select('value').eq('tenant_id', tid).eq('key', 'kepuasan_data').maybeSingle();
+        if (dk?.value) {
+          const all = JSON.parse(dk.value);
+          const readIdsK = new Set(JSON.parse(localStorage.getItem(`kepuasan_read_${tid}`) || '[]'));
+          setUnreadKepuasanCount(all.filter((k: any) => !readIdsK.has(k.id)).length);
+        }
+
+        // Buku Tamu
+        const readIdsB = new Set(JSON.parse(localStorage.getItem(`buku_tamu_read_${tid}`) || '[]'));
+        const { data: dB } = await supabase.from('guest_book').select('id').eq('tenant_id', tid);
+        setUnreadBukuTamuCount((dB || []).filter((b: any) => !readIdsB.has(b.id)).length);
+
+        // Usulan
+        const readIdsU = new Set(JSON.parse(localStorage.getItem(`usulan_read_${tid}`) || '[]'));
+        const { data: dU } = await supabase.from('usulan_desas').select('id').eq('tenant_id', tid);
+        setUnreadUsulanCount((dU || []).filter((u: any) => !readIdsU.has(u.id)).length);
+      } catch {}
+    };
+    poll();
+    const pollTimer = setInterval(poll, 30000);
+    return () => clearInterval(pollTimer);
   }, []);
 
   return (
