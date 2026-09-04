@@ -705,14 +705,14 @@ export default function App() {
         {/* Mobile Navigation Bar matching user mockup request */}
         <nav className="fixed bottom-0 w-full h-16 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 flex justify-around items-center lg:hidden z-50 shadow-[0px_-2px_10px_rgba(0,0,0,0.05)] pb-safe">
           <button 
-             onClick={() => setPublicTab('dashboard')} 
+             onClick={() => { setPublicTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
              className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${publicTab === 'dashboard' ? 'text-emerald-800 font-bold' : 'text-gray-400'}`}
           >
             <LayoutDashboard className="w-5 h-5 mb-0.5" />
             <span className="text-[9px] font-bold">Utama</span>
           </button>
           <button 
-             id="tour-mobile-layanan" onClick={() => setPublicTab('layanan_mandiri')} 
+             id="tour-mobile-layanan" onClick={() => { setPublicTab('layanan_mandiri'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
              className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${publicTab === 'layanan_mandiri' ? 'text-emerald-800 font-bold' : 'text-gray-400'}`}
           >
             <ShieldCheck className="w-5 h-5 mb-0.5" />
@@ -721,7 +721,7 @@ export default function App() {
           
           <div className="relative -top-3">
             <button 
-              id="tour-mobile-aspirasi" onClick={() => setPublicTab('aspirasi')}
+              id="tour-mobile-aspirasi" onClick={() => { setPublicTab('aspirasi'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               className="w-14 h-14 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full flex flex-col items-center justify-center shadow-lg dark:shadow-none shadow-emerald-700/30 active:scale-95 transition-all border-4 border-white"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-square-text"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg>
@@ -729,14 +729,14 @@ export default function App() {
           </div>
           
           <button 
-             id="tour-mobile-berita" onClick={() => setPublicTab('berita')} 
+             id="tour-mobile-berita" onClick={() => { setPublicTab('berita'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
              className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${publicTab === 'berita' ? 'text-emerald-800 font-bold' : 'text-gray-400'}`}
           >
             <Newspaper className="w-5 h-5 mb-0.5" />
             <span className="text-[9px] font-bold">Berita</span>
           </button>
           <button 
-             onClick={() => setPublicTab('profil_desa')} 
+             onClick={() => { setPublicTab('profil_desa'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
              className={`flex flex-col items-center justify-center flex-1 h-full transition-all ${publicTab === 'profil_desa' ? 'text-emerald-800 font-bold' : 'text-gray-400'}`}
           >
             <Building2 className="w-5 h-5 mb-0.5" />
