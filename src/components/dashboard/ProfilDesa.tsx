@@ -184,15 +184,13 @@ export default function ProfilDesa() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {rwList.map((rw, rwIdx) => {
               const rwNo = rw.no || String(rwIdx + 1);
               const rwNoInt = parseInt(rwNo);
               const assignedRts = rtList.filter(rt => {
-                // 1. Cek dari mapping RT→RW
                 const mapping = rtRwMapping.find(m => m.rt === rt.no || m.rt === String(parseInt(rt.no)));
                 if (mapping && (mapping.rw === rwNo || mapping.rw === String(rwNoInt))) return true;
-                // 2. Fallback: cek dari field rtRw (format: "01 / 01")
                 if (rt.rtRw && typeof rt.rtRw === 'string') {
                   const parts = rt.rtRw.split('/').map((s: string) => s.trim());
                   if (parts.length >= 2 && (parts[1] === rwNo.padStart(2, '0') || parts[1] === String(rwNoInt))) return true;
@@ -200,26 +198,26 @@ export default function ProfilDesa() {
                 return false;
               });
               return (
-                <div key={rwIdx} className="bg-emerald-50/70 dark:bg-emerald-900/20 rounded-2xl p-4 border border-emerald-200/60 dark:border-emerald-800/40">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0">
-                      RW {rwNo.padStart(2, '0')}
+                <div key={rwIdx} className="group bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 rounded-2xl p-5 border border-emerald-200/60 dark:border-emerald-700/40 hover:shadow-lg hover:shadow-emerald-100 dark:hover:shadow-emerald-900/20 transition-all duration-300">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white font-black text-base shadow-lg shadow-emerald-200 dark:shadow-emerald-800/40 group-hover:scale-105 transition-transform">
+                      RW{rwNo.padStart(2, '0')}
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white text-sm">{rw.name}</h4>
-                      <p className="text-xs text-emerald-700 dark:text-emerald-400">{rw.role || 'Ketua RW'}</p>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-base">{rw.name}</h4>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">{rw.role || 'Ketua RW'}</p>
                     </div>
                   </div>
                   {assignedRts.length > 0 && (
-                    <div className="ml-4 pl-4 border-l-2 border-emerald-300 dark:border-emerald-700 space-y-2">
+                    <div className="ml-2 pl-4 border-l-2 border-emerald-300 dark:border-emerald-600 space-y-3">
                       {assignedRts.map((rt, rtIdx) => (
-                        <div key={rtIdx} className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-[10px] border border-emerald-200 dark:border-emerald-700 shrink-0">
-                            RT {rt.no.padStart(2, '0')}
+                        <div key={rtIdx} className="flex items-center gap-3 group/rt">
+                          <div className="w-9 h-9 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-[11px] border-2 border-emerald-200 dark:border-emerald-700 shrink-0 group-hover/rt:border-emerald-400 dark:group-hover/rt:border-emerald-500 transition-colors">
+                            RT{rt.no.padStart(2, '0')}
                           </div>
                           <div>
-                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{rt.name}</p>
-                            <p className="text-[10px] text-gray-500 dark:text-slate-400">{rt.role || 'Ketua RT'}</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover/rt:text-emerald-700 dark:group-hover/rt:text-emerald-300 transition-colors">{rt.name}</p>
+                            <p className="text-[11px] text-gray-500 dark:text-slate-400">{rt.role || 'Ketua RT'}</p>
                           </div>
                         </div>
                       ))}
@@ -230,10 +228,10 @@ export default function ProfilDesa() {
             })}
 
             {rtList.length > 0 && rwList.length === 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="col-span-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {rtList.map((rt, idx) => (
-                  <div key={idx} className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5">
-                    <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-xs shrink-0">
+                  <div key={idx} className="group bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-800 dark:to-slate-700/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex items-center gap-3 hover:shadow-md transition-all duration-300">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0 group-hover:scale-105 transition-transform">
                       {rt.no}
                     </div>
                     <div>
