@@ -6,7 +6,6 @@ export default function Header({
   activeTab,
   setActiveTab,
   user,
-  onAdminLogin,
   onLogout,
   residentUser,
   onResidentLogin,
@@ -15,7 +14,6 @@ export default function Header({
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
   user?: { role: string } | null;
-  onAdminLogin?: () => void;
   onLogout?: () => void;
   residentUser?: { nik: string; name: string } | null;
   onResidentLogin?: () => void;
@@ -128,15 +126,6 @@ export default function Header({
             <span className="hidden sm:inline">Masuk Warga</span>
           </button>
         ) : null}
-
-        {onAdminLogin && (
-          <button 
-            onClick={onAdminLogin}
-            className="px-3 py-1.5 bg-emerald-800 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-bold transition-all cursor-pointer active:scale-95"
-          >
-            Mode Admin
-          </button>
-        )}
 
         {user && onLogout && (
           <button 

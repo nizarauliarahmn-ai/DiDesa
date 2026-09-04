@@ -705,7 +705,6 @@ export default function App() {
         <Header 
           activeTab={publicTab}
           setActiveTab={setPublicTab}
-          onAdminLogin={() => setView('admin')}
           residentUser={residentUser}
           onResidentLogin={() => setShowResidentLogin(true)}
           onResidentLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }}
