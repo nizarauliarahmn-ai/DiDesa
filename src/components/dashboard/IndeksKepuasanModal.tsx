@@ -70,6 +70,20 @@ export default function IndeksKepuasanModal({ onClose }: Props) {
         // localStorage already saved, ignore Supabase error
       }
 
+      // Send notification to admin bell
+      await supabase.from('notifications').insert([{
+        id: `notif-${Date.now()}`,
+        tenant_id: tenantId,
+        title: 'Indeks Kepuasan Baru',
+        message: `Warga memberikan penilaian rata-rata ${Math.round(avgScore * 10) / 10} bintang${ulasan.trim() ? ': "' + ulasan.trim().slice(0, 80) + '"' : ''}`,
+        category: 'Services',
+        is_read: false,
+        timestamp: new Date().toISOString(),
+      }]);
+
+      // Trigger sidebar badge update
+      window.dispatchEvent(new Event('didesa_kepuasan_updated'));
+
       setSubmitted(true);
     } catch (err) {
       console.error(err);
