@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, Newspaper, ShieldCheck, Building2, ArrowLeft } from 'lucide-react';
 import { ensureKadesInOfficers } from './utils/letterOfficers';
-import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import Dashboard from './components/Dashboard';
 import AdminSidebar from './components/admin/AdminSidebar';
@@ -674,9 +673,6 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-gray-50/50 dark:bg-slate-800/50 text-gray-900 dark:text-white font-sans overflow-hidden">
-      <div className="lg:hidden">
-        <Sidebar onLogout={handleLogout} activeTab={publicTab} setActiveTab={setPublicTab} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
-      </div>
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative pb-16 lg:pb-0">
         <Header 
           toggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)} 
