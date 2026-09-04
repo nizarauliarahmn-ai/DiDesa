@@ -283,7 +283,7 @@ export default function App() {
             // kosong. Mencegah nama desa tenant lain tertinggal di localStorage
             // dan bocor ke surat yang dicetak / verifikasi QR.
             localStorage.setItem('village_name', tName);
-            localStorage.setItem('kop_desa', tName.toLowerCase().startsWith('desa') ? tName : `Desa ${tName}`);
+            localStorage.setItem('kop_desa', tName.toLowerCase().startsWith('desa') || tName.toLowerCase().startsWith('didesa') ? tName : `DiDesa ${tName}`);
           }
         }
 
