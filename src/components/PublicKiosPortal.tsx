@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BookOpen, FileText, Megaphone, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { BookOpen, FileText, Megaphone, ArrowRight, ShieldCheck, Zap, Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 import { supabase } from '../utils/supabase';
@@ -122,7 +122,7 @@ export default function PublicKiosPortal() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 px-6 pb-20 flex items-center justify-center">
-        <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           
           {/* Card 1 */}
           <motion.button 
@@ -197,6 +197,30 @@ export default function PublicKiosPortal() {
               Sampaikan aspirasi, saran, atau pengaduan layanan kepada pemerintah desa secara anonim maupun resmi.
             </p>
             <div className="relative z-10 mt-8 flex items-center text-amber-400 font-bold text-xl group-hover:text-amber-300 transition-colors">
+              Buka Layanan <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-3 transition-transform duration-300" />
+            </div>
+          </motion.button>
+
+          {/* Card 4 - Indeks Kepuasan */}
+          <motion.button 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            whileHover={{ y: -10, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigateTo('kios_kepuasan')}
+            className="group relative bg-slate-800/40 backdrop-blur-xl rounded-[2rem] p-8 border border-slate-700/50 text-left flex flex-col h-full hover:bg-slate-800/60 transition-all overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative z-10 w-20 h-20 bg-gradient-to-br from-violet-400 to-purple-600 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform duration-500 group-hover:rotate-3">
+              <Star className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="relative z-10 text-3xl font-bold text-white mb-4">Indeks Kepuasan</h2>
+            <p className="relative z-10 text-slate-400 text-lg flex-1 leading-relaxed group-hover:text-slate-300 transition-colors">
+              Beri penilaian dan ulasan Anda terhadap kualitas pelayanan desa hari ini.
+            </p>
+            <div className="relative z-10 mt-8 flex items-center text-violet-400 font-bold text-xl group-hover:text-violet-300 transition-colors">
               Buka Layanan <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-3 transition-transform duration-300" />
             </div>
           </motion.button>

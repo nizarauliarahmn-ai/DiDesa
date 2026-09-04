@@ -66,6 +66,7 @@ import PrintQRKiosk from './components/admin/PrintQRKiosk';
 import PublicKiosPortal from './components/PublicKiosPortal';
 import PublicKiosSurat from './components/PublicKiosSurat';
 import PublicKiosAspirasi from './components/PublicKiosAspirasi';
+import PublicKiosKepuasan from './components/PublicKiosKepuasan';
 import KioskKtpScanner from './components/KioskKtpScanner';
 import SaasLandingPage from './components/SaasLandingPage';
 
@@ -509,6 +510,9 @@ export default function App() {
   }
   if (tabParam === 'kios_aspirasi') {
     return <><PublicKiosAspirasi /><ToastContainer /></>;
+  }
+  if (tabParam === 'kios_kepuasan') {
+    return <><PublicKiosKepuasan /><ToastContainer /></>;
   }
   if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
     return <><PublicVerifikasiSurat /><ToastContainer /></>;
