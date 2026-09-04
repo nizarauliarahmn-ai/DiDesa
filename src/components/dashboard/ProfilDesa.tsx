@@ -13,6 +13,9 @@ export default function ProfilDesa() {
   const [totalPenduduk, setTotalPenduduk] = useState(0);
   const [ketinggian, setKetinggian] = useState(() => localStorage.getItem('village_ketinggian') || '-');
   const [batasUtara, setBatasUtara] = useState(() => localStorage.getItem('village_batas_utara') || '-');
+  const [batasSelatan, setBatasSelatan] = useState(() => localStorage.getItem('village_batas_selatan') || '-');
+  const [batasTimur, setBatasTimur] = useState(() => localStorage.getItem('village_batas_timur') || '-');
+  const [batasBarat, setBatasBarat] = useState(() => localStorage.getItem('village_batas_barat') || '-');
   const [villageLat, setVillageLat] = useState(() => parseFloat(localStorage.getItem('village_lat') || '0'));
   const [villageLng, setVillageLng] = useState(() => parseFloat(localStorage.getItem('village_lng') || '0'));
 
@@ -64,6 +67,9 @@ export default function ProfilDesa() {
             if (map['village_luas_wilayah']) setLuasWilayah(map['village_luas_wilayah']);
             if (map['village_ketinggian']) setKetinggian(map['village_ketinggian']);
             if (map['village_batas_utara']) setBatasUtara(map['village_batas_utara']);
+            if (map['village_batas_selatan']) setBatasSelatan(map['village_batas_selatan']);
+            if (map['village_batas_timur']) setBatasTimur(map['village_batas_timur']);
+            if (map['village_batas_barat']) setBatasBarat(map['village_batas_barat']);
             if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
             if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
           }
@@ -100,88 +106,7 @@ export default function ProfilDesa() {
         <p className="text-gray-500 dark:text-slate-400 mt-2">Mengenal lebih dekat pemerintahan dan kelembagaan desa</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Kepala Desa Highlight */}
-        <motion.div variants={itemVariants} className="lg:col-span-1">
-          <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden h-full">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <Building className="w-48 h-48" />
-            </div>
-            <div className="relative z-10 flex flex-col items-center text-center space-y-4">
-              <div className="w-32 h-32 rounded-full border-4 border-emerald-500/30 overflow-hidden bg-white/10 p-1">
-                <UserPlaceholder className="w-full h-full rounded-full bg-slate-100 dark:bg-slate-800" iconClassName="w-2/5 h-2/5 text-slate-500 dark:text-slate-400" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold">{perangkatDesa[0].name}</h3>
-                <p className="text-emerald-300 font-semibold mt-1 tracking-wider uppercase text-sm">{perangkatDesa[0].role}</p>
-              </div>
-              <p className="text-emerald-100/80 text-sm mt-4 italic leading-relaxed">
-                "Bersama masyarakat membangun desa yang mandiri, transparan, dan berkeadilan untuk kesejahteraan bersama."
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Info Geografis */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 flex flex-col justify-center h-full">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-600">
-                <MapPin className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Lokasi & Demografi</h3>
-                <p className="text-sm text-gray-500 dark:text-slate-400">Informasi geografis wilayah</p>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Luas Wilayah</p>
-                <p className="text-xl font-black text-gray-900 dark:text-white">{luasWilayah} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">km²</span></p>
-              </div>
-              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Total Penduduk</p>
-                <p className="text-xl font-black text-gray-900 dark:text-white">{totalPenduduk.toLocaleString('id-ID')} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Jiwa</span></p>
-              </div>
-              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Ketinggian</p>
-                <p className="text-xl font-black text-gray-900 dark:text-white">{ketinggian} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">mdpl</span></p>
-              </div>
-              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Batas Utara</p>
-                <p className="text-sm font-black text-gray-900 dark:text-white">{batasUtara}</p>
-              </div>
-            </div>
-            
-            {villageLat !== 0 && villageLng !== 0 ? (
-              <div className="mt-4 rounded-2xl h-40 overflow-hidden relative border border-gray-200 dark:border-slate-700">
-                <iframe
-                  title="Peta Desa"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${villageLng - 0.01}%2C${villageLat - 0.005}%2C${villageLng + 0.01}%2C${villageLat + 0.005}&layer=mapnik&marker=${villageLat}%2C${villageLng}`}
-                />
-                <a
-                  href={`https://www.openstreetmap.org/?mlat=${villageLat}&mlon=${villageLng}#map=14/${villageLat}/${villageLng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-2 right-2 bg-white/90 dark:bg-slate-800/90 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-white dark:hover:bg-slate-700 transition-colors"
-                >
-                  Buka Peta Penuh
-                </a>
-              </div>
-            ) : (
-              <div className="mt-4 bg-gray-100 dark:bg-slate-800 rounded-2xl h-32 overflow-hidden relative flex items-center justify-center border border-gray-200 dark:border-slate-700">
-                <span className="text-sm font-bold text-gray-400">Atur koordinat desa di Pengaturan untuk menampilkan peta</span>
-              </div>
-            )}
-          </div>
-        </motion.div>
-      </div>
-
+      {/* Perangkat Desa & Staf */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
@@ -194,6 +119,24 @@ export default function ProfilDesa() {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {/* Kepala Desa - Card terbesar */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="col-span-2 md:col-span-3 lg:col-span-5 bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-2xl p-6 border border-emerald-700/30 shadow-md flex flex-col md:flex-row items-center text-center md:text-left gap-5 group"
+          >
+            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full border-4 border-emerald-500/30 overflow-hidden bg-white/10 p-1 shrink-0">
+              <UserPlaceholder className="w-full h-full rounded-full bg-slate-100 dark:bg-slate-800" iconClassName="w-2/5 h-2/5 text-slate-500 dark:text-slate-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-xl md:text-2xl font-bold text-white">{perangkatDesa[0].name}</h4>
+              <p className="text-emerald-300 font-semibold mt-1 tracking-wider uppercase text-sm">{perangkatDesa[0].role}</p>
+              <p className="text-emerald-100/70 text-sm mt-3 italic leading-relaxed">
+                "Bersama masyarakat membangun desa yang mandiri, transparan, dan berkeadilan untuk kesejahteraan bersama."
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Perangkat lainnya */}
           {perangkatDesa.slice(1).map((person, idx) => (
             <motion.div 
               key={idx}
@@ -207,6 +150,90 @@ export default function ProfilDesa() {
           ))}
         </div>
       </div>
+
+      {/* Lokasi & Demografi - Full Width */}
+      <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-600">
+            <MapPin className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">Lokasi & Demografi</h3>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Informasi geografis wilayah</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Peta - 7 kolom */}
+          <div className="lg:col-span-7">
+            {villageLat !== 0 && villageLng !== 0 ? (
+              <div className="rounded-2xl h-64 md:h-80 overflow-hidden relative border border-gray-200 dark:border-slate-700">
+                <iframe
+                  title="Peta Desa"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  loading="lazy"
+                  src={`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${villageLng - 0.01},${villageLat - 0.005},${villageLng + 0.01},${villageLat + 0.005}&size=800,400&imageSR=4326&bboxSR=4326&format=png&f=image`}
+                />
+                <a
+                  href={`https://www.openstreetmap.org/?mlat=${villageLat}&mlon=${villageLng}#map=14/${villageLat}/${villageLng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-3 right-3 bg-white/90 dark:bg-slate-800/90 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                >
+                  Buka Peta Penuh
+                </a>
+              </div>
+            ) : (
+              <div className="bg-gray-100 dark:bg-slate-800 rounded-2xl h-64 overflow-hidden relative flex items-center justify-center border border-gray-200 dark:border-slate-700">
+                <span className="text-sm font-bold text-gray-400">Atur koordinat desa di Pengaturan untuk menampilkan peta</span>
+              </div>
+            )}
+          </div>
+
+          {/* Statistik & Batas - 5 kolom */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Luas Wilayah</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">{luasWilayah} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">km²</span></p>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Total Penduduk</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">{totalPenduduk.toLocaleString('id-ID')} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">Jiwa</span></p>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Ketinggian</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">{ketinggian} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">mdpl</span></p>
+              </div>
+            </div>
+
+            {/* Batas Desa */}
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Batas Wilayah</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-sky-50 dark:bg-sky-900/30 p-3 rounded-xl border border-sky-100 dark:border-sky-800">
+                  <p className="text-[10px] text-sky-600 dark:text-sky-400 font-bold uppercase">Utara</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasUtara}</p>
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-xl border border-amber-100 dark:border-amber-800">
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase">Selatan</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasSelatan}</p>
+                </div>
+                <div className="bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-xl border border-emerald-100 dark:border-emerald-800">
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Timur</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasTimur}</p>
+                </div>
+                <div className="bg-rose-50 dark:bg-rose-900/30 p-3 rounded-xl border border-rose-100 dark:border-rose-800">
+                  <p className="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase">Barat</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasBarat}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
         <div className="flex items-center gap-3 mb-6">
