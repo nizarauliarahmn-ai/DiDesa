@@ -675,7 +675,6 @@ export default function App() {
     <div className="flex h-screen bg-gray-50/50 dark:bg-slate-800/50 text-gray-900 dark:text-white font-sans overflow-hidden">
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative pb-16 lg:pb-0">
         <Header 
-          toggleMobileMenu={() => setIsMobileMenuOpen(prev => !prev)} 
           activeTab={publicTab}
           setActiveTab={setPublicTab}
           onAdminLogin={() => setView('admin')}

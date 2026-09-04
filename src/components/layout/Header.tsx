@@ -1,16 +1,14 @@
 import React from 'react';
-import { Globe, Menu, LogOut } from 'lucide-react';
+import { Globe, LogOut } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 
 export default function Header({ 
-  toggleMobileMenu,
   activeTab,
   setActiveTab,
   user,
   onAdminLogin,
   onLogout
 }: { 
-  toggleMobileMenu?: () => void;
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
   user?: { role: string } | null;
@@ -59,9 +57,6 @@ export default function Header({
   return (
     <header className="h-16 md:h-18 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 z-40 sticky top-0 shadow-sm transition-all">
       <div className="flex items-center gap-3 shrink-0">
-        <button onClick={toggleMobileMenu} className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-          <Menu size={22} />
-        </button>
         <a href="#section-dashboard" onClick={() => handleNavClick('dashboard')} className="flex items-center gap-3 group">
           <div 
             className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-900/10 group-hover:scale-105 transition-transform"
@@ -75,9 +70,8 @@ export default function Header({
           </div>
           <div className="leading-tight">
             <h2 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">{desaName}</h2>
-            <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-              PORTAL WARGA RESMI
+            <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-extrabold uppercase tracking-widest">
+              PORTAL WARGA
             </p>
           </div>
         </a>
