@@ -323,7 +323,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       window.removeEventListener('didesa_kepuasan_updated', handleKepuasanUpdate);
       window.removeEventListener('didesa_buku_tamu_updated', handleBukuTamuUpdate);
       window.removeEventListener('didesa_usulan_updated', handleUsulanUpdate);
-      if (pollTimer) clearInterval(pollTimer);
     };
   }, []);
 
