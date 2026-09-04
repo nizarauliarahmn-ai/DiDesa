@@ -751,7 +751,6 @@ export default function App() {
       <ToastContainer />
       <WaNotificationManager />
       <GlobalUpdateNotifier isBusy={isBusy} />
-      {user && user.role !== 'saas_admin' && <GlobalBugReportButton />}
     </div>
   );
 }
