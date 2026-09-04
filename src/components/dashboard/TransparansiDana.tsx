@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'motion/react';
-import { TrendingUp, ArrowDownRight, ArrowUpRight, CheckCircle, Search, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { TrendingUp, ArrowDownRight, ArrowUpRight, CheckCircle, Search, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface BudgetLineItem {
   id: string;
@@ -15,6 +15,8 @@ export default function TransparansiDana() {
   const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear().toString());
   const [activeTab, setActiveTab] = useState<'semua' | 'pendapatan' | 'belanja'>('semua');
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCard, setExpandedCard] = useState<'pendapatan' | 'belanja' | 'silpa' | null>(null);
+  const [showAllDetails, setShowAllDetails] = useState(false);
   const [apbdesData, setApbdesData] = useState<any>(() => {
     const saved = localStorage.getItem('didesa_apbdes_data');
     return saved ? JSON.parse(saved) : null;
@@ -125,7 +127,8 @@ export default function TransparansiDana() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.45, delay: 0 }}
-          className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group"
+          onClick={() => { setExpandedCard(expandedCard === 'pendapatan' ? null : 'pendapatan'); setActiveTab('pendapatan'); }}
+          className={`bg-white dark:bg-slate-900 p-6 rounded-3xl border shadow-sm dark:shadow-none flex items-center justify-between group cursor-pointer transition-all ${expandedCard === 'pendapatan' ? 'border-emerald-300 dark:border-emerald-600 ring-2 ring-emerald-100 dark:ring-emerald-800' : 'border-gray-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-700'}`}
         >
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">TOTAL PENDAPATAN ({selectedYear})</p>
@@ -133,7 +136,7 @@ export default function TransparansiDana() {
             <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1.5 font-medium">Target APBDes: {formatRupiah(summary.pendapatanBudget)}</p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 group-hover:scale-110 transition-transform">
-            <ArrowUpRight className="w-6 h-6" />
+            {expandedCard === 'pendapatan' ? <ChevronUp className="w-6 h-6" /> : <ArrowUpRight className="w-6 h-6" />}
           </div>
         </motion.div>
 
@@ -143,7 +146,8 @@ export default function TransparansiDana() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.45, delay: 0.1 }}
-          className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group"
+          onClick={() => { setExpandedCard(expandedCard === 'belanja' ? null : 'belanja'); setActiveTab('belanja'); }}
+          className={`bg-white dark:bg-slate-900 p-6 rounded-3xl border shadow-sm dark:shadow-none flex items-center justify-between group cursor-pointer transition-all ${expandedCard === 'belanja' ? 'border-rose-300 dark:border-rose-600 ring-2 ring-rose-100 dark:ring-rose-800' : 'border-gray-100 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-700'}`}
         >
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">TOTAL BELANJA ({selectedYear})</p>
@@ -151,7 +155,7 @@ export default function TransparansiDana() {
             <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-1.5 font-medium">Anggaran Dialokasi: {formatRupiah(summary.belanjaBudget)}</p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 shrink-0 group-hover:scale-110 transition-transform">
-            <ArrowDownRight className="w-6 h-6" />
+            {expandedCard === 'belanja' ? <ChevronUp className="w-6 h-6" /> : <ArrowDownRight className="w-6 h-6" />}
           </div>
         </motion.div>
 
@@ -161,7 +165,8 @@ export default function TransparansiDana() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.45, delay: 0.2 }}
-          className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none flex items-center justify-between group"
+          onClick={() => { setExpandedCard(expandedCard === 'silpa' ? null : 'silpa'); setActiveTab('semua'); }}
+          className={`bg-white dark:bg-slate-900 p-6 rounded-3xl border shadow-sm dark:shadow-none flex items-center justify-between group cursor-pointer transition-all ${expandedCard === 'silpa' ? 'border-amber-300 dark:border-amber-600 ring-2 ring-amber-100 dark:ring-amber-800' : 'border-gray-100 dark:border-slate-800 hover:border-amber-200 dark:hover:border-amber-700'}`}
         >
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">REBOISASI / SILPA / REALISASI</p>
@@ -171,115 +176,139 @@ export default function TransparansiDana() {
             </p>
           </div>
           <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0 group-hover:scale-110 transition-transform">
-            <TrendingUp className="w-6 h-6" />
+            {expandedCard === 'silpa' ? <ChevronUp className="w-6 h-6" /> : <TrendingUp className="w-6 h-6" />}
           </div>
         </motion.div>
       </div>
 
-      {/* Sektoral Realization Progress Bars */}
-      <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-6">
-        <div>
-          <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Realisasi per Bidang / Sektor Belanja</h3>
-          <p className="text-xs text-gray-500 dark:text-slate-400">Persentase pengerjaan dan alokasi anggaran tiap sektor kepemerintahan desa.</p>
-        </div>
+      {/* Sektoral & Detail - Collapsible */}
+      <AnimatePresence>
+        {expandedCard && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="overflow-hidden space-y-6"
+          >
+            {/* Sektoral Realization Progress Bars */}
+            <div className="bg-white dark:bg-slate-900 p-6 md:p-8 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-6">
+              <div>
+                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1">Realisasi per Bidang / Sektor Belanja</h3>
+                <p className="text-xs text-gray-500 dark:text-slate-400">Persentase pengerjaan dan alokasi anggaran tiap sektor kepemerintahan desa.</p>
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <SectorProgress label="Bidang Penyelenggaraan Pemerintahan" budget={350000000} realized={350000000} color="bg-emerald-600" />
-          <SectorProgress label="Bidang Pelaksanaan Pembangunan Desa" budget={450000000} realized={380000000} color="bg-blue-600" />
-          <SectorProgress label="Bidang Pembinaan Kemasyarakatan" budget={120000000} realized={110000000} color="bg-purple-600" />
-          <SectorProgress label="Bidang Pemberdayaan Masyarakat" budget={180000000} realized={135000000} color="bg-amber-500" />
-          <SectorProgress label="Bidang Penanggulangan Bencana/Darurat" budget={100000000} realized={100000000} color="bg-red-500" />
-        </div>
-      </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <SectorProgress label="Bidang Penyelenggaraan Pemerintahan" budget={350000000} realized={350000000} color="bg-emerald-600" />
+                <SectorProgress label="Bidang Pelaksanaan Pembangunan Desa" budget={450000000} realized={380000000} color="bg-blue-600" />
+                <SectorProgress label="Bidang Pembinaan Kemasyarakatan" budget={120000000} realized={110000000} color="bg-purple-600" />
+                <SectorProgress label="Bidang Pemberdayaan Masyarakat" budget={180000000} realized={135000000} color="bg-amber-500" />
+                <SectorProgress label="Bidang Penanggulangan Bencana/Darurat" budget={100000000} realized={100000000} color="bg-red-500" />
+              </div>
+            </div>
 
-      {/* Search & Filters for Detailed Budget Items */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-slate-800 pb-4">
-          <div className="flex border border-gray-100 dark:border-slate-800 p-1 bg-gray-50 dark:bg-slate-800 rounded-xl gap-1 shrink-0 w-fit">
-            <button 
-              onClick={() => setActiveTab('semua')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'semua' ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900'}`}
-            >
-              Semua Pos
-            </button>
-            <button 
-              onClick={() => setActiveTab('pendapatan')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'pendapatan' ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900'}`}
-            >
-              Pendapatan
-            </button>
-            <button 
-              onClick={() => setActiveTab('belanja')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'belanja' ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900'}`}
-            >
-              Belanja Saja
-            </button>
-          </div>
+            {/* Search & Filters for Detailed Budget Items */}
+            <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div className="flex border border-gray-100 dark:border-slate-800 p-1 bg-gray-50 dark:bg-slate-800 rounded-xl gap-1 shrink-0 w-fit">
+                  <button 
+                    onClick={() => setActiveTab('semua')}
+                    className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'semua' ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900'}`}
+                  >
+                    Semua Pos
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('pendapatan')}
+                    className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'pendapatan' ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900'}`}
+                  >
+                    Pendapatan
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('belanja')}
+                    className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'belanja' ? 'bg-white dark:bg-slate-900 text-emerald-800 shadow-sm dark:shadow-none' : 'text-gray-500 dark:text-slate-400 hover:text-gray-900'}`}
+                  >
+                    Belanja Saja
+                  </button>
+                </div>
 
-          <div className="relative w-full sm:w-64">
-            <input 
-              type="text" 
-              placeholder="Cari rincian anggaran..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
-            />
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          </div>
-        </div>
+                <div className="relative w-full sm:w-64">
+                  <input 
+                    type="text" 
+                    placeholder="Cari rincian anggaran..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                  />
+                  <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
 
-        {/* Detailed Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-400 font-bold text-xs uppercase tracking-wider">
-                <th className="pb-3 font-semibold">Uraian Kegiatan / Sumber</th>
-                <th className="pb-3 font-semibold">Sektor / Asal</th>
-                <th className="pb-3 font-semibold text-right">Anggaran</th>
-                <th className="pb-3 font-semibold text-right">Realisasi</th>
-                <th className="pb-3 font-semibold text-right">Persentase</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filteredItems.length > 0 ? (
-                filteredItems.map(item => {
-                  const percent = (item.realized / item.budget) * 100;
-                  return (
-                    <tr key={item.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
-                      <td className="py-4">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`w-2 h-2 rounded-full ${item.category === 'pendapatan' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                          <span className="font-bold text-gray-800 dark:text-slate-100">{item.name}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 text-xs font-semibold text-gray-400 uppercase tracking-tight">
-                        {item.sector}
-                      </td>
-                      <td className="py-4 text-right font-medium text-gray-600 dark:text-slate-400">
-                        {formatRupiah(item.budget)}
-                      </td>
-                      <td className="py-4 text-right font-bold text-gray-800 dark:text-slate-100">
-                        {formatRupiah(item.realized)}
-                      </td>
-                      <td className="py-4 text-right">
-                        <span className={`inline-block px-2 py-1 rounded-md text-[10px] font-bold ${percent >= 100 ? 'bg-emerald-50 text-emerald-700' : percent >= 80 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
-                          {percent.toFixed(0)}%
-                        </span>
-                      </td>
+              {/* Detailed Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-400 font-bold text-xs uppercase tracking-wider">
+                      <th className="pb-3 font-semibold">Uraian Kegiatan / Sumber</th>
+                      <th className="pb-3 font-semibold">Sektor / Asal</th>
+                      <th className="pb-3 font-semibold text-right">Anggaran</th>
+                      <th className="pb-3 font-semibold text-right">Realisasi</th>
+                      <th className="pb-3 font-semibold text-right">Persentase</th>
                     </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-gray-400 text-xs">
-                    Tidak ada rincian kegiatan yang sesuai dengan pencarian Anda.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {filteredItems.length > 0 ? (
+                      filteredItems.map(item => {
+                        const percent = (item.realized / item.budget) * 100;
+                        return (
+                          <tr key={item.id} className="hover:bg-gray-50/50 dark:bg-slate-800/50 transition-colors">
+                            <td className="py-4">
+                              <div className="flex items-center gap-2.5">
+                                <div className={`w-2 h-2 rounded-full ${item.category === 'pendapatan' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                <span className="font-bold text-gray-800 dark:text-slate-100">{item.name}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 text-xs font-semibold text-gray-400 uppercase tracking-tight">
+                              {item.sector}
+                            </td>
+                            <td className="py-4 text-right font-medium text-gray-600 dark:text-slate-400">
+                              {formatRupiah(item.budget)}
+                            </td>
+                            <td className="py-4 text-right font-bold text-gray-800 dark:text-slate-100">
+                              {formatRupiah(item.realized)}
+                            </td>
+                            <td className="py-4 text-right">
+                              <span className={`inline-block px-2 py-1 rounded-md text-[10px] font-bold ${percent >= 100 ? 'bg-emerald-50 text-emerald-700' : percent >= 80 ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>
+                                {percent.toFixed(0)}%
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-gray-400 text-xs">
+                          Tidak ada rincian kegiatan yang sesuai dengan pencarian Anda.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!expandedCard && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-8"
+        >
+          <p className="text-sm text-gray-400 dark:text-slate-500">Klik kartu di atas untuk melihat rincian anggaran</p>
+          <ChevronDown className="w-5 h-5 text-gray-300 dark:text-slate-600 mx-auto mt-2 animate-bounce" />
+        </motion.div>
+      )}
     </div>
   );
 }
