@@ -32,6 +32,9 @@ export default function ProfilDesa() {
   const [batasBarat, setBatasBarat] = useState(() => localStorage.getItem('village_batas_barat') || '-');
   const [villageLat, setVillageLat] = useState(() => parseFloat(localStorage.getItem('village_lat') || '0'));
   const [villageLng, setVillageLng] = useState(() => parseFloat(localStorage.getItem('village_lng') || '0'));
+  const [rtList, setRtList] = useState<{ no: string; name: string; role?: string }[]>([]);
+  const [rwList, setRwList] = useState<{ no: string; name: string; role?: string }[]>([]);
+  const [rtRwMapping, setRtRwMapping] = useState<{ rt: string; rw: string }[]>([]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -86,6 +89,9 @@ export default function ProfilDesa() {
             if (map['village_batas_barat']) setBatasBarat(map['village_batas_barat']);
             if (map['village_lat']) setVillageLat(parseFloat(map['village_lat']));
             if (map['village_lng']) setVillageLng(parseFloat(map['village_lng']));
+            try { if (map['village_rt_list']) setRtList(JSON.parse(map['village_rt_list'])); } catch {}
+            try { if (map['village_rw_list']) setRwList(JSON.parse(map['village_rw_list'])); } catch {}
+            try { if (map['village_rt_rw_mapping']) setRtRwMapping(JSON.parse(map['village_rt_rw_mapping'])); } catch {}
           }
         }
         // Count residents using shared cache (same as StatCards)
@@ -164,6 +170,75 @@ export default function ProfilDesa() {
           ))}
         </div>
       </div>
+
+      {/* Struktur RT & RW */}
+      {(rtList.length > 0 || rwList.length > 0) && (
+        <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Struktur RT & RW</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Pembagian wilayah administrasi lingkungan</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {rwList.map((rw, rwIdx) => {
+              const rwNo = rw.no || String(rwIdx + 1);
+              const assignedRts = rtList.filter(rt => {
+                const mapping = rtRwMapping.find(m => m.rt === rt.no || m.rt === String(parseInt(rt.no)));
+                return mapping ? (mapping.rw === rwNo || mapping.rw === String(parseInt(rwNo))) : false;
+              });
+              return (
+                <div key={rwIdx} className="bg-emerald-50/70 dark:bg-emerald-900/20 rounded-2xl p-4 border border-emerald-200/60 dark:border-emerald-800/40">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0">
+                      RW {rwNo.padStart(2, '0')}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 dark:text-white text-sm">{rw.name}</h4>
+                      <p className="text-xs text-emerald-700 dark:text-emerald-400">{rw.role || 'Ketua RW'}</p>
+                    </div>
+                  </div>
+                  {assignedRts.length > 0 && (
+                    <div className="ml-4 pl-4 border-l-2 border-emerald-300 dark:border-emerald-700 space-y-2">
+                      {assignedRts.map((rt, rtIdx) => (
+                        <div key={rtIdx} className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-[10px] border border-emerald-200 dark:border-emerald-700 shrink-0">
+                            RT {rt.no.padStart(2, '0')}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{rt.name}</p>
+                            <p className="text-[10px] text-gray-500 dark:text-slate-400">{rt.role || 'Ketua RT'}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {rtList.length > 0 && rwList.length === 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {rtList.map((rt, idx) => (
+                  <div key={idx} className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 border border-slate-200 dark:border-slate-700 flex items-center gap-2.5">
+                    <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/40 rounded-lg flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-xs shrink-0">
+                      {rt.no}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">{rt.name}</p>
+                      <p className="text-[10px] text-gray-500 dark:text-slate-400">{rt.role || 'Ketua RT'}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* Lokasi & Demografi - Full Width */}
       <motion.div variants={itemVariants} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">

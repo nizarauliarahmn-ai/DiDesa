@@ -6,6 +6,7 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { generateKopSuratHTML } from '../../utils/letterFormat';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 import ResidentSearchInput from './ResidentSearchInput';
+import { getRtRwMapping } from '../../utils/rtRwMapping';
 
 interface Officer {
   name: string;
@@ -374,6 +375,7 @@ export default function AdminAparatur() {
         { tenant_id: tenantId, key: 'village_signature_left_nip', value: sigLeftNip },
         { tenant_id: tenantId, key: 'village_rt_list', value: JSON.stringify(rtList) },
         { tenant_id: tenantId, key: 'village_rw_list', value: JSON.stringify(rwList) },
+        { tenant_id: tenantId, key: 'village_rt_rw_mapping', value: JSON.stringify(getRtRwMapping()) },
       ];
 
       try {
