@@ -1,10 +1,24 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, MapPin, Building, ShieldCheck, ChevronRight, X } from 'lucide-react';
+import { MapContainer, TileLayer, LayersControl, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import UserPlaceholder from '../common/UserPlaceholder';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { fetchResidentsCached } from '../../utils/apiCache';
+
+const defaultIcon = L.icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+L.Marker.prototype.options.icon = defaultIcon;
 
 export default function ProfilDesa() {
   const [selectedLembaga, setSelectedLembaga] = useState<typeof lembagaDesa[0] | null>(null);
@@ -168,19 +182,35 @@ export default function ProfilDesa() {
           <div className="lg:col-span-7">
             {villageLat !== 0 && villageLng !== 0 ? (
               <div className="rounded-2xl h-64 md:h-80 overflow-hidden relative border border-gray-200 dark:border-slate-700">
-                <iframe
-                  title="Peta Desa"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                  src={`https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${villageLng - 0.01},${villageLat - 0.005},${villageLng + 0.01},${villageLat + 0.005}&size=800,400&imageSR=4326&bboxSR=4326&format=png&f=image`}
-                />
+                <MapContainer
+                  center={[villageLat, villageLng]}
+                  zoom={14}
+                  scrollWheelZoom={false}
+                  className="w-full h-full z-0"
+                >
+                  <LayersControl position="topright">
+                    <LayersControl.BaseLayer checked name="Satelit">
+                      <TileLayer
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        attribution="&copy; Esri"
+                      />
+                    </LayersControl.BaseLayer>
+                    <LayersControl.BaseLayer name="Jalan">
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution="&copy; OpenStreetMap contributors"
+                      />
+                    </LayersControl.BaseLayer>
+                  </LayersControl>
+                  <Marker position={[villageLat, villageLng]}>
+                    <Popup>Kantor Desa</Popup>
+                  </Marker>
+                </MapContainer>
                 <a
                   href={`https://www.openstreetmap.org/?mlat=${villageLat}&mlon=${villageLng}#map=14/${villageLat}/${villageLng}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute bottom-3 right-3 bg-white/90 dark:bg-slate-800/90 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-white dark:hover:bg-slate-700 transition-colors"
+                  className="absolute bottom-3 right-3 z-[1000] bg-white/90 dark:bg-slate-800/90 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-white dark:hover:bg-slate-700 transition-colors"
                 >
                   Buka Peta Penuh
                 </a>
@@ -213,20 +243,20 @@ export default function ProfilDesa() {
             <div className="space-y-2">
               <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Batas Wilayah</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-sky-50 dark:bg-sky-900/30 p-3 rounded-xl border border-sky-100 dark:border-sky-800">
-                  <p className="text-[10px] text-sky-600 dark:text-sky-400 font-bold uppercase">Utara</p>
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Utara</p>
                   <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasUtara}</p>
                 </div>
-                <div className="bg-amber-50 dark:bg-amber-900/30 p-3 rounded-xl border border-amber-100 dark:border-amber-800">
-                  <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold uppercase">Selatan</p>
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Selatan</p>
                   <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasSelatan}</p>
                 </div>
-                <div className="bg-emerald-50 dark:bg-emerald-900/30 p-3 rounded-xl border border-emerald-100 dark:border-emerald-800">
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase">Timur</p>
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Timur</p>
                   <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasTimur}</p>
                 </div>
-                <div className="bg-rose-50 dark:bg-rose-900/30 p-3 rounded-xl border border-rose-100 dark:border-rose-800">
-                  <p className="text-[10px] text-rose-600 dark:text-rose-400 font-bold uppercase">Barat</p>
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">Barat</p>
                   <p className="text-xs font-bold text-gray-900 dark:text-white mt-0.5">{batasBarat}</p>
                 </div>
               </div>
