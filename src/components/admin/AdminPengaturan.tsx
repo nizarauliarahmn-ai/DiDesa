@@ -212,6 +212,12 @@ export default function AdminPengaturan() {
         key,
         value,
       }));
+      // Also sync RT/RW mapping to Supabase
+      settingsToSave.push({
+        tenant_id: tenantId,
+        key: 'village_rt_rw_mapping',
+        value: JSON.stringify(getRtRwMapping()),
+      });
 
       const { error: upsertError } = await supabase
         .from('saas_settings')
