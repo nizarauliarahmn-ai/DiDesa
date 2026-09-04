@@ -682,6 +682,23 @@ export default function App() {
   }
 
 
+  // Full screen resident view — tanpa header/footer/bottom nav portal
+  if (showResidentLogin || (residentUser && publicTab === 'resident_dashboard')) {
+    return (
+      <>
+        {showResidentLogin && !residentUser ? (
+          <ResidentLogin
+            onLoginSuccess={(resident) => { setResidentUser(resident); setShowResidentLogin(false); setPublicTab('resident_dashboard'); }}
+            onBack={() => setShowResidentLogin(false)}
+          />
+        ) : residentUser ? (
+          <ResidentDashboard onLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }} />
+        ) : null}
+        <ToastContainer />
+      </>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gray-50/50 dark:bg-slate-800/50 text-gray-900 dark:text-white font-sans overflow-hidden">
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative pb-16 lg:pb-0">
@@ -693,31 +710,19 @@ export default function App() {
           onResidentLogin={() => setShowResidentLogin(true)}
           onResidentLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }}
         />
-        {showResidentLogin && (
-          <ResidentLogin
-            onLoginSuccess={(resident) => { setResidentUser(resident); setShowResidentLogin(false); setPublicTab('resident_dashboard'); }}
-            onBack={() => setShowResidentLogin(false)}
-          />
-        )}
         <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scroll-smooth transition-all duration-300 ease-in-out">
           <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-4 flex flex-col min-h-full">
             
             <div className="flex-1 w-full">
               <PageTransition pageKey={publicTab}>
-                {publicTab === 'resident_dashboard' && residentUser ? (
-                  <ResidentDashboard onLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }} />
-                ) : (
-                  <>
-                    {publicTab === 'dashboard' && <Dashboard setPublicTab={setPublicTab} />}
-                    {publicTab === 'profil_desa' && <ProfilDesa />}
-                    {publicTab === 'transparansi' && <TransparansiDana />}
-                    {publicTab === 'berita' && <BeritaDesa />}
-                    {publicTab === 'peta_wilayah' && <PetaWilayah />}
-                    {publicTab === 'layanan_mandiri' && <LayananMandiri />}
-                    {publicTab === 'aspirasi' && <AspirasiWarga />}
-                    {publicTab === 'ai_assistant' && <AiAssistant />}
-                  </>
-                )}
+                {publicTab === 'dashboard' && <Dashboard setPublicTab={setPublicTab} />}
+                {publicTab === 'profil_desa' && <ProfilDesa />}
+                {publicTab === 'transparansi' && <TransparansiDana />}
+                {publicTab === 'berita' && <BeritaDesa />}
+                {publicTab === 'peta_wilayah' && <PetaWilayah />}
+                {publicTab === 'layanan_mandiri' && <LayananMandiri />}
+                {publicTab === 'aspirasi' && <AspirasiWarga />}
+                {publicTab === 'ai_assistant' && <AiAssistant />}
               </PageTransition>
             </div>
             
