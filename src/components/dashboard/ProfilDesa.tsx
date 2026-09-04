@@ -187,9 +187,17 @@ export default function ProfilDesa() {
           <div className="space-y-4">
             {rwList.map((rw, rwIdx) => {
               const rwNo = rw.no || String(rwIdx + 1);
+              const rwNoInt = parseInt(rwNo);
               const assignedRts = rtList.filter(rt => {
+                // 1. Cek dari mapping RT→RW
                 const mapping = rtRwMapping.find(m => m.rt === rt.no || m.rt === String(parseInt(rt.no)));
-                return mapping ? (mapping.rw === rwNo || mapping.rw === String(parseInt(rwNo))) : false;
+                if (mapping && (mapping.rw === rwNo || mapping.rw === String(rwNoInt))) return true;
+                // 2. Fallback: cek dari field rtRw (format: "01 / 01")
+                if (rt.rtRw && typeof rt.rtRw === 'string') {
+                  const parts = rt.rtRw.split('/').map((s: string) => s.trim());
+                  if (parts.length >= 2 && (parts[1] === rwNo.padStart(2, '0') || parts[1] === String(rwNoInt))) return true;
+                }
+                return false;
               });
               return (
                 <div key={rwIdx} className="bg-emerald-50/70 dark:bg-emerald-900/20 rounded-2xl p-4 border border-emerald-200/60 dark:border-emerald-800/40">
