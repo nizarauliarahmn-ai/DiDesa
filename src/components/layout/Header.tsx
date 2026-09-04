@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, LogOut, User } from 'lucide-react';
+import { Globe, LogOut } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 
 export default function Header({ 
@@ -111,9 +111,8 @@ export default function Header({
         {residentUser ? (
           <div className="flex items-center gap-2">
             <button onClick={() => { if (setActiveTab) setActiveTab('resident_dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[11px] font-bold transition-all cursor-pointer border border-emerald-200">
-              <User size={14} />
-              <span className="hidden sm:inline">{residentUser.name}</span>
+              className="px-2 py-1 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer">
+              Log In
             </button>
             <button onClick={onResidentLogout} title="Keluar" className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer">
               <LogOut size={16} />
@@ -121,9 +120,8 @@ export default function Header({
           </div>
         ) : onResidentLogin ? (
           <button onClick={onResidentLogin}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-[11px] font-bold transition-all cursor-pointer active:scale-95">
-            <User size={14} />
-            <span className="hidden sm:inline">Masuk Warga</span>
+            className="px-2 py-1 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer">
+            Log In
           </button>
         ) : null}
 
