@@ -709,10 +709,11 @@ export default function App() {
         <Header 
           activeTab={publicTab}
           setActiveTab={setPublicTab}
+          user={user}
           residentUser={residentUser}
+          onAdminLogin={() => setView('admin')}
           onResidentLogin={() => setShowResidentLogin(true)}
           onResidentLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }}
-          onLogoClick={user && user.role !== 'public' ? () => setView('admin') : undefined}
         />
         <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scroll-smooth transition-all duration-300 ease-in-out">
           <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-4 flex flex-col min-h-full">

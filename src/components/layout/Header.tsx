@@ -10,7 +10,7 @@ export default function Header({
   residentUser,
   onResidentLogin,
   onResidentLogout,
-  onLogoClick
+  onAdminLogin
 }: { 
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
@@ -19,7 +19,7 @@ export default function Header({
   residentUser?: { nik: string; name: string } | null;
   onResidentLogin?: () => void;
   onResidentLogout?: () => void;
-  onLogoClick?: () => void;
+  onAdminLogin?: () => void;
 }) {
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'DiDesa');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
@@ -63,7 +63,7 @@ export default function Header({
   return (
     <header className="h-16 md:h-18 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between px-4 sm:px-6 z-40 sticky top-0 shadow-sm transition-all">
       <div className="flex items-center gap-3 shrink-0">
-        <a href="#" onClick={(e) => { e.preventDefault(); if (onLogoClick) { onLogoClick(); } else { handleNavClick('dashboard'); } }} className="flex items-center gap-3 group">
+        <a href="#section-dashboard" onClick={() => handleNavClick('dashboard')} className="flex items-center gap-3 group">
           <div 
             className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-md shadow-emerald-900/10 group-hover:scale-105 transition-transform"
             style={{ backgroundColor: globalColor }}
@@ -121,7 +121,7 @@ export default function Header({
             </button>
           </div>
         ) : onResidentLogin ? (
-          <button onClick={onResidentLogin}
+          <button onClick={() => { if (user && onAdminLogin) { onAdminLogin(); } else if (onResidentLogin) { onResidentLogin(); } }}
             className="px-2 py-1 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer">
             Log In
           </button>
