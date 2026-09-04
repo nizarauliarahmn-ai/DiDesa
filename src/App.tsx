@@ -294,7 +294,10 @@ export default function App() {
         if (data && data.length > 0) {
           data.forEach((row: any) => {
             if (row.value !== null && row.value !== undefined && row.value !== '') {
-              localStorage.setItem(row.key, row.value);
+              // Skip kop_desa — handled separately with DiDesa prefix below
+              if (row.key !== 'kop_desa') {
+                localStorage.setItem(row.key, row.value);
+              }
             }
           });
           // If Supabase has village_officers, it's already written above.
