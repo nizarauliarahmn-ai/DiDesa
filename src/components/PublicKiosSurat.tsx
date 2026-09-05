@@ -217,8 +217,8 @@ export default function PublicKiosSurat() {
     // Auto reset after 10s
     setTimeout(() => {
       const p = new URLSearchParams(window.location.search);
-      const t = p.get('tenant') || p.get('t_id');
-      window.location.search = t ? `?tenant=${t}&tab=kios` : '?tab=kios';
+      const t = p.get('t_id') || p.get('tenant');
+      window.location.search = t ? `?t_id=${t}&tab=kios` : '?tab=kios';
     }, 10000);
   };
 
@@ -404,7 +404,7 @@ export default function PublicKiosSurat() {
         
         {step < 4 && (
           <button 
-            onClick={() => { const p = new URLSearchParams(window.location.search); const t = p.get('tenant') || p.get('t_id'); window.location.search = t ? `?tenant=${t}&tab=kios` : '?tab=kios'; }}
+            onClick={() => { const p = new URLSearchParams(window.location.search); const t = p.get('t_id') || p.get('tenant'); window.location.search = t ? `?t_id=${t}&tab=kios` : '?tab=kios'; }}
             className="flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full font-bold transition-colors"
           >
             <Home className="w-5 h-5" /> Kembali ke Beranda
