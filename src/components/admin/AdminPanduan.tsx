@@ -29,6 +29,9 @@ export default function AdminPanduan() {
       userTenantId = user.tenantId || '';
     } catch (e) {}
   }
+  if (!userTenantId) {
+    userTenantId = localStorage.getItem('didesa_active_tenant_id') || '';
+  }
 
   useEffect(() => {
     const loadItems = async () => {
