@@ -256,7 +256,7 @@ export default function PublicKiosPortal() {
           onClick={() => {
             const p = new URLSearchParams(window.location.search);
             const t = p.get('t_id') || p.get('tenant');
-            window.location.href = t ? `/?mode=public&tab=layanan_mandiri&t_id=${t}#section-dashboard` : `/?mode=public&tab=layanan_mandiri#section-dashboard`;
+            window.location.href = t ? `/?t_id=${t}#section-dashboard` : `/#section-dashboard`;
           }}
           className={`group font-bold transition-all flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-md border hover:shadow-lg ${isDark ? 'text-emerald-400 hover:text-emerald-300 bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50 hover:shadow-emerald-900/20' : 'text-emerald-600 hover:text-emerald-700 bg-white border-slate-200 hover:bg-slate-50 hover:shadow-slate-200/50'}`}
         >
