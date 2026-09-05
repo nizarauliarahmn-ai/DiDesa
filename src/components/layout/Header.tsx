@@ -1,5 +1,5 @@
-import React from 'react';
-import { Globe, LogOut, LogIn, Users } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Globe, LogOut, LogIn, Users, ChevronDown } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 
 export default function Header({ 
@@ -24,6 +24,8 @@ export default function Header({
   const [desaName, setDesaName] = React.useState(() => localStorage.getItem('kop_desa') || 'DiDesa');
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
+  const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const handleSettingsUpdate = () => {
@@ -39,6 +41,17 @@ export default function Header({
       window.removeEventListener('village_settings_updated', handleSettingsUpdate);
       window.removeEventListener('global_branding_updated', handleBrandingUpdate);
     };
+  }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowLoginDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
   const navItems = [
@@ -113,7 +126,7 @@ export default function Header({
         {residentUser ? (
           <div className="flex items-center gap-2">
             <button onClick={() => { if (setActiveTab) setActiveTab('resident_dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold rounded-lg transition-all cursor-pointer border border-emerald-200/50">
+              className="flex items-center gap-1.5 px-3 py-1.5 text-emerald-700 text-[11px] font-bold rounded-lg transition-all cursor-pointer hover:bg-emerald-50">
               <Users size={13} />
               <span>Profil Saya</span>
             </button>
@@ -121,24 +134,42 @@ export default function Header({
               <LogOut size={16} />
             </button>
           </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            {onAdminLogin && (
-              <button onClick={onAdminLogin}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm shadow-emerald-600/20 hover:shadow-md hover:shadow-emerald-600/30">
-                <LogIn size={13} />
-                <span>Masuk Admin</span>
-              </button>
-            )}
-            {onResidentLogin && (
-              <button onClick={onResidentLogin}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-all cursor-pointer border border-slate-200 shadow-sm hover:shadow-md">
-                <Users size={13} />
-                <span>Warga</span>
-              </button>
+        ) : onAdminLogin ? (
+          <div className="relative" ref={dropdownRef}>
+            <button onClick={() => setShowLoginDropdown(!showLoginDropdown)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer hover:bg-emerald-50 rounded-lg">
+              <LogIn size={13} />
+              <span>Log In</span>
+              <ChevronDown size={12} className={`transition-transform ${showLoginDropdown ? 'rotate-180' : ''}`} />
+            </button>
+            {showLoginDropdown && (
+              <div className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 w-44 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <button onClick={() => { setShowLoginDropdown(false); onAdminLogin(); }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center">
+                    <LogIn size={14} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-800">Admin Desa</p>
+                    <p className="text-[10px] text-slate-400">Email & password</p>
+                  </div>
+                </button>
+                {onResidentLogin && (
+                  <button onClick={() => { setShowLoginDropdown(false); onResidentLogin(); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer">
+                    <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <Users size={14} className="text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">Warga</p>
+                      <p className="text-[10px] text-slate-400">Nomor NIK</p>
+                    </div>
+                  </button>
+                )}
+              </div>
             )}
           </div>
-        )}
+        ) : null}
 
         {user && onLogout && (
           <button 
