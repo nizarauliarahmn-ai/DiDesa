@@ -1,36 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { LayoutDashboard, Newspaper, ShieldCheck, Building2, ArrowLeft } from 'lucide-react';
 import { ensureKadesInOfficers } from './utils/letterOfficers';
 import Header from './components/layout/Header';
 import Dashboard from './components/Dashboard';
 import AdminSidebar from './components/admin/AdminSidebar';
 import AdminHeader from './components/admin/AdminHeader';
-import AdminDashboard from './components/admin/AdminDashboard';
-import AdminPenduduk from './components/admin/AdminPenduduk';
-import AdminAparatur from './components/admin/AdminAparatur';
-import AdminSurat from './components/admin/AdminSurat';
-import AdminBantuan from './components/admin/AdminBantuan';
-import AdminProdukHukum from './components/admin/AdminProdukHukum';
-import AdminPengaturan from './components/admin/AdminPengaturan';
-import AdminNotifikasi from './components/admin/AdminNotifikasi';
-import AdminTenants from './components/admin/AdminTenants';
-import AdminAspirasi from './components/admin/AdminAspirasi';
-import AdminKepuasan from './components/admin/AdminKepuasan';
-import AdminBukuTamu from './components/admin/AdminBukuTamu';
-import AdminUsulanDesa from './components/admin/AdminUsulanDesa';
-import AdminBerita from './components/admin/AdminBerita';
-import PublicBukuTamu from './components/PublicBukuTamu';
-import PublicVerifikasiSurat from './components/PublicVerifikasiSurat';
-import AdminAiAssistant from './components/admin/AdminAiAssistant';
-import AdminSaaSLogs from './components/admin/AdminSaaSLogs';
-import AdminSaaSLeads from './components/admin/AdminSaaSLeads';
-import AdminGlobalBranding from './components/admin/AdminGlobalBranding';
-import AdminSaaSGlobalUpdates from './components/admin/AdminSaaSGlobalUpdates';
-import AdminSaaSBugReports from './components/admin/AdminSaaSBugReports';
-import GlobalBugReportButton from './components/common/GlobalBugReportButton';
-import AdminSaaSTemplateSurat from './components/admin/AdminSaaSTemplateSurat';
-import AdminPanduan from './components/admin/AdminPanduan';
-import AdminSaaSPanduanCMS from './components/admin/AdminSaaSPanduanCMS';
 import ToastContainer from './components/common/ToastContainer';
 import WaNotificationManager from './components/common/WaNotificationManager';
 import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
@@ -38,37 +12,81 @@ import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
 import TenantNotFound from './components/TenantNotFound';
 import TenantPending from './components/TenantPending';
-import AdminPendingApprovals from './components/admin/AdminPendingApprovals';
-import SaaSAffiliateManager from './components/admin/saas/SaaSAffiliateManager';
 import Footer from './components/common/Footer';
-import SyaratKetentuanPage from './pages/SyaratKetentuan';
-import KebijakanPrivasiPage from './pages/KebijakanPrivasi';
-import AffiliateLandingPage from './pages/AffiliateLandingPage';
-import AffiliateDashboard from './pages/AffiliateDashboard';
 import { subscribeGlobalBrandingRealtime, subscribeSaaSSettingsRealtime } from './utils/globalBrandingSync';
 import { supabase } from './utils/supabase';
 import { resolveCurrentTenant, clearTenantCache } from './utils/tenantResolver';
-import ResidentLogin from './components/portal/ResidentLogin';
-import ResidentDashboard from './components/portal/ResidentDashboard';
 import { performLazyCleanup } from './utils/cleanupService';
 import { useDynamicTitle } from './utils/useDynamicTitle';
 
-// Public views
-import TransparansiDana from './components/dashboard/TransparansiDana';
-import BeritaDesa from './components/dashboard/BeritaDesa';
-import PetaWilayah from './components/dashboard/PetaWilayah';
-import LayananMandiri from './components/dashboard/LayananMandiri';
-import ProfilDesa from './components/dashboard/ProfilDesa';
-import AspirasiWarga from './components/dashboard/AspirasiWarga';
-import AiAssistant from './components/dashboard/AiAssistant';
-import IntroductionTour from './components/IntroductionTour';
-import PrintQRKiosk from './components/admin/PrintQRKiosk';
-import PublicKiosPortal from './components/PublicKiosPortal';
-import PublicKiosSurat from './components/PublicKiosSurat';
-import PublicKiosAspirasi from './components/PublicKiosAspirasi';
-import PublicKiosKepuasan from './components/PublicKiosKepuasan';
-import KioskKtpScanner from './components/KioskKtpScanner';
-import SaasLandingPage from './components/SaasLandingPage';
+// Lazy-loaded admin components
+const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard'));
+const AdminPenduduk = React.lazy(() => import('./components/admin/AdminPenduduk'));
+const AdminAparatur = React.lazy(() => import('./components/admin/AdminAparatur'));
+const AdminSurat = React.lazy(() => import('./components/admin/AdminSurat'));
+const AdminBantuan = React.lazy(() => import('./components/admin/AdminBantuan'));
+const AdminProdukHukum = React.lazy(() => import('./components/admin/AdminProdukHukum'));
+const AdminPengaturan = React.lazy(() => import('./components/admin/AdminPengaturan'));
+const AdminNotifikasi = React.lazy(() => import('./components/admin/AdminNotifikasi'));
+const AdminTenants = React.lazy(() => import('./components/admin/AdminTenants'));
+const AdminAspirasi = React.lazy(() => import('./components/admin/AdminAspirasi'));
+const AdminKepuasan = React.lazy(() => import('./components/admin/AdminKepuasan'));
+const AdminBukuTamu = React.lazy(() => import('./components/admin/AdminBukuTamu'));
+const AdminUsulanDesa = React.lazy(() => import('./components/admin/AdminUsulanDesa'));
+const AdminBerita = React.lazy(() => import('./components/admin/AdminBerita'));
+const AdminAiAssistant = React.lazy(() => import('./components/admin/AdminAiAssistant'));
+const AdminSaaSLogs = React.lazy(() => import('./components/admin/AdminSaaSLogs'));
+const AdminSaaSLeads = React.lazy(() => import('./components/admin/AdminSaaSLeads'));
+const AdminGlobalBranding = React.lazy(() => import('./components/admin/AdminGlobalBranding'));
+const AdminSaaSGlobalUpdates = React.lazy(() => import('./components/admin/AdminSaaSGlobalUpdates'));
+const AdminSaaSBugReports = React.lazy(() => import('./components/admin/AdminSaaSBugReports'));
+const AdminSaaSTemplateSurat = React.lazy(() => import('./components/admin/AdminSaaSTemplateSurat'));
+const AdminPanduan = React.lazy(() => import('./components/admin/AdminPanduan'));
+const AdminSaaSPanduanCMS = React.lazy(() => import('./components/admin/AdminSaaSPanduanCMS'));
+const AdminPendingApprovals = React.lazy(() => import('./components/admin/AdminPendingApprovals'));
+const SaaSAffiliateManager = React.lazy(() => import('./components/admin/saas/SaaSAffiliateManager'));
+const GlobalBugReportButton = React.lazy(() => import('./components/common/GlobalBugReportButton'));
+const IntroductionTour = React.lazy(() => import('./components/IntroductionTour'));
+const PrintQRKiosk = React.lazy(() => import('./components/admin/PrintQRKiosk'));
+
+// Lazy-loaded portal components
+const PublicBukuTamu = React.lazy(() => import('./components/PublicBukuTamu'));
+const PublicVerifikasiSurat = React.lazy(() => import('./components/PublicVerifikasiSurat'));
+const PublicKiosPortal = React.lazy(() => import('./components/PublicKiosPortal'));
+const PublicKiosSurat = React.lazy(() => import('./components/PublicKiosSurat'));
+const PublicKiosAspirasi = React.lazy(() => import('./components/PublicKiosAspirasi'));
+const PublicKiosKepuasan = React.lazy(() => import('./components/PublicKiosKepuasan'));
+const KioskKtpScanner = React.lazy(() => import('./components/KioskKtpScanner'));
+const SaasLandingPage = React.lazy(() => import('./components/SaasLandingPage'));
+const ResidentLogin = React.lazy(() => import('./components/portal/ResidentLogin'));
+const ResidentDashboard = React.lazy(() => import('./components/portal/ResidentDashboard'));
+
+// Lazy-loaded dashboard components
+const TransparansiDana = React.lazy(() => import('./components/dashboard/TransparansiDana'));
+const BeritaDesa = React.lazy(() => import('./components/dashboard/BeritaDesa'));
+const PetaWilayah = React.lazy(() => import('./components/dashboard/PetaWilayah'));
+const LayananMandiri = React.lazy(() => import('./components/dashboard/LayananMandiri'));
+const ProfilDesa = React.lazy(() => import('./components/dashboard/ProfilDesa'));
+const AspirasiWarga = React.lazy(() => import('./components/dashboard/AspirasiWarga'));
+const AiAssistant = React.lazy(() => import('./components/dashboard/AiAssistant'));
+
+// Lazy-loaded pages
+const SyaratKetentuanPage = React.lazy(() => import('./pages/SyaratKetentuan'));
+const KebijakanPrivasiPage = React.lazy(() => import('./pages/KebijakanPrivasi'));
+const AffiliateLandingPage = React.lazy(() => import('./pages/AffiliateLandingPage'));
+const AffiliateDashboard = React.lazy(() => import('./pages/AffiliateDashboard'));
+
+// Loading fallback for lazy components
+function LazyLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[200px]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs text-slate-400 font-medium">Memuat...</p>
+      </div>
+    </div>
+  );
+}
 
 function useUrlSync<T extends string>(
   key: string, 
@@ -536,7 +554,7 @@ export default function App() {
     window.location.pathname.includes('/affiliator') ||
     window.location.pathname.includes('/affiliate')
   ) {
-    return <><AffiliateLandingPage /><ToastContainer /></>;
+    return <><Suspense fallback={<LazyLoader />}><AffiliateLandingPage /></Suspense><ToastContainer /></>;
   }
 
   if (tenantValid === false) {
@@ -588,6 +606,7 @@ export default function App() {
             />
             <div className="max-w-[1800px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-4 flex flex-col min-h-full print:p-0 print:block">
               <div className="flex-1 print:block">
+                <Suspense fallback={<LazyLoader />}>
                 <PageTransition pageKey={adminTab}>
                 {adminTab === 'dashboard' && <AdminDashboard setActiveTab={setAdminTab} />}
                 {adminTab === 'produk_hukum' && <AdminProdukHukum />}
@@ -656,6 +675,7 @@ export default function App() {
                 )}
                 {adminTab === 'ai_assistant' && <AdminAiAssistant />}
               </PageTransition>
+                </Suspense>
               </div>
               {/* Impersonation Banner */}
               {isImpersonated && (
@@ -707,7 +727,7 @@ export default function App() {
   // Full screen resident view — tanpa header/footer/bottom nav portal
   if (showResidentLogin || (residentUser && publicTab === 'resident_dashboard')) {
     return (
-      <>
+      <Suspense fallback={<LazyLoader />}>
         {showResidentLogin && !residentUser ? (
           <ResidentLogin
             onLoginSuccess={(resident) => { setResidentUser(resident); setShowResidentLogin(false); setPublicTab('resident_dashboard'); }}
@@ -717,7 +737,7 @@ export default function App() {
           <ResidentDashboard onLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }} />
         ) : null}
         <ToastContainer />
-      </>
+      </Suspense>
     );
   }
 
@@ -743,6 +763,7 @@ export default function App() {
           <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-4 flex flex-col min-h-full">
             
             <div className="flex-1 w-full">
+              <Suspense fallback={<LazyLoader />}>
               <PageTransition pageKey={publicTab}>
                 {publicTab === 'dashboard' && <Dashboard setPublicTab={setPublicTab} />}
                 {publicTab === 'profil_desa' && <ProfilDesa />}
@@ -753,6 +774,7 @@ export default function App() {
                 {publicTab === 'aspirasi' && <AspirasiWarga />}
                 {publicTab === 'ai_assistant' && <AiAssistant />}
               </PageTransition>
+              </Suspense>
             </div>
             
             <Footer />
