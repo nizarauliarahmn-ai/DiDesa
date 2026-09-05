@@ -105,7 +105,7 @@ export default function Header({
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`text-xs font-extrabold transition-all cursor-pointer py-1 border-b-2 ${
+                className={`text-xs font-semibold transition-all cursor-pointer py-1 border-b-2 ${
                   isActive 
                     ? 'border-emerald-700 text-emerald-800 dark:text-emerald-400' 
                     : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-emerald-800 dark:hover:text-emerald-400'
