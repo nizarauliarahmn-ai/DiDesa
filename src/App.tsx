@@ -169,6 +169,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
   const [showResidentLogin, setShowResidentLogin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
 
   const [view, setView] = useUrlSync<'public' | 'admin'>('mode', 'public', () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -686,6 +687,23 @@ export default function App() {
   }
 
 
+  // Full screen admin login — when admin clicks "Log In" from portal
+  if (showAdminLogin && !user) {
+    return (
+      <>
+        <Login onLoginSuccess={(loggedInUser) => {
+          setUser(loggedInUser);
+          setAdminTab('dashboard');
+          setPublicTab('dashboard');
+          setShowAdminLogin(false);
+          setView(loggedInUser.role === 'public' ? 'public' : 'admin');
+        }} />
+        <ToastContainer />
+        <GlobalUpdateNotifier isBusy={false} />
+      </>
+    );
+  }
+
   // Full screen resident view — tanpa header/footer/bottom nav portal
   if (showResidentLogin || (residentUser && publicTab === 'resident_dashboard')) {
     return (
@@ -711,7 +729,13 @@ export default function App() {
           setActiveTab={setPublicTab}
           user={user}
           residentUser={residentUser}
-          onAdminLogin={() => setView('admin')}
+          onAdminLogin={() => {
+            if (user) {
+              setView('admin');
+            } else {
+              setShowAdminLogin(true);
+            }
+          }}
           onResidentLogin={() => setShowResidentLogin(true)}
           onResidentLogout={() => { localStorage.removeItem('didesa_resident_user'); setResidentUser(null); setPublicTab('dashboard'); }}
         />

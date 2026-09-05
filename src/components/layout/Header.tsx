@@ -120,12 +120,22 @@ export default function Header({
               <LogOut size={16} />
             </button>
           </div>
-        ) : onResidentLogin ? (
-          <button onClick={() => { if (user && onAdminLogin) { onAdminLogin(); } else if (onResidentLogin) { onResidentLogin(); } }}
-            className="px-2 py-1 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer">
-            Log In
-          </button>
-        ) : null}
+        ) : (
+          <div className="flex items-center gap-2">
+            {onAdminLogin && (
+              <button onClick={onAdminLogin}
+                className="px-2 py-1 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer">
+                Log In
+              </button>
+            )}
+            {onResidentLogin && (
+              <button onClick={onResidentLogin}
+                className="px-2 py-1 text-slate-500 hover:text-slate-700 text-[11px] font-bold transition-all cursor-pointer border border-slate-200 rounded-lg">
+                Warga
+              </button>
+            )}
+          </div>
+        )}
 
         {user && onLogout && (
           <button 
