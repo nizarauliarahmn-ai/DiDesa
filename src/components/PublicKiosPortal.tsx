@@ -107,7 +107,7 @@ export default function PublicKiosPortal() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-xl md:text-3xl font-medium text-slate-300 mb-4"
         >
-          Pemerintah Desa <span className="text-white font-bold">{desaName}</span>
+          Pemerintah Desa <span className="text-white font-bold whitespace-nowrap">{desaName.replace(/^DiDesa\s+/i, '')}</span>
         </motion.p>
         
         <motion.p 
