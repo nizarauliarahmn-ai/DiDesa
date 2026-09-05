@@ -250,20 +250,20 @@ export default function PublicKiosPortal() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1 }}
-        className={`py-8 flex flex-col items-center justify-center gap-6 font-medium z-10 relative mt-auto border-t ${isDark ? 'text-slate-500 border-slate-800/50' : 'text-slate-400 border-slate-200'}`}
+        className={`py-8 flex flex-col items-center justify-center gap-6 font-medium z-10 relative mt-auto border-t text-center ${isDark ? 'text-slate-500 border-slate-800/50' : 'text-slate-400 border-slate-200'}`}
       >
         <button 
           onClick={() => {
             const p = new URLSearchParams(window.location.search);
-            const t = p.get('tenant') || p.get('t_id');
-            window.location.search = t ? `?mode=public&tab=layanan_mandiri&tenant=${t}` : `?mode=public&tab=layanan_mandiri`;
+            const t = p.get('t_id') || p.get('tenant');
+            window.location.search = t ? `?mode=public&tab=layanan_mandiri&t_id=${t}` : `?mode=public&tab=layanan_mandiri`;
           }}
-          className="group text-emerald-400 hover:text-emerald-300 font-bold transition-all flex items-center gap-3 bg-slate-800/50 px-6 py-3 rounded-full backdrop-blur-md border border-slate-700/50 hover:bg-slate-700/50 hover:shadow-lg hover:shadow-emerald-900/20"
+          className={`group font-bold transition-all flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-md border hover:shadow-lg ${isDark ? 'text-emerald-400 hover:text-emerald-300 bg-slate-800/50 border-slate-700/50 hover:bg-slate-700/50 hover:shadow-emerald-900/20' : 'text-emerald-600 hover:text-emerald-700 bg-white border-slate-200 hover:bg-slate-50 hover:shadow-slate-200/50'}`}
         >
           <Zap className="w-5 h-5 group-hover:animate-pulse" />
           Lihat Dashboard Publik <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
-        <p className="tracking-wider text-sm">&copy; {new Date().getFullYear()} DiDesa. Sistem Pemerintahan Desa Modern.</p>
+        <p className="tracking-wider text-sm px-4">&copy; {new Date().getFullYear()} DiDesa. Sistem Digitalisasi Desa Modern di Indonesia.</p>
       </motion.footer>
       </div>
     </>
