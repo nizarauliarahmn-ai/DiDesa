@@ -1,5 +1,5 @@
 import React from 'react';
-import { Globe, LogOut } from 'lucide-react';
+import { Globe, LogOut, LogIn, Users } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 
 export default function Header({ 
@@ -113,8 +113,9 @@ export default function Header({
         {residentUser ? (
           <div className="flex items-center gap-2">
             <button onClick={() => { if (setActiveTab) setActiveTab('resident_dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="px-2 py-1 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer">
-              Log In
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold rounded-lg transition-all cursor-pointer border border-emerald-200/50">
+              <Users size={13} />
+              <span>Profil Saya</span>
             </button>
             <button onClick={onResidentLogout} title="Keluar" className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer">
               <LogOut size={16} />
@@ -124,14 +125,16 @@ export default function Header({
           <div className="flex items-center gap-2">
             {onAdminLogin && (
               <button onClick={onAdminLogin}
-                className="px-2 py-1 text-emerald-700 hover:text-emerald-800 text-[11px] font-bold transition-all cursor-pointer">
-                Log In
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg transition-all cursor-pointer shadow-sm shadow-emerald-600/20 hover:shadow-md hover:shadow-emerald-600/30">
+                <LogIn size={13} />
+                <span>Masuk Admin</span>
               </button>
             )}
             {onResidentLogin && (
               <button onClick={onResidentLogin}
-                className="px-2 py-1 text-slate-500 hover:text-slate-700 text-[11px] font-bold transition-all cursor-pointer border border-slate-200 rounded-lg">
-                Warga
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-600 text-[11px] font-bold rounded-lg transition-all cursor-pointer border border-slate-200 shadow-sm hover:shadow-md">
+                <Users size={13} />
+                <span>Warga</span>
               </button>
             )}
           </div>
