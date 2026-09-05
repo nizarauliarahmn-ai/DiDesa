@@ -86,7 +86,7 @@ export default function PublicKiosPortal() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700/50 backdrop-blur-md mb-8 shadow-xl"
+          className="hidden"
         >
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span className="text-sm font-semibold tracking-wide text-slate-300">PORTAL RESMI PELAYANAN DESA</span>
