@@ -116,7 +116,7 @@ export default function PublicKiosPortal() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-slate-400 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed"
         >
-          Pusat layanan digital mandiri. Silakan pilih menu di bawah ini untuk memulai layanan tanpa perlu antre di loket balai desa.
+          Pusat layanan digital mandiri yang dikelola oleh <a href="https://sistemdidesa.id" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:underline">sistemdidesa.id</a>. Silakan pilih menu di bawah ini untuk memulai layanan.
         </motion.p>
       </header>
 
