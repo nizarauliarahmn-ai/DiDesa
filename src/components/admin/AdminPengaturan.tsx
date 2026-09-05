@@ -41,6 +41,7 @@ export default function AdminPengaturan() {
 
   const [luasWilayah, setLuasWilayah] = useState(() => localStorage.getItem('village_luas_wilayah') || '');
   const [ketinggian, setKetinggian] = useState(() => localStorage.getItem('village_ketinggian') || '');
+  const [topografi, setTopografi] = useState(() => localStorage.getItem('village_topografi') || 'Dataran Rendah');
   const [batasUtara, setBatasUtara] = useState(() => localStorage.getItem('village_batas_utara') || '');
   const [batasSelatan, setBatasSelatan] = useState(() => localStorage.getItem('village_batas_selatan') || '');
   const [batasTimur, setBatasTimur] = useState(() => localStorage.getItem('village_batas_timur') || '');
@@ -95,6 +96,7 @@ export default function AdminPengaturan() {
           set('google_drive_api_key', setGoogleDriveApiKey);
           set('village_luas_wilayah', setLuasWilayah);
           set('village_ketinggian', setKetinggian);
+          set('village_topografi', setTopografi);
           set('village_batas_utara', setBatasUtara);
           set('village_batas_selatan', setBatasSelatan);
           set('village_batas_timur', setBatasTimur);
@@ -198,6 +200,7 @@ export default function AdminPengaturan() {
       supabase_storage_bucket: storageBucketName,
       village_luas_wilayah: luasWilayah,
       village_ketinggian: ketinggian,
+      village_topografi: topografi,
       village_batas_utara: batasUtara,
       village_batas_selatan: batasSelatan,
       village_batas_timur: batasTimur,
@@ -537,7 +540,7 @@ export default function AdminPengaturan() {
               {/* Profil Desa - Geografi */}
               <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-700/50">
                 <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Profil Desa (Data Geografi)</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Luas Wilayah (km²)</label>
                     <input type="text" value={luasWilayah} onChange={e => setLuasWilayah(e.target.value)} placeholder="cth: 4.5" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
@@ -545,6 +548,10 @@ export default function AdminPengaturan() {
                   <div className="space-y-1.5">
                     <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Ketinggian (mdpl)</label>
                     <input type="text" value={ketinggian} onChange={e => setKetinggian(e.target.value)} placeholder="cth: 45" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Topografi</label>
+                    <input type="text" value={topografi} onChange={e => setTopografi(e.target.value)} placeholder="cth: Dataran Rendah" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">

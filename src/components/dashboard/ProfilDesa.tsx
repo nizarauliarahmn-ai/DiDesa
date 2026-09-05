@@ -26,6 +26,7 @@ export default function ProfilDesa() {
   const [luasWilayah, setLuasWilayah] = useState(() => localStorage.getItem('village_luas_wilayah') || '-');
   const [totalPenduduk, setTotalPenduduk] = useState(0);
   const [ketinggian, setKetinggian] = useState(() => localStorage.getItem('village_ketinggian') || '-');
+  const [topografi, setTopografi] = useState(() => localStorage.getItem('village_topografi') || 'Dataran Rendah');
   const [batasUtara, setBatasUtara] = useState(() => localStorage.getItem('village_batas_utara') || '-');
   const [batasSelatan, setBatasSelatan] = useState(() => localStorage.getItem('village_batas_selatan') || '-');
   const [batasTimur, setBatasTimur] = useState(() => localStorage.getItem('village_batas_timur') || '-');
@@ -83,6 +84,7 @@ export default function ProfilDesa() {
             data.forEach(r => { map[r.key] = r.value; });
             if (map['village_luas_wilayah']) setLuasWilayah(map['village_luas_wilayah']);
             if (map['village_ketinggian']) setKetinggian(map['village_ketinggian']);
+            if (map['village_topografi']) setTopografi(map['village_topografi']);
             if (map['village_batas_utara']) setBatasUtara(map['village_batas_utara']);
             if (map['village_batas_selatan']) setBatasSelatan(map['village_batas_selatan']);
             if (map['village_batas_timur']) setBatasTimur(map['village_batas_timur']);
@@ -317,6 +319,10 @@ export default function ProfilDesa() {
               <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                 <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Ketinggian</p>
                 <p className="text-xl font-black text-gray-900 dark:text-white">{ketinggian} <span className="text-sm font-medium text-gray-500 dark:text-slate-400">mdpl</span></p>
+              </div>
+              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Topografi</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">{topografi}</p>
               </div>
             </div>
 
