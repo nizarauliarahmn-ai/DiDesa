@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowRight, CheckCircle2, Wallet, CalendarCheck, Landmark, UserPlus,
-  Copy, Users, BadgeCheck, TrendingUp, Smartphone, MessagesSquare,
+  Copy, Users, TrendingUp, Smartphone, MessagesSquare,
   ChevronDown, ShieldAlert, ClipboardCheck, Timer, MapPin, Zap, X
 } from 'lucide-react';
 import { supabase } from '../utils/supabase';
@@ -337,9 +337,6 @@ export default function AffiliateLandingPage() {
           <div className="absolute top-1/3 -left-24 w-80 h-80 bg-teal-400/20 rounded-full blur-3xl" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-14 lg:pt-24 lg:pb-20 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-600/10 border border-emerald-600/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-black uppercase tracking-widest mb-6">
-            <BadgeCheck className="w-4 h-4" /> Program Resmi DiDesa
-          </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.05] max-w-3xl mx-auto">
             Bantu Desa Go-Digital,<br />
             Raih{' '}
