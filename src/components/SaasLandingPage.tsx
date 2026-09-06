@@ -82,19 +82,27 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             const { data: settingsData } = await supabase
               .from('saas_settings')
               .select('tenant_id, key, value')
-              .in('key', ['kop_kabupaten', 'village_kabupaten']);
+              .in('key', ['kop_kabupaten', 'village_kabupaten', 'kop_logo_url']);
 
             if (settingsData && settingsData.length > 0) {
               const kabupatenMap: Record<string, string> = {};
+              const logoMap: Record<string, string> = {};
               settingsData.forEach(row => {
                 if (row.tenant_id && row.value) {
-                  kabupatenMap[row.tenant_id] = row.value;
+                  if (row.key === 'kop_logo_url') {
+                    logoMap[row.tenant_id] = row.value;
+                  } else {
+                    kabupatenMap[row.tenant_id] = row.value;
+                  }
                 }
               });
 
               tenantsData.forEach(t => {
                 if (t.id && kabupatenMap[t.id]) {
                   t.kabupaten = kabupatenMap[t.id];
+                }
+                if (t.id && logoMap[t.id] && !t.logo_url) {
+                  t.logo_url = logoMap[t.id];
                 }
               });
             }
