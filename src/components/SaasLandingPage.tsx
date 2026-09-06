@@ -184,7 +184,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMCIgc3Ryb2tlLW9wYWNpdHk9IjAuMDUiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] dark:opacity-20 opacity-50" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-[4fr_3fr] gap-12 items-center">
+        <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8 relative z-10">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
               Sistem <br/>
@@ -225,8 +225,8 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
           </div>
 
           {/* Right Side Visuals / Ilustrasi */}
-          <div className="relative z-10 lg:h-[600px] flex items-center justify-center">
-            <img src="/ilustrasi 1.png" alt="Ilustrasi Digitalisasi Desa" className="w-full h-full object-contain drop-shadow-2xl" />
+          <div className="relative z-10 lg:h-[600px] flex items-center justify-center -ml-16">
+            <img src="/ilustrasi 1.png" alt="Ilustrasi Digitalisasi Desa" className="w-[120%] h-full object-contain drop-shadow-2xl" />
           </div>
         </div>
       </main>
