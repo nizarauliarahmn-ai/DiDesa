@@ -102,7 +102,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             console.warn('[SaasLandingPage] saas_settings fetch skipped:', e);
           }
 
-          setTenants(tenantsData);
+          setTenants(tenantsData.filter(t => t.nama_desa !== 'Global SaaS' && t.role !== 'platform_owner'));
         } else {
           setTenants([]);
         }
