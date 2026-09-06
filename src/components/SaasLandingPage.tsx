@@ -437,9 +437,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <div 
-                          className="w-12 h-12 rounded-2xl flex items-center justify-center p-1"
-                        >
+                        <div className="w-12 h-12 flex items-center justify-center">
                           {tenant.logo_url ? (
                             <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain" />
                           ) : (
