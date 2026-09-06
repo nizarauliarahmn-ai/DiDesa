@@ -189,9 +189,10 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
               Sistem <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
-                Pemerintahan
+                Digitalisasi
               </span><br/>
-              Era Digital
+              Pemerintahan<br/>
+              Desa Modern
             </h1>
             
             <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-lg">
