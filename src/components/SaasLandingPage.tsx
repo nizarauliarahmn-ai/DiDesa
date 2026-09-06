@@ -186,7 +186,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
 
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8 relative z-10">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black leading-[1.1] tracking-tight">
               Sistem <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">
                 Digitalisasi
