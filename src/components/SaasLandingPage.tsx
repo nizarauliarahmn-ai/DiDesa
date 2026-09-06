@@ -226,7 +226,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
 
           {/* Right Side Visuals / Ilustrasi */}
           <div className="relative z-10 lg:h-[600px] flex items-center justify-center">
-            <img src="/ilustrasi 1.png" alt="Ilustrasi Digitalisasi Desa" className="w-full max-w-lg object-contain drop-shadow-2xl" />
+            <img src="/ilustrasi 1.png" alt="Ilustrasi Digitalisasi Desa" className="w-full h-full object-contain drop-shadow-2xl" />
           </div>
         </div>
       </main>
