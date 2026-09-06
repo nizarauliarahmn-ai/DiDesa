@@ -224,81 +224,9 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             </div>
           </div>
 
-          {/* Right Side Visuals / Mockup */}
+          {/* Right Side Visuals / Ilustrasi */}
           <div className="relative z-10 lg:h-[600px] flex items-center justify-center">
-            {/* Dekorasi Glow Belakang Mockup */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 blur-3xl rounded-full" />
-            
-            <div className="relative w-full max-w-lg bg-white/70 dark:bg-slate-800/70 backdrop-blur-2xl rounded-3xl border border-white/40 dark:border-slate-700/50 shadow-2xl overflow-hidden shadow-emerald-900/10 transform rotate-2 hover:rotate-0 transition-transform duration-500">
-              
-              {/* Mockup Header */}
-              <div className="h-12 bg-white/50 dark:bg-slate-900/50 border-b border-gray-100 dark:border-slate-700/50 flex items-center px-4 gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-rose-400" />
-                  <div className="w-3 h-3 rounded-full bg-amber-400" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                </div>
-                <div className="mx-auto bg-white dark:bg-slate-800 h-6 px-3 rounded-md text-[10px] font-mono flex items-center text-slate-400 border border-gray-200 dark:border-slate-700">
-                  Ketupat.sistemdidesa.id
-                </div>
-              </div>
-
-              {/* Mockup Content */}
-              <div className="p-6 space-y-4">
-                <div className="flex items-center gap-4 mb-8">
-                  {globalLogo ? (
-                    <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg p-2"
-                      style={{ backgroundColor: globalColor }}
-                    >
-                      <img src={globalLogo} alt="Logo Desa" className="w-full h-full object-contain" />
-                    </div>
-                  ) : (
-                    <div 
-                      className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
-                      style={{ backgroundColor: globalColor }}
-                    >
-                       <Building2 className="text-white" size={24} />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-800 dark:text-white leading-tight">Desa Ketupat</h3>
-                    <p className="text-xs font-bold tracking-wide" style={{ color: globalColor }}>PORTAL WARGA</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
-                    <FileText className="text-emerald-600 dark:text-emerald-400 mb-2" size={24} />
-                    <h4 className="font-bold text-sm">Persuratan & TTE</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Surat elektronik resmi</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/30">
-                    <PieChart className="text-blue-600 dark:text-blue-400 mb-2" size={24} />
-                    <h4 className="font-bold text-sm">Transparansi</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Publikasi Dana Desa</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-4 rounded-2xl border border-amber-100 dark:border-amber-800/30 col-span-2 flex items-center justify-between">
-                     <div>
-                       <h4 className="font-bold text-sm">Layanan Mandiri Warga</h4>
-                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Akses 24/7 via Kiosk / HP</p>
-                     </div>
-                     <Smartphone className="text-amber-500" size={32} />
-                  </div>
-                </div>
-
-                <div className="mt-6 p-4 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-sm flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                    <CheckCircle2 className="text-emerald-600" size={16} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="h-2 bg-gray-200 dark:bg-slate-700 rounded w-full mb-2"></div>
-                    <div className="h-2 bg-gray-200 dark:bg-slate-700 rounded w-2/3"></div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
+            <img src="/ilustrasi 1.png" alt="Ilustrasi Digitalisasi Desa" className="w-full max-w-lg object-contain drop-shadow-2xl" />
           </div>
         </div>
       </main>
