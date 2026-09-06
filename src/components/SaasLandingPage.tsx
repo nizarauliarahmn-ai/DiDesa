@@ -438,13 +438,12 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <div 
-                          className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md p-1"
-                          style={{ backgroundColor: globalColor }}
+                          className="w-12 h-12 rounded-2xl flex items-center justify-center p-1"
                         >
                           {tenant.logo_url ? (
-                            <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain rounded-xl" />
+                            <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain" />
                           ) : (
-                            <Building2 className="text-white" size={24} />
+                            <Building2 className="text-slate-400" size={24} />
                           )}
                         </div>
                       </div>
