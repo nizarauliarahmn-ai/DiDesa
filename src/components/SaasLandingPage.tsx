@@ -198,15 +198,15 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
               <strong className="text-slate-900 dark:text-white">DiDesa</strong> — Solusi Administrasi & Digitalisasi Desa Modern Indonesia. Terintegrasi, transparan, dan mudah digunakan oleh Aparatur maupun Warga.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <button onClick={onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-bold hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-xl hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer">
-                <LayoutDashboard size={20} /> Masuk ke Dashboard Admin
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <button onClick={onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                <LayoutDashboard size={16} /> Masuk ke Dashboard Admin
               </button>
               <button 
                 onClick={() => setIsSearchModalOpen(true)} 
-                className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-8 py-4 rounded-2xl font-bold border border-gray-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer"
+                className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl font-bold text-sm border border-gray-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Search size={20} /> Cari Portal Desa Saya
+                <Search size={16} /> Cari Portal Desa Saya
               </button>
             </div>
             
