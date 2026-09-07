@@ -60,7 +60,7 @@ const FIELD_LABELS: Record<keyof ColumnMapping, string> = {
   linkFile: 'Link File (URL)',
 };
 
-const REQUIRED_FIELDS = ['uraian', 'tahun'];
+const REQUIRED_FIELDS = ['uraian'];
 
 function guessMapping(headers: string[]): ColumnMapping {
   const mapping = { ...DEFAULT_MAPPING };
@@ -74,16 +74,16 @@ function guessMapping(headers: string[]): ColumnMapping {
     return '';
   };
 
-  mapping.no = findHeader(['no', 'nomor', 'urut']);
-  mapping.tahun = findHeader(['tahun', 'year']);
-  mapping.uraian = findHeader(['uraian', 'judul', 'deskripsi', 'description', 'title']);
-  mapping.tanggal = findHeader(['tanggal', 'date', 'tgl']);
-  mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit']);
-  mapping.jenisDokumen = findHeader(['jenis dokumen', 'jenis', 'type', 'kategori', 'category']);
+  mapping.no = findHeader(['no', 'nomor', 'urut', 'no.']);
+  mapping.tahun = findHeader(['tahun', 'year', 'thn', 'th']);
+  mapping.uraian = findHeader(['uraian', 'judul', 'deskripsi', 'description', 'title', 'nama', 'produk', 'keterangan uraian']);
+  mapping.tanggal = findHeader(['tanggal', 'date', 'tgl', 'waktu', 'tmt']);
+  mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit', 'tgl undang']);
+  mapping.jenisDokumen = findHeader(['jenis dokumen', 'jenis', 'type', 'kategori', 'category', 'tipe']);
   mapping.arsip = findHeader(['arsip', 'archive']);
-  mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip']);
-  mapping.ketLain = findHeader(['ket lain', 'keterangan lain', 'catatan', 'note', 'remark']);
-  mapping.linkFile = findHeader(['link file', 'link', 'url', 'google drive', 'gdrive', 'file link']);
+  mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip', 'status']);
+  mapping.ketLain = findHeader(['ket lain', 'keterangan lain', 'catatan', 'note', 'remark', 'keterangan', 'dasar', 'tentang', 'ref']);
+  mapping.linkFile = findHeader(['link file', 'link', 'url', 'google drive', 'gdrive', 'file link', 'file']);
 
   return mapping;
 }
@@ -151,7 +151,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     for (let i = 0; i < Math.min(lines.length, 20); i++) {
       const lower = lines[i].toLowerCase();
       const matchCount = headerKeywords.filter(kw => lower.includes(kw)).length;
-      if (matchCount >= 3) { headerIdx = i; break; }
+      if (matchCount >= 2) { headerIdx = i; break; }
     }
     if (headerIdx === -1) return { headers: [], rows: [] };
 
@@ -331,11 +331,18 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
   });
 
   const getMappedPreview = (): MappedData[] => {
-    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx));
+    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
   };
 
   const getAllMappedData = (): MappedData[] => {
-    return rawRows.map((row, idx) => mapRow(row, idx));
+    return rawRows.map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
+  };
+
+  const getFilteredRowCount = (): number => {
+    return rawRows.filter(row => {
+      const uraianVal = mapping.uraian ? String(row[mapping.uraian] || '').trim() : '';
+      return uraianVal !== '';
+    }).length;
   };
 
   const handleImport = () => {
@@ -492,10 +499,15 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
               <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3">
                 <CheckCircle2 size={16} className="text-emerald-600" />
                 <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                  {getAllMappedData().length} data siap diimport
+                  {getAllMappedData().length} data valid siap diimport
+                  {rawRows.length > getAllMappedData().length && (
+                    <span className="text-xs font-normal text-emerald-600/70 dark:text-emerald-400/70 ml-1">
+                      (dari {rawRows.length} baris, {rawRows.length - getAllMappedData().length} baris kosong/tanpa uraian dibuang)
+                    </span>
+                  )}
                   {getAllMappedData().length > 100 && (
                     <span className="text-xs font-normal text-emerald-600/70 dark:text-emerald-400/70 ml-1">
-                      (menampilkan 100 dari {getAllMappedData().length} data)
+                      (menampilkan 100 dari {getAllMappedData().length})
                     </span>
                   )}
                 </span>
