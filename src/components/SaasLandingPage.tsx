@@ -207,8 +207,8 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <button onClick={onTrialClick || onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
-                <LayoutDashboard size={16} /> Coba Gratis
+              <button onClick={onTrialClick || onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                <LayoutDashboard size={22} /> Coba Gratis
               </button>
             </div>
             
