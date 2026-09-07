@@ -189,8 +189,23 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
         if (rows.length === 0) {
           const data = new Uint8Array(result as ArrayBuffer);
           const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+          let jsonData: any[][] = [];
+
+          for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as any[][];
+            const nonEmptyRows = sheetData.filter(r => r && r.some(c => String(c || '').trim() !== ''));
+            if (nonEmptyRows.length > jsonData.length) {
+              jsonData = sheetData;
+            }
+          }
+
+          if (jsonData.length < 2) {
+            for (const sn of workbook.SheetNames) {
+              const sd = XLSX.utils.sheet_to_json(workbook.Sheets[sn], { header: 1, defval: '' }) as any[][];
+              jsonData.push(...sd);
+            }
+          }
 
           if (jsonData.length < 2) {
             showToast('File kosong atau tidak ada data!', 'error');
@@ -217,7 +232,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
               const row = jsonData[i] as any[];
               if (!row) continue;
               const nonEmpty = row.filter((c: any) => String(c || '').trim() !== '').length;
-              if (nonEmpty >= 4) {
+              if (nonEmpty >= 2) {
                 headerRowIndex = i;
                 break;
               }
@@ -225,14 +240,16 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
           }
 
           if (headerRowIndex === -1) {
-            showToast('Tidak dapat menemukan baris header di file!', 'error');
-            setIsProcessing(false);
-            return;
+            headerRowIndex = 0;
           }
 
-          const rawHeaders = (jsonData[headerRowIndex] as any[]).map(h => String(h || '').trim());
+          const rawHeaders = (jsonData[headerRowIndex] as any[]).map((h, i) => {
+            const val = String(h || '').trim();
+            return val || `Kolom ${i + 1}`;
+          });
           let lastNonEmpty = rawHeaders.length - 1;
-          while (lastNonEmpty >= 0 && !rawHeaders[lastNonEmpty]) lastNonEmpty--;
+          while (lastNonEmpty >= 0 && !rawHeaders[lastNonEmpty] || rawHeaders[lastNonEmpty]?.startsWith('Kolom ')) lastNonEmpty--;
+          if (lastNonEmpty < 0) lastNonEmpty = rawHeaders.length - 1;
           headers = rawHeaders.slice(0, lastNonEmpty + 1);
 
           rows = jsonData.slice(headerRowIndex + 1)
