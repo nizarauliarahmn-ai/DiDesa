@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, ExternalLink, Link2, ArrowLeft } from 'lucide-react';
+import { FileText, Download, Link2, ArrowLeft } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 interface SKData {
   id: string;
@@ -29,13 +30,22 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
 
   const fetchSk = async (id: string) => {
     try {
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) { setLoading(false); return; }
+
       const { data, error } = await supabase
-        .from('produk_hukum_items')
-        .select('*')
-        .eq('id', id)
+        .from('saas_settings')
+        .select('value')
+        .eq('tenant_id', tenantId)
+        .eq('key', 'produk_hukum_data')
         .single();
-      if (error) throw error;
-      setSk(data);
+
+      if (error || !data?.value) { setLoading(false); return; }
+
+      const all = JSON.parse(data.value);
+      const skItems: SKData[] = all['sk_kades'] || [];
+      const found = skItems.find((item) => item.id === id);
+      setSk(found || null);
     } catch {
       setSk(null);
     } finally {
