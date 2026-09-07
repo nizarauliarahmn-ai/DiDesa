@@ -101,7 +101,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                 if (t.id && kabupatenMap[t.id]) {
                   t.kabupaten = kabupatenMap[t.id];
                 }
-                if (t.id && logoMap[t.id] && !t.logo_url) {
+                if (t.id && logoMap[t.id]) {
                   t.logo_url = logoMap[t.id];
                 }
               });
