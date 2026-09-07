@@ -213,6 +213,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
         if (a.importOrder != null && b.importOrder != null) return a.importOrder - b.importOrder;
         if (a.importOrder != null) return -1;
         if (b.importOrder != null) return 1;
+        return 0;
       }
       let cmp = 0;
       if (sortField === 'tahun') {
@@ -225,14 +226,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
         cmp = a.no - b.no;
       }
       if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
-      if (sortField !== 'importOrder') {
-        if (a.importOrder != null && b.importOrder != null) return a.importOrder - b.importOrder;
-        if (a.importOrder != null) return -1;
-        if (b.importOrder != null) return 1;
-      }
-      const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
-      const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
-      if (tglA !== tglB) return tglB - tglA;
+      if (a.tahun !== b.tahun) return (a.tahun || '').localeCompare(b.tahun || '');
       return a.no - b.no;
     });
     return result;
@@ -565,7 +559,13 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                       className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                   </th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">No</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
+                    onClick={() => { if (sortField === 'no') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('no'); setSortDir('asc'); } }}>
+                    <span className="inline-flex items-center gap-1">
+                      No
+                      {sortField === 'no' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
+                    </span>
+                  </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
                     onClick={() => { if (sortField === 'tahun') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('tahun'); setSortDir('asc'); } }}>
                     <span className="inline-flex items-center gap-1">
