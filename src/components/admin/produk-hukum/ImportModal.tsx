@@ -191,12 +191,30 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
           const workbook = XLSX.read(data, { type: 'array' });
           let jsonData: any[][] = [];
 
+          let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+          let bestCount = 0;
           for (const sheetName of workbook.SheetNames) {
             const sheet = workbook.Sheets[sheetName];
             const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as any[][];
             const nonEmptyRows = sheetData.filter(r => r && r.some(c => String(c || '').trim() !== ''));
-            if (nonEmptyRows.length > jsonData.length) {
-              jsonData = sheetData;
+            if (nonEmptyRows.length > bestCount) {
+              bestCount = nonEmptyRows.length;
+              bestSheet = sheet;
+            }
+          }
+
+          jsonData = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: '' }) as any[][];
+
+          const range = XLSX.utils.decode_range(bestSheet['!ref'] || 'A1');
+          for (let r = range.s.r; r <= range.e.r; r++) {
+            for (let c = range.s.c; c <= range.e.c; c++) {
+              const addr = XLSX.utils.encode_cell({ r, c });
+              const cell = bestSheet[addr];
+              if (cell && cell.l && cell.l.Target) {
+                if (jsonData[r]) {
+                  jsonData[r][c] = cell.l.Target;
+                }
+              }
             }
           }
 
