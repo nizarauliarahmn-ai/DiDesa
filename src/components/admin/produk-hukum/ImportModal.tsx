@@ -218,22 +218,28 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     e.target.value = '';
   };
 
+  const mapRow = (row: ParsedRow, idx: number): MappedData => ({
+    no: mapping.no ? (parseInt(String(row[mapping.no])) || idx + 1) : idx + 1,
+    tahun: mapping.tahun ? String(row[mapping.tahun] || '') : new Date().getFullYear().toString(),
+    uraian: mapping.uraian ? String(row[mapping.uraian] || '') : '',
+    tanggal: mapping.tanggal ? String(row[mapping.tanggal] || '') : '',
+    tanggalDiundangkan: mapping.tanggalDiundangkan ? String(row[mapping.tanggalDiundangkan] || '') : '',
+    jenisDokumen: mapping.jenisDokumen ? String(row[mapping.jenisDokumen] || '') : '',
+    arsip: mapping.arsip ? parseArsipValue(row[mapping.arsip]) : true,
+    ketArsip: mapping.ketArsip ? String(row[mapping.ketArsip] || '') : '',
+    ketLain: mapping.ketLain ? String(row[mapping.ketLain] || '') : '',
+  });
+
   const getMappedPreview = (): MappedData[] => {
-    return rawRows.slice(0, 100).map((row, idx) => ({
-      no: mapping.no ? (parseInt(String(row[mapping.no])) || idx + 1) : idx + 1,
-      tahun: mapping.tahun ? String(row[mapping.tahun] || '') : new Date().getFullYear().toString(),
-      uraian: mapping.uraian ? String(row[mapping.uraian] || '') : '',
-      tanggal: mapping.tanggal ? String(row[mapping.tanggal] || '') : '',
-      tanggalDiundangkan: mapping.tanggalDiundangkan ? String(row[mapping.tanggalDiundangkan] || '') : '',
-      jenisDokumen: mapping.jenisDokumen ? String(row[mapping.jenisDokumen] || '') : '',
-      arsip: mapping.arsip ? parseArsipValue(row[mapping.arsip]) : true,
-      ketArsip: mapping.ketArsip ? String(row[mapping.ketArsip] || '') : '',
-      ketLain: mapping.ketLain ? String(row[mapping.ketLain] || '') : '',
-    }));
+    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx));
+  };
+
+  const getAllMappedData = (): MappedData[] => {
+    return rawRows.map((row, idx) => mapRow(row, idx));
   };
 
   const handleImport = () => {
-    const data = getMappedPreview();
+    const data = getAllMappedData();
     if (data.length === 0) {
       showToast('Tidak ada data untuk diimport!', 'error');
       return;
