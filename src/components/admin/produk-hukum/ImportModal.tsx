@@ -198,7 +198,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
             return;
           }
 
-          const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
+          const headerKeywords = ['tahun', 'year', 'uraian', 'deskripsi', 'tanggal', 'date', 'jenis', 'type', 'arsip', 'archive', 'link', 'keterangan', 'note', 'no', 'nomor'];
           let headerRowIndex = -1;
 
           for (let i = 0; i < Math.min(jsonData.length, 50); i++) {
@@ -206,9 +206,21 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
             if (!row) continue;
             const rowText = row.map(c => String(c || '').toLowerCase().trim()).join(' ');
             const matchCount = headerKeywords.filter(kw => rowText.includes(kw)).length;
-            if (matchCount >= 3) {
+            if (matchCount >= 2) {
               headerRowIndex = i;
               break;
+            }
+          }
+
+          if (headerRowIndex === -1) {
+            for (let i = 0; i < Math.min(jsonData.length, 20); i++) {
+              const row = jsonData[i] as any[];
+              if (!row) continue;
+              const nonEmpty = row.filter((c: any) => String(c || '').trim() !== '').length;
+              if (nonEmpty >= 4) {
+                headerRowIndex = i;
+                break;
+              }
             }
           }
 
