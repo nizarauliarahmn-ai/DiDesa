@@ -13,6 +13,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
     <title>DiDesa</title>
+    <script>
+      (function() {
+        var params = new URLSearchParams(window.location.search);
+        var tab = params.get('tab');
+        var skId = params.get('sk_id');
+        var title = 'DiDesa - Portal Warga';
+        var description = 'Portal informasi, layanan administrasi, dan transparansi data desa.';
+        if (tab === 'sk_kades' && skId) {
+          title = 'Detail SK Kepala Desa | DiDesa';
+          description = 'Buka tautan ini untuk melihat detail produk hukum, dasar penetapan, dan lampiran Surat Keputusan Kepala Desa.';
+        }
+        document.title = title;
+        var metaOgTitle = document.querySelector('meta[property="og:title"]');
+        var metaOgDesc = document.querySelector('meta[property="og:description"]');
+        var metaOgSite = document.querySelector('meta[property="og:site_name"]');
+        var metaTwTitle = document.querySelector('meta[name="twitter:title"]');
+        var metaTwDesc = document.querySelector('meta[name="twitter:description"]');
+        if (!metaOgTitle) { metaOgTitle = document.createElement('meta'); metaOgTitle.setAttribute('property', 'og:title'); document.head.appendChild(metaOgTitle); }
+        if (!metaOgDesc) { metaOgDesc = document.createElement('meta'); metaOgDesc.setAttribute('property', 'og:description'); document.head.appendChild(metaOgDesc); }
+        if (!metaOgSite) { metaOgSite = document.createElement('meta'); metaOgSite.setAttribute('property', 'og:site_name'); document.head.appendChild(metaOgSite); }
+        if (!metaTwTitle) { metaTwTitle = document.createElement('meta'); metaTwTitle.setAttribute('name', 'twitter:title'); document.head.appendChild(metaTwTitle); }
+        if (!metaTwDesc) { metaTwDesc = document.createElement('meta'); metaTwDesc.setAttribute('name', 'twitter:description'); document.head.appendChild(metaTwDesc); }
+        metaOgTitle.content = title;
+        metaOgDesc.content = description;
+        metaOgSite.content = 'DiDesa';
+        metaTwTitle.content = title;
+        metaTwDesc.content = description;
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
