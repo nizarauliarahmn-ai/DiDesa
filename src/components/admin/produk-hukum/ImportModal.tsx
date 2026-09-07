@@ -121,6 +121,47 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     onClose();
   };
 
+  const parseRawText = (text: string): { headers: string[]; rows: ParsedRow[] } => {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return { headers: [], rows: [] };
+
+    const sep = lines[0].split(';').length > lines[0].split(',').length ? ';' : ',';
+
+    const parseLine = (line: string): string[] => {
+      const result: string[] = [];
+      let current = '';
+      let inQuote = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQuote = !inQuote; continue; }
+        if (ch === sep && !inQuote) { result.push(current.trim()); current = ''; continue; }
+        current += ch;
+      }
+      result.push(current.trim());
+      return result;
+    };
+
+    const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
+    let headerIdx = -1;
+    for (let i = 0; i < Math.min(lines.length, 20); i++) {
+      const lower = lines[i].toLowerCase();
+      const matchCount = headerKeywords.filter(kw => lower.includes(kw)).length;
+      if (matchCount >= 3) { headerIdx = i; break; }
+    }
+    if (headerIdx === -1) return { headers: [], rows: [] };
+
+    const headers = parseLine(lines[headerIdx]).filter(h => h);
+    const rows: ParsedRow[] = [];
+    for (let i = headerIdx + 1; i < lines.length; i++) {
+      const cells = parseLine(lines[i]);
+      if (cells.every(c => !c)) continue;
+      const obj: ParsedRow = {};
+      headers.forEach((h, j) => { obj[h] = cells[j] ?? ''; });
+      rows.push(obj);
+    }
+    return { headers, rows };
+  };
+
   const processFile = useCallback((file: File) => {
     setIsProcessing(true);
     setFileName(file.name);
@@ -128,55 +169,71 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+        const result = e.target?.result;
 
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+        let headers: string[] = [];
+        let rows: ParsedRow[] = [];
 
-        if (jsonData.length < 2) {
-          showToast('File kosong atau tidak ada data!', 'error');
-          setIsProcessing(false);
-          return;
+        if (file.name.endsWith('.csv')) {
+          const text = typeof result === 'string' ? result : new TextDecoder().decode(result as ArrayBuffer);
+          const textResult = parseRawText(text);
+          headers = textResult.headers;
+          rows = textResult.rows;
         }
 
-        // Cari baris header yang mengandung kata kunci yang dikenal
-        const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
-        let headerRowIndex = -1;
+        if (rows.length === 0) {
+          const data = new Uint8Array(result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
 
-        for (let i = 0; i < Math.min(jsonData.length, 10); i++) {
-          const row = jsonData[i] as any[];
-          if (!row) continue;
-          const rowText = row.map(c => String(c || '').toLowerCase().trim()).join(' ');
-          const matchCount = headerKeywords.filter(kw => rowText.includes(kw)).length;
-          if (matchCount >= 3) {
-            headerRowIndex = i;
-            break;
+          if (jsonData.length < 2) {
+            showToast('File kosong atau tidak ada data!', 'error');
+            setIsProcessing(false);
+            return;
           }
+
+          const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
+          let headerRowIndex = -1;
+
+          for (let i = 0; i < Math.min(jsonData.length, 10); i++) {
+            const row = jsonData[i] as any[];
+            if (!row) continue;
+            const rowText = row.map(c => String(c || '').toLowerCase().trim()).join(' ');
+            const matchCount = headerKeywords.filter(kw => rowText.includes(kw)).length;
+            if (matchCount >= 3) {
+              headerRowIndex = i;
+              break;
+            }
+          }
+
+          if (headerRowIndex === -1) {
+            showToast('Tidak dapat menemukan baris header di file!', 'error');
+            setIsProcessing(false);
+            return;
+          }
+
+          const rawHeaders = (jsonData[headerRowIndex] as any[]).map(h => String(h || '').trim());
+          let lastNonEmpty = rawHeaders.length - 1;
+          while (lastNonEmpty >= 0 && !rawHeaders[lastNonEmpty]) lastNonEmpty--;
+          headers = rawHeaders.slice(0, lastNonEmpty + 1);
+
+          rows = jsonData.slice(headerRowIndex + 1)
+            .filter((row: any) => {
+              return row && row.some((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
+            })
+            .map((row: any) => {
+              const obj: ParsedRow = {};
+              headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
+              return obj;
+            });
         }
 
-        if (headerRowIndex === -1) {
+        if (headers.length === 0 || rows.length === 0) {
           showToast('Tidak dapat menemukan baris header di file!', 'error');
           setIsProcessing(false);
           return;
         }
-
-        const rawHeaders = (jsonData[headerRowIndex] as any[]).map(h => String(h || '').trim());
-        
-        // Filter kolom kosong di akhir
-        let lastNonEmpty = rawHeaders.length - 1;
-        while (lastNonEmpty >= 0 && !rawHeaders[lastNonEmpty]) lastNonEmpty--;
-        const headers = rawHeaders.slice(0, lastNonEmpty + 1);
-
-        const rows = jsonData.slice(headerRowIndex + 1)
-          .filter((row: any) => {
-            return row && row.some((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
-          })
-          .map((row: any) => {
-            const obj: ParsedRow = {};
-            headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
-            return obj;
-          });
 
         setRawHeaders(headers);
         setRawRows(rows);
