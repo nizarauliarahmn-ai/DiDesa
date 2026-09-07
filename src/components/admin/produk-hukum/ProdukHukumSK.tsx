@@ -22,6 +22,7 @@ interface ProdukHukumItem {
   documentName: string;
   createdAt: string;
   noManual?: boolean;
+  importOrder?: number;
 }
 
 const JENIS_DOKUMEN_SK = [
@@ -204,6 +205,9 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
     if (filterTahun) result = result.filter(i => i.tahun === filterTahun);
     if (filterArsip !== 'semua') result = result.filter(i => String(i.arsip) === filterArsip);
     result.sort((a, b) => {
+      if (a.importOrder != null && b.importOrder != null) return a.importOrder - b.importOrder;
+      if (a.importOrder != null) return -1;
+      if (b.importOrder != null) return 1;
       const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
       const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
       if (tglA !== tglB) return tglB - tglA;
@@ -266,7 +270,8 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
   };
 
   const handleImport = (importedData: any[]) => {
-    const newItems: ProdukHukumItem[] = importedData.map(row => ({
+    const baseOrder = Date.now();
+    const newItems: ProdukHukumItem[] = importedData.map((row, idx) => ({
       id: generateId(),
       no: row.no || 0,
       tahun: row.tahun || new Date().getFullYear().toString(),
@@ -281,6 +286,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
       documentName: '',
       createdAt: new Date().toISOString(),
       noManual: false,
+      importOrder: baseOrder + idx,
     }));
     const updated = [...items, ...newItems];
     setItems(updated);
