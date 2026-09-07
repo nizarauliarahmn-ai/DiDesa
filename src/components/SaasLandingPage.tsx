@@ -257,20 +257,12 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5 }}
             >
-              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden p-4 pb-0">
-                <div className="w-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
-                  <div className="h-7 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                    <span className="ml-3 text-[10px] text-slate-400 font-medium">sistemdidesa.id</span>
-                  </div>
-                  <img 
-                    src="/fitur-persuratan.png" 
-                    alt="Tampilan pembuatan surat otomatis DiDesa"
-                    className="w-full h-auto object-cover object-top"
-                  />
-                </div>
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                <img 
+                  src="/fitur-persuratan.png" 
+                  alt="Tampilan pembuatan surat otomatis DiDesa"
+                  className="w-full h-auto"
+                />
               </div>
               <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
                 <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/10 rounded-2xl flex items-center justify-center shrink-0">
@@ -291,20 +283,12 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5 }}
             >
-              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden p-4 pb-0">
-                <div className="w-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
-                  <div className="h-7 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                    <span className="ml-3 text-[10px] text-slate-400 font-medium">sistemdidesa.id</span>
-                  </div>
-                  <img 
-                    src="/fitur-keuangan.png" 
-                    alt="Tampilan keuangan desa DiDesa"
-                    className="w-full h-auto object-cover object-top"
-                  />
-                </div>
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                <img 
+                  src="/fitur-keuangan.png" 
+                  alt="Tampilan keuangan desa DiDesa"
+                  className="w-full h-auto"
+                />
               </div>
               <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
                 <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl flex items-center justify-center shrink-0">
@@ -325,20 +309,12 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5 }}
             >
-              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden p-4 pb-0">
-                <div className="w-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
-                  <div className="h-7 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                    <span className="ml-3 text-[10px] text-slate-400 font-medium">sistemdidesa.id</span>
-                  </div>
-                  <img 
-                    src="/fitur-kiosk.png" 
-                    alt="Tampilan kiosk layanan mandiri DiDesa"
-                    className="w-full h-auto object-cover object-top"
-                  />
-                </div>
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                <img 
+                  src="/fitur-kiosk.png" 
+                  alt="Tampilan kiosk layanan mandiri DiDesa"
+                  className="w-full h-auto"
+                />
               </div>
               <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
                 <div className="w-14 h-14 bg-rose-50 dark:bg-rose-900/10 rounded-2xl flex items-center justify-center shrink-0">
