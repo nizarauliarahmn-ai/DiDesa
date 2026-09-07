@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye, Printer, Link2, Share2, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { showToast } from '../../../utils/toast';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
@@ -316,6 +317,26 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     });
   };
 
+  const handleDownloadTemplate = () => {
+    const headers = ['NO', 'TAHUN', 'URAIAN', 'TANGGAL', 'TGL DIUNDANGKAN', 'JENIS DOKUMEN', 'KET LAIN', 'LINK FILE'];
+    const sampleRows = [
+      [1, 2026, 'APBDesa Murni Tahun Anggaran 2026', '2026-01-15', '2026-01-20', 'APBDES MURNI', 'Ditetapkan 15 Januari 2026', ''],
+      [2, 2026, 'RPJMDesa Tahun 2026-2032', '2026-02-10', '2026-02-15', 'RPJMDES', 'Masa 6 tahun', ''],
+      [3, 2026, 'Realisasi APBDesa Triwulan I', '2026-04-01', '2026-04-05', 'REALISASI', 'Periode Januari - Maret 2026', ''],
+    ];
+
+    const wsData = [headers, ...sampleRows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [
+      { wch: 5 }, { wch: 6 }, { wch: 45 }, { wch: 12 },
+      { wch: 16 }, { wch: 20 }, { wch: 35 }, { wch: 50 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template Perdes');
+    XLSX.writeFile(wb, 'Template_Import_Perdes.xlsx');
+    showToast('Template berhasil diunduh!', 'success');
+  };
+
   const handleBulkDelete = () => {
     const newItems = items.filter(i => !selectedIds.has(i.id));
     setItems(newItems);
@@ -440,6 +461,13 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             </button>
           )}
           <button
+            onClick={handleDownloadTemplate}
+            className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition-colors shadow-sm dark:shadow-none"
+          >
+            <Download size={18} />
+            <span>Template</span>
+          </button>
+          <button
             onClick={() => setShowImportModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm dark:shadow-none"
           >
@@ -507,6 +535,10 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data Perdes</h3>
             <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Tambahkan data secara manual atau import dari file</p>
             <div className="flex items-center gap-2">
+              <button onClick={handleDownloadTemplate}
+                className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white text-sm font-bold rounded-xl hover:bg-cyan-700 transition-colors">
+                <Download size={16} /> Template
+              </button>
               <button onClick={() => setShowImportModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors">
                 <Upload size={16} /> Import
