@@ -546,7 +546,14 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                     />
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">No</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">
+                    <select value={filterTahun} onChange={(e) => setFilterTahun(e.target.value)}
+                      className="text-xs font-bold bg-transparent border-0 border-b-2 border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 focus:ring-0 focus:border-emerald-500 cursor-pointer p-0 pr-4 uppercase"
+                      style={{ minWidth: '60px' }}>
+                      <option value="">Tahun</option>
+                      {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                  </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px] whitespace-nowrap">Uraian</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Tanggal</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Jenis</th>
