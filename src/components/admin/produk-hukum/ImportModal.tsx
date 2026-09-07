@@ -17,6 +17,7 @@ interface MappedData {
   arsip: boolean;
   ketArsip: string;
   ketLain: string;
+  linkFile: string;
   [key: string]: any;
 }
 
@@ -30,6 +31,7 @@ interface ColumnMapping {
   arsip: string;
   ketArsip: string;
   ketLain: string;
+  linkFile: string;
 }
 
 const DEFAULT_MAPPING: ColumnMapping = {
@@ -42,6 +44,7 @@ const DEFAULT_MAPPING: ColumnMapping = {
   arsip: '',
   ketArsip: '',
   ketLain: '',
+  linkFile: '',
 };
 
 const FIELD_LABELS: Record<keyof ColumnMapping, string> = {
@@ -54,6 +57,7 @@ const FIELD_LABELS: Record<keyof ColumnMapping, string> = {
   arsip: 'Arsip (TRUE/FALSE)',
   ketArsip: 'Ket Arsip',
   ketLain: 'Ket Lain',
+  linkFile: 'Link File (URL)',
 };
 
 const REQUIRED_FIELDS = ['uraian', 'tahun'];
@@ -79,6 +83,7 @@ function guessMapping(headers: string[]): ColumnMapping {
   mapping.arsip = findHeader(['arsip', 'archive']);
   mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip']);
   mapping.ketLain = findHeader(['ket lain', 'keterangan lain', 'catatan', 'note', 'remark']);
+  mapping.linkFile = findHeader(['link file', 'link', 'url', 'google drive', 'gdrive', 'file link']);
 
   return mapping;
 }
@@ -293,6 +298,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     arsip: mapping.arsip ? parseArsipValue(row[mapping.arsip]) : true,
     ketArsip: mapping.ketArsip ? String(row[mapping.ketArsip] || '') : '',
     ketLain: mapping.ketLain ? String(row[mapping.ketLain] || '') : '',
+    linkFile: mapping.linkFile ? String(row[mapping.linkFile] || '').trim() : '',
   });
 
   const getMappedPreview = (): MappedData[] => {
@@ -477,6 +483,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Jenis</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Arsip</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Ket Arsip</th>
+                      <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Link File</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -499,6 +506,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
                           )}
                         </td>
                         <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{item.ketArsip || '-'}</td>
+                        <td className="px-3 py-2 text-gray-500 dark:text-slate-400 max-w-[150px] truncate">{item.linkFile ? <a href={item.linkFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.linkFile}</a> : '-'}</td>
                       </tr>
                     ))}
                   </tbody>

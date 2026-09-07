@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, AlertTriangle, ArrowLeft, Upload, Eye, Printer } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, AlertTriangle, ArrowLeft, Upload, Eye, Printer, ExternalLink } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
@@ -20,6 +20,7 @@ interface ProdukHukumItem {
   ketLain: string;
   documentData: string | null;
   documentName: string;
+  linkFile: string;
   createdAt: string;
   noManual?: boolean;
   importOrder?: number;
@@ -284,6 +285,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
       ketLain: row.ketLain || '',
       documentData: null,
       documentName: '',
+      linkFile: row.linkFile || '',
       createdAt: new Date().toISOString(),
       noManual: false,
       importOrder: baseOrder + idx,
@@ -552,6 +554,12 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                     </td>
                     <td className="px-4 py-3 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-center gap-1">
+                        {item.linkFile && (
+                          <a href={item.linkFile} target="_blank" rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Buka Link File">
+                            <ExternalLink size={14} />
+                          </a>
+                        )}
                         {item.documentData && (
                           <button onClick={() => { setViewerData({ data: item.documentData, name: item.documentName }); setShowViewer(true); }}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Lihat Dokumen">
@@ -712,6 +720,7 @@ function ModalSK({ item, items, onSave, onClose }: {
   const [arsip, setArsip] = useState(item?.arsip ?? true);
   const [ketArsip, setKetArsip] = useState(item?.ketArsip || 'ASLI');
   const [ketLain, setKetLain] = useState(item?.ketLain || '');
+  const [linkFile, setLinkFile] = useState(item?.linkFile || '');
   const [documentData, setDocumentData] = useState<string | null>(item?.documentData || null);
   const [documentName, setDocumentName] = useState(item?.documentName || '');
 
@@ -734,6 +743,7 @@ function ModalSK({ item, items, onSave, onClose }: {
       noManual: isManualNo,
       tahun, uraian: uraian.trim(), tanggal, tanggalDiundangkan: '',
       jenisDokumen, arsip, ketArsip, ketLain: ketLain.trim(),
+      linkFile: linkFile.trim(),
       documentData, documentName,
     });
   };
@@ -798,6 +808,11 @@ function ModalSK({ item, items, onSave, onClose }: {
           <div>
             <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Keterangan Lain</label>
             <input type="text" value={ketLain} onChange={(e) => setKetLain(e.target.value)} placeholder="Catatan tambahan (opsional)"
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Link File (Google Drive / URL)</label>
+            <input type="url" value={linkFile} onChange={(e) => setLinkFile(e.target.value)} placeholder="https://drive.google.com/..."
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
           <div className="border-t border-gray-100 dark:border-slate-800 pt-4">

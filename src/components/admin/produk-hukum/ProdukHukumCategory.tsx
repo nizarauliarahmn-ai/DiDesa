@@ -16,6 +16,7 @@ interface ProdukHukumItem {
   arsip: boolean;
   ketArsip: string;
   ketLain: string;
+  linkFile: string;
   createdAt: string;
 }
 
@@ -277,6 +278,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
       arsip: row.arsip ?? true,
       ketArsip: row.ketArsip || '',
       ketLain: row.ketLain || '',
+      linkFile: row.linkFile || '',
       createdAt: new Date().toISOString(),
     }));
     const updated = [...items, ...newItems];
