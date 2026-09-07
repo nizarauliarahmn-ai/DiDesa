@@ -95,6 +95,8 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
+  const [sortField, setSortField] = useState<'importOrder' | 'tahun' | 'tanggal' | 'no'>('importOrder');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
@@ -104,7 +106,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [showViewer, setShowViewer] = useState(false);
   const [viewerData, setViewerData] = useState<{ data: string | null; name: string }>({ data: null, name: '' });
-  const ITEMS_PER_PAGE = 15;
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   // Listen for open_document_viewer events
   useEffect(() => {
@@ -223,11 +225,23 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   }, [items, searchQuery, filterJenis, filterTahun, filterArsip]);
 
   const itemsWithNumbers = useMemo(() => {
-    return filteredItems.map((item) => ({
+    const mapped = filteredItems.map((item) => ({
       ...item,
       displayNo: item.no,
     }));
-  }, [filteredItems]);
+    return mapped.sort((a, b) => {
+      let cmp = 0;
+      if (sortField === 'importOrder') {
+        cmp = (a.importOrder ?? 99999) - (b.importOrder ?? 99999);
+        if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
+        return a.tahun.localeCompare(b.tahun) || a.no - b.no;
+      }
+      if (sortField === 'no') cmp = a.no - b.no;
+      else if (sortField === 'tahun') cmp = a.tahun.localeCompare(b.tahun);
+      else if (sortField === 'tanggal') cmp = (a.tanggal || '').localeCompare(b.tanggal || '');
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [filteredItems, sortField, sortDir]);
 
   // Deteksi dokumen original (pertama kali dibuat) untuk setiap kombinasi tahun_no
   const originalDocsMap = useMemo(() => {
@@ -257,10 +271,10 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     return freq;
   }, [items]);
 
-  const totalPages = Math.ceil(itemsWithNumbers.length / ITEMS_PER_PAGE);
-  const paginatedItems = itemsWithNumbers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(itemsWithNumbers.length / itemsPerPage);
+  const paginatedItems = itemsWithNumbers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterJenis, filterTahun, filterArsip]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterJenis, filterTahun, filterArsip, sortField, sortDir]);
 
   const handleSave = (item: Omit<ProdukHukumItem, 'id' | 'createdAt'>) => {
     let newItems: ProdukHukumItem[];
@@ -562,8 +576,20 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                       className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                   </th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap">No</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
+                    onClick={() => { if (sortField === 'no') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('no'); setSortDir('asc'); } }}>
+                    <span className="inline-flex items-center gap-0.5">
+                      No
+                      {sortField === 'no' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
+                    </span>
+                  </th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
+                    onClick={() => { if (sortField === 'tahun') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('tahun'); setSortDir('asc'); } }}>
+                    <span className="inline-flex items-center gap-0.5">
+                      Tahun
+                      {sortField === 'tahun' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
+                    </span>
+                  </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[180px] whitespace-nowrap">Uraian</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tanggal</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tgl Diundangkan</th>
@@ -644,21 +670,40 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         )}
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
-            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}�{Math.min(currentPage * ITEMS_PER_PAGE, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
+            <div className="flex items-center gap-2">
+              <span>Menampilkan {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
+              <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                className="px-2 py-1 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                {[10, 15, 25, 50, 100].map(n => <option key={n} value={n}>{n}/hal</option>)}
+              </select>
+            </div>
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}
                 className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed font-semibold transition-colors">
-                Sebelumnya
+                ‹
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button key={page} onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 rounded-lg font-bold transition-colors ${page === currentPage ? 'bg-emerald-600 text-white' : 'border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-                  {page}
-                </button>
-              ))}
+              {(() => {
+                const pages: (number | '...')[] = [];
+                if (totalPages <= 5) {
+                  for (let i = 1; i <= totalPages; i++) pages.push(i);
+                } else {
+                  pages.push(1);
+                  if (currentPage > 3) pages.push('...');
+                  for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+                  if (currentPage < totalPages - 2) pages.push('...');
+                  pages.push(totalPages);
+                }
+                return pages.map((page, idx) =>
+                  page === '...' ? <span key={`e${idx}`} className="px-1 text-gray-300">…</span> :
+                  <button key={page} onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg font-bold transition-colors ${page === currentPage ? 'bg-emerald-600 text-white' : 'border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+                    {page}
+                  </button>
+                );
+              })()}
               <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}
                 className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed font-semibold transition-colors">
-                Berikutnya
+                ›
               </button>
             </div>
           </div>
