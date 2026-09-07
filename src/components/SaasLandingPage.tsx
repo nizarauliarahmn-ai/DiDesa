@@ -208,7 +208,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <button onClick={onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
-                <LayoutDashboard size={16} /> Masuk ke Dashboard Admin
+                <LayoutDashboard size={16} /> Coba Gratis
               </button>
               <button 
                 onClick={() => setIsSearchModalOpen(true)} 
