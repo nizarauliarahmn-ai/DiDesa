@@ -40,6 +40,8 @@ const CATEGORIES = [
   { label: 'SOSIAL & BANTUAN', color: 'bg-purple-50 text-purple-700 border-purple-100' }
 ];
 
+const newsChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('didesa_news_sync') : null;
+
 const compressImage = (file: File): Promise<{ blob: Blob; originalSize: number; compressedSize: number }> => {
   return new Promise((resolve, reject) => {
     const originalSize = file.size;
@@ -180,9 +182,8 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
 
     // Simpan ke localStorage dulu (optimistic)
     localStorage.setItem('didesa_news_list', serialized);
-    window.dispatchEvent(new Event('didesa_news_updated'));
 
-    // Push ke Supabase dengan error handling ketat
+    // Push ke Supabase, THEN dispatch event setelah berhasil
     const saveToSupabase = async () => {
       try {
         const { data, error } = await supabase.from('saas_settings').upsert({
@@ -199,6 +200,9 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
           return;
         }
 
+        // Dispatch event SETELAH Supabase save berhasil
+        window.dispatchEvent(new Event('didesa_news_updated'));
+        newsChannel?.postMessage({ type: 'news_updated' });
         console.log('[AdminBerita] Berita berhasil disimpan ke Supabase untuk tenant:', tenantId);
       } catch (err: any) {
         console.error('[AdminBerita] Error saat save ke Supabase:', err?.message || err);
@@ -210,19 +214,35 @@ export default function AdminBerita({ searchQuery = '', setSearchQuery, debounce
 
   // Sync real-time when citizens like or comment from Portal Warga (local event sync)
   useEffect(() => {
-    const handleNewsUpdate = () => {
-      const saved = localStorage.getItem('didesa_news_list');
-      if (saved) {
-        setNews(JSON.parse(saved));
+    const handleNewsUpdate = async () => {
+      if (!tenantId) return;
+      try {
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('tenant_id', tenantId)
+          .eq('key', 'didesa_news_list')
+          .single();
+
+        if (!error && data?.value) {
+          const parsed = JSON.parse(data.value);
+          const sanitized = sanitizeNewsList(parsed);
+          setNews(sanitized);
+          localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
+        }
+      } catch (err: any) {
+        console.error('[AdminBerita] Gagal sync dari portal:', err?.message || err);
       }
     };
     window.addEventListener('didesa_news_updated', handleNewsUpdate);
     window.addEventListener('storage', handleNewsUpdate);
+    newsChannel?.addEventListener('message', handleNewsUpdate);
     return () => {
       window.removeEventListener('didesa_news_updated', handleNewsUpdate);
       window.removeEventListener('storage', handleNewsUpdate);
+      newsChannel?.removeEventListener('message', handleNewsUpdate);
     };
-  }, []);
+  }, [tenantId]);
 
   const filteredNews = useMemo(() => {
     return news.filter(item => 
