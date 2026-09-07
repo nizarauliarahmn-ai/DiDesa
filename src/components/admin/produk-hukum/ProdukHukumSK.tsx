@@ -588,6 +588,8 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[180px] whitespace-nowrap">Uraian</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tanggal</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[90px] whitespace-nowrap">Jenis</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Ket Lain</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-14 whitespace-nowrap">Link</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-20 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
                 </tr>
               </thead>
@@ -622,14 +624,17 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                         {item.jenisDokumen || '-'}
                       </span>
                     </td>
+                    <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap truncate max-w-[120px]" title={item.ketLain}>{item.ketLain || '-'}</td>
+                    <td className="px-2 py-2 text-center">
+                      {item.linkFile ? (
+                        <a href={item.linkFile} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center text-blue-500 hover:text-blue-700 transition-colors" title="Buka Link">
+                          <ExternalLink size={13} />
+                        </a>
+                      ) : <span className="text-gray-300 dark:text-slate-600">-</span>}
+                    </td>
                     <td className="px-2 py-2 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-center gap-0.5">
-                        {item.linkFile && (
-                          <a href={item.linkFile} target="_blank" rel="noopener noreferrer"
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Buka Link File">
-                            <ExternalLink size={14} />
-                          </a>
-                        )}
                         {item.documentData && (
                           <button onClick={() => { setViewerData({ data: item.documentData, name: item.documentName }); setShowViewer(true); }}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Lihat Dokumen">
