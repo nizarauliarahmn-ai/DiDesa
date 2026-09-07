@@ -95,6 +95,7 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
         <FileText size={48} className="text-gray-300" />
         <p className="text-gray-500">Data SK tidak ditemukan.</p>
         <p className="text-xs text-gray-400">Dokumen ini dikelola oleh <a href="https://sistemdidesa.id" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 underline">sistemdidesa.id</a></p>
+        <p className="text-[10px] text-gray-300 mt-1">2026 · DiDesa · Sistem Digitalisasi Desa Modern di Indonesia</p>
       </div>
     );
   }
@@ -159,6 +160,7 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
           </div>
         </div>
         <p className="text-center text-xs text-gray-400 mt-6">Dokumen ini dikelola oleh <a href="https://sistemdidesa.id" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 underline">sistemdidesa.id</a></p>
+        <p className="text-center text-[10px] text-gray-300 mt-2">2026 · DiDesa · Sistem Digitalisasi Desa Modern di Indonesia</p>
       </div>
     </div>
   );
