@@ -93,6 +93,8 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
+  const [sortField, setSortField] = useState<'importOrder' | 'tahun' | 'tanggal' | 'no'>('importOrder');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
@@ -207,9 +209,27 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
     if (filterTahun) result = result.filter(i => i.tahun === filterTahun);
     if (filterArsip !== 'semua') result = result.filter(i => String(i.arsip) === filterArsip);
     result.sort((a, b) => {
-      if (a.importOrder != null && b.importOrder != null) return a.importOrder - b.importOrder;
-      if (a.importOrder != null) return -1;
-      if (b.importOrder != null) return 1;
+      if (sortField === 'importOrder') {
+        if (a.importOrder != null && b.importOrder != null) return a.importOrder - b.importOrder;
+        if (a.importOrder != null) return -1;
+        if (b.importOrder != null) return 1;
+      }
+      let cmp = 0;
+      if (sortField === 'tahun') {
+        cmp = (a.tahun || '').localeCompare(b.tahun || '');
+      } else if (sortField === 'tanggal') {
+        const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+        const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+        cmp = tglA - tglB;
+      } else if (sortField === 'no') {
+        cmp = a.no - b.no;
+      }
+      if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
+      if (sortField !== 'importOrder') {
+        if (a.importOrder != null && b.importOrder != null) return a.importOrder - b.importOrder;
+        if (a.importOrder != null) return -1;
+        if (b.importOrder != null) return 1;
+      }
       const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
       const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
       if (tglA !== tglB) return tglB - tglA;
@@ -546,13 +566,12 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                     />
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">No</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">
-                    <select value={filterTahun} onChange={(e) => setFilterTahun(e.target.value)}
-                      className="text-xs font-bold bg-transparent border-0 border-b-2 border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 focus:ring-0 focus:border-emerald-500 cursor-pointer p-0 pr-4 uppercase"
-                      style={{ minWidth: '60px' }}>
-                      <option value="">Tahun</option>
-                      {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
-                    </select>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
+                    onClick={() => { if (sortField === 'tahun') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('tahun'); setSortDir('asc'); } }}>
+                    <span className="inline-flex items-center gap-1">
+                      Tahun
+                      {sortField === 'tahun' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
+                    </span>
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px] whitespace-nowrap">Uraian</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Tanggal</th>
