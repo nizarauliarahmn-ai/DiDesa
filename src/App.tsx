@@ -591,6 +591,22 @@ export default function App() {
     );
   }
 
+  // Full screen trial registration — harus sebelum landing page
+  if (showTrialRegistration && !user) {
+    return (
+      <Suspense fallback={<LazyLoader />}>
+        <TrialRegistration
+          onBack={() => setShowTrialRegistration(false)}
+          onSuccess={(domain) => {
+            setShowTrialRegistration(false);
+            setShowAdminLogin(true);
+          }}
+        />
+        <ToastContainer />
+      </Suspense>
+    );
+  }
+
   // Jika kita di domain utama dan di mode publik, tampilkan SaaS Landing Page (Portal Pusat PT)
   if (view === 'public' && isRootDomain && tabParam !== 'verifikasi' && tabParam !== 'verifikasi_surat') {
     return <SaasLandingPage onLoginClick={() => setView('admin')} onTrialClick={() => setShowTrialRegistration(true)} />;
@@ -716,22 +732,6 @@ export default function App() {
     );
   }
 
-
-  // Full screen trial registration
-  if (showTrialRegistration && !user) {
-    return (
-      <Suspense fallback={<LazyLoader />}>
-        <TrialRegistration
-          onBack={() => setShowTrialRegistration(false)}
-          onSuccess={(domain) => {
-            setShowTrialRegistration(false);
-            setShowAdminLogin(true);
-          }}
-        />
-        <ToastContainer />
-      </Suspense>
-    );
-  }
 
   // Full screen admin login — when admin clicks "Log In" from portal
   if (showAdminLogin && !user) {

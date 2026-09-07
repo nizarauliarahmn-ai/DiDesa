@@ -210,12 +210,6 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
               <button onClick={onTrialClick || onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
                 <LayoutDashboard size={16} /> Coba Gratis
               </button>
-              <button 
-                onClick={() => setIsSearchModalOpen(true)} 
-                className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl font-bold text-sm border border-gray-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Search size={16} /> Cari Portal Desa Saya
-              </button>
             </div>
             
             <div className="flex items-center gap-4 pt-6 border-t border-gray-200 dark:border-slate-800">
