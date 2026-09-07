@@ -139,7 +139,7 @@ export default function PublicKiosPortal() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 px-6 pb-20 flex items-center justify-center">
-        <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+        <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           
           {/* Card 1 */}
           <motion.button 
