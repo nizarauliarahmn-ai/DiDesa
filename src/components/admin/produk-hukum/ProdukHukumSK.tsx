@@ -560,70 +560,70 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
           </div>
         ) : (
           <div className="w-full overflow-auto max-h-[calc(100vh-300px)] border border-gray-100 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 relative">
-            <table className="w-full min-w-[800px] text-sm border-collapse">
+            <table className="w-full min-w-[700px] text-xs border-collapse">
               <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                 <tr>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-3 py-3 whitespace-nowrap">
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 whitespace-nowrap">
                     <input
                       type="checkbox"
                       checked={paginatedItems.length > 0 && selectedIds.size === paginatedItems.length}
                       onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                   </th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
                     onClick={() => { if (sortField === 'no') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('no'); setSortDir('asc'); } }}>
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-0.5">
                       No
                       {sortField === 'no' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
                     </span>
                   </th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
                     onClick={() => { if (sortField === 'tahun') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('tahun'); setSortDir('asc'); } }}>
-                    <span className="inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-0.5">
                       Tahun
                       {sortField === 'tahun' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
                     </span>
                   </th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px] whitespace-nowrap">Uraian</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Tanggal</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Jenis</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[180px] whitespace-nowrap">Uraian</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tanggal</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[90px] whitespace-nowrap">Jenis</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-20 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedItems.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.has(item.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`}>
-                    <td className="px-3 py-3 text-center">
+                    <td className="px-2 py-2 text-center">
                       <input
                         type="checkbox"
                         checked={selectedIds.has(item.id)}
                         onChange={() => toggleSelect(item.id)}
-                        className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                       />
                     </td>
-                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                    <td className="px-2 py-2 font-bold text-gray-900 dark:text-white">
                       <div className="flex items-center">
                         {item.displayNo}
                         {duplicateMap[`${item.tahun}_${item.no}`] > 1 && originalDocsMap.get(`${item.tahun}_${item.no}`) !== item.id && (
-                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-200 print:hidden" title="Nomor dokumen ini ganda / sisipan">
+                          <span className="ml-1.5 inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-amber-100 text-amber-800 border border-amber-200 print:hidden" title="Nomor dokumen ini ganda / sisipan">
                             Sisipan
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
-                    <td className="px-4 py-3">
-                      <p className="text-gray-900 dark:text-white font-medium whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
+                    <td className="px-2 py-2 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
+                    <td className="px-2 py-2">
+                      <p className="text-gray-900 dark:text-white font-medium whitespace-nowrap truncate max-w-[220px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap min-w-[130px]">{formatDateDisplay(item.tanggal)}</td>
-                    <td className="px-4 py-3 min-w-[130px]">
-                      <span className="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
+                    <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggal)}</td>
+                    <td className="px-2 py-2">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         {item.jenisDokumen || '-'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
-                      <div className="flex items-center justify-center gap-1">
+                    <td className="px-2 py-2 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
+                      <div className="flex items-center justify-center gap-0.5">
                         {item.linkFile && (
                           <a href={item.linkFile} target="_blank" rel="noopener noreferrer"
                             className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Buka Link File">
