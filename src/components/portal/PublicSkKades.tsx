@@ -5,11 +5,11 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 interface SKData {
   id: string;
-  tahun: number;
+  no: number;
+  tahun: string;
   uraian: string;
   tanggal: string;
   jenisDokumen: string;
-  nomorManual: string;
   ketLain: string;
   linkFile: string;
   documentData: string;
@@ -94,7 +94,7 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
         <FileText size={48} className="text-gray-300" />
         <p className="text-gray-500">Data SK tidak ditemukan.</p>
-        <button onClick={onBack} className="text-emerald-600 hover:text-emerald-700 text-sm font-medium">Kembali ke Portal</button>
+        <p className="text-xs text-gray-400">Dokumen ini dikelola oleh <a href="https://sistemdidesa.id" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 underline">sistemdidesa.id</a></p>
       </div>
     );
   }
@@ -103,7 +103,7 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50">
       <div className="max-w-lg mx-auto px-4 py-8">
         <button onClick={onBack} className="flex items-center gap-1 text-emerald-700 hover:text-emerald-800 text-sm font-medium mb-6">
-          <ArrowLeft size={16} /> Kembali ke Portal
+          <ArrowLeft size={16} /> Kembali
         </button>
         <div className="bg-white rounded-2xl shadow-lg border border-emerald-100 overflow-hidden">
           <div className="bg-gradient-to-r from-emerald-600 to-green-600 px-6 py-4">
@@ -116,7 +116,7 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
           <div className="px-6 py-5 space-y-4">
             <div>
               <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Nomor</p>
-              <p className="text-sm font-bold text-slate-800">{sk.nomorManual || sk.uraian?.split(' ').slice(0, 2).join(' ') || '-'}</p>
+              <p className="text-sm font-bold text-slate-800">{sk.no || '-'}</p>
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Tahun</p>
@@ -158,6 +158,7 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
             )}
           </div>
         </div>
+        <p className="text-center text-xs text-gray-400 mt-6">Dokumen ini dikelola oleh <a href="https://sistemdidesa.id" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 underline">sistemdidesa.id</a></p>
       </div>
     </div>
   );
