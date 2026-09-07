@@ -26,11 +26,15 @@
         var params = new URLSearchParams(window.location.search);
         var tab = params.get('tab');
         var skId = params.get('sk_id');
+        var perdesId = params.get('perdes_id');
         var title = 'DiDesa - Portal Warga';
         var description = 'Portal informasi, layanan administrasi, dan transparansi data desa.';
         if (tab === 'sk_kades' && skId) {
           title = 'Detail SK Kepala Desa | DiDesa';
           description = 'Buka tautan ini untuk melihat detail produk hukum, dasar penetapan, dan lampiran Surat Keputusan Kepala Desa.';
+        } else if (tab === 'perdes' && perdesId) {
+          title = 'Detail Peraturan Desa | DiDesa';
+          description = 'Buka tautan ini untuk melihat detail Peraturan Desa (Perdes), dasar penetapan, dan lampiran dokumen hukum desa.';
         }
         document.title = title;
         var metaOgTitle = document.querySelector('meta[property="og:title"]');

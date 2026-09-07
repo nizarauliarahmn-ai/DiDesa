@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye, Printer } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye, Printer, Link2, Share2, Download } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
@@ -18,10 +18,12 @@ interface ProdukHukumItem {
   arsip: boolean;
   ketArsip: string;
   ketLain: string;
+  linkFile: string;
   documentData: string | null;
   documentName: string;
   createdAt: string;
   noManual?: boolean;
+  importOrder?: number;
 }
 
 const JENIS_DOKUMEN_PERDES = [
@@ -305,6 +307,15 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     showToast('Data berhasil dihapus!', 'success');
   };
 
+  const handleShare = (item: ProdukHukumItem) => {
+    const shareUrl = `${window.location.origin}/?tab=perdes&perdes_id=${item.id}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Link sharing berhasil disalin ke clipboard!', 'success');
+    }).catch(() => {
+      prompt('Salin link ini:', shareUrl);
+    });
+  };
+
   const handleBulkDelete = () => {
     const newItems = items.filter(i => !selectedIds.has(i.id));
     setItems(newItems);
@@ -511,57 +522,68 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             <table className="w-full min-w-[900px] text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                 <tr>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-3 py-3 whitespace-nowrap">
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 whitespace-nowrap">
                     <input
                       type="checkbox"
                       checked={paginatedItems.length > 0 && selectedIds.size === paginatedItems.length}
                       onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                      className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                     />
                   </th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">No</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider whitespace-nowrap">Tahun</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[250px] whitespace-nowrap">Uraian</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Tanggal</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Tgl Diundangkan</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider min-w-[120px] whitespace-nowrap">Jenis</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-4 py-3 font-bold text-gray-500 dark:text-slate-400 text-xs uppercase tracking-wider w-24 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap">No</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap">Tahun</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[180px] whitespace-nowrap">Uraian</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tanggal</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tgl Diundangkan</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[90px] whitespace-nowrap">Jenis</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Ket Lain</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-14 whitespace-nowrap">Link</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-20 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedItems.map((item) => (
                   <tr key={item.id} className={`border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.has(item.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`}>
-                    <td className="px-3 py-3 text-center">
+                    <td className="px-2 py-2 text-center">
                       <input
                         type="checkbox"
                         checked={selectedIds.has(item.id)}
                         onChange={() => toggleSelect(item.id)}
-                        className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                       />
                     </td>
-                    <td className="px-4 py-3 font-bold text-gray-900 dark:text-white">
+                    <td className="px-2 py-2 font-bold text-gray-900 dark:text-white">
                       <div className="flex items-center">
                         {item.displayNo}
                         {duplicateMap[`${item.tahun}_${item.no}`] > 1 && originalDocsMap.get(`${item.tahun}_${item.no}`) !== item.id && (
-                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-200 print:hidden" title="Nomor dokumen ini ganda / sisipan">
+                          <span className="ml-1.5 inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-amber-100 text-amber-800 border border-amber-200 print:hidden" title="Nomor dokumen ini ganda / sisipan">
                             Sisipan
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
-                    <td className="px-4 py-3">
-                      <p className="text-gray-900 dark:text-white font-medium whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
+                    <td className="px-2 py-2 text-gray-700 dark:text-slate-300 font-semibold text-[11px]">{item.tahun}</td>
+                    <td className="px-2 py-2">
+                      <p className="text-gray-900 dark:text-white font-medium text-[11px] whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap min-w-[130px]">{formatDateDisplay(item.tanggal)}</td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-slate-400 text-xs whitespace-nowrap min-w-[130px]">{formatDateDisplay(item.tanggalDiundangkan)}</td>
-                    <td className="px-4 py-3 min-w-[130px]">
-                      <span className="inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
+                    <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggal)}</td>
+                    <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggalDiundangkan)}</td>
+                    <td className="px-2 py-2">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         {item.jenisDokumen || '-'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
-                      <div className="flex items-center justify-center gap-1">
+                    <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap truncate max-w-[120px]" title={item.ketLain}>{item.ketLain || '-'}</td>
+                    <td className="px-2 py-2 text-center">
+                      {item.linkFile ? (
+                        <a href={item.linkFile} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center text-blue-500 hover:text-blue-700 transition-colors" title="Buka Link">
+                          <Link2 size={13} />
+                        </a>
+                      ) : <span className="text-gray-300 dark:text-slate-600">-</span>}
+                    </td>
+                    <td className="px-2 py-2 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
+                      <div className="flex items-center justify-center gap-0.5">
                         {item.documentData && (
                           <button onClick={() => { setViewerData({ data: item.documentData, name: item.documentName }); setShowViewer(true); }}
                             className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Lihat Dokumen">
@@ -571,6 +593,10 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                         <button onClick={() => { setEditingItem(item); setShowModal(true); }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Edit">
                           <Edit3 size={14} />
+                        </button>
+                        <button onClick={() => handleShare(item)}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Share Perdes">
+                          <Share2 size={14} />
                         </button>
                         <button onClick={() => setShowDeleteConfirm(item.id)}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors" title="Hapus">
