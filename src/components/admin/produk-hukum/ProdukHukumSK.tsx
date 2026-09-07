@@ -100,7 +100,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [showViewer, setShowViewer] = useState(false);
   const [viewerData, setViewerData] = useState<{ data: string | null; name: string }>({ data: null, name: '' });
-  const ITEMS_PER_PAGE = 15;
+  const [itemsPerPage, setItemsPerPage] = useState(15);
 
   useEffect(() => {
     const handler = (e: CustomEvent) => {
@@ -249,10 +249,10 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
     return freq;
   }, [items]);
 
-  const totalPages = Math.ceil(itemsWithNumbers.length / ITEMS_PER_PAGE);
-  const paginatedItems = itemsWithNumbers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(itemsWithNumbers.length / itemsPerPage);
+  const paginatedItems = itemsWithNumbers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterJenis, filterTahun, filterArsip]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterJenis, filterTahun, filterArsip, itemsPerPage]);
 
   const handleSave = (item: Omit<ProdukHukumItem, 'id' | 'createdAt'>) => {
     let newItems: ProdukHukumItem[];
@@ -576,21 +576,47 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
         )}
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
-            <span>Menampilkan {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
+            <div className="flex items-center gap-2">
+              <span>Tampilkan</span>
+              <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                className="px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                {[10, 15, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+              <span>data</span>
+              <span className="ml-2">Menampilkan {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, itemsWithNumbers.length)} dari {itemsWithNumbers.length}</span>
+            </div>
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}
                 className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed font-semibold transition-colors">
-                Sebelumnya
+                ‹
               </button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button key={page} onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 rounded-lg font-bold transition-colors ${page === currentPage ? 'bg-emerald-600 text-white' : 'border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-                  {page}
-                </button>
-              ))}
+              {(() => {
+                const pages: (number | '...')[] = [];
+                if (totalPages <= 7) {
+                  for (let i = 1; i <= totalPages; i++) pages.push(i);
+                } else {
+                  pages.push(1);
+                  if (currentPage > 3) pages.push('...');
+                  for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                    pages.push(i);
+                  }
+                  if (currentPage < totalPages - 2) pages.push('...');
+                  pages.push(totalPages);
+                }
+                return pages.map((p, idx) =>
+                  p === '...' ? (
+                    <span key={`e${idx}`} className="px-1 text-gray-400 select-none">…</span>
+                  ) : (
+                    <button key={p} onClick={() => setCurrentPage(p)}
+                      className={`w-8 h-8 rounded-lg font-bold transition-colors ${p === currentPage ? 'bg-emerald-600 text-white' : 'border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+                      {p}
+                    </button>
+                  )
+                );
+              })()}
               <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}
                 className="px-3 py-1.5 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed font-semibold transition-colors">
-                Berikutnya
+                ›
               </button>
             </div>
           </div>
