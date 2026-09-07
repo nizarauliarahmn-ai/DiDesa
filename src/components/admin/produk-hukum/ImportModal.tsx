@@ -77,8 +77,8 @@ function guessMapping(headers: string[]): ColumnMapping {
   mapping.no = findHeader(['no', 'nomor', 'urut', 'no.']);
   mapping.tahun = findHeader(['tahun', 'year', 'thn', 'th']);
   mapping.uraian = findHeader(['uraian', 'judul', 'deskripsi', 'description', 'title', 'nama', 'produk', 'keterangan uraian']);
-  mapping.tanggal = findHeader(['tanggal', 'date', 'tgl', 'waktu', 'tmt']);
-  mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit', 'tgl undang']);
+  mapping.tanggal = findHeader(['tanggal', 'date', 'tgl', 'tmt']);
+  mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit', 'tgl undang', 'waktu', 'penetapan']);
   mapping.jenisDokumen = findHeader(['jenis dokumen', 'jenis', 'type', 'kategori', 'category', 'tipe']);
   mapping.arsip = findHeader(['arsip', 'archive']);
   mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip', 'status']);
