@@ -248,46 +248,109 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
             <p className="text-slate-500 dark:text-slate-400">Dirancang khusus sesuai standar administrasi pemerintahan desa di Indonesia, dengan antarmuka yang sangat mudah dipahami.</p>
           </div>
 
-          <motion.div 
-            className="grid md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              visible: { transition: { staggerChildren: 0.15 } }
-            }}
-          >
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
-              <FeatureCard 
-                icon={<FileText size={28} className="text-blue-500" />}
-                title="Persuratan Otomatis & TTE"
-                desc="Generasi surat keterangan dengan KOP resmi dan Tanda Tangan Elektronik ber-QR Code otomatis."
-                bg="bg-blue-50 dark:bg-blue-900/10"
-                image="/fitur-persuratan.png"
-                imageAlt="Tampilan pembuatan surat otomatis DiDesa"
-              />
+          <div className="space-y-8">
+            {/* Fitur 1 - Persuratan */}
+            <motion.div 
+              className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden p-4 pb-0">
+                <div className="w-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
+                  <div className="h-7 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                    <span className="ml-3 text-[10px] text-slate-400 font-medium">sistemdidesa.id</span>
+                  </div>
+                  <img 
+                    src="/fitur-persuratan.png" 
+                    alt="Tampilan pembuatan surat otomatis DiDesa"
+                    className="w-full h-auto object-cover object-top"
+                  />
+                </div>
+              </div>
+              <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
+                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <FileText size={28} className="text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">Persuratan Otomatis & TTE</h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">Generasi surat keterangan dengan KOP resmi dan Tanda Tangan Elektronik ber-QR Code otomatis.</p>
+                </div>
+              </div>
             </motion.div>
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
-              <FeatureCard 
-                icon={<PieChart size={28} className="text-emerald-500" />}
-                title="Buku Keuangan & Bansos"
-                desc="Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran."
-                bg="bg-emerald-50 dark:bg-emerald-900/10"
-                image="/fitur-keuangan.png"
-                imageAlt="Tampilan keuangan desa DiDesa"
-              />
+
+            {/* Fitur 2 - Keuangan */}
+            <motion.div 
+              className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden p-4 pb-0">
+                <div className="w-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
+                  <div className="h-7 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                    <span className="ml-3 text-[10px] text-slate-400 font-medium">sistemdidesa.id</span>
+                  </div>
+                  <img 
+                    src="/fitur-keuangan.png" 
+                    alt="Tampilan keuangan desa DiDesa"
+                    className="w-full h-auto object-cover object-top"
+                  />
+                </div>
+              </div>
+              <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
+                <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <PieChart size={28} className="text-emerald-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">Buku Keuangan & Bansos</h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran.</p>
+                </div>
+              </div>
             </motion.div>
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
-              <FeatureCard 
-                icon={<ShieldCheck size={28} className="text-rose-500" />}
-                title="Layanan Mandiri & Kiosk"
-                desc="Portal mandiri (Kiosk) bagi warga untuk cetak surat, buku tamu, hingga lapor aspirasi secara swadaya."
-                bg="bg-rose-50 dark:bg-rose-900/10"
-                image="/fitur-kiosk.png"
-                imageAlt="Tampilan kiosk layanan mandiri DiDesa"
-              />
+
+            {/* Fitur 3 - Kiosk */}
+            <motion.div 
+              className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden p-4 pb-0">
+                <div className="w-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
+                  <div className="h-7 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                    <span className="ml-3 text-[10px] text-slate-400 font-medium">sistemdidesa.id</span>
+                  </div>
+                  <img 
+                    src="/fitur-kiosk.png" 
+                    alt="Tampilan kiosk layanan mandiri DiDesa"
+                    className="w-full h-auto object-cover object-top"
+                  />
+                </div>
+              </div>
+              <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
+                <div className="w-14 h-14 bg-rose-50 dark:bg-rose-900/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <ShieldCheck size={28} className="text-rose-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">Layanan Mandiri & Kiosk</h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">Portal mandiri (Kiosk) bagi warga untuk cetak surat, buku tamu, hingga lapor aspirasi secara swadaya.</p>
+                </div>
+              </div>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </motion.section>
 
