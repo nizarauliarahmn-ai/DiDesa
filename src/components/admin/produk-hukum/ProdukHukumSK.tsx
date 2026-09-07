@@ -230,7 +230,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
       return a.no - b.no;
     });
     return result;
-  }, [items, searchQuery, filterJenis, filterTahun, filterArsip]);
+  }, [items, searchQuery, filterJenis, filterTahun, filterArsip, sortField, sortDir]);
 
   const itemsWithNumbers = useMemo(() => {
     return filteredItems.map((item) => ({
