@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/sk/:id", "destination": "/api/og-sk" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

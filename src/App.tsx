@@ -541,19 +541,6 @@ export default function App() {
     return <><PublicVerifikasiSurat /><ToastContainer /></>;
   }
 
-  // Route /sk/:id → redirect ke tab sk_kades
-  if (window.location.pathname.startsWith('/sk/')) {
-    const skId = window.location.pathname.split('/sk/')[1];
-    if (skId && !tabParam) {
-      window.location.replace(`/?tab=sk_kades&sk_id=${skId}`);
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
-        </div>
-      );
-    }
-  }
-
   // Halaman dokumen legal publik (Syarat & Ketentuan / Kebijakan Privasi)
   if (window.location.pathname.includes('/syarat-ketentuan')) {
     return <><SyaratKetentuanPage /><Footer /><ToastContainer /></>;
