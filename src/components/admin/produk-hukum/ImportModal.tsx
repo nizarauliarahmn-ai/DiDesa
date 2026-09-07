@@ -218,9 +218,17 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     e.target.value = '';
   };
 
+  const extractYear = (val: any): string => {
+    if (!val) return new Date().getFullYear().toString();
+    if (val instanceof Date) return val.getFullYear().toString();
+    const str = String(val).trim();
+    const yearMatch = str.match(/(\d{4})/);
+    return yearMatch ? yearMatch[1] : new Date().getFullYear().toString();
+  };
+
   const mapRow = (row: ParsedRow, idx: number): MappedData => ({
     no: mapping.no ? (parseInt(String(row[mapping.no])) || idx + 1) : idx + 1,
-    tahun: mapping.tahun ? String(row[mapping.tahun] || '') : new Date().getFullYear().toString(),
+    tahun: mapping.tahun ? extractYear(row[mapping.tahun]) : new Date().getFullYear().toString(),
     uraian: mapping.uraian ? String(row[mapping.uraian] || '') : '',
     tanggal: mapping.tanggal ? String(row[mapping.tanggal] || '') : '',
     tanggalDiundangkan: mapping.tanggalDiundangkan ? String(row[mapping.tanggalDiundangkan] || '') : '',
@@ -392,7 +400,12 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
               <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3">
                 <CheckCircle2 size={16} className="text-emerald-600" />
                 <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                  {getMappedPreview().length} data siap diimport
+                  {getAllMappedData().length} data siap diimport
+                  {getAllMappedData().length > 100 && (
+                    <span className="text-xs font-normal text-emerald-600/70 dark:text-emerald-400/70 ml-1">
+                      (menampilkan 100 dari {getAllMappedData().length} data)
+                    </span>
+                  )}
                 </span>
               </div>
 
@@ -470,7 +483,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
               className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors text-sm"
             >
               <CheckCircle2 size={14} />
-              Import {getMappedPreview().length} Data
+              Import {getAllMappedData().length} Data
             </button>
           )}
         </div>
