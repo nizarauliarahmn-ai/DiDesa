@@ -69,10 +69,22 @@ function getNoUrut(items: ProdukHukumItem[], tahun: string): number {
   return Math.max(...filtered.map(i => i.no)) + 1;
 }
 
+function excelSerialToDate(serial: number): Date {
+  const utcDays = Math.floor(serial - 25569);
+  const utcValue = utcDays * 86400;
+  return new Date(utcValue * 1000);
+}
+
 function formatDateDisplay(dateStr: string): string {
   if (!dateStr || dateStr === '-' || dateStr === 'Tidak Tahu') return '-';
   try {
-    const d = new Date(dateStr);
+    let d: Date;
+    const numVal = Number(dateStr);
+    if (!isNaN(numVal) && numVal > 30000 && numVal < 60000 && String(numVal) === dateStr.trim()) {
+      d = excelSerialToDate(numVal);
+    } else {
+      d = new Date(dateStr);
+    }
     if (isNaN(d.getTime())) return dateStr;
     const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];

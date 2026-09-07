@@ -317,12 +317,26 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     return yearMatch ? yearMatch[1] : new Date().getFullYear().toString();
   };
 
+  const normalizeDate = (val: any): string => {
+    if (!val) return '';
+    if (val instanceof Date) return val.toISOString().slice(0, 10);
+    const str = String(val).trim();
+    if (!str) return '';
+    const numVal = Number(str);
+    if (!isNaN(numVal) && numVal > 30000 && numVal < 60000 && String(numVal) === str) {
+      const utcDays = Math.floor(numVal - 25569);
+      const d = new Date(utcDays * 86400 * 1000);
+      return d.toISOString().slice(0, 10);
+    }
+    return str;
+  };
+
   const mapRow = (row: ParsedRow, idx: number): MappedData => ({
     no: mapping.no ? (parseInt(String(row[mapping.no])) || idx + 1) : idx + 1,
     tahun: mapping.tahun ? extractYear(row[mapping.tahun]) : new Date().getFullYear().toString(),
     uraian: mapping.uraian ? String(row[mapping.uraian] || '') : '',
-    tanggal: mapping.tanggal ? String(row[mapping.tanggal] || '') : '',
-    tanggalDiundangkan: mapping.tanggalDiundangkan ? String(row[mapping.tanggalDiundangkan] || '') : '',
+    tanggal: mapping.tanggal ? normalizeDate(row[mapping.tanggal]) : '',
+    tanggalDiundangkan: mapping.tanggalDiundangkan ? normalizeDate(row[mapping.tanggalDiundangkan]) : '',
     jenisDokumen: mapping.jenisDokumen ? String(row[mapping.jenisDokumen] || '') : '',
     arsip: mapping.arsip ? parseArsipValue(row[mapping.arsip]) : true,
     ketArsip: mapping.ketArsip ? String(row[mapping.ketArsip] || '') : '',
