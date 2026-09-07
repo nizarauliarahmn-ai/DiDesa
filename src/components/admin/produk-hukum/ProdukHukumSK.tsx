@@ -153,7 +153,14 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
 
         if (data && data.value && isMounted) {
           const all = JSON.parse(data.value);
-          const serverItems = all[KATEGORI_KEY] || [];
+          const serverItems: ProdukHukumItem[] = all[KATEGORI_KEY] || [];
+          const urlRegex = /^https?:\/\//i;
+          serverItems.forEach(item => {
+            if (item.ketLain && !item.linkFile && urlRegex.test(item.ketLain.trim())) {
+              item.linkFile = item.ketLain.trim();
+              item.ketLain = '';
+            }
+          });
           const localItems = loadData();
           const localIds = new Set(localItems.map(i => i.id));
           const merged = [...serverItems, ...localItems.filter(i => !localIds.has(i.id))];
@@ -299,24 +306,33 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
 
   const handleImport = (importedData: any[]) => {
     const baseOrder = Date.now();
-    const newItems: ProdukHukumItem[] = importedData.map((row, idx) => ({
-      id: generateId(),
-      no: row.no || 0,
-      tahun: row.tahun || new Date().getFullYear().toString(),
-      uraian: row.uraian || '',
-      tanggal: row.tanggal || '',
-      tanggalDiundangkan: row.tanggalDiundangkan || '',
-      jenisDokumen: row.jenisDokumen || '',
-      arsip: row.arsip ?? true,
-      ketArsip: row.ketArsip || '',
-      ketLain: row.ketLain || '',
-      documentData: null,
-      documentName: '',
-      linkFile: row.linkFile || '',
-      createdAt: new Date().toISOString(),
-      noManual: false,
-      importOrder: baseOrder + idx,
-    }));
+    const urlRegex = /^https?:\/\//i;
+    const newItems: ProdukHukumItem[] = importedData.map((row, idx) => {
+      let ketLain = row.ketLain || '';
+      let linkFile = row.linkFile || '';
+      if (ketLain && !linkFile && urlRegex.test(ketLain.trim())) {
+        linkFile = ketLain.trim();
+        ketLain = '';
+      }
+      return {
+        id: generateId(),
+        no: row.no || 0,
+        tahun: row.tahun || new Date().getFullYear().toString(),
+        uraian: row.uraian || '',
+        tanggal: row.tanggal || '',
+        tanggalDiundangkan: row.tanggalDiundangkan || '',
+        jenisDokumen: row.jenisDokumen || '',
+        arsip: row.arsip ?? true,
+        ketArsip: row.ketArsip || '',
+        ketLain,
+        documentData: null,
+        documentName: '',
+        linkFile,
+        createdAt: new Date().toISOString(),
+        noManual: false,
+        importOrder: baseOrder + idx,
+      };
+    });
     const updated = [...items, ...newItems];
     setItems(updated);
     saveData(updated);
