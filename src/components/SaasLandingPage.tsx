@@ -39,7 +39,7 @@ function getKabupatenName(tenant: any): string {
   return isKota ? `Kota ${clean}` : `Kabupaten ${clean}`;
 }
 
-export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () => void }) {
+export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLoginClick?: () => void; onTrialClick?: () => void }) {
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
   const [globalPhone, setGlobalPhone] = useState(() => localStorage.getItem('global_footer_phone') || '+6281346867519');
@@ -207,7 +207,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <button onClick={onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+              <button onClick={onTrialClick || onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
                 <LayoutDashboard size={16} /> Coba Gratis
               </button>
               <button 

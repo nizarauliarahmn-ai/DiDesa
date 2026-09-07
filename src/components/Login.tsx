@@ -157,6 +157,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
           showToast('Akun desa ini sedang dinonaktifkan. Hubungi Pengelola Platform untuk informasi lebih lanjut.', 'error');
           return;
         }
+        if (matchingTenantKades.trial_end && new Date(matchingTenantKades.trial_end) < new Date()) {
+          setIsLoading(false);
+          showToast('Masa trial 14 hari telah berakhir. Silakan hubungi Pengelola Platform untuk berlangganan.', 'error');
+          return;
+        }
         const loggedUser = {
           email: email,
           role: 'kades' as const,
@@ -194,6 +199,11 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         if (matchingTenantAdmin.status === 'inactive') {
           setIsLoading(false);
           showToast('Akun desa ini sedang dinonaktifkan. Hubungi Pengelola Platform untuk informasi lebih lanjut.', 'error');
+          return;
+        }
+        if (matchingTenantAdmin.trial_end && new Date(matchingTenantAdmin.trial_end) < new Date()) {
+          setIsLoading(false);
+          showToast('Masa trial 14 hari telah berakhir. Silakan hubungi Pengelola Platform untuk berlangganan.', 'error');
           return;
         }
         const loggedUser = {
