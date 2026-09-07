@@ -966,6 +966,75 @@ async function setupVite() {
     }
   });
 
+  // Middleware: server-side OG tag injection for shared SK Kades links (?tab=sk_kades&sk_id=xxx)
+  app.get("*", async (req, res, next) => {
+    const tab = req.query.tab as string | undefined;
+    const skId = req.query.sk_id as string | undefined;
+    if (tab !== "sk_kades" || !skId) return next();
+
+    try {
+      const supabaseUrl = (process.env.SUPABASE_URL || "").trim();
+      const supabaseKey = (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KE || "").trim();
+      if (!supabaseUrl || !supabaseKey) return next();
+
+      const { createClient } = await import("@supabase/supabase-js");
+      const sb = createClient(supabaseUrl, supabaseKey);
+
+      const hostname = req.hostname;
+      const parts = hostname.split(".");
+      let targetDomain = "";
+      if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
+        targetDomain = parts[0];
+      }
+
+      let tenantId = "";
+      if (targetDomain) {
+        const { data: tenant } = await sb.from("tenants")
+          .select("id, name").or(`domain.ilike.${targetDomain},domain.ilike.${targetDomain}.%`).maybeSingle();
+        if (tenant?.id) { tenantId = tenant.id; }
+      }
+      if (!tenantId) return next();
+
+      const { data: setting } = await sb.from("saas_settings")
+        .select("value").eq("tenant_id", tenantId).eq("key", "produk_hukum_data").single();
+      if (!setting?.value) return next();
+
+      const all = JSON.parse(setting.value);
+      const skItems = all["sk_kades"] || [];
+      const skItem = skItems.find((i: any) => i.id === skId);
+      if (!skItem) return next();
+
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const shareUrl = `${baseUrl}/?tenant=${req.query.tenant || targetDomain}&tab=sk_kades&sk_id=${skId}`;
+      const title = `SK Kades - ${skItem.uraian || "Surat Keputusan"}`;
+      const description = [
+        skItem.no ? `Nomor: ${skItem.no}` : "",
+        skItem.tahun ? `Tahun: ${skItem.tahun}` : "",
+        skItem.jenisDokumen ? `Jenis: ${skItem.jenisDokumen}` : "",
+      ].filter(Boolean).join(" • ");
+
+      const html = await getIndexHtml();
+      const ogTags = `
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="${title.replace(/"/g, "&quot;")}" />
+    <meta property="og:description" content="${description.replace(/"/g, "&quot;").substring(0, 200)}" />
+    <meta property="og:url" content="${shareUrl}" />
+    <meta property="og:site_name" content="DiDesa" />
+    <meta property="og:locale" content="id_ID" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="${title.replace(/"/g, "&quot;")}" />
+    <meta name="twitter:description" content="${description.replace(/"/g, "&quot;").substring(0, 200)}" />
+    <title>${title} - DiDesa</title>`;
+
+      const modifiedHtml = html.replace("</head>", `${ogTags}\n  </head>`);
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.send(modifiedHtml);
+    } catch (err: any) {
+      console.error("[OG SK Middleware] Error:", err.message);
+      return next();
+    }
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
