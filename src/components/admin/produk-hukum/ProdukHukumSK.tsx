@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, AlertTriangle, ArrowLeft, Upload, Eye, Printer, ExternalLink } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, AlertTriangle, ArrowLeft, Upload, Eye, Printer, ExternalLink, Download } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
+import * as XLSX from 'xlsx';
 import ImportModal from './ImportModal';
 import DocumentViewerModal from './DocumentViewerModal';
 import DocumentUpload from './DocumentUpload';
@@ -402,6 +403,26 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
     }, 500);
   };
 
+  const handleDownloadTemplate = () => {
+    const headers = ['NO', 'TAHUN', 'NAMA PRODUK HUKUM', 'TANGGAL', 'JENIS DOKUMEN', 'ARSIP (TRUE/FALSE)', 'KET ARSIP', 'KET LAIN', 'LINK FILE'];
+    const sampleRows = [
+      [1, 2026, 'SK Pengangkatan Perangkat Desa', '2026-01-15', 'SK PENGANGKATAN', 'TRUE', 'ASLI', 'Pengangkatan Kaur Keuangan', 'https://drive.google.com/file/d/xxx/view'],
+      [2, 2026, 'SK Pemberhentian Kepala Dusun', '2026-02-10', 'SK PEMBERHENTIAN', 'TRUE', 'ASLI', 'Pemberhentian Kepala Dusun I', ''],
+      [3, 2026, 'SK Penetapan TP-PKK Desa', '2026-03-01', 'SK PENETAPAN', 'TRUE', 'FOTOKOPI', 'Masa bakti 2026-2032', ''],
+    ];
+
+    const wsData = [headers, ...sampleRows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [
+      { wch: 5 }, { wch: 6 }, { wch: 40 }, { wch: 12 },
+      { wch: 20 }, { wch: 16 }, { wch: 12 }, { wch: 30 }, { wch: 50 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template SK');
+    XLSX.writeFile(wb, 'Template_Import_SK_Kades.xlsx');
+    showToast('Template berhasil diunduh!', 'success');
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -424,6 +445,13 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
               <span>Hapus ({selectedIds.size})</span>
             </button>
           )}
+          <button
+            onClick={handleDownloadTemplate}
+            className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition-colors shadow-sm dark:shadow-none"
+          >
+            <Download size={18} />
+            <span>Template</span>
+          </button>
           <button
             onClick={() => setShowImportModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm dark:shadow-none"
@@ -490,6 +518,10 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data SK</h3>
             <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Tambahkan data secara manual atau import dari file</p>
             <div className="flex items-center gap-2">
+              <button onClick={handleDownloadTemplate}
+                className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white text-sm font-bold rounded-xl hover:bg-cyan-700 transition-colors">
+                <Download size={16} /> Template
+              </button>
               <button onClick={() => setShowImportModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors">
                 <Upload size={16} /> Import
