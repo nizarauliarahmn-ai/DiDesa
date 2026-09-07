@@ -46,18 +46,41 @@ const sanitizeNewsList = (rawList: NewsItem[]): NewsItem[] => {
   });
 };
 
+const newsChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('didesa_news_sync') : null;
+
 export default function BeritaDesa() {
   const [loading, setLoading] = useState(true);
   const [tenantId, setTenantId] = useState<string | null>(null);
-  const [news, setNews] = useState<NewsItem[]>(() => {
-    const saved = localStorage.getItem('didesa_news_list');
-    const parsed = saved ? JSON.parse(saved) : [];
-    return sanitizeNewsList(parsed);
-  });
+  const [news, setNews] = useState<NewsItem[]>([]);
 
   const [desaName, setDesaName] = useState(() => localStorage.getItem('kop_desa') || 'Desa Ketupat');
 
-  // Fetch news from Supabase on mount
+  const fetchNewsFromSupabase = async (tid: string): Promise<NewsItem[] | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('saas_settings')
+        .select('key,value')
+        .eq('tenant_id', tid)
+        .eq('key', 'didesa_news_list')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('[BeritaDesa] Gagal memuat berita dari server:', error.message);
+        return null;
+      }
+
+      if (data && data.value) {
+        const parsed = JSON.parse(data.value);
+        return sanitizeNewsList(parsed);
+      }
+      return [];
+    } catch (err: any) {
+      console.error('[BeritaDesa] Error fetching news:', err?.message || err);
+      return null;
+    }
+  };
+
+  // Fetch news from Supabase on mount — always start fresh from server
   useEffect(() => {
     let isMounted = true;
     const fetchNews = async () => {
@@ -65,35 +88,22 @@ export default function BeritaDesa() {
       if (!isMounted) return;
       setTenantId(tid);
       if (!tid) {
-        console.warn('[BeritaDesa] Tenant ID tidak ditemukan. Menggunakan berita default.');
+        console.warn('[BeritaDesa] Tenant ID tidak ditemukan.');
         if (isMounted) setLoading(false);
         return;
       }
 
-      try {
-        const { data, error } = await supabase
-          .from('saas_settings')
-          .select('key,value')
-          .eq('tenant_id', tid)
-          .eq('key', 'didesa_news_list')
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('[BeritaDesa] Gagal memuat berita dari server:', error.message);
-          if (isMounted) setLoading(false);
-          return;
+      const result = await fetchNewsFromSupabase(tid);
+      if (isMounted) {
+        if (result !== null) {
+          setNews(result);
+          localStorage.setItem('didesa_news_list', JSON.stringify(result));
+        } else {
+          // Fallback ke localStorage jika Supabase gagal (offline)
+          const saved = localStorage.getItem('didesa_news_list');
+          setNews(saved ? JSON.parse(saved) : []);
         }
-
-        if (data && data.value && isMounted) {
-          const parsed = JSON.parse(data.value);
-          const sanitized = sanitizeNewsList(parsed);
-          setNews(sanitized);
-          localStorage.setItem('didesa_news_list', JSON.stringify(sanitized));
-        }
-      } catch (err: any) {
-        console.error('[BeritaDesa] Error fetching news:', err?.message || err);
-      } finally {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       }
     };
     fetchNews();
@@ -129,6 +139,7 @@ export default function BeritaDesa() {
 
     localStorage.setItem('didesa_news_list', serialized);
     window.dispatchEvent(new Event('didesa_news_updated'));
+    newsChannel?.postMessage({ type: 'news_updated' });
 
     if (tenantId) {
       supabase.from('saas_settings').upsert({
@@ -141,21 +152,25 @@ export default function BeritaDesa() {
     }
   }, [news, tenantId]);
 
-  // Sync when Admin updates news
+  // Sync when Admin updates news — re-fetch from Supabase for fresh data
   useEffect(() => {
-    const handleNewsUpdate = () => {
-      const saved = localStorage.getItem('didesa_news_list');
-      if (saved) {
-        setNews(JSON.parse(saved));
+    const handleNewsUpdate = async () => {
+      if (!tenantId) return;
+      const result = await fetchNewsFromSupabase(tenantId);
+      if (result !== null) {
+        setNews(result);
+        localStorage.setItem('didesa_news_list', JSON.stringify(result));
       }
     };
     window.addEventListener('didesa_news_updated', handleNewsUpdate);
     window.addEventListener('storage', handleNewsUpdate);
+    newsChannel?.addEventListener('message', handleNewsUpdate);
     return () => {
       window.removeEventListener('didesa_news_updated', handleNewsUpdate);
       window.removeEventListener('storage', handleNewsUpdate);
+      newsChannel?.removeEventListener('message', handleNewsUpdate);
     };
-  }, []);
+  }, [tenantId]);
 
   const processedNews = useMemo(() => {
     return news.map(item => {
@@ -285,15 +300,21 @@ export default function BeritaDesa() {
     showToast('Komentar berhasil dikirim!', 'success');
   };
 
-  // Auto-open selected news modal if navigated from Portal Dashboard
+  // Auto-open selected news modal if navigated via shared link (?id=xxx)
   useEffect(() => {
-    const selectedId = localStorage.getItem('didesa_selected_news_id');
-    if (selectedId && processedNews.length > 0) {
-      const found = processedNews.find(n => n.id === selectedId);
+    if (processedNews.length === 0) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const newsId = urlParams.get('id');
+    if (newsId) {
+      const found = processedNews.find(n => n.id === newsId);
       if (found) {
         setSelectedNews(found);
+        const auth = localStorage.getItem('didesa_auth_user');
+        if (auth) setCommentName(JSON.parse(auth).name);
       }
-      localStorage.removeItem('didesa_selected_news_id');
+      // Clean URL without reload
+      const cleanUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, '', cleanUrl);
     }
   }, [processedNews]);
 
@@ -539,7 +560,8 @@ export default function BeritaDesa() {
                   </button>
                   <button 
                     onClick={() => {
-                      navigator.clipboard.writeText(window.location.href);
+                      const shareUrl = `${window.location.origin}${window.location.pathname}?id=${activeSelectedNews.id}${window.location.hash}`;
+                      navigator.clipboard.writeText(shareUrl);
                       showToast('Tautan berita disalin ke papan klip!', 'success');
                     }}
                     className="flex items-center gap-2 bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 px-4 py-2 rounded-xl text-xs font-bold transition-all"

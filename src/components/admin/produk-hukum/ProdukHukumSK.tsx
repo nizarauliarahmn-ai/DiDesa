@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, CheckCircle2, Circle, AlertTriangle, ArrowLeft, Upload, Eye, Printer, Link2, Share2, Download } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, AlertTriangle, ArrowLeft, Upload, Eye, Printer, Link2, Download, Share2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
+import * as XLSX from 'xlsx';
 import ImportModal from './ImportModal';
 import DocumentViewerModal from './DocumentViewerModal';
 import DocumentUpload from './DocumentUpload';
@@ -19,27 +19,25 @@ interface ProdukHukumItem {
   arsip: boolean;
   ketArsip: string;
   ketLain: string;
-  linkFile: string;
   documentData: string | null;
   documentName: string;
+  linkFile: string;
   createdAt: string;
   noManual?: boolean;
   importOrder?: number;
 }
 
-const JENIS_DOKUMEN_PERDES = [
-  'APBDES MURNI',
-  'APBDES PERUBAHAN',
-  'RKPDES',
-  'RPJMDES',
-  'REALISASI',
-  'BUMDESA',
-  'ASAL-USUL',
-  'LAINNYA',
+const JENIS_DOKUMEN_SK = [
+  'SK PENGANGKATAN',
+  'SK PEMBERHENTIAN',
+  'SK PERUBAHAN NAMA',
+  'SK PENETAPAN',
+  'SK PERMOHONAN',
+  'SK LAINNYA',
 ];
 
 const STORAGE_KEY = 'produk_hukum_data';
-const KATEGORI_KEY = 'perdes';
+const KATEGORI_KEY = 'sk_kades';
 
 function generateId() {
   return `ph_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -71,10 +69,22 @@ function getNoUrut(items: ProdukHukumItem[], tahun: string): number {
   return Math.max(...filtered.map(i => i.no)) + 1;
 }
 
+function excelSerialToDate(serial: number): Date {
+  const utcDays = Math.floor(serial - 25569);
+  const utcValue = utcDays * 86400;
+  return new Date(utcValue * 1000);
+}
+
 function formatDateDisplay(dateStr: string): string {
   if (!dateStr || dateStr === '-' || dateStr === 'Tidak Tahu') return '-';
   try {
-    const d = new Date(dateStr);
+    let d: Date;
+    const numVal = Number(dateStr);
+    if (!isNaN(numVal) && numVal > 30000 && numVal < 60000 && String(numVal) === dateStr.trim()) {
+      d = excelSerialToDate(numVal);
+    } else {
+      d = new Date(dateStr);
+    }
     if (isNaN(d.getTime())) return dateStr;
     const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -84,11 +94,11 @@ function formatDateDisplay(dateStr: string): string {
   }
 }
 
-interface PerdesProps {
+interface SKProps {
   onBack: () => void;
 }
 
-export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
+export default function ProdukHukumSK({ onBack }: SKProps) {
   const [items, setItems] = useState<ProdukHukumItem[]>(loadData);
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,7 +118,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [viewerData, setViewerData] = useState<{ data: string | null; name: string }>({ data: null, name: '' });
   const [itemsPerPage, setItemsPerPage] = useState(15);
 
-  // Listen for open_document_viewer events
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       setViewerData({ data: e.detail.data, name: e.detail.name });
@@ -118,7 +127,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     return () => window.removeEventListener('open_document_viewer', handler as EventListener);
   }, []);
 
-  // Fetch data from Supabase on mount
   useEffect(() => {
     let isMounted = true;
     const fetchFromSupabase = async () => {
@@ -126,7 +134,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       if (!isMounted) return;
       setTenantId(tid);
       if (!tid) {
-        console.warn('[ProdukHukumPerdes] Tenant ID tidak ditemukan. Data hanya tersimpan lokal.');
+        console.warn('[ProdukHukumSK] Tenant ID tidak ditemukan. Data hanya tersimpan lokal.');
         return;
       }
 
@@ -139,34 +147,31 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
           .single();
 
         if (error && error.code !== 'PGRST116') {
-          console.error('[ProdukHukumPerdes] Gagal memuat dari Supabase:', error.message);
+          console.error('[ProdukHukumSK] Gagal memuat dari Supabase:', error.message);
           return;
         }
 
         if (data && data.value && isMounted) {
           const all = JSON.parse(data.value);
           const serverItems = all[KATEGORI_KEY] || [];
-          // Merge: prioritize server data, but keep any local-only items
           const localItems = loadData();
           const localIds = new Set(localItems.map(i => i.id));
           const merged = [...serverItems, ...localItems.filter(i => !localIds.has(i.id))];
           setItems(merged);
-          // Save merged back to localStorage
           const raw = localStorage.getItem(STORAGE_KEY);
           const allData = raw ? JSON.parse(raw) : {};
           allData[KATEGORI_KEY] = merged;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
-          console.log('[ProdukHukumPerdes] Data synced dari Supabase. Total:', merged.length);
+          console.log('[ProdukHukumSK] Data synced dari Supabase. Total:', merged.length);
         }
       } catch (err: any) {
-        console.error('[ProdukHukumPerdes] Error fetching:', err?.message || err);
+        console.error('[ProdukHukumSK] Error fetching:', err?.message || err);
       }
     };
     fetchFromSupabase();
     return () => { isMounted = false; };
   }, []);
 
-  // Sync to Supabase whenever items change
   useEffect(() => {
     if (!tenantId || items.length === 0) return;
 
@@ -184,13 +189,13 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         }, { onConflict: 'tenant_id,key' });
 
         if (error) {
-          console.error('[ProdukHukumPerdes] Gagal sync ke Supabase:', error.message);
+          console.error('[ProdukHukumSK] Gagal sync ke Supabase:', error.message);
           showToast('Gagal sinkronisasi ke server: ' + error.message, 'error');
         } else {
-          console.log('[ProdukHukumPerdes] Berhasil sync ke Supabase');
+          console.log('[ProdukHukumSK] Berhasil sync ke Supabase');
         }
       } catch (err: any) {
-        console.error('[ProdukHukumPerdes] Error syncing:', err?.message || err);
+        console.error('[ProdukHukumSK] Error syncing:', err?.message || err);
       }
     };
     saveToSupabase();
@@ -216,36 +221,38 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     if (filterTahun) result = result.filter(i => i.tahun === filterTahun);
     if (filterArsip !== 'semua') result = result.filter(i => String(i.arsip) === filterArsip);
     result.sort((a, b) => {
-      const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
-      const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
-      if (tglA !== tglB) return tglB - tglA;
+      if (sortField === 'importOrder') {
+        if (a.importOrder != null && b.importOrder != null) return a.importOrder - b.importOrder;
+        if (a.importOrder != null) return -1;
+        if (b.importOrder != null) return 1;
+        return 0;
+      }
+      let cmp = 0;
+      if (sortField === 'tahun') {
+        cmp = (a.tahun || '').localeCompare(b.tahun || '');
+      } else if (sortField === 'tanggal') {
+        const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+        const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+        cmp = tglA - tglB;
+      } else if (sortField === 'no') {
+        cmp = a.no - b.no;
+      }
+      if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
+      if (a.tahun !== b.tahun) return (a.tahun || '').localeCompare(b.tahun || '');
       return a.no - b.no;
     });
     return result;
-  }, [items, searchQuery, filterJenis, filterTahun, filterArsip]);
+  }, [items, searchQuery, filterJenis, filterTahun, filterArsip, sortField, sortDir]);
 
   const itemsWithNumbers = useMemo(() => {
-    const mapped = filteredItems.map((item) => ({
+    return filteredItems.map((item) => ({
       ...item,
       displayNo: item.no,
     }));
-    return mapped.sort((a, b) => {
-      let cmp = 0;
-      if (sortField === 'importOrder') {
-        cmp = (a.importOrder ?? 99999) - (b.importOrder ?? 99999);
-        if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
-        return a.tahun.localeCompare(b.tahun) || a.no - b.no;
-      }
-      if (sortField === 'no') cmp = a.no - b.no;
-      else if (sortField === 'tahun') cmp = a.tahun.localeCompare(b.tahun);
-      else if (sortField === 'tanggal') cmp = (a.tanggal || '').localeCompare(b.tanggal || '');
-      return sortDir === 'asc' ? cmp : -cmp;
-    });
-  }, [filteredItems, sortField, sortDir]);
+  }, [filteredItems]);
 
-  // Deteksi dokumen original (pertama kali dibuat) untuk setiap kombinasi tahun_no
   const originalDocsMap = useMemo(() => {
-    const map = new Map<string, string>(); // key -> id of oldest document
+    const map = new Map<string, string>();
     items.forEach(item => {
       const key = `${item.tahun}_${item.no}`;
       const currentOldestId = map.get(key);
@@ -261,7 +268,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     return map;
   }, [items]);
 
-  // Hitung frekuensi nomor per tahun untuk mendeteksi ganda
   const duplicateMap = useMemo(() => {
     const freq: Record<string, number> = {};
     items.forEach(item => {
@@ -274,7 +280,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const totalPages = Math.ceil(itemsWithNumbers.length / itemsPerPage);
   const paginatedItems = itemsWithNumbers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterJenis, filterTahun, filterArsip, sortField, sortDir]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterJenis, filterTahun, filterArsip, itemsPerPage]);
 
   const handleSave = (item: Omit<ProdukHukumItem, 'id' | 'createdAt'>) => {
     let newItems: ProdukHukumItem[];
@@ -292,7 +298,8 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   };
 
   const handleImport = (importedData: any[]) => {
-    const newItems: ProdukHukumItem[] = importedData.map(row => ({
+    const baseOrder = Date.now();
+    const newItems: ProdukHukumItem[] = importedData.map((row, idx) => ({
       id: generateId(),
       no: row.no || 0,
       tahun: row.tahun || new Date().getFullYear().toString(),
@@ -305,8 +312,10 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       ketLain: row.ketLain || '',
       documentData: null,
       documentName: '',
+      linkFile: row.linkFile || '',
       createdAt: new Date().toISOString(),
       noManual: false,
+      importOrder: baseOrder + idx,
     }));
     const updated = [...items, ...newItems];
     setItems(updated);
@@ -320,35 +329,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     setShowDeleteConfirm(null);
     setSelectedIds(prev => { const n = new Set(prev); n.delete(id); return n; });
     showToast('Data berhasil dihapus!', 'success');
-  };
-
-  const handleShare = (item: ProdukHukumItem) => {
-    const shareUrl = `${window.location.origin}/?tab=perdes&perdes_id=${item.id}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      showToast('Link sharing berhasil disalin ke clipboard!', 'success');
-    }).catch(() => {
-      prompt('Salin link ini:', shareUrl);
-    });
-  };
-
-  const handleDownloadTemplate = () => {
-    const headers = ['NO', 'TAHUN', 'URAIAN', 'TANGGAL', 'TGL DIUNDANGKAN', 'JENIS DOKUMEN', 'KET LAIN', 'LINK FILE'];
-    const sampleRows = [
-      [1, 2026, 'APBDesa Murni Tahun Anggaran 2026', '2026-01-15', '2026-01-20', 'APBDES MURNI', 'Ditetapkan 15 Januari 2026', ''],
-      [2, 2026, 'RPJMDesa Tahun 2026-2032', '2026-02-10', '2026-02-15', 'RPJMDES', 'Masa 6 tahun', ''],
-      [3, 2026, 'Realisasi APBDesa Triwulan I', '2026-04-01', '2026-04-05', 'REALISASI', 'Periode Januari - Maret 2026', ''],
-    ];
-
-    const wsData = [headers, ...sampleRows];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!cols'] = [
-      { wch: 5 }, { wch: 6 }, { wch: 45 }, { wch: 12 },
-      { wch: 16 }, { wch: 20 }, { wch: 35 }, { wch: 50 },
-    ];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Template Perdes');
-    XLSX.writeFile(wb, 'Template_Import_Perdes.xlsx');
-    showToast('Template berhasil diunduh!', 'success');
   };
 
   const handleBulkDelete = () => {
@@ -396,14 +376,13 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         <td style="text-align:center;font-weight:600;font-size:10px">${item.tahun}</td>
         <td style="font-weight:500;font-size:10px;line-height:1.3">${item.uraian || 'TANPA KETERANGAN'}</td>
         <td style="font-size:10px;line-height:1.3">${formatDateDisplay(item.tanggal)}</td>
-        <td style="font-size:10px;line-height:1.3">${formatDateDisplay(item.tanggalDiundangkan)}</td>
         <td style="text-align:center;font-size:10px">${item.jenisDokumen || '-'}</td>
       </tr>
     `).join('');
     const now = new Date();
     const tglCetak = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><title>Cetak Data Perdes</title>
+    doc.write(`<!DOCTYPE html><html><head><title>Cetak Data SK</title>
       <style>
         @page{size:A4 portrait;margin:0}
         *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}
@@ -419,28 +398,27 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         td{padding:6px 8px;border:1px solid #d1d5db;white-space:normal;vertical-align:top;page-break-inside:avoid;line-height:1.3}
         tr{border-bottom:1px solid #e2e8f0}
         tr:nth-child(even){background:#f9fafb}
-        colgroup .col-no{width:4%}
-        colgroup .col-tahun{width:6%}
-        colgroup .col-uraian{width:36%}
-        colgroup .col-tanggal{width:22%}
-        colgroup .col-diundangkan{width:22%}
-        colgroup .col-jenis{width:10%}
+        colgroup .col-no{width:5%}
+        colgroup .col-tahun{width:8%}
+        colgroup .col-uraian{width:42%}
+        colgroup .col-tanggal{width:25%}
+        colgroup .col-jenis{width:12%}
         tfoot td{padding-top:1cm;padding-bottom:1.5cm;font-size:8px;color:#64748b;border-top:1px solid #cbd5e1;border-left:none;border-right:none;border-bottom:none;line-height:1.4}
       </style></head><body>
       <div class="header">
-        <h2>DATA PERATURAN DESA (PERDES)</h2>
+        <h2>DATA SURAT KEPUTUSAN (SK)</h2>
         <p class="subtitle">Total: ${itemsWithNumbers.length} dokumen &bull; Dicetak: ${tglCetak}</p>
       </div>
       <table>
         <colgroup>
-          <col class="col-ck" style="width:3%"><col class="col-no" style="width:4%"><col class="col-tahun" style="width:6%"><col class="col-uraian" style="width:33%"><col class="col-tanggal" style="width:21%"><col class="col-diundangkan" style="width:21%"><col class="col-jenis" style="width:10%">
+          <col class="col-ck" style="width:3%"><col class="col-no" style="width:5%"><col class="col-tahun" style="width:8%"><col class="col-uraian" style="width:42%"><col class="col-tanggal" style="width:25%"><col class="col-jenis" style="width:12%">
         </colgroup>
         <thead>
-          <tr><th colSpan="7" style="padding:0;margin:0;border:none;background:white"><div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white">&nbsp;</div></th></tr>
-          <tr><th></th><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Tgl Diundangkan</th><th>Jenis</th></tr>
+          <tr><th colSpan="6" style="padding:0;margin:0;border:none;background:white"><div style="height:1.5cm;width:100%;font-size:1px;line-height:1px;color:transparent;background:white">&nbsp;</div></th></tr>
+          <tr><th></th><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Jenis</th></tr>
         </thead>
         <tbody>${rows}</tbody>
-        <tfoot><tr style="border:none"><td colspan="7" style="border:none;padding-top:1cm;padding-bottom:1.5cm"><div style="border-top:1px solid #cbd5e1;padding-top:10px;text-align:left"><span style="font-size:9pt;color:#64748b">${globalFooter}</span></div></td></tr></tfoot>
+        <tfoot><tr style="border:none"><td colspan="6" style="border:none;padding-top:1cm;padding-bottom:1.5cm"><div style="border-top:1px solid #cbd5e1;padding-top:10px;text-align:left"><span style="font-size:9pt;color:#64748b">${globalFooter}</span></div></td></tr></tfoot>
       </table>
     </body></html>`);
     doc.close();
@@ -451,17 +429,47 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
     }, 500);
   };
 
+  const handleShare = (item: ProdukHukumItem) => {
+    const params = new URLSearchParams(window.location.search);
+    const tenant = params.get('tenant') || window.location.hostname.split('.')[0];
+    const shareUrl = `${window.location.origin}/?tab=sk_kades&sk_id=${item.id}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Link sharing berhasil disalin ke clipboard!', 'success');
+    }).catch(() => {
+      prompt('Salin link ini:', shareUrl);
+    });
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = ['NO', 'TAHUN', 'NAMA PRODUK HUKUM', 'TANGGAL', 'JENIS DOKUMEN', 'ARSIP (TRUE/FALSE)', 'KET ARSIP', 'KET LAIN', 'LINK FILE'];
+    const sampleRows = [
+      [1, 2026, 'SK Pengangkatan Perangkat Desa', '2026-01-15', 'SK PENGANGKATAN', 'TRUE', 'ASLI', 'Pengangkatan Kaur Keuangan', 'https://drive.google.com/file/d/xxx/view'],
+      [2, 2026, 'SK Pemberhentian Kepala Dusun', '2026-02-10', 'SK PEMBERHENTIAN', 'TRUE', 'ASLI', 'Pemberhentian Kepala Dusun I', ''],
+      [3, 2026, 'SK Penetapan TP-PKK Desa', '2026-03-01', 'SK PENETAPAN', 'TRUE', 'FOTOKOPI', 'Masa bakti 2026-2032', ''],
+    ];
+
+    const wsData = [headers, ...sampleRows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [
+      { wch: 5 }, { wch: 6 }, { wch: 40 }, { wch: 12 },
+      { wch: 20 }, { wch: 16 }, { wch: 12 }, { wch: 30 }, { wch: 50 },
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template SK');
+    XLSX.writeFile(wb, 'Template_Import_SK_Kades.xlsx');
+    showToast('Template berhasil diunduh!', 'success');
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
         <div className="flex items-center gap-3">
           <button onClick={onBack} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-gray-600 transition-colors">
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Perdes</h2>
-            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Peraturan Desa ({items.length} dokumen)</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">SK Kades</h2>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Surat Keputusan Kepala Desa ({items.length} dokumen)</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -493,7 +501,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none"
           >
             <PlusCircle size={18} />
-            <span>Tambah Perdes</span>
+            <span>Tambah SK</span>
           </button>
           <button
             onClick={handlePrint}
@@ -505,7 +513,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         </div>
       </div>
 
-      {/* Filter Bar */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none p-4">
         <div className="flex flex-col lg:flex-row gap-3">
           <div className="relative flex-1">
@@ -534,19 +541,18 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
           <select value={filterJenis} onChange={(e) => setFilterJenis(e.target.value)}
             className="px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
             <option value="">Semua Jenis</option>
-            {JENIS_DOKUMEN_PERDES.map(j => <option key={j} value={j}>{j}</option>)}
+            {JENIS_DOKUMEN_SK.map(j => <option key={j} value={j}>{j}</option>)}
           </select>
         </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none">
         {filteredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 rounded-full flex items-center justify-center mb-4">
               <FileText size={28} />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data Perdes</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data SK</h3>
             <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Tambahkan data secara manual atau import dari file</p>
             <div className="flex items-center gap-2">
               <button onClick={handleDownloadTemplate}
@@ -565,7 +571,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
           </div>
         ) : (
           <div className="w-full overflow-auto max-h-[calc(100vh-300px)] border border-gray-100 dark:border-slate-800 rounded-lg bg-white dark:bg-slate-900 relative">
-            <table className="w-full min-w-[900px] text-sm border-collapse">
+            <table className="w-full min-w-[700px] text-xs border-collapse">
               <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 whitespace-nowrap">
@@ -592,7 +598,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[180px] whitespace-nowrap">Uraian</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tanggal</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tgl Diundangkan</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[90px] whitespace-nowrap">Jenis</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Ket Lain</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-14 whitespace-nowrap">Link</th>
@@ -620,12 +625,11 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                         )}
                       </div>
                     </td>
-                    <td className="px-2 py-2 text-gray-700 dark:text-slate-300 font-semibold text-[11px]">{item.tahun}</td>
+                    <td className="px-2 py-2 text-gray-700 dark:text-slate-300 font-semibold">{item.tahun}</td>
                     <td className="px-2 py-2">
-                      <p className="text-gray-900 dark:text-white font-medium text-[11px] whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
+                      <p className="text-gray-900 dark:text-white font-medium whitespace-nowrap truncate max-w-[220px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
                     </td>
                     <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggal)}</td>
-                    <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggalDiundangkan)}</td>
                     <td className="px-2 py-2">
                       <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
                         {item.jenisDokumen || '-'}
@@ -653,7 +657,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
                           <Edit3 size={14} />
                         </button>
                         <button onClick={() => handleShare(item)}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Share Perdes">
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Share Kartu SK">
                           <Share2 size={14} />
                         </button>
                         <button onClick={() => setShowDeleteConfirm(item.id)}
@@ -671,11 +675,13 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <span>Menampilkan {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
-              <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="px-2 py-1 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                {[10, 15, 25, 50, 100].map(n => <option key={n} value={n}>{n}/hal</option>)}
+              <span>Tampilkan</span>
+              <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                className="px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                {[10, 15, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
               </select>
+              <span>data</span>
+              <span className="ml-2">Menampilkan {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, itemsWithNumbers.length)} dari {itemsWithNumbers.length}</span>
             </div>
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}
@@ -684,21 +690,26 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
               </button>
               {(() => {
                 const pages: (number | '...')[] = [];
-                if (totalPages <= 5) {
+                if (totalPages <= 7) {
                   for (let i = 1; i <= totalPages; i++) pages.push(i);
                 } else {
                   pages.push(1);
                   if (currentPage > 3) pages.push('...');
-                  for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+                  for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                    pages.push(i);
+                  }
                   if (currentPage < totalPages - 2) pages.push('...');
                   pages.push(totalPages);
                 }
-                return pages.map((page, idx) =>
-                  page === '...' ? <span key={`e${idx}`} className="px-1 text-gray-300">…</span> :
-                  <button key={page} onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 rounded-lg font-bold transition-colors ${page === currentPage ? 'bg-emerald-600 text-white' : 'border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-                    {page}
-                  </button>
+                return pages.map((p, idx) =>
+                  p === '...' ? (
+                    <span key={`e${idx}`} className="px-1 text-gray-400 select-none">…</span>
+                  ) : (
+                    <button key={p} onClick={() => setCurrentPage(p)}
+                      className={`w-8 h-8 rounded-lg font-bold transition-colors ${p === currentPage ? 'bg-emerald-600 text-white' : 'border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+                      {p}
+                    </button>
+                  )
                 );
               })()}
               <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}
@@ -710,20 +721,17 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         )}
       </div>
 
-      {/* Modal */}
       {showModal && (
-        <ModalPerdes item={editingItem} items={items} onSave={handleSave} onClose={() => { setShowModal(false); setEditingItem(null); }} />
+        <ModalSK item={editingItem} items={items} onSave={handleSave} onClose={() => { setShowModal(false); setEditingItem(null); }} />
       )}
 
-      {/* Import Modal */}
       <ImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onImport={handleImport}
-        kategoriLabel="Perdes"
+        kategoriLabel="SK Kades"
       />
 
-      {/* Document Viewer Modal */}
       <DocumentViewerModal
         isOpen={showViewer}
         onClose={() => setShowViewer(false)}
@@ -732,7 +740,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         documentType=""
       />
 
-      {/* Bulk Delete Confirm */}
       {showBulkDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowBulkDeleteConfirm(false)}>
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
@@ -759,7 +766,6 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
         </div>
       )}
 
-      {/* Delete Confirm */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowDeleteConfirm(null)}>
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
@@ -789,7 +795,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   );
 }
 
-function ModalPerdes({ item, items, onSave, onClose }: {
+function ModalSK({ item, items, onSave, onClose }: {
   item: ProdukHukumItem | null;
   items: ProdukHukumItem[];
   onSave: (item: Omit<ProdukHukumItem, 'id' | 'createdAt'>) => void;
@@ -800,11 +806,11 @@ function ModalPerdes({ item, items, onSave, onClose }: {
   const [no, setNo] = useState(item?.no?.toString() || '');
   const [uraian, setUraian] = useState(item?.uraian || '');
   const [tanggal, setTanggal] = useState(item?.tanggal || '');
-  const [tanggalDiundangkan, setTanggalDiundangkan] = useState(item?.tanggalDiundangkan || '');
-  const [jenisDokumen, setJenisDokumen] = useState(item?.jenisDokumen || 'APBDES MURNI');
+  const [jenisDokumen, setJenisDokumen] = useState(item?.jenisDokumen || 'SK PENGANGKATAN');
   const [arsip, setArsip] = useState(item?.arsip ?? true);
   const [ketArsip, setKetArsip] = useState(item?.ketArsip || 'ASLI');
   const [ketLain, setKetLain] = useState(item?.ketLain || '');
+  const [linkFile, setLinkFile] = useState(item?.linkFile || '');
   const [documentData, setDocumentData] = useState<string | null>(item?.documentData || null);
   const [documentName, setDocumentName] = useState(item?.documentName || '');
 
@@ -825,8 +831,9 @@ function ModalPerdes({ item, items, onSave, onClose }: {
     onSave({
       no: enteredNo,
       noManual: isManualNo,
-      tahun, uraian: uraian.trim(), tanggal, tanggalDiundangkan,
+      tahun, uraian: uraian.trim(), tanggal, tanggalDiundangkan: '',
       jenisDokumen, arsip, ketArsip, ketLain: ketLain.trim(),
+      linkFile: linkFile.trim(),
       documentData, documentName,
     });
   };
@@ -836,7 +843,7 @@ function ModalPerdes({ item, items, onSave, onClose }: {
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{isEdit ? 'Edit' : 'Tambah'} Perdes</h3>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{isEdit ? 'Edit' : 'Tambah'} SK</h3>
             <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Lengkapi data berikut</p>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-gray-600 transition-colors">
@@ -858,25 +865,19 @@ function ModalPerdes({ item, items, onSave, onClose }: {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Uraian <span className="text-red-500">*</span></label>
-            <input type="text" value={uraian} onChange={(e) => setUraian(e.target.value)} placeholder="cth: PERDES APBDesa 2025"
+            <input type="text" value={uraian} onChange={(e) => setUraian(e.target.value)} placeholder="cth: SK Pengangkatan Perangkat Desa 2025"
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Tanggal Tetap</label>
-              <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Tanggal Diundangkan</label>
-              <input type="date" value={tanggalDiundangkan} onChange={(e) => setTanggalDiundangkan(e.target.value)} className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Tanggal</label>
+            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)} className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Jenis Dokumen</label>
               <select value={jenisDokumen} onChange={(e) => setJenisDokumen(e.target.value)}
                 className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white">
-                {JENIS_DOKUMEN_PERDES.map(j => <option key={j} value={j}>{j}</option>)}
+                {JENIS_DOKUMEN_SK.map(j => <option key={j} value={j}>{j}</option>)}
               </select>
             </div>
             <div>
@@ -899,11 +900,16 @@ function ModalPerdes({ item, items, onSave, onClose }: {
             <input type="text" value={ketLain} onChange={(e) => setKetLain(e.target.value)} placeholder="Catatan tambahan (opsional)"
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Link File (Google Drive / URL)</label>
+            <input type="url" value={linkFile} onChange={(e) => setLinkFile(e.target.value)} placeholder="https://drive.google.com/..."
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
+          </div>
           <div className="border-t border-gray-100 dark:border-slate-800 pt-4">
             <DocumentUpload
               value={documentData}
               onChange={(data, name) => { setDocumentData(data); setDocumentName(name); }}
-              label="Dokumen Perdes (Scan/Upload)"
+              label="Dokumen SK (Scan/Upload)"
             />
           </div>
           <div className="flex gap-2 pt-2">

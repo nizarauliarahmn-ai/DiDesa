@@ -17,6 +17,7 @@ interface MappedData {
   arsip: boolean;
   ketArsip: string;
   ketLain: string;
+  linkFile: string;
   [key: string]: any;
 }
 
@@ -30,6 +31,7 @@ interface ColumnMapping {
   arsip: string;
   ketArsip: string;
   ketLain: string;
+  linkFile: string;
 }
 
 const DEFAULT_MAPPING: ColumnMapping = {
@@ -42,6 +44,7 @@ const DEFAULT_MAPPING: ColumnMapping = {
   arsip: '',
   ketArsip: '',
   ketLain: '',
+  linkFile: '',
 };
 
 const FIELD_LABELS: Record<keyof ColumnMapping, string> = {
@@ -54,9 +57,10 @@ const FIELD_LABELS: Record<keyof ColumnMapping, string> = {
   arsip: 'Arsip (TRUE/FALSE)',
   ketArsip: 'Ket Arsip',
   ketLain: 'Ket Lain',
+  linkFile: 'Link File (URL)',
 };
 
-const REQUIRED_FIELDS = ['uraian', 'tahun'];
+const REQUIRED_FIELDS = ['uraian'];
 
 function guessMapping(headers: string[]): ColumnMapping {
   const mapping = { ...DEFAULT_MAPPING };
@@ -70,15 +74,16 @@ function guessMapping(headers: string[]): ColumnMapping {
     return '';
   };
 
-  mapping.no = findHeader(['no', 'nomor', 'urut']);
-  mapping.tahun = findHeader(['tahun', 'year']);
-  mapping.uraian = findHeader(['uraian', 'judul', 'deskripsi', 'description', 'title']);
-  mapping.tanggal = findHeader(['tanggal', 'date', 'tgl']);
-  mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit']);
-  mapping.jenisDokumen = findHeader(['jenis dokumen', 'jenis', 'type', 'kategori', 'category']);
+  mapping.no = findHeader(['no', 'nomor', 'urut', 'no.']);
+  mapping.tahun = findHeader(['tahun', 'year', 'thn', 'th']);
+  mapping.uraian = findHeader(['uraian', 'judul', 'deskripsi', 'description', 'title', 'nama', 'produk', 'keterangan uraian']);
+  mapping.tanggal = findHeader(['tanggal', 'date', 'tgl', 'tmt']);
+  mapping.tanggalDiundangkan = findHeader(['tanggal diundangkan', 'diundangkan', 'undang', 'publish', 'terbit', 'tgl undang', 'waktu', 'penetapan']);
+  mapping.jenisDokumen = findHeader(['jenis dokumen', 'jenis', 'type', 'kategori', 'category', 'tipe']);
   mapping.arsip = findHeader(['arsip', 'archive']);
-  mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip']);
-  mapping.ketLain = findHeader(['ket lain', 'keterangan lain', 'catatan', 'note', 'remark']);
+  mapping.ketArsip = findHeader(['ket arsip', 'keterangan arsip', 'status arsip', 'status']);
+  mapping.ketLain = findHeader(['ket lain', 'keterangan lain', 'catatan', 'note', 'remark', 'keterangan', 'dasar', 'tentang', 'ref']);
+  mapping.linkFile = findHeader(['link file', 'link', 'url', 'google drive', 'gdrive', 'file link', 'file']);
 
   return mapping;
 }
@@ -121,6 +126,47 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     onClose();
   };
 
+  const parseRawText = (text: string): { headers: string[]; rows: ParsedRow[] } => {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) return { headers: [], rows: [] };
+
+    const sep = lines[0].split(';').length > lines[0].split(',').length ? ';' : ',';
+
+    const parseLine = (line: string): string[] => {
+      const result: string[] = [];
+      let current = '';
+      let inQuote = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') { inQuote = !inQuote; continue; }
+        if (ch === sep && !inQuote) { result.push(current.trim()); current = ''; continue; }
+        current += ch;
+      }
+      result.push(current.trim());
+      return result;
+    };
+
+    const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
+    let headerIdx = -1;
+    for (let i = 0; i < Math.min(lines.length, 20); i++) {
+      const lower = lines[i].toLowerCase();
+      const matchCount = headerKeywords.filter(kw => lower.includes(kw)).length;
+      if (matchCount >= 2) { headerIdx = i; break; }
+    }
+    if (headerIdx === -1) return { headers: [], rows: [] };
+
+    const headers = parseLine(lines[headerIdx]).filter(h => h);
+    const rows: ParsedRow[] = [];
+    for (let i = headerIdx + 1; i < lines.length; i++) {
+      const cells = parseLine(lines[i]);
+      if (cells.every(c => !c)) continue;
+      const obj: ParsedRow = {};
+      headers.forEach((h, j) => { obj[h] = cells[j] ?? ''; });
+      rows.push(obj);
+    }
+    return { headers, rows };
+  };
+
   const processFile = useCallback((file: File) => {
     setIsProcessing(true);
     setFileName(file.name);
@@ -128,55 +174,118 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+        const result = e.target?.result;
 
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+        let headers: string[] = [];
+        let rows: ParsedRow[] = [];
 
-        if (jsonData.length < 2) {
-          showToast('File kosong atau tidak ada data!', 'error');
-          setIsProcessing(false);
-          return;
+        if (file.name.endsWith('.csv')) {
+          const text = typeof result === 'string' ? result : new TextDecoder().decode(result as ArrayBuffer);
+          const textResult = parseRawText(text);
+          headers = textResult.headers;
+          rows = textResult.rows;
         }
 
-        // Cari baris header yang mengandung kata kunci yang dikenal
-        const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
-        let headerRowIndex = -1;
+        if (rows.length === 0) {
+          const data = new Uint8Array(result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          let jsonData: any[][] = [];
 
-        for (let i = 0; i < Math.min(jsonData.length, 10); i++) {
-          const row = jsonData[i] as any[];
-          if (!row) continue;
-          const rowText = row.map(c => String(c || '').toLowerCase().trim()).join(' ');
-          const matchCount = headerKeywords.filter(kw => rowText.includes(kw)).length;
-          if (matchCount >= 3) {
-            headerRowIndex = i;
-            break;
+          let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
+          let bestCount = 0;
+          for (const sheetName of workbook.SheetNames) {
+            const sheet = workbook.Sheets[sheetName];
+            const sheetData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' }) as any[][];
+            const nonEmptyRows = sheetData.filter(r => r && r.some(c => String(c || '').trim() !== ''));
+            if (nonEmptyRows.length > bestCount) {
+              bestCount = nonEmptyRows.length;
+              bestSheet = sheet;
+            }
           }
+
+          jsonData = XLSX.utils.sheet_to_json(bestSheet, { header: 1, defval: '' }) as any[][];
+
+          const range = XLSX.utils.decode_range(bestSheet['!ref'] || 'A1');
+          for (let r = range.s.r; r <= range.e.r; r++) {
+            for (let c = range.s.c; c <= range.e.c; c++) {
+              const addr = XLSX.utils.encode_cell({ r, c });
+              const cell = bestSheet[addr];
+              if (cell && cell.l && cell.l.Target) {
+                if (jsonData[r]) {
+                  jsonData[r][c] = cell.l.Target;
+                }
+              }
+            }
+          }
+
+          if (jsonData.length < 2) {
+            for (const sn of workbook.SheetNames) {
+              const sd = XLSX.utils.sheet_to_json(workbook.Sheets[sn], { header: 1, defval: '' }) as any[][];
+              jsonData.push(...sd);
+            }
+          }
+
+          if (jsonData.length < 2) {
+            showToast('File kosong atau tidak ada data!', 'error');
+            setIsProcessing(false);
+            return;
+          }
+
+          const headerKeywords = ['tahun', 'year', 'uraian', 'deskripsi', 'tanggal', 'date', 'jenis', 'type', 'arsip', 'archive', 'link', 'keterangan', 'note', 'no', 'nomor'];
+          let headerRowIndex = -1;
+
+          for (let i = 0; i < Math.min(jsonData.length, 50); i++) {
+            const row = jsonData[i] as any[];
+            if (!row) continue;
+            const rowText = row.map(c => String(c || '').toLowerCase().trim()).join(' ');
+            const matchCount = headerKeywords.filter(kw => rowText.includes(kw)).length;
+            if (matchCount >= 2) {
+              headerRowIndex = i;
+              break;
+            }
+          }
+
+          if (headerRowIndex === -1) {
+            for (let i = 0; i < Math.min(jsonData.length, 20); i++) {
+              const row = jsonData[i] as any[];
+              if (!row) continue;
+              const nonEmpty = row.filter((c: any) => String(c || '').trim() !== '').length;
+              if (nonEmpty >= 2) {
+                headerRowIndex = i;
+                break;
+              }
+            }
+          }
+
+          if (headerRowIndex === -1) {
+            headerRowIndex = 0;
+          }
+
+          const rawHeaders = (jsonData[headerRowIndex] as any[]).map((h, i) => {
+            const val = String(h || '').trim();
+            return val || `Kolom ${i + 1}`;
+          });
+          let lastNonEmpty = rawHeaders.length - 1;
+          while (lastNonEmpty >= 0 && !rawHeaders[lastNonEmpty] || rawHeaders[lastNonEmpty]?.startsWith('Kolom ')) lastNonEmpty--;
+          if (lastNonEmpty < 0) lastNonEmpty = rawHeaders.length - 1;
+          headers = rawHeaders.slice(0, lastNonEmpty + 1);
+
+          rows = jsonData.slice(headerRowIndex + 1)
+            .filter((row: any) => {
+              return row && row.some((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
+            })
+            .map((row: any) => {
+              const obj: ParsedRow = {};
+              headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
+              return obj;
+            });
         }
 
-        if (headerRowIndex === -1) {
+        if (headers.length === 0 || rows.length === 0) {
           showToast('Tidak dapat menemukan baris header di file!', 'error');
           setIsProcessing(false);
           return;
         }
-
-        const rawHeaders = (jsonData[headerRowIndex] as any[]).map(h => String(h || '').trim());
-        
-        // Filter kolom kosong di akhir
-        let lastNonEmpty = rawHeaders.length - 1;
-        while (lastNonEmpty >= 0 && !rawHeaders[lastNonEmpty]) lastNonEmpty--;
-        const headers = rawHeaders.slice(0, lastNonEmpty + 1);
-
-        const rows = jsonData.slice(headerRowIndex + 1)
-          .filter((row: any) => {
-            return row && row.some((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
-          })
-          .map((row: any) => {
-            const obj: ParsedRow = {};
-            headers.forEach((h, i) => { obj[h] = row[i] ?? ''; });
-            return obj;
-          });
 
         setRawHeaders(headers);
         setRawRows(rows);
@@ -218,22 +327,58 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
     e.target.value = '';
   };
 
+  const extractYear = (val: any): string => {
+    if (!val) return new Date().getFullYear().toString();
+    if (val instanceof Date) return val.getFullYear().toString();
+    const str = String(val).trim();
+    const yearMatch = str.match(/(\d{4})/);
+    return yearMatch ? yearMatch[1] : new Date().getFullYear().toString();
+  };
+
+  const normalizeDate = (val: any): string => {
+    if (!val) return '';
+    if (val instanceof Date) return val.toISOString().slice(0, 10);
+    const str = String(val).trim();
+    if (!str) return '';
+    const numVal = Number(str);
+    if (!isNaN(numVal) && numVal > 30000 && numVal < 60000 && String(numVal) === str) {
+      const utcDays = Math.floor(numVal - 25569);
+      const d = new Date(utcDays * 86400 * 1000);
+      return d.toISOString().slice(0, 10);
+    }
+    return str;
+  };
+
+  const mapRow = (row: ParsedRow, idx: number): MappedData => ({
+    no: mapping.no ? (parseInt(String(row[mapping.no])) || idx + 1) : idx + 1,
+    tahun: mapping.tahun ? extractYear(row[mapping.tahun]) : new Date().getFullYear().toString(),
+    uraian: mapping.uraian ? String(row[mapping.uraian] || '') : '',
+    tanggal: mapping.tanggal ? normalizeDate(row[mapping.tanggal]) : '',
+    tanggalDiundangkan: mapping.tanggalDiundangkan ? normalizeDate(row[mapping.tanggalDiundangkan]) : '',
+    jenisDokumen: mapping.jenisDokumen ? String(row[mapping.jenisDokumen] || '') : '',
+    arsip: mapping.arsip ? parseArsipValue(row[mapping.arsip]) : true,
+    ketArsip: mapping.ketArsip ? String(row[mapping.ketArsip] || '') : '',
+    ketLain: mapping.ketLain ? String(row[mapping.ketLain] || '') : '',
+    linkFile: mapping.linkFile ? String(row[mapping.linkFile] || '').trim() : '',
+  });
+
   const getMappedPreview = (): MappedData[] => {
-    return rawRows.slice(0, 100).map((row, idx) => ({
-      no: mapping.no ? (parseInt(String(row[mapping.no])) || idx + 1) : idx + 1,
-      tahun: mapping.tahun ? String(row[mapping.tahun] || '') : new Date().getFullYear().toString(),
-      uraian: mapping.uraian ? String(row[mapping.uraian] || '') : '',
-      tanggal: mapping.tanggal ? String(row[mapping.tanggal] || '') : '',
-      tanggalDiundangkan: mapping.tanggalDiundangkan ? String(row[mapping.tanggalDiundangkan] || '') : '',
-      jenisDokumen: mapping.jenisDokumen ? String(row[mapping.jenisDokumen] || '') : '',
-      arsip: mapping.arsip ? parseArsipValue(row[mapping.arsip]) : true,
-      ketArsip: mapping.ketArsip ? String(row[mapping.ketArsip] || '') : '',
-      ketLain: mapping.ketLain ? String(row[mapping.ketLain] || '') : '',
-    }));
+    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
+  };
+
+  const getAllMappedData = (): MappedData[] => {
+    return rawRows.map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
+  };
+
+  const getFilteredRowCount = (): number => {
+    return rawRows.filter(row => {
+      const uraianVal = mapping.uraian ? String(row[mapping.uraian] || '').trim() : '';
+      return uraianVal !== '';
+    }).length;
   };
 
   const handleImport = () => {
-    const data = getMappedPreview();
+    const data = getAllMappedData();
     if (data.length === 0) {
       showToast('Tidak ada data untuk diimport!', 'error');
       return;
@@ -386,7 +531,17 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
               <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-3">
                 <CheckCircle2 size={16} className="text-emerald-600" />
                 <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                  {getMappedPreview().length} data siap diimport
+                  {getAllMappedData().length} data valid siap diimport
+                  {rawRows.length > getAllMappedData().length && (
+                    <span className="text-xs font-normal text-emerald-600/70 dark:text-emerald-400/70 ml-1">
+                      (dari {rawRows.length} baris, {rawRows.length - getAllMappedData().length} baris kosong/tanpa uraian dibuang)
+                    </span>
+                  )}
+                  {getAllMappedData().length > 100 && (
+                    <span className="text-xs font-normal text-emerald-600/70 dark:text-emerald-400/70 ml-1">
+                      (menampilkan 100 dari {getAllMappedData().length})
+                    </span>
+                  )}
                 </span>
               </div>
 
@@ -401,6 +556,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Jenis</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Arsip</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Ket Arsip</th>
+                      <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Link File</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -423,6 +579,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
                           )}
                         </td>
                         <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{item.ketArsip || '-'}</td>
+                        <td className="px-3 py-2 text-gray-500 dark:text-slate-400 max-w-[150px] truncate">{item.linkFile ? <a href={item.linkFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.linkFile}</a> : '-'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -464,7 +621,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
               className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors text-sm"
             >
               <CheckCircle2 size={14} />
-              Import {getMappedPreview().length} Data
+              Import {getAllMappedData().length} Data
             </button>
           )}
         </div>
