@@ -432,7 +432,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
   const handleShare = (item: ProdukHukumItem) => {
     const params = new URLSearchParams(window.location.search);
     const tenant = params.get('tenant') || window.location.hostname.split('.')[0];
-    const shareUrl = `${window.location.origin}/?tenant=${tenant}&tab=produk_hukum&sk=${item.id}`;
+    const shareUrl = `${window.location.origin}/?tenant=${tenant}&tab=sk_kades&sk_id=${item.id}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
       showToast('Link sharing berhasil disalin ke clipboard!', 'success');
     }).catch(() => {

@@ -60,6 +60,7 @@ const KioskKtpScanner = React.lazy(() => import('./components/KioskKtpScanner'))
 const SaasLandingPage = React.lazy(() => import('./components/SaasLandingPage'));
 const ResidentLogin = React.lazy(() => import('./components/portal/ResidentLogin'));
 const ResidentDashboard = React.lazy(() => import('./components/portal/ResidentDashboard'));
+const PublicSkKades = React.lazy(() => import('./components/portal/PublicSkKades'));
 
 // Lazy-loaded dashboard components
 const TransparansiDana = React.lazy(() => import('./components/dashboard/TransparansiDana'));
@@ -518,6 +519,9 @@ export default function App() {
     return <><KioskKtpScanner /><ToastContainer /></>;
   }
   
+  if (tabParam === 'sk_kades' && urlParams.get('sk_id')) {
+    return <><Suspense fallback={<LazyLoader />}><PublicSkKades onBack={() => { window.location.search = ''; }} /></Suspense><ToastContainer /></>;
+  }
   if (tabParam === 'kios') {
     return <><PublicKiosPortal /><ToastContainer /></>;
   }
