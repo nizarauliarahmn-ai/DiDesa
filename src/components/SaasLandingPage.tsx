@@ -659,30 +659,24 @@ function FeatureCard({ icon, title, desc, bg, image, imageAlt }: {
   return (
     <div className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:shadow-xl hover:shadow-emerald-900/5 transition-all group overflow-hidden">
       {image && (
-        <div className="relative w-full aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden">
-          <img 
-            src={image} 
-            alt={imageAlt || title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const parent = target.parentElement;
-              if (parent) {
-                parent.innerHTML = `
-                  <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3 opacity-50">
-                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-                      <circle cx="9" cy="9" r="2"/>
-                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-                    </svg>
-                    <span class="text-xs font-medium">Screenshot / GIF</span>
-                    <span class="text-[10px] opacity-70 mt-1">${title}</span>
-                  </div>
-                `;
-              }
-            }}
-          />
+        <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden p-4 pb-0">
+          <div className="w-full h-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
+            <div className="h-6 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
+              <span className="w-2 h-2 rounded-full bg-red-400"></span>
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="w-2 h-2 rounded-full bg-green-400"></span>
+              <span className="ml-2 text-[9px] text-slate-400 font-medium truncate">sistemdidesa.id</span>
+            </div>
+            <img 
+              src={image} 
+              alt={imageAlt || title}
+              className="w-full h-[calc(100%-1.5rem)] object-cover object-top group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+            />
+          </div>
         </div>
       )}
       <div className="p-8">
