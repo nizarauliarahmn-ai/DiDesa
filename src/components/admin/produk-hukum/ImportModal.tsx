@@ -201,7 +201,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
           const headerKeywords = ['tahun', 'uraian', 'tanggal', 'jenis', 'arsip', 'link', 'keterangan', 'no'];
           let headerRowIndex = -1;
 
-          for (let i = 0; i < Math.min(jsonData.length, 10); i++) {
+          for (let i = 0; i < Math.min(jsonData.length, 50); i++) {
             const row = jsonData[i] as any[];
             if (!row) continue;
             const rowText = row.map(c => String(c || '').toLowerCase().trim()).join(' ');
