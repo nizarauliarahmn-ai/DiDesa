@@ -437,41 +437,30 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                   : `https://${tenant.domain}.sistemdidesa.id`;
 
                 return (
-                  <div 
+                  <a 
                     key={tenant.id}
-                    className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-3xl border border-gray-200/60 dark:border-slate-700/60 hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group"
+                    href={targetUrl}
+                    className="block bg-slate-50 dark:bg-slate-800/60 p-5 rounded-3xl border border-gray-200/60 dark:border-slate-700/60 hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 group"
                   >
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="w-12 h-12 flex items-center justify-center">
-                          {tenant.logo_url ? (
-                            <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain" />
-                          ) : (
-                            <Building2 className="text-slate-400" size={24} />
-                          )}
-                        </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 p-2">
+                        {tenant.logo_url ? (
+                          <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain" />
+                        ) : (
+                          <Building2 className="text-slate-400" size={28} />
+                        )}
                       </div>
-
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors">
-                        {tenant.nama_desa}
-                      </h3>
-                      
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                        <MapPin size={12} className="text-slate-400 shrink-0" />
-                        <span>{getKabupatenName(tenant)}</span>
-                      </p>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors truncate">
+                          {tenant.nama_desa}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                          <MapPin size={11} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{getKabupatenName(tenant)}</span>
+                        </p>
+                      </div>
                     </div>
-
-                    <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
-                      <a
-                        href={targetUrl}
-                        className="w-full py-2.5 px-4 bg-white dark:bg-slate-900 hover:bg-emerald-600 hover:text-white border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2 group-hover:shadow-md"
-                      >
-                        <span>Kunjungi Portal</span>
-                        <ExternalLink size={14} />
-                      </a>
-                    </div>
-                  </div>
+                  </a>
                 );
               })}
             </div>
