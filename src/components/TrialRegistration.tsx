@@ -73,6 +73,7 @@ export default function TrialRegistration({ onBack, onSuccess }: TrialRegistrati
       trialEnd.setDate(trialEnd.getDate() + 14);
 
       const tenantPayload = {
+        kode_desa: cleanDomain,
         nama_desa: `DiDesa ${form.namaDesa}`,
         domain: cleanDomain,
         admin_email: form.email,
