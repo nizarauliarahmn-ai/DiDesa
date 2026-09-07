@@ -269,6 +269,8 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                 title="Persuratan Otomatis & TTE"
                 desc="Generasi surat keterangan dengan KOP resmi dan Tanda Tangan Elektronik ber-QR Code otomatis."
                 bg="bg-blue-50 dark:bg-blue-900/10"
+                image="/fitur-persuratan.png"
+                imageAlt="Tampilan pembuatan surat otomatis DiDesa"
               />
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
@@ -277,6 +279,8 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                 title="Buku Keuangan & Bansos"
                 desc="Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran."
                 bg="bg-emerald-50 dark:bg-emerald-900/10"
+                image="/fitur-keuangan.png"
+                imageAlt="Tampilan keuangan desa DiDesa"
               />
             </motion.div>
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
@@ -285,6 +289,8 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                 title="Layanan Mandiri & Kiosk"
                 desc="Portal mandiri (Kiosk) bagi warga untuk cetak surat, buku tamu, hingga lapor aspirasi secara swadaya."
                 bg="bg-rose-50 dark:bg-rose-900/10"
+                image="/fitur-kiosk.png"
+                imageAlt="Tampilan kiosk layanan mandiri DiDesa"
               />
             </motion.div>
           </motion.div>
@@ -659,16 +665,52 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
   );
 }
 
-function FeatureCard({ icon, title, desc, bg }: { icon: React.ReactNode, title: string, desc: string, bg: string }) {
+function FeatureCard({ icon, title, desc, bg, image, imageAlt }: { 
+  icon: React.ReactNode, 
+  title: string, 
+  desc: string, 
+  bg: string,
+  image?: string,
+  imageAlt?: string
+}) {
   return (
-    <div className="bg-white dark:bg-slate-800/50 p-8 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:shadow-xl hover:shadow-emerald-900/5 transition-all group">
-      <div className={`w-14 h-14 ${bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-        {icon}
+    <div className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:shadow-xl hover:shadow-emerald-900/5 transition-all group overflow-hidden">
+      {image && (
+        <div className="relative w-full aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden">
+          <img 
+            src={image} 
+            alt={imageAlt || title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+              const parent = target.parentElement;
+              if (parent) {
+                parent.innerHTML = `
+                  <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3 opacity-50">
+                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                      <circle cx="9" cy="9" r="2"/>
+                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    </svg>
+                    <span class="text-xs font-medium">Screenshot / GIF</span>
+                    <span class="text-[10px] opacity-70 mt-1">${title}</span>
+                  </div>
+                `;
+              }
+            }}
+          />
+        </div>
+      )}
+      <div className="p-8">
+        <div className={`w-14 h-14 ${bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+          {icon}
+        </div>
+        <h3 className="text-xl font-bold mb-3">{title}</h3>
+        <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
+          {desc}
+        </p>
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
-        {desc}
-      </p>
     </div>
   );
 }
