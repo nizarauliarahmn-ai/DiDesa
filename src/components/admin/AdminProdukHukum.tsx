@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ProdukHukumDashboard from './produk-hukum/ProdukHukumDashboard';
 import ProdukHukumPerdes from './produk-hukum/ProdukHukumPerdes';
+import ProdukHukumSK from './produk-hukum/ProdukHukumSK';
 import ProdukHukumCategory from './produk-hukum/ProdukHukumCategory';
 
 type SubTab = 'dashboard' | 'perdes' | 'sk_kades' | 'perkades' | 'mou_pks' | 'skb' | 'berita_acara' | 'piagam';
@@ -15,7 +16,7 @@ export default function AdminProdukHukum() {
       case 'perdes':
         return <ProdukHukumPerdes onBack={() => setActiveSubTab('dashboard')} />;
       case 'sk_kades':
-        return <ProdukHukumCategory kategori="sk_kades" onBack={() => setActiveSubTab('dashboard')} />;
+        return <ProdukHukumSK onBack={() => setActiveSubTab('dashboard')} />;
       case 'perkades':
         return <ProdukHukumCategory kategori="perkades" onBack={() => setActiveSubTab('dashboard')} />;
       case 'mou_pks':
