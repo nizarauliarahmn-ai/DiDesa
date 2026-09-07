@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { PlusCircle, Search, Edit3, Trash2, FileText, X, AlertTriangle, ArrowLeft, Upload, Eye, Printer, ExternalLink, Download } from 'lucide-react';
+import { PlusCircle, Search, Edit3, Trash2, FileText, X, AlertTriangle, ArrowLeft, Upload, Eye, Printer, Link2, Download, Share2 } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
@@ -429,6 +429,17 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
     }, 500);
   };
 
+  const handleShare = (item: ProdukHukumItem) => {
+    const params = new URLSearchParams(window.location.search);
+    const tenant = params.get('tenant') || window.location.hostname.split('.')[0];
+    const shareUrl = `${window.location.origin}/?tenant=${tenant}&tab=produk_hukum&sk=${item.id}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Link sharing berhasil disalin ke clipboard!', 'success');
+    }).catch(() => {
+      prompt('Salin link ini:', shareUrl);
+    });
+  };
+
   const handleDownloadTemplate = () => {
     const headers = ['NO', 'TAHUN', 'NAMA PRODUK HUKUM', 'TANGGAL', 'JENIS DOKUMEN', 'ARSIP (TRUE/FALSE)', 'KET ARSIP', 'KET LAIN', 'LINK FILE'];
     const sampleRows = [
@@ -629,7 +640,7 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                       {item.linkFile ? (
                         <a href={item.linkFile} target="_blank" rel="noopener noreferrer"
                           className="inline-flex items-center text-blue-500 hover:text-blue-700 transition-colors" title="Buka Link">
-                          <ExternalLink size={13} />
+                          <Link2 size={13} />
                         </a>
                       ) : <span className="text-gray-300 dark:text-slate-600">-</span>}
                     </td>
@@ -644,6 +655,10 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
                         <button onClick={() => { setEditingItem(item); setShowModal(true); }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Edit">
                           <Edit3 size={14} />
+                        </button>
+                        <button onClick={() => handleShare(item)}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors" title="Share Kartu SK">
+                          <Share2 size={14} />
                         </button>
                         <button onClick={() => setShowDeleteConfirm(item.id)}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors" title="Hapus">
