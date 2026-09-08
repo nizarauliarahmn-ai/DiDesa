@@ -264,16 +264,16 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   };
 
   const handleDownloadTemplate = () => {
-    const headers = ['NO', 'TAHUN', 'URAIAN', 'TANGGAL', 'KETERANGAN', 'LINK FILE'];
+    const headers = ['TAHUN', 'URAIAN', 'TANGGAL', 'KETERANGAN', 'LINK FILE'];
     const sampleRows = [
-      [1, 2026, 'Berita Acara Serah Terima Jabatan Kepala Desa', '2026-01-15', 'Serah terima periode 2021-2026', ''],
-      [2, 2026, 'Berita Acara Rapat Musyawarah Desa', '2026-02-10', 'Pembahasan APBDesa', ''],
-      [3, 2026, 'Berita Acara Peresmian Balai Desa', '2026-03-01', 'Peresmian gedung baru', ''],
+      [2026, 'Berita Acara Serah Terima Jabatan Kepala Desa', '2026-01-15', 'Serah terima periode 2021-2026', ''],
+      [2026, 'Berita Acara Rapat Musyawarah Desa', '2026-02-10', 'Pembahasan APBDesa', ''],
+      [2026, 'Berita Acara Peresmian Balai Desa', '2026-03-01', 'Peresmian gedung baru', ''],
     ];
     const wsData = [headers, ...sampleRows];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     ws['!cols'] = [
-      { wch: 5 }, { wch: 6 }, { wch: 45 }, { wch: 12 }, { wch: 35 }, { wch: 50 },
+      { wch: 6 }, { wch: 45 }, { wch: 12 }, { wch: 35 }, { wch: 50 },
     ];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Template Berita Acara');
@@ -304,7 +304,6 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
     const tglCetak = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const rows = itemsWithNumbers.map((item) => `
       <tr>
-        <td style="text-align:center;font-weight:bold;font-size:10px">${item.displayNo}</td>
         <td style="text-align:center;font-size:10px">${item.tahun}</td>
         <td style="font-size:10px">${item.uraian || '-'}</td>
         <td style="text-align:center;font-size:10px">${formatDateDisplay(item.tanggal)}</td>
@@ -315,7 +314,7 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
       <style>body{font-family:Arial,sans-serif;font-size:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px}th{background:#f0f0f0}</style></head><body>
       <h2 style="text-align:center">DAFTAR BERITA ACARA</h2>
       <p style="text-align:center;color:#666">Total: ${itemsWithNumbers.length} dokumen • Dicetak: ${tglCetak}</p>
-      <table><thead><tr><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Keterangan</th></tr></thead><tbody>${rows}</tbody></table>
+      <table><thead><tr><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Keterangan</th></tr></thead><tbody>${rows}</tbody></table>
       <script>window.onload=function(){window.print();window.close()}<\/script></body></html>`);
     printWindow.document.close();
   };
@@ -469,13 +468,6 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
                     />
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
-                    onClick={() => { if (sortField === 'no') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('no'); setSortDir('asc'); } }}>
-                    <span className="inline-flex items-center gap-0.5">
-                      No
-                      {sortField === 'no' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
-                    </span>
-                  </th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
                     onClick={() => { if (sortField === 'tahun') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('tahun'); setSortDir('asc'); } }}>
                     <span className="inline-flex items-center gap-0.5">
                       Tahun
@@ -505,16 +497,6 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
                         }}
                         className="w-3.5 h-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                       />
-                    </td>
-                    <td className="px-2 py-2 font-bold text-gray-900 dark:text-white">
-                      <div className="flex items-center">
-                        {item.displayNo}
-                        {duplicateMap[`${item.tahun}_${item.no}`] > 1 && originalDocsMap.get(`${item.tahun}_${item.no}`) !== item.id && (
-                          <span className="ml-1.5 inline-flex items-center px-1 py-0.5 rounded text-[9px] font-medium bg-amber-100 text-amber-800 border border-amber-200 print:hidden" title="Nomor dokumen ini ganda / sisipan">
-                            Sisipan
-                          </span>
-                        )}
-                      </div>
                     </td>
                     <td className="px-2 py-2 text-gray-700 dark:text-slate-300 font-semibold text-[11px]">{item.tahun}</td>
                     <td className="px-2 py-2">

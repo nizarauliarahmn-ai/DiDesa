@@ -117,10 +117,6 @@ export default function PublicBeritaAcara({ onBack }: { onBack: () => void }) {
           </div>
           <div className="px-6 py-5 space-y-4">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Nomor</p>
-              <p className="text-sm font-bold text-slate-800">{ba.no || '-'}</p>
-            </div>
-            <div>
               <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Tahun</p>
               <p className="text-sm font-bold text-slate-800">{ba.tahun || '-'}</p>
             </div>
