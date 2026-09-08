@@ -378,11 +378,11 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
   });
 
   const getMappedPreview = (): MappedData[] => {
-    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '' && item.tahun.trim() !== '');
+    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
   };
 
   const getAllMappedData = (): MappedData[] => {
-    return rawRows.map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '' && item.tahun.trim() !== '');
+    return rawRows.map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
   };
 
   const getFilteredRowCount = (): number => {
@@ -589,12 +589,16 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
                     </tr>
                   </thead>
                   <tbody>
-                    {getMappedPreview().map((item, i) => (
-                      <tr key={i} className="border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30">
+                    {getMappedPreview().map((item, i) => {
+                      const needsReview = (!item.no && kategori === 'berita_acara') || !item.tahun;
+                      return (
+                      <tr key={i} className={`border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 ${needsReview ? 'bg-amber-50/60 dark:bg-amber-900/10' : ''}`}>
                         {kategori !== 'berita_acara' && (
                           <td className="px-3 py-2 font-bold text-gray-900 dark:text-white">{item.no}</td>
                         )}
-                        <td className="px-3 py-2 text-gray-700 dark:text-slate-300">{item.tahun}</td>
+                        <td className="px-3 py-2 text-gray-700 dark:text-slate-300">
+                          {item.tahun || <span className="text-amber-600 font-semibold">Perlu diisi</span>}
+                        </td>
                         <td className="px-3 py-2 text-gray-900 dark:text-white max-w-[200px] truncate">{item.uraian || '-'}</td>
                         <td className="px-3 py-2 text-gray-600 dark:text-slate-400 whitespace-nowrap">{item.tanggal || '-'}</td>
                         {kategori !== 'berita_acara' && (
@@ -617,7 +621,8 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
                         <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{item.ketLain || '-'}</td>
                         <td className="px-3 py-2 text-gray-500 dark:text-slate-400 max-w-[150px] truncate">{item.linkFile ? <a href={item.linkFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.linkFile}</a> : '-'}</td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

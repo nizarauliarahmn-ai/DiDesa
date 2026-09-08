@@ -25,6 +25,7 @@ interface ProdukHukumItem {
   createdAt: string;
   noManual?: boolean;
   importOrder?: number;
+  needsReview?: boolean;
 }
 
 const JENIS_DOKUMEN_BA = [
@@ -320,14 +321,17 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   };
 
   const handleImport = (importedData: any[]) => {
-    const filtered = importedData.filter(row => row.tahun && row.tahun.trim() !== '');
     const byYear: Record<string, number> = {};
-    const newItems: ProdukHukumItem[] = filtered.map((row) => {
-      const thn = row.tahun;
-      byYear[thn] = (byYear[thn] || 0) + 1;
+    const newItems: ProdukHukumItem[] = importedData.map((row) => {
+      const thn = row.tahun || '';
+      if (thn) {
+        byYear[thn] = (byYear[thn] || 0) + 1;
+      }
+      const noEmpty = !row.no || row.no === 0;
+      const tahunEmpty = !thn;
       return {
         id: generateId(),
-        no: row.no || byYear[thn],
+        no: row.no || (thn ? byYear[thn] : 0),
         tahun: thn,
         uraian: row.uraian || row.nama_produk_hukum || '',
         tanggal: row.tanggal || '',
@@ -342,16 +346,18 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
         createdAt: new Date().toISOString(),
         noManual: false,
         importOrder: items.length,
+        needsReview: noEmpty || tahunEmpty,
       };
     });
     if (newItems.length === 0) {
-      showToast('Tidak ada data valid untuk diimport (tahun wajib diisi)!', 'error');
+      showToast('Tidak ada data untuk diimport!', 'error');
       return;
     }
     const merged = [...items, ...newItems];
     setItems(merged);
     saveData(merged);
-    showToast(`${newItems.length} data berhasil diimport!${importedData.length - newItems.length > 0 ? ` (${importedData.length - newItems.length} baris tanpa tahun dibuang)` : ''}`, 'success');
+    const reviewCount = newItems.filter(i => i.needsReview).length;
+    showToast(`${newItems.length} data berhasil diimport!${reviewCount > 0 ? ` (${reviewCount} baris perlu diedit)` : ''}`, 'success');
   };
 
   return (
@@ -493,7 +499,7 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
               </thead>
               <tbody>
                 {paginatedItems.map((item) => (
-                  <tr key={item.id} className={`border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.has(item.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`}>
+                  <tr key={item.id} className={`border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 transition-colors ${item.needsReview ? 'bg-amber-50/60 dark:bg-amber-900/10' : ''} ${selectedIds.has(item.id) ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}`}>
                     <td className="px-2 py-2 text-center">
                       <input
                         type="checkbox"
@@ -510,7 +516,14 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
                     </td>
                     <td className="px-2 py-2 text-gray-700 dark:text-slate-300 font-semibold text-[11px]">{item.tahun}</td>
                     <td className="px-2 py-2">
-                      <p className="text-gray-900 dark:text-white font-medium text-[11px] whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-gray-900 dark:text-white font-medium text-[11px] whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
+                        {item.needsReview && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-300 whitespace-nowrap print:hidden" title="Baris ini perlu diedit: No atau Tahun kosong">
+                            Perlu Edit
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggal)}</td>
                     <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap truncate max-w-[120px]" title={item.ketLain}>{item.ketLain || '-'}</td>
