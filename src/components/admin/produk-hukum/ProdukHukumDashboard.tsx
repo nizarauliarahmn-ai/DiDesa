@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Scale, FileText, TrendingUp, Archive, ChevronRight, FileCheck, ScrollText, Handshake, ClipboardList, Award } from 'lucide-react';
+import { Scale, FileText, TrendingUp, TrendingDown, Archive, ChevronRight, FileCheck, ScrollText, Handshake, ClipboardList, Award, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 type SubTab = 'dashboard' | 'perdes' | 'sk_kades' | 'perkades' | 'mou_pks' | 'skb' | 'berita_acara' | 'piagam';
@@ -80,7 +80,26 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
     });
     recentItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    return { totalDokumen, totalArsip, perKategori, tahunList, jumlahPerTahun, recentItems: recentItems.slice(0, 5) };
+    const sortedTahun = Array.from(tahunSet).sort((a, b) => b.localeCompare(a));
+    const tahunIni = sortedTahun[0] || '';
+    const tahunLalu = sortedTahun[1] || '';
+    const jumlahTahunIni = jumlahPerTahun[tahunIni] || 0;
+    const jumlahTahunLalu = jumlahPerTahun[tahunLalu] || 0;
+    const selisih = jumlahTahunLalu > 0 ? ((jumlahTahunIni - jumlahTahunLalu) / jumlahTahunLalu) * 100 : jumlahTahunIni > 0 ? 100 : 0;
+
+    const arsipTahunIni = Object.values(allData).reduce((sum, items) => sum + items.filter(i => i.tahun === tahunIni && i.arsip).length, 0);
+    const arsipTahunLalu = Object.values(allData).reduce((sum, items) => sum + items.filter(i => i.tahun === tahunLalu && i.arsip).length, 0);
+    const selisihArsip = arsipTahunLalu > 0 ? ((arsipTahunIni - arsipTahunLalu) / arsipTahunLalu) * 100 : arsipTahunIni > 0 ? 100 : 0;
+
+    const pertumbuhanPerKategori = perKategori.map(kat => {
+      const items = allData[kat.key] || [];
+      const countIni = items.filter(i => i.tahun === tahunIni).length;
+      const countLalu = items.filter(i => i.tahun === tahunLalu).length;
+      const growth = countLalu > 0 ? ((countIni - countLalu) / countLalu) * 100 : countIni > 0 ? 100 : 0;
+      return { ...kat, countIni, countLalu, growth };
+    }).filter(kat => kat.count > 0);
+
+    return { totalDokumen, totalArsip, perKategori, tahunList, jumlahPerTahun, recentItems: recentItems.slice(0, 5), tahunIni, tahunLalu, jumlahTahunIni, jumlahTahunLalu, selisih, arsipTahunIni, arsipTahunLalu, selisihArsip, pertumbuhanPerKategori };
   }, [allData]);
 
   return (
@@ -138,6 +157,91 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
           </div>
         </div>
       </div>
+
+      {/* Pertumbuhan Tahunan */}
+      {stats.tahunIni && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pertumbuhan {stats.tahunIni} vs {stats.tahunLalu || '-'}</h3>
+            {stats.tahunLalu && (
+              <span className="text-[10px] text-gray-400 dark:text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded-lg">{stats.tahunLalu} → {stats.tahunIni}</span>
+            )}
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Total Dokumen */}
+            <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Total Dokumen</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-gray-900 dark:text-white">{stats.jumlahTahunIni}</span>
+                <span className="text-xs text-gray-400 dark:text-slate-500">dok</span>
+              </div>
+              {stats.tahunLalu && (
+                <div className="flex items-center gap-1 mt-2">
+                  {stats.selisih > 0 ? (
+                    <ArrowUpRight size={14} className="text-emerald-600" />
+                  ) : stats.selisih < 0 ? (
+                    <ArrowDownRight size={14} className="text-red-500" />
+                  ) : (
+                    <Minus size={14} className="text-gray-400" />
+                  )}
+                  <span className={`text-xs font-bold ${stats.selisih > 0 ? 'text-emerald-600' : stats.selisih < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                    {stats.selisih > 0 ? '+' : ''}{stats.selisih.toFixed(0)}%
+                  </span>
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500">vs {stats.tahunLalu}</span>
+                </div>
+              )}
+            </div>
+            {/* Arsip */}
+            <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4">
+              <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Bersifat Arsip</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-black text-gray-900 dark:text-white">{stats.arsipTahunIni}</span>
+                <span className="text-xs text-gray-400 dark:text-slate-500">dok</span>
+              </div>
+              {stats.tahunLalu && (
+                <div className="flex items-center gap-1 mt-2">
+                  {stats.selisihArsip > 0 ? (
+                    <ArrowUpRight size={14} className="text-emerald-600" />
+                  ) : stats.selisihArsip < 0 ? (
+                    <ArrowDownRight size={14} className="text-red-500" />
+                  ) : (
+                    <Minus size={14} className="text-gray-400" />
+                  )}
+                  <span className={`text-xs font-bold ${stats.selisihArsip > 0 ? 'text-emerald-600' : stats.selisihArsip < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                    {stats.selisihArsip > 0 ? '+' : ''}{stats.selisihArsip.toFixed(0)}%
+                  </span>
+                  <span className="text-[10px] text-gray-400 dark:text-slate-500">vs {stats.tahunLalu}</span>
+                </div>
+              )}
+            </div>
+            {/* Per Kategori (top 2) */}
+            {stats.pertumbuhanPerKategori.slice(0, 2).map(kat => (
+              <div key={kat.key} className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4">
+                <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">{kat.label}</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-black text-gray-900 dark:text-white">{kat.countIni}</span>
+                  <span className="text-xs text-gray-400 dark:text-slate-500">dok</span>
+                </div>
+                {stats.tahunLalu && (
+                  <div className="flex items-center gap-1 mt-2">
+                    {kat.growth > 0 ? (
+                      <ArrowUpRight size={14} className="text-emerald-600" />
+                    ) : kat.growth < 0 ? (
+                      <ArrowDownRight size={14} className="text-red-500" />
+                    ) : (
+                      <Minus size={14} className="text-gray-400" />
+                    )}
+                    <span className={`text-xs font-bold ${kat.growth > 0 ? 'text-emerald-600' : kat.growth < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                      {kat.growth > 0 ? '+' : ''}{kat.growth.toFixed(0)}%
+                    </span>
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500">vs {stats.tahunLalu}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Kategori Cards */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none p-6">
