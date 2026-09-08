@@ -705,14 +705,10 @@ function AddEditModal({ item, onSave, onClose, getNoUrut }: {
   onClose: () => void;
   getNoUrut: (tahun: string) => number;
 }) {
-  const [tahun, setTahun] = useState(item?.tahun || new Date().getFullYear().toString());
+  const [tahun, setTahun] = useState(item?.tahun || '');
   const [no, setNo] = useState(item?.no?.toString() || '');
   const [uraian, setUraian] = useState(item?.uraian || '');
   const [tanggal, setTanggal] = useState(item?.tanggal || '');
-  const [tanggalDiundangkan, setTanggalDiundangkan] = useState(item?.tanggalDiundangkan || '');
-  const [jenisDokumen, setJenisDokumen] = useState(item?.jenisDokumen || 'BERITA ACARA');
-  const [arsip, setArsip] = useState(item?.arsip ?? false);
-  const [ketArsip, setKetArsip] = useState(item?.ketArsip || '');
   const [ketLain, setKetLain] = useState(item?.ketLain || '');
   const [linkFile, setLinkFile] = useState(item?.linkFile || '');
   const [noManual, setNoManual] = useState(item?.noManual ?? false);
@@ -724,25 +720,33 @@ function AddEditModal({ item, onSave, onClose, getNoUrut }: {
       no: enteredNo,
       uraian,
       tanggal,
-      tanggalDiundangkan,
-      jenisDokumen,
-      arsip,
-      ketArsip,
+      tanggalDiundangkan: item?.tanggalDiundangkan || '',
+      jenisDokumen: item?.jenisDokumen || 'BERITA ACARA',
+      arsip: item?.arsip ?? true,
+      ketArsip: item?.ketArsip || '',
       ketLain,
       linkFile,
       documentData: item?.documentData || null,
       documentName: item?.documentName || '',
       noManual: noManual,
+      needsReview: false,
     });
   };
+
+  const isNeedsReview = item?.needsReview;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-xl">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            {item ? 'Edit Berita Acara' : 'Tambah Berita Acara'}
-          </h3>
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              {item ? 'Edit Berita Acara' : 'Tambah Berita Acara'}
+            </h3>
+            {isNeedsReview && (
+              <p className="text-xs text-amber-600 mt-0.5">Baris ini perlu diperbaiki: No atau Tahun kosong</p>
+            )}
+          </div>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
             <X size={20} className="text-gray-400" />
           </button>
@@ -750,42 +754,30 @@ function AddEditModal({ item, onSave, onClose, getNoUrut }: {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Tahun</label>
+              <label className="block text-xs font-bold text-gray-500 mb-1">Tahun <span className="text-red-500">*</span></label>
               <input type="text" value={tahun} onChange={(e) => setTahun(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
+                placeholder="Contoh: 2025"
+                className={`w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${!tahun ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-slate-700'}`} />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">No</label>
               <input type="number" value={no} onChange={(e) => setNo(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
+                placeholder="Nomor urut"
+                className={`w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${!no ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-slate-700'}`} />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Uraian *</label>
+            <label className="block text-xs font-bold text-gray-500 mb-1">Uraian <span className="text-red-500">*</span></label>
             <input type="text" value={uraian} onChange={(e) => setUraian(e.target.value)}
               className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Tanggal</label>
-              <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Tgl Diundangkan</label>
-              <input type="date" value={tanggalDiundangkan} onChange={(e) => setTanggalDiundangkan(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 mb-1">Tanggal</label>
+            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Jenis Dokumen</label>
-            <select value={jenisDokumen} onChange={(e) => setJenisDokumen(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
-              {JENIS_DOKUMEN_BA.map(j => <option key={j} value={j}>{j}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Keterangan Lain</label>
+            <label className="block text-xs font-bold text-gray-500 mb-1">Keterangan</label>
             <input type="text" value={ketLain} onChange={(e) => setKetLain(e.target.value)}
               className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
           </div>
@@ -794,13 +786,6 @@ function AddEditModal({ item, onSave, onClose, getNoUrut }: {
             <input type="url" value={linkFile} onChange={(e) => setLinkFile(e.target.value)}
               placeholder="https://..."
               className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
-          </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={arsip} onChange={(e) => setArsip(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500" />
-              <span className="text-sm text-gray-600 dark:text-slate-400">Bersifat Arsip</span>
-            </label>
           </div>
         </div>
         <div className="flex gap-2 justify-end mt-6">
