@@ -128,19 +128,9 @@ export default function PublicBeritaAcara({ onBack }: { onBack: () => void }) {
               <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Uraian</p>
               <p className="text-sm text-slate-700 leading-relaxed">{ba.uraian || '-'}</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Tanggal</p>
-                <p className="text-sm text-slate-700">{formatDate(ba.tanggal)}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Tgl Diundangkan</p>
-                <p className="text-sm text-slate-700">{formatDate(ba.tanggalDiundangkan)}</p>
-              </div>
-            </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Jenis Dokumen</p>
-              <p className="text-sm font-medium text-slate-700">{ba.jenisDokumen || '-'}</p>
+              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Tanggal</p>
+              <p className="text-sm text-slate-700">{formatDate(ba.tanggal)}</p>
             </div>
             {ba.ketLain && (
               <div>
