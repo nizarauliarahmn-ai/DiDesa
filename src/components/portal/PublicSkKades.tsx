@@ -145,17 +145,25 @@ export default function PublicSkKades({ onBack }: { onBack: () => void }) {
             )}
           </div>
           <div className="px-6 py-4 border-t border-gray-100 flex flex-wrap gap-3">
-            {sk.linkFile && (
+            {sk.linkFile ? (
               <a href={sk.linkFile} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
                 <Link2 size={15} /> Buka Link
               </a>
+            ) : (
+              <span className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed">
+                <Link2 size={15} /> Tidak ada link
+              </span>
             )}
-            {sk.documentData && (
+            {sk.documentData ? (
               <button onClick={handleDownloadDocument}
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-medium hover:bg-emerald-100 transition-colors">
                 <Download size={15} /> Unduh Dokumen
               </button>
+            ) : (
+              <span className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed">
+                <Download size={15} /> Tidak ada dokumen
+              </span>
             )}
           </div>
         </div>
