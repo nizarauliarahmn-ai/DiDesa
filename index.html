@@ -35,6 +35,9 @@
         } else if (tab === 'perdes' && perdesId) {
           title = 'Detail Peraturan Desa | DiDesa';
           description = 'Buka tautan ini untuk melihat detail Peraturan Desa (Perdes), dasar penetapan, dan lampiran dokumen hukum desa.';
+        } else if (tab === 'berita_acara' && params.get('ba_id')) {
+          title = 'Detail Berita Acara | DiDesa';
+          description = 'Buka tautan ini untuk melihat detail Berita Acara desa, tanggal pelaksanaan, dan lampiran dokumen.';
         }
         document.title = title;
         var metaOgTitle = document.querySelector('meta[property="og:title"]');

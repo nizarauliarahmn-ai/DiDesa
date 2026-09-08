@@ -1,0 +1,832 @@
+[
+  {
+    "id": "notif-1788058162675",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. gfndggngfn (NIK: 13214214234234) otomatis didaftarkan melalui pembuatan surat Pembuatan Surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-30T02:49:22.675+00:00",
+    "is_read": false
+  },
+  {
+    "id": "notif-1788058163051",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. sdrgnfgnfgnfgn (NIK: 23535346346346) otomatis didaftarkan melalui pembuatan surat Pembuatan Surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-30T02:49:23.051+00:00",
+    "is_read": false
+  },
+  {
+    "id": "notif-1786405619780",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Diperbarui",
+    "message": "Data penduduk Maulida Hasanah (NIK: 6306064503100001) telah diperbarui.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-10T23:46:59.78+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785121325864",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama Nadhif (NIK: ) mengajukan SK USAHA.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-27T03:02:05.864+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785379506381",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama aaaa (NIK: ) mengajukan SK KEPEMILIKAN TANAH.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-30T02:45:06.381+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785483670539",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Baru Ditambahkan",
+    "message": "Penduduk baru TES (NIK: 1234567890123454) telah ditambahkan.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-31T07:41:10.539+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784703480131",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk ABD. MUHID (NIK: 6306060203600003) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T06:58:00.131+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787803906520",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. BUDI SUDARSONO (NIK: 3201011105840005) otomatis didaftarkan melalui pembuatan surat Pembuatan Surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-27T04:11:46.52+00:00",
+    "is_read": false
+  },
+  {
+    "id": "notif-1788058163444",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. bdbsgbdb (NIK: BAYI-20260830024923) otomatis didaftarkan melalui pembuatan surat Pembuatan Surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-30T02:49:23.444+00:00",
+    "is_read": false
+  },
+  {
+    "id": "notif-1788503082601",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Indeks Kepuasan Baru",
+    "message": "Warga memberikan penilaian rata-rata 5 bintang: \"2\"",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-09-04T06:24:42.601+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787543345546",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. MUHAMMAD FATHAN RIZQI (NIK: 6306010505920002) otomatis didaftarkan melalui pembuatan surat Pembuatan Surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-24T03:49:05.546+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787273338733",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Siap Diterbitkan",
+    "message": "Arliyandi telah menandatangani SURAT KETERANGAN PINDAH di Kios.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-08-21T00:48:58.733+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787022386988",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk TES (NIK: 1234567890123454) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-18T03:06:26.988+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787022393283",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk etawa (NIK: 4563267123457345) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-18T03:06:33.283+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705739803",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk TES 2 (NIK: 5436785435678906) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:39.803+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785209318116",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "PAHRINAWATI telah hadir. Keperluan: Urusan Tanah / Aset",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-28T03:28:38.116+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705741278",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk TES 3 (NIK: 1987456783123456) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:41.278+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705743096",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk TES 5 (NIK: 1254367854567840) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:43.096+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785379667012",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama aaaa (NIK: ) mengajukan SK KEPEMILIKAN TANAH.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-30T02:47:47.012+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784861316030",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Test",
+    "message": "Test message",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-24T02:48:36.917101+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784861481744",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "T",
+    "message": "M",
+    "category": "C",
+    "time": null,
+    "timestamp": "2026-07-24T02:51:21.744+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705744645",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk TES 3 (NIK: 1234567890123456) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:44.645+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785559446092",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk Sunda (NIK: 1234567890123456) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-01T04:44:06.092+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1786165858411",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk etawa (NIK: 4563267123457345) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-08T05:10:58.411+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1786170967354",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk TES (NIK: 1234567890123454) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-08T06:36:07.354+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-chat-1786509331251",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Balasan Tiket Bantuan",
+    "message": "SaaS Admin merespon tiket Anda: \"tes 2\".",
+    "category": "Assistance",
+    "time": null,
+    "timestamp": "2026-08-12T04:35:31.251+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705335135",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Baru Ditambahkan",
+    "message": "Penduduk baru TES 3 (NIK: 1987456783123456) telah ditambahkan.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:28:55.135+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705708368",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Baru Ditambahkan",
+    "message": "Penduduk baru TES 5 (NIK: 1254367854567840) telah ditambahkan.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:08.368+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705717482",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk TES 2 (NIK: 5436785435678906) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:17.482+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705719365",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk TES 3 (NIK: 1987456783123456) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:19.365+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705721206",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk TES 5 (NIK: 1254367854567840) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:21.206+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705723034",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk TES 3 (NIK: 1234567890123456) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:23.034+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784864720506",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Aspirasi Kios: Pelayanan Publik Desa",
+    "message": "Tes mengirim pengaduan/aspirasi: \"Hhjj Bu h tubuh nggk\"",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-24T03:45:20.506+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784958367079",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Nizar telah hadir. Keperluan: Mengurus Surat Keterangan",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-25T05:46:07.079+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784959736709",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Nizar telah hadir. Keperluan: Kunjungan Dinas",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-25T06:08:56.709+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787894664793",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. - (NIK: 1234567890123456) otomatis didaftarkan melalui pembuatan surat Surat Pengantar Nikah.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-28T05:24:24.793+00:00",
+    "is_read": false
+  },
+  {
+    "id": "notif-1784703639282",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk ABD. MUHID (NIK: 6306060203600003) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:00:39.282+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1786166040476",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. erny (NIK: 6306060107140005) telah ditambahkan ke Data Penduduk melalui form surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-08T05:14:00.476+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-chat-1786507707387",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Balasan Tiket Bantuan",
+    "message": "SaaS Admin merespon tiket Anda: \"tes\".",
+    "category": "Assistance",
+    "time": null,
+    "timestamp": "2026-08-12T04:08:27.387+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787190296584",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Layanan Mandiri",
+    "message": "Warga atas nama ARLIYANDI (NIK: 6306060410960002) mengajukan SURAT KETERANGAN PINDAH untuk keperluan: Pindah domisili ikut isteri",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-08-20T01:44:56.584+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705726886",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk tes (NIK: 1111111111111111) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:26.886+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705732076",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Dipulihkan",
+    "message": "Data penduduk ABD. MUHID (NIK: 6306060203600003) telah dipulihkan (Restore) dari Tong Sampah.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:32.076+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785899905754",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama ANITA NOVIA ARIANTI (NIK: 6306064601920001) mengajukan SURAT PERJALANAN DINAS.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-08-05T03:18:25.754+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785457306474",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Saleh telah hadir. Keperluan: Mengurus Surat Keterangan",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-31T00:21:46.474+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787022391471",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk erny (NIK: 6306060107140005) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-18T03:06:31.471+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787796290865",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. SRIE HELMALIA (NIK: 6306026009030001) otomatis didaftarkan melalui pembuatan surat Pembuatan Surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-27T02:04:50.865+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785113026070",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama Miniyartie (NIK: ) mengajukan SK USAHA.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-27T00:43:46.07+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785113260171",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Agus telah hadir. Keperluan: Kunjungan Dinas",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-27T00:47:40.172+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1788406790735",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Bambang Sosilo telah hadir. Keperluan: Kunjungan Dinas",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-09-03T03:39:50.735+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787196798005",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Hss Bhx telah hadir. Keperluan: Mengurus Surat Keterangan",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-08-20T03:33:18.005+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785379940362",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama bbbbb (NIK: ) mengajukan SK KEPEMILIKAN TANAH.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-30T02:52:20.362+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785290526781",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Adnan Ismail telah hadir. Keperluan: Lainnya",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-29T02:02:06.781+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784863204525",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama Tes (NIK: 1234567890123456) mengajukan SK DOMISILI PERORANGAN.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-24T03:20:04.525+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784863591424",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Aspirasi Kios: Infrastruktur & Fasilitas Umum",
+    "message": "Nizar mengirim pengaduan/aspirasi: \"Jsbdsnsxshbx s\"",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-24T03:26:31.424+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784703684848",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Baru Ditambahkan",
+    "message": "Penduduk baru tes (NIK: 1111111111111111) telah ditambahkan.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:01:24.848+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784704598849",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Baru Ditambahkan",
+    "message": "Penduduk baru TES (NIK: 0983452341023456) telah ditambahkan.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:16:38.849+00:00",
+    "is_read": true
+  },
+  {
+    "id": "test-1785372252766",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Test Log",
+    "message": "Test Message",
+    "category": "System",
+    "time": null,
+    "timestamp": "2026-07-30T00:44:12.863358+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1788042493954",
+    "tenant_id": "22222222-2222-2222-2222-222222222222",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk - (NIK: 1234567890123456) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-29T22:28:13.954+00:00",
+    "is_read": false
+  },
+  {
+    "id": "notif-1784705037849",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Baru Ditambahkan",
+    "message": "Penduduk baru TES 2 (NIK: 5436785435678906) telah ditambahkan.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:23:57.849+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705735549",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk tes (NIK: 1111111111111111) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:35.549+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705737095",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk TES (NIK: 0983452341023456) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:37.095+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785116663094",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Dcfgbb telah hadir. Keperluan: Bantuan Sosial",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-27T01:44:23.094+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1788610090229",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Indeks Kepuasan Baru",
+    "message": "Warga memberikan penilaian rata-rata 3.5 bintang: \"tes 2 tumbuh\"",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-09-05T12:08:10.229+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785116743594",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Sfdrghfdsgdfg telah hadir. Keperluan: Mengurus Surat Keterangan",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-27T01:45:43.594+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785116858365",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama Nizar (NIK: 885) mengajukan SK NIKAH.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-27T01:47:38.365+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787795104025",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Muhammad Khairur Rijal telah hadir. Keperluan: Lainnya",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-08-27T01:45:04.025+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1788226279319",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Nor Aisyah telah hadir. Keperluan: Silaturahmi",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-09-01T01:31:19.319+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785118865841",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama Nopi (NIK: ) mengajukan SK DOMISILI PERORANGAN.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-07-27T02:21:05.841+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784703646078",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Dipulihkan",
+    "message": "Data penduduk ABD. MUHID (NIK: 6306060203600003) telah dipulihkan (Restore) dari Tong Sampah.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:00:46.078+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784703650372",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk ABD. MUHID (NIK: 6306060203600003) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:00:50.372+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1786164844549",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. etawa (NIK: 4563267123457345) telah ditambahkan ke Data Penduduk melalui form surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-08T04:54:04.549+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1786684575477",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Diperbarui",
+    "message": "Data penduduk ANITA NOVIA ARIANTI (NIK: 6306064601920001) telah diperbarui.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-14T05:16:15.477+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784705724826",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Masuk Tong Sampah",
+    "message": "Data penduduk TES (NIK: 0983452341023456) dipindahkan ke Tong Sampah oleh Super Admin.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-07-22T07:35:24.826+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787107913194",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Penduduk Terdata Otomatis",
+    "message": "Warga a.n. MUHAMMAD ABDI FADILAH (NIK: 6306040512980002) otomatis didaftarkan melalui pembuatan surat Pembuatan Surat.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-19T02:51:53.194+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787274463401",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Permohonan Surat Kios",
+    "message": "Warga atas nama ARLIYANDI (NIK: 6306060410960002) mengajukan SK DOMISILI PERORANGAN.",
+    "category": "Services",
+    "time": null,
+    "timestamp": "2026-08-21T01:07:43.401+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787196915290",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Muhammad Faisal telah hadir. Keperluan: Kunjungan Dinas",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-08-20T03:35:15.291+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787022395011",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Data Penduduk Dihapus Permanen",
+    "message": "Data penduduk Sunda (NIK: 1234567890123456) telah dihapus permanen dari sistem.",
+    "category": "Residents",
+    "time": null,
+    "timestamp": "2026-08-18T03:06:35.011+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784962230578",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Dfvhhff telah hadir. Keperluan: Mengurus Surat Keterangan",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-25T06:50:30.578+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784963454167",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Idirdir telah hadir. Keperluan: Mengurus Surat Keterangan",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-25T07:10:54.167+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1787795229628",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Muhammad Khairur Rijal telah hadir. Keperluan: Urusan Administrasi",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-08-27T01:47:09.628+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1788226426454",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Hapipah Hayati telah hadir. Keperluan: Silaturahmi",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-09-01T01:33:46.454+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1784970962485",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Tes Di Luar Jam telah hadir. Keperluan: Mengurus Surat Keterangan",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-25T09:16:02.485+00:00",
+    "is_read": true
+  },
+  {
+    "id": "notif-1785112935942",
+    "tenant_id": "11111111-1111-1111-1111-111111111111",
+    "title": "Tamu Baru",
+    "message": "Mini telah hadir. Keperluan: Urusan Administrasi",
+    "category": "Buku Tamu",
+    "time": null,
+    "timestamp": "2026-07-27T00:42:15.942+00:00",
+    "is_read": true
+  }
+]

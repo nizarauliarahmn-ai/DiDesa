@@ -1,0 +1,54 @@
+[
+  {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "kode_desa": "63.06.05.2001",
+    "nama_desa": "Wasah Hilir",
+    "domain": "wasahhilir",
+    "status": "active",
+    "created_at": "2026-07-16T06:42:55.306687+00:00",
+    "admin_email": "admin@wasahhilir",
+    "admin_password": "wasah123",
+    "kades_email": "super@wasahhilir",
+    "kades_password": "super123",
+    "trial_end": null
+  },
+  {
+    "id": "8d77c17a-8812-441d-9edf-143a2fc021a0",
+    "kode_desa": "6306062010",
+    "nama_desa": "Wasah Hulu",
+    "domain": "wasahhulu",
+    "status": "active",
+    "created_at": "2026-07-30T00:59:15.357533+00:00",
+    "admin_email": "admin@wasahhulu",
+    "admin_password": "admin123",
+    "kades_email": "super@wasahhulu",
+    "kades_password": "super123",
+    "trial_end": null
+  },
+  {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "kode_desa": "00.00.00.0000",
+    "nama_desa": "Global SaaS",
+    "domain": null,
+    "status": "active",
+    "created_at": "2026-08-08T10:37:00.29926+00:00",
+    "admin_email": null,
+    "admin_password": null,
+    "kades_email": null,
+    "kades_password": null,
+    "trial_end": null
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "kode_desa": "32.01.01.2001",
+    "nama_desa": "Ketupat",
+    "domain": "ketupat",
+    "status": "active",
+    "created_at": "2026-07-16T06:42:55.306687+00:00",
+    "admin_email": "admin@ketupat",
+    "admin_password": "admin123",
+    "kades_email": "super@ketupat",
+    "kades_password": "super123",
+    "trial_end": null
+  }
+]

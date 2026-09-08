@@ -62,6 +62,7 @@ const ResidentLogin = React.lazy(() => import('./components/portal/ResidentLogin
 const ResidentDashboard = React.lazy(() => import('./components/portal/ResidentDashboard'));
 const PublicSkKades = React.lazy(() => import('./components/portal/PublicSkKades'));
 const PublicPerdes = React.lazy(() => import('./components/portal/PublicPerdes'));
+const PublicBeritaAcara = React.lazy(() => import('./components/portal/PublicBeritaAcara'));
 
 // Lazy-loaded dashboard components
 const TransparansiDana = React.lazy(() => import('./components/dashboard/TransparansiDana'));
@@ -525,6 +526,9 @@ export default function App() {
   }
   if (tabParam === 'perdes' && urlParams.get('perdes_id')) {
     return <><Suspense fallback={<LazyLoader />}><PublicPerdes onBack={() => { window.location.search = ''; }} /></Suspense><ToastContainer /></>;
+  }
+  if (tabParam === 'berita_acara' && urlParams.get('ba_id')) {
+    return <><Suspense fallback={<LazyLoader />}><PublicBeritaAcara onBack={() => { window.location.search = ''; }} /></Suspense><ToastContainer /></>;
   }
   if (tabParam === 'kios') {
     return <><PublicKiosPortal /><ToastContainer /></>;
