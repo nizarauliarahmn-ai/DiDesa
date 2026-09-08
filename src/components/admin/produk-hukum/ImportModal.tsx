@@ -571,9 +571,7 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
                 <table className="w-full text-xs">
                   <thead className="sticky top-0 bg-gray-50 dark:bg-slate-800">
                     <tr className="border-b border-gray-200 dark:border-slate-700">
-                      {kategori !== 'berita_acara' && (
-                        <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">No</th>
-                      )}
+                      <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">No</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Tahun</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Uraian</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Tanggal</th>
@@ -593,9 +591,9 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
                       const needsReview = (!item.no && kategori === 'berita_acara') || !item.tahun;
                       return (
                       <tr key={i} className={`border-b border-gray-50 dark:border-slate-800/50 hover:bg-gray-50/50 dark:hover:bg-slate-800/30 ${needsReview ? 'bg-amber-50/60 dark:bg-amber-900/10' : ''}`}>
-                        {kategori !== 'berita_acara' && (
-                          <td className="px-3 py-2 font-bold text-gray-900 dark:text-white">{item.no}</td>
-                        )}
+                        <td className="px-3 py-2 font-bold text-gray-900 dark:text-white">
+                          {item.no || <span className="text-amber-600 font-semibold">Perlu diisi</span>}
+                        </td>
                         <td className="px-3 py-2 text-gray-700 dark:text-slate-300">
                           {item.tahun || <span className="text-amber-600 font-semibold">Perlu diisi</span>}
                         </td>
