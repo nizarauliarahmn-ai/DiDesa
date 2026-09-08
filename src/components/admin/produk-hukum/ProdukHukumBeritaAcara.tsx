@@ -615,6 +615,7 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onImport={handleImport}
+        kategoriLabel="Berita Acara"
         kategori="berita_acara"
       />
 

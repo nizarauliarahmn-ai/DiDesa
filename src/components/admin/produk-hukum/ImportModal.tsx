@@ -100,9 +100,10 @@ interface ImportModalProps {
   onClose: () => void;
   onImport: (data: MappedData[]) => void;
   kategoriLabel: string;
+  kategori?: string;
 }
 
-export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }: ImportModalProps) {
+export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, kategori }: ImportModalProps) {
   const [step, setStep] = useState<'upload' | 'mapping' | 'preview'>('upload');
   const [fileName, setFileName] = useState('');
   const [rawHeaders, setRawHeaders] = useState<string[]>([]);
@@ -478,24 +479,30 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel }
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {(Object.keys(FIELD_LABELS) as (keyof ColumnMapping)[]).map((field) => (
-                  <div key={field}>
-                    <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">
-                      {FIELD_LABELS[field]}
-                      {REQUIRED_FIELDS.includes(field) && <span className="text-red-500 ml-0.5">*</span>}
-                    </label>
-                    <select
-                      value={mapping[field]}
-                      onChange={(e) => setMapping(prev => ({ ...prev, [field]: e.target.value }))}
-                      className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-                    >
-                      <option value="">-- Pilih Kolom --</option>
-                      {rawHeaders.map(h => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
+                {(Object.keys(FIELD_LABELS) as (keyof ColumnMapping)[]).map((field) => {
+                  const hideFields = kategori === 'berita_acara' 
+                    ? ['tanggalDiundangkan', 'jenisDokumen', 'arsip', 'ketArsip'] 
+                    : [];
+                  if (hideFields.includes(field)) return null;
+                  return (
+                    <div key={field}>
+                      <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1">
+                        {FIELD_LABELS[field]}
+                        {REQUIRED_FIELDS.includes(field) && <span className="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      <select
+                        value={mapping[field]}
+                        onChange={(e) => setMapping(prev => ({ ...prev, [field]: e.target.value }))}
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                      >
+                        <option value="">-- Pilih Kolom --</option>
+                        {rawHeaders.map(h => (
+                          <option key={h} value={h}>{h}</option>
+                        ))}
+                      </select>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Preview Mapping Result */}
