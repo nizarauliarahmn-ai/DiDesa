@@ -309,8 +309,6 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
         <td style="text-align:center;font-size:10px">${item.tahun}</td>
         <td style="font-size:10px">${item.uraian || '-'}</td>
         <td style="text-align:center;font-size:10px">${formatDateDisplay(item.tanggal)}</td>
-        <td style="text-align:center;font-size:10px">${formatDateDisplay(item.tanggalDiundangkan)}</td>
-        <td style="text-align:center;font-size:10px">${item.jenisDokumen || '-'}</td>
         <td style="font-size:10px">${item.ketLain || '-'}</td>
       </tr>
     `).join('');
@@ -318,7 +316,7 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
       <style>body{font-family:Arial,sans-serif;font-size:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #333;padding:4px}th{background:#f0f0f0}</style></head><body>
       <h2 style="text-align:center">DAFTAR BERITA ACARA</h2>
       <p style="text-align:center;color:#666">Total: ${itemsWithNumbers.length} dokumen • Dicetak: ${tglCetak}</p>
-      <table><thead><tr><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Tgl Diundangkan</th><th>Jenis</th><th>Ket Lain</th></tr></thead><tbody>${rows}</tbody></table>
+      <table><thead><tr><th>No</th><th>Tahun</th><th>Uraian</th><th>Tanggal</th><th>Keterangan</th></tr></thead><tbody>${rows}</tbody></table>
       <script>window.onload=function(){window.print();window.close()}<\/script></body></html>`);
     printWindow.document.close();
   };
@@ -487,9 +485,7 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[180px] whitespace-nowrap">Uraian</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tanggal</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Tgl Diundangkan</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[90px] whitespace-nowrap">Jenis</th>
-                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Ket Lain</th>
+                  <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider min-w-[100px] whitespace-nowrap">Keterangan</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-14 whitespace-nowrap">Link</th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-center px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider w-20 whitespace-nowrap sticky right-0 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">Aksi</th>
                 </tr>
@@ -526,12 +522,6 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
                       <p className="text-gray-900 dark:text-white font-medium text-[11px] whitespace-nowrap truncate max-w-[300px]" title={item.uraian}>{item.uraian || 'TANPA KETERANGAN'}</p>
                     </td>
                     <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggal)}</td>
-                    <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap">{formatDateDisplay(item.tanggalDiundangkan)}</td>
-                    <td className="px-2 py-2">
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800/50 whitespace-nowrap">
-                        {item.jenisDokumen || '-'}
-                      </span>
-                    </td>
                     <td className="px-2 py-2 text-gray-600 dark:text-slate-400 text-[11px] whitespace-nowrap truncate max-w-[120px]" title={item.ketLain}>{item.ketLain || '-'}</td>
                     <td className="px-2 py-2 text-center">
                       {item.linkFile ? (
