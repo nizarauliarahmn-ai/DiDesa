@@ -39,7 +39,7 @@ function getKabupatenName(tenant: any): string {
   return isKota ? `Kota ${clean}` : `Kabupaten ${clean}`;
 }
 
-export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () => void }) {
+export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLoginClick?: () => void; onTrialClick?: () => void }) {
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
   const [globalPhone, setGlobalPhone] = useState(() => localStorage.getItem('global_footer_phone') || '+6281346867519');
@@ -101,7 +101,7 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                 if (t.id && kabupatenMap[t.id]) {
                   t.kabupaten = kabupatenMap[t.id];
                 }
-                if (t.id && logoMap[t.id] && !t.logo_url) {
+                if (t.id && logoMap[t.id]) {
                   t.logo_url = logoMap[t.id];
                 }
               });
@@ -207,14 +207,8 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <button onClick={onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
-                <LayoutDashboard size={16} /> Masuk ke Dashboard Admin
-              </button>
-              <button 
-                onClick={() => setIsSearchModalOpen(true)} 
-                className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-6 py-3 rounded-xl font-bold text-sm border border-gray-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600 transition-all shadow-sm hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Search size={16} /> Cari Portal Desa Saya
+              <button onClick={onTrialClick || onLoginClick} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                <LayoutDashboard size={22} /> Coba Gratis
               </button>
             </div>
             
@@ -254,40 +248,85 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
             <p className="text-slate-500 dark:text-slate-400">Dirancang khusus sesuai standar administrasi pemerintahan desa di Indonesia, dengan antarmuka yang sangat mudah dipahami.</p>
           </div>
 
-          <motion.div 
-            className="grid md:grid-cols-3 gap-8"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              visible: { transition: { staggerChildren: 0.15 } }
-            }}
-          >
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
-              <FeatureCard 
-                icon={<FileText size={28} className="text-blue-500" />}
-                title="Persuratan Otomatis & TTE"
-                desc="Generasi surat keterangan dengan KOP resmi dan Tanda Tangan Elektronik ber-QR Code otomatis."
-                bg="bg-blue-50 dark:bg-blue-900/10"
-              />
+          <div className="space-y-8">
+            {/* Fitur 1 - Persuratan */}
+            <motion.div 
+              className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                <img 
+                  src="/fitur-persuratan.png" 
+                  alt="Tampilan pembuatan surat otomatis DiDesa"
+                  className="w-full h-auto"
+                />
+              </div>
+              <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
+                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <FileText size={28} className="text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">Persuratan Otomatis & TTE</h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">Generasi surat keterangan dengan KOP resmi dan Tanda Tangan Elektronik ber-QR Code otomatis.</p>
+                </div>
+              </div>
             </motion.div>
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
-              <FeatureCard 
-                icon={<PieChart size={28} className="text-emerald-500" />}
-                title="Buku Keuangan & Bansos"
-                desc="Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran."
-                bg="bg-emerald-50 dark:bg-emerald-900/10"
-              />
+
+            {/* Fitur 2 - Keuangan */}
+            <motion.div 
+              className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                <img 
+                  src="/fitur-keuangan.png" 
+                  alt="Tampilan keuangan desa DiDesa"
+                  className="w-full h-auto"
+                />
+              </div>
+              <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
+                <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <PieChart size={28} className="text-emerald-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">Buku Keuangan & Bansos</h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">Manajemen kas desa, laporan realisasi APBDes, serta penyaluran bantuan sosial tepat sasaran.</p>
+                </div>
+              </div>
             </motion.div>
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }}>
-              <FeatureCard 
-                icon={<ShieldCheck size={28} className="text-rose-500" />}
-                title="Layanan Mandiri & Kiosk"
-                desc="Portal mandiri (Kiosk) bagi warga untuk cetak surat, buku tamu, hingga lapor aspirasi secara swadaya."
-                bg="bg-rose-50 dark:bg-rose-900/10"
-              />
+
+            {/* Fitur 3 - Kiosk */}
+            <motion.div 
+              className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 overflow-hidden shadow-sm hover:shadow-xl transition-all"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="relative w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 overflow-hidden">
+                <img 
+                  src="/fitur-kiosk.png" 
+                  alt="Tampilan kiosk layanan mandiri DiDesa"
+                  className="w-full h-auto"
+                />
+              </div>
+              <div className="p-8 md:p-10 flex flex-col md:flex-row items-start gap-6">
+                <div className="w-14 h-14 bg-rose-50 dark:bg-rose-900/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <ShieldCheck size={28} className="text-rose-500" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3">Layanan Mandiri & Kiosk</h3>
+                  <p className="text-slate-500 dark:text-slate-400 leading-relaxed">Portal mandiri (Kiosk) bagi warga untuk cetak surat, buku tamu, hingga lapor aspirasi secara swadaya.</p>
+                </div>
+              </div>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </motion.section>
 
@@ -431,44 +470,30 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
                   : `https://${tenant.domain}.sistemdidesa.id`;
 
                 return (
-                  <div 
+                  <a 
                     key={tenant.id}
-                    className="bg-slate-50 dark:bg-slate-800/60 p-6 rounded-3xl border border-gray-200/60 dark:border-slate-700/60 hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group"
+                    href={targetUrl}
+                    className="block bg-slate-50 dark:bg-slate-800/60 p-5 rounded-3xl border border-gray-200/60 dark:border-slate-700/60 hover:shadow-xl hover:border-emerald-500/50 transition-all duration-300 group"
                   >
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <div 
-                          className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md p-1"
-                          style={{ backgroundColor: globalColor }}
-                        >
-                          {tenant.logo_url ? (
-                            <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain rounded-xl" />
-                          ) : (
-                            <Building2 className="text-white" size={24} />
-                          )}
-                        </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 shrink-0 flex items-center justify-center rounded-2xl bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 p-2">
+                        {tenant.logo_url ? (
+                          <img src={tenant.logo_url} alt={tenant.nama_desa} className="w-full h-full object-contain" />
+                        ) : (
+                          <Building2 className="text-slate-400" size={28} />
+                        )}
                       </div>
-
-                      <h3 className="font-bold text-lg text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors">
-                        {tenant.nama_desa}
-                      </h3>
-                      
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
-                        <MapPin size={12} className="text-slate-400 shrink-0" />
-                        <span>{getKabupatenName(tenant)}</span>
-                      </p>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-base text-slate-900 dark:text-white leading-tight group-hover:text-emerald-600 transition-colors truncate">
+                          {tenant.nama_desa}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
+                          <MapPin size={11} className="text-slate-400 shrink-0" />
+                          <span className="truncate">{getKabupatenName(tenant)}</span>
+                        </p>
+                      </div>
                     </div>
-
-                    <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-slate-700/50">
-                      <a
-                        href={targetUrl}
-                        className="w-full py-2.5 px-4 bg-white dark:bg-slate-900 hover:bg-emerald-600 hover:text-white border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-2 group-hover:shadow-md"
-                      >
-                        <span>Kunjungi Portal</span>
-                        <ExternalLink size={14} />
-                      </a>
-                    </div>
-                  </div>
+                  </a>
                 );
               })}
             </div>
@@ -662,16 +687,46 @@ export default function SaasLandingPage({ onLoginClick }: { onLoginClick?: () =>
   );
 }
 
-function FeatureCard({ icon, title, desc, bg }: { icon: React.ReactNode, title: string, desc: string, bg: string }) {
+function FeatureCard({ icon, title, desc, bg, image, imageAlt }: { 
+  icon: React.ReactNode, 
+  title: string, 
+  desc: string, 
+  bg: string,
+  image?: string,
+  imageAlt?: string
+}) {
   return (
-    <div className="bg-white dark:bg-slate-800/50 p-8 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:shadow-xl hover:shadow-emerald-900/5 transition-all group">
-      <div className={`w-14 h-14 ${bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-        {icon}
+    <div className="bg-white dark:bg-slate-800/50 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:shadow-xl hover:shadow-emerald-900/5 transition-all group overflow-hidden">
+      {image && (
+        <div className="relative w-full aspect-[16/10] bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden p-4 pb-0">
+          <div className="w-full h-full rounded-t-xl overflow-hidden border border-slate-200 dark:border-slate-600 shadow-lg bg-white dark:bg-slate-900">
+            <div className="h-6 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 px-3 border-b border-slate-200 dark:border-slate-700">
+              <span className="w-2 h-2 rounded-full bg-red-400"></span>
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="w-2 h-2 rounded-full bg-green-400"></span>
+              <span className="ml-2 text-[9px] text-slate-400 font-medium truncate">sistemdidesa.id</span>
+            </div>
+            <img 
+              src={image} 
+              alt={imageAlt || title}
+              className="w-full h-[calc(100%-1.5rem)] object-cover object-top group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <div className="p-8">
+        <div className={`w-14 h-14 ${bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+          {icon}
+        </div>
+        <h3 className="text-xl font-bold mb-3">{title}</h3>
+        <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
+          {desc}
+        </p>
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-slate-500 dark:text-slate-400 leading-relaxed text-sm">
-        {desc}
-      </p>
     </div>
   );
 }

@@ -896,7 +896,7 @@ export default function AdminTenants() {
 
                         {/* Status */}
                         <td className="px-6 py-4 text-center">
-                          <div className="flex flex-col items-center justify-center">
+                          <div className="flex flex-col items-center justify-center gap-1.5">
                             {tenant.status !== 'inactive' ? (
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold tracking-wide uppercase">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -905,6 +905,18 @@ export default function AdminTenants() {
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold tracking-wide uppercase">
                                 Suspend
+                              </span>
+                            )}
+                            {tenant.trial_end && (
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide ${
+                                new Date(tenant.trial_end) > new Date() 
+                                  ? 'bg-blue-100 text-blue-700' 
+                                  : 'bg-red-100 text-red-600'
+                              }`}>
+                                {new Date(tenant.trial_end) > new Date() 
+                                  ? `Trial sisa ${Math.ceil((new Date(tenant.trial_end).getTime() - Date.now()) / 86400000)}h`
+                                  : 'Trial expired'
+                                }
                               </span>
                             )}
                           </div>

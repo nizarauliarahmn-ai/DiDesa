@@ -10,6 +10,7 @@ import WaNotificationManager from './components/common/WaNotificationManager';
 import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
 import Login from './components/Login';
+const TrialRegistration = React.lazy(() => import('./components/TrialRegistration'));
 import TenantNotFound from './components/TenantNotFound';
 import TenantPending from './components/TenantPending';
 import Footer from './components/common/Footer';
@@ -191,6 +192,7 @@ export default function App() {
   });
   const [showResidentLogin, setShowResidentLogin] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showTrialRegistration, setShowTrialRegistration] = useState(false);
 
   const [view, setView] = useUrlSync<'public' | 'admin'>('mode', 'public', () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -593,9 +595,25 @@ export default function App() {
     );
   }
 
+  // Full screen trial registration — harus sebelum landing page
+  if (showTrialRegistration && !user) {
+    return (
+      <Suspense fallback={<LazyLoader />}>
+        <TrialRegistration
+          onBack={() => setShowTrialRegistration(false)}
+          onSuccess={(domain) => {
+            setShowTrialRegistration(false);
+            setShowAdminLogin(true);
+          }}
+        />
+        <ToastContainer />
+      </Suspense>
+    );
+  }
+
   // Jika kita di domain utama dan di mode publik, tampilkan SaaS Landing Page (Portal Pusat PT)
   if (view === 'public' && isRootDomain && tabParam !== 'verifikasi' && tabParam !== 'verifikasi_surat') {
-    return <SaasLandingPage onLoginClick={() => setView('admin')} />;
+    return <SaasLandingPage onLoginClick={() => setView('admin')} onTrialClick={() => setShowTrialRegistration(true)} />;
   }
 
   // Determine if the user is in a "busy" state where reloading would cause data loss

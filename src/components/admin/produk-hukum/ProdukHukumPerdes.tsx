@@ -145,7 +145,14 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
 
         if (data && data.value && isMounted) {
           const all = JSON.parse(data.value);
-          const serverItems = all[KATEGORI_KEY] || [];
+          const serverItems: ProdukHukumItem[] = all[KATEGORI_KEY] || [];
+          const urlRegex = /^https?:\/\//i;
+          serverItems.forEach(item => {
+            if (item.ketLain && !item.linkFile && urlRegex.test(item.ketLain.trim())) {
+              item.linkFile = item.ketLain.trim();
+              item.ketLain = '';
+            }
+          });
           // Merge: prioritize server data, but keep any local-only items
           const localItems = loadData();
           const localIds = new Set(localItems.map(i => i.id));
@@ -292,22 +299,32 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   };
 
   const handleImport = (importedData: any[]) => {
-    const newItems: ProdukHukumItem[] = importedData.map(row => ({
-      id: generateId(),
-      no: row.no || 0,
-      tahun: row.tahun || new Date().getFullYear().toString(),
-      uraian: row.uraian || '',
-      tanggal: row.tanggal || '',
-      tanggalDiundangkan: row.tanggalDiundangkan || '',
-      jenisDokumen: row.jenisDokumen || '',
-      arsip: row.arsip ?? true,
-      ketArsip: row.ketArsip || '',
-      ketLain: row.ketLain || '',
-      documentData: null,
-      documentName: '',
-      createdAt: new Date().toISOString(),
-      noManual: false,
-    }));
+    const newItems: ProdukHukumItem[] = importedData.map(row => {
+      let ketLain = row.ketLain || '';
+      let linkFile = row.linkFile || '';
+      const urlRegex = /^https?:\/\//i;
+      if (ketLain && !linkFile && urlRegex.test(ketLain.trim())) {
+        linkFile = ketLain.trim();
+        ketLain = '';
+      }
+      return {
+        id: generateId(),
+        no: row.no || 0,
+        tahun: row.tahun || new Date().getFullYear().toString(),
+        uraian: row.uraian || '',
+        tanggal: row.tanggal || '',
+        tanggalDiundangkan: row.tanggalDiundangkan || '',
+        jenisDokumen: row.jenisDokumen || '',
+        arsip: row.arsip ?? true,
+        ketArsip: row.ketArsip || '',
+        ketLain,
+        linkFile,
+        documentData: null,
+        documentName: '',
+        createdAt: new Date().toISOString(),
+        noManual: false,
+      };
+    });
     const updated = [...items, ...newItems];
     setItems(updated);
     saveData(updated);
