@@ -264,17 +264,16 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   };
 
   const handleDownloadTemplate = () => {
-    const headers = ['NO', 'TAHUN', 'URAIAN', 'TANGGAL', 'TGL DIUNDANGKAN', 'JENIS DOKUMEN', 'KET LAIN', 'LINK FILE'];
+    const headers = ['NO', 'TAHUN', 'URAIAN', 'TANGGAL', 'KETERANGAN', 'LINK FILE'];
     const sampleRows = [
-      [1, 2026, 'Berita Acara Serah Terima Jabatan Kepala Desa', '2026-01-15', '2026-01-20', 'BERITA ACARA SERAH TERIMA', 'Serah terima periode 2021-2026', ''],
-      [2, 2026, 'Berita Acara Rapat Musyawarah Desa', '2026-02-10', '2026-02-15', 'BERITA ACARA RAPAT', 'Pembahasan APBDesa', ''],
-      [3, 2026, 'Berita Acara Peresmian Balai Desa', '2026-03-01', '2026-03-05', 'BERITA ACARA LAINNYA', 'Peresmian gedung baru', ''],
+      [1, 2026, 'Berita Acara Serah Terima Jabatan Kepala Desa', '2026-01-15', 'Serah terima periode 2021-2026', ''],
+      [2, 2026, 'Berita Acara Rapat Musyawarah Desa', '2026-02-10', 'Pembahasan APBDesa', ''],
+      [3, 2026, 'Berita Acara Peresmian Balai Desa', '2026-03-01', 'Peresmian gedung baru', ''],
     ];
     const wsData = [headers, ...sampleRows];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     ws['!cols'] = [
-      { wch: 5 }, { wch: 6 }, { wch: 45 }, { wch: 12 },
-      { wch: 16 }, { wch: 25 }, { wch: 35 }, { wch: 50 },
+      { wch: 5 }, { wch: 6 }, { wch: 45 }, { wch: 12 }, { wch: 35 }, { wch: 50 },
     ];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Template Berita Acara');
