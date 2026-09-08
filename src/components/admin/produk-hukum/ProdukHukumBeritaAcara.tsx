@@ -575,11 +575,12 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <span>Menampilkan {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
               <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                className="px-2 py-1 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
-                {[10, 15, 25, 50, 100].map(n => <option key={n} value={n}>{n}/hal</option>)}
+                className="px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                {[10, 15, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
               </select>
+              <span>data</span>
+              <span className="ml-2">Menampilkan {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, itemsWithNumbers.length)} dari {itemsWithNumbers.length}</span>
             </div>
             <div className="flex items-center gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage <= 1}
