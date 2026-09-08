@@ -95,6 +95,19 @@ function parseArsipValue(val: any): boolean {
   return str === 'TRUE' || str === 'YA' || str === '1' || str === 'BENAR';
 }
 
+function formatPreviewDate(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'number' && val > 30000 && val < 60000) {
+    const d = new Date((val - 25569) * 86400 * 1000);
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}/.test(val)) {
+    const d = new Date(val);
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  return String(val);
+}
+
 interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -520,9 +533,10 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
                     <tbody>
                       {rawRows.slice(0, 5).map((row, i) => (
                         <tr key={i} className="border-b border-gray-100 dark:border-slate-800">
-                          {rawHeaders.slice(0, 6).map(h => (
-                            <td key={h} className="px-2 py-1 text-gray-700 dark:text-slate-300 max-w-[120px] truncate">{String(row[h] || '')}</td>
-                          ))}
+                          {rawHeaders.slice(0, 6).map(h => {
+                            const isDateCol = ['tanggal', 'tgl', 'date', 'diundangkan', 'undang', 'waktu', 'penetapan'].some(k => h.toLowerCase().includes(k));
+                            return <td key={h} className="px-2 py-1 text-gray-700 dark:text-slate-300 max-w-[120px] truncate">{isDateCol ? formatPreviewDate(row[h]) : String(row[h] || '')}</td>;
+                          })}
                         </tr>
                       ))}
                     </tbody>
