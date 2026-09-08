@@ -714,8 +714,11 @@ function AddEditModal({ item, onSave, onClose, getNoUrut }: {
   const [linkFile, setLinkFile] = useState(item?.linkFile || '');
   const [noManual, setNoManual] = useState(item?.noManual ?? false);
 
+  const autoNo = tahun ? getNoUrut(tahun) : 1;
+  const displayNo = no || (item ? '' : `Otomatis: ${autoNo}`);
+
   const handleSubmit = () => {
-    const enteredNo = parseInt(no) || 0;
+    const enteredNo = parseInt(no) || (!item ? autoNo : 0);
     onSave({
       tahun,
       no: enteredNo,
@@ -763,8 +766,11 @@ function AddEditModal({ item, onSave, onClose, getNoUrut }: {
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">No</label>
               <input type="number" value={no} onChange={(e) => setNo(e.target.value)}
-                placeholder="Nomor urut"
+                placeholder={tahun ? `Otomatis: ${autoNo}` : 'Isi Tahun dulu'}
                 className={`w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${!no ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-slate-700'}`} />
+              {!no && tahun && (
+                <p className="text-[10px] text-amber-600 mt-1">Kosongkan untuk nomor otomatis: <strong>{autoNo}</strong></p>
+              )}
             </div>
           </div>
           <div>
