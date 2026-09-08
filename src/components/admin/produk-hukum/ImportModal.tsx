@@ -574,9 +574,14 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Tahun</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Uraian</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Tanggal</th>
-                      <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Jenis</th>
-                      <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Arsip</th>
-                      <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Ket Arsip</th>
+                      {kategori !== 'berita_acara' && (
+                        <>
+                          <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Jenis</th>
+                          <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Arsip</th>
+                          <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Ket Arsip</th>
+                        </>
+                      )}
+                      <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">{kategori === 'berita_acara' ? 'Keterangan' : 'Ket Lain'}</th>
                       <th className="px-3 py-2 text-left font-bold text-gray-500 dark:text-slate-400">Link File</th>
                     </tr>
                   </thead>
@@ -587,19 +592,24 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
                         <td className="px-3 py-2 text-gray-700 dark:text-slate-300">{item.tahun}</td>
                         <td className="px-3 py-2 text-gray-900 dark:text-white max-w-[200px] truncate">{item.uraian || '-'}</td>
                         <td className="px-3 py-2 text-gray-600 dark:text-slate-400 whitespace-nowrap">{item.tanggal || '-'}</td>
-                        <td className="px-3 py-2">
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                            {item.jenisDokumen || '-'}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2">
-                          {item.arsip ? (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">Ya</span>
-                          ) : (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-500">Tidak</span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{item.ketArsip || '-'}</td>
+                        {kategori !== 'berita_acara' && (
+                          <>
+                            <td className="px-3 py-2">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                                {item.jenisDokumen || '-'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              {item.arsip ? (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">Ya</span>
+                              ) : (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-slate-800 text-gray-500">Tidak</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{item.ketArsip || '-'}</td>
+                          </>
+                        )}
+                        <td className="px-3 py-2 text-gray-500 dark:text-slate-400">{item.ketLain || '-'}</td>
                         <td className="px-3 py-2 text-gray-500 dark:text-slate-400 max-w-[150px] truncate">{item.linkFile ? <a href={item.linkFile} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.linkFile}</a> : '-'}</td>
                       </tr>
                     ))}
