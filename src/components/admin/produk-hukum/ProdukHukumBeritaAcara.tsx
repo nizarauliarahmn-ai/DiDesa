@@ -320,28 +320,38 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   };
 
   const handleImport = (importedData: any[]) => {
-    const newItems: ProdukHukumItem[] = importedData.map((row, idx) => ({
-      id: generateId(),
-      no: row.no || idx + 1,
-      tahun: row.tahun || new Date().getFullYear().toString(),
-      uraian: row.uraian || row.nama_produk_hukum || '',
-      tanggal: row.tanggal || '',
-      tanggalDiundangkan: row.tanggalDiundangkan || row.tanggal_diundangkan || '',
-      jenisDokumen: row.jenisDokumen || row.jenis_dokumen || 'BERITA ACARA',
-      arsip: row.arsip === true || row.arsip === 'TRUE',
-      ketArsip: row.ketArsip || '',
-      ketLain: row.ketLain || row.ket_lain || '',
-      linkFile: row.linkFile || row.link_file || '',
-      documentData: null,
-      documentName: '',
-      createdAt: new Date().toISOString(),
-      noManual: false,
-      importOrder: idx,
-    }));
+    const filtered = importedData.filter(row => row.tahun && row.tahun.trim() !== '');
+    const byYear: Record<string, number> = {};
+    const newItems: ProdukHukumItem[] = filtered.map((row) => {
+      const thn = row.tahun;
+      byYear[thn] = (byYear[thn] || 0) + 1;
+      return {
+        id: generateId(),
+        no: row.no || byYear[thn],
+        tahun: thn,
+        uraian: row.uraian || row.nama_produk_hukum || '',
+        tanggal: row.tanggal || '',
+        tanggalDiundangkan: row.tanggalDiundangkan || row.tanggal_diundangkan || '',
+        jenisDokumen: row.jenisDokumen || row.jenis_dokumen || 'BERITA ACARA',
+        arsip: row.arsip === true || row.arsip === 'TRUE',
+        ketArsip: row.ketArsip || '',
+        ketLain: row.ketLain || row.ket_lain || '',
+        linkFile: row.linkFile || row.link_file || '',
+        documentData: null,
+        documentName: '',
+        createdAt: new Date().toISOString(),
+        noManual: false,
+        importOrder: items.length,
+      };
+    });
+    if (newItems.length === 0) {
+      showToast('Tidak ada data valid untuk diimport (tahun wajib diisi)!', 'error');
+      return;
+    }
     const merged = [...items, ...newItems];
     setItems(merged);
     saveData(merged);
-    showToast(`${newItems.length} data berhasil diimport!`, 'success');
+    showToast(`${newItems.length} data berhasil diimport!${importedData.length - newItems.length > 0 ? ` (${importedData.length - newItems.length} baris tanpa tahun dibuang)` : ''}`, 'success');
   };
 
   return (

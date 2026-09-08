@@ -342,11 +342,12 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
   };
 
   const extractYear = (val: any): string => {
-    if (!val) return new Date().getFullYear().toString();
+    if (!val) return '';
     if (val instanceof Date) return val.getFullYear().toString();
     const str = String(val).trim();
+    if (!str) return '';
     const yearMatch = str.match(/(\d{4})/);
-    return yearMatch ? yearMatch[1] : new Date().getFullYear().toString();
+    return yearMatch ? yearMatch[1] : '';
   };
 
   const normalizeDate = (val: any): string => {
@@ -364,8 +365,8 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
   };
 
   const mapRow = (row: ParsedRow, idx: number): MappedData => ({
-    no: mapping.no ? (parseInt(String(row[mapping.no])) || idx + 1) : idx + 1,
-    tahun: mapping.tahun ? extractYear(row[mapping.tahun]) : new Date().getFullYear().toString(),
+    no: mapping.no ? (parseInt(String(row[mapping.no])) || 0) : 0,
+    tahun: mapping.tahun ? extractYear(row[mapping.tahun]) : '',
     uraian: mapping.uraian ? String(row[mapping.uraian] || '') : '',
     tanggal: mapping.tanggal ? normalizeDate(row[mapping.tanggal]) : '',
     tanggalDiundangkan: mapping.tanggalDiundangkan ? normalizeDate(row[mapping.tanggalDiundangkan]) : '',
@@ -377,11 +378,11 @@ export default function ImportModal({ isOpen, onClose, onImport, kategoriLabel, 
   });
 
   const getMappedPreview = (): MappedData[] => {
-    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
+    return rawRows.slice(0, 100).map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '' && item.tahun.trim() !== '');
   };
 
   const getAllMappedData = (): MappedData[] => {
-    return rawRows.map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '');
+    return rawRows.map((row, idx) => mapRow(row, idx)).filter(item => item.uraian.trim() !== '' && item.tahun.trim() !== '');
   };
 
   const getFilteredRowCount = (): number => {
