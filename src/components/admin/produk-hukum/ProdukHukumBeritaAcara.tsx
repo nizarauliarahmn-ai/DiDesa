@@ -93,8 +93,8 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
-  const [sortField, setSortField] = useState<'importOrder' | 'tahun' | 'tanggal' | 'no'>('importOrder');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortField, setSortField] = useState<'no' | 'tahun' | 'tanggal'>('no');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
@@ -187,16 +187,22 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
       displayNo: item.no,
     }));
     return mapped.sort((a, b) => {
-      let cmp = 0;
-      if (sortField === 'importOrder') {
-        cmp = (a.importOrder ?? 99999) - (b.importOrder ?? 99999);
-        if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
-        return a.tahun.localeCompare(b.tahun) || a.no - b.no;
-      }
-      if (sortField === 'no') cmp = a.no - b.no;
-      else if (sortField === 'tahun') cmp = a.tahun.localeCompare(b.tahun);
-      else if (sortField === 'tanggal') cmp = (a.tanggal || '').localeCompare(b.tanggal || '');
-      return sortDir === 'asc' ? cmp : -cmp;
+      const aOnlyUraian = !a.no && !a.tahun && !a.tanggal;
+      const bOnlyUraian = !b.no && !b.tahun && !b.tanggal;
+      if (aOnlyUraian && !bOnlyUraian) return -1;
+      if (!aOnlyUraian && bOnlyUraian) return 1;
+      if (aOnlyUraian && bOnlyUraian) return 0;
+
+      const aIncomplete = a.needsReview || !a.no || !a.tahun;
+      const bIncomplete = b.needsReview || !b.no || !b.tahun;
+      if (aIncomplete && !bIncomplete) return -1;
+      if (!aIncomplete && bIncomplete) return 1;
+
+      if (sortField === 'no') return sortDir === 'asc' ? a.no - b.no : b.no - a.no;
+      if (sortField === 'tahun') return sortDir === 'asc' ? a.tahun.localeCompare(b.tahun) : b.tahun.localeCompare(a.tahun);
+      if (sortField === 'tanggal') return sortDir === 'asc' ? (a.tanggal || '').localeCompare(b.tanggal || '') : (b.tanggal || '').localeCompare(a.tanggal || '');
+
+      return sortDir === 'asc' ? a.no - b.no : b.no - a.no;
     });
   }, [filteredItems, sortField, sortDir]);
 
@@ -485,14 +491,14 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
                     />
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
-                    onClick={() => { if (sortField === 'no') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('no'); setSortDir('asc'); } }}>
+                    onClick={() => { if (sortField === 'no') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('no'); setSortDir('desc'); } }}>
                     <span className="inline-flex items-center gap-0.5">
                       No
                       {sortField === 'no' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
                     </span>
                   </th>
                   <th className="sticky top-0 bg-slate-50 dark:bg-slate-800 z-20 text-left px-2 py-2 font-bold text-gray-500 dark:text-slate-400 text-[10px] uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 transition-colors select-none"
-                    onClick={() => { if (sortField === 'tahun') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('tahun'); setSortDir('asc'); } }}>
+                    onClick={() => { if (sortField === 'tahun') setSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setSortField('tahun'); setSortDir('desc'); } }}>
                     <span className="inline-flex items-center gap-0.5">
                       Tahun
                       {sortField === 'tahun' && <span className="text-emerald-600">{sortDir === 'asc' ? '↑' : '↓'}</span>}
