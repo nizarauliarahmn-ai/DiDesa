@@ -634,7 +634,22 @@ export default function AdminRPJMDesa() {
                     {belumLinked.length === 0 && sudahLinked.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada usulan ditemukan</p>}
                     {belumLinked.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-purple-600">Belum Ditarik ({belumLinked.length})</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-purple-600">Belum Ditarik ({belumLinked.length})</p>
+                          <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" className="accent-purple-600"
+                              checked={belumLinked.every((u: any) => selectedUsulan.includes(u.id))}
+                              onChange={e => {
+                                const ids = belumLinked.map((u: any) => u.id);
+                                if (e.target.checked) {
+                                  setSelectedUsulan(prev => [...new Set([...prev, ...ids])]);
+                                } else {
+                                  setSelectedUsulan(prev => prev.filter(id => !ids.includes(id)));
+                                }
+                              }} />
+                            <span className="text-[10px] font-bold text-purple-600">Centang Semua</span>
+                          </label>
+                        </div>
                         {belumLinked.map((u: any) => (
                           <label key={u.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedUsulan.includes(u.id) ? 'bg-purple-50 border-purple-300 dark:bg-purple-950/30' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
                             <input type="checkbox" className="mt-1 accent-purple-600"
