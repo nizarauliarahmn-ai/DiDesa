@@ -478,23 +478,16 @@ export default function AdminAspirasi({
                       </label>
                     </div>
                     
-                    <div className="pt-2">
-                      <button 
-                        onClick={handleUpdateStatus}
-                        className="w-full py-3 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow-md dark:shadow-none shadow-blue-600/20"
-                      >
-                        Kirim Jawaban
-                      </button>
-                    </div>
+
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800">
+            <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 flex justify-end">
               <button 
                 onClick={handleUpdateStatus}
-                className="w-full py-3 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-colors"
+                className="px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-colors"
               >
                 Kirim Jawaban
               </button>
