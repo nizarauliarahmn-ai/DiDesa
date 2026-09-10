@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3 } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
@@ -428,6 +428,10 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem collapsed={isCollapsed} icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
               <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); markTabAsRead('buku_tamu'); }} badgeCount={activeTab === 'buku_tamu' ? 0 : unreadBukuTamuCount} />
             <NavItem collapsed={isCollapsed} icon={<ListChecks size={18} />} label="Usulan Desa" active={activeTab === 'usulan_desa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('usulan_desa'); markTabAsRead('usulan_desa'); }} badgeCount={activeTab === 'usulan_desa' ? 0 : unreadUsulanCount} />
+            {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Perencanaan</p>}
+            <NavItem collapsed={isCollapsed} icon={<Target size={18} />} label="RPJMDesa" active={activeTab === 'rpjmdesa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('rpjmdesa'); }} />
+            <NavItem collapsed={isCollapsed} icon={<ClipboardList size={18} />} label="RKPDesa" active={activeTab === 'rkpdesa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('rkpdesa'); }} />
+            <NavItem collapsed={isCollapsed} icon={<BarChart3 size={18} />} label="APBDesa" active={activeTab === 'apbdesa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('apbdesa'); }} />
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Lainnya</p>}
             <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} className="text-emerald-600" />} label="Panduan & Tutorial" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />
             {authUser?.role === 'kades' && <NavItem collapsed={isCollapsed} icon={<Settings size={18} />} label="Pengaturan" active={activeTab === 'pengaturan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pengaturan'); }} />}

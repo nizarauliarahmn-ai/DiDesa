@@ -34,6 +34,9 @@ const AdminAspirasi = React.lazy(() => import('./components/admin/AdminAspirasi'
 const AdminKepuasan = React.lazy(() => import('./components/admin/AdminKepuasan'));
 const AdminBukuTamu = React.lazy(() => import('./components/admin/AdminBukuTamu'));
 const AdminUsulanDesa = React.lazy(() => import('./components/admin/AdminUsulanDesa'));
+const AdminRPJMDesa = React.lazy(() => import('./components/admin/AdminRPJMDesa'));
+const AdminRKPDesa = React.lazy(() => import('./components/admin/AdminRKPDesa'));
+const AdminAPBDesa = React.lazy(() => import('./components/admin/AdminAPBDesa'));
 const AdminBerita = React.lazy(() => import('./components/admin/AdminBerita'));
 const AdminAiAssistant = React.lazy(() => import('./components/admin/AdminAiAssistant'));
 const AdminSaaSLogs = React.lazy(() => import('./components/admin/AdminSaaSLogs'));
@@ -518,6 +521,36 @@ export default function App() {
     );
   }
 
+  // Route /admin/rpjmdesa → redirect ke mode admin + tab rpjmdesa
+  if (window.location.pathname.includes('/admin/rpjmdesa') && !urlParams.get('admin_tab')) {
+    window.location.replace('/?mode=admin&admin_tab=rpjmdesa');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
+  // Route /admin/rkpdesa → redirect ke mode admin + tab rkpdesa
+  if (window.location.pathname.includes('/admin/rkpdesa') && !urlParams.get('admin_tab')) {
+    window.location.replace('/?mode=admin&admin_tab=rkpdesa');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
+  // Route /admin/apbdesa → redirect ke mode admin + tab apbdesa
+  if (window.location.pathname.includes('/admin/apbdesa') && !urlParams.get('admin_tab')) {
+    window.location.replace('/?mode=admin&admin_tab=apbdesa');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
   // Remote KTP Scanner (Tablet Desa) — route /kiosk/scan
   if (window.location.pathname.includes('/kiosk/scan')) {
     return <><KioskKtpScanner /><ToastContainer /></>;
@@ -676,6 +709,9 @@ export default function App() {
                 {adminTab === 'kepuasan' && <AdminKepuasan />}
                 {adminTab === 'buku_tamu' && <AdminBukuTamu />}
                 {adminTab === 'usulan_desa' && <AdminUsulanDesa />}
+                {adminTab === 'rpjmdesa' && <AdminRPJMDesa />}
+                {adminTab === 'rkpdesa' && <AdminRKPDesa />}
+                {adminTab === 'apbdesa' && <AdminAPBDesa />}
                 {adminTab === 'berita' && (
                   <AdminBerita 
                     searchQuery={globalSearch}
