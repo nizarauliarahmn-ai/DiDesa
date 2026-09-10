@@ -86,25 +86,30 @@ export default function AdminRKPDesa() {
   useEffect(() => { loadData(); }, []);
 
   const loadData = async () => {
-    setLoading(true);
-    const tenantId = await resolveCurrentTenant();
-    if (!tenantId) { setLoading(false); return; }
+    try {
+      setLoading(true);
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) { setLoading(false); return; }
 
-    const { data } = await supabase.from('rkpdesa').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
-    if (data) {
-      const items = data as RKPDesa[];
-      // Enrich with rpjmdesa nama (batch per 100)
-      const rpjmIds = items.filter(i => i.rpjmdesa_id).map(i => i.rpjmdesa_id!);
-      const rpjmMap = new Map<string, string>();
-      for (let i = 0; i < rpjmIds.length; i += 100) {
-        const chunk = rpjmIds.slice(i, i + 100);
-        const { data: rpjmData } = await supabase.from('rpjmdesa').select('id, nama_program').in('id', chunk);
-        (rpjmData || []).forEach((r: any) => rpjmMap.set(r.id, r.nama_program));
+      const { data, error } = await supabase.from('rkpdesa').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
+      if (error) { showToast('Gagal load RKPDesa: ' + error.message, 'error'); setLoading(false); return; }
+      if (data) {
+        const items = data as RKPDesa[];
+        const rpjmIds = items.filter(i => i.rpjmdesa_id).map(i => i.rpjmdesa_id!);
+        const rpjmMap = new Map<string, string>();
+        for (let i = 0; i < rpjmIds.length; i += 100) {
+          const chunk = rpjmIds.slice(i, i + 100);
+          const { data: rpjmData } = await supabase.from('rpjmdesa').select('id, nama_program').in('id', chunk);
+          (rpjmData || []).forEach((r: any) => rpjmMap.set(r.id, r.nama_program));
+        }
+        items.forEach(i => { i.rpjmdesa_nama = rpjmMap.get(i.rpjmdesa_id!) || null; });
+        setList(items);
       }
-      items.forEach(i => { i.rpjmdesa_nama = rpjmMap.get(i.rpjmdesa_id!) || null; });
-      setList(items);
+      setLoading(false);
+    } catch (err: any) {
+      showToast('Error RKPDesa: ' + (err.message || err), 'error');
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const generateKode = async (): Promise<string> => {
