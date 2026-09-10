@@ -24,9 +24,13 @@ export interface UsulanDesa {
   pengusul?: string | null;
   diteruskan_tags?: string[] | null;
   status_terakomodir: string;
+  pipeline_status: string;
   skala_prioritas?: number | null;
   keterangan?: string | null;
   foto_url?: string | null;
+  foto_progress_url?: string | null;
+  anggaran?: number;
+  rpjmdesa_id?: string | null;
   google_drive_file_id?: string | null;
   google_drive_view_url?: string | null;
   google_drive_download_url?: string | null;
@@ -37,6 +41,18 @@ const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemer
 const STATUS_TERAKOMODIR_OPTIONS = ['Belum', 'Desa 2026', 'Desa 2027', 'Kab 2026', 'Kab 2027', 'Ditolak'];
 const TAG_OPTIONS = ['RKPDes 2026', 'RKPDes 2027', 'Musrenbang 2026', 'Musrenbang 2027'];
 const PRIORITAS_OPTIONS = [1, 2, 3, 4, 5];
+
+const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RKPDesa', 'RPJMDesa', 'APBDesa', 'Dikerjakan', 'Selesai'];
+const PIPELINE_COLORS: Record<string, { bg: string; text: string; border: string; icon: string }> = {
+  'Diajukan': { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-300', icon: 'bg-gray-400' },
+  'Musrenbang': { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', icon: 'bg-blue-400' },
+  'RKPDesa': { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-200', icon: 'bg-indigo-400' },
+  'RPJMDesa': { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200', icon: 'bg-violet-400' },
+  'APBDesa': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: 'bg-amber-400' },
+  'Dikerjakan': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', icon: 'bg-orange-400' },
+  'Selesai': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: 'bg-emerald-500' },
+  'Ditolak': { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', icon: 'bg-rose-400' },
+};
 
 const compressImage = (file: File): Promise<{ blob: Blob; originalSize: number; compressedSize: number }> => {
   return new Promise((resolve, reject) => {
@@ -776,6 +792,7 @@ ${rowsHtml}
                 <th className="min-w-[340px] max-w-[550px] px-6 py-4 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
                 <th className="min-w-[140px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
                 <th className="min-w-[180px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
+                <th className="min-w-[120px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pipeline</th>
                 <th className="min-w-[180px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
                 <th className="min-w-[100px] px-4 py-4 whitespace-nowrap text-center text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
                 <th className="min-w-[150px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan/Foto</th>
@@ -785,14 +802,14 @@ ${rowsHtml}
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-16 text-center">
+                  <td colSpan={10} className="px-4 py-16 text-center">
                     <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mx-auto" />
                     <p className="text-sm text-gray-500 mt-3 font-semibold">Memuat data usulan...</p>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-16 text-center">
+                  <td colSpan={10} className="px-4 py-16 text-center">
                     <div className="w-14 h-14 bg-gray-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
                       <FolderOpen className="w-7 h-7 text-gray-400" />
                     </div>
@@ -865,6 +882,27 @@ ${rowsHtml}
                           ))}
                         </div>
                       )}
+                    </td>
+                    <td className="min-w-[120px] px-4 py-4 whitespace-nowrap">
+                      {(() => {
+                        const ps = u.pipeline_status || 'Diajukan';
+                        const psColors: Record<string, string> = {
+                          'Diajukan': 'bg-gray-100 text-gray-600 border-gray-200',
+                          'Musrenbang': 'bg-blue-50 text-blue-600 border-blue-200',
+                          'RKPDesa': 'bg-indigo-50 text-indigo-600 border-indigo-200',
+                          'RPJMDesa': 'bg-violet-50 text-violet-600 border-violet-200',
+                          'APBDesa': 'bg-amber-50 text-amber-700 border-amber-200',
+                          'Dikerjakan': 'bg-orange-50 text-orange-700 border-orange-200',
+                          'Selesai': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                          'Ditolak': 'bg-rose-50 text-rose-700 border-rose-200',
+                        };
+                        return (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold border whitespace-nowrap ${psColors[ps] || psColors['Diajukan']}`}>
+                            {ps === 'Selesai' ? <CheckCircle2 className="w-3 h-3" /> : ps === 'Ditolak' ? <Ban className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                            {ps}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="min-w-[180px] px-4 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${statusTerakomodirBadge(u.status_terakomodir)}`}>

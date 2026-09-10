@@ -358,6 +358,31 @@ export default function AdminAPBDesa() {
       const { error } = await supabase.from('apbdesa').insert(payloads);
       if (error) { showToast('Gagal import: ' + error.message, 'error'); return; }
     }
+
+    // Update pipeline_status di usulan_desas (trace back via rkpdesa → rpjmdesa → usulan)
+    const rkpIds = selectedRkp.filter((id: string) => rkpList.find((x: any) => x.id === id));
+    const rpjmIds: string[] = [];
+    for (const rid of rkpIds) {
+      const r = rkpList.find((x: any) => x.id === rid);
+      if (r?.rpjmdesa_id) rpjmIds.push(r.rpjmdesa_id);
+    }
+    if (rpjmIds.length > 0) {
+      const uniqueRpjmIds = [...new Set(rpjmIds)];
+      const BATCH = 100;
+      for (let i = 0; i < uniqueRpjmIds.length; i += BATCH) {
+        const chunk = uniqueRpjmIds.slice(i, i + BATCH);
+        const { data: rpjmData } = await supabase.from('rpjmdesa').select('usulan_id').in('id', chunk);
+        const usulanIds = (rpjmData || []).map((r: any) => r.usulan_id).filter(Boolean);
+        if (usulanIds.length > 0) {
+          const uniqueUsulanIds = [...new Set(usulanIds)];
+          for (let j = 0; j < uniqueUsulanIds.length; j += BATCH) {
+            const uChunk = uniqueUsulanIds.slice(j, j + BATCH);
+            await supabase.from('usulan_desas').update({ pipeline_status: 'APBDesa' }).in('id', uChunk);
+          }
+        }
+      }
+    }
+
     showToast(`${payloads.length} kegiatan berhasil ditarik ke APBDesa`, 'success');
     setShowFromRkp(false); setSelectedRkp([]); setRkpSearchQuery(''); loadData();
   };

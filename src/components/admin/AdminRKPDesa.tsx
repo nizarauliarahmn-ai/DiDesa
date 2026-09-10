@@ -207,6 +207,23 @@ export default function AdminRKPDesa() {
 
     const { error } = await supabase.from('rkpdesa').insert(rows);
     if (error) { showToast(`Gagal menarik: ${error.message}`, 'error'); return; }
+
+    // Update pipeline_status di usulan_desas (trace back via rpjmdesa.usulan_id)
+    const rpjmIds = selectedRpjm.filter((id: string) => rpjmList.find((x: any) => x.id === id));
+    const usulanIds: string[] = [];
+    for (const rid of rpjmIds) {
+      const r = rpjmList.find((x: any) => x.id === rid);
+      if (r?.usulan_id) usulanIds.push(r.usulan_id);
+    }
+    if (usulanIds.length > 0) {
+      const uniqueUsulanIds = [...new Set(usulanIds)];
+      const BATCH = 100;
+      for (let i = 0; i < uniqueUsulanIds.length; i += BATCH) {
+        const chunk = uniqueUsulanIds.slice(i, i + BATCH);
+        await supabase.from('usulan_desas').update({ pipeline_status: 'RKPDesa' }).in('id', chunk);
+      }
+    }
+
     showToast(`${rows.length} program berhasil ditarik ke RKPDesa`, 'success');
     setShowFromRpjm(false); setSelectedRpjm([]); setRpjmSearch(''); loadData();
   };

@@ -1,9 +1,21 @@
 import {
   X, MapPin, User, FolderOpen, AlertTriangle, CheckCircle2, Ban,
-  Layers, Link2, CalendarDays, Edit2, FileText, Clock
+  Layers, Link2, CalendarDays, Edit2, FileText, Clock, Camera
 } from 'lucide-react';
 import type { UsulanDesa } from './AdminUsulanDesa';
 import { findSimilarUsulan, tokenOverlapSimilarity } from '../../utils/similarity';
+
+const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RKPDesa', 'RPJMDesa', 'APBDesa', 'Dikerjakan', 'Selesai'];
+
+const PIPELINE_CONFIG: Record<string, { bg: string; text: string; active: string; icon: string }> = {
+  'Diajukan': { bg: 'bg-gray-100', text: 'text-gray-500', active: 'bg-gray-400', icon: 'bg-gray-400' },
+  'Musrenbang': { bg: 'bg-blue-50', text: 'text-blue-600', active: 'bg-blue-500', icon: 'bg-blue-400' },
+  'RKPDesa': { bg: 'bg-indigo-50', text: 'text-indigo-600', active: 'bg-indigo-500', icon: 'bg-indigo-400' },
+  'RPJMDesa': { bg: 'bg-violet-50', text: 'text-violet-600', active: 'bg-violet-500', icon: 'bg-violet-400' },
+  'APBDesa': { bg: 'bg-amber-50', text: 'text-amber-700', active: 'bg-amber-500', icon: 'bg-amber-400' },
+  'Dikerjakan': { bg: 'bg-orange-50', text: 'text-orange-700', active: 'bg-orange-500', icon: 'bg-orange-400' },
+  'Selesai': { bg: 'bg-emerald-50', text: 'text-emerald-700', active: 'bg-emerald-500', icon: 'bg-emerald-500' },
+};
 
 interface Props {
   usulan: UsulanDesa;
@@ -14,6 +26,7 @@ interface Props {
 
 export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }: Props) {
   const similar = findSimilarUsulan(allUsulan, usulan);
+  const currentStageIdx = PIPELINE_STAGES.indexOf(usulan.pipeline_status || 'Diajukan');
 
   const tagColor = (tag: string) => {
     const t = (tag || '').toLowerCase();
@@ -21,34 +34,6 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
     if (t.includes('musrenbang')) return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800';
     return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
   };
-
-  // ── Kronologi status (timeline) ──
-  const steps: { label: string; detail: string; color: string }[] = [];
-  steps.push({
-    label: 'Usulan diajukan',
-    detail: new Date(usulan.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }),
-    color: 'bg-gray-100 dark:bg-slate-800',
-  });
-  (usulan.diteruskan_tags || []).forEach(tag => {
-    const t = (tag || '').toLowerCase();
-    if (t.includes('rkpdes')) {
-      steps.push({ label: 'Ditarik ke RKPDes', detail: tag, color: 'bg-purple-100 dark:bg-purple-950/40' });
-    } else if (t.includes('musrenbang')) {
-      steps.push({ label: 'Diusulkan ke Musrenbang', detail: tag, color: 'bg-blue-100 dark:bg-blue-950/40' });
-    }
-  });
-  if (usulan.status_terakomodir && usulan.status_terakomodir !== 'Belum') {
-    steps.push({
-      label: usulan.status_terakomodir === 'Ditolak' ? 'Ditolak' : 'Terakomodir (APBDes)',
-      detail: usulan.status_terakomodir,
-      color: usulan.status_terakomodir === 'Ditolak'
-        ? 'bg-gray-100 dark:bg-slate-800'
-        : 'bg-emerald-100 dark:bg-emerald-950/40',
-    });
-  }
-  if (steps.length === 1) {
-    steps.push({ label: 'Belum diteruskan', detail: 'Menunggu peninjauan RKPDes / Musrenbang', color: 'bg-gray-100 dark:bg-slate-800' });
-  }
 
   return (
     <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -98,8 +83,18 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
             </div>
           </div>
 
-          {/* Status terakomodir + diteruskan */}
+          {/* Status badges */}
           <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
+              usulan.pipeline_status === 'Selesai'
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                : usulan.pipeline_status === 'Ditolak'
+                  ? 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                  : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+            }`}>
+              {usulan.pipeline_status === 'Selesai' ? <CheckCircle2 className="w-3 h-3" /> : usulan.pipeline_status === 'Ditolak' ? <Ban className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+              {usulan.pipeline_status || 'Diajukan'}
+            </span>
             <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
               usulan.status_terakomodir === 'Belum'
                 ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800'
@@ -122,24 +117,44 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
             )}
           </div>
 
-          {/* Kronologi */}
+          {/* Pipeline Status */}
           <div>
-            <p className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2.5 flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5" /> Kronologi Status
+            <p className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" /> Pipeline Status
             </p>
-            <div className="space-y-0">
-              {steps.map((s, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <span className={`w-3 h-3 rounded-full border-2 border-white dark:border-slate-900 ${s.color.split(' ')[0]}`} />
-                    {i < steps.length - 1 && <span className="w-px flex-1 bg-gray-200 dark:bg-slate-700" />}
-                  </div>
-                  <div className="pb-4">
-                    <p className="text-sm font-bold text-gray-800 dark:text-slate-100">{s.label}</p>
-                    <p className="text-[11px] text-gray-500 dark:text-slate-400">{s.detail}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center gap-0 overflow-x-auto pb-2">
+              {PIPELINE_STAGES.map((stage, i) => {
+                const isActive = i === currentStageIdx;
+                const isDone = i < currentStageIdx;
+                const isDitolak = usulan.pipeline_status === 'Ditolak' && stage === 'Ditolak';
+                const cfg = PIPELINE_CONFIG[stage] || PIPELINE_CONFIG['Diajukan'];
+                return (
+                  <React.Fragment key={stage}>
+                    <div className="flex flex-col items-center min-w-[60px]">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold border-2 transition-all ${
+                        isDone || isActive
+                          ? `${cfg.active} border-transparent text-white shadow-md`
+                          : `bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-600 text-gray-400`
+                      }`}>
+                        {isDone ? <CheckCircle2 size={14} /> : i + 1}
+                      </div>
+                      <p className={`text-[9px] font-bold mt-1.5 text-center leading-tight ${
+                        isActive ? cfg.text : isDone ? 'text-gray-600 dark:text-slate-400' : 'text-gray-400 dark:text-slate-500'
+                      }`}>
+                        {stage}
+                      </p>
+                      {isActive && (
+                        <span className={`mt-1 px-1.5 py-0.5 rounded-full text-[8px] font-black ${cfg.bg} ${cfg.text} border ${cfg.active.replace('bg-', 'border-')}/20`}>
+                          SAAT INI
+                        </span>
+                      )}
+                    </div>
+                    {i < PIPELINE_STAGES.length - 1 && (
+                      <div className={`flex-1 h-0.5 min-w-[12px] mt-[-12px] ${i < currentStageIdx ? cfg.active : 'bg-gray-200 dark:bg-slate-700'}`} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
           </div>
 
@@ -148,34 +163,23 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
             <p className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2.5 flex items-center gap-1">
               <FolderOpen className="w-3.5 h-3.5" /> Foto &amp; Lampiran Dokumen
             </p>
-            {usulan.foto_url || usulan.google_drive_view_url ? (
+            {(usulan.foto_url || usulan.google_drive_view_url) ? (
               <div className="flex flex-wrap items-start gap-3">
                 {usulan.foto_url && (
                   <img src={usulan.foto_url} alt="Dokumentasi lokasi" className="w-40 h-40 rounded-xl object-cover border border-gray-200 dark:border-slate-700" />
                 )}
                 <div className="flex flex-col gap-2">
                   {usulan.google_drive_view_url && (
-                    <a
-                      href={usulan.google_drive_view_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors"
-                    >
+                    <a href={usulan.google_drive_view_url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors">
                       <FolderOpen className="w-3.5 h-3.5" /> Buka Lampiran
                     </a>
                   )}
                   {usulan.google_drive_download_url && (
-                    <a
-                      href={usulan.google_drive_download_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-slate-300 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 transition-colors"
-                    >
+                    <a href={usulan.google_drive_download_url} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-gray-600 dark:text-slate-300 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 transition-colors">
                       <FolderOpen className="w-3.5 h-3.5" /> Unduh Lampiran
                     </a>
-                  )}
-                  {!usulan.google_drive_view_url && (
-                    <span className="text-[11px] text-gray-400">Tidak ada lampiran dokumen.</span>
                   )}
                 </div>
               </div>
@@ -185,6 +189,16 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
               </div>
             )}
           </div>
+
+          {/* Foto Progress (Dikerjakan/Selesai) */}
+          {usulan.foto_progress_url && (
+            <div>
+              <p className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                <Camera className="w-3.5 h-3.5" /> Foto Progress Pelaksanaan
+              </p>
+              <img src={usulan.foto_progress_url} alt="Progress pelaksanaan" className="w-full max-w-sm rounded-xl object-cover border border-gray-200 dark:border-slate-700" />
+            </div>
+          )}
 
           {/* Keterangan */}
           <div>

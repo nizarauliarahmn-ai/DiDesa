@@ -260,7 +260,10 @@ export default function AdminRPJMDesa() {
       const u = usulanList.find((x: any) => x.id === uid);
       if (!u) continue;
       const tags = [...(u.diteruskan_tags || []), `RPJMDes ${new Date().getFullYear()}`];
-      await supabase.from('usulan_desas').update({ diteruskan_tags: tags, rpjmdesa_id: null }).eq('id', u.id);
+      await supabase.from('usulan_desas').update({
+        diteruskan_tags: tags,
+        pipeline_status: 'RPJMDesa'
+      }).eq('id', u.id);
     }
 
     showToast(`${rows.length} usulan berhasil ditarik ke RPJMDesa`, 'success');
