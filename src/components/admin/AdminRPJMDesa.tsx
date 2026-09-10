@@ -63,6 +63,17 @@ export default function AdminRPJMDesa() {
   const [usulanList, setUsulanList] = useState<any[]>([]);
   const [selectedUsulan, setSelectedUsulan] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showMassEdit, setShowMassEdit] = useState(false);
+  const [massEditForm, setMassEditForm] = useState({
+    applyKategori: false, kategori: 'Infrastruktur',
+    applyStatus: false, status: 'Rencana',
+    applyTahun: false, tahun_awal: new Date().getFullYear(), tahun_akhir: new Date().getFullYear() + 4,
+    applyAnggaran: false, anggaran_estimasi: 0,
+    applyPrioritas: false, skala_prioritas: 3,
+    applyLokasi: false, lokasi: '',
+    applyKeterangan: false, keterangan: '',
+  });
 
   const [form, setForm] = useState({
     nama_program: '', kategori: 'Infrastruktur', lokasi: '', tahun_awal: new Date().getFullYear(),
@@ -154,6 +165,37 @@ export default function AdminRPJMDesa() {
     if (error) { showToast('Gagal menghapus', 'error'); return; }
     showToast('Berhasil dihapus', 'success');
     loadData();
+  };
+
+  const handleMassEdit = async () => {
+    if (selectedIds.length === 0) return;
+    const anyChecked = massEditForm.applyKategori || massEditForm.applyStatus || massEditForm.applyTahun ||
+      massEditForm.applyAnggaran || massEditForm.applyPrioritas || massEditForm.applyLokasi || massEditForm.applyKeterangan;
+    if (!anyChecked) { showToast('Centang minimal 1 field untuk diedit', 'error'); return; }
+
+    const payload: any = {};
+    if (massEditForm.applyKategori) payload.kategori = massEditForm.kategori;
+    if (massEditForm.applyStatus) payload.status = massEditForm.status;
+    if (massEditForm.applyTahun) { payload.tahun_awal = massEditForm.tahun_awal; payload.tahun_akhir = massEditForm.tahun_akhir; }
+    if (massEditForm.applyAnggaran) payload.anggaran_estimasi = massEditForm.anggaran_estimasi;
+    if (massEditForm.applyPrioritas) payload.skala_prioritas = massEditForm.skala_prioritas;
+    if (massEditForm.applyLokasi) payload.lokasi = massEditForm.lokasi;
+    if (massEditForm.applyKeterangan) payload.keterangan = massEditForm.keterangan;
+
+    const { error } = await supabase.from('rpjmdesa').update(payload).in('id', selectedIds);
+    if (error) { showToast(`Gagal update massal: ${error.message}`, 'error'); return; }
+    showToast(`${selectedIds.length} program berhasil diupdate`, 'success');
+    setSelectedIds([]);
+    setShowMassEdit(false);
+    loadData();
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filtered.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filtered.map(r => r.id));
+    }
   };
 
   const handleImportFromUsulan = async () => {
@@ -309,6 +351,12 @@ export default function AdminRPJMDesa() {
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
             <Download size={14} /> Export
           </button>
+          {selectedIds.length > 0 && (
+            <button onClick={() => setShowMassEdit(true)}
+              className="px-4 py-2.5 bg-amber-500 text-white text-sm font-bold rounded-xl hover:bg-amber-600 flex items-center gap-2">
+              <Edit2 size={14} /> Edit Massal ({selectedIds.length})
+            </button>
+          )}
         </div>
       </div>
 
@@ -317,6 +365,11 @@ export default function AdminRPJMDesa() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
+                <th className="py-3 px-4 text-left w-10">
+                  <input type="checkbox" className="accent-purple-600"
+                    checked={filtered.length > 0 && selectedIds.length === filtered.length}
+                    onChange={toggleSelectAll} />
+                </th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Kode</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Nama Program</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Kategori</th>
@@ -331,7 +384,12 @@ export default function AdminRPJMDesa() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map(r => (
-                <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                <tr key={r.id} className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(r.id) ? 'bg-purple-50/50 dark:bg-purple-950/20' : ''}`}>
+                  <td className="py-3 px-4">
+                    <input type="checkbox" className="accent-purple-600"
+                      checked={selectedIds.includes(r.id)}
+                      onChange={e => setSelectedIds(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id))} />
+                  </td>
                   <td className="py-3 px-4 text-xs font-bold text-purple-600 dark:text-purple-400 whitespace-nowrap">{r.kode_rpjmdesa}</td>
                   <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white max-w-[250px] truncate">{r.nama_program}</td>
                   <td className="py-3 px-4 whitespace-nowrap">
@@ -374,7 +432,7 @@ export default function AdminRPJMDesa() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={10} className="py-12 text-center text-gray-500 font-medium">Belum ada data RPJMDesa</td></tr>
+                <tr><td colSpan={11} className="py-12 text-center text-gray-500 font-medium">Belum ada data RPJMDesa</td></tr>
               )}
             </tbody>
           </table>
@@ -554,6 +612,94 @@ export default function AdminRPJMDesa() {
               <button onClick={handleImportFromUsulan} disabled={selectedUsulan.length === 0}
                 className="px-5 py-2.5 bg-purple-600 text-white text-sm font-bold rounded-xl hover:bg-purple-700 disabled:opacity-50">
                 Tarik {selectedUsulan.length} Usulan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMassEdit && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+              <div>
+                <h3 className="text-lg font-black text-gray-900 dark:text-white">Edit Massal</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{selectedIds.length} program terpilih</p>
+              </div>
+              <button onClick={() => setShowMassEdit(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-800">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-xs text-gray-500">Centang field yang ingin diubah, lalu isi nilai barunya:</p>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyKategori} onChange={e => setMassEditForm({ ...massEditForm, applyKategori: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Kategori</label>
+                <select value={massEditForm.kategori} onChange={e => setMassEditForm({ ...massEditForm, kategori: e.target.value })} disabled={!massEditForm.applyKategori}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40">
+                  {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyStatus} onChange={e => setMassEditForm({ ...massEditForm, applyStatus: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Status</label>
+                <select value={massEditForm.status} onChange={e => setMassEditForm({ ...massEditForm, status: e.target.value })} disabled={!massEditForm.applyStatus}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40">
+                  {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyTahun} onChange={e => setMassEditForm({ ...massEditForm, applyTahun: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Tahun</label>
+                <input type="number" value={massEditForm.tahun_awal} onChange={e => setMassEditForm({ ...massEditForm, tahun_awal: +e.target.value })} disabled={!massEditForm.applyTahun}
+                  className="w-24 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+                <span className="text-gray-400">—</span>
+                <input type="number" value={massEditForm.tahun_akhir} onChange={e => setMassEditForm({ ...massEditForm, tahun_akhir: +e.target.value })} disabled={!massEditForm.applyTahun}
+                  className="w-24 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyAnggaran} onChange={e => setMassEditForm({ ...massEditForm, applyAnggaran: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Anggaran</label>
+                <input type="number" value={massEditForm.anggaran_estimasi} onChange={e => setMassEditForm({ ...massEditForm, anggaran_estimasi: +e.target.value })} disabled={!massEditForm.applyAnggaran}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyPrioritas} onChange={e => setMassEditForm({ ...massEditForm, applyPrioritas: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Prioritas</label>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <button key={i} type="button" disabled={!massEditForm.applyPrioritas}
+                      onClick={() => setMassEditForm({ ...massEditForm, skala_prioritas: i })}
+                      className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors disabled:opacity-40 ${massEditForm.skala_prioritas === i ? 'bg-amber-400 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200'}`}>{i}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyLokasi} onChange={e => setMassEditForm({ ...massEditForm, applyLokasi: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Lokasi</label>
+                <input value={massEditForm.lokasi} onChange={e => setMassEditForm({ ...massEditForm, lokasi: e.target.value })} disabled={!massEditForm.applyLokasi}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
+                <input type="checkbox" className="accent-amber-500 mt-1" checked={massEditForm.applyKeterangan} onChange={e => setMassEditForm({ ...massEditForm, applyKeterangan: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Keterangan</label>
+                <textarea value={massEditForm.keterangan} onChange={e => setMassEditForm({ ...massEditForm, keterangan: e.target.value })} disabled={!massEditForm.applyKeterangan} rows={2}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40 resize-none" />
+              </div>
+            </div>
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+              <button onClick={() => setShowMassEdit(false)}
+                className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Batal</button>
+              <button onClick={handleMassEdit}
+                className="px-5 py-2.5 bg-amber-500 text-white text-sm font-bold rounded-xl hover:bg-amber-600">
+                Simpan ke {selectedIds.length} Program
               </button>
             </div>
           </div>
