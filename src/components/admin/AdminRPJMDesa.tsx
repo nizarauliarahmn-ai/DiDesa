@@ -95,12 +95,18 @@ export default function AdminRPJMDesa() {
     return `RPJM-${year}-${String(maxSeq + 1).padStart(3, '0')}`;
   };
 
+  const [usulanSearch, setUsulanSearch] = useState('');
+
   const loadUsulan = async () => {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
-    const currentYear = new Date().getFullYear();
-    const { data } = await supabase.from('usulan_desas').select('*').eq('tenant_id', tenantId).or(`status_terakomodir.eq.Desa ${currentYear},status_terakomodir.eq.Kab ${currentYear}`);
-    setUsulanList(data || []);
+    // Ambil semua usulan yang sudah terakomodir (semua tahun), kecuali 'Belum' dan 'Ditolak'
+    const { data } = await supabase.from('usulan_desas').select('*').eq('tenant_id', tenantId).not('status_terakomodir', 'in', '("Belum","Ditolak")');
+    // Tandai mana yang sudah ditarik ke RPJMDesa
+    const { data: rpjmData } = await supabase.from('rpjmdesa').select('usulan_id').eq('tenant_id', tenantId).not('usulan_id', 'is', null);
+    const linkedIds = new Set((rpjmData || []).map((r: any) => r.usulan_id));
+    const list = (data || []).map((u: any) => ({ ...u, _alreadyLinked: linkedIds.has(u.id) }));
+    setUsulanList(list);
   };
 
   const handleSave = async () => {
@@ -438,25 +444,62 @@ export default function AdminRPJMDesa() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">Tarik dari Usulan Desa</h3>
-              <button onClick={() => { setShowFromUsulan(false); setSelectedUsulan([]); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
+              <button onClick={() => { setShowFromUsulan(false); setSelectedUsulan([]); setUsulanSearch(''); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
             </div>
-            <div className="p-5 space-y-4 flex-1 overflow-y-auto">
+            <div className="p-5 space-y-3 flex-1 overflow-y-auto">
               <p className="text-sm text-gray-500">Pilih usulan yang sudah terakomodir untuk ditarik ke RPJMDesa:</p>
-              {usulanList.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada usulan terakomodir tahun ini</p>}
-              {usulanList.map((u: any) => (
-                <label key={u.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedUsulan.includes(u.id) ? 'bg-purple-50 border-purple-300 dark:bg-purple-950/30' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-                  <input type="checkbox" className="mt-1 accent-purple-600"
-                    checked={selectedUsulan.includes(u.id)}
-                    onChange={e => setSelectedUsulan(prev => e.target.checked ? [...prev, u.id] : prev.filter(x => x !== u.id))} />
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">{u.kode_usulan} — {u.uraian_usulan}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{u.kategori} {u.lokasi_rt_rw ? `• ${u.lokasi_rt_rw}` : ''}</p>
-                  </div>
-                </label>
-              ))}
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input value={usulanSearch} onChange={e => setUsulanSearch(e.target.value)} placeholder="Cari kode, nama usulan, atau kategori..."
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+              </div>
+              {(() => {
+                const filtered = usulanList.filter((u: any) => {
+                  const q = usulanSearch.toLowerCase();
+                  const matchSearch = !q || u.kode_usulan?.toLowerCase().includes(q) || u.uraian_usulan?.toLowerCase().includes(q) || u.kategori?.toLowerCase().includes(q);
+                  return matchSearch;
+                });
+                const belumLinked = filtered.filter((u: any) => !u._alreadyLinked);
+                const sudahLinked = filtered.filter((u: any) => u._alreadyLinked);
+                return (
+                  <>
+                    {belumLinked.length === 0 && sudahLinked.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada usulan terakomodir ditemukan</p>}
+                    {belumLinked.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-purple-600">Belum Ditarik ({belumLinked.length})</p>
+                        {belumLinked.map((u: any) => (
+                          <label key={u.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedUsulan.includes(u.id) ? 'bg-purple-50 border-purple-300 dark:bg-purple-950/30' : 'hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+                            <input type="checkbox" className="mt-1 accent-purple-600"
+                              checked={selectedUsulan.includes(u.id)}
+                              onChange={e => setSelectedUsulan(prev => e.target.checked ? [...prev, u.id] : prev.filter(x => x !== u.id))} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{u.kode_usulan} — {u.uraian_usulan}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">{u.kategori} {u.lokasi_rt_rw ? `• ${u.lokasi_rt_rw}` : ''} • {u.status_terakomodir}</p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    {sudahLinked.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sudah Ditarik ({sudahLinked.length})</p>
+                        {sudahLinked.map((u: any) => (
+                          <div key={u.id} className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/20 opacity-60">
+                            <CheckCircle2 size={16} className="mt-0.5 text-emerald-500 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-gray-500 dark:text-slate-400 truncate">{u.kode_usulan} — {u.uraian_usulan}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">{u.kategori} • Sudah di RPJMDesa</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
             <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
-              <button onClick={() => { setShowFromUsulan(false); setSelectedUsulan([]); }}
+              <button onClick={() => { setShowFromUsulan(false); setSelectedUsulan([]); setUsulanSearch(''); }}
                 className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Batal</button>
               <button onClick={handleImportFromUsulan} disabled={selectedUsulan.length === 0}
                 className="px-5 py-2.5 bg-purple-600 text-white text-sm font-bold rounded-xl hover:bg-purple-700 disabled:opacity-50">
