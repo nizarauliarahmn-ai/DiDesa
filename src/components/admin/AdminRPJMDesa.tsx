@@ -161,13 +161,20 @@ export default function AdminRPJMDesa() {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
 
-    let successCount = 0;
-    for (const usulanId of selectedUsulan) {
+    // Ambil kode terakhir sekali saja
+    const { data: lastData } = await supabase.from('rpjmdesa').select('kode_rpjmdesa').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(1);
+    let lastNum = 0;
+    if (lastData && lastData.length > 0) {
+      const match = lastData[0].kode_rpjmdesa?.match(/(\d+)$/);
+      if (match) lastNum = parseInt(match[1], 10);
+    }
+
+    const rows = selectedUsulan.map((usulanId: string, idx: number) => {
       const u = usulanList.find((x: any) => x.id === usulanId);
-      if (!u) continue;
-      const payload = {
+      if (!u) return null;
+      return {
         tenant_id: tenantId,
-        kode_rpjmdesa: await generateKode(),
+        kode_rpjmdesa: `RPJM-${new Date().getFullYear()}-${String(lastNum + idx + 1).padStart(5, '0')}`,
         nama_program: u.uraian_usulan,
         kategori: u.kategori,
         lokasi: u.lokasi_rt_rw || null,
@@ -180,17 +187,31 @@ export default function AdminRPJMDesa() {
         keterangan: u.keterangan || null,
         status: 'Rencana'
       };
-      const { error } = await supabase.from('rpjmdesa').insert(payload);
-      if (!error) {
-        successCount++;
-        const tags = [...(u.diteruskan_tags || []), `RPJMDes ${new Date().getFullYear()}`];
-        await supabase.from('usulan_desas').update({ diteruskan_tags: tags, rpjmdesa_id: null }).eq('id', u.id);
-      }
+    }).filter(Boolean);
+
+    if (rows.length === 0) { showToast('Tidak ada usulan valid', 'error'); return; }
+
+    // Batch insert langsung
+    const { error } = await supabase.from('rpjmdesa').insert(rows);
+    if (error) {
+      showToast(`Gagal menarik usulan: ${error.message}`, 'error');
+      return;
     }
 
-    showToast(`${successCount} usulan berhasil ditarik ke RPJMDesa`, 'success');
+    // Update tag di usulan_desas
+    const usulanIds = selectedUsulan.filter((id: string) => usulanList.find((u: any) => u.id === id));
+    for (const uid of usulanIds) {
+      const u = usulanList.find((x: any) => x.id === uid);
+      if (!u) continue;
+      const tags = [...(u.diteruskan_tags || []), `RPJMDes ${new Date().getFullYear()}`];
+      await supabase.from('usulan_desas').update({ diteruskan_tags: tags, rpjmdesa_id: null }).eq('id', u.id);
+    }
+
+    showToast(`${rows.length} usulan berhasil ditarik ke RPJMDesa`, 'success');
     setShowFromUsulan(false);
     setSelectedUsulan([]);
+    setUsulanSearch('');
+    setUsulanStatusFilter('Semua');
     loadData();
   };
 
