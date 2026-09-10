@@ -503,8 +503,13 @@ export default function AdminRPJMDesa() {
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Estimasi Anggaran (Rp)</label>
-                <input type="number" value={form.anggaran_estimasi} onChange={e => setForm({ ...form, anggaran_estimasi: parseFloat(e.target.value) || 0 })}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400">Rp</span>
+                  <input type="text" inputMode="numeric" value={form.anggaran_estimasi === 0 ? '' : form.anggaran_estimasi.toLocaleString('id-ID')}
+                    onChange={e => { const raw = e.target.value.replace(/[^0-9]/g, ''); setForm({ ...form, anggaran_estimasi: raw ? parseInt(raw, 10) : 0 }); }}
+                    placeholder="0"
+                    className="w-full pl-10 pr-4 border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+                </div>
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Skala Prioritas</label>
@@ -678,8 +683,13 @@ export default function AdminRPJMDesa() {
               <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
                 <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyAnggaran} onChange={e => setMassEditForm({ ...massEditForm, applyAnggaran: e.target.checked })} />
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 w-24">Anggaran</label>
-                <input type="number" value={massEditForm.anggaran_estimasi} onChange={e => setMassEditForm({ ...massEditForm, anggaran_estimasi: +e.target.value })} disabled={!massEditForm.applyAnggaran}
-                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+                <div className="flex-1 relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">Rp</span>
+                  <input type="text" inputMode="numeric" value={massEditForm.anggaran_estimasi === 0 ? '' : massEditForm.anggaran_estimasi.toLocaleString('id-ID')}
+                    onChange={e => { const raw = e.target.value.replace(/[^0-9]/g, ''); setMassEditForm({ ...massEditForm, anggaran_estimasi: raw ? parseInt(raw, 10) : 0 }); }}
+                    disabled={!massEditForm.applyAnggaran} placeholder="0"
+                    className="w-full pl-8 pr-4 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+                </div>
               </div>
 
               <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800">
