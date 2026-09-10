@@ -41,7 +41,34 @@ export interface Pencairan {
 }
 
 const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
-const TAHAPAN_OPTIONS = ['Belum', 'Dianggarkan', 'Tahap 1', 'Tahap 2', 'Tahap 3', 'Selesai'];
+const TAHAPAN_OPTIONS = ['Belum', 'Dianggarkan', 'Berlangsung', 'Selesai'];
+
+const getTahapanStatus = (anggaran: number, totalPencairan: number): string => {
+  if (anggaran === 0) return 'Belum';
+  if (totalPencairan === 0) return 'Dianggarkan';
+  if (totalPencairan >= anggaran) return 'Selesai';
+  return 'Berlangsung';
+};
+
+const tahapanColor = (t: string) => {
+  switch (t) {
+    case 'Belum': return 'bg-gray-100 text-gray-600 border-gray-200';
+    case 'Dianggarkan': return 'bg-blue-50 text-blue-600 border-blue-200';
+    case 'Berlangsung': return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'Selesai': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    default: return 'bg-gray-100 text-gray-600 border-gray-200';
+  }
+};
+
+const tahapanIcon = (t: string) => {
+  switch (t) {
+    case 'Belum': return <Clock size={10} />;
+    case 'Dianggarkan': return <AlertTriangle size={10} />;
+    case 'Berlangsung': return <Clock size={10} />;
+    case 'Selesai': return <CheckCircle2 size={10} />;
+    default: return null;
+  }
+};
 
 const kategoriColor = (k: string) => {
   switch (k) {
@@ -88,7 +115,7 @@ export default function AdminAPBDesa() {
 
   const [selectedForMassEdit, setSelectedForMassEdit] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
-  const [massEditForm, setMassEditForm] = useState({ anggaran: '', tahapan_pencairan: '', keterangan_pencairan: '' });
+  const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '' });
 
   const currentYear = new Date().getFullYear();
 
@@ -104,8 +131,6 @@ export default function AdminAPBDesa() {
   const [pencairanFoto, setPencairanFoto] = useState<File | null>(null);
   const [pencairanFotoPreview, setPencairanFotoPreview] = useState<string | null>(null);
   const fotoInputRef = useRef<HTMLInputElement>(null);
-
-  const [tahapanForm, setTahapanForm] = useState('Belum');
 
   useEffect(() => { loadData(); }, []);
 
@@ -150,7 +175,13 @@ export default function AdminAPBDesa() {
         const pc = newPencairanMap.get(i.id) || [];
         i.total_pencairan = pc.reduce((s, p) => s + (p.jumlah || 0), 0);
         i.jumlah_foto = pc.filter(p => p.foto_url).length;
+        i.tahapan_pencairan = getTahapanStatus(i.anggaran, i.total_pencairan || 0);
       });
+
+      const updates = items.filter(i => i.tahapan_pencairan !== (data as any[]).find((d: any) => d.id === i.id)?.tahapan_pencairan);
+      for (const u of updates) {
+        await supabase.from('apbdesa').update({ tahapan_pencairan: u.tahapan_pencairan, updated_at: new Date().toISOString() }).eq('id', u.id);
+      }
 
       setPencairanMap(newPencairanMap);
       setImportedRkpIds(linked);
@@ -248,6 +279,10 @@ export default function AdminAPBDesa() {
       updated_at: new Date().toISOString()
     }).eq('id', showPencairanModal.id);
 
+    const newTotal = (showPencairanModal.total_pencairan || 0) + jumlah;
+    const autoTahapan = getTahapanStatus(showPencairanModal.anggaran, newTotal);
+    await supabase.from('apbdesa').update({ tahapan_pencairan: autoTahapan }).eq('id', showPencairanModal.id);
+
     showToast('Pencairan berhasil dicatat', 'success');
     setPencairanForm({ jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: '' });
     setPencairanFoto(null); setPencairanFotoPreview(null);
@@ -259,16 +294,6 @@ export default function AdminAPBDesa() {
     const { error } = await supabase.from('apbdesa_pencairan').delete().eq('id', pencairanId);
     if (error) { showToast('Gagal menghapus', 'error'); return; }
     showToast('Berhasil dihapus', 'success'); loadData();
-  };
-
-  const handleUpdateTahapan = async (apbdesaId: string, tahapan: string) => {
-    const { error } = await supabase.from('apbdesa').update({
-      tahapan_pencairan: tahapan,
-      updated_at: new Date().toISOString()
-    }).eq('id', apbdesaId);
-    if (error) { showToast('Gagal update tahapan', 'error'); return; }
-    setTahapanForm(tahapan);
-    showToast('Tahapan diperbarui', 'success'); loadData();
   };
 
   const handleDelete = async (id: string) => {
@@ -284,7 +309,6 @@ export default function AdminAPBDesa() {
     if (!tenantId) return;
     const updatePayload: Record<string, any> = { updated_at: new Date().toISOString() };
     if (massEditForm.anggaran !== '') updatePayload.anggaran = parseFloat(massEditForm.anggaran.replace(/\./g, '')) || 0;
-    if (massEditForm.tahapan_pencairan !== '') updatePayload.tahapan_pencairan = massEditForm.tahapan_pencairan;
     if (massEditForm.keterangan_pencairan !== '') updatePayload.keterangan_pencairan = massEditForm.keterangan_pencairan;
     if (Object.keys(updatePayload).length <= 1) { showToast('Isi minimal 1 field untuk diupdate', 'error'); return; }
     const chunks: string[][] = [];
@@ -295,7 +319,7 @@ export default function AdminAPBDesa() {
       if (!error) totalUpdated += chunk.length;
     }
     showToast(`${totalUpdated} kegiatan berhasil diupdate`, 'success');
-    setSelectedForMassEdit([]); setShowMassEdit(false); setMassEditForm({ anggaran: '', tahapan_pencairan: '', keterangan_pencairan: '' }); loadData();
+    setSelectedForMassEdit([]); setShowMassEdit(false); setMassEditForm({ anggaran: '', keterangan_pencairan: '' }); loadData();
   };
 
   const handleImportFromRkp = async () => {
@@ -405,25 +429,15 @@ export default function AdminAPBDesa() {
     );
   };
 
-  const tahapanProgress = (current: string) => {
-    const idx = TAHAPAN_OPTIONS.indexOf(current);
+  const TahapanBadge = ({ item }: { item: APBDesa }) => {
+    const total = item.total_pencairan || 0;
+    const tahapan = getTahapanStatus(item.anggaran, total);
+    const pct = item.anggaran > 0 ? Math.round((total / item.anggaran) * 100) : 0;
     return (
-      <div className="flex items-center gap-0.5">
-        {TAHAPAN_OPTIONS.map((t, i) => (
-          <React.Fragment key={t}>
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold border-2 transition-all ${
-              i < idx ? 'bg-emerald-500 border-emerald-500 text-white' :
-              i === idx ? 'bg-blue-500 border-blue-500 text-white ring-2 ring-blue-200' :
-              'bg-gray-100 dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-400'
-            }`}>
-              {i < idx ? <CheckCircle2 size={10} /> : i + 1}
-            </div>
-            {i < TAHAPAN_OPTIONS.length - 1 && (
-              <div className={`w-3 h-0.5 ${i < idx ? 'bg-emerald-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
+      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${tahapanColor(tahapan)}`}>
+        {tahapanIcon(tahapan)} {tahapan}
+        {tahapan === 'Berlangsung' && <span className="ml-1 text-[9px] font-black">{pct}%</span>}
+      </span>
     );
   };
 
@@ -489,7 +503,7 @@ export default function AdminAPBDesa() {
             <Download size={14} /> Export
           </button>
           {selectedForMassEdit.length > 0 && (
-            <button onClick={() => { setMassEditForm({ anggaran: '', tahapan_pencairan: '', keterangan_pencairan: '' }); setShowMassEdit(true); }}
+            <button onClick={() => { setMassEditForm({ anggaran: '', keterangan_pencairan: '' }); setShowMassEdit(true); }}
               className="px-4 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 flex items-center gap-2">
               <Edit2 size={14} /> Edit Massal ({selectedForMassEdit.length})
             </button>
@@ -537,7 +551,7 @@ export default function AdminAPBDesa() {
                     </td>
                     <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">{formatRp(r.anggaran)}</td>
                     <td className="py-3 px-4"><PencairanBadge item={r} /></td>
-                    <td className="py-3 px-4">{tahapanProgress(r.tahapan_pencairan)}</td>
+                    <td className="py-3 px-4"><TahapanBadge item={r} /></td>
                     <td className="py-3 px-4 text-center whitespace-nowrap">
                       {hl ? (
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${hl.color} ${hl.bg} ${hl.border}`}>
@@ -552,7 +566,6 @@ export default function AdminAPBDesa() {
                     <td className="py-3 px-4 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => {
-                          setTahapanForm(r.tahapan_pencairan);
                           setPencairanForm({ jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: '' });
                           setPencairanFoto(null); setPencairanFotoPreview(null);
                           setShowPencairanModal(r);
@@ -604,22 +617,6 @@ export default function AdminAPBDesa() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-500">{pct}% terpakai</span>
                   <span className="text-xs font-bold text-gray-500">Sisa {formatRp(Math.max(0, showPencairanModal.anggaran - totalPc))}</span>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Status Tahapan</label>
-                  <div className="flex items-center gap-1.5">
-                    {TAHAPAN_OPTIONS.map(t => (
-                      <button key={t} onClick={() => handleUpdateTahapan(showPencairanModal.id, t)}
-                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-all ${
-                          showPencairanModal.tahapan_pencairan === t
-                            ? 'bg-emerald-500 border-emerald-500 text-white'
-                            : 'border-gray-200 dark:border-slate-700 hover:border-emerald-300 text-gray-600 dark:text-slate-400'
-                        }`}>
-                        {t}
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
 
@@ -734,21 +731,6 @@ export default function AdminAPBDesa() {
                   <input type="text" inputMode="numeric" value={massEditForm.anggaran}
                     onChange={e => { const raw = e.target.value.replace(/\D/g, ''); setMassEditForm({ ...massEditForm, anggaran: raw ? parseInt(raw).toLocaleString('id-ID') : '' }); }}
                     placeholder="0" className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 pl-10 text-sm font-medium bg-white dark:bg-slate-900" />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-2 block">Tahapan Pencairan</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {TAHAPAN_OPTIONS.map(t => (
-                    <button key={t} onClick={() => setMassEditForm({ ...massEditForm, tahapan_pencairan: massEditForm.tahapan_pencairan === t ? '' : t })}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all text-center ${
-                        massEditForm.tahapan_pencairan === t
-                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-md'
-                          : 'border-gray-200 dark:border-slate-700 hover:border-emerald-300 text-gray-600 dark:text-slate-400'
-                      }`}>
-                      {t}
-                    </button>
-                  ))}
                 </div>
               </div>
               <div>
