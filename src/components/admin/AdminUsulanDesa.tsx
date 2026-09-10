@@ -823,7 +823,7 @@ ${rowsHtml}
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-4 shadow-sm dark:shadow-none flex flex-col lg:flex-row gap-3">
+      <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-slate-800 p-4 shadow-sm dark:shadow-none flex flex-col lg:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -861,11 +861,10 @@ ${rowsHtml}
       </div>
 
       {/* Spreadsheet Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
-        <div className="w-full overflow-x-auto rounded-2xl border border-slate-200/80 shadow-sm bg-white">
-          <table className="w-full text-left min-w-[1100px]">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/40">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-x-auto">
+        <table className="w-full text-left min-w-[1100px]">
+          <thead className="sticky top-[108px] z-20">
+            <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/90 dark:bg-slate-800/90 backdrop-blur-xl">
                 <th className="w-10 px-3 py-3 text-center shrink-0">
                   <input
                     ref={masterCheckRef}
@@ -1074,7 +1073,6 @@ ${rowsHtml}
               })}
             </tbody>
           </table>
-        </div>
         {!loading && filtered.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-xs text-gray-500 dark:text-slate-400 font-semibold">
             Menampilkan {filtered.length} dari {list.length} usulan{selectedIds.size > 0 && <span className="text-emerald-600 dark:text-emerald-400"> · {selectedIds.size} terpilih</span>}
