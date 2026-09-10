@@ -491,12 +491,12 @@ export default function AdminAspirasi({
               </div>
             </div>
             
-            <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800 flex justify-end gap-3">
+            <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800">
               <button 
-                onClick={() => setSelectedAspirasi(null)}
-                className="px-6 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+                onClick={handleUpdateStatus}
+                className="w-full py-3 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-md shadow-blue-600/20 transition-colors"
               >
-                Tutup
+                Kirim Jawaban
               </button>
             </div>
           </div>
