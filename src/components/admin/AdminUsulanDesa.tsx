@@ -157,6 +157,10 @@ export default function AdminUsulanDesa() {
     google_drive_download_url: '',
   });
 
+  // ── Extended data for pipeline & terakomodir auto-detection ──
+  const [apbdesaYearMap, setApbdesaYearMap] = useState<Record<string, string>>({}); // usulan_id → tahun
+  const [hasPencairanSet, setHasPencairanSet] = useState<Set<string>>(new Set()); // usulan_ids that have pencairan
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -165,7 +169,91 @@ export default function AdminUsulanDesa() {
       if (tenantId) builder = builder.eq('tenant_id', tenantId);
       const { data, error } = await builder;
       if (error) throw error;
-      setList((data || []) as UsulanDesa[]);
+      const usulanList = (data || []) as UsulanDesa[];
+      setList(usulanList);
+
+      // Fetch linked APBDesa data to detect pipeline year & pencairan status
+      if (tenantId && usulanList.length > 0) {
+        try {
+          const yearMap: Record<string, string> = {};
+          const pencairanSet = new Set<string>();
+
+          // Step 1: Get all rpjmdesa records with usulan_id
+          const { data: rpjmData } = await supabase.from('rpjmdesa')
+            .select('id, usulan_id')
+            .eq('tenant_id', tenantId)
+            .not('usulan_id', 'is', null);
+          if (rpjmData && rpjmData.length > 0) {
+            const rpjmIdToUsulan: Record<string, string> = {};
+            const usulanToRpjm: Record<string, string> = {};
+            rpjmData.forEach((r: any) => {
+              if (r.usulan_id) {
+                rpjmIdToUsulan[r.id] = r.usulan_id;
+                usulanToRpjm[r.usulan_id] = r.id;
+              }
+            });
+
+            // Step 2: Get rkpdesa records linked to these rpjmdesa
+            const rpjmIds = rpjmData.map((r: any) => r.id);
+            const rkpIdToUsulan: Record<string, string> = {};
+            for (let i = 0; i < rpjmIds.length; i += 100) {
+              const chunk = rpjmIds.slice(i, i + 100);
+              const { data: rkpData } = await supabase.from('rkpdesa')
+                .select('id, rpjmdesa_id')
+                .in('rpjmdesa_id', chunk);
+              if (rkpData) {
+                rkpData.forEach((r: any) => {
+                  const usulanId = rpjmIdToUsulan[r.rpjmdesa_id];
+                  if (usulanId) rkpIdToUsulan[r.id] = usulanId;
+                });
+              }
+            }
+
+            // Step 3: Get apbdesa records linked to these rkpdesa
+            const rkpIds = Object.keys(rkpIdToUsulan);
+            const apbIdsByUsulan: Record<string, string[]> = {};
+            for (let i = 0; i < rkpIds.length; i += 100) {
+              const chunk = rkpIds.slice(i, i + 100);
+              const { data: apbData } = await supabase.from('apbdesa')
+                .select('id, rkpdesa_id, tahun')
+                .eq('tenant_id', tenantId)
+                .in('rkpdesa_id', chunk);
+              if (apbData) {
+                apbData.forEach((a: any) => {
+                  const usulanId = rkpIdToUsulan[a.rkpdesa_id];
+                  if (usulanId) {
+                    yearMap[usulanId] = a.tahun || '';
+                    if (!apbIdsByUsulan[usulanId]) apbIdsByUsulan[usulanId] = [];
+                    apbIdsByUsulan[usulanId].push(a.id);
+                  }
+                });
+              }
+            }
+
+            // Step 4: Check pencairan for these apbdesa
+            const allApbIds = Object.values(apbIdsByUsulan).flat();
+            for (let i = 0; i < allApbIds.length; i += 100) {
+              const chunk = allApbIds.slice(i, i + 100);
+              const { data: penData } = await supabase.from('apbdesa_pencairan')
+                .select('apbdesa_id')
+                .in('apbdesa_id', chunk);
+              if (penData) {
+                const apbIdsWithPen = new Set(penData.map((p: any) => p.apbdesa_id));
+                Object.entries(apbIdsByUsulan).forEach(([usulanId, apbIds]) => {
+                  if (apbIds.some(id => apbIdsWithPen.has(id))) {
+                    pencairanSet.add(usulanId);
+                  }
+                });
+              }
+            }
+
+            setApbdesaYearMap(yearMap);
+            setHasPencairanSet(pencairanSet);
+          }
+        } catch (e) {
+          console.warn('Gagal memuat data APBDesa untuk pipeline:', e);
+        }
+      }
     } catch (e: any) {
       console.error('Gagal memuat usulan desa:', e);
       showToast('Gagal memuat data usulan. Pastikan tabel usulan_desas sudah dibuat.', 'error');
@@ -775,10 +863,10 @@ ${rowsHtml}
       {/* Spreadsheet Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
         <div className="w-full overflow-x-auto rounded-2xl border border-slate-200/80 shadow-sm bg-white">
-          <table className="w-full text-left min-w-[1408px]">
+          <table className="w-full text-left min-w-[1100px]">
             <thead>
               <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/40">
-                <th className="w-12 px-4 py-4 text-center shrink-0">
+                <th className="w-10 px-3 py-3 text-center shrink-0">
                   <input
                     ref={masterCheckRef}
                     type="checkbox"
@@ -788,15 +876,15 @@ ${rowsHtml}
                     title="Pilih semua baris terfilter"
                   />
                 </th>
-                <th className="min-w-[150px] px-4 py-4 whitespace-nowrap shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID Usulan</th>
-                <th className="min-w-[340px] max-w-[550px] px-6 py-4 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
-                <th className="min-w-[140px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
-                <th className="min-w-[180px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
-                <th className="min-w-[120px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pipeline</th>
-                <th className="min-w-[180px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
-                <th className="min-w-[100px] px-4 py-4 whitespace-nowrap text-center text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
-                <th className="min-w-[150px] px-4 py-4 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan/Foto</th>
-                <th className="min-w-[120px] px-4 py-4 whitespace-nowrap text-right shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
+                <th className="min-w-[120px] px-3 py-3 whitespace-nowrap shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID Usulan</th>
+                <th className="min-w-[280px] max-w-[480px] px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
+                <th className="min-w-[100px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
+                <th className="min-w-[120px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
+                <th className="min-w-[100px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pipeline</th>
+                <th className="min-w-[110px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
+                <th className="min-w-[80px] px-3 py-3 whitespace-nowrap text-center text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
+                <th className="min-w-[60px] px-3 py-3 whitespace-nowrap text-center text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Foto</th>
+                <th className="min-w-[80px] px-3 py-3 whitespace-nowrap text-right shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -826,7 +914,7 @@ ${rowsHtml}
                     className={`border-b border-gray-50 dark:border-slate-800/60 transition-colors cursor-pointer hover:bg-slate-50/80 group ${isSelected ? 'bg-emerald-50/60 dark:bg-emerald-950/20' : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}
                     title="Klik untuk lihat detail usulan"
                   >
-                    <td className="w-12 px-4 py-4 text-center shrink-0">
+                    <td className="w-10 px-3 py-3 text-center shrink-0">
                       <input
                         type="checkbox"
                         checked={isSelected}
@@ -836,11 +924,11 @@ ${rowsHtml}
                         title="Pilih usulan"
                       />
                     </td>
-                    <td className="min-w-[150px] px-4 py-4 whitespace-nowrap shrink-0">
+                    <td className="min-w-[120px] px-3 py-3 whitespace-nowrap shrink-0">
                       <span className="whitespace-nowrap inline-block text-emerald-700 dark:text-emerald-300 text-xs font-mono font-semibold">{u.kode_usulan}</span>
                       <span className="block text-[10px] text-gray-400 mt-0.5">{new Date(u.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                     </td>
-                    <td className="min-w-[340px] max-w-[550px] px-6 py-4">
+                    <td className="min-w-[280px] max-w-[480px] px-4 py-3">
                       <p
                         className="font-semibold text-slate-800 dark:text-slate-100 text-sm leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
                         title="Klik untuk lihat detail usulan"
@@ -867,23 +955,23 @@ ${rowsHtml}
                         </button>
                       )}
                     </td>
-                    <td className="min-w-[140px] px-4 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${kodeSektorColor(u.kategori)}`}>{u.kategori}</span>
+                    <td className="min-w-[100px] px-3 py-3 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-0.5 rounded-lg text-[10px] font-bold border whitespace-nowrap ${kodeSektorColor(u.kategori)}`}>{u.kategori}</span>
                     </td>
-                    <td className="min-w-[180px] px-4 py-4 whitespace-nowrap">
+                    <td className="min-w-[120px] px-3 py-3 whitespace-nowrap">
                       {(u.diteruskan_tags || []).length === 0 ? (
                         <span className="text-xs text-gray-400">—</span>
                       ) : (
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-1">
                           {(u.diteruskan_tags || []).map((tag, i) => (
-                            <span key={i} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-black border ${tagColor(tag)}`}>
-                              <Link2 className="w-3 h-3" /> {tag}
+                            <span key={i} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black border ${tagColor(tag)}`}>
+                              <Link2 className="w-2.5 h-2.5" /> {tag}
                             </span>
                           ))}
                         </div>
                       )}
                     </td>
-                    <td className="min-w-[120px] px-4 py-4 whitespace-nowrap">
+                    <td className="min-w-[100px] px-3 py-3 whitespace-nowrap">
                       {(() => {
                         const ps = u.pipeline_status || 'Diajukan';
                         const psColors: Record<string, string> = {
@@ -896,27 +984,36 @@ ${rowsHtml}
                           'Selesai': 'bg-emerald-50 text-emerald-700 border-emerald-200',
                           'Ditolak': 'bg-rose-50 text-rose-700 border-rose-200',
                         };
+                        const displayLabel = ps === 'APBDesa' && apbdesaYearMap[u.id]
+                          ? `APBDesa ${apbdesaYearMap[u.id]}`
+                          : ps;
                         return (
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-bold border whitespace-nowrap ${psColors[ps] || psColors['Diajukan']}`}>
-                            {ps === 'Selesai' ? <CheckCircle2 className="w-3 h-3" /> : ps === 'Ditolak' ? <Ban className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                            {ps}
+                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${psColors[ps] || psColors['Diajukan']}`}>
+                            {ps === 'Selesai' ? <CheckCircle2 className="w-2.5 h-2.5" /> : ps === 'Ditolak' ? <Ban className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
+                            {displayLabel}
                           </span>
                         );
                       })()}
                     </td>
-                    <td className="min-w-[180px] px-4 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border whitespace-nowrap ${statusTerakomodirBadge(u.status_terakomodir)}`}>
-                        {u.status_terakomodir === 'Belum' ? <AlertTriangle className="w-3 h-3" /> : u.status_terakomodir === 'Ditolak' ? <Ban className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
-                        {u.status_terakomodir}
-                      </span>
+                    <td className="min-w-[110px] px-3 py-3 whitespace-nowrap">
+                      {(() => {
+                        const isSelesai = hasPencairanSet.has(u.id);
+                        const displayStatus = isSelesai ? 'Selesai' : u.status_terakomodir;
+                        return (
+                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${isSelesai ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : statusTerakomodirBadge(displayStatus)}`}>
+                            {isSelesai ? <CheckCircle2 className="w-2.5 h-2.5" /> : displayStatus === 'Belum' ? <AlertTriangle className="w-2.5 h-2.5" /> : displayStatus === 'Ditolak' ? <Ban className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5" />}
+                            {displayStatus}
+                          </span>
+                        );
+                      })()}
                     </td>
-                    <td className="min-w-[100px] px-4 py-4 whitespace-nowrap text-center">
+                    <td className="min-w-[80px] px-3 py-3 whitespace-nowrap text-center">
                       {u.skala_prioritas ? (
                         <div className="flex items-center justify-center gap-1">
                           <span className="text-sm font-black text-amber-600 dark:text-amber-400">{u.skala_prioritas}</span>
                           <div className="flex gap-0.5">
                             {[1, 2, 3, 4, 5].map(n => (
-                              <span key={n} className={`w-1.5 h-4 rounded-sm ${n <= u.skala_prioritas ? 'bg-amber-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
+                              <span key={n} className={`w-1.5 h-3 rounded-sm ${n <= u.skala_prioritas ? 'bg-amber-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
                             ))}
                           </div>
                         </div>
@@ -924,62 +1021,38 @@ ${rowsHtml}
                         <span className="text-xs text-gray-400">—</span>
                       )}
                     </td>
-                    <td className="min-w-[150px] px-4 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {u.foto_url ? (
-                          <img
-                            src={u.foto_url}
-                            alt="Dokumentasi lokasi"
-                            className="w-12 h-12 rounded-lg object-cover border border-gray-200 dark:border-slate-700 cursor-pointer"
-                            onClick={(e) => { e.stopPropagation(); setDetailTarget(u); }}
-                            title="Lihat foto"
-                          />
-                        ) : (
-                          <span className="w-12 h-12 rounded-lg bg-gray-50 dark:bg-slate-800 border border-dashed border-gray-200 dark:border-slate-700 flex items-center justify-center">
-                            <ImageIcon className="w-4 h-4 text-gray-300 dark:text-slate-600" />
-                          </span>
-                        )}
-                        <div className="min-w-0">
-                          {u.keterangan ? (
-                            <p className="text-[11px] text-gray-500 dark:text-slate-400 line-clamp-2 max-w-[160px]">{u.keterangan}</p>
-                          ) : (
-                            <span className="text-[11px] text-gray-300 dark:text-slate-600">Tidak ada</span>
-                          )}
-                          {u.google_drive_file_id && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); window.open(u.google_drive_view_url || u.google_drive_download_url || undefined, '_blank'); }}
-                              className="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[9px] font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors cursor-pointer"
-                              title="Buka lampiran di Storage"
-                            >
-                              <FolderOpen className="w-2.5 h-2.5" /> Lampiran
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                    <td className="min-w-[60px] px-3 py-3 whitespace-nowrap text-center">
+                      {u.foto_url ? (
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 cursor-pointer" onClick={(e) => { e.stopPropagation(); setDetailTarget(u); }} title="Lihat foto">
+                          <ImageIcon className="w-3 h-3" />
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-300 dark:text-slate-600">—</span>
+                      )}
                     </td>
-                    <td className="min-w-[120px] px-4 py-4 whitespace-nowrap text-right shrink-0">
+                    <td className="min-w-[80px] px-3 py-3 whitespace-nowrap text-right shrink-0">
                       <div className="flex items-center justify-end gap-0.5">
                         <button
                           onClick={(e) => { e.stopPropagation(); setDetailTarget(u); }}
                           title="Lihat detail"
-                          className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 hover:text-sky-700 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-sky-50 dark:hover:bg-sky-950/40 hover:text-sky-700 transition-colors cursor-pointer"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={(e) => { e.stopPropagation(); openEditModal(u); }}
                           title="Edit"
-                          className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:text-emerald-700 transition-colors cursor-pointer"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <div className="relative">
                           <button
                             onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === u.id ? null : u.id); }}
                             title="Aksi lainnya"
-                            className={`p-2 rounded-lg transition-colors cursor-pointer ${openMenuId === u.id ? 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${openMenuId === u.id ? 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                           >
-                            <MoreVertical className="w-4 h-4" />
+                            <MoreVertical className="w-3.5 h-3.5" />
                           </button>
                           {openMenuId === u.id && (
                             <>
