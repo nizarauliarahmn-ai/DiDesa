@@ -53,6 +53,7 @@ const statusColor = (s: string) => {
 };
 
 export default function AdminRKPDesa() {
+  const currentYear = new Date().getFullYear();
   const [list, setList] = useState<RKPDesa[]>([]);
   const [rpjmList, setRpjmList] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,8 +76,6 @@ export default function AdminRKPDesa() {
     applyLokasi: false, lokasi: '',
     applyKeterangan: false, keterangan: '',
   });
-
-  const currentYear = new Date().getFullYear();
 
   const [form, setForm] = useState({
     nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', tahun: currentYear,
