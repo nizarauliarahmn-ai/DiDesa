@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Filter, CheckCircle, Clock, AlertTriangle, X, MessageSquareText, UploadCloud, MessageCircle, Printer, Calendar } from 'lucide-react';
+import { Search, Filter, CheckCircle, Clock, AlertTriangle, X, MessageSquareText, UploadCloud, MessageCircle, Printer, Calendar, Trash2 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -57,6 +57,17 @@ export default function AdminAspirasi({
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [printStartDate, setPrintStartDate] = useState('');
   const [printEndDate, setPrintEndDate] = useState('');
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Apakah Anda yakin ingin menghapus aspirasi ini?')) return;
+    const { error } = await supabase.from('aspirasi').delete().eq('id', id);
+    if (error) {
+      showToast('Gagal menghapus aspirasi', 'error');
+      return;
+    }
+    setAspirasiList(prev => prev.filter(a => a.id !== id));
+    showToast('Aspirasi berhasil dihapus', 'success');
+  };
 
   const handlePrint = () => {
     let toPrint = [...aspirasiList];
@@ -336,9 +347,10 @@ export default function AdminAspirasi({
                   </td>
                   <td className="py-4 px-4 text-center">
                     <button 
-                      className="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-100 group-hover:bg-emerald-200 rounded-lg transition-colors cursor-pointer"
+                      onClick={(e) => { e.stopPropagation(); handleDelete(aspirasi.id); }}
+                      className="p-1.5 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                     >
-                      Jawab
+                      <Trash2 size={16} />
                     </button>
                   </td>
                 </tr>
