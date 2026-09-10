@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, ClipboardList, X, Link2,
-  Download, Filter
+  Download, Filter, CheckCircle2
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -63,6 +63,18 @@ export default function AdminRKPDesa() {
   const [showFromRpjm, setShowFromRpjm] = useState(false);
   const [selectedRpjm, setSelectedRpjm] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rpjmSearch, setRpjmSearch] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showMassEdit, setShowMassEdit] = useState(false);
+  const [massEditForm, setMassEditForm] = useState({
+    applyKategori: false, kategori: 'Infrastruktur',
+    applyStatus: false, status: 'Rencana',
+    applyTahun: false, tahun: currentYear,
+    applyAnggaran: false, anggaran: 0,
+    applyPrioritas: false, skala_prioritas: 3,
+    applyLokasi: false, lokasi: '',
+    applyKeterangan: false, keterangan: '',
+  });
 
   const currentYear = new Date().getFullYear();
 
@@ -106,8 +118,13 @@ export default function AdminRKPDesa() {
   const loadRpjm = async () => {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
+    // Ambil semua RPJMDesa, filter tahun + status rencana/berlangsung
     const { data } = await supabase.from('rpjmdesa').select('*').eq('tenant_id', tenantId).lte('tahun_awal', currentYear).gte('tahun_akhir', currentYear).in('status', ['Rencana', 'Berlangsung']);
-    setRpjmList(data || []);
+    // Tandai mana yang sudah ditarik ke RKPDesa
+    const { data: rkpData } = await supabase.from('rkpdesa').select('rpjmdesa_id').eq('tenant_id', tenantId).not('rpjmdesa_id', 'is', null);
+    const linkedIds = new Set((rkpData || []).map((r: any) => r.rpjmdesa_id));
+    const list = (data || []).map((r: any) => ({ ...r, _alreadyLinked: linkedIds.has(r.id) }));
+    setRpjmList(list);
   };
 
   const handleSave = async () => {
@@ -155,13 +172,20 @@ export default function AdminRKPDesa() {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
 
-    let successCount = 0;
-    for (const rpjmId of selectedRpjm) {
+    // Batch kode
+    const { data: lastData } = await supabase.from('rkpdesa').select('kode_rkpdesa').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(1);
+    let lastNum = 0;
+    if (lastData && lastData.length > 0) {
+      const match = lastData[0].kode_rkpdesa?.match(/(\d+)$/);
+      if (match) lastNum = parseInt(match[1], 10);
+    }
+
+    const rows = selectedRpjm.map((rpjmId: string, idx: number) => {
       const r = rpjmList.find((x: any) => x.id === rpjmId);
-      if (!r) continue;
-      const payload = {
+      if (!r) return null;
+      return {
         tenant_id: tenantId,
-        kode_rkpdesa: await generateKode(),
+        kode_rkpdesa: `RKP-${currentYear}-${String(lastNum + idx + 1).padStart(5, '0')}`,
         rpjmdesa_id: r.id,
         nama_kegiatan: r.nama_program,
         kategori: r.kategori,
@@ -173,11 +197,50 @@ export default function AdminRKPDesa() {
         keterangan: r.keterangan || null,
         status: 'Rencana'
       };
-      const { error } = await supabase.from('rkpdesa').insert(payload);
-      if (!error) successCount++;
+    }).filter(Boolean);
+
+    if (rows.length === 0) { showToast('Tidak ada data valid', 'error'); return; }
+
+    const { error } = await supabase.from('rkpdesa').insert(rows);
+    if (error) { showToast(`Gagal menarik: ${error.message}`, 'error'); return; }
+    showToast(`${rows.length} program berhasil ditarik ke RKPDesa`, 'success');
+    setShowFromRpjm(false); setSelectedRpjm([]); setRpjmSearch(''); loadData();
+  };
+
+  const handleMassEdit = async () => {
+    if (selectedIds.length === 0) return;
+    const anyChecked = massEditForm.applyKategori || massEditForm.applyStatus || massEditForm.applyTahun ||
+      massEditForm.applyAnggaran || massEditForm.applyPrioritas || massEditForm.applyLokasi || massEditForm.applyKeterangan;
+    if (!anyChecked) { showToast('Centang minimal 1 field untuk diedit', 'error'); return; }
+
+    const payload: any = {};
+    if (massEditForm.applyKategori) payload.kategori = massEditForm.kategori;
+    if (massEditForm.applyStatus) payload.status = massEditForm.status;
+    if (massEditForm.applyTahun) payload.tahun = massEditForm.tahun;
+    if (massEditForm.applyAnggaran) payload.anggaran = massEditForm.anggaran;
+    if (massEditForm.applyPrioritas) payload.skala_prioritas = massEditForm.skala_prioritas;
+    if (massEditForm.applyLokasi) payload.lokasi = massEditForm.lokasi;
+    if (massEditForm.applyKeterangan) payload.keterangan = massEditForm.keterangan;
+
+    const BATCH = 100;
+    let okCount = 0;
+    for (let i = 0; i < selectedIds.length; i += BATCH) {
+      const chunk = selectedIds.slice(i, i + BATCH);
+      const { error } = await supabase.from('rkpdesa').update(payload).in('id', chunk);
+      if (error) { showToast(`Gagal di batch ${Math.floor(i / BATCH) + 1}: ${error.message}`, 'error'); break; }
+      okCount += chunk.length;
     }
-    showToast(`${successCount} program berhasil ditarik ke RKPDesa`, 'success');
-    setShowFromRpjm(false); setSelectedRpjm([]); loadData();
+    if (okCount === selectedIds.length) {
+      showToast(`${selectedIds.length} kegiatan berhasil diupdate`, 'success');
+    } else {
+      showToast(`${okCount} dari ${selectedIds.length} kegiatan diupdate`, 'success');
+    }
+    setSelectedIds([]); setShowMassEdit(false); loadData();
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filtered.length) { setSelectedIds([]); }
+    else { setSelectedIds(filtered.map(r => r.id)); }
   };
 
   const resetForm = () => {
@@ -274,6 +337,12 @@ export default function AdminRKPDesa() {
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
             <Download size={14} /> Export
           </button>
+          {selectedIds.length > 0 && (
+            <button onClick={() => setShowMassEdit(true)}
+              className="px-4 py-2.5 bg-amber-500 text-white text-sm font-bold rounded-xl hover:bg-amber-600 flex items-center gap-2">
+              <Edit2 size={14} /> Edit Massal ({selectedIds.length})
+            </button>
+          )}
         </div>
       </div>
 
@@ -282,6 +351,11 @@ export default function AdminRKPDesa() {
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
+                <th className="py-3 px-4 text-left w-10">
+                  <input type="checkbox" className="accent-blue-600"
+                    checked={filtered.length > 0 && selectedIds.length === filtered.length}
+                    onChange={toggleSelectAll} />
+                </th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kode</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kategori</th>
@@ -295,7 +369,12 @@ export default function AdminRKPDesa() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map(r => (
-                <tr key={r.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                <tr key={r.id} className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(r.id) ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}>
+                  <td className="py-3 px-4">
+                    <input type="checkbox" className="accent-blue-600"
+                      checked={selectedIds.includes(r.id)}
+                      onChange={e => setSelectedIds(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id))} />
+                  </td>
                   <td className="py-3 px-4 text-xs font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{r.kode_rkpdesa}</td>
                   <td className="py-3 px-4">
                     <p className="text-sm font-bold text-gray-900 dark:text-white max-w-[250px] truncate">{r.nama_kegiatan}</p>
@@ -335,7 +414,7 @@ export default function AdminRKPDesa() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={9} className="py-12 text-center text-gray-500 font-medium">Belum ada data RKPDesa</td></tr>}
+              {filtered.length === 0 && <tr><td colSpan={10} className="py-12 text-center text-gray-500 font-medium">Belum ada data RKPDesa</td></tr>}
             </tbody>
           </table>
         </div>
@@ -412,29 +491,146 @@ export default function AdminRKPDesa() {
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">Tarik dari RPJMDesa</h3>
-              <button onClick={() => { setShowFromRpjm(false); setSelectedRpjm([]); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
+              <button onClick={() => { setShowFromRpjm(false); setSelectedRpjm([]); setRpjmSearch(''); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
             </div>
             <div className="p-5 space-y-4 flex-1 overflow-y-auto">
               <p className="text-sm text-gray-500">Pilih program RPJMDesa tahun {currentYear} untuk ditarik ke RKPDesa:</p>
-              {rpjmList.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada program RPJMDesa aktif tahun ini</p>}
-              {rpjmList.map((r: any) => (
-                <label key={r.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedRpjm.includes(r.id) ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'}`}>
-                  <input type="checkbox" className="mt-1 accent-blue-600"
-                    checked={selectedRpjm.includes(r.id)}
-                    onChange={e => setSelectedRpjm(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id))} />
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white">{r.kode_rpjmdesa} — {r.nama_program}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{r.kategori} {r.lokasi ? `• ${r.lokasi}` : ''} • Est. {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(r.anggaran_estimasi || 0)}</p>
-                  </div>
-                </label>
-              ))}
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input value={rpjmSearch} onChange={e => setRpjmSearch(e.target.value)} placeholder="Cari kode, nama program, atau kategori..."
+                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              {(() => {
+                const filteredRpjm = rpjmList.filter((r: any) => {
+                  const q = rpjmSearch.toLowerCase();
+                  return !q || r.kode_rpjmdesa?.toLowerCase().includes(q) || r.nama_program?.toLowerCase().includes(q) || r.kategori?.toLowerCase().includes(q);
+                });
+                const belumLinked = filteredRpjm.filter((r: any) => !r._alreadyLinked);
+                const sudahLinked = filteredRpjm.filter((r: any) => r._alreadyLinked);
+                return (
+                  <>
+                    {belumLinked.length === 0 && sudahLinked.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada program ditemukan</p>}
+                    {belumLinked.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">Belum Ditarik ({belumLinked.length})</p>
+                        {belumLinked.map((r: any) => (
+                          <label key={r.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedRpjm.includes(r.id) ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'}`}>
+                            <input type="checkbox" className="mt-1 accent-blue-600"
+                              checked={selectedRpjm.includes(r.id)}
+                              onChange={e => setSelectedRpjm(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id))} />
+                            <div>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">{r.kode_rpjmdesa} — {r.nama_program}</p>
+                              <p className="text-xs text-gray-500 mt-0.5">{r.kategori} {r.lokasi ? `• ${r.lokasi}` : ''} • Est. {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(r.anggaran_estimasi || 0)}</p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    {sudahLinked.length > 0 && (
+                      <div className="space-y-2 mt-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sudah Ditarik ({sudahLinked.length})</p>
+                        {sudahLinked.map((r: any) => (
+                          <div key={r.id} className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50/50 opacity-60">
+                            <CheckCircle2 size={16} className="mt-0.5 text-emerald-500 shrink-0" />
+                            <div>
+                              <p className="text-sm font-bold text-gray-500 truncate">{r.kode_rpjmdesa} — {r.nama_program}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">Sudah di RKPDesa</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
             <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
-              <button onClick={() => { setShowFromRpjm(false); setSelectedRpjm([]); }}
+              <button onClick={() => { setShowFromRpjm(false); setSelectedRpjm([]); setRpjmSearch(''); }}
                 className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Batal</button>
               <button onClick={handleImportFromRpjm} disabled={selectedRpjm.length === 0}
                 className="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50">
                 Tarik {selectedRpjm.length} Program
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showMassEdit && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+              <div>
+                <h3 className="text-lg font-black text-gray-900 dark:text-white">Edit Massal</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{selectedIds.length} kegiatan terpilih</p>
+              </div>
+              <button onClick={() => setShowMassEdit(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <p className="text-xs text-gray-500">Centang field yang ingin diubah, lalu isi nilai barunya:</p>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyKategori} onChange={e => setMassEditForm({ ...massEditForm, applyKategori: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 w-24">Kategori</label>
+                <select value={massEditForm.kategori} onChange={e => setMassEditForm({ ...massEditForm, kategori: e.target.value })} disabled={!massEditForm.applyKategori}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40">
+                  {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyStatus} onChange={e => setMassEditForm({ ...massEditForm, applyStatus: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 w-24">Status</label>
+                <select value={massEditForm.status} onChange={e => setMassEditForm({ ...massEditForm, status: e.target.value })} disabled={!massEditForm.applyStatus}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40">
+                  {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyTahun} onChange={e => setMassEditForm({ ...massEditForm, applyTahun: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 w-24">Tahun</label>
+                <input type="number" value={massEditForm.tahun} onChange={e => setMassEditForm({ ...massEditForm, tahun: +e.target.value })} disabled={!massEditForm.applyTahun}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyAnggaran} onChange={e => setMassEditForm({ ...massEditForm, applyAnggaran: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 w-24">Anggaran</label>
+                <input type="number" value={massEditForm.anggaran} onChange={e => setMassEditForm({ ...massEditForm, anggaran: +e.target.value })} disabled={!massEditForm.applyAnggaran}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyPrioritas} onChange={e => setMassEditForm({ ...massEditForm, applyPrioritas: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 w-24">Prioritas</label>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <button key={i} type="button" disabled={!massEditForm.applyPrioritas}
+                      onClick={() => setMassEditForm({ ...massEditForm, skala_prioritas: i })}
+                      className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors disabled:opacity-40 ${massEditForm.skala_prioritas === i ? 'bg-amber-400 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 hover:bg-gray-200'}`}>{i}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50">
+                <input type="checkbox" className="accent-amber-500" checked={massEditForm.applyLokasi} onChange={e => setMassEditForm({ ...massEditForm, applyLokasi: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 w-24">Lokasi</label>
+                <input value={massEditForm.lokasi} onChange={e => setMassEditForm({ ...massEditForm, lokasi: e.target.value })} disabled={!massEditForm.applyLokasi}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40" />
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 dark:border-slate-700 hover:bg-gray-50">
+                <input type="checkbox" className="accent-amber-500 mt-1" checked={massEditForm.applyKeterangan} onChange={e => setMassEditForm({ ...massEditForm, applyKeterangan: e.target.checked })} />
+                <label className="text-xs font-bold text-gray-700 w-24">Keterangan</label>
+                <textarea value={massEditForm.keterangan} onChange={e => setMassEditForm({ ...massEditForm, keterangan: e.target.value })} disabled={!massEditForm.applyKeterangan} rows={2}
+                  className="flex-1 border border-gray-300 dark:border-slate-600 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40 resize-none" />
+              </div>
+            </div>
+            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+              <button onClick={() => setShowMassEdit(false)} className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Batal</button>
+              <button onClick={handleMassEdit} className="px-5 py-2.5 bg-amber-500 text-white text-sm font-bold rounded-xl hover:bg-amber-600">
+                Simpan ke {selectedIds.length} Kegiatan
               </button>
             </div>
           </div>
