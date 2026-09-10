@@ -548,12 +548,6 @@ export default function AdminAPBDesa() {
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
             <Download size={14} /> Export
           </button>
-          {selectedForMassEdit.length > 0 && (
-            <button onClick={() => { setMassEditForm({ anggaran: '', keterangan_pencairan: '' }); setShowMassEdit(true); }}
-              className="px-4 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 flex items-center gap-2">
-              <Edit2 size={14} /> Edit Massal ({selectedForMassEdit.length})
-            </button>
-          )}
         </div>
       </div>
 
