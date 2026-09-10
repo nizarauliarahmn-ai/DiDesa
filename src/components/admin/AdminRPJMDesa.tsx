@@ -182,9 +182,23 @@ export default function AdminRPJMDesa() {
     if (massEditForm.applyLokasi) payload.lokasi = massEditForm.lokasi;
     if (massEditForm.applyKeterangan) payload.keterangan = massEditForm.keterangan;
 
-    const { error } = await supabase.from('rpjmdesa').update(payload).in('id', selectedIds);
-    if (error) { showToast(`Gagal update massal: ${error.message}`, 'error'); return; }
-    showToast(`${selectedIds.length} program berhasil diupdate`, 'success');
+    // Batch update per 100 item untuk hindari Supabase limit
+    const BATCH = 100;
+    let okCount = 0;
+    for (let i = 0; i < selectedIds.length; i += BATCH) {
+      const chunk = selectedIds.slice(i, i + BATCH);
+      const { error } = await supabase.from('rpjmdesa').update(payload).in('id', chunk);
+      if (error) {
+        showToast(`Gagal di batch ${Math.floor(i / BATCH) + 1}: ${error.message}`, 'error');
+        break;
+      }
+      okCount += chunk.length;
+    }
+    if (okCount === selectedIds.length) {
+      showToast(`${selectedIds.length} program berhasil diupdate`, 'success');
+    } else {
+      showToast(`${okCount} dari ${selectedIds.length} program diupdate`, 'success');
+    }
     setSelectedIds([]);
     setShowMassEdit(false);
     loadData();
