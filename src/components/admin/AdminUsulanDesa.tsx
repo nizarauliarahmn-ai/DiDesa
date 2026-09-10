@@ -863,8 +863,8 @@ ${rowsHtml}
       {/* Spreadsheet Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-x-auto">
         <table className="w-full text-left min-w-[1100px]">
-          <thead className="sticky top-[108px] z-20">
-            <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/90 dark:bg-slate-800/90 backdrop-blur-xl">
+          <thead>
+            <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/40">
                 <th className="w-10 px-3 py-3 text-center shrink-0">
                   <input
                     ref={masterCheckRef}
