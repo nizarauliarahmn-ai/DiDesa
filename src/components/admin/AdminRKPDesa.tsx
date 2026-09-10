@@ -93,13 +93,15 @@ export default function AdminRKPDesa() {
     const { data } = await supabase.from('rkpdesa').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
     if (data) {
       const items = data as RKPDesa[];
-      // Enrich with rpjmdesa nama
-      const rpjmIds = items.filter(i => i.rpjmdesa_id).map(i => i.rpjmdesa_id);
-      if (rpjmIds.length > 0) {
-        const { data: rpjmData } = await supabase.from('rpjmdesa').select('id, nama_program').in('id', rpjmIds);
-        const rpjmMap = new Map((rpjmData || []).map((r: any) => [r.id, r.nama_program]));
-        items.forEach(i => { i.rpjmdesa_nama = rpjmMap.get(i.rpjmdesa_id!) || null; });
+      // Enrich with rpjmdesa nama (batch per 100)
+      const rpjmIds = items.filter(i => i.rpjmdesa_id).map(i => i.rpjmdesa_id!);
+      const rpjmMap = new Map<string, string>();
+      for (let i = 0; i < rpjmIds.length; i += 100) {
+        const chunk = rpjmIds.slice(i, i + 100);
+        const { data: rpjmData } = await supabase.from('rpjmdesa').select('id, nama_program').in('id', chunk);
+        (rpjmData || []).forEach((r: any) => rpjmMap.set(r.id, r.nama_program));
       }
+      items.forEach(i => { i.rpjmdesa_nama = rpjmMap.get(i.rpjmdesa_id!) || null; });
       setList(items);
     }
     setLoading(false);
@@ -118,9 +120,7 @@ export default function AdminRKPDesa() {
   const loadRpjm = async () => {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
-    // Ambil semua RPJMDesa, filter tahun + status rencana/berlangsung
     const { data } = await supabase.from('rpjmdesa').select('*').eq('tenant_id', tenantId).lte('tahun_awal', currentYear).gte('tahun_akhir', currentYear).in('status', ['Rencana', 'Berlangsung']);
-    // Tandai mana yang sudah ditarik ke RKPDesa
     const { data: rkpData } = await supabase.from('rkpdesa').select('rpjmdesa_id').eq('tenant_id', tenantId).not('rpjmdesa_id', 'is', null);
     const linkedIds = new Set((rkpData || []).map((r: any) => r.rpjmdesa_id));
     const list = (data || []).map((r: any) => ({ ...r, _alreadyLinked: linkedIds.has(r.id) }));
