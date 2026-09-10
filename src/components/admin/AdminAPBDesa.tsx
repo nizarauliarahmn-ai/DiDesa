@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
-  Download, AlertTriangle, CheckCircle2, Clock, ChevronRight
+  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -25,6 +25,19 @@ export interface APBDesa {
   created_at: string;
   updated_at: string;
   rkpdesa_nama?: string;
+  total_pencairan?: number;
+  jumlah_foto?: number;
+}
+
+export interface Pencairan {
+  id: string;
+  tenant_id: string;
+  apbdesa_id: string;
+  jumlah: number;
+  tanggal: string;
+  keterangan?: string | null;
+  foto_url?: string | null;
+  created_at: string;
 }
 
 const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
@@ -41,41 +54,31 @@ const kategoriColor = (k: string) => {
   }
 };
 
-const getHighlight = (item: APBDesa): { label: string; color: string; bg: string; border: string } | null => {
+const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+const getHighlight = (item: APBDesa, totalPencairan: number): { label: string; color: string; bg: string; border: string } | null => {
   const tahapIdx = TAHAPAN_OPTIONS.indexOf(item.tahapan_pencairan);
-  if (tahapIdx === 0 && item.anggaran > 0) {
-    return { label: 'Perlu Diproses', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' };
-  }
-  if (item.tanggal_pencairan) {
-    const daysSince = Math.floor((Date.now() - new Date(item.tanggal_pencairan).getTime()) / 86400000);
-    if (tahapIdx === 1 && daysSince > 30) {
-      return { label: 'Terlambat', color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-300' };
-    }
-    if (tahapIdx >= 2 && tahapIdx < TAHAPAN_OPTIONS.length - 1 && daysSince > 60) {
-      return { label: 'Stagnan', color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-300' };
-    }
-  }
   if (item.anggaran === 0) {
     return { label: 'Belum Dianggarkan', color: 'text-gray-500', bg: 'bg-gray-50', border: 'border-gray-200' };
   }
+  if (tahapIdx === 0 && item.anggaran > 0 && totalPencairan === 0) {
+    return { label: 'Perlu Diproses', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' };
+  }
+  if (item.tahapan_pencairan === 'Selesai' && totalPencairan < item.anggaran) {
+    return { label: 'Pencairan Kurang', color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-300' };
+  }
   return null;
-};
-
-const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
-
-const daysSince = (date: string | null): number | null => {
-  if (!date) return null;
-  return Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
 };
 
 export default function AdminAPBDesa() {
   const [list, setList] = useState<APBDesa[]>([]);
   const [rkpList, setRkpList] = useState<any[]>([]);
+  const [pencairanMap, setPencairanMap] = useState<Map<string, Pencairan[]>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [filterKategori, setFilterKategori] = useState('Semua');
   const [filterHighlight, setFilterHighlight] = useState('Semua');
   const [showModal, setShowModal] = useState(false);
-  const [showProgressModal, setShowProgressModal] = useState<APBDesa | null>(null);
+  const [showPencairanModal, setShowPencairanModal] = useState<APBDesa | null>(null);
   const [editItem, setEditItem] = useState<APBDesa | null>(null);
   const [showFromRkp, setShowFromRkp] = useState(false);
   const [selectedRkp, setSelectedRkp] = useState<string[]>([]);
@@ -94,9 +97,15 @@ export default function AdminAPBDesa() {
     keterangan_pencairan: ''
   });
 
-  const [progressForm, setProgressForm] = useState({
-    anggaran: 0, tahapan_pencairan: 'Belum', keterangan_pencairan: ''
+  const [pencairanForm, setPencairanForm] = useState({
+    jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: ''
   });
+  const [pencairanUploading, setPencairanUploading] = useState(false);
+  const [pencairanFoto, setPencairanFoto] = useState<File | null>(null);
+  const [pencairanFotoPreview, setPencairanFotoPreview] = useState<string | null>(null);
+  const fotoInputRef = useRef<HTMLInputElement>(null);
+
+  const [tahapanForm, setTahapanForm] = useState('Belum');
 
   useEffect(() => { loadData(); }, []);
 
@@ -111,22 +120,39 @@ export default function AdminAPBDesa() {
       const linked = new Set<string>();
       const rkpIds = items.filter(i => i.rkpdesa_id).map(i => i.rkpdesa_id);
       if (rkpIds.length > 0) {
-        const chunks: string[][] = [];
-        for (let i = 0; i < rkpIds.length; i += 100) chunks.push(rkpIds.slice(i, i + 100));
-        for (const chunk of chunks) {
-          const { data: rkpData } = await supabase.from('rkpdesa').select('id, nama_kegiatan').in('id', chunk);
-          (rkpData || []).forEach((r: any) => { linked.add(r.id); });
-        }
         const allRkpIds = [...new Set(rkpIds)];
         const allChunks: string[][] = [];
         for (let i = 0; i < allRkpIds.length; i += 100) allChunks.push(allRkpIds.slice(i, i + 100));
         const rkpMap = new Map<string, string>();
         for (const chunk of allChunks) {
-          const { data: names } = await supabase.from('rkpdesa').select('id, nama_kegiatan').in('id', chunk);
-          (names || []).forEach((r: any) => rkpMap.set(r.id, r.nama_kegiatan));
+          const { data: rkpData } = await supabase.from('rkpdesa').select('id, nama_kegiatan').in('id', chunk);
+          (rkpData || []).forEach((r: any) => { rkpMap.set(r.id, r.nama_kegiatan); linked.add(r.id); });
         }
         items.forEach(i => { i.rkpdesa_nama = rkpMap.get(i.rkpdesa_id!) || null; });
       }
+
+      const apbIds = items.map(i => i.id);
+      const newPencairanMap = new Map<string, Pencairan[]>();
+      if (apbIds.length > 0) {
+        const apbChunks: string[][] = [];
+        for (let i = 0; i < apbIds.length; i += 100) apbChunks.push(apbIds.slice(i, i + 100));
+        for (const chunk of apbChunks) {
+          const { data: pencairanData } = await supabase.from('apbdesa_pencairan').select('*').in('apbdesa_id', chunk).order('tanggal', { ascending: true });
+          (pencairanData || []).forEach((p: Pencairan) => {
+            const existing = newPencairanMap.get(p.apbdesa_id) || [];
+            existing.push(p);
+            newPencairanMap.set(p.apbdesa_id, existing);
+          });
+        }
+      }
+
+      items.forEach(i => {
+        const pc = newPencairanMap.get(i.id) || [];
+        i.total_pencairan = pc.reduce((s, p) => s + (p.jumlah || 0), 0);
+        i.jumlah_foto = pc.filter(p => p.foto_url).length;
+      });
+
+      setPencairanMap(newPencairanMap);
       setImportedRkpIds(linked);
       setList(items);
     }
@@ -181,18 +207,68 @@ export default function AdminAPBDesa() {
     setShowModal(false); setEditItem(null); resetForm(); loadData();
   };
 
-  const handleUpdateProgress = async () => {
-    if (!showProgressModal) return;
-    const { error } = await supabase.from('apbdesa').update({
-      anggaran: progressForm.anggaran,
-      tahapan_pencairan: progressForm.tahapan_pencairan,
-      keterangan_pencairan: progressForm.keterangan_pencairan || null,
-      tanggal_pencairan: new Date().toISOString(),
+  const handleAddPencairan = async () => {
+    if (!showPencairanModal) return;
+    if (!pencairanForm.jumlah || parseFloat(pencairanForm.jumlah.replace(/\./g, '')) <= 0) {
+      showToast('Jumlah pencairan wajib diisi', 'error'); return;
+    }
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) return;
+
+    setPencairanUploading(true);
+    let fotoUrl: string | null = null;
+
+    if (pencairanFoto) {
+      const ext = pencairanFoto.name.split('.').pop() || 'jpg';
+      const filePath = `${tenantId}/${showPencairanModal.id}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from('apbdesa-foto').upload(filePath, pencairanFoto);
+      if (uploadError) {
+        showToast('Gagal upload foto: ' + uploadError.message, 'error');
+        setPencairanUploading(false); return;
+      }
+      const { data: urlData } = supabase.storage.from('apbdesa-foto').getPublicUrl(filePath);
+      fotoUrl = urlData.publicUrl;
+    }
+
+    const jumlah = parseFloat(pencairanForm.jumlah.replace(/\./g, '')) || 0;
+    const { error } = await supabase.from('apbdesa_pencairan').insert({
+      tenant_id: tenantId,
+      apbdesa_id: showPencairanModal.id,
+      jumlah,
+      tanggal: pencairanForm.tanggal,
+      keterangan: pencairanForm.keterangan || null,
+      foto_url: fotoUrl
+    });
+
+    setPencairanUploading(false);
+    if (error) { showToast('Gagal catat pencairan: ' + error.message, 'error'); return; }
+
+    await supabase.from('apbdesa').update({
+      tanggal_pencairan: pencairanForm.tanggal,
       updated_at: new Date().toISOString()
-    }).eq('id', showProgressModal.id);
-    if (error) { showToast('Gagal update progress', 'error'); return; }
-    showToast('Progress berhasil diperbarui', 'success');
-    setShowProgressModal(null); loadData();
+    }).eq('id', showPencairanModal.id);
+
+    showToast('Pencairan berhasil dicatat', 'success');
+    setPencairanForm({ jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: '' });
+    setPencairanFoto(null); setPencairanFotoPreview(null);
+    loadData();
+  };
+
+  const handleDeletePencairan = async (pencairanId: string) => {
+    if (!window.confirm('Hapus catatan pencairan ini?')) return;
+    const { error } = await supabase.from('apbdesa_pencairan').delete().eq('id', pencairanId);
+    if (error) { showToast('Gagal menghapus', 'error'); return; }
+    showToast('Berhasil dihapus', 'success'); loadData();
+  };
+
+  const handleUpdateTahapan = async (apbdesaId: string, tahapan: string) => {
+    const { error } = await supabase.from('apbdesa').update({
+      tahapan_pencairan: tahapan,
+      updated_at: new Date().toISOString()
+    }).eq('id', apbdesaId);
+    if (error) { showToast('Gagal update tahapan', 'error'); return; }
+    setTahapanForm(tahapan);
+    showToast('Tahapan diperbarui', 'success'); loadData();
   };
 
   const handleDelete = async (id: string) => {
@@ -269,7 +345,7 @@ export default function AdminAPBDesa() {
   const filtered = useMemo(() => list.filter(r => {
     const matchSearch = r.nama_kegiatan.toLowerCase().includes(searchQuery.toLowerCase()) || r.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase());
     const matchKat = filterKategori === 'Semua' || r.kategori === filterKategori;
-    const hl = getHighlight(r);
+    const hl = getHighlight(r, r.total_pencairan || 0);
     const matchHl = filterHighlight === 'Semua' ||
       (filterHighlight === 'highlight' && hl !== null) ||
       (filterHighlight === 'aman' && hl === null);
@@ -277,26 +353,24 @@ export default function AdminAPBDesa() {
   }), [list, searchQuery, filterKategori, filterHighlight]);
 
   const metrics = useMemo(() => {
-    const highlighted = list.filter(r => getHighlight(r) !== null);
     return {
       total: list.length,
-      highlight: highlighted.length,
+      highlight: list.filter(r => getHighlight(r, r.total_pencairan || 0) !== null).length,
       perluDiproses: list.filter(r => r.tahapan_pencairan === 'Belum' && r.anggaran > 0).length,
-      terlambat: list.filter(r => {
-        const d = daysSince(r.tanggal_pencairan);
-        return TAHAPAN_OPTIONS.indexOf(r.tahapan_pencairan) === 1 && d !== null && d > 30;
-      }).length,
       selesai: list.filter(r => r.tahapan_pencairan === 'Selesai').length,
-      totalAnggaran: list.reduce((s, r) => s + (r.anggaran || 0), 0)
+      totalAnggaran: list.reduce((s, r) => s + (r.anggaran || 0), 0),
+      totalPencairan: list.reduce((s, r) => s + (r.total_pencairan || 0), 0)
     };
   }, [list]);
 
   const handleExport = () => {
     const rows = filtered.map(r => ({
       Kode: r.kode_apbdesa, Kegiatan: r.nama_kegiatan, Kategori: r.kategori, Lokasi: r.lokasi || '',
-      Anggaran: r.anggaran, Tahapan: r.tahapan_pencairan,
-      'Terakhir Update': r.tanggal_pencairan ? new Date(r.tanggal_pencairan).toLocaleDateString('id-ID') : '-',
-      Catatan: r.keterangan_pencairan || '', Highlight: getHighlight(r)?.label || '-'
+      Anggaran: r.anggaran, 'Tahapan': r.tahapan_pencairan,
+      'Total Pencairan': r.total_pencairan || 0,
+      'Persentase': r.anggaran > 0 ? Math.round(((r.total_pencairan || 0) / r.anggaran) * 100) + '%' : '0%',
+      'Foto': r.jumlah_foto || 0,
+      Highlight: getHighlight(r, r.total_pencairan || 0)?.label || '-'
     }));
     const ws = utils.json_to_sheet(rows);
     const wb = utils.book_new();
@@ -305,21 +379,47 @@ export default function AdminAPBDesa() {
     showToast('Berhasil diexport', 'success');
   };
 
+  const PencairanBadge = ({ item }: { item: APBDesa }) => {
+    const total = item.total_pencairan || 0;
+    const pct = item.anggaran > 0 ? Math.round((total / item.anggaran) * 100) : 0;
+    const fotoCount = item.jumlah_foto || 0;
+    return (
+      <div className="space-y-1.5 min-w-[160px]">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Pencairan</span>
+          <span className="text-xs font-black text-gray-900 dark:text-white">{pct}%</span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2">
+          <div className={`h-2 rounded-full transition-all ${pct >= 100 ? 'bg-emerald-500' : pct > 0 ? 'bg-blue-500' : 'bg-gray-300'}`}
+            style={{ width: `${Math.min(pct, 100)}%` }} />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold text-gray-500">{formatRp(total)} / {formatRp(item.anggaran)}</span>
+          {fotoCount > 0 && (
+            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full text-[9px] font-bold">
+              <Camera size={9} /> {fotoCount}
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const tahapanProgress = (current: string) => {
     const idx = TAHAPAN_OPTIONS.indexOf(current);
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {TAHAPAN_OPTIONS.map((t, i) => (
           <React.Fragment key={t}>
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold border-2 transition-all ${
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold border-2 transition-all ${
               i < idx ? 'bg-emerald-500 border-emerald-500 text-white' :
               i === idx ? 'bg-blue-500 border-blue-500 text-white ring-2 ring-blue-200' :
               'bg-gray-100 dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-400'
             }`}>
-              {i < idx ? <CheckCircle2 size={12} /> : i + 1}
+              {i < idx ? <CheckCircle2 size={10} /> : i + 1}
             </div>
             {i < TAHAPAN_OPTIONS.length - 1 && (
-              <div className={`w-4 h-0.5 ${i < idx ? 'bg-emerald-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
+              <div className={`w-3 h-0.5 ${i < idx ? 'bg-emerald-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
             )}
           </React.Fragment>
         ))}
@@ -353,12 +453,12 @@ export default function AdminAPBDesa() {
 
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         {[
-          { label: 'Total Kegiatan', value: metrics.total, color: 'border-l-emerald-500', icon: BarChart3 },
-          { label: 'Perlu Perhatian', value: metrics.highlight, color: 'border-l-amber-500', icon: AlertTriangle },
-          { label: 'Perlu Diproses', value: metrics.perluDiproses, color: 'border-l-orange-500', icon: Clock },
-          { label: 'Terlambat', value: metrics.terlambat, color: 'border-l-rose-500', icon: AlertTriangle },
-          { label: 'Selesai', value: metrics.selesai, color: 'border-l-emerald-700', icon: CheckCircle2 },
-          { label: 'Total Anggaran', value: formatRp(metrics.totalAnggaran), color: 'border-l-emerald-500', isText: true }
+          { label: 'Total Kegiatan', value: metrics.total, color: 'border-l-emerald-500' },
+          { label: 'Perlu Perhatian', value: metrics.highlight, color: 'border-l-amber-500' },
+          { label: 'Perlu Diproses', value: metrics.perluDiproses, color: 'border-l-orange-500' },
+          { label: 'Selesai', value: metrics.selesai, color: 'border-l-emerald-700' },
+          { label: 'Total Anggaran', value: formatRp(metrics.totalAnggaran), color: 'border-l-emerald-500', isText: true },
+          { label: 'Total Pencairan', value: formatRp(metrics.totalPencairan), color: 'border-l-blue-500', isText: true }
         ].map((m, i) => (
           <div key={i} className={`standard-card p-4 border-l-4 ${m.color}`}>
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{m.label}</p>
@@ -411,15 +511,15 @@ export default function AdminAPBDesa() {
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kategori</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Anggaran</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Progress Tahapan</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Pencairan</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Tahapan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Highlight</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Update</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map(r => {
-                const hl = getHighlight(r);
+                const hl = getHighlight(r, r.total_pencairan || 0);
                 return (
                   <tr key={r.id} className={`transition-colors ${hl ? `${hl.bg}/30 hover:${hl.bg}/50` : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}>
                     <td className="py-3 px-4">
@@ -436,6 +536,7 @@ export default function AdminAPBDesa() {
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{r.kategori}</span>
                     </td>
                     <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">{formatRp(r.anggaran)}</td>
+                    <td className="py-3 px-4"><PencairanBadge item={r} /></td>
                     <td className="py-3 px-4">{tahapanProgress(r.tahapan_pencairan)}</td>
                     <td className="py-3 px-4 text-center whitespace-nowrap">
                       {hl ? (
@@ -448,15 +549,16 @@ export default function AdminAPBDesa() {
                         </span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-center text-xs text-gray-500 whitespace-nowrap">
-                      {r.tanggal_pencairan ? new Date(r.tanggal_pencairan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}
-                    </td>
                     <td className="py-3 px-4 text-center">
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => {
-                          setProgressForm({ anggaran: r.anggaran, tahapan_pencairan: r.tahapan_pencairan, keterangan_pencairan: r.keterangan_pencairan || '' });
-                          setShowProgressModal(r);
-                        }} className="px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition-colors">Update</button>
+                          setTahapanForm(r.tahapan_pencairan);
+                          setPencairanForm({ jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: '' });
+                          setPencairanFoto(null); setPencairanFotoPreview(null);
+                          setShowPencairanModal(r);
+                        }} className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors flex items-center gap-1">
+                          <Camera size={12} /> Catat
+                        </button>
                         <button onClick={() => {
                           setEditItem(r);
                           setForm({ nama_kegiatan: r.nama_kegiatan, kategori: r.kategori, lokasi: r.lokasi || '',
@@ -475,56 +577,143 @@ export default function AdminAPBDesa() {
         </div>
       </div>
 
-      {showProgressModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
-              <div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-white">Update Progress Pencairan</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{showProgressModal.kode_apbdesa} — {showProgressModal.nama_kegiatan}</p>
+      {showPencairanModal && (() => {
+        const pcList = pencairanMap.get(showPencairanModal.id) || [];
+        const totalPc = pcList.reduce((s, p) => s + (p.jumlah || 0), 0);
+        const pct = showPencairanModal.anggaran > 0 ? Math.round((totalPc / showPencairanModal.anggaran) * 100) : 0;
+        return (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
+                <div>
+                  <h3 className="text-lg font-black text-gray-900 dark:text-white">Catat Pencairan</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">{showPencairanModal.kode_apbdesa} — {showPencairanModal.nama_kegiatan}</p>
+                </div>
+                <button onClick={() => setShowPencairanModal(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
               </div>
-              <button onClick={() => setShowProgressModal(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
-            </div>
-            <div className="p-5 space-y-4">
-              <div>
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Anggaran</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500">Rp</span>
-                  <input type="text" inputMode="numeric" value={progressForm.anggaran === 0 ? '' : progressForm.anggaran.toLocaleString('id-ID')}
-                    onChange={e => { const raw = e.target.value.replace(/\D/g, ''); setProgressForm({ ...progressForm, anggaran: raw ? parseInt(raw) : 0 }); }}
-                    placeholder="0" className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 pl-10 text-sm font-medium bg-white dark:bg-slate-900" />
+
+              <div className="p-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/30">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Pencairan</span>
+                  <span className="text-lg font-black text-gray-900 dark:text-white">{formatRp(totalPc)} / {formatRp(showPencairanModal.anggaran)}</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3 mb-2">
+                  <div className={`h-3 rounded-full transition-all ${pct >= 100 ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                    style={{ width: `${Math.min(pct, 100)}%` }} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-500">{pct}% terpakai</span>
+                  <span className="text-xs font-bold text-gray-500">Sisa {formatRp(Math.max(0, showPencairanModal.anggaran - totalPc))}</span>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Status Tahapan</label>
+                  <div className="flex items-center gap-1.5">
+                    {TAHAPAN_OPTIONS.map(t => (
+                      <button key={t} onClick={() => handleUpdateTahapan(showPencairanModal.id, t)}
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-bold border transition-all ${
+                          showPencairanModal.tahapan_pencairan === t
+                            ? 'bg-emerald-500 border-emerald-500 text-white'
+                            : 'border-gray-200 dark:border-slate-700 hover:border-emerald-300 text-gray-600 dark:text-slate-400'
+                        }`}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-2 block">Tahapan Pencairan</label>
-                <div className="flex items-center justify-between mb-3">{tahapanProgress(progressForm.tahapan_pencairan)}</div>
-                <div className="grid grid-cols-3 gap-2">
-                  {TAHAPAN_OPTIONS.map(t => (
-                    <button key={t} onClick={() => setProgressForm({ ...progressForm, tahapan_pencairan: t })}
-                      className={`px-3 py-2 rounded-xl text-xs font-bold border-2 transition-all text-center ${
-                        progressForm.tahapan_pencairan === t
-                          ? 'bg-emerald-500 border-emerald-500 text-white shadow-md'
-                          : 'border-gray-200 dark:border-slate-700 hover:border-emerald-300 text-gray-600 dark:text-slate-400'
-                      }`}>
-                      {t}
+
+              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+                {pcList.length === 0 && <p className="text-sm text-gray-400 text-center py-4">Belum ada catatan pencairan</p>}
+                {pcList.map(p => (
+                  <div key={p.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl">
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">{formatRp(p.jumlah)}</span>
+                        <span className="text-[10px] font-bold text-gray-500">{new Date(p.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                      {p.keterangan && <p className="text-xs text-gray-500 mt-1">{p.keterangan}</p>}
+                      {p.foto_url && (
+                        <a href={p.foto_url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold text-blue-500 hover:text-blue-700">
+                          <ImageIcon size={10} /> Lihat Foto
+                        </a>
+                      )}
+                    </div>
+                    <button onClick={() => handleDeletePencairan(p.id)} className="p-1 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600">
+                      <Trash2 size={12} />
                     </button>
-                  ))}
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-5 border-t border-gray-100 dark:border-slate-800 space-y-3 bg-gray-50 dark:bg-slate-800/30">
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Catat Pencairan Baru</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jumlah (Rp)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500">Rp</span>
+                      <input type="text" inputMode="numeric" value={pencairanForm.jumlah}
+                        onChange={e => { const raw = e.target.value.replace(/\D/g, ''); setPencairanForm({ ...pencairanForm, jumlah: raw ? parseInt(raw).toLocaleString('id-ID') : '' }); }}
+                        placeholder="0" className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 pl-10 text-sm font-medium bg-white dark:bg-slate-900" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Tanggal</label>
+                    <input type="date" value={pencairanForm.tanggal}
+                      onChange={e => setPencairanForm({ ...pencairanForm, tanggal: e.target.value })}
+                      className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Keterangan</label>
+                  <input value={pencairanForm.keterangan}
+                    onChange={e => setPencairanForm({ ...pencairanForm, keterangan: e.target.value })}
+                    placeholder="Catatan pencairan..."
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Foto Bukti (opsional)</label>
+                  <input ref={fotoInputRef} type="file" accept="image/*" className="hidden"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setPencairanFoto(file);
+                        const reader = new FileReader();
+                        reader.onload = ev => setPencairanFotoPreview(ev.target?.result as string);
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  {pencairanFotoPreview ? (
+                    <div className="relative inline-block">
+                      <img src={pencairanFotoPreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl border" />
+                      <button onClick={() => { setPencairanFoto(null); setPencairanFotoPreview(null); if (fotoInputRef.current) fotoInputRef.current.value = ''; }}
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs">
+                        <X size={10} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => fotoInputRef.current?.click()}
+                      className="w-full border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl p-4 text-center hover:border-blue-400 transition-colors">
+                      <Camera size={20} className="mx-auto text-gray-400 mb-1" />
+                      <p className="text-xs text-gray-500">Klik untuk upload foto</p>
+                    </button>
+                  )}
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Catatan Progress</label>
-                <textarea value={progressForm.keterangan_pencairan} onChange={e => setProgressForm({ ...progressForm, keterangan_pencairan: e.target.value })} rows={3}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 resize-none" />
+
+              <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+                <button onClick={() => setShowPencairanModal(null)} className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Tutup</button>
+                <button onClick={handleAddPencairan} disabled={pencairanUploading || !pencairanForm.jumlah}
+                  className="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
+                  {pencairanUploading ? 'Uploading...' : <><Camera size={14} /> Catat Pencairan</>}
+                </button>
               </div>
-            </div>
-            <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
-              <button onClick={() => setShowProgressModal(null)} className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Batal</button>
-              <button onClick={handleUpdateProgress}
-                className="px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 shadow-md shadow-emerald-600/20">Simpan Progress</button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {showMassEdit && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
