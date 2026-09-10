@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
-  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon
+  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -115,6 +115,7 @@ export default function AdminAPBDesa() {
 
   const [selectedForMassEdit, setSelectedForMassEdit] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '' });
 
   const currentYear = new Date().getFullYear();
@@ -301,6 +302,26 @@ export default function AdminAPBDesa() {
     const { error } = await supabase.from('apbdesa').delete().eq('id', id);
     if (error) { showToast('Gagal menghapus', 'error'); return; }
     showToast('Berhasil dihapus', 'success'); loadData();
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedForMassEdit.length === 0) return;
+    if (!window.confirm(`Hapus ${selectedForMassEdit.length} kegiatan APBDesa terpilih?`)) return;
+    setBulkBusy(true);
+    try {
+      for (let i = 0; i < selectedForMassEdit.length; i += 100) {
+        const chunk = selectedForMassEdit.slice(i, i + 100);
+        const { error } = await supabase.from('apbdesa').delete().in('id', chunk);
+        if (error) throw error;
+      }
+      showToast(`${selectedForMassEdit.length} kegiatan berhasil dihapus.`, 'success');
+      setSelectedForMassEdit([]);
+      loadData();
+    } catch (e: any) {
+      showToast(e?.message || 'Gagal menghapus massal.', 'error');
+    } finally {
+      setBulkBusy(false);
+    }
   };
 
   const handleMassEdit = async () => {
@@ -614,6 +635,35 @@ export default function AdminAPBDesa() {
           </table>
         </div>
       </div>
+
+      {selectedForMassEdit.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9990] w-[95vw] max-w-2xl">
+          <div className="flex items-center gap-2 flex-wrap justify-center rounded-2xl bg-slate-900/95 dark:bg-black/90 backdrop-blur border border-white/10 shadow-2xl px-4 py-3">
+            <span className="text-sm font-black text-white whitespace-nowrap">{selectedForMassEdit.length} Kegiatan Terpilih</span>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkBusy}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-white bg-rose-600 hover:bg-rose-700 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {bulkBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null} Hapus Massal ({selectedForMassEdit.length})
+            </button>
+            <button
+              onClick={() => setShowMassEdit(true)}
+              disabled={bulkBusy}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-white bg-amber-600 hover:bg-amber-700 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              Edit Massal ({selectedForMassEdit.length})
+            </button>
+            <button
+              onClick={() => setSelectedForMassEdit([])}
+              className="p-2 rounded-xl text-gray-300 hover:bg-white/10 transition-colors cursor-pointer"
+              title="Batalkan pilihan"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {showPencairanModal && (() => {
         const pcList = pencairanMap.get(showPencairanModal.id) || [];

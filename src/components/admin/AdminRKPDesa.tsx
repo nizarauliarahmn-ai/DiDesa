@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, ClipboardList, X, Link2,
-  Download, Filter, CheckCircle2
+  Download, Filter, CheckCircle2, Loader2
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -67,6 +67,7 @@ export default function AdminRKPDesa() {
   const [rpjmSearch, setRpjmSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({
     applyKategori: false, kategori: 'Infrastruktur',
     applyStatus: false, status: 'Rencana',
@@ -169,6 +170,26 @@ export default function AdminRKPDesa() {
     const { error } = await supabase.from('rkpdesa').delete().eq('id', id);
     if (error) { showToast('Gagal menghapus', 'error'); return; }
     showToast('Berhasil dihapus', 'success'); loadData();
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Hapus ${selectedIds.length} kegiatan RKPDesa terpilih?`)) return;
+    setBulkBusy(true);
+    try {
+      for (let i = 0; i < selectedIds.length; i += 100) {
+        const chunk = selectedIds.slice(i, i + 100);
+        const { error } = await supabase.from('rkpdesa').delete().in('id', chunk);
+        if (error) throw error;
+      }
+      showToast(`${selectedIds.length} kegiatan berhasil dihapus.`, 'success');
+      setSelectedIds([]);
+      loadData();
+    } catch (e: any) {
+      showToast(e?.message || 'Gagal menghapus massal.', 'error');
+    } finally {
+      setBulkBusy(false);
+    }
   };
 
   const handleImportFromRpjm = async () => {
@@ -440,6 +461,35 @@ export default function AdminRKPDesa() {
           </table>
         </div>
       </div>
+
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9990] w-[95vw] max-w-2xl">
+          <div className="flex items-center gap-2 flex-wrap justify-center rounded-2xl bg-slate-900/95 dark:bg-black/90 backdrop-blur border border-white/10 shadow-2xl px-4 py-3">
+            <span className="text-sm font-black text-white whitespace-nowrap">{selectedIds.length} Kegiatan Terpilih</span>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkBusy}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-white bg-rose-600 hover:bg-rose-700 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {bulkBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null} Hapus Massal ({selectedIds.length})
+            </button>
+            <button
+              onClick={() => setShowMassEdit(true)}
+              disabled={bulkBusy}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-white bg-amber-600 hover:bg-amber-700 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              Edit Massal ({selectedIds.length})
+            </button>
+            <button
+              onClick={() => setSelectedIds([])}
+              className="p-2 rounded-xl text-gray-300 hover:bg-white/10 transition-colors cursor-pointer"
+              title="Batalkan pilihan"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
