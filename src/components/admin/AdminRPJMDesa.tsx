@@ -96,12 +96,13 @@ export default function AdminRPJMDesa() {
   };
 
   const [usulanSearch, setUsulanSearch] = useState('');
+  const [usulanStatusFilter, setUsulanStatusFilter] = useState('Semua');
 
   const loadUsulan = async () => {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
-    // Ambil semua usulan yang sudah terakomodir (semua tahun), kecuali 'Belum' dan 'Ditolak'
-    const { data } = await supabase.from('usulan_desas').select('*').eq('tenant_id', tenantId).not('status_terakomodir', 'in', '("Belum","Ditolak")');
+    // Ambil SEMUA usulan (semua status) — RPJMDesa bisa menarik semua aspirasi
+    const { data } = await supabase.from('usulan_desas').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
     // Tandai mana yang sudah ditarik ke RPJMDesa
     const { data: rpjmData } = await supabase.from('rpjmdesa').select('usulan_id').eq('tenant_id', tenantId).not('usulan_id', 'is', null);
     const linkedIds = new Set((rpjmData || []).map((r: any) => r.usulan_id));
@@ -447,23 +448,45 @@ export default function AdminRPJMDesa() {
               <button onClick={() => { setShowFromUsulan(false); setSelectedUsulan([]); setUsulanSearch(''); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
             </div>
             <div className="p-5 space-y-3 flex-1 overflow-y-auto">
-              <p className="text-sm text-gray-500">Pilih usulan yang sudah terakomodir untuk ditarik ke RPJMDesa:</p>
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input value={usulanSearch} onChange={e => setUsulanSearch(e.target.value)} placeholder="Cari kode, nama usulan, atau kategori..."
-                  className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+              <p className="text-sm text-gray-500">Semua usulan bisa ditarik ke RPJMDesa. Centang yang ingin dimasukkan:</p>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input value={usulanSearch} onChange={e => setUsulanSearch(e.target.value)} placeholder="Cari kode, nama usulan, atau kategori..."
+                    className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
+                </div>
+                <select value={usulanStatusFilter} onChange={e => setUsulanStatusFilter(e.target.value)}
+                  className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold bg-white dark:bg-slate-900">
+                  <option value="Semua">Semua Status</option>
+                  <option value="Belum">Belum Dianggarkan</option>
+                  <option value="Desa">Terakomodir Desa</option>
+                  <option value="Kab">Terakomodir Kab</option>
+                  <option value="Ditolak">Ditolak</option>
+                </select>
               </div>
               {(() => {
+                const usulanStatusColor = (s: string) => {
+                  if (s === 'Belum') return 'bg-amber-50 text-amber-700 border-amber-200';
+                  if (s === 'Ditolak') return 'bg-gray-100 text-gray-500 border-gray-200';
+                  if (s?.startsWith('Desa')) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                  if (s?.startsWith('Kab')) return 'bg-blue-50 text-blue-700 border-blue-200';
+                  return 'bg-gray-100 text-gray-600 border-gray-200';
+                };
                 const filtered = usulanList.filter((u: any) => {
                   const q = usulanSearch.toLowerCase();
                   const matchSearch = !q || u.kode_usulan?.toLowerCase().includes(q) || u.uraian_usulan?.toLowerCase().includes(q) || u.kategori?.toLowerCase().includes(q);
-                  return matchSearch;
+                  const matchStatus = usulanStatusFilter === 'Semua' ||
+                    (usulanStatusFilter === 'Desa' && u.status_terakomodir?.startsWith('Desa')) ||
+                    (usulanStatusFilter === 'Kab' && u.status_terakomodir?.startsWith('Kab')) ||
+                    (usulanStatusFilter === 'Belum' && u.status_terakomodir === 'Belum') ||
+                    (usulanStatusFilter === 'Ditolak' && u.status_terakomodir === 'Ditolak');
+                  return matchSearch && matchStatus;
                 });
                 const belumLinked = filtered.filter((u: any) => !u._alreadyLinked);
                 const sudahLinked = filtered.filter((u: any) => u._alreadyLinked);
                 return (
                   <>
-                    {belumLinked.length === 0 && sudahLinked.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada usulan terakomodir ditemukan</p>}
+                    {belumLinked.length === 0 && sudahLinked.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada usulan ditemukan</p>}
                     {belumLinked.length > 0 && (
                       <div className="space-y-2">
                         <p className="text-[10px] font-black uppercase tracking-widest text-purple-600">Belum Ditarik ({belumLinked.length})</p>
@@ -473,8 +496,11 @@ export default function AdminRPJMDesa() {
                               checked={selectedUsulan.includes(u.id)}
                               onChange={e => setSelectedUsulan(prev => e.target.checked ? [...prev, u.id] : prev.filter(x => x !== u.id))} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{u.kode_usulan} — {u.uraian_usulan}</p>
-                              <p className="text-xs text-gray-500 mt-0.5">{u.kategori} {u.lokasi_rt_rw ? `• ${u.lokasi_rt_rw}` : ''} • {u.status_terakomodir}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{u.kode_usulan} — {u.uraian_usulan}</p>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border whitespace-nowrap ${usulanStatusColor(u.status_terakomodir)}`}>{u.status_terakomodir}</span>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-0.5">{u.kategori} {u.lokasi_rt_rw ? `• ${u.lokasi_rt_rw}` : ''}</p>
                             </div>
                           </label>
                         ))}
@@ -487,7 +513,10 @@ export default function AdminRPJMDesa() {
                           <div key={u.id} className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/20 opacity-60">
                             <CheckCircle2 size={16} className="mt-0.5 text-emerald-500 shrink-0" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold text-gray-500 dark:text-slate-400 truncate">{u.kode_usulan} — {u.uraian_usulan}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-bold text-gray-500 dark:text-slate-400 truncate">{u.kode_usulan} — {u.uraian_usulan}</p>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border whitespace-nowrap ${usulanStatusColor(u.status_terakomodir)}`}>{u.status_terakomodir}</span>
+                              </div>
                               <p className="text-xs text-gray-400 mt-0.5">{u.kategori} • Sudah di RPJMDesa</p>
                             </div>
                           </div>
