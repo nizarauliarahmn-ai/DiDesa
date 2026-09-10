@@ -25,7 +25,7 @@ ALTER TABLE apbdesa_pencairan ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "apbdesa_pencairan_tenant_isolation"
   ON apbdesa_pencairan
   FOR ALL
-  USING (tenant_id = current_setting('request.jwt.claims', true)::json->>'tenant_id'::uuid);
+  USING (tenant_id = (current_setting('request.jwt.claims', true)::json->>'tenant_id')::uuid);
 
 -- Bucket untuk foto pencairan APBDesa
 INSERT INTO storage.buckets (id, name, public) VALUES ('apbdesa-foto', 'apbdesa-foto', true)
