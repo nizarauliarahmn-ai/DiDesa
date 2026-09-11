@@ -966,6 +966,26 @@ export default function AdminAPBDesa() {
                 <input value={rkpSearchQuery} onChange={e => setRkpSearchQuery(e.target.value)} placeholder="Cari kegiatan RKPDesa..."
                   className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 outline-none" />
               </div>
+              {(() => {
+                const filteredRkp = rkpList.filter((r: any) => r.nama_kegiatan.toLowerCase().includes(rkpSearchQuery.toLowerCase()) || r.kode_rkpdesa.toLowerCase().includes(rkpSearchQuery.toLowerCase()));
+                const selectableFiltered = filteredRkp.filter((r: any) => !importedRkpIds.has(r.id));
+                const allSelectableSelected = selectableFiltered.length > 0 && selectableFiltered.every((r: any) => selectedRkp.includes(r.id));
+                return selectableFiltered.length > 0 ? (
+                  <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 cursor-pointer">
+                    <input type="checkbox" className="accent-emerald-600"
+                      checked={allSelectableSelected}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setSelectedRkp(prev => [...new Set([...prev, ...selectableFiltered.map((r: any) => r.id)])]);
+                        } else {
+                          const selectableIds = new Set(selectableFiltered.map((r: any) => r.id));
+                          setSelectedRkp(prev => prev.filter(id => !selectableIds.has(id)));
+                        }
+                      }} />
+                    <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">Tandai Semua ({selectableFiltered.length})</span>
+                  </label>
+                ) : null;
+              })()}
               {rkpList.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada kegiatan RKPDesa tahun ini</p>}
               {rkpList.filter((r: any) => r.nama_kegiatan.toLowerCase().includes(rkpSearchQuery.toLowerCase()) || r.kode_rkpdesa.toLowerCase().includes(rkpSearchQuery.toLowerCase())).length === 0 && rkpList.length > 0 && (
                 <p className="text-sm text-gray-400 text-center py-4">Tidak ditemukan kegiatan yang cocok</p>

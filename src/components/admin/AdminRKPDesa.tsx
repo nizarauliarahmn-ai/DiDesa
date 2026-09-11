@@ -679,7 +679,22 @@ export default function AdminRKPDesa() {
                     {belumLinked.length === 0 && sudahLinked.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada program ditemukan</p>}
                     {belumLinked.length > 0 && (
                       <div className="space-y-2">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">Belum Ditarik ({belumLinked.length})</p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">Belum Ditarik ({belumLinked.length})</p>
+                          <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input type="checkbox" className="accent-blue-600"
+                              checked={belumLinked.every((r: any) => selectedRpjm.includes(r.id))}
+                              onChange={e => {
+                                if (e.target.checked) {
+                                  setSelectedRpjm(prev => [...new Set([...prev, ...belumLinked.map((r: any) => r.id)])]);
+                                } else {
+                                  const ids = new Set(belumLinked.map((r: any) => r.id));
+                                  setSelectedRpjm(prev => prev.filter(id => !ids.has(id)));
+                                }
+                              }} />
+                            <span className="text-[10px] font-bold text-blue-600">Tandai Semua</span>
+                          </label>
+                        </div>
                         {belumLinked.map((r: any) => (
                           <label key={r.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${selectedRpjm.includes(r.id) ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'}`}>
                             <input type="checkbox" className="mt-1 accent-blue-600"
