@@ -412,7 +412,16 @@ export default function AdminRKPDesa() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.map(r => (
+              {loading ? (
+                <tr><td colSpan={10} className="py-12 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                    <p className="text-sm text-gray-500 font-medium">Memuat data RKPDesa...</p>
+                  </div>
+                </td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={10} className="py-12 text-center text-gray-500 font-medium">Belum ada data RKPDesa</td></tr>
+              ) : filtered.map(r => (
                 <tr key={r.id} onClick={() => setDetailTarget(r)} className={`cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(r.id) ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}>
                   <td className="py-3 px-4">
                     <input type="checkbox" className="accent-blue-600"
@@ -458,7 +467,6 @@ export default function AdminRKPDesa() {
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && <tr><td colSpan={10} className="py-12 text-center text-gray-500 font-medium">Belum ada data RKPDesa</td></tr>}
             </tbody>
           </table>
         </div>

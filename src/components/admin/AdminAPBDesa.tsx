@@ -593,7 +593,16 @@ export default function AdminAPBDesa() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filtered.map(r => {
+              {loading ? (
+                <tr><td colSpan={9} className="py-12 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                    <p className="text-sm text-gray-500 font-medium">Memuat data APBDesa...</p>
+                  </div>
+                </td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan={9} className="py-12 text-center text-gray-500 font-medium">Belum ada data APBDesa tahun ini</td></tr>
+              ) : filtered.map(r => {
                 const hl = getHighlight(r, r.total_pencairan || 0);
                 return (
                   <tr key={r.id} onClick={() => setDetailTarget(r)} className={`cursor-pointer transition-colors ${hl ? `${hl.bg}/30 hover:${hl.bg}/50` : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}>
@@ -648,7 +657,6 @@ export default function AdminAPBDesa() {
                   </tr>
                 );
               })}
-              {filtered.length === 0 && <tr><td colSpan={9} className="py-12 text-center text-gray-500 font-medium">Belum ada data APBDesa tahun ini</td></tr>}
             </tbody>
           </table>
         </div>
