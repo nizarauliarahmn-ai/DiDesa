@@ -324,42 +324,35 @@ export default function AdminRKPDesa() {
   const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="pb-24 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-2xl flex items-center justify-center">
-              <ClipboardList className="w-5 h-5 text-blue-600" />
-            </div>
-            RKPDesa
-          </h1>
-          <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mt-1 ml-13">Rencana Kerja Pemerintah Desa — Tahun {currentYear}</p>
+    <div className="pb-24 space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+            <ClipboardList className="w-4 h-4 text-blue-600" />
+          </div>
+          <h1 className="text-lg font-black text-gray-900 dark:text-white">RKPDesa</h1>
+          <div className="hidden md:flex items-center gap-2 ml-2">
+            {[
+              { label: 'Total', value: metrics.total, color: 'bg-emerald-50 text-emerald-700' },
+              { label: 'Rencana', value: metrics.rencana, color: 'bg-gray-100 text-gray-600' },
+              { label: 'Berlangsung', value: metrics.berlangsung, color: 'bg-blue-50 text-blue-700' },
+              { label: 'Selesai', value: metrics.selesai, color: 'bg-emerald-100 text-emerald-800' },
+            ].map((m, i) => (
+              <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${m.color}`}>{m.label}: {m.value}</span>
+            ))}
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700">{formatRp(metrics.totalAnggaran)}</span>
+          </div>
         </div>
         <div className="flex gap-2">
           <button onClick={() => { loadRpjm(importYear); setShowFromRpjm(true); }}
-            className="px-4 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 flex items-center gap-2">
-            <Link2 size={16} /> Tarik dari RPJMDesa
+            className="px-3 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 flex items-center gap-1.5">
+            <Link2 size={14} /> Tarik dari RPJMDesa
           </button>
           <button onClick={() => { resetForm(); setEditItem(null); setShowModal(true); }}
-            className="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 flex items-center gap-2">
-            <PlusCircle size={16} /> Tambah Baru
+            className="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-1.5">
+            <PlusCircle size={14} /> Tambah Baru
           </button>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {[
-          { label: 'Total Kegiatan', value: metrics.total, color: 'border-l-emerald-500' },
-          { label: 'Rencana', value: metrics.rencana, color: 'border-l-gray-400' },
-          { label: 'Berlangsung', value: metrics.berlangsung, color: 'border-l-blue-500' },
-          { label: 'Selesai', value: metrics.selesai, color: 'border-l-emerald-700' },
-          { label: 'Total Anggaran', value: formatRp(metrics.totalAnggaran), color: 'border-l-blue-500', isText: true }
-        ].map((m, i) => (
-          <div key={i} className={`standard-card p-4 border-l-4 ${m.color}`}>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">{m.label}</p>
-            <p className="text-xl font-black text-gray-900 dark:text-white mt-1">{m.value}</p>
-          </div>
-        ))}
       </div>
 
       <div className="sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 py-3">
