@@ -100,6 +100,8 @@ const getHighlight = (item: APBDesa, totalPencairan: number): { label: string; c
 };
 
 export default function AdminAPBDesa() {
+  const currentYear = new Date().getFullYear();
+
   const [list, setList] = useState<APBDesa[]>([]);
   const [rkpList, setRkpList] = useState<any[]>([]);
   const [pencairanMap, setPencairanMap] = useState<Map<string, Pencairan[]>>(new Map());
@@ -123,8 +125,6 @@ export default function AdminAPBDesa() {
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '', applyJenis: false, jenis: 'Murni' });
-
-  const currentYear = new Date().getFullYear();
 
   const [form, setForm] = useState({
     nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0,
@@ -641,7 +641,7 @@ export default function AdminAPBDesa() {
                         <button onClick={() => {
                           setEditItem(r);
                           setForm({ nama_kegiatan: r.nama_kegiatan, kategori: r.kategori, lokasi: r.lokasi || '',
-                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '' });
+                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '', jenis: r.jenis || 'Murni' });
                           setShowModal(true);
                         }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600"><Edit2 size={14} /></button>
                         <button onClick={() => handleDelete(r.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-gray-500 hover:text-rose-600"><Trash2 size={14} /></button>
