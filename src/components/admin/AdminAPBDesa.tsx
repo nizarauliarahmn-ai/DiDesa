@@ -729,6 +729,13 @@ export default function AdminAPBDesa() {
             <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-100 dark:border-slate-800 sticky bottom-0 bg-white dark:bg-slate-900">
               <button onClick={() => setDetailTarget(null)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">Tutup</button>
               <button onClick={() => {
+                const item = detailTarget;
+                setDetailTarget(null);
+                setShowPencairanModal(item);
+              }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer">
+                <Camera size={14} /> Catat Pencairan
+              </button>
+              <button onClick={() => {
                 setEditItem(detailTarget);
                 setForm({ nama_kegiatan: detailTarget.nama_kegiatan, kategori: detailTarget.kategori, lokasi: detailTarget.lokasi || '',
                   tahun: detailTarget.tahun, anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '' });
