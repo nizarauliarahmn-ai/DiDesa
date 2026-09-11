@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
-  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2
+  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -107,6 +107,7 @@ export default function AdminAPBDesa() {
   const [showModal, setShowModal] = useState(false);
   const [showPencairanModal, setShowPencairanModal] = useState<APBDesa | null>(null);
   const [editItem, setEditItem] = useState<APBDesa | null>(null);
+  const [detailTarget, setDetailTarget] = useState<APBDesa | null>(null);
   const [showFromRkp, setShowFromRkp] = useState(false);
   const [selectedRkp, setSelectedRkp] = useState<string[]>([]);
   const [importedRkpIds, setImportedRkpIds] = useState<Set<string>>(new Set());
@@ -580,7 +581,7 @@ export default function AdminAPBDesa() {
               {filtered.map(r => {
                 const hl = getHighlight(r, r.total_pencairan || 0);
                 return (
-                  <tr key={r.id} className={`transition-colors ${hl ? `${hl.bg}/30 hover:${hl.bg}/50` : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}>
+                  <tr key={r.id} onClick={() => setDetailTarget(r)} className={`cursor-pointer transition-colors ${hl ? `${hl.bg}/30 hover:${hl.bg}/50` : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}>
                     <td className="py-3 px-4">
                       <input type="checkbox" className="accent-emerald-600"
                         checked={selectedForMassEdit.includes(r.id)}
@@ -660,6 +661,83 @@ export default function AdminAPBDesa() {
             >
               <X className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {detailTarget && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">Detail Kegiatan APBDesa</h3>
+              <button onClick={() => setDetailTarget(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl p-4">
+                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Kode</p>
+                <p className="text-sm font-mono font-black text-emerald-700 dark:text-emerald-300 mt-1">{detailTarget.kode_apbdesa}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nama Kegiatan</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.nama_kegiatan}</p>
+              </div>
+              {detailTarget.rkpdesa_nama && (
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber RKPDesa</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1"><Link2 size={12} /> {detailTarget.rkpdesa_nama}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Kategori</p>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${kategoriColor(detailTarget.kategori)}`}>{detailTarget.kategori}</span>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahun</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahun}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anggaran</p>
+                  <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-1">{formatRp(detailTarget.anggaran)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Lokasi</p>
+                  <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 flex items-center gap-1"><MapPin size={12} /> {detailTarget.lokasi || '-'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahapan</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahapan_pencairan}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Pencairan</p>
+                  <p className="text-sm font-black text-blue-700 dark:text-blue-400 mt-1">{formatRp(detailTarget.total_pencairan || 0)}</p>
+                </div>
+              </div>
+              {detailTarget.keterangan_pencairan && (
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</p>
+                  <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 bg-gray-50 dark:bg-slate-800 rounded-lg p-3">{detailTarget.keterangan_pencairan}</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-100 dark:border-slate-800 sticky bottom-0 bg-white dark:bg-slate-900">
+              <button onClick={() => setDetailTarget(null)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">Tutup</button>
+              <button onClick={() => {
+                setEditItem(detailTarget);
+                setForm({ nama_kegiatan: detailTarget.nama_kegiatan, kategori: detailTarget.kategori, lokasi: detailTarget.lokasi || '',
+                  tahun: detailTarget.tahun, anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '' });
+                setDetailTarget(null);
+                setShowModal(true);
+              }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer">
+                <Edit2 size={14} /> Edit
+              </button>
+            </div>
           </div>
         </div>
       )}

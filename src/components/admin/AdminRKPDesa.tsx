@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, ClipboardList, X, Link2,
-  Download, Filter, CheckCircle2, Loader2
+  Download, Filter, CheckCircle2, Loader2, MapPin
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -61,6 +61,7 @@ export default function AdminRKPDesa() {
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<RKPDesa | null>(null);
+  const [detailTarget, setDetailTarget] = useState<RKPDesa | null>(null);
   const [showFromRpjm, setShowFromRpjm] = useState(false);
   const [selectedRpjm, setSelectedRpjm] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -410,7 +411,7 @@ export default function AdminRKPDesa() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.map(r => (
-                <tr key={r.id} className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(r.id) ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}>
+                <tr key={r.id} onClick={() => setDetailTarget(r)} className={`cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(r.id) ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}>
                   <td className="py-3 px-4">
                     <input type="checkbox" className="accent-blue-600"
                       checked={selectedIds.includes(r.id)}
@@ -486,6 +487,97 @@ export default function AdminRKPDesa() {
             >
               <X className="w-4 h-4" />
             </button>
+          </div>
+        </div>
+      )}
+
+      {detailTarget && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">Detail Kegiatan RKPDesa</h3>
+              <button onClick={() => setDetailTarget(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-4">
+                <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Kode</p>
+                <p className="text-sm font-mono font-black text-blue-700 dark:text-blue-300 mt-1">{detailTarget.kode_rkpdesa}</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nama Kegiatan</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.nama_kegiatan}</p>
+              </div>
+              {detailTarget.rpjmdesa_nama && (
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber RPJMDesa</p>
+                  <p className="text-sm text-purple-600 dark:text-purple-400 mt-1 flex items-center gap-1"><Link2 size={12} /> {detailTarget.rpjmdesa_nama}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Kategori</p>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${kategoriColor(detailTarget.kategori)}`}>{detailTarget.kategori}</span>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</p>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${statusColor(detailTarget.status)}`}>{detailTarget.status}</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Lokasi</p>
+                  <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 flex items-center gap-1"><MapPin size={12} /> {detailTarget.lokasi || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahun</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahun}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anggaran</p>
+                  <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-1">{formatRp(detailTarget.anggaran)}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Skala Prioritas</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-sm font-black text-amber-600">{detailTarget.skala_prioritas}</span>
+                    <div className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className={`w-2 h-5 rounded-sm ${i <= detailTarget.skala_prioritas ? 'bg-amber-400' : 'bg-gray-200 dark:bg-slate-700'}`} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber Data</p>
+                <span className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${detailTarget.sumber_data === 'rpjmdesa' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                  {detailTarget.sumber_data === 'rpjmdesa' ? <><Link2 size={10} className="mr-1" /> RPJMDesa</> : 'Manual'}
+                </span>
+              </div>
+              {detailTarget.keterangan && (
+                <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</p>
+                  <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 bg-gray-50 dark:bg-slate-800 rounded-lg p-3">{detailTarget.keterangan}</p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-100 dark:border-slate-800 sticky bottom-0 bg-white dark:bg-slate-900">
+              <button onClick={() => setDetailTarget(null)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">Tutup</button>
+              <button onClick={() => {
+                setEditItem(detailTarget);
+                setForm({ nama_kegiatan: detailTarget.nama_kegiatan, kategori: detailTarget.kategori, lokasi: detailTarget.lokasi || '',
+                  tahun: detailTarget.tahun, anggaran: detailTarget.anggaran, skala_prioritas: detailTarget.skala_prioritas,
+                  keterangan: detailTarget.keterangan || '', status: detailTarget.status });
+                setDetailTarget(null);
+                setShowModal(true);
+              }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-blue-600 hover:bg-blue-700 transition-colors cursor-pointer">
+                <Edit2 size={14} /> Edit
+              </button>
+            </div>
           </div>
         </div>
       )}
