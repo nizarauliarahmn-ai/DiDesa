@@ -538,7 +538,7 @@ export default function AdminAPBDesa() {
         ))}
       </div>
 
-      <div className="sticky top-16 z-40 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl px-4 py-3 border-b border-slate-200/50 dark:border-slate-700/50">
+      <div className="standard-card p-4">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
