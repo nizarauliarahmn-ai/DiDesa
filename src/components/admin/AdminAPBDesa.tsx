@@ -491,11 +491,9 @@ export default function AdminAPBDesa() {
   const TahapanBadge = ({ item }: { item: APBDesa }) => {
     const total = item.total_pencairan || 0;
     const tahapan = getTahapanStatus(item.anggaran, total);
-    const pct = item.anggaran > 0 ? Math.round((total / item.anggaran) * 100) : 0;
     return (
       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${tahapanColor(tahapan)}`}>
         {tahapanIcon(tahapan)} {tahapan}
-        {tahapan === 'Berlangsung' && <span className="ml-1 text-[9px] font-black">{pct}%</span>}
       </span>
     );
   };
