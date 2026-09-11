@@ -109,6 +109,7 @@ export default function AdminAPBDesa() {
   const [filterKategori, setFilterKategori] = useState('Semua');
   const [filterJenis, setFilterJenis] = useState('Semua');
   const [filterHighlight, setFilterHighlight] = useState('Semua');
+  const [filterYear, setFilterYear] = useState('Semua');
   const [showModal, setShowModal] = useState(false);
   const [showPencairanModal, setShowPencairanModal] = useState<APBDesa | null>(null);
   const [editItem, setEditItem] = useState<APBDesa | null>(null);
@@ -430,8 +431,9 @@ export default function AdminAPBDesa() {
     const matchHl = filterHighlight === 'Semua' ||
       (filterHighlight === 'highlight' && hl !== null) ||
       (filterHighlight === 'aman' && hl === null);
-    return matchSearch && matchKat && matchJenis && matchHl;
-  }), [list, searchQuery, filterKategori, filterJenis, filterHighlight]);
+    const matchYear = filterYear === 'Semua' || r.tahun === Number(filterYear);
+    return matchSearch && matchKat && matchJenis && matchHl && matchYear;
+  }), [list, searchQuery, filterKategori, filterJenis, filterHighlight, filterYear]);
 
   const metrics = useMemo(() => {
     return {
@@ -557,6 +559,11 @@ export default function AdminAPBDesa() {
             <option value="Semua">Semua Status</option>
             <option value="highlight">Perlu Perhatian</option>
             <option value="aman">Aman</option>
+          </select>
+          <select value={filterYear} onChange={e => setFilterYear(e.target.value)}
+            className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+            <option>Semua</option>
+            {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
             <Download size={14} /> Export
