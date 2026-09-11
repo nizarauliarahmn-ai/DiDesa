@@ -425,13 +425,13 @@ export default function AdminAPBDesa() {
 
   const filtered = useMemo(() => list.filter(r => {
     const matchSearch = r.nama_kegiatan.toLowerCase().includes(searchQuery.toLowerCase()) || r.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchKat = filterKategori === 'Semua' || r.kategori === filterKategori;
-    const matchJenis = filterJenis === 'Semua' || r.jenis === filterJenis;
+    const matchKat = filterKategori === 'Semua Kategori' || r.kategori === filterKategori;
+    const matchJenis = filterJenis === 'Semua Jenis' || r.jenis === filterJenis;
     const hl = getHighlight(r, r.total_pencairan || 0);
-    const matchHl = filterHighlight === 'Semua' ||
+    const matchHl = filterHighlight === 'Semua Status' ||
       (filterHighlight === 'highlight' && hl !== null) ||
       (filterHighlight === 'aman' && hl === null);
-    const matchYear = filterYear === 'Semua' || r.tahun === Number(filterYear);
+    const matchYear = filterYear === 'Semua Tahun' || r.tahun === Number(filterYear);
     return matchSearch && matchKat && matchJenis && matchHl && matchYear;
   }), [list, searchQuery, filterKategori, filterJenis, filterHighlight, filterYear]);
 
@@ -545,24 +545,24 @@ export default function AdminAPBDesa() {
           </div>
           <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option value="Semua">Semua Kategori</option>
+            <option value="Semua Kategori">Semua Kategori</option>
             {KATEGORI_OPTIONS.map(k => <option key={k} value={k}>{k}</option>)}
           </select>
           <select value={filterJenis} onChange={e => setFilterJenis(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option value="Semua">Semua Jenis</option>
+            <option value="Semua Jenis">Semua Jenis</option>
             <option value="Murni">Murni</option>
             <option value="Perubahan">Perubahan</option>
           </select>
           <select value={filterHighlight} onChange={e => setFilterHighlight(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option value="Semua">Semua Status</option>
+            <option value="Semua Status">Semua Status</option>
             <option value="highlight">Perlu Perhatian</option>
             <option value="aman">Aman</option>
           </select>
           <select value={filterYear} onChange={e => setFilterYear(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option>Semua</option>
+            <option>Semua Tahun</option>
             {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">

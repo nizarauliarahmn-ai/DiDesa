@@ -304,9 +304,9 @@ export default function AdminRPJMDesa() {
 
   const filtered = useMemo(() => list.filter(r => {
     const matchSearch = r.nama_program.toLowerCase().includes(searchQuery.toLowerCase()) || r.kode_rpjmdesa.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchKat = filterKategori === 'Semua' || r.kategori === filterKategori;
-    const matchSts = filterStatus === 'Semua' || r.status === filterStatus;
-    const matchYear = filterYear === 'Semua' || (Number(filterYear) >= r.tahun_awal && Number(filterYear) <= r.tahun_akhir);
+    const matchKat = filterKategori === 'Semua Kategori' || r.kategori === filterKategori;
+    const matchSts = filterStatus === 'Semua Status' || r.status === filterStatus;
+    const matchYear = filterYear === 'Semua Tahun' || (Number(filterYear) >= r.tahun_awal && Number(filterYear) <= r.tahun_akhir);
     return matchSearch && matchKat && matchSts && matchYear;
   }), [list, searchQuery, filterKategori, filterStatus, filterYear]);
 
@@ -379,17 +379,17 @@ export default function AdminRPJMDesa() {
           </div>
           <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option>Semua</option>
+            <option>Semua Kategori</option>
             {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
           </select>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option>Semua</option>
+            <option>Semua Status</option>
             {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
           </select>
           <select value={filterYear} onChange={e => setFilterYear(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option>Semua</option>
+            <option>Semua Tahun</option>
             {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
