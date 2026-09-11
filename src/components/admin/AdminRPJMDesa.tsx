@@ -55,9 +55,9 @@ const statusColor = (s: string) => {
 export default function AdminRPJMDesa() {
   const [list, setList] = useState<RPJMDesa[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterKategori, setFilterKategori] = useState('Semua');
-  const [filterStatus, setFilterStatus] = useState('Semua');
-  const [filterYear, setFilterYear] = useState('Semua');
+  const [filterKategori, setFilterKategori] = useState('Semua Kategori');
+  const [filterStatus, setFilterStatus] = useState('Semua Status');
+  const [filterYear, setFilterYear] = useState('Semua Tahun');
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<RPJMDesa | null>(null);
   const [detailTarget, setDetailTarget] = useState<RPJMDesa | null>(null);

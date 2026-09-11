@@ -106,10 +106,10 @@ export default function AdminAPBDesa() {
   const [rkpList, setRkpList] = useState<any[]>([]);
   const [pencairanMap, setPencairanMap] = useState<Map<string, Pencairan[]>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterKategori, setFilterKategori] = useState('Semua');
-  const [filterJenis, setFilterJenis] = useState('Semua');
-  const [filterHighlight, setFilterHighlight] = useState('Semua');
-  const [filterYear, setFilterYear] = useState('Semua');
+  const [filterKategori, setFilterKategori] = useState('Semua Kategori');
+  const [filterJenis, setFilterJenis] = useState('Semua Jenis');
+  const [filterHighlight, setFilterHighlight] = useState('Semua Status');
+  const [filterYear, setFilterYear] = useState('Semua Tahun');
   const [showModal, setShowModal] = useState(false);
   const [showPencairanModal, setShowPencairanModal] = useState<APBDesa | null>(null);
   const [editItem, setEditItem] = useState<APBDesa | null>(null);

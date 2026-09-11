@@ -57,9 +57,9 @@ export default function AdminRKPDesa() {
   const [list, setList] = useState<RKPDesa[]>([]);
   const [rpjmList, setRpjmList] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterKategori, setFilterKategori] = useState('Semua');
-  const [filterStatus, setFilterStatus] = useState('Semua');
-  const [filterYear, setFilterYear] = useState('Semua');
+  const [filterKategori, setFilterKategori] = useState('Semua Kategori');
+  const [filterStatus, setFilterStatus] = useState('Semua Status');
+  const [filterYear, setFilterYear] = useState('Semua Tahun');
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<RKPDesa | null>(null);
   const [detailTarget, setDetailTarget] = useState<RKPDesa | null>(null);
