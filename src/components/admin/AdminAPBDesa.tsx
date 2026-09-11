@@ -466,11 +466,17 @@ export default function AdminAPBDesa() {
     const total = item.total_pencairan || 0;
     const pct = item.anggaran > 0 ? Math.round((total / item.anggaran) * 100) : 0;
     const fotoCount = item.jumlah_foto || 0;
+    const pcCount = (pencairanMap.get(item.id) || []).length;
     return (
       <div className="space-y-1.5 min-w-[160px]">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Pencairan</span>
-          <span className="text-xs font-black text-gray-900 dark:text-white">{pct}%</span>
+          <div className="flex items-center gap-1.5">
+            {pcCount > 0 && (
+              <span className="inline-flex items-center px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded-full text-[9px] font-bold">{pcCount}x</span>
+            )}
+            <span className="text-xs font-black text-gray-900 dark:text-white">{pct}%</span>
+          </div>
         </div>
         <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2">
           <div className={`h-2 rounded-full transition-all ${pct >= 100 ? 'bg-emerald-500' : pct > 0 ? 'bg-blue-500' : 'bg-gray-300'}`}
