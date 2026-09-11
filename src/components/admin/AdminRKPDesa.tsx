@@ -66,6 +66,7 @@ export default function AdminRKPDesa() {
   const [selectedRpjm, setSelectedRpjm] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [rpjmSearch, setRpjmSearch] = useState('');
+  const [importYear, setImportYear] = useState(currentYear);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -123,10 +124,11 @@ export default function AdminRKPDesa() {
     return `RKP-${currentYear}-${String(maxSeq + 1).padStart(3, '0')}`;
   };
 
-  const loadRpjm = async () => {
+  const loadRpjm = async (year?: number) => {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
-    const { data } = await supabase.from('rpjmdesa').select('*').eq('tenant_id', tenantId).lte('tahun_awal', currentYear).gte('tahun_akhir', currentYear).in('status', ['Rencana', 'Berlangsung']);
+    const targetYear = year || importYear;
+    const { data } = await supabase.from('rpjmdesa').select('*').eq('tenant_id', tenantId).lte('tahun_awal', targetYear).gte('tahun_akhir', targetYear).in('status', ['Rencana', 'Berlangsung']);
     const { data: rkpData } = await supabase.from('rkpdesa').select('rpjmdesa_id').eq('tenant_id', tenantId).not('rpjmdesa_id', 'is', null);
     const linkedIds = new Set((rkpData || []).map((r: any) => r.rpjmdesa_id));
     const list = (data || []).map((r: any) => ({ ...r, _alreadyLinked: linkedIds.has(r.id) }));
@@ -211,13 +213,13 @@ export default function AdminRKPDesa() {
       if (!r) return null;
       return {
         tenant_id: tenantId,
-        kode_rkpdesa: `RKP-${currentYear}-${String(lastNum + idx + 1).padStart(5, '0')}`,
+        kode_rkpdesa: `RKP-${importYear}-${String(lastNum + idx + 1).padStart(5, '0')}`,
         rpjmdesa_id: r.id,
         nama_kegiatan: r.nama_program,
         kategori: r.kategori,
         lokasi: r.lokasi || null,
         sumber_data: 'rpjmdesa',
-        tahun: currentYear,
+        tahun: importYear,
         anggaran: r.anggaran_estimasi || 0,
         skala_prioritas: r.skala_prioritas || 3,
         keterangan: r.keterangan || null,
@@ -334,7 +336,7 @@ export default function AdminRKPDesa() {
           <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mt-1 ml-13">Rencana Kerja Pemerintah Desa — Tahun {currentYear}</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => { loadRpjm(); setShowFromRpjm(true); }}
+          <button onClick={() => { loadRpjm(importYear); setShowFromRpjm(true); }}
             className="px-4 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 flex items-center gap-2">
             <Link2 size={16} /> Tarik dari RPJMDesa
           </button>
@@ -661,7 +663,14 @@ export default function AdminRKPDesa() {
               <button onClick={() => { setShowFromRpjm(false); setSelectedRpjm([]); setRpjmSearch(''); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
             </div>
             <div className="p-5 space-y-4 flex-1 overflow-y-auto">
-              <p className="text-sm text-gray-500">Pilih program RPJMDesa tahun {currentYear} untuk ditarik ke RKPDesa:</p>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Tahun Target RKPDesa</label>
+                <select value={importYear} onChange={e => { const y = Number(e.target.value); setImportYear(y); loadRpjm(y); setSelectedRpjm([]); }}
+                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+                  {[currentYear - 1, currentYear, currentYear + 1, currentYear + 2].map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              <p className="text-sm text-gray-500">Pilih program RPJMDesa yang mencakup tahun <strong>{importYear}</strong> untuk ditarik ke RKPDesa:</p>
               <div className="relative">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input value={rpjmSearch} onChange={e => setRpjmSearch(e.target.value)} placeholder="Cari kode, nama program, atau kategori..."

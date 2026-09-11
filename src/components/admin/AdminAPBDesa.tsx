@@ -18,6 +18,7 @@ export interface APBDesa {
   lokasi?: string | null;
   sumber_data: string;
   tahun: number;
+  jenis: string;
   anggaran: number;
   tahapan_pencairan: string;
   tanggal_pencairan?: string | null;
@@ -42,6 +43,7 @@ export interface Pencairan {
 
 const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
 const TAHAPAN_OPTIONS = ['Belum', 'Dianggarkan', 'Berlangsung', 'Selesai'];
+const JENIS_OPTIONS = ['Murni', 'Perubahan'];
 
 const getTahapanStatus = (anggaran: number, totalPencairan: number): string => {
   if (anggaran === 0) return 'Belum';
@@ -103,6 +105,7 @@ export default function AdminAPBDesa() {
   const [pencairanMap, setPencairanMap] = useState<Map<string, Pencairan[]>>(new Map());
   const [searchQuery, setSearchQuery] = useState('');
   const [filterKategori, setFilterKategori] = useState('Semua');
+  const [filterJenis, setFilterJenis] = useState('Semua');
   const [filterHighlight, setFilterHighlight] = useState('Semua');
   const [showModal, setShowModal] = useState(false);
   const [showPencairanModal, setShowPencairanModal] = useState<APBDesa | null>(null);
@@ -112,18 +115,20 @@ export default function AdminAPBDesa() {
   const [selectedRkp, setSelectedRkp] = useState<string[]>([]);
   const [importedRkpIds, setImportedRkpIds] = useState<Set<string>>(new Set());
   const [rkpSearchQuery, setRkpSearchQuery] = useState('');
+  const [importYear, setImportYear] = useState(currentYear);
+  const [importJenis, setImportJenis] = useState('Murni');
   const [loading, setLoading] = useState(true);
 
   const [selectedForMassEdit, setSelectedForMassEdit] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
-  const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '' });
+  const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '', applyJenis: false, jenis: 'Murni' });
 
   const currentYear = new Date().getFullYear();
 
   const [form, setForm] = useState({
     nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0,
-    keterangan_pencairan: ''
+    keterangan_pencairan: '', jenis: 'Murni'
   });
 
   const [pencairanForm, setPencairanForm] = useState({
@@ -202,10 +207,11 @@ export default function AdminAPBDesa() {
     return `APB-${currentYear}-${String(maxSeq + 1).padStart(3, '0')}`;
   };
 
-  const loadRkp = async () => {
+  const loadRkp = async (year?: number) => {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
-    const { data } = await supabase.from('rkpdesa').select('*').eq('tenant_id', tenantId).eq('tahun', currentYear).in('status', ['Rencana', 'Berlangsung']);
+    const targetYear = year || importYear;
+    const { data } = await supabase.from('rkpdesa').select('*').eq('tenant_id', tenantId).eq('tahun', targetYear).in('status', ['Rencana', 'Berlangsung']);
     setRkpList(data || []);
   };
 
@@ -223,6 +229,7 @@ export default function AdminAPBDesa() {
       lokasi: form.lokasi || null,
       sumber_data: editItem?.sumber_data || 'manual',
       tahun: currentYear,
+      jenis: editItem?.jenis || form.jenis,
       anggaran: form.anggaran,
       tahapan_pencairan: editItem?.tahapan_pencairan || 'Belum',
       keterangan_pencairan: form.keterangan_pencairan || null,
@@ -332,6 +339,7 @@ export default function AdminAPBDesa() {
     const updatePayload: Record<string, any> = { updated_at: new Date().toISOString() };
     if (massEditForm.anggaran !== '') updatePayload.anggaran = parseFloat(massEditForm.anggaran.replace(/\./g, '')) || 0;
     if (massEditForm.keterangan_pencairan !== '') updatePayload.keterangan_pencairan = massEditForm.keterangan_pencairan;
+    if (massEditForm.applyJenis) updatePayload.jenis = massEditForm.jenis;
     if (Object.keys(updatePayload).length <= 1) { showToast('Isi minimal 1 field untuk diupdate', 'error'); return; }
     const chunks: string[][] = [];
     for (let i = 0; i < selectedForMassEdit.length; i += 100) chunks.push(selectedForMassEdit.slice(i, i + 100));
@@ -341,7 +349,7 @@ export default function AdminAPBDesa() {
       if (!error) totalUpdated += chunk.length;
     }
     showToast(`${totalUpdated} kegiatan berhasil diupdate`, 'success');
-    setSelectedForMassEdit([]); setShowMassEdit(false); setMassEditForm({ anggaran: '', keterangan_pencairan: '' }); loadData();
+    setSelectedForMassEdit([]); setShowMassEdit(false); setMassEditForm({ anggaran: '', keterangan_pencairan: '', applyJenis: false, jenis: 'Murni' }); loadData();
   };
 
   const handleImportFromRkp = async () => {
@@ -351,7 +359,7 @@ export default function AdminAPBDesa() {
 
     const payloads = [];
     let seq = 0;
-    const { data: existing } = await supabase.from('apbdesa').select('kode_apbdesa').eq('tenant_id', tenantId).like('kode_apbdesa', `APB-${currentYear}-%`);
+    const { data: existing } = await supabase.from('apbdesa').select('kode_apbdesa').eq('tenant_id', tenantId).eq('tahun', importYear).eq('jenis', importJenis).like('kode_apbdesa', `APB-${importYear}-%`);
     seq = (existing || []).reduce((max, row) => {
       const match = row.kode_apbdesa.match(/APB-\d{4}-(\d+)/);
       return match ? Math.max(max, parseInt(match[1], 10)) : max;
@@ -363,13 +371,14 @@ export default function AdminAPBDesa() {
       seq++;
       payloads.push({
         tenant_id: tenantId,
-        kode_apbdesa: `APB-${currentYear}-${String(seq).padStart(3, '0')}`,
+        kode_apbdesa: `APB-${importYear}-${String(seq).padStart(3, '0')}`,
         rkpdesa_id: r.id,
         nama_kegiatan: r.nama_kegiatan,
         kategori: r.kategori,
         lokasi: r.lokasi || null,
         sumber_data: 'rkpdesa',
-        tahun: currentYear,
+        tahun: importYear,
+        jenis: importJenis,
         anggaran: r.anggaran || 0,
         tahapan_pencairan: 'Belum',
         keterangan_pencairan: null
@@ -410,18 +419,19 @@ export default function AdminAPBDesa() {
   };
 
   const resetForm = () => {
-    setForm({ nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0, keterangan_pencairan: '' });
+    setForm({ nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni' });
   };
 
   const filtered = useMemo(() => list.filter(r => {
     const matchSearch = r.nama_kegiatan.toLowerCase().includes(searchQuery.toLowerCase()) || r.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase());
     const matchKat = filterKategori === 'Semua' || r.kategori === filterKategori;
+    const matchJenis = filterJenis === 'Semua' || r.jenis === filterJenis;
     const hl = getHighlight(r, r.total_pencairan || 0);
     const matchHl = filterHighlight === 'Semua' ||
       (filterHighlight === 'highlight' && hl !== null) ||
       (filterHighlight === 'aman' && hl === null);
-    return matchSearch && matchKat && matchHl;
-  }), [list, searchQuery, filterKategori, filterHighlight]);
+    return matchSearch && matchKat && matchJenis && matchHl;
+  }), [list, searchQuery, filterKategori, filterJenis, filterHighlight]);
 
   const metrics = useMemo(() => {
     return {
@@ -501,7 +511,7 @@ export default function AdminAPBDesa() {
           <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mt-1 ml-13">Monitoring Pencairan Dana Kegiatan</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => { loadRkp(); setShowFromRkp(true); }}
+          <button onClick={() => { loadRkp(importYear); setShowFromRkp(true); }}
             className="px-4 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 flex items-center gap-2">
             <Link2 size={16} /> Tarik dari RKPDesa
           </button>
@@ -542,8 +552,14 @@ export default function AdminAPBDesa() {
           </div>
           <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
-            <option>Semua Kategori</option>
-            {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
+            <option value="Semua">Semua Kategori</option>
+            {KATEGORI_OPTIONS.map(k => <option key={k} value={k}>{k}</option>)}
+          </select>
+          <select value={filterJenis} onChange={e => setFilterJenis(e.target.value)}
+            className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+            <option value="Semua">Semua Jenis</option>
+            <option value="Murni">Murni</option>
+            <option value="Perubahan">Perubahan</option>
           </select>
           <select value={filterHighlight} onChange={e => setFilterHighlight(e.target.value)}
             className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
@@ -570,6 +586,7 @@ export default function AdminAPBDesa() {
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kode</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kategori</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Jenis</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Anggaran</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Pencairan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Tahapan</th>
@@ -594,6 +611,9 @@ export default function AdminAPBDesa() {
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{r.kategori}</span>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap text-center">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${r.jenis === 'Perubahan' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{r.jenis || 'Murni'}</span>
                     </td>
                     <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">{formatRp(r.anggaran)}</td>
                     <td className="py-3 px-4"><PencairanBadge item={r} /></td>
@@ -695,6 +715,10 @@ export default function AdminAPBDesa() {
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${kategoriColor(detailTarget.kategori)}`}>{detailTarget.kategori}</span>
                 </div>
                 <div>
+                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis</p>
+                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${detailTarget.jenis === 'Perubahan' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{detailTarget.jenis || 'Murni'}</span>
+                </div>
+                <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahun</p>
                   <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahun}</p>
                 </div>
@@ -738,7 +762,7 @@ export default function AdminAPBDesa() {
               <button onClick={() => {
                 setEditItem(detailTarget);
                 setForm({ nama_kegiatan: detailTarget.nama_kegiatan, kategori: detailTarget.kategori, lokasi: detailTarget.lokasi || '',
-                  tahun: detailTarget.tahun, anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '' });
+                  anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '', jenis: detailTarget.jenis || 'Murni' });
                 setDetailTarget(null);
                 setShowModal(true);
               }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer">
@@ -897,6 +921,16 @@ export default function AdminAPBDesa() {
                 <textarea value={massEditForm.keterangan_pencairan} onChange={e => setMassEditForm({ ...massEditForm, keterangan_pencairan: e.target.value })} rows={2}
                   className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 resize-none" />
               </div>
+              <div>
+                <label className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 cursor-pointer">
+                  <input type="checkbox" checked={massEditForm.applyJenis} onChange={e => setMassEditForm({ ...massEditForm, applyJenis: e.target.checked })} className="accent-emerald-600" />
+                  Ubah Jenis
+                </label>
+                <select value={massEditForm.jenis} onChange={e => setMassEditForm({ ...massEditForm, jenis: e.target.value })} disabled={!massEditForm.applyJenis}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 disabled:opacity-40">
+                  {JENIS_OPTIONS.map(j => <option key={j}>{j}</option>)}
+                </select>
+              </div>
             </div>
             <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
               <button onClick={() => setShowMassEdit(false)} className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Batal</button>
@@ -926,6 +960,13 @@ export default function AdminAPBDesa() {
                   <select value={form.kategori} onChange={e => setForm({ ...form, kategori: e.target.value })}
                     className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
                     {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jenis APBDesa</label>
+                  <select value={form.jenis} onChange={e => setForm({ ...form, jenis: e.target.value })}
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                    {JENIS_OPTIONS.map(j => <option key={j}>{j}</option>)}
                   </select>
                 </div>
                 <div>
@@ -967,7 +1008,23 @@ export default function AdminAPBDesa() {
               <button onClick={() => { setShowFromRkp(false); setSelectedRkp([]); setRkpSearchQuery(''); }} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"><X size={18} /></button>
             </div>
             <div className="p-5 space-y-3 flex-1 overflow-y-auto">
-              <p className="text-sm text-gray-500">Pilih kegiatan RKPDesa tahun {currentYear} untuk dimasukkan ke APBDesa:</p>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Tahun RKPDesa</label>
+                  <select value={importYear} onChange={e => { const y = Number(e.target.value); setImportYear(y); loadRkp(y); setSelectedRkp([]); }}
+                    className="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+                    {[currentYear - 1, currentYear, currentYear + 1, currentYear + 2].map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Jenis APBDesa</label>
+                  <select value={importJenis} onChange={e => setImportJenis(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+                    {JENIS_OPTIONS.map(j => <option key={j} value={j}>{j}</option>)}
+                  </select>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500">Pilih kegiatan RKPDesa tahun <strong>{importYear}</strong> untuk dimasukkan ke APBDesa <strong>{importJenis}</strong>:</p>
               <div className="relative">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input value={rkpSearchQuery} onChange={e => setRkpSearchQuery(e.target.value)} placeholder="Cari kegiatan RKPDesa..."
