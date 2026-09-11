@@ -370,7 +370,7 @@ export default function AdminRPJMDesa() {
         ))}
       </div>
 
-      <div className="sticky top-16 z-40 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl -mx-4 -mt-4 px-4 pt-4 pb-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 mb-4">
+      <div className="sticky top-16 z-40 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xl px-4 py-3 border-b border-slate-200/50 dark:border-slate-700/50">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
