@@ -58,6 +58,9 @@ export default function AdminHeader({
   const [searchQuery, setSearchQuery] = useState(globalSearch);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [residents, setResidents] = useState<any[]>([]);
+  const [suratList, setSuratList] = useState<any[]>([]);
+  const [aspirasiList, setAspirasiList] = useState<any[]>([]);
+  const [apbdesaList, setApbdesaList] = useState<any[]>([]);
   const [loadingResidents, setLoadingResidents] = useState(false);
   const [hasLoadedResidents, setHasLoadedResidents] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -81,24 +84,28 @@ export default function AdminHeader({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSearchDropdown]);
 
-  // Load residents on-demand for search matching NIK or name
+  // Load data on-demand for search
   useEffect(() => {
     if (searchQuery.trim().length >= 2 && !hasLoadedResidents && !loadingResidents) {
       setLoadingResidents(true);
       resolveCurrentTenant().then(tenantId => {
-        if (!tenantId) {
+        if (!tenantId) { setLoadingResidents(false); return; }
+        Promise.all([
+          supabase.from('residents').select('*').eq('tenant_id', tenantId),
+          supabase.from('surat').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(200),
+          supabase.from('aspirasi').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(100),
+          supabase.from('apbdesa').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(100),
+        ]).then(([residentsRes, suratRes, aspirasiRes, apbdesaRes]) => {
+          if (residentsRes.data) {
+            const formatted = residentsRes.data.map(r => ({ ...r, noKk: r.no_kk }));
+            setResidents(formatted.filter(r => r.is_deleted !== 1));
+          }
+          if (suratRes.data) setSuratList(suratRes.data);
+          if (aspirasiRes.data) setAspirasiList(aspirasiRes.data);
+          if (apbdesaRes.data) setApbdesaList(apbdesaRes.data);
+          setHasLoadedResidents(true);
           setLoadingResidents(false);
-          return;
-        }
-        supabase.from('residents').select('*').eq('tenant_id', tenantId)
-          .then(({ data }) => {
-            if (data) {
-              const formatted = data.map(r => ({ ...r, noKk: r.no_kk }));
-              setResidents(formatted.filter(r => r.is_deleted !== 1));
-            }
-            setHasLoadedResidents(true);
-            setLoadingResidents(false);
-          });
+        });
       });
     }
   }, [searchQuery, hasLoadedResidents, loadingResidents]);
@@ -130,6 +137,29 @@ export default function AdminHeader({
       ).slice(0, 3)
     : [], [searchQuery, notifications]);
 
+  const filteredSurat = useMemo(() => searchQuery.trim().length >= 2
+    ? suratList.filter(s =>
+        (s.nama && s.nama.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (s.nomor && s.nomor.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (s.nik && s.nik.includes(searchQuery))
+      ).slice(0, 3)
+    : [], [searchQuery, suratList]);
+
+  const filteredAspirasi = useMemo(() => searchQuery.trim().length >= 2
+    ? aspirasiList.filter(a =>
+        (a.subject && a.subject.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (a.nama && a.nama.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (a.id && a.id.toLowerCase().includes(searchQuery.toLowerCase()))
+      ).slice(0, 3)
+    : [], [searchQuery, aspirasiList]);
+
+  const filteredApbdesa = useMemo(() => searchQuery.trim().length >= 2
+    ? apbdesaList.filter(a =>
+        (a.nama_kegiatan && a.nama_kegiatan.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (a.kode_apbdesa && a.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase()))
+      ).slice(0, 3)
+    : [], [searchQuery, apbdesaList]);
+
   const handleQuickLinkClick = (tab: string) => {
     if (setActiveTab) setActiveTab(tab);
     setSearchQuery('');
@@ -153,6 +183,27 @@ export default function AdminHeader({
     setSearchQuery('');
     if (setGlobalSearch) setGlobalSearch('');
     setShowSearchDropdown(false);
+  };
+
+  const handleSuratClick = (item: any) => {
+    if (setActiveTab) setActiveTab('surat');
+    setSearchQuery('');
+    setShowSearchDropdown(false);
+    showToast(`Membuka surat ${item.nama || item.nomor} 📄`, 'success');
+  };
+
+  const handleAspirasiClick = (item: any) => {
+    if (setActiveTab) setActiveTab('aspirasi');
+    setSearchQuery('');
+    setShowSearchDropdown(false);
+    showToast(`Membuka aspirasi: ${item.subject} 💬`, 'success');
+  };
+
+  const handleApbdesaClick = (item: any) => {
+    if (setActiveTab) setActiveTab('keuangan');
+    setSearchQuery('');
+    setShowSearchDropdown(false);
+    showToast(`Membuka APBDesa: ${item.nama_kegiatan} 📊`, 'success');
   };
 
   useEffect(() => {
@@ -547,7 +598,7 @@ export default function AdminHeader({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 
-            placeholder="Cari penduduk, NIK, atau fitur cepat..." 
+            placeholder="Cari penduduk, surat, aspirasi, anggaran..." 
             value={searchQuery}
             onChange={(e) => {
               const val = e.target.value;
@@ -572,11 +623,11 @@ export default function AdminHeader({
               </div>
 
               {/* Empty state */}
-              {filteredQuickLinks.length === 0 && filteredResidents.length === 0 && filteredNotifications.length === 0 && (
+              {filteredQuickLinks.length === 0 && filteredResidents.length === 0 && filteredNotifications.length === 0 && filteredSurat.length === 0 && filteredAspirasi.length === 0 && filteredApbdesa.length === 0 && (
                 <div className="p-6 text-center text-gray-400">
                   <Search className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                   <p className="text-xs">Tidak ada hasil untuk "{searchQuery}"</p>
-                  <p className="text-[10px] text-gray-400 mt-1">Ketik nama penduduk, NIK, atau halaman menu</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Ketik nama penduduk, NIK, surat, aspirasi, atau menu</p>
                 </div>
               )}
 
@@ -651,6 +702,81 @@ export default function AdminHeader({
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+
+              {/* Surat matches */}
+              {filteredSurat.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Surat</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredSurat.map(s => (
+                      <button
+                        key={s.id}
+                        onClick={() => handleSuratClick(s)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-blue-100 text-blue-800 font-bold text-[9px] flex-shrink-0">📄</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100">{s.nama || s.jenis_surat}</div>
+                            <div className="text-[10px] text-gray-400">{s.nomor || s.nik} • {s.status || '-'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-blue-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Aspirasi matches */}
+              {filteredAspirasi.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Aspirasi</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredAspirasi.map(a => (
+                      <button
+                        key={a.id}
+                        onClick={() => handleAspirasiClick(a)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-purple-100 text-purple-800 font-bold text-[9px] flex-shrink-0">💬</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100">{a.subject}</div>
+                            <div className="text-[10px] text-gray-400">{a.nama} • {a.status || 'Baru'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-purple-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* APBDesa matches */}
+              {filteredApbdesa.length > 0 && (
+                <div className="p-2">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">APBDesa</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredApbdesa.map(a => (
+                      <button
+                        key={a.id}
+                        onClick={() => handleApbdesaClick(a)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px] flex-shrink-0">📊</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100">{a.nama_kegiatan}</div>
+                            <div className="text-[10px] text-gray-400">{a.kode_apbdesa} • {a.kategori}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-emerald-600 font-bold">Buka</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
