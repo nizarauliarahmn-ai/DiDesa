@@ -91,8 +91,6 @@ export default function AdminPengaturan() {
           set('village_aspirasi_banner_zoom', setAspirasiBannerZoom);
           set('app_theme', setAppTheme);
           set('village_letter_font', setLetterFont);
-          set('google_drive_folder_id', setGoogleDriveFolderId);
-          set('google_drive_api_key', setGoogleDriveApiKey);
           set('village_luas_wilayah', setLuasWilayah);
           set('village_ketinggian', setKetinggian);
           set('village_topografi', setTopografi);

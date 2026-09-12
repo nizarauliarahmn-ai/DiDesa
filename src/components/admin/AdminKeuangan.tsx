@@ -445,7 +445,7 @@ export default function AdminKeuangan() {
         <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-800 space-y-6 animate-in fade-in duration-200">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-              <UploadCloud className="w-5 h-5" />
+              <FileText className="w-5 h-5" />
             </div>
             <div>
               <h4 className="text-lg font-bold text-gray-900 dark:text-white">Ekstraksi Laporan Siskeudes Berbasis AI</h4>

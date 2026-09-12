@@ -826,47 +826,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             onCustomNomorSurat={handleCustomNomorSurat}
           />
 
-          {showPdfUpload && (
-              <div className="mt-4 bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
-                <input
-                  ref={pdfInputRef}
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handlePdfUpload(file);
-                    e.target.value = '';
-                  }}
-                />
-                {pdfAnalyzing ? (
-                  <div className="flex items-center gap-3 py-2">
-                    <Loader2 className="w-5 h-5 animate-spin text-white" />
-                    <div>
-                      <p className="font-semibold text-sm">Membaca Dokumen PDF: {pdfFileName}</p>
-                      <p className="text-xs text-white/70">DiDesa AI sedang mengekstrak data dari surat undangan...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    className="border-2 border-dashed border-white/40 rounded-xl p-6 text-center cursor-pointer hover:border-white/70 hover:bg-white/5 transition-all"
-                    onClick={() => pdfInputRef.current?.click()}
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const file = e.dataTransfer.files?.[0];
-                      if (file) handlePdfUpload(file);
-                    }}
-                  >
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-white/60" />
-                    <p className="font-semibold text-sm">Klik atau Seret PDF ke sini</p>
-                    <p className="text-xs text-white/60 mt-1">Format: PDF • Maks: 10MB • Surat undangan dari dinas/instansi</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
           <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-gray-900 dark:text-white text-sm uppercase tracking-wider">Daftar Pelaksana Perjalanan Dinas</h3>

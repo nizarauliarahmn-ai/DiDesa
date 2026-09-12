@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3, Clock } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
 import { fetchSaaSTenantRequests, getLeadReadState, getApprovalReadState } from '../../utils/saasLeads';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 
 // Status tiket yang dianggap sudah selesai ditangani (resolved).
 // Tiket berstatus ini TIDAK boleh memicu badge notifikasi merah.
@@ -246,7 +247,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
     const handleAspirasiUpdate = async () => {
       try {
-        const tid = await resolveTid();
+        const tid = await resolveCurrentTenant();
         if (!tid) return;
         const readKey = `aspirasi_read_${tid}`;
         const readIds = new Set(JSON.parse(localStorage.getItem(readKey) || '[]'));
@@ -257,7 +258,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
     const handleKepuasanUpdate = async () => {
       try {
-        const tid = await resolveTid();
+        const tid = await resolveCurrentTenant();
         if (!tid) return;
         const { data } = await supabase.from('saas_settings').select('value').eq('tenant_id', tid).eq('key', 'kepuasan_data').maybeSingle();
         if (data?.value) {
@@ -271,7 +272,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
     const handleBukuTamuUpdate = async () => {
       try {
-        const tid = await resolveTid();
+        const tid = await resolveCurrentTenant();
         if (!tid) return;
         const readKey = `buku_tamu_read_${tid}`;
         const readIds = new Set(JSON.parse(localStorage.getItem(readKey) || '[]'));
@@ -282,7 +283,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
 
     const handleUsulanUpdate = async () => {
       try {
-        const tid = await resolveTid();
+        const tid = await resolveCurrentTenant();
         if (!tid) return;
         const readKey = `usulan_read_${tid}`;
         const readIds = new Set(JSON.parse(localStorage.getItem(readKey) || '[]'));
@@ -443,7 +444,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem collapsed={isCollapsed} icon={<ShieldCheck size={18} className="text-emerald-600" />} label="Persetujuan Desa" active={activeTab === 'pending_approvals'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('pending_approvals'); }} badgeCount={activeTab === 'pending_approvals' ? 0 : pendingApprovalsCount} />
             <NavItem collapsed={isCollapsed} icon={<Handshake size={18} className="text-emerald-700" />} label="Manajemen Afiliator" active={activeTab === 'saas_affiliates'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_affiliates'); }} badgeCount={activeTab === 'saas_affiliates' ? 0 : pendingAffiliatesCount} />
             <NavItem collapsed={isCollapsed} icon={<Database size={18} className="text-purple-600" />} label="Log Aktivitas" active={activeTab === 'log_aktivitas'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_aktivitas'); }} />
-            <NavItem collapsed={isCollapsed} icon={<Sparkles size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Clock size={18} className="text-amber-500" />} label="Log Pembaruan" active={activeTab === 'log_pembaruan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('log_pembaruan'); }} />
             <NavItem collapsed={isCollapsed} icon={<Bug size={18} className="text-rose-500" />} label="Tiket & Laporkan Bug" active={activeTab === 'saas_bugs'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('saas_bugs'); }} badgeCount={activeTab === 'saas_bugs' ? 0 : pendingBugsCount} />
             <NavItem collapsed={isCollapsed} icon={<FileText size={18} className="text-emerald-600" />} label="Template Surat Global" active={activeTab === 'template_surat'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('template_surat'); }} />
             <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} className="text-teal-600" />} label="Panduan & Documentation" active={activeTab === 'panduan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('panduan'); }} />

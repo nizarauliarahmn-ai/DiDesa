@@ -211,7 +211,6 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
           <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-center gap-6">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider backdrop-blur-md">
-                <Sparkles className="w-3.5 h-3.5" />
                 <span>SaaS Master Control Center</span>
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
@@ -350,7 +349,9 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
           <div className="bg-slate-900 rounded-[32px] p-8 text-white relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
             <div className="relative z-10">
-              <Sparkles className="w-8 h-8 text-amber-400 mb-6" />
+              <div className="w-8 h-8 rounded-xl bg-amber-400/20 flex items-center justify-center mb-6">
+                <Building2 className="w-5 h-5 text-amber-400" />
+              </div>
               <h4 className="text-xl font-bold leading-tight mb-2">Kontrol Branding Global</h4>
               <p className="text-sm text-slate-400 mb-6">Sesuaikan logo, nama aplikasi, dan warna tema utama untuk seluruh desa dalam satu klik.</p>
               <button 
