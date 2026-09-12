@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, Target, AlertTriangle, X, Loader2,
-  MapPin, Link2, CheckCircle2, Ban, Printer, Download, Eye, Star, Filter, ListChecks, Square
+  MapPin, Link2, CheckCircle2, Ban, Printer, Download, Eye, Star, Filter, ListChecks, Square, SlidersHorizontal
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -68,6 +68,8 @@ export default function AdminRPJMDesa() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
+  const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const filterPopoverRef = useRef<HTMLDivElement>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({
     applyKategori: false, kategori: 'Infrastruktur',
@@ -88,6 +90,14 @@ export default function AdminRPJMDesa() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterPopoverRef.current && !filterPopoverRef.current.contains(e.target as Node)) setShowFilterPopover(false);
+    };
+    if (showFilterPopover) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showFilterPopover]);
 
   const loadData = async () => {
     setLoading(true);
@@ -367,8 +377,8 @@ export default function AdminRPJMDesa() {
       </div>
 
       <div className="sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 py-2.5">
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex-1 min-w-[200px] relative">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Cari..."
               className="w-full pl-8 pr-8 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
@@ -378,21 +388,47 @@ export default function AdminRPJMDesa() {
               </button>
             )}
           </div>
-          <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
-            className="px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-purple-500 outline-none cursor-pointer">
-            <option value="Semua Kategori">Kategori</option>
-            {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
-          </select>
-          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-            className="px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-purple-500 outline-none cursor-pointer">
-            <option value="Semua Status">Status</option>
-            {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
-          </select>
-          <select value={filterYear} onChange={e => setFilterYear(e.target.value)}
-            className="px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-purple-500 outline-none cursor-pointer">
-            <option value="Semua Tahun">Tahun</option>
-            {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+          <div className="relative" ref={filterPopoverRef}>
+            <button onClick={() => setShowFilterPopover(v => !v)}
+              className={`px-3 py-2 border rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${showFilterPopover ? 'border-purple-400 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300' : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+              <SlidersHorizontal size={13} /> Filter
+              {(filterKategori !== 'Semua Kategori' || filterStatus !== 'Semua Status' || filterYear !== 'Semua Tahun') && (
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+              )}
+            </button>
+            {showFilterPopover && (
+              <div className="absolute right-0 top-full mt-1.5 w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 space-y-3 z-50">
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Kategori</label>
+                  <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
+                    className="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 outline-none">
+                    <option value="Semua Kategori">Semua</option>
+                    {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Status</label>
+                  <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
+                    className="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 outline-none">
+                    <option value="Semua Status">Semua</option>
+                    {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Tahun</label>
+                  <select value={filterYear} onChange={e => setFilterYear(e.target.value)}
+                    className="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 outline-none">
+                    <option value="Semua Tahun">Semua</option>
+                    {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
+                  </select>
+                </div>
+                <button onClick={() => { setFilterKategori('Semua Kategori'); setFilterStatus('Semua Status'); setFilterYear('Semua Tahun'); }}
+                  className="w-full py-1.5 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-slate-300 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                  Reset Filter
+                </button>
+              </div>
+            )}
+          </div>
           <button onClick={handleExport} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
             <Download size={12} /> Export
           </button>
