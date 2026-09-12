@@ -752,10 +752,6 @@ export default function AdminAPBDesa() {
                       <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahapan_pencairan}</p>
                     </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Pencairan</p>
-                    <p className="text-sm font-black text-blue-700 dark:text-blue-400 mt-1">{formatRp(detailTarget.total_pencairan || 0)}</p>
-                  </div>
                   {detailTarget.keterangan_pencairan && (
                     <div>
                       <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</p>
@@ -765,6 +761,11 @@ export default function AdminAPBDesa() {
                 </div>
                 {/* Kanan: Riwayat Pencairan */}
                 <div className="flex-1 p-5">
+                  <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-4 mb-4">
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Pencairan</p>
+                    <p className="text-lg font-black text-blue-700 dark:text-blue-300 mt-1">{formatRp(detailTarget.total_pencairan || 0)}</p>
+                    <p className="text-[10px] text-blue-500 mt-0.5">dari {formatRp(detailTarget.anggaran)}</p>
+                  </div>
                   {(() => {
                     const pcList = pencairanMap.get(detailTarget.id) || [];
                     return (
