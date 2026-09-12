@@ -17,6 +17,7 @@ export interface APBDesa {
   kategori: string;
   lokasi?: string | null;
   sumber_data: string;
+  sumber_dana?: string | null;
   tahun: number;
   jenis: string;
   anggaran: number;
@@ -44,6 +45,7 @@ export interface Pencairan {
 const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
 const TAHAPAN_OPTIONS = ['Belum', 'Dianggarkan', 'Berlangsung', 'Selesai'];
 const JENIS_OPTIONS = ['Murni', 'Perubahan'];
+const SUMBER_DANA_OPTIONS = ['Dana Desa (DD)', 'Alokasi Dana Desa (ADD)', 'Pendapatan Asli Desa (PAD)', 'Bantuan Pemerintah Provinsi', 'Bantuan Pemerintah Kabupaten', 'Lainnya'];
 
 const getTahapanStatus = (anggaran: number, totalPencairan: number): string => {
   if (anggaran === 0) return 'Belum';
@@ -129,7 +131,7 @@ export default function AdminAPBDesa() {
 
   const [form, setForm] = useState({
     nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0,
-    keterangan_pencairan: '', jenis: 'Murni'
+    keterangan_pencairan: '', jenis: 'Murni', sumber_dana: ''
   });
 
   const [pencairanForm, setPencairanForm] = useState({
@@ -229,6 +231,7 @@ export default function AdminAPBDesa() {
       kategori: form.kategori,
       lokasi: form.lokasi || null,
       sumber_data: editItem?.sumber_data || 'manual',
+      sumber_dana: form.sumber_dana || null,
       tahun: currentYear,
       jenis: editItem?.jenis || form.jenis,
       anggaran: form.anggaran,
@@ -420,7 +423,7 @@ export default function AdminAPBDesa() {
   };
 
   const resetForm = () => {
-    setForm({ nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni' });
+    setForm({ nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '' });
   };
 
   const filtered = useMemo(() => list.filter(r => {
@@ -652,7 +655,7 @@ export default function AdminAPBDesa() {
                         <button onClick={() => {
                           setEditItem(r);
                           setForm({ nama_kegiatan: r.nama_kegiatan, kategori: r.kategori, lokasi: r.lokasi || '',
-                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '', jenis: r.jenis || 'Murni' });
+                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '', jenis: r.jenis || 'Murni', sumber_dana: r.sumber_dana || '' });
                           setShowModal(true);
                         }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600"><Edit2 size={14} /></button>
                         <button onClick={() => handleDelete(r.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-gray-500 hover:text-rose-600"><Trash2 size={14} /></button>
@@ -742,6 +745,12 @@ export default function AdminAPBDesa() {
                       <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 flex items-center gap-1"><MapPin size={12} /> {detailTarget.lokasi || '-'}</p>
                     </div>
                   </div>
+                  {detailTarget.sumber_dana && (
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber Dana</p>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 mt-1">{detailTarget.sumber_dana}</span>
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anggaran</p>
@@ -812,7 +821,7 @@ export default function AdminAPBDesa() {
               <button onClick={() => {
                 setEditItem(detailTarget);
                 setForm({ nama_kegiatan: detailTarget.nama_kegiatan, kategori: detailTarget.kategori, lokasi: detailTarget.lokasi || '',
-                  anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '', jenis: detailTarget.jenis || 'Murni' });
+                  anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '', jenis: detailTarget.jenis || 'Murni', sumber_dana: detailTarget.sumber_dana || '' });
                 setDetailTarget(null);
                 setShowModal(true);
               }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer">
@@ -1033,6 +1042,14 @@ export default function AdminAPBDesa() {
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Lokasi</label>
                 <input value={form.lokasi} onChange={e => setForm({ ...form, lokasi: e.target.value })}
                   className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Sumber Dana</label>
+                <select value={form.sumber_dana} onChange={e => setForm({ ...form, sumber_dana: e.target.value })}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                  <option value="">Pilih Sumber Dana</option>
+                  {SUMBER_DANA_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Keterangan</label>
