@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Bot, Sparkles, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3 } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
 import { fetchSaaSTenantRequests, getLeadReadState, getApprovalReadState } from '../../utils/saasLeads';
 import { supabase } from '../../utils/supabase';
 import { showToast } from '../../utils/toast';
-import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 
 // Status tiket yang dianggap sudah selesai ditangani (resolved).
 // Tiket berstatus ini TIDAK boleh memicu badge notifikasi merah.
@@ -453,49 +452,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
           </>
         )}
         
-        <div className="pt-4 mt-6 border-t border-gray-100 dark:border-slate-800">
-          <button 
-            onClick={() => {
-              setIsMobileMenuOpen?.(false);
-              if (!ENABLE_AI_FEATURES) {
-                showToast(AI_DEV_MESSAGE, 'info');
-                return;
-              }
-              setActiveTab('ai_assistant');
-            }}
-            className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl transition-all relative overflow-hidden group ${isCollapsed ? 'justify-center px-2' : ''} ${activeTab === 'ai_assistant' ? 'bg-indigo-50 border border-indigo-100' : 'hover:bg-gray-50 dark:hover:bg-slate-800 border border-transparent'}`}
-            title={isCollapsed ? 'Asisten AI' : undefined}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner text-white overflow-hidden">
-                {globalDesiLogo ? (
-                  <img src={globalDesiLogo} alt="Desi Logo" className="w-full h-full object-cover" />
-                ) : (
-                  <Bot size={16} />
-                )}
-              </div>
-              {!isCollapsed && (
-              <div className="flex flex-col items-start">
-                <div className="flex items-center gap-1.5">
-                  <span className={`text-sm font-bold ${activeTab === 'ai_assistant' ? 'text-indigo-900' : 'text-gray-700 dark:text-slate-300'}`}>Asisten AI</span>
-                  {!ENABLE_AI_FEATURES && (
-                    <span className="px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[9px] font-black rounded-md border border-amber-200 dark:border-amber-800">
-                      [DEV]
-                    </span>
-                  )}
-                </div>
-                <span className="text-[9px] text-indigo-500 font-bold tracking-wider uppercase flex items-center gap-1">
-                  <Sparkles size={8} /> Pintar
-                </span>
-              </div>
-              )}
-            </div>
-            {activeTab === 'ai_assistant' && !isCollapsed && (
-              <div className="w-1.5 h-6 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.5)]" />
-            )}
-          </button>
-        </div>
       </nav>
 
       {/* Profile */}

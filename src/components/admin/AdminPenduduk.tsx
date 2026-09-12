@@ -1,13 +1,12 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, X, SlidersHorizontal } from 'lucide-react';
+import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, X, SlidersHorizontal } from 'lucide-react';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
 import AdminPendudukArchive from './penduduk/AdminPendudukArchive';
 import { showToast } from '../../utils/toast';
-import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 import { supabase } from '../../utils/supabase';
 import { addSaaSLog } from '../../utils/saasLogs';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -62,7 +61,6 @@ export default function AdminPenduduk({
   const [showImportModal, setShowImportModal] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
   const itemsPerPage = 10;
   const [villageName, setVillageName] = useState('Desa');
 
@@ -796,21 +794,6 @@ export default function AdminPenduduk({
             )}
           </div>
 
-          <button onClick={() => {
-            if (!ENABLE_AI_FEATURES) {
-              showToast(AI_DEV_MESSAGE, 'info');
-              return;
-            }
-            setShowAiAnalysis(true);
-          }} className="relative group overflow-hidden flex-1 md:flex-none justify-center flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs sm:text-sm shadow-sm dark:shadow-none hover:from-indigo-700 hover:to-purple-700 transition-all whitespace-nowrap border border-indigo-500/50">
-            <Sparkles className="w-4 h-4 text-purple-200 group-hover:animate-pulse" />
-            <span>Analisis Data AI</span>
-            {!ENABLE_AI_FEATURES && <span className="bg-amber-300 text-amber-950 text-[9px] font-black px-1.5 py-0.5 rounded-full">[DEV]</span>}
-            <span className="absolute top-0 right-0 flex w-3 h-3 mt-0.5 mr-0.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-            </span>
-          </button>
           <button onClick={() => setEditingPenduduk({})} className="flex-1 md:flex-none justify-center flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-sm dark:shadow-none hover:bg-emerald-800 transition-colors whitespace-nowrap">
             <UserPlus className="w-4 h-4" />
             <span>Tambah Penduduk</span>
@@ -1074,60 +1057,6 @@ export default function AdminPenduduk({
         <AdminPendudukImport onClose={() => setShowImportModal(false)} onRefresh={fetchResidents} />
       )}
 
-      {showAiAnalysis && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAiAnalysis(false)}></div>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-300">
-            <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-indigo-50/50">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-inner text-white">
-                  <Sparkles size={20} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white">Analisis Penduduk AI</h3>
-                  <p className="text-xs font-medium text-gray-500 dark:text-slate-400">Berdasarkan data {residents.length} penduduk terdaftar</p>
-                </div>
-              </div>
-              <button onClick={() => setShowAiAnalysis(false)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
-                <FilterX size={20} />
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto bg-gray-50/50 dark:bg-slate-800/50">
-              <div className="space-y-4">
-                <div className="p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl shadow-sm dark:shadow-none">
-                  <h4 className="text-sm font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
-                    <Users size={16} className="text-indigo-600" /> Demografi Usia
-                  </h4>
-                  <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed">
-                    Sebagian besar penduduk berada pada usia produktif (18-45 tahun). Terdapat potensi besar untuk program pemberdayaan ekonomi dan pelatihan kerja.
-                  </p>
-                </div>
-                <div className="p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl shadow-sm dark:shadow-none">
-                  <h4 className="text-sm font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
-                    <Heart size={16} className="text-rose-500" /> Bantuan Sosial
-                  </h4>
-                  <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed">
-                    AI mendeteksi ada sekitar 15% keluarga yang berpotensi membutuhkan bantuan sosial berdasarkan indikator pekerjaan dan jumlah tanggungan.
-                  </p>
-                </div>
-                <div className="p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl shadow-sm dark:shadow-none">
-                  <h4 className="text-sm font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
-                    <Zap size={16} className="text-amber-500" /> Rekomendasi Program
-                  </h4>
-                  <p className="text-xs text-gray-600 dark:text-slate-400 leading-relaxed">
-                    Disarankan untuk mengadakan program posyandu lansia di RW 02 dikarenakan tingginya konsentrasi penduduk usia lanjut di area tersebut.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-4 border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end">
-              <button onClick={() => setShowAiAnalysis(false)} className="px-4 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 text-gray-700 dark:text-slate-300 font-bold text-sm rounded-lg transition-colors">
-                Tutup Analisis
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {/* Custom Delete Confirmation Modal */}
       {deleteConfirmModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200">

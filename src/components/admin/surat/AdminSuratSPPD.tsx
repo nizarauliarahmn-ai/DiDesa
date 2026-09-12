@@ -2,9 +2,8 @@ import SuratEditorHeader, { getLetterHeaderTemplate } from './SuratEditorHeader'
 import { useBackdateNumber } from '../../../hooks/useBackdateNumber';
 import BackdateConfig from './BackdateConfig';
 import React, { useState, useEffect, useRef, Component } from 'react';
-import { Printer, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Upload, Sparkles, Loader2, Plane } from 'lucide-react';
+import { Printer, Plus, Trash2, Search, ZoomIn, ZoomOut, FileText, Upload, Loader2, Plane } from 'lucide-react';
 import { showToast } from '../../../utils/toast';
-import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../../utils/featureFlags';
 import { parseInvitationPdf, getActiveTenantId } from '../../../utils/aiChat';
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import { useLetterKode } from '../../../hooks/useLetterKode';
@@ -827,38 +826,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             onCustomNomorSurat={handleCustomNomorSurat}
           />
 
-          {/* AI PDF AUTOFILL CARD */}
-          <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-5 rounded-2xl shadow-md text-white">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm">DiDesa AI — Isi SPPD dari Surat Undangan {!ENABLE_AI_FEATURES && (
-                    <span className="bg-amber-300 text-amber-950 text-[10px] font-black px-1.5 py-0.5 rounded-md ml-1 align-middle">[DEV]</span>
-                  )}</h4>
-                  <p className="text-xs text-white/80 mt-0.5 leading-relaxed">
-                    Upload PDF surat undangan dari instansi lain, AI akan mendeteksi tujuan, tanggal, nomor surat, dan tempat kegiatan secara otomatis.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (!ENABLE_AI_FEATURES) {
-                    showToast(AI_DEV_MESSAGE, 'info');
-                    return;
-                  }
-                  setShowPdfUpload(!showPdfUpload);
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-700 font-bold text-xs rounded-xl hover:bg-indigo-50 transition-colors shrink-0"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                Upload Undangan
-              </button>
-            </div>
-
-            {showPdfUpload && (
+          {showPdfUpload && (
               <div className="mt-4 bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
                 <input
                   ref={pdfInputRef}

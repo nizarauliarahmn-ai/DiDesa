@@ -38,7 +38,6 @@ const AdminRPJMDesa = React.lazy(() => import('./components/admin/AdminRPJMDesa'
 const AdminRKPDesa = React.lazy(() => import('./components/admin/AdminRKPDesa'));
 const AdminAPBDesa = React.lazy(() => import('./components/admin/AdminAPBDesa'));
 const AdminBerita = React.lazy(() => import('./components/admin/AdminBerita'));
-const AdminAiAssistant = React.lazy(() => import('./components/admin/AdminAiAssistant'));
 const AdminSaaSLogs = React.lazy(() => import('./components/admin/AdminSaaSLogs'));
 const AdminSaaSLeads = React.lazy(() => import('./components/admin/AdminSaaSLeads'));
 const AdminGlobalBranding = React.lazy(() => import('./components/admin/AdminGlobalBranding'));
@@ -75,7 +74,6 @@ const PetaWilayah = React.lazy(() => import('./components/dashboard/PetaWilayah'
 const LayananMandiri = React.lazy(() => import('./components/dashboard/LayananMandiri'));
 const ProfilDesa = React.lazy(() => import('./components/dashboard/ProfilDesa'));
 const AspirasiWarga = React.lazy(() => import('./components/dashboard/AspirasiWarga'));
-const AiAssistant = React.lazy(() => import('./components/dashboard/AiAssistant'));
 
 // Lazy-loaded pages
 const SyaratKetentuanPage = React.lazy(() => import('./pages/SyaratKetentuan'));
@@ -736,7 +734,6 @@ export default function App() {
                     debouncedSearchQuery={debouncedSearch}
                   />
                 )}
-                {adminTab === 'ai_assistant' && <AdminAiAssistant />}
               </PageTransition>
                 </Suspense>
               </div>
@@ -835,7 +832,6 @@ export default function App() {
                 {publicTab === 'peta_wilayah' && <PetaWilayah />}
                 {publicTab === 'layanan_mandiri' && <LayananMandiri />}
                 {publicTab === 'aspirasi' && <AspirasiWarga />}
-                {publicTab === 'ai_assistant' && <AiAssistant />}
               </PageTransition>
               </Suspense>
             </div>

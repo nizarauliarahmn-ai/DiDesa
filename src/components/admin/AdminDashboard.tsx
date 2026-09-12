@@ -2,7 +2,7 @@ import NumberCounter from '../common/NumberCounter';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Users, FileText, MessageSquare, TrendingUp, PenTool, Loader2, Building2, BarChart3, Clock, CheckCircle2, MessageCircle, Sparkles } from 'lucide-react';
+import { Users, FileText, MessageSquare, TrendingUp, PenTool, Loader2, Building2, BarChart3, Clock, CheckCircle2, MessageCircle } from 'lucide-react';
 import { getAspirasi } from '../../utils/aspirasiData';
 import { fetchFeedbacksAsync, Feedback } from '../../utils/feedbackData';
 import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
@@ -10,7 +10,6 @@ import { supabase } from '../../utils/supabase';
 import { fetchLetterHistoryAsync, LetterHistory } from '../../utils/letterHistory';
 import { getLetterClassifications } from '../../utils/letterClassifications';
 import { showToast } from '../../utils/toast';
-import { ENABLE_AI_FEATURES, AI_DEV_MESSAGE } from '../../utils/featureFlags';
 
 export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
   const [residents, setResidents] = useState<any[]>([]);
@@ -520,23 +519,6 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               >
                 <FileText className="w-4 h-4" />
                 <span>Buat Surat Baru</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  if (!ENABLE_AI_FEATURES) {
-                    showToast(AI_DEV_MESSAGE, 'info');
-                    return;
-                  }
-                  setActiveTab?.('ai_assistant');
-                }}
-                className="w-full sm:w-auto px-5 py-3 bg-indigo-600/80 hover:bg-indigo-600 text-white border border-indigo-400/40 rounded-xl font-bold text-xs sm:text-sm backdrop-blur-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-indigo-200" />
-                <span>Asisten AI Desa</span>
-                {!ENABLE_AI_FEATURES && (
-                  <span className="bg-amber-400 text-amber-950 text-[9px] font-black px-1.5 py-0.5 rounded-full">[DEV]</span>
-                )}
               </button>
 
               <button
