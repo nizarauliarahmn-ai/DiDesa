@@ -18,6 +18,7 @@ export interface APBDesa {
   lokasi?: string | null;
   sumber_data: string;
   sumber_dana?: string | null;
+  cara_pengadaan?: string | null;
   tahun: number;
   jenis: string;
   anggaran: number;
@@ -46,7 +47,18 @@ const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemer
 const TAHAPAN_OPTIONS = ['Belum', 'Dianggarkan', 'Berlangsung', 'Selesai'];
 const JENIS_OPTIONS = ['Murni', 'Perubahan'];
 const SUMBER_DANA_OPTIONS = ['DDS', 'DDS [SILPA]', 'ADD', 'ADD [SILPA]', 'PBH', 'PBH [SILPA]', 'DDCS', 'Bantuan Provinsi', 'Bantuan Kabupaten', 'Bantuan Pusat', 'DLL'];
+const CARA_PENGADAAN_OPTIONS = ['Swakelola', 'Pembelian Langsung', 'Permintaan Penawaran', 'Lelang/Tender', 'Penunjukan Langsung'];
 
+const caraPengadaanColor = (c: string) => {
+  switch (c) {
+    case 'Swakelola': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'Pembelian Langsung': return 'bg-sky-50 text-sky-700 border-sky-200';
+    case 'Permintaan Penawaran': return 'bg-violet-50 text-violet-700 border-violet-200';
+    case 'Lelang/Tender': return 'bg-amber-50 text-amber-700 border-amber-200';
+    case 'Penunjukan Langsung': return 'bg-rose-50 text-rose-700 border-rose-200';
+    default: return 'bg-gray-50 text-gray-600 border-gray-200';
+  }
+};
 const getTahapanStatus = (anggaran: number, totalPencairan: number): string => {
   if (anggaran === 0) return 'Belum';
   if (totalPencairan === 0) return 'Dianggarkan';
@@ -87,18 +99,16 @@ const kategoriColor = (k: string) => {
 
 const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
-const getHighlight = (item: APBDesa, totalPencairan: number): { label: string; color: string; bg: string; border: string } | null => {
-  const tahapIdx = TAHAPAN_OPTIONS.indexOf(item.tahapan_pencairan);
-  if (item.anggaran === 0) {
-    return { label: 'Belum Dianggarkan', color: 'text-gray-500', bg: 'bg-gray-50', border: 'border-gray-200' };
+const getHighlight = (item: APBDesa): { label: string; color: string; bg: string; border: string } | null => {
+  const cp = item.cara_pengadaan;
+  if (!cp || cp === 'Swakelola') return null;
+  switch (cp) {
+    case 'Pembelian Langsung': return { label: 'Pembelian Langsung', color: 'text-sky-700', bg: 'bg-sky-50', border: 'border-sky-200' };
+    case 'Permintaan Penawaran': return { label: 'Permintaan Penawaran', color: 'text-violet-700', bg: 'bg-violet-50', border: 'border-violet-200' };
+    case 'Lelang/Tender': return { label: 'Lelang / Tender', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-200' };
+    case 'Penunjukan Langsung': return { label: 'Penunjukan Langsung', color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-200' };
+    default: return null;
   }
-  if (tahapIdx === 0 && item.anggaran > 0 && totalPencairan === 0) {
-    return { label: 'Perlu Diproses', color: 'text-amber-700', bg: 'bg-amber-50', border: 'border-amber-300' };
-  }
-  if (item.tahapan_pencairan === 'Selesai' && totalPencairan < item.anggaran) {
-    return { label: 'Pencairan Kurang', color: 'text-rose-700', bg: 'bg-rose-50', border: 'border-rose-300' };
-  }
-  return null;
 };
 
 export default function AdminAPBDesa() {
@@ -134,7 +144,7 @@ export default function AdminAPBDesa() {
 
   const [form, setForm] = useState({
     nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0,
-    keterangan_pencairan: '', jenis: 'Murni', sumber_dana: ''
+    keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola'
   });
 
   const [pencairanForm, setPencairanForm] = useState({
@@ -244,6 +254,7 @@ export default function AdminAPBDesa() {
       lokasi: form.lokasi || null,
       sumber_data: editItem?.sumber_data || 'manual',
       sumber_dana: form.sumber_dana || null,
+      cara_pengadaan: form.cara_pengadaan || 'Swakelola',
       tahun: currentYear,
       jenis: editItem?.jenis || form.jenis,
       anggaran: form.anggaran,
@@ -450,17 +461,14 @@ export default function AdminAPBDesa() {
   };
 
   const resetForm = () => {
-    setForm({ nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '' });
+    setForm({ nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola' });
   };
 
   const filtered = useMemo(() => list.filter(r => {
     const matchSearch = r.nama_kegiatan.toLowerCase().includes(searchQuery.toLowerCase()) || r.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase());
     const matchKat = filterKategori === 'Semua Kategori' || r.kategori === filterKategori;
     const matchJenis = filterJenis === 'Semua Jenis' || r.jenis === filterJenis;
-    const hl = getHighlight(r, r.total_pencairan || 0);
-    const matchHl = filterHighlight === 'Semua Status' ||
-      (filterHighlight === 'highlight' && hl !== null) ||
-      (filterHighlight === 'aman' && hl === null);
+    const matchHl = filterHighlight === 'Semua Status' || (r.cara_pengadaan || 'Swakelola') === filterHighlight;
     const matchYear = filterYear === 'Semua Tahun' || r.tahun === Number(filterYear);
     return matchSearch && matchKat && matchJenis && matchHl && matchYear;
   }), [list, searchQuery, filterKategori, filterJenis, filterHighlight, filterYear]);
@@ -468,7 +476,7 @@ export default function AdminAPBDesa() {
   const metrics = useMemo(() => {
     return {
       total: list.length,
-      highlight: list.filter(r => getHighlight(r, r.total_pencairan || 0) !== null).length,
+      highlight: list.filter(r => r.cara_pengadaan && r.cara_pengadaan !== 'Swakelola').length,
       perluDiproses: list.filter(r => r.tahapan_pencairan === 'Belum' && r.anggaran > 0).length,
       selesai: list.filter(r => r.tahapan_pencairan === 'Selesai').length,
       totalAnggaran: list.reduce((s, r) => s + (r.anggaran || 0), 0),
@@ -483,7 +491,7 @@ export default function AdminAPBDesa() {
       'Total Pencairan': r.total_pencairan || 0,
       'Persentase': r.anggaran > 0 ? Math.round(((r.total_pencairan || 0) / r.anggaran) * 100) + '%' : '0%',
       'Foto': r.jumlah_foto || 0,
-      Highlight: getHighlight(r, r.total_pencairan || 0)?.label || '-'
+      'Cara Pengadaan': r.cara_pengadaan || 'Swakelola'
     }));
     const ws = utils.json_to_sheet(rows);
     const wb = utils.book_new();
@@ -545,7 +553,7 @@ export default function AdminAPBDesa() {
           <div className="hidden md:flex items-center gap-2 ml-2">
             {[
               { label: 'Total', value: metrics.total, color: 'bg-emerald-50 text-emerald-700' },
-              { label: 'Perlu', value: metrics.highlight, color: 'bg-amber-50 text-amber-700' },
+              { label: 'Non-Swakelola', value: metrics.highlight, color: 'bg-amber-50 text-amber-700' },
               { label: 'Selesai', value: metrics.selesai, color: 'bg-emerald-100 text-emerald-800' },
             ].map((m, i) => (
               <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${m.color}`}>{m.label}: {m.value}</span>
@@ -607,10 +615,13 @@ export default function AdminAPBDesa() {
                 <div>
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Status</label>
                   <select value={filterHighlight} onChange={e => setFilterHighlight(e.target.value)}
-                    className="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 outline-none">
-                    <option value="Semua Status">Semua</option>
-                    <option value="highlight">Perlu Perhatian</option>
-                    <option value="aman">Aman</option>
+                    className="border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold bg-white dark:bg-slate-900">
+                    <option value="Semua Status">Semua Pengadaan</option>
+                    <option value="Swakelola">Swakelola</option>
+                    <option value="Pembelian Langsung">Pembelian Langsung</option>
+                    <option value="Permintaan Penawaran">Permintaan Penawaran</option>
+                    <option value="Lelang/Tender">Lelang / Tender</option>
+                    <option value="Penunjukan Langsung">Penunjukan Langsung</option>
                   </select>
                 </div>
                 <div>
@@ -661,7 +672,7 @@ export default function AdminAPBDesa() {
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Anggaran</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Pencairan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Tahapan</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Highlight</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Cara Pengadaan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Aksi</th>
               </tr>
             </thead>
@@ -676,7 +687,7 @@ export default function AdminAPBDesa() {
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={10} className="py-12 text-center text-gray-500 font-medium">Belum ada data APBDesa tahun ini</td></tr>
               ) : filtered.map(r => {
-                const hl = getHighlight(r, r.total_pencairan || 0);
+                const hl = getHighlight(r);
                 return (
                   <tr key={r.id} onClick={() => setDetailTarget(r)} className={`cursor-pointer transition-colors ${hl ? `${hl.bg}/30 hover:${hl.bg}/50` : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}>
                     <td className="py-3 px-4">
@@ -704,16 +715,16 @@ export default function AdminAPBDesa() {
                     <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">{formatRp(r.anggaran)}</td>
                     <td className="py-3 px-4"><PencairanBadge item={r} /></td>
                     <td className="py-3 px-4"><TahapanBadge item={r} /></td>
-                    <td className="py-3 px-4 text-center whitespace-nowrap">
-                      {hl ? (
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${hl.color} ${hl.bg} ${hl.border}`}>
-                          <AlertTriangle size={10} /> {hl.label}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-emerald-50 text-emerald-700 border-emerald-200">
-                          <CheckCircle2 size={10} /> Aman
-                        </span>
-                      )}
+                    <td className="py-3 px-4">
+                      {(() => {
+                        const cp = r.cara_pengadaan || 'Swakelola';
+                        const cpColor = caraPengadaanColor(cp);
+                        return (
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${cpColor}`}>
+                            {cp === 'Swakelola' ? <CheckCircle2 size={10} /> : <AlertTriangle size={10} />} {cp}
+                          </span>
+                        );
+                      })()}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <div className="flex items-center justify-center gap-1">
@@ -727,7 +738,7 @@ export default function AdminAPBDesa() {
                         <button onClick={() => {
                           setEditItem(r);
                           setForm({ nama_kegiatan: r.nama_kegiatan, kategori: r.kategori, lokasi: r.lokasi || '',
-                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '', jenis: r.jenis || 'Murni', sumber_dana: r.sumber_dana || '' });
+                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '', jenis: r.jenis || 'Murni', sumber_dana: r.sumber_dana || '', cara_pengadaan: r.cara_pengadaan || 'Swakelola' });
                           setShowModal(true);
                         }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600"><Edit2 size={14} /></button>
                         <button onClick={() => handleDelete(r.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-gray-500 hover:text-rose-600"><Trash2 size={14} /></button>
@@ -830,6 +841,18 @@ export default function AdminAPBDesa() {
                       <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahapan</p>
                       <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahapan_pencairan}</p>
                     </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Cara Pengadaan</p>
+                      {(() => {
+                        const cp = detailTarget.cara_pengadaan || 'Swakelola';
+                        const cpColor = caraPengadaanColor(cp);
+                        return (
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${cpColor}`}>
+                            {cp === 'Swakelola' ? <CheckCircle2 size={10} /> : <AlertTriangle size={10} />} {cp}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
                   {detailTarget.keterangan_pencairan && (
                     <div>
@@ -891,7 +914,7 @@ export default function AdminAPBDesa() {
               <button onClick={() => {
                 setEditItem(detailTarget);
                 setForm({ nama_kegiatan: detailTarget.nama_kegiatan, kategori: detailTarget.kategori, lokasi: detailTarget.lokasi || '',
-                  anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '', jenis: detailTarget.jenis || 'Murni', sumber_dana: detailTarget.sumber_dana || '' });
+                  anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '', jenis: detailTarget.jenis || 'Murni', sumber_dana: detailTarget.sumber_dana || '', cara_pengadaan: detailTarget.cara_pengadaan || 'Swakelola' });
                 setDetailTarget(null);
                 setShowModal(true);
               }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer">
@@ -1178,6 +1201,13 @@ export default function AdminAPBDesa() {
                   className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
                   <option value="">Pilih Sumber Dana</option>
                   {SUMBER_DANA_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Cara Pengadaan</label>
+                <select value={form.cara_pengadaan} onChange={e => setForm({ ...form, cara_pengadaan: e.target.value })}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                  {CARA_PENGADAAN_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
