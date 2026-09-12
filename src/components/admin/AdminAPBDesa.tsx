@@ -745,12 +745,10 @@ export default function AdminAPBDesa() {
                       <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 flex items-center gap-1"><MapPin size={12} /> {detailTarget.lokasi || '-'}</p>
                     </div>
                   </div>
-                  {detailTarget.sumber_dana && (
-                    <div>
-                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber Dana</p>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 mt-1">{detailTarget.sumber_dana}</span>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber Dana</p>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 mt-1">{detailTarget.sumber_dana || '-'}</span>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anggaran</p>
