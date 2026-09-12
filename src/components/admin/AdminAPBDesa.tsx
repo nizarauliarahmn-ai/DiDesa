@@ -45,7 +45,7 @@ export interface Pencairan {
 const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
 const TAHAPAN_OPTIONS = ['Belum', 'Dianggarkan', 'Berlangsung', 'Selesai'];
 const JENIS_OPTIONS = ['Murni', 'Perubahan'];
-const SUMBER_DANA_OPTIONS = ['Dana Desa (DD)', 'Alokasi Dana Desa (ADD)', 'Pendapatan Asli Desa (PAD)', 'Bantuan Pemerintah Provinsi', 'Bantuan Pemerintah Kabupaten', 'Lainnya'];
+const SUMBER_DANA_OPTIONS = ['DDS', 'DDS [SILPA]', 'ADD', 'ADD [SILPA]', 'PBH', 'PBH [SILPA]', 'DDCS', 'Bantuan Provinsi', 'Bantuan Kabupaten', 'Bantuan Pusat', 'DLL'];
 
 const getTahapanStatus = (anggaran: number, totalPencairan: number): string => {
   if (anggaran === 0) return 'Belum';
