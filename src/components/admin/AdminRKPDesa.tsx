@@ -426,7 +426,8 @@ export default function AdminRKPDesa() {
                   <td className="py-3 px-4">
                     <input type="checkbox" className="accent-blue-600"
                       checked={selectedIds.includes(r.id)}
-                      onChange={e => setSelectedIds(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id))} />
+                      onClick={e => e.stopPropagation()}
+                      onChange={e => { e.stopPropagation(); setSelectedIds(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id)); }} />
                   </td>
                   <td className="py-3 px-4 text-xs font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{r.kode_rkpdesa}</td>
                   <td className="py-3 px-4">

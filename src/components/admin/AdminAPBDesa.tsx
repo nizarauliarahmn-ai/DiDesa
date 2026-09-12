@@ -617,7 +617,8 @@ export default function AdminAPBDesa() {
                     <td className="py-3 px-4">
                       <input type="checkbox" className="accent-emerald-600"
                         checked={selectedForMassEdit.includes(r.id)}
-                        onChange={e => setSelectedForMassEdit(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id))} />
+                        onClick={e => e.stopPropagation()}
+                        onChange={e => { e.stopPropagation(); setSelectedForMassEdit(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id)); }} />
                     </td>
                     <td className="py-3 px-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{r.kode_apbdesa}</td>
                     <td className="py-3 px-4">
