@@ -385,10 +385,6 @@ export default function AdminRKPDesa() {
             <option>Semua Tahun</option>
             {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <button onClick={() => { setSelectMode(v => !v); if (selectMode) setSelectedIds([]); }}
-            className={`px-4 py-2.5 border rounded-xl text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer ${selectMode ? 'border-blue-400 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300' : 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-            {selectMode ? <ListChecks size={14} /> : <Square size={14} />} Pilih
-          </button>
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
             <Download size={14} /> Export
           </button>
@@ -401,11 +397,18 @@ export default function AdminRKPDesa() {
             <thead className="sticky top-0 z-20">
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
                 <th className="py-3 px-4 text-left w-10">
-                  {selectMode && (
-                  <input type="checkbox" className="accent-blue-600"
-                    checked={filtered.length > 0 && selectedIds.length === filtered.length}
-                    onChange={toggleSelectAll} />
-                  )}
+                  <div className="flex flex-col items-center gap-1">
+                    <button onClick={() => { setSelectMode(v => !v); if (selectMode) setSelectedIds([]); }}
+                      className={`p-1 rounded-md transition-colors cursor-pointer ${selectMode ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
+                      title={selectMode ? 'Nonaktifkan pilih' : 'Aktifkan pilih'}>
+                      {selectMode ? <ListChecks size={14} /> : <Square size={14} />}
+                    </button>
+                    {selectMode && (
+                    <input type="checkbox" className="accent-blue-600"
+                      checked={filtered.length > 0 && selectedIds.length === filtered.length}
+                      onChange={toggleSelectAll} />
+                    )}
+                  </div>
                 </th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kode</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
