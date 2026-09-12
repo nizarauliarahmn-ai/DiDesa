@@ -151,7 +151,7 @@ export default function AdminAPBDesa() {
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) { setLoading(false); return; }
 
-    const { data } = await supabase.from('apbdesa').select('*').eq('tenant_id', tenantId).eq('tahun', currentYear).order('created_at', { ascending: false });
+    const { data } = await supabase.from('apbdesa').select('*').eq('tenant_id', tenantId).eq('tahun', currentYear).order('kode_apbdesa', { ascending: true });
     if (data) {
       const items = data as APBDesa[];
       const linked = new Set<string>();
