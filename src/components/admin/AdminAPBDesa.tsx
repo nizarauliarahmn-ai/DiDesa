@@ -141,6 +141,7 @@ export default function AdminAPBDesa() {
   const [pencairanUploading, setPencairanUploading] = useState(false);
   const [pencairanFoto, setPencairanFoto] = useState<File | null>(null);
   const [pencairanFotoPreview, setPencairanFotoPreview] = useState<string | null>(null);
+  const [pencairanQueue, setPencairanQueue] = useState<{ jumlah: number; tanggal: string; keterangan: string; foto: File | null; fotoPreview: string | null }[]>([]);
   const fotoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { loadData(); }, []);
@@ -252,54 +253,66 @@ export default function AdminAPBDesa() {
     setShowModal(false); setEditItem(null); resetForm(); loadData();
   };
 
-  const handleAddPencairan = async () => {
-    if (!showPencairanModal) return;
+  const handleAddToQueue = () => {
     if (!pencairanForm.jumlah || parseFloat(pencairanForm.jumlah.replace(/\./g, '')) <= 0) {
       showToast('Jumlah pencairan wajib diisi', 'error'); return;
     }
+    const jumlah = parseFloat(pencairanForm.jumlah.replace(/\./g, '')) || 0;
+    setPencairanQueue(prev => [...prev, {
+      jumlah,
+      tanggal: pencairanForm.tanggal,
+      keterangan: pencairanForm.keterangan,
+      foto: pencairanFoto,
+      fotoPreview: pencairanFotoPreview
+    }]);
+    setPencairanForm({ jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: '' });
+    setPencairanFoto(null); setPencairanFotoPreview(null);
+    if (fotoInputRef.current) fotoInputRef.current.value = '';
+  };
+
+  const handleSaveAllPencairan = async () => {
+    if (!showPencairanModal || pencairanQueue.length === 0) return;
     const tenantId = await resolveCurrentTenant();
     if (!tenantId) return;
 
     setPencairanUploading(true);
-    let fotoUrl: string | null = null;
+    let totalAdded = 0;
 
-    if (pencairanFoto) {
-      const ext = pencairanFoto.name.split('.').pop() || 'jpg';
-      const filePath = `${tenantId}/${showPencairanModal.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('apbdesa-foto').upload(filePath, pencairanFoto);
-      if (uploadError) {
-        showToast('Gagal upload foto: ' + uploadError.message, 'error');
-        setPencairanUploading(false); return;
+    for (const item of pencairanQueue) {
+      let fotoUrl: string | null = null;
+      if (item.foto) {
+        const ext = item.foto.name.split('.').pop() || 'jpg';
+        const filePath = `${tenantId}/${showPencairanModal.id}/${Date.now()}.${ext}`;
+        const { error: uploadError } = await supabase.storage.from('apbdesa-foto').upload(filePath, item.foto);
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from('apbdesa-foto').getPublicUrl(filePath);
+          fotoUrl = urlData.publicUrl;
+        }
       }
-      const { data: urlData } = supabase.storage.from('apbdesa-foto').getPublicUrl(filePath);
-      fotoUrl = urlData.publicUrl;
+      const { error } = await supabase.from('apbdesa_pencairan').insert({
+        tenant_id: tenantId,
+        apbdesa_id: showPencairanModal.id,
+        jumlah: item.jumlah,
+        tanggal: item.tanggal,
+        keterangan: item.keterangan || null,
+        foto_url: fotoUrl
+      });
+      if (!error) totalAdded += item.jumlah;
     }
 
-    const jumlah = parseFloat(pencairanForm.jumlah.replace(/\./g, '')) || 0;
-    const { error } = await supabase.from('apbdesa_pencairan').insert({
-      tenant_id: tenantId,
-      apbdesa_id: showPencairanModal.id,
-      jumlah,
-      tanggal: pencairanForm.tanggal,
-      keterangan: pencairanForm.keterangan || null,
-      foto_url: fotoUrl
-    });
+    if (totalAdded > 0) {
+      const newTotal = (showPencairanModal.total_pencairan || 0) + totalAdded;
+      const autoTahapan = getTahapanStatus(showPencairanModal.anggaran, newTotal);
+      await supabase.from('apbdesa').update({
+        tanggal_pencairan: pencairanQueue[pencairanQueue.length - 1].tanggal,
+        tahapan_pencairan: autoTahapan,
+        updated_at: new Date().toISOString()
+      }).eq('id', showPencairanModal.id);
+    }
 
     setPencairanUploading(false);
-    if (error) { showToast('Gagal catat pencairan: ' + error.message, 'error'); return; }
-
-    await supabase.from('apbdesa').update({
-      tanggal_pencairan: pencairanForm.tanggal,
-      updated_at: new Date().toISOString()
-    }).eq('id', showPencairanModal.id);
-
-    const newTotal = (showPencairanModal.total_pencairan || 0) + jumlah;
-    const autoTahapan = getTahapanStatus(showPencairanModal.anggaran, newTotal);
-    await supabase.from('apbdesa').update({ tahapan_pencairan: autoTahapan }).eq('id', showPencairanModal.id);
-
-    showToast('Pencairan berhasil dicatat', 'success');
-    setPencairanForm({ jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: '' });
-    setPencairanFoto(null); setPencairanFotoPreview(null);
+    showToast(`${pencairanQueue.length} pencairan berhasil dicatat`, 'success');
+    setPencairanQueue([]);
     loadData();
   };
 
@@ -905,6 +918,27 @@ export default function AdminAPBDesa() {
               </div>
 
               <div className="p-5 border-t border-gray-100 dark:border-slate-800 space-y-3 bg-gray-50 dark:bg-slate-800/30">
+                {pencairanQueue.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Antrian ({pencairanQueue.length})</p>
+                    {pencairanQueue.map((q, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-bold text-gray-900 dark:text-white">{formatRp(q.jumlah)}</span>
+                            <span className="text-[10px] font-bold text-gray-500">{new Date(q.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          </div>
+                          {q.keterangan && <p className="text-xs text-gray-500 truncate">{q.keterangan}</p>}
+                          {q.fotoPreview && <span className="text-[10px] text-blue-500 font-bold">Ada foto</span>}
+                        </div>
+                        <button onClick={() => setPencairanQueue(prev => prev.filter((_, idx) => idx !== i))}
+                          className="p-1 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600 shrink-0">
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Catat Pencairan Baru</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -961,11 +995,17 @@ export default function AdminAPBDesa() {
               </div>
 
               <div className="p-5 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
-                <button onClick={() => setShowPencairanModal(null)} className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Tutup</button>
-                <button onClick={handleAddPencairan} disabled={pencairanUploading || !pencairanForm.jumlah}
-                  className="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
-                  {pencairanUploading ? 'Uploading...' : <><Camera size={14} /> Catat Pencairan</>}
+                <button onClick={() => { setShowPencairanModal(null); setPencairanQueue([]); }} className="px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl">Tutup</button>
+                <button onClick={handleAddToQueue} disabled={!pencairanForm.jumlah}
+                  className="px-4 py-2.5 border border-blue-600 text-blue-600 text-sm font-bold rounded-xl hover:bg-blue-50 disabled:opacity-50 flex items-center gap-2">
+                  <PlusCircle size={14} /> Tambah
                 </button>
+                {pencairanQueue.length > 0 && (
+                <button onClick={handleSaveAllPencairan} disabled={pencairanUploading}
+                  className="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
+                  {pencairanUploading ? 'Menyimpan...' : <><Camera size={14} /> Simpan {pencairanQueue.length} Pencairan</>}
+                </button>
+                )}
               </div>
             </div>
           </div>
