@@ -678,9 +678,6 @@ export default function App() {
                   <AdminPenduduk 
                     onNavigateToTab={setAdminTab} 
                     onSetPresetResident={setPresetResident} 
-                    searchQuery={globalSearch}
-                    setSearchQuery={setGlobalSearch}
-                    debouncedSearchQuery={debouncedSearch}
                   />
                 )}
                 {adminTab === 'surat' && (
