@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
-  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin
+  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -126,6 +126,7 @@ export default function AdminAPBDesa() {
 
   const [selectedForMassEdit, setSelectedForMassEdit] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '', applyJenis: false, jenis: 'Murni' });
 
@@ -572,6 +573,10 @@ export default function AdminAPBDesa() {
             <option>Semua Tahun</option>
             {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+          <button onClick={() => { setSelectMode(v => !v); if (selectMode) setSelectedForMassEdit([]); }}
+            className={`px-4 py-2.5 border rounded-xl text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer ${selectMode ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300' : 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+            {selectMode ? <ListChecks size={14} /> : <Square size={14} />} Pilih
+          </button>
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
             <Download size={14} /> Export
           </button>
@@ -584,9 +589,11 @@ export default function AdminAPBDesa() {
             <thead className="sticky top-0 z-20">
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
                 <th className="py-3 px-4 w-10">
+                  {selectMode && (
                   <input type="checkbox" className="accent-emerald-600"
                     checked={selectedForMassEdit.length === filtered.length && filtered.length > 0}
                     onChange={e => setSelectedForMassEdit(e.target.checked ? filtered.map(r => r.id) : [])} />
+                  )}
                 </th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kode</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
@@ -615,10 +622,12 @@ export default function AdminAPBDesa() {
                 return (
                   <tr key={r.id} onClick={() => setDetailTarget(r)} className={`cursor-pointer transition-colors ${hl ? `${hl.bg}/30 hover:${hl.bg}/50` : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/30'}`}>
                     <td className="py-3 px-4">
+                      {selectMode && (
                       <input type="checkbox" className="accent-emerald-600"
                         checked={selectedForMassEdit.includes(r.id)}
                         onClick={e => e.stopPropagation()}
                         onChange={e => { e.stopPropagation(); setSelectedForMassEdit(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id)); }} />
+                      )}
                     </td>
                     <td className="py-3 px-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{r.kode_apbdesa}</td>
                     <td className="py-3 px-4">

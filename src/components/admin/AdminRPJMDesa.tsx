@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, Target, AlertTriangle, X, Loader2,
-  MapPin, Link2, CheckCircle2, Ban, Printer, Download, Eye, Star, Filter
+  MapPin, Link2, CheckCircle2, Ban, Printer, Download, Eye, Star, Filter, ListChecks, Square
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -67,6 +67,7 @@ export default function AdminRPJMDesa() {
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({
     applyKategori: false, kategori: 'Infrastruktur',
@@ -392,6 +393,10 @@ export default function AdminRPJMDesa() {
             <option>Semua Tahun</option>
             {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+          <button onClick={() => { setSelectMode(v => !v); if (selectMode) setSelectedIds([]); }}
+            className={`px-4 py-2.5 border rounded-xl text-sm font-bold flex items-center gap-2 transition-colors cursor-pointer ${selectMode ? 'border-purple-400 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300' : 'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+            {selectMode ? <ListChecks size={14} /> : <Square size={14} />} Pilih
+          </button>
           <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
             <Download size={14} /> Export
           </button>
@@ -404,9 +409,11 @@ export default function AdminRPJMDesa() {
             <thead className="sticky top-0 z-20">
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
                 <th className="py-3 px-4 text-left w-10">
+                  {selectMode && (
                   <input type="checkbox" className="accent-purple-600"
                     checked={filtered.length > 0 && selectedIds.length === filtered.length}
                     onChange={toggleSelectAll} />
+                  )}
                 </th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Kode</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Nama Program</th>
@@ -433,10 +440,12 @@ export default function AdminRPJMDesa() {
               ) : filtered.map(r => (
                 <tr key={r.id} onClick={() => setDetailTarget(r)} className={`cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors ${selectedIds.includes(r.id) ? 'bg-purple-50/50 dark:bg-purple-950/20' : ''}`}>
                   <td className="py-3 px-4">
+                    {selectMode && (
                     <input type="checkbox" className="accent-purple-600"
                       checked={selectedIds.includes(r.id)}
                       onClick={e => e.stopPropagation()}
                       onChange={e => { e.stopPropagation(); setSelectedIds(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id)); }} />
+                    )}
                   </td>
                   <td className="py-3 px-4 text-xs font-bold text-purple-600 dark:text-purple-400 whitespace-nowrap">{r.kode_rpjmdesa}</td>
                   <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white max-w-[250px] truncate">{r.nama_program}</td>
