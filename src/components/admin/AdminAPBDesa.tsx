@@ -753,6 +753,34 @@ export default function AdminAPBDesa() {
                   <p className="text-sm font-black text-blue-700 dark:text-blue-400 mt-1">{formatRp(detailTarget.total_pencairan || 0)}</p>
                 </div>
               </div>
+              {(() => {
+                const pcList = pencairanMap.get(detailTarget.id) || [];
+                if (pcList.length === 0) return null;
+                return (
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Riwayat Pencairan ({pcList.length}x)</p>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {pcList.map((pc: any, idx: number) => (
+                        <div key={pc.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl">
+                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center shrink-0">
+                            <span className="text-xs font-black text-blue-600 dark:text-blue-400">{idx + 1}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-gray-900 dark:text-white">{formatRp(pc.jumlah)}</p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">{new Date(pc.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                            {pc.keterangan && <p className="text-[10px] text-gray-400 mt-0.5 truncate">{pc.keterangan}</p>}
+                          </div>
+                          {pc.foto_url && (
+                            <a href={pc.foto_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 shrink-0">
+                              <Camera size={14} />
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
               {detailTarget.keterangan_pencairan && (
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</p>
