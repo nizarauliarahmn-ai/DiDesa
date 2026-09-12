@@ -358,35 +358,35 @@ export default function AdminRKPDesa() {
         </div>
       </div>
 
-      <div className="sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 py-3">
-        <div className="flex flex-col md:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Cari kegiatan..."
-              className="w-full pl-9 pr-9 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none" />
+      <div className="sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 py-2.5">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex-1 min-w-[200px] relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Cari..."
+              className="w-full pl-8 pr-8 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none" />
             {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 cursor-pointer">
-                <X size={14} />
+              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X size={12} />
               </button>
             )}
           </div>
           <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
-            className="px-3 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
-            <option>Semua Kategori</option>
+            className="px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+            <option value="Semua Kategori">Kategori</option>
             {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
           </select>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-            className="px-3 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
-            <option>Semua Status</option>
+            className="px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+            <option value="Semua Status">Status</option>
             {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
           </select>
           <select value={filterYear} onChange={e => setFilterYear(e.target.value)}
-            className="px-3 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
-            <option>Semua Tahun</option>
+            className="px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:border-gray-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
+            <option value="Semua Tahun">Tahun</option>
             {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <button onClick={handleExport} className="px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-2">
-            <Download size={14} /> Export
+          <button onClick={handleExport} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
+            <Download size={12} /> Export
           </button>
         </div>
       </div>
