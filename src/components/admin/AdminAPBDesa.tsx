@@ -893,8 +893,8 @@ export default function AdminAPBDesa() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-5 space-y-3">
-                {pcList.length === 0 && <p className="text-sm text-gray-400 text-center py-4">Belum ada catatan pencairan</p>}
+              <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                {pcList.length === 0 && pencairanQueue.length === 0 && <p className="text-sm text-gray-400 text-center py-4">Belum ada catatan pencairan</p>}
                 {pcList.map(p => (
                   <div key={p.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl">
                     <div className="flex-1">
@@ -915,82 +915,84 @@ export default function AdminAPBDesa() {
                     </button>
                   </div>
                 ))}
-              </div>
-
-              <div className="p-5 border-t border-gray-100 dark:border-slate-800 space-y-3 bg-gray-50 dark:bg-slate-800/30">
                 {pencairanQueue.length > 0 && (
                   <div className="space-y-2">
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Antrian ({pencairanQueue.length})</p>
-                    {pencairanQueue.map((q, i) => (
-                      <div key={i} className="flex items-center gap-3 p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-bold text-gray-900 dark:text-white">{formatRp(q.jumlah)}</span>
-                            <span className="text-[10px] font-bold text-gray-500">{new Date(q.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    {[...pencairanQueue].sort((a, b) => a.tanggal.localeCompare(b.tanggal)).map((q, i) => {
+                      const origIdx = pencairanQueue.indexOf(q);
+                      return (
+                        <div key={origIdx} className="flex items-center gap-3 p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-bold text-gray-900 dark:text-white">{formatRp(q.jumlah)}</span>
+                              <span className="text-[10px] font-bold text-gray-500">{new Date(q.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            </div>
+                            {q.keterangan && <p className="text-xs text-gray-500 truncate">{q.keterangan}</p>}
+                            {q.fotoPreview && <span className="text-[10px] text-blue-500 font-bold">Ada foto</span>}
                           </div>
-                          {q.keterangan && <p className="text-xs text-gray-500 truncate">{q.keterangan}</p>}
-                          {q.fotoPreview && <span className="text-[10px] text-blue-500 font-bold">Ada foto</span>}
+                          <button onClick={() => setPencairanQueue(prev => prev.filter((_, idx) => idx !== origIdx))}
+                            className="p-1 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600 shrink-0">
+                            <Trash2 size={12} />
+                          </button>
                         </div>
-                        <button onClick={() => setPencairanQueue(prev => prev.filter((_, idx) => idx !== i))}
-                          className="p-1 hover:bg-rose-50 rounded-lg text-gray-400 hover:text-rose-600 shrink-0">
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Catat Pencairan Baru</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jumlah (Rp)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500">Rp</span>
-                      <input type="text" inputMode="numeric" value={pencairanForm.jumlah}
-                        onChange={e => { const raw = e.target.value.replace(/\D/g, ''); setPencairanForm({ ...pencairanForm, jumlah: raw ? parseInt(raw).toLocaleString('id-ID') : '' }); }}
-                        placeholder="0" className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 pl-10 text-sm font-medium bg-white dark:bg-slate-900" />
+                <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-3">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Catat Pencairan Baru</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jumlah (Rp)</label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-500">Rp</span>
+                        <input type="text" inputMode="numeric" value={pencairanForm.jumlah}
+                          onChange={e => { const raw = e.target.value.replace(/\D/g, ''); setPencairanForm({ ...pencairanForm, jumlah: raw ? parseInt(raw).toLocaleString('id-ID') : '' }); }}
+                          placeholder="0" className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 pl-10 text-sm font-medium bg-white dark:bg-slate-900" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Tanggal</label>
+                      <input type="date" value={pencairanForm.tanggal}
+                        onChange={e => setPencairanForm({ ...pencairanForm, tanggal: e.target.value })}
+                        className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Tanggal</label>
-                    <input type="date" value={pencairanForm.tanggal}
-                      onChange={e => setPencairanForm({ ...pencairanForm, tanggal: e.target.value })}
+                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Keterangan</label>
+                    <input value={pencairanForm.keterangan}
+                      onChange={e => setPencairanForm({ ...pencairanForm, keterangan: e.target.value })}
+                      placeholder="Catatan pencairan..."
                       className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
                   </div>
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Keterangan</label>
-                  <input value={pencairanForm.keterangan}
-                    onChange={e => setPencairanForm({ ...pencairanForm, keterangan: e.target.value })}
-                    placeholder="Catatan pencairan..."
-                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Foto Bukti (opsional)</label>
-                  <input ref={fotoInputRef} type="file" accept="image/*" className="hidden"
-                    onChange={e => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setPencairanFoto(file);
-                        const reader = new FileReader();
-                        reader.onload = ev => setPencairanFotoPreview(ev.target?.result as string);
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  {pencairanFotoPreview ? (
-                    <div className="relative inline-block">
-                      <img src={pencairanFotoPreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl border" />
-                      <button onClick={() => { setPencairanFoto(null); setPencairanFotoPreview(null); if (fotoInputRef.current) fotoInputRef.current.value = ''; }}
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs">
-                        <X size={10} />
+                  <div>
+                    <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Foto Bukti (opsional)</label>
+                    <input ref={fotoInputRef} type="file" accept="image/*" className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setPencairanFoto(file);
+                          const reader = new FileReader();
+                          reader.onload = ev => setPencairanFotoPreview(ev.target?.result as string);
+                          reader.readAsDataURL(file);
+                        }
+                      }} />
+                    {pencairanFotoPreview ? (
+                      <div className="relative inline-block">
+                        <img src={pencairanFotoPreview} alt="Preview" className="w-20 h-20 object-cover rounded-xl border" />
+                        <button onClick={() => { setPencairanFoto(null); setPencairanFotoPreview(null); if (fotoInputRef.current) fotoInputRef.current.value = ''; }}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs">
+                          <X size={10} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => fotoInputRef.current?.click()}
+                        className="w-full border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl p-4 text-center hover:border-blue-400 transition-colors">
+                        <Camera size={20} className="mx-auto text-gray-400 mb-1" />
+                        <p className="text-xs text-gray-500">Klik untuk upload foto</p>
                       </button>
-                    </div>
-                  ) : (
-                    <button onClick={() => fotoInputRef.current?.click()}
-                      className="w-full border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl p-4 text-center hover:border-blue-400 transition-colors">
-                      <Camera size={20} className="mx-auto text-gray-400 mb-1" />
-                      <p className="text-xs text-gray-500">Klik untuk upload foto</p>
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
 
