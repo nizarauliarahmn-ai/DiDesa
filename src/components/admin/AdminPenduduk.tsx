@@ -1,7 +1,7 @@
 import NumberCounter from '../common/NumberCounter';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, X } from 'lucide-react';
+import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Sparkles, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, X, SlidersHorizontal } from 'lucide-react';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
@@ -54,6 +54,8 @@ export default function AdminPenduduk({
   const [aidFilter, setAidFilter] = useState('Semua Bantuan');
   const [sortOrder, setSortOrder] = useState('No. KK');
   const [showQuickFilters, setShowQuickFilters] = useState(true);
+  const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const filterPopoverRef = useRef<HTMLDivElement>(null);
   const [selectedPenduduk, setSelectedPenduduk] = useState<any>(null);
   const [editingPenduduk, setEditingPenduduk] = useState<any>(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
@@ -75,6 +77,14 @@ export default function AdminPenduduk({
       } catch(e) {}
     }
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (filterPopoverRef.current && !filterPopoverRef.current.contains(e.target as Node)) setShowFilterPopover(false);
+    };
+    if (showFilterPopover) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showFilterPopover]);
 
   // Reset current page when debounced search query, filter or sorting changes
   useEffect(() => {
@@ -830,97 +840,84 @@ export default function AdminPenduduk({
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 p-6">
-        <div className="flex mb-6 flex-col gap-5">
-          {showQuickFilters && (
-            <div className="flex flex-wrap items-center gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
-              <span className="text-sm font-bold text-gray-600 dark:text-slate-400 mr-2">Filter Cepat:</span>
-              {FILTERS.map((filter) => (
-                <button 
-                  key={filter}
-                  onClick={() => {
-                    setActiveFilter(filter);
-                    if (filter === '✨ Terbaru') {
-                      setSortOrder('Terbaru');
-                    } else if (filter === 'Semua') {
-                      setSortOrder('No. KK');
-                    }
-                  }}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-colors shadow-sm dark:shadow-none ${
-                    activeFilter === filter 
-                      ? 'bg-emerald-700 text-white' 
-                      : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
-            </div>
-          )}
-          <div className="flex mb-6 flex-col md:flex-row md:items-center gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Masukkan NIK, No. KK, atau Nama Penduduk..." 
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-gray-800 dark:text-slate-100 placeholder:text-gray-400 outline-none transition-shadow"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <select 
-                value={aidFilter}
-                onChange={(e) => setAidFilter(e.target.value)}
-                className="px-3.5 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800/80 focus:ring-2 focus:ring-emerald-500 text-xs font-extrabold text-emerald-900 dark:text-emerald-200 bg-emerald-50/70 dark:bg-emerald-950/40 outline-none cursor-pointer min-w-[200px] shadow-2xs"
-              >
-                <option value="Semua Bantuan">🎁 Filter Bantuan: Semua Status</option>
-                <option value="Penerima Bansos">🎁 Semua Penerima Bansos</option>
-                <option value="Non-Penerima Bansos">🚫 Non-Penerima Bansos</option>
-                <option value="BLT Dana Desa">BLT Dana Desa</option>
-                <option value="Program Keluarga Harapan">PKH (Keluarga Harapan)</option>
-                <option value="Bantuan Pangan Non-Tunai">BPNT (Bantuan Pangan)</option>
-                <option value="Bansos Tunai Kemensos">Bansos Tunai Kemensos</option>
-                <option value="Bantuan Cadangan Beras">Cadangan Beras (CBP)</option>
-                <option value="RTLH">RTLH (Bedah Rumah)</option>
-                <option value="Jaminan Kesehatan PBI-JK">BPJS Gratis (PBI-JK)</option>
-              </select>
-
-              <select 
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 text-xs font-semibold text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-900 outline-none cursor-pointer min-w-[170px]"
-              >
-                <option value="No. KK">Urutkan: No. KK</option>
-                <option value="Terbaru">Urutkan: ✨ Terbaru Ditambahkan</option>
-                <option value="A-Z Nama">Urutkan: A-Z Nama</option>
-                <option value="Z-A Nama">Urutkan: Z-A Nama</option>
-              </select>
-              <button 
-                onClick={() => setShowQuickFilters(!showQuickFilters)}
-                className={`p-2.5 rounded-xl border transition-colors ${
-                  showQuickFilters 
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' 
-                    : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 bg-white dark:bg-slate-900'
-                }`}
-                title="Tampilkan/Sembunyikan Filter Cepat"
-              >
-                {showQuickFilters ? (
-                  <Filter className="w-5 h-5" />
-                ) : (
-                  <FilterX className="w-5 h-5" />
-                )}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 p-4">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Cari NIK, No. KK, atau Nama..." 
+              className="w-full pl-8 pr-8 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 outline-none"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer">
+                <X size={12} />
               </button>
-            </div>
+            )}
           </div>
+          <div className="relative" ref={filterPopoverRef}>
+            <button onClick={() => setShowFilterPopover(v => !v)}
+              className={`px-3 py-2 border rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${showFilterPopover ? 'border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300' : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+              <SlidersHorizontal size={13} /> Filter
+              {(activeFilter !== 'Semua' || aidFilter !== 'Semua Bantuan' || sortOrder !== 'No. KK') && (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              )}
+            </button>
+            {showFilterPopover && (
+              <div className="absolute right-0 top-full mt-1.5 w-72 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 space-y-3 z-50 max-h-[70vh] overflow-y-auto">
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Filter Cepat</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {FILTERS.map(f => (
+                      <button key={f} onClick={() => {
+                        setActiveFilter(f);
+                        if (f === '✨ Terbaru') setSortOrder('Terbaru');
+                        else if (f === 'Semua') setSortOrder('No. KK');
+                      }}
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${activeFilter === f ? 'bg-emerald-600 text-white' : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200'}`}>
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Bantuan</label>
+                  <select value={aidFilter} onChange={e => setAidFilter(e.target.value)}
+                    className="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 outline-none">
+                    <option value="Semua Bantuan">Semua</option>
+                    <option value="Penerima Bansos">Penerima Bansos</option>
+                    <option value="Non-Penerima Bansos">Non-Penerima Bansos</option>
+                    <option value="BLT Dana Desa">BLT Dana Desa</option>
+                    <option value="Program Keluarga Harapan">PKH</option>
+                    <option value="Bantuan Pangan Non-Tunai">BPNT</option>
+                    <option value="Bansos Tunai Kemensos">Bansos Tunai</option>
+                    <option value="Bantuan Cadangan Beras">Cadangan Beras</option>
+                    <option value="RTLH">RTLH</option>
+                    <option value="Jaminan Kesehatan PBI-JK">BPJS (PBI-JK)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 block">Urutkan</label>
+                  <select value={sortOrder} onChange={e => setSortOrder(e.target.value)}
+                    className="w-full px-2.5 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 outline-none">
+                    <option value="No. KK">No. KK</option>
+                    <option value="Terbaru">Terbaru Ditambahkan</option>
+                    <option value="A-Z Nama">A-Z Nama</option>
+                    <option value="Z-A Nama">Z-A Nama</option>
+                  </select>
+                </div>
+                <button onClick={() => { setActiveFilter('Semua'); setAidFilter('Semua Bantuan'); setSortOrder('No. KK'); }}
+                  className="w-full py-1.5 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-slate-300 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                  Reset Filter
+                </button>
+              </div>
+            )}
+          </div>
+          <button className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
+            <Download size={12} /> Export
+          </button>
         </div>
       </div>
 
