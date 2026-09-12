@@ -591,6 +591,7 @@ export default function AdminAPBDesa() {
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kode</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kategori</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Sumber Dana</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Jenis</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Anggaran</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Pencairan</th>
@@ -601,14 +602,14 @@ export default function AdminAPBDesa() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={9} className="py-12 text-center">
+                <tr><td colSpan={10} className="py-12 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
                     <p className="text-sm text-gray-500 font-medium">Memuat data APBDesa...</p>
                   </div>
                 </td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={9} className="py-12 text-center text-gray-500 font-medium">Belum ada data APBDesa tahun ini</td></tr>
+                <tr><td colSpan={10} className="py-12 text-center text-gray-500 font-medium">Belum ada data APBDesa tahun ini</td></tr>
               ) : filtered.map(r => {
                 const hl = getHighlight(r, r.total_pencairan || 0);
                 return (
@@ -625,6 +626,9 @@ export default function AdminAPBDesa() {
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{r.kategori}</span>
+                    </td>
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">{r.sumber_dana || '-'}</span>
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap text-center">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${r.jenis === 'Perubahan' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{r.jenis || 'Murni'}</span>
