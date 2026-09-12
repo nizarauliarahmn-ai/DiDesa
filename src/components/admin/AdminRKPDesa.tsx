@@ -370,17 +370,17 @@ export default function AdminRKPDesa() {
             )}
           </div>
           <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
-            className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+            className="px-3 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
             <option>Semua Kategori</option>
             {KATEGORI_OPTIONS.map(k => <option key={k}>{k}</option>)}
           </select>
           <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
-            className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+            className="px-3 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
             <option>Semua Status</option>
             {STATUS_OPTIONS.map(s => <option key={s}>{s}</option>)}
           </select>
           <select value={filterYear} onChange={e => setFilterYear(e.target.value)}
-            className="px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900">
+            className="px-3 py-2.5 border border-blue-200 dark:border-blue-800 rounded-xl text-xs font-bold bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer">
             <option>Semua Tahun</option>
             {Array.from({ length: 11 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
