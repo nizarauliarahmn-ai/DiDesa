@@ -697,96 +697,107 @@ export default function AdminAPBDesa() {
 
       {detailTarget && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 shrink-0">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">Detail Kegiatan APBDesa</h3>
               <button onClick={() => setDetailTarget(null)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer">
                 <X size={18} />
               </button>
             </div>
-            <div className="p-5 space-y-4">
-              <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl p-4">
-                <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Kode</p>
-                <p className="text-sm font-mono font-black text-emerald-700 dark:text-emerald-300 mt-1">{detailTarget.kode_apbdesa}</p>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nama Kegiatan</p>
-                <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.nama_kegiatan}</p>
-              </div>
-              {detailTarget.rkpdesa_nama && (
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber RKPDesa</p>
-                  <p className="text-sm text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1"><Link2 size={12} /> {detailTarget.rkpdesa_nama}</p>
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Kategori</p>
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${kategoriColor(detailTarget.kategori)}`}>{detailTarget.kategori}</span>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis</p>
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${detailTarget.jenis === 'Perubahan' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{detailTarget.jenis || 'Murni'}</span>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahun</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahun}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anggaran</p>
-                  <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-1">{formatRp(detailTarget.anggaran)}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Lokasi</p>
-                  <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 flex items-center gap-1"><MapPin size={12} /> {detailTarget.lokasi || '-'}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahapan</p>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahapan_pencairan}</p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Pencairan</p>
-                  <p className="text-sm font-black text-blue-700 dark:text-blue-400 mt-1">{formatRp(detailTarget.total_pencairan || 0)}</p>
-                </div>
-              </div>
-              {(() => {
-                const pcList = pencairanMap.get(detailTarget.id) || [];
-                if (pcList.length === 0) return null;
-                return (
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex flex-col md:flex-row">
+                {/* Kiri: Info Kegiatan */}
+                <div className="flex-1 p-5 space-y-4 border-b md:border-b-0 md:border-r border-gray-100 dark:border-slate-800">
+                  <div className="bg-emerald-50 dark:bg-emerald-950/30 rounded-xl p-4">
+                    <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Kode</p>
+                    <p className="text-sm font-mono font-black text-emerald-700 dark:text-emerald-300 mt-1">{detailTarget.kode_apbdesa}</p>
+                  </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Riwayat Pencairan ({pcList.length}x)</p>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {pcList.map((pc: any, idx: number) => (
-                        <div key={pc.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl">
-                          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center shrink-0">
-                            <span className="text-xs font-black text-blue-600 dark:text-blue-400">{idx + 1}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 dark:text-white">{formatRp(pc.jumlah)}</p>
-                            <p className="text-[10px] text-gray-500 mt-0.5">{new Date(pc.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-                            {pc.keterangan && <p className="text-[10px] text-gray-400 mt-0.5 truncate">{pc.keterangan}</p>}
-                          </div>
-                          {pc.foto_url && (
-                            <a href={pc.foto_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 shrink-0">
-                              <Camera size={14} />
-                            </a>
-                          )}
-                        </div>
-                      ))}
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nama Kegiatan</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.nama_kegiatan}</p>
+                  </div>
+                  {detailTarget.rkpdesa_nama && (
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sumber RKPDesa</p>
+                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1"><Link2 size={12} /> {detailTarget.rkpdesa_nama}</p>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Kategori</p>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${kategoriColor(detailTarget.kategori)}`}>{detailTarget.kategori}</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis</p>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${detailTarget.jenis === 'Perubahan' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{detailTarget.jenis || 'Murni'}</span>
                     </div>
                   </div>
-                );
-              })()}
-              {detailTarget.keterangan_pencairan && (
-                <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</p>
-                  <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 bg-gray-50 dark:bg-slate-800 rounded-lg p-3">{detailTarget.keterangan_pencairan}</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahun</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahun}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Lokasi</p>
+                      <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 flex items-center gap-1"><MapPin size={12} /> {detailTarget.lokasi || '-'}</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anggaran</p>
+                      <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-1">{formatRp(detailTarget.anggaran)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahapan</p>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahapan_pencairan}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Total Pencairan</p>
+                    <p className="text-sm font-black text-blue-700 dark:text-blue-400 mt-1">{formatRp(detailTarget.total_pencairan || 0)}</p>
+                  </div>
+                  {detailTarget.keterangan_pencairan && (
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</p>
+                      <p className="text-xs text-gray-700 dark:text-slate-300 mt-1 bg-gray-50 dark:bg-slate-800 rounded-lg p-2">{detailTarget.keterangan_pencairan}</p>
+                    </div>
+                  )}
                 </div>
-              )}
+                {/* Kanan: Riwayat Pencairan */}
+                <div className="flex-1 p-5">
+                  {(() => {
+                    const pcList = pencairanMap.get(detailTarget.id) || [];
+                    return (
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-3">Riwayat Pencairan ({pcList.length}x)</p>
+                        {pcList.length === 0 ? (
+                          <p className="text-xs text-gray-400 italic">Belum ada catatan pencairan</p>
+                        ) : (
+                          <div className="space-y-2 max-h-[calc(90vh-200px)] overflow-y-auto">
+                            {pcList.map((pc: any, idx: number) => (
+                              <div key={pc.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl">
+                                <div className="w-7 h-7 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                  <span className="text-[10px] font-black text-blue-600 dark:text-blue-400">{idx + 1}</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-bold text-gray-900 dark:text-white">{formatRp(pc.jumlah)}</p>
+                                  <p className="text-[10px] text-gray-500 mt-0.5">{new Date(pc.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                  {pc.keterangan && <p className="text-[10px] text-gray-400 mt-0.5 truncate">{pc.keterangan}</p>}
+                                </div>
+                                {pc.foto_url && (
+                                  <a href={pc.foto_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700 shrink-0 mt-1">
+                                    <Camera size={14} />
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
             <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-100 dark:border-slate-800 sticky bottom-0 bg-white dark:bg-slate-900">
               <button onClick={() => setDetailTarget(null)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">Tutup</button>
