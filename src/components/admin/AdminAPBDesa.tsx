@@ -1014,7 +1014,7 @@ export default function AdminAPBDesa() {
                     <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">
                         Total Pencairan
                         {detailTarget.pencairan_list && detailTarget.pencairan_list.length > 0 && (
-                          <span className="ml-1.5 text-[10px] font-bold text-purple-500 dark:text-purple-400">({detailTarget.pencairan_list.length}x)</span>
+                          <span className="ml-1.5 text-[10px] font-bold text-gray-500 dark:text-slate-400">({detailTarget.pencairan_list.length}x)</span>
                         )}
                       </p>
                     <p className="text-xl font-black text-gray-900 dark:text-white mt-1.5">{formatRp(detailTarget.total_pencairan || 0)}</p>
