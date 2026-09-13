@@ -446,8 +446,8 @@ export default function AdminRKPDesa() {
                     )}
                   </div>
                 </th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kode</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left sticky left-0 bg-gray-50 dark:bg-slate-800/50 z-10">Kode</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left sticky left-[72px] bg-gray-50 dark:bg-slate-800/50 z-10">Kegiatan</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kategori</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Lokasi</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Anggaran</th>
@@ -477,8 +477,8 @@ export default function AdminRKPDesa() {
                       onChange={e => { e.stopPropagation(); setSelectedIds(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id)); }} />
                     )}
                   </td>
-                  <td className="py-3 px-4 text-xs font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">{r.kode_rkpdesa}</td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-4 text-xs font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap sticky left-0 bg-white dark:bg-slate-900 z-10">{r.kode_rkpdesa}</td>
+                  <td className="py-3 px-4 sticky left-[72px] bg-white dark:bg-slate-900 z-10">
                     <p className="text-sm font-bold text-gray-900 dark:text-white max-w-[250px] truncate">{r.nama_kegiatan}</p>
                     {r.rpjmdesa_nama && <p className="text-[10px] text-purple-500 mt-0.5 flex items-center gap-1"><Link2 size={10} /> {r.rpjmdesa_nama}</p>}
                   </td>

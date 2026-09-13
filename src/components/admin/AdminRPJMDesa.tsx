@@ -454,8 +454,8 @@ export default function AdminRPJMDesa() {
                     )}
                   </div>
                 </th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Kode</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Nama Program</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left sticky left-0 bg-gray-50 dark:bg-slate-800/50 z-10">Kode</th>
+                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left sticky left-[72px] bg-gray-50 dark:bg-slate-800/50 z-10">Nama Program</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Kategori</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Lokasi</th>
                 <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-slate-400 text-left">Tahun</th>
@@ -486,8 +486,8 @@ export default function AdminRPJMDesa() {
                       onChange={e => { e.stopPropagation(); setSelectedIds(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id)); }} />
                     )}
                   </td>
-                  <td className="py-3 px-4 text-xs font-bold text-purple-600 dark:text-purple-400 whitespace-nowrap">{r.kode_rpjmdesa}</td>
-                  <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white max-w-[250px] truncate">{r.nama_program}</td>
+                  <td className="py-3 px-4 text-xs font-bold text-purple-600 dark:text-purple-400 whitespace-nowrap sticky left-0 bg-white dark:bg-slate-900 z-10">{r.kode_rpjmdesa}</td>
+                  <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white max-w-[250px] truncate sticky left-[72px] bg-white dark:bg-slate-900 z-10">{r.nama_program}</td>
                   <td className="py-3 px-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{r.kategori}</span>
                   </td>
