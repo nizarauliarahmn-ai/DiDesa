@@ -750,19 +750,20 @@ export default function AdminAPBDesa() {
                 <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Pencairan</th>
                 <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Tahapan</th>
                 <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Cara Pengadaan</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>PKA</th>
                 <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading ? (
-                <tr><td colSpan={10} className="py-12 text-center">
+                <tr><td colSpan={11} className="py-12 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
                     <p className="text-sm text-gray-500 font-medium">Memuat data APBDesa...</p>
                   </div>
                 </td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={10} className="py-12 text-center text-gray-500 font-medium">Belum ada data APBDesa tahun ini</td></tr>
+                <tr><td colSpan={11} className="py-12 text-center text-gray-500 font-medium">Belum ada data APBDesa tahun ini</td></tr>
               ) : filtered.map(r => {
                 const hl = getHighlight(r);
                 return (
@@ -802,6 +803,15 @@ export default function AdminAPBDesa() {
                           </span>
                         );
                       })()}
+                    </td>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-center`}>
+                      {r.pka ? (
+                        <span className={`${denseMode ? 'px-1.5 py-0' : 'px-2.5 py-1'} inline-flex items-center rounded-full text-[10px] font-bold uppercase tracking-wider border bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-700`}>
+                          {r.pka}
+                        </span>
+                      ) : (
+                        <span className="text-gray-300 dark:text-slate-600 text-[10px]">—</span>
+                      )}
                     </td>
                     <td className="py-3 px-4 text-center">
                       <div className="flex items-center justify-center gap-1">
