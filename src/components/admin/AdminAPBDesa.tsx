@@ -108,13 +108,24 @@ const tahapanIcon = (t: string) => {
   }
 };
 
+const kategoriNorm = (k: string): string => {
+  const map: Record<string, string> = {
+    'Infrastruktur': 'Pelaksanaan Pembangunan Desa',
+    'Ekonomi': 'Pemberdayaan Masyarakat',
+    'Sosial/Kesehatan': 'Pembinaan Kemasyarakatan',
+    'Pemerintahan': 'Penyelenggaraan Pemerintahan Desa',
+    'Pemberdayaan': 'Pemberdayaan Masyarakat',
+  };
+  return map[k] || k;
+};
+
 const kategoriColor = (k: string) => {
-  switch (k) {
-    case 'Infrastruktur': return 'bg-sky-100 text-sky-700 border-sky-200';
-    case 'Ekonomi': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-    case 'Sosial/Kesehatan': return 'bg-rose-100 text-rose-700 border-rose-200';
-    case 'Pemerintahan': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
-    case 'Pemberdayaan': return 'bg-amber-100 text-amber-700 border-amber-200';
+  const norm = kategoriNorm(k);
+  switch (norm) {
+    case 'Penyelenggaraan Pemerintahan Desa': return 'bg-indigo-100 text-indigo-700 border-indigo-200';
+    case 'Pelaksanaan Pembangunan Desa': return 'bg-sky-100 text-sky-700 border-sky-200';
+    case 'Pembinaan Kemasyarakatan': return 'bg-rose-100 text-rose-700 border-rose-200';
+    case 'Pemberdayaan Masyarakat': return 'bg-amber-100 text-amber-700 border-amber-200';
     default: return 'bg-gray-100 text-gray-700 border-gray-200';
   }
 };
@@ -546,7 +557,7 @@ export default function AdminAPBDesa() {
 
   const filtered = useMemo(() => list.filter(r => {
     const matchSearch = r.nama_kegiatan.toLowerCase().includes(searchQuery.toLowerCase()) || r.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchKat = filterKategori === 'Semua Kategori' || r.kategori === filterKategori;
+    const matchKat = filterKategori === 'Semua Kategori' || kategoriNorm(r.kategori) === filterKategori;
     const matchJenis = filterJenis === 'Semua Jenis' || r.jenis === filterJenis;
     const matchHl = filterHighlight === 'Semua Status' || hitungCaraPengadaan(r.anggaran, r.fisik_non_fisik, r.total_pencairan) === filterHighlight;
     const matchYear = filterYear === 'Semua Tahun' || r.tahun === Number(filterYear);
@@ -566,7 +577,7 @@ export default function AdminAPBDesa() {
 
   const handleExport = () => {
     const rows = filtered.map(r => ({
-      Kode: r.kode_apbdesa, Kegiatan: r.nama_kegiatan, Kategori: r.kategori, Lokasi: r.lokasi || '',
+      Kode: r.kode_apbdesa, Kegiatan: r.nama_kegiatan, Kategori: kategoriNorm(r.kategori), Lokasi: r.lokasi || '',
       Anggaran: r.anggaran, 'Tahapan': r.tahapan_pencairan,
       'Total Pencairan': r.total_pencairan || 0,
       'Persentase': r.anggaran > 0 ? Math.round(((r.total_pencairan || 0) / r.anggaran) * 100) + '%' : '0%',
@@ -788,7 +799,7 @@ export default function AdminAPBDesa() {
                       {r.rkpdesa_nama && <p className="text-[10px] text-blue-500 mt-0.5 flex items-center gap-1"><Link2 size={10} /> {r.rkpdesa_nama}</p>}
                     </td>
                     <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} whitespace-nowrap`}>
-                      <span className={`inline-flex items-center ${denseMode ? 'px-1.5 py-0' : 'px-2.5 py-1'} rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{r.kategori}</span>
+                      <span className={`inline-flex items-center ${denseMode ? 'px-1.5 py-0' : 'px-2.5 py-1'} rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{kategoriNorm(r.kategori)}</span>
                     </td>
                     <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} whitespace-nowrap`}>
                       <span className={`inline-flex items-center ${denseMode ? 'px-1.5 py-0' : 'px-2 py-0.5'} rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200`}>{r.sumber_dana || '-'}</span>
@@ -929,7 +940,7 @@ export default function AdminAPBDesa() {
                   <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Kategori</p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{detailTarget.kategori}</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{kategoriNorm(detailTarget.kategori)}</p>
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Jenis</p>
