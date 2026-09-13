@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
-  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square, SlidersHorizontal
+  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square, SlidersHorizontal, List
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -151,6 +151,7 @@ export default function AdminAPBDesa() {
   const [selectedForMassEdit, setSelectedForMassEdit] = useState<string[]>([]);
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
+  const [denseMode, setDenseMode] = useState(false);
   const [showFilterPopover, setShowFilterPopover] = useState(false);
   const filterPopoverRef = useRef<HTMLDivElement>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -712,6 +713,9 @@ export default function AdminAPBDesa() {
               </div>
             )}
           </div>
+          <button onClick={() => setDenseMode(v => !v)} className={`px-3 py-2 border rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${denseMode ? 'border-gray-900 dark:border-white bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
+            <List size={12} /> {denseMode ? 'Normal' : 'Compact'}
+          </button>
           <button onClick={handleExport} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
             <Download size={12} /> Export
           </button>
@@ -720,7 +724,7 @@ export default function AdminAPBDesa() {
 
       <div className="standard-card overflow-hidden">
         <div className="w-full overflow-auto max-h-[calc(100vh-280px)] relative">
-          <table className="w-full">
+          <table className="w-full" style={{ tableLayout: 'auto' }}>
             <thead className="sticky top-0 z-20">
               <tr className="bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
                 <th className="py-3 px-4 w-10">
@@ -737,16 +741,16 @@ export default function AdminAPBDesa() {
                     )}
                   </div>
                 </th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kode</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kegiatan</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Kategori</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-left">Sumber Dana</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Jenis</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Anggaran</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Pencairan</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Tahapan</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Cara Pengadaan</th>
-                <th className="py-3 px-4 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Aksi</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-left sticky left-0 bg-gray-50 dark:bg-slate-800/50 z-10`}>Kode</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-left sticky left-[72px] bg-gray-50 dark:bg-slate-800/50 z-10`}>Kegiatan</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-left`}>Kategori</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-left`}>Sumber Dana</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Jenis</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-right`}>Anggaran</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Pencairan</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Tahapan</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Cara Pengadaan</th>
+                <th className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-[10px] font-black uppercase tracking-widest text-gray-500 text-center`}>Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -771,30 +775,30 @@ export default function AdminAPBDesa() {
                         onChange={e => { e.stopPropagation(); setSelectedForMassEdit(prev => e.target.checked ? [...prev, r.id] : prev.filter(x => x !== r.id)); }} />
                       )}
                     </td>
-                    <td className="py-3 px-4 text-xs font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{r.kode_apbdesa}</td>
-                    <td className="py-3 px-4">
-                      <p className="text-sm font-bold text-gray-900 dark:text-white max-w-[220px] truncate">{r.nama_kegiatan}</p>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-xs font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap sticky left-0 bg-white dark:bg-slate-900 z-10`}>{r.kode_apbdesa}</td>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} sticky left-[72px] bg-white dark:bg-slate-900 z-10`}>
+                      <p className={`${denseMode ? 'text-xs' : 'text-sm'} font-bold text-gray-900 dark:text-white max-w-[200px] truncate`}>{r.nama_kegiatan}</p>
                       {r.rkpdesa_nama && <p className="text-[10px] text-blue-500 mt-0.5 flex items-center gap-1"><Link2 size={10} /> {r.rkpdesa_nama}</p>}
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{r.kategori}</span>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} whitespace-nowrap`}>
+                      <span className={`inline-flex items-center ${denseMode ? 'px-1.5 py-0' : 'px-2.5 py-1'} rounded-full text-[10px] font-bold uppercase tracking-wider border ${kategoriColor(r.kategori)}`}>{r.kategori}</span>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">{r.sumber_dana || '-'}</span>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} whitespace-nowrap`}>
+                      <span className={`inline-flex items-center ${denseMode ? 'px-1.5 py-0' : 'px-2 py-0.5'} rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200`}>{r.sumber_dana || '-'}</span>
                     </td>
-                    <td className="py-3 px-4 whitespace-nowrap text-center">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${r.jenis === 'Perubahan' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{r.jenis || 'Murni'}</span>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} whitespace-nowrap text-center`}>
+                      <span className={`inline-flex items-center ${denseMode ? 'px-1.5 py-0' : 'px-2.5 py-1'} rounded-full text-[10px] font-bold uppercase tracking-wider border ${r.jenis === 'Perubahan' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'}`}>{r.jenis || 'Murni'}</span>
                     </td>
-                    <td className="py-3 px-4 text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap">{formatRp(r.anggaran)}</td>
-                    <td className="py-3 px-4"><PencairanBadge item={r} /></td>
-                    <td className="py-3 px-4"><TahapanBadge item={r} /></td>
-                    <td className="py-3 px-4">
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'} text-sm font-bold text-gray-900 dark:text-white text-right whitespace-nowrap`}>{formatRp(r.anggaran)}</td>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'}`}><PencairanBadge item={r} /></td>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'}`}><TahapanBadge item={r} /></td>
+                    <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'}`}>
                       {(() => {
                         const cp = r.cara_pengadaan || 'Swakelola';
                         const cpColor = caraPengadaanColor(cp);
                         return (
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${cpColor}`}>
-                            {cp === 'Swakelola' ? <CheckCircle2 size={10} /> : <AlertTriangle size={10} />} {cp}
+                          <span className={`inline-flex items-center gap-1 ${denseMode ? 'px-1.5 py-0' : 'px-2.5 py-1'} rounded-full text-[10px] font-bold uppercase tracking-wider border ${cpColor}`}>
+                            {cp === 'Swakelola' ? <CheckCircle2 size={10} /> : <AlertTriangle size={10} />} {!denseMode && cp}
                           </span>
                         );
                       })()}
@@ -805,8 +809,8 @@ export default function AdminAPBDesa() {
                           setPencairanForm({ jumlah: '', tanggal: new Date().toISOString().split('T')[0], keterangan: '' });
                           setPencairanFoto(null); setPencairanFotoPreview(null);
                           setShowPencairanModal(r);
-                        }} className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors flex items-center gap-1">
-                          <Camera size={12} /> Catat
+                        }} className={`${denseMode ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-xs'} font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-lg transition-colors flex items-center gap-1`}>
+                          <Camera size={12} /> {!denseMode && 'Catat'}
                         </button>
                         <button onClick={() => {
                           setEditItem(r);
@@ -816,8 +820,8 @@ export default function AdminAPBDesa() {
                             pka: r.pka || '', ketua_tpk: r.ketua_tpk || '', sekretaris_tpk: r.sekretaris_tpk || '', anggota_tpk: r.anggota_tpk || '',
                             jenis_kegiatan: r.jenis_kegiatan || 'Pengadaan', fisik_non_fisik: r.fisik_non_fisik || 'Fisik', status_spj: r.status_spj || 'Belum', catatan_kendala: r.catatan_kendala || '' });
                           setShowModal(true);
-                        }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600"><Edit2 size={14} /></button>
-                        <button onClick={() => handleDelete(r.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-gray-500 hover:text-rose-600"><Trash2 size={14} /></button>
+                        }} className={`${denseMode ? 'p-1' : 'p-1.5'} hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600`}><Edit2 size={14} /></button>
+                        <button onClick={() => handleDelete(r.id)} className={`${denseMode ? 'p-1' : 'p-1.5'} hover:bg-rose-50 rounded-lg text-gray-500 hover:text-rose-600`}><Trash2 size={14} /></button>
                       </div>
                     </td>
                   </tr>
