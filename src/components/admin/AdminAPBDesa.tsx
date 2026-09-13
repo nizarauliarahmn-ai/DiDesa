@@ -19,6 +19,16 @@ export interface APBDesa {
   sumber_data: string;
   sumber_dana?: string | null;
   cara_pengadaan?: string | null;
+  bidang?: string | null;
+  jenis_belanja?: string | null;
+  pka?: string | null;
+  ketua_tpk?: string | null;
+  sekretaris_tpk?: string | null;
+  anggota_tpk?: string | null;
+  jenis_kegiatan?: string | null;
+  fisik_non_fisik?: string | null;
+  status_spj?: string | null;
+  catatan_kendala?: string | null;
   tahun: number;
   jenis: string;
   anggaran: number;
@@ -43,11 +53,15 @@ export interface Pencairan {
   created_at: string;
 }
 
-const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
+const KATEGORI_OPTIONS = ['Penyelenggaraan Pemerintahan Desa', 'Pelaksanaan Pembangunan Desa', 'Pembinaan Kemasyarakatan', 'Pemberdayaan Masyarakat'];
 const TAHAPAN_OPTIONS = ['Belum', 'Dianggarkan', 'Berlangsung', 'Selesai'];
 const JENIS_OPTIONS = ['Murni', 'Perubahan'];
 const SUMBER_DANA_OPTIONS = ['DDS', 'DDS [SILPA]', 'ADD', 'ADD [SILPA]', 'PBH', 'PBH [SILPA]', 'DDCS', 'Bantuan Provinsi', 'Bantuan Kabupaten', 'Bantuan Pusat', 'DLL'];
 const CARA_PENGADAAN_OPTIONS = ['Swakelola', 'Pembelian Langsung', 'Permintaan Penawaran', 'Lelang/Tender', 'Penunjukan Langsung'];
+const JENIS_BELANJA_OPTIONS = ['Belanja Modal', 'Belanja Bantuan', 'Belanja Operasional Kantor Lainnya', 'Belanja Barang dan Jasa'];
+const JENIS_KEGIATAN_OPTIONS = ['Pengadaan', 'Peningkatan', 'Pemeliharaan', 'Pembangunan', 'Sosialisasi'];
+const FISIK_NON_FISIK_OPTIONS = ['Fisik', 'Non Fisik'];
+const STATUS_SPJ_OPTIONS = ['Belum', 'Proses', 'Selesai'];
 
 const caraPengadaanColor = (c: string) => {
   switch (c) {
@@ -143,8 +157,11 @@ export default function AdminAPBDesa() {
   const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '', applyJenis: false, jenis: 'Murni', applyKategori: false, kategori: 'Infrastruktur', applySumberDana: false, sumber_dana: 'DDS', applyLokasi: false, lokasi: '' });
 
   const [form, setForm] = useState({
-    nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0,
-    keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola'
+    nama_kegiatan: '', kategori: 'Penyelenggaraan Pemerintahan Desa', lokasi: '', anggaran: 0,
+    keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola',
+    bidang: 'Penyelenggaraan Pemerintahan Desa', jenis_belanja: 'Belanja Modal',
+    pka: '', ketua_tpk: '', sekretaris_tpk: '', anggota_tpk: '',
+    jenis_kegiatan: 'Pengadaan', fisik_non_fisik: 'Fisik', status_spj: 'Belum', catatan_kendala: ''
   });
 
   const [pencairanForm, setPencairanForm] = useState({
@@ -255,6 +272,16 @@ export default function AdminAPBDesa() {
       sumber_data: editItem?.sumber_data || 'manual',
       sumber_dana: form.sumber_dana || null,
       cara_pengadaan: form.cara_pengadaan || 'Swakelola',
+      bidang: form.bidang || 'Penyelenggaraan Pemerintahan Desa',
+      jenis_belanja: form.jenis_belanja || 'Belanja Modal',
+      pka: form.pka || null,
+      ketua_tpk: form.ketua_tpk || null,
+      sekretaris_tpk: form.sekretaris_tpk || null,
+      anggota_tpk: form.anggota_tpk || null,
+      jenis_kegiatan: form.jenis_kegiatan || 'Pengadaan',
+      fisik_non_fisik: form.fisik_non_fisik || 'Fisik',
+      status_spj: form.status_spj || 'Belum',
+      catatan_kendala: form.catatan_kendala || null,
       tahun: currentYear,
       jenis: editItem?.jenis || form.jenis,
       anggaran: form.anggaran,
@@ -461,7 +488,10 @@ export default function AdminAPBDesa() {
   };
 
   const resetForm = () => {
-    setForm({ nama_kegiatan: '', kategori: 'Infrastruktur', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola' });
+    setForm({ nama_kegiatan: '', kategori: 'Penyelenggaraan Pemerintahan Desa', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola',
+      bidang: 'Penyelenggaraan Pemerintahan Desa', jenis_belanja: 'Belanja Modal',
+      pka: '', ketua_tpk: '', sekretaris_tpk: '', anggota_tpk: '',
+      jenis_kegiatan: 'Pengadaan', fisik_non_fisik: 'Fisik', status_spj: 'Belum', catatan_kendala: '' });
   };
 
   const filtered = useMemo(() => list.filter(r => {
@@ -738,7 +768,10 @@ export default function AdminAPBDesa() {
                         <button onClick={() => {
                           setEditItem(r);
                           setForm({ nama_kegiatan: r.nama_kegiatan, kategori: r.kategori, lokasi: r.lokasi || '',
-                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '', jenis: r.jenis || 'Murni', sumber_dana: r.sumber_dana || '', cara_pengadaan: r.cara_pengadaan || 'Swakelola' });
+                            anggaran: r.anggaran, keterangan_pencairan: r.keterangan_pencairan || '', jenis: r.jenis || 'Murni', sumber_dana: r.sumber_dana || '', cara_pengadaan: r.cara_pengadaan || 'Swakelola',
+                            bidang: r.bidang || 'Penyelenggaraan Pemerintahan Desa', jenis_belanja: r.jenis_belanja || 'Belanja Modal',
+                            pka: r.pka || '', ketua_tpk: r.ketua_tpk || '', sekretaris_tpk: r.sekretaris_tpk || '', anggota_tpk: r.anggota_tpk || '',
+                            jenis_kegiatan: r.jenis_kegiatan || 'Pengadaan', fisik_non_fisik: r.fisik_non_fisik || 'Fisik', status_spj: r.status_spj || 'Belum', catatan_kendala: r.catatan_kendala || '' });
                           setShowModal(true);
                         }} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-blue-600"><Edit2 size={14} /></button>
                         <button onClick={() => handleDelete(r.id)} className="p-1.5 hover:bg-rose-50 rounded-lg text-gray-500 hover:text-rose-600"><Trash2 size={14} /></button>
@@ -854,6 +887,53 @@ export default function AdminAPBDesa() {
                       })()}
                     </div>
                   </div>
+                  <div className="border-t border-gray-100 dark:border-slate-800 pt-3 mt-3">
+                    <p className="text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Detail Kegiatan</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Belanja</p>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{detailTarget.jenis_belanja || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Kegiatan</p>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{detailTarget.jenis_kegiatan || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Fisik / Non Fisik</p>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{detailTarget.fisik_non_fisik || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status SPJ</p>
+                        {(() => {
+                          const spj = detailTarget.status_spj || 'Belum';
+                          const spjColor = spj === 'Selesai' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : spj === 'Proses' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200';
+                          return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border mt-1 ${spjColor}`}>{spj}</span>;
+                        })()}
+                      </div>
+                    </div>
+                    {detailTarget.pka && (
+                      <div className="mt-3">
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pelaksana Kegiatan Anggaran (PKA)</p>
+                        <p className="text-sm text-gray-900 dark:text-white mt-1">{detailTarget.pka}</p>
+                      </div>
+                    )}
+                    {(detailTarget.ketua_tpk || detailTarget.sekretaris_tpk || detailTarget.anggota_tpk) && (
+                      <div className="mt-3">
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tim Pelaksana Kegiatan (TPK)</p>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          {detailTarget.ketua_tpk && <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-2"><span className="text-gray-500">Ketua:</span> <span className="font-bold text-gray-900 dark:text-white">{detailTarget.ketua_tpk}</span></div>}
+                          {detailTarget.sekretaris_tpk && <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-2"><span className="text-gray-500">Sekretaris:</span> <span className="font-bold text-gray-900 dark:text-white">{detailTarget.sekretaris_tpk}</span></div>}
+                          {detailTarget.anggota_tpk && <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-2"><span className="text-gray-500">Anggota:</span> <span className="font-bold text-gray-900 dark:text-white">{detailTarget.anggota_tpk}</span></div>}
+                        </div>
+                      </div>
+                    )}
+                    {detailTarget.catatan_kendala && (
+                      <div className="mt-3">
+                        <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Catatan / Kendala</p>
+                        <p className="text-xs text-gray-700 dark:text-slate-300 mt-1 bg-amber-50 dark:bg-amber-950/30 rounded-lg p-2 border border-amber-200 dark:border-amber-800">{detailTarget.catatan_kendala}</p>
+                      </div>
+                    )}
+                  </div>
                   {detailTarget.keterangan_pencairan && (
                     <div>
                       <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keterangan</p>
@@ -914,7 +994,10 @@ export default function AdminAPBDesa() {
               <button onClick={() => {
                 setEditItem(detailTarget);
                 setForm({ nama_kegiatan: detailTarget.nama_kegiatan, kategori: detailTarget.kategori, lokasi: detailTarget.lokasi || '',
-                  anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '', jenis: detailTarget.jenis || 'Murni', sumber_dana: detailTarget.sumber_dana || '', cara_pengadaan: detailTarget.cara_pengadaan || 'Swakelola' });
+                  anggaran: detailTarget.anggaran, keterangan_pencairan: detailTarget.keterangan_pencairan || '', jenis: detailTarget.jenis || 'Murni', sumber_dana: detailTarget.sumber_dana || '', cara_pengadaan: detailTarget.cara_pengadaan || 'Swakelola',
+                  bidang: detailTarget.bidang || 'Penyelenggaraan Pemerintahan Desa', jenis_belanja: detailTarget.jenis_belanja || 'Belanja Modal',
+                  pka: detailTarget.pka || '', ketua_tpk: detailTarget.ketua_tpk || '', sekretaris_tpk: detailTarget.sekretaris_tpk || '', anggota_tpk: detailTarget.anggota_tpk || '',
+                  jenis_kegiatan: detailTarget.jenis_kegiatan || 'Pengadaan', fisik_non_fisik: detailTarget.fisik_non_fisik || 'Fisik', status_spj: detailTarget.status_spj || 'Belum', catatan_kendala: detailTarget.catatan_kendala || '' });
                 setDetailTarget(null);
                 setShowModal(true);
               }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-600 hover:bg-emerald-700 transition-colors cursor-pointer">
@@ -1211,7 +1294,64 @@ export default function AdminAPBDesa() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Keterangan</label>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jenis Belanja</label>
+                <select value={form.jenis_belanja} onChange={e => setForm({ ...form, jenis_belanja: e.target.value })}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                  {JENIS_BELANJA_OPTIONS.map(j => <option key={j} value={j}>{j}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Pelaksana Kegiatan Anggaran (PKA)</label>
+                <input value={form.pka} onChange={e => setForm({ ...form, pka: e.target.value })}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" placeholder="Nama penanggung jawab anggaran" />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Ketua TPK</label>
+                  <input value={form.ketua_tpk} onChange={e => setForm({ ...form, ketua_tpk: e.target.value })}
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" placeholder="Ketua" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Sekretaris TPK</label>
+                  <input value={form.sekretaris_tpk} onChange={e => setForm({ ...form, sekretaris_tpk: e.target.value })}
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" placeholder="Sekretaris" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Anggota TPK</label>
+                  <input value={form.anggota_tpk} onChange={e => setForm({ ...form, anggota_tpk: e.target.value })}
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" placeholder="Anggota" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jenis Kegiatan</label>
+                  <select value={form.jenis_kegiatan} onChange={e => setForm({ ...form, jenis_kegiatan: e.target.value })}
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                    {JENIS_KEGIATAN_OPTIONS.map(j => <option key={j} value={j}>{j}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Fisik / Non Fisik</label>
+                  <select value={form.fisik_non_fisik} onChange={e => setForm({ ...form, fisik_non_fisik: e.target.value })}
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                    {FISIK_NON_FISIK_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Status SPJ</label>
+                  <select value={form.status_spj} onChange={e => setForm({ ...form, status_spj: e.target.value })}
+                    className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                    {STATUS_SPJ_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Catatan / Kendala</label>
+                <textarea value={form.catatan_kendala} onChange={e => setForm({ ...form, catatan_kendala: e.target.value })} rows={3}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 resize-none" placeholder="Catatan atau kendala di lapangan..." />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Keterangan Pencairan</label>
                 <textarea value={form.keterangan_pencairan} onChange={e => setForm({ ...form, keterangan_pencairan: e.target.value })} rows={3}
                   className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 resize-none" />
               </div>
