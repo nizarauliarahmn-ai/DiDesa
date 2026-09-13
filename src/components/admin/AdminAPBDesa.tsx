@@ -1011,7 +1011,12 @@ export default function AdminAPBDesa() {
                 <div className="flex-1 p-6">
                   {/* Total Pencairan */}
                   <div className="mb-6">
-                    <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Total Pencairan</p>
+                    <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">
+                        Total Pencairan
+                        {detailTarget.pencairan_list && detailTarget.pencairan_list.length > 0 && (
+                          <span className="ml-1.5 text-[10px] font-bold text-purple-500 dark:text-purple-400">({detailTarget.pencairan_list.length}x)</span>
+                        )}
+                      </p>
                     <p className="text-xl font-black text-gray-900 dark:text-white mt-1.5">{formatRp(detailTarget.total_pencairan || 0)}</p>
                     <div className="mt-2">
                       <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-slate-400 mb-1">
