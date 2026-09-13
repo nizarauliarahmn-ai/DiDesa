@@ -63,6 +63,14 @@ const JENIS_KEGIATAN_OPTIONS = ['Pengadaan', 'Peningkatan', 'Pemeliharaan', 'Pem
 const FISIK_NON_FISIK_OPTIONS = ['Fisik', 'Non Fisik'];
 const STATUS_SPJ_OPTIONS = ['Belum', 'Proses', 'Selesai'];
 
+export const hitungCaraPengadaan = (anggaran: number, fisikNonFisik?: string | null, totalPencairan?: number): string => {
+  if (fisikNonFisik === 'Fisik') return 'Swakelola';
+  const dasar = totalPencairan && totalPencairan > 0 ? totalPencairan : anggaran;
+  if (dasar < 10_000_000) return 'Pembelian Langsung';
+  if (dasar < 200_000_000) return 'Permintaan Penawaran';
+  return 'Lelang/Tender';
+};
+
 const caraPengadaanColor = (c: string) => {
   switch (c) {
     case 'Swakelola': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -161,7 +169,6 @@ export default function AdminAPBDesa() {
     applyKategori: false, kategori: 'Penyelenggaraan Pemerintahan Desa',
     applySumberDana: false, sumber_dana: 'DDS',
     applyLokasi: false, lokasi: '',
-    applyCaraPengadaan: false, cara_pengadaan: 'Swakelola',
     applyJenisBelanja: false, jenis_belanja: 'Belanja Modal',
     applyPka: false, pka: '',
     applyKetuaTpk: false, ketua_tpk: '',
@@ -434,7 +441,6 @@ export default function AdminAPBDesa() {
     if (massEditForm.applyKategori) updatePayload.kategori = massEditForm.kategori;
     if (massEditForm.applySumberDana) updatePayload.sumber_dana = massEditForm.sumber_dana;
     if (massEditForm.applyLokasi) updatePayload.lokasi = massEditForm.lokasi;
-    if (massEditForm.applyCaraPengadaan) updatePayload.cara_pengadaan = massEditForm.cara_pengadaan;
     if (massEditForm.applyJenisBelanja) updatePayload.jenis_belanja = massEditForm.jenis_belanja;
     if (massEditForm.applyPka) updatePayload.pka = massEditForm.pka;
     if (massEditForm.applyKetuaTpk) updatePayload.ketua_tpk = massEditForm.ketua_tpk;
@@ -457,7 +463,7 @@ export default function AdminAPBDesa() {
       anggaran: '', keterangan_pencairan: '',
       applyJenis: false, jenis: 'Murni', applyKategori: false, kategori: 'Penyelenggaraan Pemerintahan Desa',
       applySumberDana: false, sumber_dana: 'DDS', applyLokasi: false, lokasi: '',
-      applyCaraPengadaan: false, cara_pengadaan: 'Swakelola', applyJenisBelanja: false, jenis_belanja: 'Belanja Modal',
+      applyJenisBelanja: false, jenis_belanja: 'Belanja Modal',
       applyPka: false, pka: '', applyKetuaTpk: false, ketua_tpk: '',
       applySekretarisTpk: false, sekretaris_tpk: '', applyAnggotaTpk: false, anggota_tpk: '',
       applyJenisKegiatan: false, jenis_kegiatan: 'Pengadaan', applyFisikNonFisik: false, fisik_non_fisik: 'Fisik',
@@ -542,7 +548,7 @@ export default function AdminAPBDesa() {
     const matchSearch = r.nama_kegiatan.toLowerCase().includes(searchQuery.toLowerCase()) || r.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase());
     const matchKat = filterKategori === 'Semua Kategori' || r.kategori === filterKategori;
     const matchJenis = filterJenis === 'Semua Jenis' || r.jenis === filterJenis;
-    const matchHl = filterHighlight === 'Semua Status' || (r.cara_pengadaan || 'Swakelola') === filterHighlight;
+    const matchHl = filterHighlight === 'Semua Status' || hitungCaraPengadaan(r.anggaran, r.fisik_non_fisik, r.total_pencairan) === filterHighlight;
     const matchYear = filterYear === 'Semua Tahun' || r.tahun === Number(filterYear);
     return matchSearch && matchKat && matchJenis && matchHl && matchYear;
   }), [list, searchQuery, filterKategori, filterJenis, filterHighlight, filterYear]);
@@ -550,7 +556,7 @@ export default function AdminAPBDesa() {
   const metrics = useMemo(() => {
     return {
       total: list.length,
-      highlight: list.filter(r => r.cara_pengadaan && r.cara_pengadaan !== 'Swakelola').length,
+      highlight: list.filter(r => hitungCaraPengadaan(r.anggaran, r.fisik_non_fisik, r.total_pencairan) !== 'Swakelola').length,
       perluDiproses: list.filter(r => r.tahapan_pencairan === 'Belum' && r.anggaran > 0).length,
       selesai: list.filter(r => r.tahapan_pencairan === 'Selesai').length,
       totalAnggaran: list.reduce((s, r) => s + (r.anggaran || 0), 0),
@@ -565,7 +571,7 @@ export default function AdminAPBDesa() {
       'Total Pencairan': r.total_pencairan || 0,
       'Persentase': r.anggaran > 0 ? Math.round(((r.total_pencairan || 0) / r.anggaran) * 100) + '%' : '0%',
       'Foto': r.jumlah_foto || 0,
-      'Cara Pengadaan': r.cara_pengadaan || 'Swakelola'
+      'Cara Pengadaan': hitungCaraPengadaan(r.anggaran, r.fisik_non_fisik, r.total_pencairan)
     }));
     const ws = utils.json_to_sheet(rows);
     const wb = utils.book_new();
@@ -795,7 +801,7 @@ export default function AdminAPBDesa() {
                     <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'}`}><TahapanBadge item={r} /></td>
                     <td className={`${denseMode ? 'py-1.5 px-2' : 'py-3 px-4'}`}>
                       {(() => {
-                        const cp = r.cara_pengadaan || 'Swakelola';
+                        const cp = hitungCaraPengadaan(r.anggaran, r.fisik_non_fisik, r.total_pencairan);
                         const cpColor = caraPengadaanColor(cp);
                         return (
                           <span className={`inline-flex items-center gap-1 ${denseMode ? 'px-1.5 py-0' : 'px-2.5 py-1'} rounded-full text-[10px] font-bold uppercase tracking-wider border ${cpColor}`}>
@@ -943,7 +949,7 @@ export default function AdminAPBDesa() {
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Cara Pengadaan</p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{detailTarget.cara_pengadaan || 'Swakelola'}</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{hitungCaraPengadaan(detailTarget.anggaran, detailTarget.fisik_non_fisik, detailTarget.total_pencairan)}</p>
                     </div>
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Tahapan</p>
@@ -1337,15 +1343,9 @@ export default function AdminAPBDesa() {
                     {SUMBER_DANA_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-                <div>
-                  <label className="flex items-center gap-2 text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 cursor-pointer">
-                    <input type="checkbox" checked={massEditForm.applyCaraPengadaan} onChange={e => setMassEditForm({ ...massEditForm, applyCaraPengadaan: e.target.checked })} className="accent-gray-900 dark:accent-white rounded" />
-                    Cara Pengadaan
-                  </label>
-                  <select value={massEditForm.cara_pengadaan} onChange={e => setMassEditForm({ ...massEditForm, cara_pengadaan: e.target.value })} disabled={!massEditForm.applyCaraPengadaan}
-                    className="w-full border border-gray-200 dark:border-slate-700 rounded-xl p-2.5 text-sm bg-white dark:bg-slate-900 disabled:opacity-40 focus:ring-2 focus:ring-gray-900 dark:focus:ring-white outline-none">
-                    {CARA_PENGADAAN_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                <div className="p-3 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700">
+                  <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1">Cara Pengadaan (Otomatis)</p>
+                  <p className="text-xs font-bold text-gray-700 dark:text-slate-300">Berdasarkan Perbup No 49 Th 2020 — menyesuaikan pagu anggaran</p>
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 cursor-pointer">
@@ -1538,11 +1538,10 @@ export default function AdminAPBDesa() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Cara Pengadaan</label>
-                <select value={form.cara_pengadaan} onChange={e => setForm({ ...form, cara_pengadaan: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
-                  {CARA_PENGADAAN_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Cara Pengadaan (Otomatis)</label>
+                <div className="w-full border border-gray-200 dark:border-slate-700 rounded-xl p-3 text-sm font-medium bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-300">
+                  {hitungCaraPengadaan(form.anggaran || 0, form.fisik_non_fisik, editItem?.total_pencairan)}
+                </div>
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jenis Belanja</label>
