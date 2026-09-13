@@ -155,6 +155,14 @@ export default function AdminAPBDesa() {
   const filterPopoverRef = useRef<HTMLDivElement>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({ anggaran: '', keterangan_pencairan: '', applyJenis: false, jenis: 'Murni', applyKategori: false, kategori: 'Infrastruktur', applySumberDana: false, sumber_dana: 'DDS', applyLokasi: false, lokasi: '' });
+  const [officers, setOfficers] = useState<{ name: string; role: string }[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('village_officers');
+      if (stored) setOfficers(JSON.parse(stored));
+    } catch {}
+  }, []);
 
   const [form, setForm] = useState({
     nama_kegiatan: '', kategori: 'Penyelenggaraan Pemerintahan Desa', lokasi: '', anggaran: 0,
@@ -1302,8 +1310,11 @@ export default function AdminAPBDesa() {
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Pelaksana Kegiatan Anggaran (PKA)</label>
-                <input value={form.pka} onChange={e => setForm({ ...form, pka: e.target.value })}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" placeholder="Nama penanggung jawab anggaran" />
+                <select value={form.pka} onChange={e => setForm({ ...form, pka: e.target.value })}
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900">
+                  <option value="">Pilih Pelaksana</option>
+                  {officers.map(o => <option key={o.name} value={o.name}>{o.name} — {o.role}</option>)}
+                </select>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
