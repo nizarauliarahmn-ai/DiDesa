@@ -175,7 +175,7 @@ export default function AdminAPBDesa() {
     applySekretarisTpk: false, sekretaris_tpk: '',
     applyAnggotaTpk: false, anggota_tpk: '',
     applyJenisKegiatan: false, jenis_kegiatan: 'Pengadaan',
-    applyFisikNonFisik: false, fisik_non_fisik: 'Fisik',
+    applyFisikNonFisik: false, fisik_non_fisik: 'Non Fisik',
     applyStatusSpj: false, status_spj: 'Belum',
     applyCatatanKendala: false, catatan_kendala: ''
   });
@@ -193,7 +193,7 @@ export default function AdminAPBDesa() {
     keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola',
     bidang: 'Penyelenggaraan Pemerintahan Desa', jenis_belanja: 'Belanja Modal',
     pka: '', ketua_tpk: '', sekretaris_tpk: '', anggota_tpk: '',
-    jenis_kegiatan: 'Pengadaan', fisik_non_fisik: 'Fisik', status_spj: 'Belum', catatan_kendala: ''
+    jenis_kegiatan: 'Pengadaan', fisik_non_fisik: 'Non Fisik', status_spj: 'Belum', catatan_kendala: ''
   });
 
   const [pencairanForm, setPencairanForm] = useState({
@@ -466,7 +466,7 @@ export default function AdminAPBDesa() {
       applyJenisBelanja: false, jenis_belanja: 'Belanja Modal',
       applyPka: false, pka: '', applyKetuaTpk: false, ketua_tpk: '',
       applySekretarisTpk: false, sekretaris_tpk: '', applyAnggotaTpk: false, anggota_tpk: '',
-      applyJenisKegiatan: false, jenis_kegiatan: 'Pengadaan', applyFisikNonFisik: false, fisik_non_fisik: 'Fisik',
+      applyJenisKegiatan: false, jenis_kegiatan: 'Pengadaan', applyFisikNonFisik: false, fisik_non_fisik: 'Non Fisik',
       applyStatusSpj: false, status_spj: 'Belum', applyCatatanKendala: false, catatan_kendala: ''
     }); loadData();
   };
@@ -541,7 +541,7 @@ export default function AdminAPBDesa() {
     setForm({ nama_kegiatan: '', kategori: 'Penyelenggaraan Pemerintahan Desa', lokasi: '', anggaran: 0, keterangan_pencairan: '', jenis: 'Murni', sumber_dana: '', cara_pengadaan: 'Swakelola',
       bidang: 'Penyelenggaraan Pemerintahan Desa', jenis_belanja: 'Belanja Modal',
       pka: '', ketua_tpk: '', sekretaris_tpk: '', anggota_tpk: '',
-      jenis_kegiatan: 'Pengadaan', fisik_non_fisik: 'Fisik', status_spj: 'Belum', catatan_kendala: '' });
+      jenis_kegiatan: 'Pengadaan', fisik_non_fisik: 'Non Fisik', status_spj: 'Belum', catatan_kendala: '' });
   };
 
   const filtered = useMemo(() => list.filter(r => {
