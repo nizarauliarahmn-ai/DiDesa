@@ -2206,7 +2206,7 @@ const MONTHS_LIST = [
                 </th>
                 <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('rtRw')}>
                   <div className="flex items-center gap-1.5">
-                    DUSUN / RT / RW
+                    RT / RW
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
@@ -2299,7 +2299,7 @@ const MONTHS_LIST = [
                       {/* Address Column */}
                       <td className="px-5 py-4 text-xs font-semibold text-gray-600 dark:text-slate-300 whitespace-nowrap">
                         <span className="bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-slate-700 whitespace-nowrap inline-block font-mono text-[11px]">
-                          {resident.desa || "Wasah Hilir"} / RT {resident.rt || "-"} / RW {resident.rw || "-"}
+                          RT {resident.rt || "-"} / RW {resident.rw || "-"}
                         </span>
                       </td>
 
@@ -2929,7 +2929,7 @@ const MONTHS_LIST = [
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-gray-600 dark:text-slate-400">Wilayah / Alamat:</span>
                   <span className="font-extrabold text-gray-900 dark:text-white font-mono">
-                    {selectedResidentDetailModal.desa || "Wasah Hilir"} / RT {selectedResidentDetailModal.rt || "-"} / RW {selectedResidentDetailModal.rw || "-"}
+                    RT {selectedResidentDetailModal.rt || "-"} / RW {selectedResidentDetailModal.rw || "-"}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
@@ -3457,8 +3457,8 @@ const MONTHS_LIST = [
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                           <div>
-                            <span className="text-[10px] text-gray-500 font-bold">Dusun / RT / RW:</span>
-                            <p className="font-bold">{res.desa || "Wasah Hilir"} / RT {res.rt || "-"}</p>
+                            <span className="text-[10px] text-gray-500 font-bold">RT / RW:</span>
+                            <p className="font-bold">RT {res.rt || "-"} / RW {res.rw || "-"}</p>
                           </div>
                           <div>
                             <span className="text-[10px] text-gray-500 font-bold">Total Bulan Cair:</span>
