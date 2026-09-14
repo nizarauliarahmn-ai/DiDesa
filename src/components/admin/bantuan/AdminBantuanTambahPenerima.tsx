@@ -27,7 +27,16 @@ const PROGRAM_OPTIONS = [
   "BLT Dana Desa",
   "Program Keluarga Harapan (PKH)",
   "Bantuan Pangan Non-Tunai",
-  "Bantuan Sosial Tunai (BST)"
+  "Bantuan Sosial Tunai (BST)",
+  "Bantuan Pendidikan",
+  "Bantuan Kesehatan",
+  "Bantuan Pangan",
+  "Bantuan Sembako",
+  "Bantuan Stimulan Perumahan",
+  "Bantuan Modal Usaha",
+  "Bantuan Alat Pertanian",
+  "Bantuan Bibit & Pakan",
+  "Bantuan Peralatan Produktif"
 ];
 
 type TabId = 'manual' | 'import' | 'scan';
@@ -41,6 +50,7 @@ export default function AdminBantuanTambahPenerima({
   const [tab, setTab] = useState<TabId>('manual');
   const [program, setProgram] = useState(initialProgram);
   const [year, setYear] = useState(new Date().getFullYear().toString());
+  const [initialStatus, setInitialStatus] = useState<'usulan' | 'aktif'>('usulan');
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
@@ -372,10 +382,36 @@ export default function AdminBantuanTambahPenerima({
             nama: row.name,
             tahun: Number(year),
             tahun_mulai: Number(year),
-            status: 'usulan',
+            status: initialStatus,
             source,
             created_at: new Date().toISOString()
           });
+
+          // If status is 'aktif', also add to residents.active_aids
+          if (initialStatus === 'aktif') {
+            const existing = existingResidents.find(r => r.nik === row.nik && r.is_deleted !== 1);
+            if (existing) {
+              const currentAids = Array.isArray(existing.activeAids) ? existing.activeAids : [];
+              if (!currentAids.includes(aidTag)) {
+                await supabase
+                  .from('residents')
+                  .update({ active_aids: [...currentAids, aidTag] })
+                  .eq('nik', row.nik)
+                  .eq('tenant_id', tenantId);
+              }
+            } else {
+              await supabase
+                .from('residents')
+                .insert([{
+                  tenant_id: tenantId,
+                  nik: row.nik,
+                  name: row.name || 'Warga Baru',
+                  gender: 'Laki-laki',
+                  active_aids: [aidTag],
+                  is_deleted: 0
+                }]);
+            }
+          }
           added++;
         } catch (err) {
           skipped++;
@@ -474,17 +510,30 @@ export default function AdminBantuanTambahPenerima({
           </button>
         </div>
 
-        {/* Program & Tahun */}
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50/50 dark:bg-slate-800/40">
+        {/* Program, Tahun & Status */}
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50/50 dark:bg-slate-800/40">
           <div>
             <label className="block text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Program Bantuan Sosial</label>
-            <select
-              value={program}
-              onChange={(e) => setProgram(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-            >
-              {PROGRAM_OPTIONS.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                value={program}
+                onChange={(e) => setProgram(e.target.value)}
+                placeholder="Ketik nama program..."
+                className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              {program.length === 0 && (
+                <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                  {PROGRAM_OPTIONS.map(p => (
+                    <button key={p} onClick={() => setProgram(p)}
+                      className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-slate-300 first:rounded-t-xl last:rounded-b-xl transition-colors">
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="mt-1 text-[10px] text-gray-400">Ketik bebas untuk program custom</p>
           </div>
           <div>
             <label className="block text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Tahun Penyaluran</label>
@@ -494,6 +543,30 @@ export default function AdminBantuanTambahPenerima({
               onChange={(e) => setYear(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
             />
+          </div>
+          <div>
+            <label className="block text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Status Awal</label>
+            <div className="flex gap-2">
+              <button onClick={() => setInitialStatus('usulan')}
+                className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                  initialStatus === 'usulan'
+                    ? 'bg-amber-50 border-amber-300 text-amber-700 ring-2 ring-amber-200'
+                    : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 text-gray-500 hover:border-amber-200'
+                }`}>
+                📋 Usulan
+              </button>
+              <button onClick={() => setInitialStatus('aktif')}
+                className={`flex-1 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                  initialStatus === 'aktif'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700 ring-2 ring-emerald-200'
+                    : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-700 text-gray-500 hover:border-emerald-200'
+                }`}>
+                ✅ Aktif Langsung
+              </button>
+            </div>
+            <p className="mt-1 text-[10px] text-gray-400">
+              {initialStatus === 'usulan' ? 'Perlu disetujui dulu sebelum aktif' : 'Langsung aktif sebagai penerima'}
+            </p>
           </div>
         </div>
 
@@ -505,7 +578,7 @@ export default function AdminBantuanTambahPenerima({
                 <div>
                   <p className="font-extrabold text-emerald-800 dark:text-emerald-200 text-sm">Konfirmasi Data Sebelum Disimpan</p>
                   <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-1">
-                    Data di bawah akan didaftarkan sebagai penerima <strong>{program}</strong> tahun {year}. Pastikan nama dan NIK sudah benar.
+                    Data di bawah akan didaftarkan sebagai <strong>{initialStatus === 'usulan' ? 'USULAN' : 'PENERIMA AKTIF'}</strong> program <strong>{program}</strong> tahun {year}. Pastikan nama dan NIK sudah benar.
                   </p>
                 </div>
               </div>
