@@ -105,8 +105,8 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
-  const [sortField, setSortField] = useState<'importOrder' | 'tahun' | 'tanggal' | 'no'>('importOrder');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortField, setSortField] = useState<'importOrder' | 'tahun' | 'tanggal' | 'no'>('tahun');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
@@ -245,8 +245,14 @@ export default function ProdukHukumSK({ onBack }: SKProps) {
         cmp = a.no - b.no;
       }
       if (cmp !== 0) return sortDir === 'asc' ? cmp : -cmp;
-      if (a.tahun !== b.tahun) return (a.tahun || '').localeCompare(b.tahun || '');
-      return a.no - b.no;
+      if (sortField !== 'tahun' && a.tahun !== b.tahun) return (b.tahun || '').localeCompare(a.tahun || '');
+      if (sortField !== 'no') {
+        const noCmp = b.no - a.no;
+        if (noCmp !== 0) return noCmp;
+      }
+      const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+      const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+      return tglB - tglA;
     });
     return result;
   }, [items, searchQuery, filterJenis, filterTahun, filterArsip, sortField, sortDir]);

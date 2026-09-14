@@ -93,7 +93,7 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
-  const [sortField, setSortField] = useState<'no' | 'tahun' | 'tanggal'>('no');
+  const [sortField, setSortField] = useState<'no' | 'tahun' | 'tanggal'>('tahun');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -198,11 +198,23 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
       if (aIncomplete && !bIncomplete) return -1;
       if (!aIncomplete && bIncomplete) return 1;
 
-      if (sortField === 'no') return sortDir === 'asc' ? a.no - b.no : b.no - a.no;
-      if (sortField === 'tahun') return sortDir === 'asc' ? a.tahun.localeCompare(b.tahun) : b.tahun.localeCompare(a.tahun);
-      if (sortField === 'tanggal') return sortDir === 'asc' ? (a.tanggal || '').localeCompare(b.tanggal || '') : (b.tanggal || '').localeCompare(a.tanggal || '');
-
-      return sortDir === 'asc' ? a.no - b.no : b.no - a.no;
+      let cmp = 0;
+      if (sortField === 'no') cmp = a.no - b.no;
+      else if (sortField === 'tahun') cmp = a.tahun.localeCompare(b.tahun);
+      else if (sortField === 'tanggal') cmp = (a.tanggal || '').localeCompare(b.tanggal || '');
+      const primary = sortDir === 'asc' ? cmp : -cmp;
+      if (primary !== 0) return primary;
+      if (sortField !== 'tahun') {
+        const yearCmp = b.tahun.localeCompare(a.tahun);
+        if (yearCmp !== 0) return yearCmp;
+      }
+      if (sortField !== 'no') {
+        const noCmp = b.no - a.no;
+        if (noCmp !== 0) return noCmp;
+      }
+      const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+      const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+      return tglB - tglA;
     });
   }, [filteredItems, sortField, sortDir]);
 
