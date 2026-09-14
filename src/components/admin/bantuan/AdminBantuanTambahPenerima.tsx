@@ -371,7 +371,8 @@ export default function AdminBantuanTambahPenerima({
             resident_id: row.nik,
             nama: row.name,
             tahun: Number(year),
-            status: 'aktif',
+            tahun_mulai: Number(year),
+            status: 'usulan',
             source,
             created_at: new Date().toISOString()
           });

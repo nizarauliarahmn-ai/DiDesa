@@ -192,6 +192,10 @@ const MONTHS_LIST = [
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [selectedResidentDetailModal, setSelectedResidentDetailModal] = useState<any | null>(null);
 
+  // Bantuan Status System: usulan / aktif / pernah_mendapat
+  const [activeStatusTab, setActiveStatusTab] = useState<'usulan' | 'aktif' | 'pernah_mendapat'>('aktif');
+  const [bansosData, setBansosData] = useState<any[]>([]);
+
   // New Table Optimization States
   const [salurFilter, setSalurFilter] = useState<'all' | 'pending_month' | 'disbursed_month' | 'lunas'>('all');
   const [selectedNiks, setSelectedNiks] = useState<string[]>([]);
@@ -343,9 +347,17 @@ const MONTHS_LIST = [
              statusColor: r.status_color
            }));
            setResidents(formatted.filter(r => r.is_deleted !== 1));
-        }
-      }
-      setDbEngine("Supabase (Multi-Tenant)");
+         }
+
+         // Load bansos_recipients for status tracking
+         const { data: bansos } = await supabase
+           .from('bansos_recipients')
+           .select('*')
+           .eq('tenant_id', resolvedTenant)
+           .order('created_at', { ascending: false });
+         if (bansos) setBansosData(bansos);
+       }
+       setDbEngine("Supabase (Multi-Tenant)");
     } catch (err) {
       console.error("Failed to fetch data:", err);
     } finally {
@@ -401,10 +413,23 @@ const MONTHS_LIST = [
   const filteredResidents = useMemo(() => {
     let list = residents;
 
-    if (showOverlapOnly) {
-      list = stats.overlaps;
+    // Status Tab Filter (Usulan / Aktif / Pernah Mendapat)
+    const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
+    const niksByStatus = bansosData
+      .filter(b => b.program_id === selectedProgram && b.status === activeStatusTab && b.tahun === yearFilter)
+      .map(b => b.resident_id);
+    const uniqueNiksByStatus = new Set(niksByStatus);
+
+    if (activeStatusTab === 'usulan' || activeStatusTab === 'pernah_mendapat') {
+      // For usulan & pernah_mendapat: show only residents matching bansos_recipients status
+      list = residents.filter(r => uniqueNiksByStatus.has(r.nik));
     } else {
-      list = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith(selectedProgram)));
+      // For aktif: use existing logic (active_aids string matching)
+      if (showOverlapOnly) {
+        list = stats.overlaps;
+      } else {
+        list = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith(selectedProgram)));
+      }
     }
 
     // Status Salur Filter
@@ -444,13 +469,13 @@ const MONTHS_LIST = [
     });
 
     return list;
-  }, [residents, selectedProgram, showOverlapOnly, debouncedSearchQuery, stats.overlaps, salurFilter, disbursedMonths, sortField, sortDirection, filterYear]);
+  }, [residents, selectedProgram, showOverlapOnly, debouncedSearchQuery, stats.overlaps, salurFilter, disbursedMonths, sortField, sortDirection, filterYear, bansosData, activeStatusTab]);
 
   // Reset pagination & selection when primary filters change
   useEffect(() => {
     setCurrentPage(1);
     setSelectedNiks([]);
-  }, [selectedProgram, showOverlapOnly, salurFilter, debouncedSearchQuery, filterYear]);
+  }, [selectedProgram, showOverlapOnly, salurFilter, debouncedSearchQuery, filterYear, activeStatusTab]);
 
   // Paginated Residents Slice
   const paginatedResidents = useMemo(() => {
@@ -676,6 +701,159 @@ const MONTHS_LIST = [
       showToast(`Berhasil menghentikan bantuan untuk ${stoppedCount} warga terpilih pada ${formattedDateStr}!`, "success");
     } catch (err: any) {
       showToast(err.message || "Gagal menghentikan bantuan massal", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // === STATUS TRANSITION: Usulan → Aktif (Setujui) ===
+  const handleApproveBansos = async (recordId: string, residentNik: string, programId: string, tahun: number) => {
+    if (!tenantId) return;
+    try {
+      const yearTag = tahun?.toString() || new Date().getFullYear().toString();
+      const aidTag = `${programId} (${yearTag})`;
+
+      // Update bansos_recipients status
+      const { error } = await supabase
+        .from('bansos_recipients')
+        .update({ status: 'aktif', tahun_mulai: tahun })
+        .eq('id', recordId)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+
+      // Also add to residents.active_aids
+      const target = residents.find(r => r.nik === residentNik);
+      if (target) {
+        const currentAids = target.activeAids || [];
+        if (!currentAids.includes(aidTag)) {
+          const updatedAids = [...currentAids, aidTag];
+          await supabase
+            .from('residents')
+            .update({ active_aids: updatedAids })
+            .eq('nik', residentNik)
+            .eq('tenant_id', tenantId);
+          setResidents(prev => prev.map(r => r.nik === residentNik ? { ...r, activeAids: updatedAids } : r));
+        }
+      }
+
+      setBansosData(prev => prev.map(b => b.id === recordId ? { ...b, status: 'aktif' } : b));
+      showToast(`Usulan ${programId} untuk warga ini telah disetujui!`, "success");
+    } catch (err: any) {
+      showToast(err.message || "Gagal menyetujui usulan", "error");
+    }
+  };
+
+  // === STATUS TRANSITION: Aktif → Pernah Mendapat (Hentikan) ===
+  const handleStopBansos = async (recordId: string, residentNik: string, programId: string, tahun: number, alasan: string, catatan?: string) => {
+    if (!tenantId) return;
+    if (!alasan || alasan.trim() === '') {
+      showToast("Alasan penghentian wajib diisi", "error");
+      return;
+    }
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const yearTag = tahun?.toString() || new Date().getFullYear().toString();
+      const aidTag = `${programId} (${yearTag})`;
+
+      // Update bansos_recipients
+      const { error } = await supabase
+        .from('bansos_recipients')
+        .update({
+          status: 'pernah_mendapat',
+          tahun_akhir: tahun,
+          alasan_berhenti: alasan.trim(),
+          tanggal_berhenti: today
+        })
+        .eq('id', recordId)
+        .eq('tenant_id', tenantId);
+
+      if (error) throw error;
+
+      // Also prefix STOPPED in residents.active_aids
+      const target = residents.find(r => r.nik === residentNik);
+      if (target) {
+        const currentAids = target.activeAids || [];
+        const formattedDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        const updatedAids = currentAids.map((aid: string) => {
+          if (aid === aidTag || aid.startsWith(selectedProgram)) {
+            return `STOPPED: ${aid} | Tgl: ${formattedDate} | Alasan: ${alasan.trim()}${catatan ? ' | Catatan: ' + catatan : ''}`;
+          }
+          return aid;
+        });
+
+        const updatePayload: any = { active_aids: updatedAids };
+        if (alasan.toLowerCase().includes('meninggal')) {
+          updatePayload.status = 'Meninggal';
+        }
+
+        await supabase
+          .from('residents')
+          .update(updatePayload)
+          .eq('nik', residentNik)
+          .eq('tenant_id', tenantId);
+        setResidents(prev => prev.map(r => r.nik === residentNik ? { ...r, activeAids: updatedAids } : r));
+      }
+
+      setBansosData(prev => prev.map(b => b.id === recordId ? { ...b, status: 'pernah_mendapat', alasan_berhenti: alasan, tanggal_berhenti: today } : b));
+      showToast(`Bantuan ${programId} telah dihentikan.`, "success");
+    } catch (err: any) {
+      showToast(err.message || "Gagal menghentikan bantuan", "error");
+    }
+  };
+
+  // === Bulk Approve: Usulan → Aktif ===
+  const handleBulkApprove = async () => {
+    if (selectedNiks.length === 0) return;
+    setIsSaving(true);
+    try {
+      if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+      const yearTag = filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear().toString();
+      const aidTag = `${selectedProgram} (${yearTag})`;
+      const year = Number(yearTag);
+
+      let approvedCount = 0;
+      // Find bansos records that are 'usulan' for selected NIKs
+      for (const nik of selectedNiks) {
+        const record = bansosData.find(b => b.resident_id === nik && b.program_id === selectedProgram && b.status === 'usulan' && b.tahun === year);
+        if (!record) continue;
+
+        const { error } = await supabase
+          .from('bansos_recipients')
+          .update({ status: 'aktif', tahun_mulai: year })
+          .eq('id', record.id)
+          .eq('tenant_id', tenantId);
+
+        if (!error) {
+          // Add to residents.active_aids
+          const target = residents.find(r => r.nik === nik);
+          if (target) {
+            const currentAids = target.activeAids || [];
+            if (!currentAids.includes(aidTag)) {
+              const updatedAids = [...currentAids, aidTag];
+              await supabase
+                .from('residents')
+                .update({ active_aids: updatedAids })
+                .eq('nik', nik)
+                .eq('tenant_id', tenantId);
+              target.activeAids = updatedAids;
+            }
+          }
+          approvedCount++;
+        }
+      }
+
+      setBansosData(prev => prev.map(b => {
+        if (selectedNiks.includes(b.resident_id) && b.program_id === selectedProgram && b.status === 'usulan' && b.tahun === year) {
+          return { ...b, status: 'aktif' };
+        }
+        return b;
+      }));
+
+      setSelectedNiks([]);
+      showToast(`Berhasil menyetujui ${approvedCount} usulan bantuan!`, "success");
+    } catch (err: any) {
+      showToast(err.message || "Gagal menyetujui usulan massal", "error");
     } finally {
       setIsSaving(false);
     }
@@ -1799,6 +1977,35 @@ const MONTHS_LIST = [
         </div>
       )}
 
+      {/* Status Tabs: Usulan / Penerima Aktif / Pernah Mendapat */}
+      <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-slate-800 rounded-2xl">
+        {([
+          { key: 'aktif' as const, label: 'Penerima Aktif', icon: <CheckCircle2 size={14} />, color: 'emerald' },
+          { key: 'usulan' as const, label: 'Usulan', icon: <Award size={14} />, color: 'amber' },
+          { key: 'pernah_mendapat' as const, label: 'Pernah Mendapat', icon: <Calendar size={14} />, color: 'gray' },
+        ]).map(tab => {
+          const count = bansosData.filter(b => b.program_id === selectedProgram && b.status === tab.key && b.tahun === (filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear())).length;
+          const isActive = activeStatusTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => { setActiveStatusTab(tab.key); setShowOverlapOnly(false); }}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex-1 justify-center ${
+                isActive
+                  ? `bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow-sm`
+                  : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                isActive ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-slate-400'
+              }`}>{count}</span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Table Section */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden relative">
         
@@ -1957,6 +2164,16 @@ const MONTHS_LIST = [
                 <Ban className="w-3.5 h-3.5" />
                 Hentikan Bantuan (Massal)
               </button>
+
+              {activeStatusTab === 'usulan' && (
+                <button
+                  onClick={handleBulkApprove}
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Setujui Usulan ({selectedNiks.length})
+                </button>
+              )}
 
               <button
                 onClick={() => setSelectedNiks([])}
@@ -2173,6 +2390,38 @@ const MONTHS_LIST = [
                       <td className="px-5 py-4 text-center whitespace-nowrap">
                         {showOverlapOnly ? (
                           <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider whitespace-nowrap">Kelola via Tab Utama</p>
+                        ) : activeStatusTab === 'usulan' ? (
+                          <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const yearNum = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
+                                const record = bansosData.find(b => b.resident_id === resident.nik && b.program_id === selectedProgram && b.status === 'usulan' && b.tahun === yearNum);
+                                if (record) handleApproveBansos(record.id, resident.nik, selectedProgram, yearNum);
+                                else showToast("Data usulan tidak ditemukan", "error");
+                              }}
+                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs active:scale-95 transition-all shadow-sm inline-flex items-center gap-1"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Setujui
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedNiks([resident.nik]);
+                                setShowBulkStopModal(true);
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg border border-gray-200/60 transition-colors active:scale-95"
+                              title="Tolak / Hentikan Usulan"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : activeStatusTab === 'pernah_mendapat' ? (
+                          <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
+                            <span className="text-[10px] font-bold text-gray-400 uppercase">
+                              {bansosData.find(b => b.resident_id === resident.nik && b.program_id === selectedProgram && b.status === 'pernah_mendapat')?.alasan_berhenti || 'Tidak aktif'}
+                            </span>
+                          </div>
                         ) : (
                           <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
                             <button
