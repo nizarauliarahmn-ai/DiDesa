@@ -95,8 +95,8 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   const [filterJenis, setFilterJenis] = useState('');
   const [filterTahun, setFilterTahun] = useState('');
   const [filterArsip, setFilterArsip] = useState<'semua' | 'true' | 'false'>('semua');
-  const [sortField, setSortField] = useState<'importOrder' | 'tahun' | 'tanggal' | 'no'>('importOrder');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortField, setSortField] = useState<'importOrder' | 'tahun' | 'tanggal' | 'no'>('tahun');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
@@ -246,7 +246,19 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
       if (sortField === 'no') cmp = a.no - b.no;
       else if (sortField === 'tahun') cmp = a.tahun.localeCompare(b.tahun);
       else if (sortField === 'tanggal') cmp = (a.tanggal || '').localeCompare(b.tanggal || '');
-      return sortDir === 'asc' ? cmp : -cmp;
+      const primary = sortDir === 'asc' ? cmp : -cmp;
+      if (primary !== 0) return primary;
+      if (sortField !== 'tahun') {
+        const yearCmp = b.tahun.localeCompare(a.tahun);
+        if (yearCmp !== 0) return yearCmp;
+      }
+      if (sortField !== 'no') {
+        const noCmp = b.no - a.no;
+        if (noCmp !== 0) return noCmp;
+      }
+      const tglA = a.tanggal ? new Date(a.tanggal).getTime() : 0;
+      const tglB = b.tanggal ? new Date(b.tanggal).getTime() : 0;
+      return tglB - tglA;
     });
   }, [filteredItems, sortField, sortDir]);
 
