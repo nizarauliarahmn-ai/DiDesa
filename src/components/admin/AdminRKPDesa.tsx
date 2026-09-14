@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, ClipboardList, X, Link2,
-  Download, Filter, CheckCircle2, Loader2, MapPin, ListChecks, Square, SlidersHorizontal
+  Download, Filter, CheckCircle2, Loader2, MapPin, ListChecks, Square, SlidersHorizontal,
+  FileText, DollarSign, LayoutGrid
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -318,7 +319,8 @@ export default function AdminRKPDesa() {
     rencana: list.filter(r => r.status === 'Rencana').length,
     berlangsung: list.filter(r => r.status === 'Berlangsung').length,
     selesai: list.filter(r => r.status === 'Selesai').length,
-    totalAnggaran: list.reduce((s, r) => s + (r.anggaran || 0), 0)
+    totalAnggaran: list.reduce((s, r) => s + (r.anggaran || 0), 0),
+    kategoriAktif: new Set(list.map(r => r.kategori)).size
   }), [list]);
 
   const handleExport = () => {
@@ -344,17 +346,6 @@ export default function AdminRKPDesa() {
             <ClipboardList className="w-4 h-4 text-blue-600" />
           </div>
           <h1 className="text-lg font-black text-gray-900 dark:text-white">RKPDesa</h1>
-          <div className="hidden md:flex items-center gap-2 ml-2">
-            {[
-              { label: 'Total', value: metrics.total, color: 'bg-emerald-50 text-emerald-700' },
-              { label: 'Rencana', value: metrics.rencana, color: 'bg-gray-100 text-gray-600' },
-              { label: 'Berlangsung', value: metrics.berlangsung, color: 'bg-blue-50 text-blue-700' },
-              { label: 'Selesai', value: metrics.selesai, color: 'bg-emerald-100 text-emerald-800' },
-            ].map((m, i) => (
-              <span key={i} className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${m.color}`}>{m.label}: {m.value}</span>
-            ))}
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700">{formatRp(metrics.totalAnggaran)}</span>
-          </div>
         </div>
         <div className="flex gap-2">
           <button onClick={() => { loadRpjm(importYear); setShowFromRpjm(true); }}
@@ -366,6 +357,23 @@ export default function AdminRKPDesa() {
             <PlusCircle size={14} /> Tambah Baru
           </button>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { icon: <FileText size={16} className="text-emerald-600" />, bg: 'bg-emerald-50', value: metrics.total, label: 'Total Kegiatan' },
+          { icon: <ClipboardList size={16} className="text-blue-600" />, bg: 'bg-blue-50', value: metrics.berlangsung, label: 'Berlangsung' },
+          { icon: <DollarSign size={16} className="text-purple-600" />, bg: 'bg-purple-50', value: formatRp(metrics.totalAnggaran), label: 'Total Anggaran' },
+          { icon: <LayoutGrid size={16} className="text-amber-600" />, bg: 'bg-amber-50', value: metrics.kategoriAktif, label: 'Kategori Aktif' },
+        ].map((m, i) => (
+          <div key={i} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 flex items-center gap-3">
+            <div className={`w-8 h-8 ${m.bg} rounded-lg flex items-center justify-center shrink-0`}>{m.icon}</div>
+            <div className="min-w-0">
+              <p className="text-lg font-black text-gray-900 dark:text-white leading-tight truncate">{m.value}</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">{m.label}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 px-4 py-2.5">
