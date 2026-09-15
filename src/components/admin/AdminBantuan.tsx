@@ -195,6 +195,7 @@ const MONTHS_LIST = [
   // Bantuan Status System: usulan / aktif / pernah_mendapat
   const [activeStatusTab, setActiveStatusTab] = useState<'usulan' | 'aktif' | 'pernah_mendapat'>('aktif');
   const [bansosData, setBansosData] = useState<any[]>([]);
+  const [removingNiks, setRemovingNiks] = useState<Set<string>>(new Set());
 
   // New Table Optimization States
   const [salurFilter] = useState<'all'>('all');
@@ -892,10 +893,16 @@ const MONTHS_LIST = [
         try {
           if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
 
+          // 1. Trigger animasi fade-out
+          setRemovingNiks(prev => new Set([...prev, nik]));
+
+          // Tunggu animasi selesai (300ms)
+          await new Promise(resolve => setTimeout(resolve, 300));
+
           const yearNum = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
           const yearStr = yearNum.toString();
 
-          // 1. Hapus dari bansos_recipients (sistem baru)
+          // 2. Hapus dari bansos_recipients (sistem baru)
           const { error: delErr } = await supabase
             .from('bansos_recipients')
             .delete()
@@ -906,18 +913,16 @@ const MONTHS_LIST = [
 
           if (delErr) throw delErr;
 
-          // 2. Bersihkan dari residents.active_aids (sistem lama) — hapus tag yang mengandung programName + tahun
+          // 3. Bersihkan dari residents.active_aids (sistem lama)
           const currentAids = targetResident.activeAids || [];
           const updatedAids = currentAids.filter((aid: string) => {
-            // Cocokkan "ProgramName (YYYY)" atau programName langsung
             const match = aid.match(/^(.+?)\s*\(\d{4}\)$/);
             const aidProgName = match ? match[1].trim() : aid.trim();
             const aidYear = match ? match[2] : null;
-            // Hapus jika program cocok DAN tahun cocok (atau tanpa tahun)
             if (aidProgName === programName) {
-              if (aidYear === yearStr || !aidYear) return false; // hapus
+              if (aidYear === yearStr || !aidYear) return false;
             }
-            return true; // simpan
+            return true;
           });
 
           if (updatedAids.length !== currentAids.length) {
@@ -927,15 +932,19 @@ const MONTHS_LIST = [
               .eq('nik', nik)
               .eq('tenant_id', tenantId);
 
-            // Update local residents state
             setResidents(prev => prev.map(r => r.nik === nik ? { ...r, activeAids: updatedAids } : r));
           }
 
-          // 3. Update local bansosData
+          // 4. Update local bansosData
           setBansosData(prev => prev.filter(b => !(b.resident_id === nik && b.program_id === programName && b.tahun === yearNum)));
+
+          // 5. Hapus dari removingNiks
+          setRemovingNiks(prev => { const next = new Set(prev); next.delete(nik); return next; });
 
           showToast(`${targetResident.name} berhasil dihapus dari daftar "${programName}".`, "success");
         } catch (err: any) {
+          // Rollback animasi jika gagal
+          setRemovingNiks(prev => { const next = new Set(prev); next.delete(nik); return next; });
           showToast(`Gagal menghapus: ${err.message}`, "error");
         }
       }
@@ -2260,9 +2269,9 @@ const MONTHS_LIST = [
                     <tr 
                       key={resident.nik} 
                       onClick={() => setSelectedResidentDetailModal(resident)}
-                      className={`hover:bg-emerald-50/30 dark:hover:bg-slate-800/80 cursor-pointer transition-colors group ${
+                      className={`hover:bg-emerald-50/30 dark:hover:bg-slate-800/80 cursor-pointer transition-all duration-300 group ${
                         isSelected ? 'bg-emerald-50/60 dark:bg-emerald-950/30' : ''
-                      }`}
+                      } ${removingNiks.has(resident.nik) ? 'opacity-0 scale-95 -translate-x-4 bg-red-50/50' : ''}`}
                     >
                       {/* Checkbox Column */}
                       <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
