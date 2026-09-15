@@ -449,7 +449,22 @@ const MONTHS_LIST = [
     const uniqueNiksByStatus = new Set(niksByStatus);
 
     if (activeStatusTab === 'usulan' || activeStatusTab === 'pernah_mendapat') {
-      list = residents.filter(r => uniqueNiksByStatus.has(r.nik));
+      // Gabungkan: residents yang ada di bansos + bansos yang NIK-nya belum ada di residents
+      const matched = residents.filter(r => uniqueNiksByStatus.has(r.nik));
+      const matchedNiks = new Set(matched.map(r => r.nik));
+      // Buat synthetic resident untuk NIK yang ada di bansos tapi belum di residents
+      const orphanEntries = bansosData
+        .filter(b => b.program_id === selectedProgram && b.status === activeStatusTab && (isAllYears || b.tahun === yearFilter) && !matchedNiks.has(b.resident_id))
+        .map(b => ({
+          nik: b.resident_id,
+          name: b.nama || 'Data Usulan',
+          rt: '',
+          rw: '',
+          activeAids: [],
+          is_deleted: 0,
+          isOrphan: true
+        }));
+      list = [...matched, ...orphanEntries];
     } else {
       // For aktif: use bansosData as primary, fallback to residents.active_aids for legacy
       if (showOverlapOnly) {
@@ -2074,7 +2089,7 @@ const MONTHS_LIST = [
           { key: 'usulan' as const, label: 'Usulan', icon: <Award size={14} />, color: 'amber' },
           { key: 'pernah_mendapat' as const, label: 'Pernah Mendapat', icon: <Calendar size={14} />, color: 'gray' },
         ]).map(tab => {
-          const count = bansosData.filter(b => b.program_id === selectedProgram && b.status === tab.key && b.tahun === (filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear())).length;
+          const count = bansosData.filter(b => b.program_id === selectedProgram && b.status === tab.key && (filterYear === "Semua Tahun" || b.tahun === Number(filterYear))).length;
           const isActive = activeStatusTab === tab.key;
           return (
             <button
