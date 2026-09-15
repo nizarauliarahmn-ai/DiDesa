@@ -2921,208 +2921,166 @@ const MONTHS_LIST = [
 
       {/* Detail & Edit Penerima Bantuan Modal */}
       {selectedResidentDetailModal && (
-        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden my-8 border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="p-6 bg-gradient-to-r from-emerald-700 to-teal-800 text-white flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest bg-white/20 px-2.5 py-0.5 rounded-full whitespace-nowrap">
-                  Detail & Edit Penerima Bantuan
-                </span>
-                <h3 className="text-xl font-extrabold mt-1.5 flex items-center gap-2">
-                  {selectedResidentDetailModal.name}
-                  {selectedResidentDetailModal.gender_color && (
-                    <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded font-mono">
-                      {selectedResidentDetailModal.gender_color.includes('blue') ? 'Laki-Laki' : 'Perempuan'}
-                    </span>
-                  )}
-                </h3>
-                <p className="text-xs text-emerald-100 font-mono mt-0.5">NIK: {selectedResidentDetailModal.nik}</p>
-              </div>
-              <button
-                onClick={() => setSelectedResidentDetailModal(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
 
-            {/* Modal Content / Form */}
-            <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto font-sans">
-              {/* Profile & Address Overview Box */}
-              <div className="bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/60 space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-gray-600 dark:text-slate-400">Wilayah / Alamat:</span>
-                  <span className="font-extrabold text-gray-900 dark:text-white font-mono">
-                    RT {selectedResidentDetailModal.rt || "-"} / RW {selectedResidentDetailModal.rw || "-"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-gray-600 dark:text-slate-400">Status Kerentanan:</span>
-                  {selectedResidentDetailModal.isLansiaTunggal ? (
-                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-extrabold rounded-md border border-amber-200">
-                      👴 Lansia Tunggal (&ge; 60 Th & KK Tunggal)
-                    </span>
-                  ) : (
-                    <span className="text-gray-500 font-medium">Warga Biasa / Anggota Keluarga</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Form Inputs for Edit Aid Data */}
-              <div className="space-y-4">
-                {/* Program Bantuan Selection */}
+            {/* Header */}
+            <div className="px-6 pt-5 pb-4 border-b border-gray-100 dark:border-slate-800">
+              <div className="flex justify-between items-start">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Program Bantuan Sosial</label>
-                  <select
-                    value={selectedProgram}
-                    onChange={(e) => setSelectedProgram(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {stats.uniquePrograms.map(p => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status Penyaluran Bulanan (Januari - Desember) */}
-                <div className="space-y-3 bg-emerald-50/60 dark:bg-emerald-950/30 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/60">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <label className="block text-xs font-extrabold text-emerald-900 dark:text-emerald-200 uppercase tracking-wider">
-                        Status Penyaluran Bulanan (12 Bulan)
-                      </label>
-                      <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">
-                        Klik bulan di bawah ini untuk mencatat pencairan bantuan per bulan.
-                      </p>
-                    </div>
-                    <span className="text-xs font-black bg-emerald-700 text-white px-3 py-1 rounded-xl shadow-2xs whitespace-nowrap">
-                      {(disbursedMonths[selectedResidentDetailModal.nik] || []).length} / 12 Bulan Salur
-                    </span>
-                  </div>
-
-                  {/* 12 Month Grid */}
-                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 pt-1">
-                    {MONTHS_LIST.map((m, idx) => {
-                      const isDisbursed = (disbursedMonths[selectedResidentDetailModal.nik] || []).includes(m.id);
-                      const isCurrentMonth = idx === new Date().getMonth();
-                      return (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => handleToggleMonth(selectedResidentDetailModal.nik, m.id)}
-                          className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all flex flex-col items-center justify-center gap-0.5 cursor-pointer shadow-2xs active:scale-95 ${
-                            isDisbursed
-                              ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
-                              : isCurrentMonth
-                              ? 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200 ring-2 ring-amber-400/40'
-                              : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-800 hover:bg-emerald-50 hover:text-emerald-700'
-                          }`}
-                        >
-                          <span>{m.fullName}</span>
-                          <span className="text-[9px] opacity-80 font-mono">
-                            {isDisbursed ? '✓ Salur' : (isCurrentMonth ? 'Bulan Ini' : 'Belum')}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Summary & Quick Action Buttons */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-emerald-100 dark:border-emerald-900/40">
-                    <div className="text-xs font-bold text-gray-700 dark:text-slate-300">
-                      Total Dana Cair: <span className="font-mono text-emerald-700 dark:text-emerald-400 font-extrabold text-sm">Rp {(((disbursedMonths[selectedResidentDetailModal.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => handleSetMonthsUntil(selectedResidentDetailModal.nik, new Date().getMonth())}
-                        className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
-                      >
-                        Salur s.d. {MONTHS_LIST[new Date().getMonth()].fullName}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSetAll12Months(selectedResidentDetailModal.nik)}
-                        className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
-                      >
-                        Lunas 12 Bulan
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleResetMonths(selectedResidentDetailModal.nik)}
-                        className="px-2.5 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
-                      >
-                        Reset
-                      </button>
-                    </div>
+                  <h3 className="text-lg font-extrabold text-gray-900 dark:text-white">{selectedResidentDetailModal.name}</h3>
+                  <div className="flex items-center gap-3 mt-1 text-[11px] text-gray-400 font-mono">
+                    <span>{selectedResidentDetailModal.nik}</span>
+                    <span>{selectedResidentDetailModal.gender_color?.includes('blue') ? 'L' : 'P'}</span>
+                    <span>RT {selectedResidentDetailModal.rt || "-"} / RW {selectedResidentDetailModal.rw || "-"}</span>
+                    {selectedResidentDetailModal.isLansiaTunggal && (
+                      <span className="text-amber-600 font-bold">Lansia Tunggal</span>
+                    )}
                   </div>
                 </div>
+                <button onClick={() => setSelectedResidentDetailModal(null)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg text-gray-400 transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
 
-                {/* Quick Action Buttons */}
-                <div className="pt-3 border-t border-gray-100 dark:border-slate-800 space-y-2">
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300">Tindakan Lanjutan Penerima</label>
-                  <div className="flex flex-wrap items-center gap-2">
+            {/* Content */}
+            <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+
+              {/* Program */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Program</label>
+                <select
+                  value={selectedProgram}
+                  onChange={(e) => setSelectedProgram(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  {stats.uniquePrograms.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Penyaluran */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Penyaluran</label>
+                  <span className="text-[10px] font-bold text-gray-500 font-mono">{(disbursedMonths[selectedResidentDetailModal.nik] || []).length}/12 bln</span>
+                </div>
+
+                {/* 12 Bulan Grid */}
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                  {MONTHS_LIST.map((m, idx) => {
+                    const isDisbursed = (disbursedMonths[selectedResidentDetailModal.nik] || []).includes(m.id);
+                    const isCurrentMonth = idx === new Date().getMonth();
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleToggleMonth(selectedResidentDetailModal.nik, m.id)}
+                        className={`py-2 px-1 rounded-lg text-[10px] font-bold border transition-all flex flex-col items-center gap-0.5 cursor-pointer active:scale-95 ${
+                          isDisbursed
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : isCurrentMonth
+                            ? 'bg-amber-50 text-amber-700 border-amber-200'
+                            : 'bg-gray-50 text-gray-400 border-gray-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-600'
+                        }`}
+                      >
+                        <span>{m.id}</span>
+                        <span className="text-[8px] opacity-70">{isDisbursed ? '✓' : isCurrentMonth ? '•' : '–'}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Summary */}
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100 dark:border-slate-800">
+                  <span className="text-xs font-bold text-gray-500">
+                    Rp {(((disbursedMonths[selectedResidentDetailModal.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
+                  </span>
+                  <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => {
-                        setSelectedPrintResident(selectedResidentDetailModal);
-                        setPrintDocType('slip_warga');
-                        setShowPrintModal(true);
-                      }}
-                      className="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl border border-emerald-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
+                      onClick={() => handleSetMonthsUntil(selectedResidentDetailModal.nik, new Date().getMonth())}
+                      className="px-2 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors cursor-pointer"
                     >
-                      <Printer className="w-3.5 h-3.5 text-emerald-700" />
-                      Cetak Kupon / Slip Bukti Penerimaan
+                      Salur s.d. {MONTHS_LIST[new Date().getMonth()].id}
                     </button>
-
                     <button
                       type="button"
-                      onClick={() => {
-                        const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
-                        handleSingleRollforward(selectedResidentDetailModal, nextYr);
-                      }}
-                      className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs rounded-xl border border-blue-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
+                      onClick={() => handleSetAll12Months(selectedResidentDetailModal.nik)}
+                      className="px-2 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 rounded-md transition-colors cursor-pointer"
                     >
-                      <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                      Teruskan ke Tahun Depan (Ke 2027)
+                      Lunas
                     </button>
-
                     <button
                       type="button"
-                      onClick={() => {
-                        setSelectedNiks([selectedResidentDetailModal.nik]);
-                        setSelectedResidentDetailModal(null);
-                        setShowBulkStopModal(true);
-                      }}
-                      className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all flex items-center gap-1.5 active:scale-95 whitespace-nowrap cursor-pointer"
+                      onClick={() => handleResetMonths(selectedResidentDetailModal.nik)}
+                      className="px-2 py-1 text-[10px] font-bold text-gray-400 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
                     >
-                      <Ban className="w-3.5 h-3.5 text-rose-600" />
-                      Hentikan Bantuan (Dengan Tanggal Rinci)
+                      Reset
                     </button>
                   </div>
                 </div>
               </div>
+
+              {/* Aksi */}
+              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedPrintResident(selectedResidentDetailModal);
+                    setPrintDocType('slip_warga');
+                    setShowPrintModal(true);
+                  }}
+                  className="px-3 py-1.5 text-[10px] font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Printer className="w-3 h-3" /> Cetak Slip
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
+                    handleSingleRollforward(selectedResidentDetailModal, nextYr);
+                  }}
+                  className="px-3 py-1.5 text-[10px] font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Calendar className="w-3 h-3" /> Teruskan ke {filterYear !== "Semua Tahun" ? parseInt(filterYear) + 1 : new Date().getFullYear() + 1}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedNiks([selectedResidentDetailModal.nik]);
+                    setSelectedResidentDetailModal(null);
+                    setShowBulkStopModal(true);
+                  }}
+                  className="px-3 py-1.5 text-[10px] font-bold text-red-500 border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Ban className="w-3 h-3" /> Hentikan
+                </button>
+              </div>
+
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+            {/* Footer */}
+            <div className="px-6 py-3 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-2">
               <button
                 onClick={() => setSelectedResidentDetailModal(null)}
-                className="px-5 py-2 text-xs font-bold text-gray-600 dark:text-slate-400 hover:bg-gray-100 rounded-xl"
+                className="px-4 py-1.5 text-[11px] font-bold text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 Batal
               </button>
               <button
                 onClick={() => {
-                  showToast(`Data bantuan ${selectedResidentDetailModal.name} berhasil diperbarui!`, "success");
+                  showToast(`Data ${selectedResidentDetailModal.name} diperbarui.`, "success");
                   setSelectedResidentDetailModal(null);
                 }}
-                className="px-6 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer whitespace-nowrap"
+                className="px-5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
-                <Check className="w-4 h-4" /> Simpan Perubahan Bantuan
+                <Check className="w-3.5 h-3.5" /> Simpan
               </button>
             </div>
+
           </div>
         </div>
       )}
