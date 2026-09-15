@@ -440,14 +440,26 @@ const MONTHS_LIST = [
     const uniqueNiksByStatus = new Set(niksByStatus);
 
     if (activeStatusTab === 'usulan' || activeStatusTab === 'pernah_mendapat') {
-      // For usulan & pernah_mendapat: show only residents matching bansos_recipients status
       list = residents.filter(r => uniqueNiksByStatus.has(r.nik));
     } else {
-      // For aktif: use existing logic (active_aids string matching)
+      // For aktif: use bansosData as primary, fallback to residents.active_aids for legacy
       if (showOverlapOnly) {
         list = stats.overlaps;
       } else {
-        list = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith(selectedProgram)));
+        // Gabungkan: NIK dari bansosData (aktif) + NIK dari residents.active_aids (legacy)
+        const niksFromBansos = new Set(
+          bansosData
+            .filter(b => b.program_id === selectedProgram && b.status === 'aktif' && b.tahun === yearFilter)
+            .map(b => b.resident_id)
+        );
+        const niksFromActiveAids = new Set(
+          residents
+            .filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith(selectedProgram)))
+            .map(r => r.nik)
+        );
+        // Union: gabungkan keduanya
+        const allNiks = new Set([...niksFromBansos, ...niksFromActiveAids]);
+        list = residents.filter(r => allNiks.has(r.nik));
       }
     }
 
