@@ -19,12 +19,16 @@ const FILTERS = ["Semua", "✨ Terbaru", "🎁 Penerima Bansos", "🚫 Non-Pener
 export default function AdminPenduduk({ 
   onNavigateToTab, 
   onSetPresetResident,
+  presetResidentNik,
+  onClearPresetResidentNik,
   searchQuery: externalSearchQuery,
   setSearchQuery: externalSetSearchQuery,
   debouncedSearchQuery: externalDebouncedSearchQuery
 }: { 
   onNavigateToTab?: (tab: string) => void;
   onSetPresetResident?: (resident: any) => void;
+  presetResidentNik?: string | null;
+  onClearPresetResidentNik?: () => void;
   searchQuery?: string;
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
@@ -88,6 +92,17 @@ export default function AdminPenduduk({
   useEffect(() => {
     setCurrentPage(1);
   }, [debouncedSearchQuery, activeFilter, sortOrder, aidFilter]);
+
+  // Auto-select resident when presetResidentNik is set (from Bantuan detail modal)
+  useEffect(() => {
+    if (presetResidentNik && residents.length > 0) {
+      const found = residents.find(r => r.nik === presetResidentNik);
+      if (found) {
+        setSelectedPenduduk(found);
+        onClearPresetResidentNik?.();
+      }
+    }
+  }, [presetResidentNik, residents]);
 
   const fetchResidents = async () => {
     if (residents.length === 0) setLoading(true);

@@ -24,7 +24,8 @@ import {
   RefreshCw,
   DollarSign,
   Award,
-  Printer
+  Printer,
+  ExternalLink
 } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import ConfirmModal from '../common/ConfirmModal';
@@ -42,11 +43,15 @@ const toTitleCase = (str: string) => {
 export default function AdminBantuan({
   searchQuery: externalSearchQuery,
   setSearchQuery: externalSetSearchQuery,
-  debouncedSearchQuery: externalDebouncedSearchQuery
+  debouncedSearchQuery: externalDebouncedSearchQuery,
+  onNavigateToTab,
+  onSetPresetResidentNik
 }: {
   searchQuery?: string;
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
+  onNavigateToTab?: (tab: string) => void;
+  onSetPresetResidentNik?: (nik: string) => void;
 } = {}) {
   const [residents, setResidents] = useState<any[]>([]);
   const [dbEngine, setDbEngine] = useState<string>("Loading...");
@@ -2935,6 +2940,18 @@ const MONTHS_LIST = [
                     <span>RT {selectedResidentDetailModal.rt || "-"} / RW {selectedResidentDetailModal.rw || "-"}</span>
                     {selectedResidentDetailModal.isLansiaTunggal && (
                       <span className="text-amber-600 font-bold">Lansia Tunggal</span>
+                    )}
+                    {onNavigateToTab && onSetPresetResidentNik && (
+                      <button
+                        onClick={() => {
+                          onSetPresetResidentNik(selectedResidentDetailModal.nik);
+                          setSelectedResidentDetailModal(null);
+                          onNavigateToTab('penduduk');
+                        }}
+                        className="text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 cursor-pointer font-bold"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Profil
+                      </button>
                     )}
                   </div>
                 </div>
