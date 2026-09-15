@@ -880,7 +880,7 @@ const MONTHS_LIST = [
   };
 
   // Remove aid program from a resident
-  // === HAPUS DARI DAFTAR: Hapus dari bansos_recipients SAJA (tanpa ubah data penduduk) ===
+  // === HAPUS DARI DAFTAR: Hapus dari bansos_recipients + bersihkan residents.active_aids ===
   const handleHapusDariDaftar = (nik: string, programName: string) => {
     const targetResident = residents.find(r => r.nik === nik);
     if (!targetResident) return;
@@ -893,9 +893,10 @@ const MONTHS_LIST = [
           if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
 
           const yearNum = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
+          const yearStr = yearNum.toString();
 
-          // Hapus dari bansos_recipients saja
-          const { error } = await supabase
+          // 1. Hapus dari bansos_recipients (sistem baru)
+          const { error: delErr } = await supabase
             .from('bansos_recipients')
             .delete()
             .eq('resident_id', nik)
@@ -903,12 +904,37 @@ const MONTHS_LIST = [
             .eq('tenant_id', tenantId)
             .eq('tahun', yearNum);
 
-          if (error) throw error;
+          if (delErr) throw delErr;
 
-          // Update local state: hapus dari bansosData
+          // 2. Bersihkan dari residents.active_aids (sistem lama) — hapus tag yang mengandung programName + tahun
+          const currentAids = targetResident.activeAids || [];
+          const updatedAids = currentAids.filter((aid: string) => {
+            // Cocokkan "ProgramName (YYYY)" atau programName langsung
+            const match = aid.match(/^(.+?)\s*\(\d{4}\)$/);
+            const aidProgName = match ? match[1].trim() : aid.trim();
+            const aidYear = match ? match[2] : null;
+            // Hapus jika program cocok DAN tahun cocok (atau tanpa tahun)
+            if (aidProgName === programName) {
+              if (aidYear === yearStr || !aidYear) return false; // hapus
+            }
+            return true; // simpan
+          });
+
+          if (updatedAids.length !== currentAids.length) {
+            await supabase
+              .from('residents')
+              .update({ active_aids: updatedAids })
+              .eq('nik', nik)
+              .eq('tenant_id', tenantId);
+
+            // Update local residents state
+            setResidents(prev => prev.map(r => r.nik === nik ? { ...r, activeAids: updatedAids } : r));
+          }
+
+          // 3. Update local bansosData
           setBansosData(prev => prev.filter(b => !(b.resident_id === nik && b.program_id === programName && b.tahun === yearNum)));
 
-          showToast(`${targetResident.name} berhasil dihapus dari daftar "${programName}". Data penduduk tidak berubah.`, "success");
+          showToast(`${targetResident.name} berhasil dihapus dari daftar "${programName}".`, "success");
         } catch (err: any) {
           showToast(`Gagal menghapus: ${err.message}`, "error");
         }
