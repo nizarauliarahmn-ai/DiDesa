@@ -26,17 +26,45 @@ interface AdminBantuanTambahPenerimaProps {
 const PROGRAM_OPTIONS = [
   "BLT Dana Desa",
   "Program Keluarga Harapan (PKH)",
-  "Bantuan Pangan Non-Tunai",
+  "Bantuan Pangan Non-Tunai (BPNT)",
   "Bantuan Sosial Tunai (BST)",
-  "Bantuan Pendidikan",
-  "Bantuan Kesehatan",
-  "Bantuan Pangan",
-  "Bantuan Sembako",
-  "Bantuan Stimulan Perumahan",
-  "Bantuan Modal Usaha",
-  "Bantuan Alat Pertanian",
-  "Bantuan Bibit & Pakan",
-  "Bantuan Peralatan Produktif"
+  "Bantuan Lansia (Lansia Terlantar)",
+  "Bantuan Disabilitas",
+  "Bantuan Yatim & Dhuafa",
+  "Bantuan Ibu Hamil & Balita (Gizi Buruk)",
+  "Bantuan Pendidikan Anak Usia Dini (PAUD)",
+  "Bantuan Beasiswa SMA/SMK",
+  "Bantuan KIP (Kartu Indonesia Pintar)",
+  "Bantuan PKH (Program Keluarga Harapan)",
+  "Bantuan KIS (Kartu Indonesia Sehat)",
+  "Bantuan Pangan Beras / Sembako",
+  "Bantuan Gas LPG 3kg",
+  "Bantuan Listrik Gratis / Subsidi",
+  "Bantuan UMKM (Modal Usaha)",
+  "Bantuan Stimulan Perumahan RTLH",
+  "Bantuan Air Bersih / Sumur Bor",
+  "Bantuan MCK Komunal",
+  "Bantuan Jalan Usaha Tani",
+  "Bantuan Irigasi Pertanian",
+  "Bantuan Alat & Mesin Pertanian",
+  "Bantuan Bibit Tanaman",
+  "Bantuan Bibit Ternak / Pakan",
+  "Bantuan Peralatan Nelayan",
+  "Bantuan Koperasi & Pemasaran",
+  "Bantuan Pelatihan Kerja / Skills",
+  "Bantuan Bencana Alam (Banjir/Gempa)",
+  "Bantuan Sembako Pasca Bencana",
+  "Bantuan Santunan Kematian",
+  "Bantuan Lubang Livestock",
+  "Bantuan Pemanfaatan Lahan Pekarangan",
+  "Bantuan Penerangan Jalan Umum (PJU)",
+  "Bantuan Panel Surya / Listrik Desa",
+  "Bantuan WIFI / Internet Desa",
+  "Bantuan Peningkatan Jalan Desa",
+  "Bantuan Jembatan Desa",
+  "Bantuan Fasilitas Olahraga",
+  "Bantuan Fasilitas Ibadah (Masjid/Gereja)",
+  "Bantuan Posyandu / Kesehatan Desa"
 ];
 
 type TabId = 'manual' | 'import' | 'scan';
@@ -49,6 +77,7 @@ export default function AdminBantuanTambahPenerima({
 }: AdminBantuanTambahPenerimaProps) {
   const [tab, setTab] = useState<TabId>('manual');
   const [program, setProgram] = useState(initialProgram);
+  const [showProgramDropdown, setShowProgramDropdown] = useState(false);
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [initialStatus, setInitialStatus] = useState<'usulan' | 'aktif'>('usulan');
   const [saving, setSaving] = useState(false);
@@ -524,27 +553,42 @@ export default function AdminBantuanTambahPenerima({
         <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/40">
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
             {/* Program */}
-            <div className="sm:col-span-5">
+            <div className="sm:col-span-5 relative">
               <label className="block text-[10px] font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-1">Program Bantuan</label>
               <div className="relative">
                 <input
                   type="text"
                   value={program}
-                  onChange={(e) => setProgram(e.target.value)}
-                  placeholder="Ketik nama program..."
+                  onChange={(e) => {
+                    setProgram(e.target.value);
+                    setShowProgramDropdown(true);
+                  }}
+                  onFocus={() => setShowProgramDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowProgramDropdown(false), 200)}
+                  placeholder="Ketik atau pilih program..."
                   className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
-                {program.length === 0 && (
-                  <div className="absolute z-20 top-full mt-1 left-0 right-0 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-52 overflow-y-auto">
-                    {PROGRAM_OPTIONS.map(p => (
-                      <button key={p} onClick={() => setProgram(p)}
-                        className="w-full text-left px-3.5 py-2.5 text-xs font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-slate-300 first:rounded-t-xl last:rounded-b-xl transition-colors">
-                        {p}
-                      </button>
-                    ))}
+                {showProgramDropdown && (
+                  <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-y-auto">
+                    {PROGRAM_OPTIONS.filter(p => p.toLowerCase().includes(program.toLowerCase())).length === 0 ? (
+                      <div className="px-3.5 py-2.5 text-xs text-gray-400 italic">
+                        Tidak ada yang cocok — ketik manual & tekan Enter
+                      </div>
+                    ) : (
+                      PROGRAM_OPTIONS.filter(p => p.toLowerCase().includes(program.toLowerCase())).map(p => (
+                        <button key={p} onMouseDown={() => { setProgram(p); setShowProgramDropdown(false); }}
+                          className={`w-full text-left px-3.5 py-2.5 text-xs font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-slate-300 first:rounded-t-xl last:rounded-b-xl transition-colors ${p === program ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold' : ''}`}>
+                          {p}
+                        </button>
+                      ))
+                    )}
                   </div>
                 )}
               </div>
+              <p className="text-[9px] text-gray-400 mt-1 flex items-center gap-1">
+                <span className="w-1 h-1 bg-emerald-400 rounded-full inline-block"></span>
+                {PROGRAM_OPTIONS.some(p => p === program) ? 'Program bantuan yang sudah terdaftar' : 'Program manual — bisa ketik apapun'}
+              </p>
             </div>
 
             {/* Tahun */}

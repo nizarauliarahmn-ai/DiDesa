@@ -5,6 +5,49 @@ import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { showToast } from '../../../utils/toast';
 
+const PROGRAM_OPTIONS = [
+  "BLT Dana Desa",
+  "Program Keluarga Harapan (PKH)",
+  "Bantuan Pangan Non-Tunai (BPNT)",
+  "Bantuan Sosial Tunai (BST)",
+  "Bantuan Lansia (Lansia Terlantar)",
+  "Bantuan Disabilitas",
+  "Bantuan Yatim & Dhuafa",
+  "Bantuan Ibu Hamil & Balita (Gizi Buruk)",
+  "Bantuan Pendidikan Anak Usia Dini (PAUD)",
+  "Bantuan Beasiswa SMA/SMK",
+  "Bantuan KIP (Kartu Indonesia Pintar)",
+  "Bantuan KIS (Kartu Indonesia Sehat)",
+  "Bantuan Pangan Beras / Sembako",
+  "Bantuan Gas LPG 3kg",
+  "Bantuan Listrik Gratis / Subsidi",
+  "Bantuan UMKM (Modal Usaha)",
+  "Bantuan Stimulan Perumahan RTLH",
+  "Bantuan Air Bersih / Sumur Bor",
+  "Bantuan MCK Komunal",
+  "Bantuan Jalan Usaha Tani",
+  "Bantuan Irigasi Pertanian",
+  "Bantuan Alat & Mesin Pertanian",
+  "Bantuan Bibit Tanaman",
+  "Bantuan Bibit Ternak / Pakan",
+  "Bantuan Peralatan Nelayan",
+  "Bantuan Koperasi & Pemasaran",
+  "Bantuan Pelatihan Kerja / Skills",
+  "Bantuan Bencana Alam (Banjir/Gempa)",
+  "Bantuan Sembako Pasca Bencana",
+  "Bantuan Santunan Kematian",
+  "Bantuan Lubang Livestock",
+  "Bantuan Pemanfaatan Lahan Pekarangan",
+  "Bantuan Penerangan Jalan Umum (PJU)",
+  "Bantuan Panel Surya / Listrik Desa",
+  "Bantuan WIFI / Internet Desa",
+  "Bantuan Peningkatan Jalan Desa",
+  "Bantuan Jembatan Desa",
+  "Bantuan Fasilitas Olahraga",
+  "Bantuan Fasilitas Ibadah (Masjid/Gereja)",
+  "Bantuan Posyandu / Kesehatan Desa"
+];
+
 interface AdminBantuanImportProps {
   onClose: () => void;
   onRefresh: () => void;
@@ -15,6 +58,7 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<any[]>([]);
   const [program, setProgram] = useState('BLT Dana Desa');
+  const [showProgramDropdown, setShowProgramDropdown] = useState(false);
   const [year, setYear] = useState(new Date().getFullYear().toString());
   const [step, setStep] = useState(1);
   const [processing, setProcessing] = useState(false);
@@ -130,18 +174,31 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
           {step === 1 && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="relative">
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Program Bantuan</label>
-                  <select 
+                  <input
+                    type="text"
                     value={program}
-                    onChange={(e) => setProgram(e.target.value)}
+                    onChange={(e) => { setProgram(e.target.value); setShowProgramDropdown(true); }}
+                    onFocus={() => setShowProgramDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowProgramDropdown(false), 200)}
+                    placeholder="Ketik atau pilih program..."
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 font-medium"
-                  >
-                    <option value="BLT Dana Desa">BLT Dana Desa</option>
-                    <option value="Program Keluarga Harapan (PKH)">Program Keluarga Harapan (PKH)</option>
-                    <option value="Bantuan Pangan Non-Tunai">Bantuan Pangan Non-Tunai (BPNT)</option>
-                    <option value="Bantuan Sosial Tunai (BST)">Bantuan Sosial Tunai (BST)</option>
-                  </select>
+                  />
+                  {showProgramDropdown && (
+                    <div className="absolute z-30 top-full mt-1 left-0 right-0 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl max-h-56 overflow-y-auto">
+                      {PROGRAM_OPTIONS.filter(p => p.toLowerCase().includes(program.toLowerCase())).length === 0 ? (
+                        <div className="px-3.5 py-2.5 text-xs text-gray-400 italic">Tidak ada yang cocok — ketik manual</div>
+                      ) : (
+                        PROGRAM_OPTIONS.filter(p => p.toLowerCase().includes(program.toLowerCase())).map(p => (
+                          <button key={p} onMouseDown={() => { setProgram(p); setShowProgramDropdown(false); }}
+                            className={`w-full text-left px-3.5 py-2.5 text-xs font-medium hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-gray-700 dark:text-slate-300 first:rounded-t-xl last:rounded-b-xl transition-colors ${p === program ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold' : ''}`}>
+                            {p}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Tahun Penyaluran</label>
