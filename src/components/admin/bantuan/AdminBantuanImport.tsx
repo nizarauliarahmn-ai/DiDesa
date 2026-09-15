@@ -86,13 +86,15 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
         throw new Error("Kolom NIK dan Nama wajib ada di file Excel/CSV Anda.");
       }
 
-      const rows = [];
+      const rows: { nik: string; name: string }[] = [];
+      const seenNiks = new Set<string>();
       for (let i = 1; i < json.length; i++) {
         const row = json[i];
         if (!row || row.length === 0) continue;
         const nik = String(row[nikIdx] || '').trim();
         const name = String(row[nameIdx] || '').trim();
-        if (nik && name) {
+        if (nik && name && !seenNiks.has(nik)) {
+          seenNiks.add(nik);
           rows.push({ nik, name });
         }
       }
@@ -117,20 +119,25 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
 
       const aidToSave = `${program} (${year})`;
 
+      const seenNiks = new Set<string>();
+
       for (const row of parsedData) {
         try {
+          if (seenNiks.has(row.nik)) {
+            failedCount++;
+            continue;
+          }
+          seenNiks.add(row.nik);
+
           const existing = existingResidents.find(r => r.nik === row.nik);
           
           if (existing) {
-            // Update existing resident
             const currentAids = typeof existing.activeAids === 'string' ? JSON.parse(existing.activeAids) : (existing.activeAids || []);
             if (!currentAids.includes(aidToSave)) {
               const updatedAids = [...currentAids, aidToSave];
               await supabase.from('residents').update({ active_aids: updatedAids }).eq('nik', row.nik).eq('tenant_id', tenantId);
             }
-            successCount++;
           } else {
-            // Insert new resident
             const newResident = {
               tenant_id: tenantId,
               nik: row.nik,
@@ -138,10 +145,36 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
               gender: 'Laki-laki',
               active_aids: [aidToSave]
             };
-            await supabase.from('residents').insert([newResident]);
+            const { error: insertErr } = await supabase.from('residents').insert([newResident]);
+            if (insertErr) throw insertErr;
             newResidentCount++;
-            successCount++;
           }
+
+          const { data: existingBan } = await supabase
+            .from('bansos_recipients')
+            .select('id')
+            .eq('resident_id', row.nik)
+            .eq('program_id', program)
+            .eq('tenant_id', tenantId)
+            .eq('tahun', Number(year))
+            .maybeSingle();
+
+          if (!existingBan) {
+            const { error: banErr } = await supabase.from('bansos_recipients').insert({
+              tenant_id: tenantId,
+              program_id: program,
+              resident_id: row.nik,
+              nama: row.name,
+              tahun: Number(year),
+              tahun_mulai: Number(year),
+              status: 'aktif',
+              source: 'import',
+              created_at: new Date().toISOString()
+            });
+            if (banErr) throw banErr;
+          }
+
+          successCount++;
         } catch (e) {
           console.error("Gagal memproses NIK:", row.nik, e);
           failedCount++;
