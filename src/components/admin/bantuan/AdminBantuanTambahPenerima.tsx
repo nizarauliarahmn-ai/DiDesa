@@ -376,9 +376,9 @@ export default function AdminBantuanTambahPenerima({
           let currentAids: string[] = [];
 
           if (existing) {
-            // Sudah ada di data penduduk → cukup daftarkan sebagai penerima
             currentAids = Array.isArray(existing.activeAids) ? existing.activeAids : [];
-            if (!currentAids.includes(aidTag)) {
+            // Update active_aids HANYA jika status aktif dan aidTag belum ada
+            if (initialStatus === 'aktif' && !currentAids.includes(aidTag)) {
               await supabase
                 .from('residents')
                 .update({ active_aids: [...currentAids, aidTag] })
@@ -386,69 +386,58 @@ export default function AdminBantuanTambahPenerima({
                 .eq('tenant_id', tenantId);
             }
           } else {
-            // Belum ada di data penduduk → otomatis tambahkan sebagai penduduk baru
-            const newResidentRecord = {
-              tenant_id: tenantId,
-              nik: row.nik,
-              name: row.name || 'Warga Baru',
-              gender: 'Laki-laki',
-              active_aids: [aidTag],
-              is_deleted: 0
-            };
+            // Warga baru → insert ke residents
+            const newAids = initialStatus === 'aktif' ? [aidTag] : [];
             const { data: inserted, error: insertErr } = await supabase
               .from('residents')
-              .insert([newResidentRecord])
+              .insert([{
+                tenant_id: tenantId,
+                nik: row.nik,
+                name: row.name || 'Warga Baru',
+                gender: 'Laki-laki',
+                active_aids: newAids,
+                is_deleted: 0
+              }])
               .select()
               .maybeSingle();
             if (insertErr) throw insertErr;
             if (inserted) created++;
           }
 
-          await supabase.from('bansos_recipients').insert({
-            tenant_id: tenantId,
-            program_id: program,
-            resident_id: row.nik,
-            nama: row.name,
-            tahun: Number(year),
-            tahun_mulai: Number(year),
-            status: initialStatus,
-            source,
-            created_at: new Date().toISOString()
-          });
+          // Insert ke bansos_recipients — cek duplikat dulu
+          const { data: existingBan } = await supabase
+            .from('bansos_recipients')
+            .select('id')
+            .eq('resident_id', row.nik)
+            .eq('program_id', program)
+            .eq('tenant_id', tenantId)
+            .eq('tahun', Number(year))
+            .maybeSingle();
 
-          // If status is 'aktif', also add to residents.active_aids
-          if (initialStatus === 'aktif') {
-            const existing = existingResidents.find(r => r.nik === row.nik && r.is_deleted !== 1);
-            if (existing) {
-              const currentAids = Array.isArray(existing.activeAids) ? existing.activeAids : [];
-              if (!currentAids.includes(aidTag)) {
-                await supabase
-                  .from('residents')
-                  .update({ active_aids: [...currentAids, aidTag] })
-                  .eq('nik', row.nik)
-                  .eq('tenant_id', tenantId);
-              }
-            } else {
-              await supabase
-                .from('residents')
-                .insert([{
-                  tenant_id: tenantId,
-                  nik: row.nik,
-                  name: row.name || 'Warga Baru',
-                  gender: 'Laki-laki',
-                  active_aids: [aidTag],
-                  is_deleted: 0
-                }]);
-            }
+          if (!existingBan) {
+            const { error: banErr } = await supabase.from('bansos_recipients').insert({
+              tenant_id: tenantId,
+              program_id: program,
+              resident_id: row.nik,
+              nama: row.name,
+              tahun: Number(year),
+              tahun_mulai: Number(year),
+              status: initialStatus,
+              source,
+              created_at: new Date().toISOString()
+            });
+            if (banErr) throw banErr;
           }
+
           added++;
-        } catch (err) {
+        } catch (err: any) {
+          console.error(`Gagal simpan NIK ${row.nik}:`, err.message);
           skipped++;
         }
       }
 
       showToast(
-        `Berhasil menambahkan ${added} penerima ke program ${program} (${year}).${created > 0 ? ` ${created} penduduk baru otomatis ditambahkan ke data penduduk.` : ''}${skipped > 0 ? ` ${skipped} gagal.` : ''}`,
+        `Berhasil: ${added} penerima ditambahkan.${created > 0 ? ` ${created} warga baru.` : ''}${skipped > 0 ? ` ${skipped} gagal.` : ''}`,
         added > 0 ? 'success' : 'error'
       );
       onRefresh();
