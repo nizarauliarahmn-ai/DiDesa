@@ -396,13 +396,29 @@ const MONTHS_LIST = [
   const stats = useMemo(() => {
     const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
     
-    // Hitung jumlah aktif per program dari bansosData
+    // Hitung jumlah aktif per program dari DUA sumber:
+    // 1. bansos_recipients (sistem baru)
     const programCounts: Record<string, number> = {};
     bansosData
       .filter(b => b.status === 'aktif' && b.tahun === yearFilter)
       .forEach(b => {
         programCounts[b.program_id] = (programCounts[b.program_id] || 0) + 1;
       });
+
+    // 2. residents.active_aids (sistem lama — program yang masih aktif tanpa STOPPED:)
+    const yearStr = yearFilter.toString();
+    residents.forEach(r => {
+      const aids = getActiveAidPrograms(r, filterYear);
+      aids.forEach((aid: string) => {
+        // Ambil nama program dari format "Nama Program (YYYY)" atau hanya "Nama Program"
+        const match = aid.match(/^(.+?)\s*\(\d{4}\)$/);
+        const progName = match ? match[1].trim() : aid.trim();
+        // Hanya hitung jika tahun cocok (jika ada format tahun di dalam string)
+        if (aid.includes(`(${yearStr})`) || !aid.match(/\(\d{4}\)$/)) {
+          programCounts[progName] = (programCounts[progName] || 0) + 1;
+        }
+      });
+    });
 
     // Urutkan: program terbanyak di atas
     const sorted = Object.entries(programCounts)
