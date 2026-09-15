@@ -396,8 +396,7 @@ const MONTHS_LIST = [
   const stats = useMemo(() => {
     const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
     
-    // Hitung jumlah aktif per program dari DUA sumber:
-    // 1. bansos_recipients (sistem baru)
+    // Hitung jumlah aktif per program dari DUA sumber
     const programCounts: Record<string, number> = {};
     bansosData
       .filter(b => b.status === 'aktif' && b.tahun === yearFilter)
@@ -405,34 +404,32 @@ const MONTHS_LIST = [
         programCounts[b.program_id] = (programCounts[b.program_id] || 0) + 1;
       });
 
-    // 2. residents.active_aids (sistem lama — program yang masih aktif tanpa STOPPED:)
     const yearStr = yearFilter.toString();
     residents.forEach(r => {
       const aids = getActiveAidPrograms(r, filterYear);
       aids.forEach((aid: string) => {
-        // Ambil nama program dari format "Nama Program (YYYY)" atau hanya "Nama Program"
         const match = aid.match(/^(.+?)\s*\(\d{4}\)$/);
         const progName = match ? match[1].trim() : aid.trim();
-        // Hanya hitung jika tahun cocok (jika ada format tahun di dalam string)
         if (aid.includes(`(${yearStr})`) || !aid.match(/\(\d{4}\)$/)) {
           programCounts[progName] = (programCounts[progName] || 0) + 1;
         }
       });
     });
 
-    // Urutkan: program terbanyak di atas
-    const sorted = Object.entries(programCounts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3);
+    // Unique programs untuk dropdown
+    const uniquePrograms = Object.keys(programCounts).sort();
 
-    // Residents with multiple genuine active aids (Overlap / Tumpang Tindih > 1)
+    // Jumlah penerima untuk program + tahun yang dipilih
+    const selectedCount = programCounts[selectedProgram] || 0;
+
     const overlapResidents = residents.filter(r => getActiveAidPrograms(r, filterYear).length > 1);
     
     return {
-      topPrograms: sorted,
+      selectedCount,
+      uniquePrograms,
       overlaps: overlapResidents
     };
-  }, [residents, filterYear, bansosData]);
+  }, [residents, filterYear, bansosData, selectedProgram]);
 
   // Filtered list of residents based on search, selected program, salurFilter, and sort
   const filteredResidents = useMemo(() => {
@@ -1927,48 +1924,59 @@ const MONTHS_LIST = [
       </div>
 
       {/* Program Overview Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {stats.topPrograms.length === 0 ? (
-          // Tidak ada data aktif
-          <div className="col-span-3 bg-white dark:bg-slate-900 border border-dashed border-gray-200 dark:border-slate-700 rounded-2xl p-8 text-center">
-            <Banknote className="w-10 h-10 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
-            <p className="text-sm font-bold text-gray-400 dark:text-slate-500">Belum ada penerima aktif di tahun {filterYear === "Semua Tahun" ? "ini" : filterYear}</p>
-            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Tambah penerima atau ubah status usulan menjadi aktif</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Card 1: Pilih Tahun */}
+        <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl flex flex-col gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
+              <Calendar className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <p className="text-[11px] font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Tahun</p>
           </div>
-        ) : (
-          stats.topPrograms.map(([programName, count], idx) => {
-            const colorSets = [
-              { selected: 'border-emerald-600 ring-4 ring-emerald-50', iconBg: 'bg-emerald-600 text-white', iconBgLight: 'bg-emerald-50 text-emerald-700', icon: <Banknote className="w-5 h-5" /> },
-              { selected: 'border-blue-600 ring-4 ring-blue-50', iconBg: 'bg-blue-600 text-white', iconBgLight: 'bg-blue-50 text-blue-700', icon: <Users className="w-5 h-5" /> },
-              { selected: 'border-amber-600 ring-4 ring-amber-50', iconBg: 'bg-amber-600 text-white', iconBgLight: 'bg-amber-50 text-amber-700', icon: <ShoppingBasket className="w-5 h-5" /> },
-            ];
-            const c = colorSets[idx] || colorSets[0];
-            const isSelected = selectedProgram === programName && !showOverlapOnly;
-            const shortName = programName.length > 28 ? programName.slice(0, 25) + '...' : programName;
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+          >
+            <option value="Semua Tahun">Semua Tahun</option>
+            {Array.from({ length: 7 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+        </div>
 
-            return (
-              <div 
-                key={programName}
-                onClick={() => { setSelectedProgram(programName); setShowOverlapOnly(false); }}
-                className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
-                  isSelected ? c.selected : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
-                }`}
-              >
-                <div className="flex justify-between items-start relative z-10">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? c.iconBg : c.iconBgLight}`}>
-                    {c.icon}
-                  </div>
-                  <span className="px-2.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full">#{idx + 1}</span>
-                </div>
-                <div className="mt-2">
-                  <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider truncate" title={programName}>{shortName}</p>
-                  <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{count} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Rp {(count * programAmountVal).toLocaleString('id-ID')}</p>
-                </div>
-              </div>
-            );
-          })
-        )}
+        {/* Card 2: Pilih Program */}
+        <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl flex flex-col gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
+              <Banknote className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <p className="text-[11px] font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Program</p>
+          </div>
+          <select
+            value={selectedProgram}
+            onChange={(e) => { setSelectedProgram(e.target.value); setShowOverlapOnly(false); }}
+            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer truncate"
+          >
+            {uniquePrograms.map(p => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Card 3: Ringkasan */}
+        <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
+              <Users className="w-4.5 h-4.5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <p className="text-[11px] font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Ringkasan</p>
+          </div>
+          <div className="mt-2">
+            <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white">{stats.selectedCount} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
+            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Rp {(stats.selectedCount * programAmountVal).toLocaleString('id-ID')}</p>
+          </div>
+        </div>
       </div>
 
       {/* Warning Bar (Overlap Detection) */}
