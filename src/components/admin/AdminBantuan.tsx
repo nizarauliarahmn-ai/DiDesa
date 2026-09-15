@@ -2932,10 +2932,9 @@ const MONTHS_LIST = [
                     onChange={(e) => setSelectedProgram(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
                   >
-                    <option value="BLT Dana Desa (2026)">BLT Dana Desa (2026)</option>
-                    <option value="PKH (Program Keluarga Harapan)">PKH (Program Keluarga Harapan)</option>
-                    <option value="BPNT (Sembako)">BPNT (Sembako)</option>
-                    <option value="Bansos Beras Cadangan Pangan">Bansos Beras Cadangan Pangan</option>
+                    {stats.uniquePrograms.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
                   </select>
                 </div>
 
