@@ -860,6 +860,43 @@ const MONTHS_LIST = [
   };
 
   // Remove aid program from a resident
+  // === HAPUS DARI DAFTAR: Hapus dari bansos_recipients SAJA (tanpa ubah data penduduk) ===
+  const handleHapusDariDaftar = (nik: string, programName: string) => {
+    const targetResident = residents.find(r => r.nik === nik);
+    if (!targetResident) return;
+
+    showConfirm(
+      "Hapus dari Daftar Bantuan",
+      `Hapus ${targetResident.name} dari daftar penerima "${programName}"?\n\nData penduduk TIDAK akan berubah. Ini hanya menghapus dari daftar bantuan saja.`,
+      async () => {
+        try {
+          if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
+
+          const yearNum = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
+
+          // Hapus dari bansos_recipients saja
+          const { error } = await supabase
+            .from('bansos_recipients')
+            .delete()
+            .eq('resident_id', nik)
+            .eq('program_id', programName)
+            .eq('tenant_id', tenantId)
+            .eq('tahun', yearNum);
+
+          if (error) throw error;
+
+          // Update local state: hapus dari bansosData
+          setBansosData(prev => prev.filter(b => !(b.resident_id === nik && b.program_id === programName && b.tahun === yearNum)));
+
+          showToast(`${targetResident.name} berhasil dihapus dari daftar "${programName}". Data penduduk tidak berubah.`, "success");
+        } catch (err: any) {
+          showToast(`Gagal menghapus: ${err.message}`, "error");
+        }
+      }
+    );
+  };
+
+  // === HENTIKAN BANTUAN: Ubah status di residents.active_aids (dengan alasan: meninggal/pindah/mampu) ===
   const handleRemoveAid = (nik: string, programToRemove: string) => {
     const targetResident = residents.find(r => r.nik === nik);
     if (!targetResident) return;
@@ -2407,11 +2444,10 @@ const MONTHS_LIST = [
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedNiks([resident.nik]);
-                                setShowBulkStopModal(true);
+                                handleHapusDariDaftar(resident.nik, selectedProgram);
                               }}
                               className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg border border-gray-200/60 transition-colors active:scale-95"
-                              title="Tolak / Hentikan Usulan"
+                              title="Hapus Usulan dari Daftar"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -2466,10 +2502,10 @@ const MONTHS_LIST = [
                             <button 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRemoveAid(resident.nik, selectedProgram);
+                                handleHapusDariDaftar(resident.nik, selectedProgram);
                               }}
                               className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg border border-gray-200/60 dark:border-slate-700/60 transition-colors inline-flex items-center justify-center active:scale-95"
-                              title="Hapus / Keluarkan Langsung"
+                              title="Hapus dari Daftar (Tidak ubah data penduduk)"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
