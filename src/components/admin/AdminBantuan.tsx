@@ -394,20 +394,29 @@ const MONTHS_LIST = [
 
   // Compute stats dynamically
   const stats = useMemo(() => {
-    const bltCount = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith("BLT Dana Desa"))).length;
-    const pkhCount = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith("Program Keluarga Harapan (PKH)"))).length;
-    const bpntCount = residents.filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith("Bantuan Pangan Non-Tunai"))).length;
+    const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
     
+    // Hitung jumlah aktif per program dari bansosData
+    const programCounts: Record<string, number> = {};
+    bansosData
+      .filter(b => b.status === 'aktif' && b.tahun === yearFilter)
+      .forEach(b => {
+        programCounts[b.program_id] = (programCounts[b.program_id] || 0) + 1;
+      });
+
+    // Urutkan: program terbanyak di atas
+    const sorted = Object.entries(programCounts)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3);
+
     // Residents with multiple genuine active aids (Overlap / Tumpang Tindih > 1)
     const overlapResidents = residents.filter(r => getActiveAidPrograms(r, filterYear).length > 1);
     
     return {
-      blt: bltCount,
-      pkh: pkhCount,
-      bpnt: bpntCount,
+      topPrograms: sorted,
       overlaps: overlapResidents
     };
-  }, [residents, filterYear]);
+  }, [residents, filterYear, bansosData]);
 
   // Filtered list of residents based on search, selected program, salurFilter, and sort
   const filteredResidents = useMemo(() => {
@@ -1908,83 +1917,46 @@ const MONTHS_LIST = [
 
       {/* Program Overview Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Card BLT */}
-        <div 
-          onClick={() => {
-            setSelectedProgram("BLT Dana Desa");
-            setShowOverlapOnly(false);
-          }}
-          className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
-            selectedProgram === "BLT Dana Desa" && !showOverlapOnly
-              ? 'border-emerald-600 ring-4 ring-emerald-50 shadow-md dark:shadow-none' 
-              : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
-          }`}
-        >
-          <div className="flex justify-between items-start relative z-10">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              selectedProgram === "BLT Dana Desa" && !showOverlapOnly ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700'
-            }`}>
-              <Banknote className="w-5 h-5" />
-            </div>
-            <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full">Desa</span>
+        {stats.topPrograms.length === 0 ? (
+          // Tidak ada data aktif
+          <div className="col-span-3 bg-white dark:bg-slate-900 border border-dashed border-gray-200 dark:border-slate-700 rounded-2xl p-8 text-center">
+            <Banknote className="w-10 h-10 text-gray-300 dark:text-slate-600 mx-auto mb-3" />
+            <p className="text-sm font-bold text-gray-400 dark:text-slate-500">Belum ada penerima aktif di tahun {filterYear === "Semua Tahun" ? "ini" : filterYear}</p>
+            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">Tambah penerima atau ubah status usulan menjadi aktif</p>
           </div>
-          <div className="mt-2">
-            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">BLT Dana Desa</p>
-            <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{stats.blt} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
-          </div>
-        </div>
+        ) : (
+          stats.topPrograms.map(([programName, count], idx) => {
+            const colorSets = [
+              { selected: 'border-emerald-600 ring-4 ring-emerald-50', iconBg: 'bg-emerald-600 text-white', iconBgLight: 'bg-emerald-50 text-emerald-700', icon: <Banknote className="w-5 h-5" /> },
+              { selected: 'border-blue-600 ring-4 ring-blue-50', iconBg: 'bg-blue-600 text-white', iconBgLight: 'bg-blue-50 text-blue-700', icon: <Users className="w-5 h-5" /> },
+              { selected: 'border-amber-600 ring-4 ring-amber-50', iconBg: 'bg-amber-600 text-white', iconBgLight: 'bg-amber-50 text-amber-700', icon: <ShoppingBasket className="w-5 h-5" /> },
+            ];
+            const c = colorSets[idx] || colorSets[0];
+            const isSelected = selectedProgram === programName && !showOverlapOnly;
+            const shortName = programName.length > 28 ? programName.slice(0, 25) + '...' : programName;
 
-        {/* Card PKH */}
-        <div 
-          onClick={() => {
-            setSelectedProgram("Program Keluarga Harapan (PKH)");
-            setShowOverlapOnly(false);
-          }}
-          className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
-            selectedProgram === "Program Keluarga Harapan (PKH)" && !showOverlapOnly
-              ? 'border-blue-600 ring-4 ring-blue-50 shadow-md dark:shadow-none' 
-              : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
-          }`}
-        >
-          <div className="flex justify-between items-start relative z-10">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              selectedProgram === "Program Keluarga Harapan (PKH)" && !showOverlapOnly ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-700'
-            }`}>
-              <Users className="w-5 h-5" />
-            </div>
-            <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded-full">Keluarga</span>
-          </div>
-          <div className="mt-2">
-            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">PKH (Harapan)</p>
-            <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{stats.pkh} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
-          </div>
-        </div>
-
-        {/* Card BPNT */}
-        <div 
-          onClick={() => {
-            setSelectedProgram("Bantuan Pangan Non-Tunai");
-            setShowOverlapOnly(false);
-          }}
-          className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
-            selectedProgram === "Bantuan Pangan Non-Tunai" && !showOverlapOnly
-              ? 'border-amber-600 ring-4 ring-amber-50 shadow-md dark:shadow-none' 
-              : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
-          }`}
-        >
-          <div className="flex justify-between items-start relative z-10">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              selectedProgram === "Bantuan Pangan Non-Tunai" && !showOverlapOnly ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-700'
-            }`}>
-              <ShoppingBasket className="w-5 h-5" />
-            </div>
-            <span className="px-2.5 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full">Pangan</span>
-          </div>
-          <div className="mt-2">
-            <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider">Pangan Non-Tunai</p>
-            <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{stats.bpnt} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
-          </div>
-        </div>
+            return (
+              <div 
+                key={programName}
+                onClick={() => { setSelectedProgram(programName); setShowOverlapOnly(false); }}
+                className={`cursor-pointer bg-white dark:bg-slate-900 border p-6 rounded-2xl flex flex-col justify-between h-[150px] relative overflow-hidden transition-all ${
+                  isSelected ? c.selected : 'border-gray-100 dark:border-slate-800 hover:shadow-md'
+                }`}
+              >
+                <div className="flex justify-between items-start relative z-10">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isSelected ? c.iconBg : c.iconBgLight}`}>
+                    {c.icon}
+                  </div>
+                  <span className="px-2.5 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full">#{idx + 1}</span>
+                </div>
+                <div className="mt-2">
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider truncate" title={programName}>{shortName}</p>
+                  <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{count} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* Warning Bar (Overlap Detection) */}
