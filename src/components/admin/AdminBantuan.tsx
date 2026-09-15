@@ -197,7 +197,7 @@ const MONTHS_LIST = [
   const [bansosData, setBansosData] = useState<any[]>([]);
 
   // New Table Optimization States
-  const [salurFilter, setSalurFilter] = useState<'all' | 'pending_month' | 'disbursed_month' | 'lunas'>('all');
+  const [salurFilter] = useState<'all'>('all');
   const [selectedNiks, setSelectedNiks] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -517,11 +517,6 @@ const MONTHS_LIST = [
     if (selectedProgram === "Bantuan Pangan Non-Tunai") return 200000;
     return 300000;
   }, [selectedProgram]);
-
-  const disbursedThisMonthCount = useMemo(() => {
-    const currentMonthId = MONTHS_LIST[new Date().getMonth()].id;
-    return filteredResidents.filter(r => (disbursedMonths[r.nik] || []).includes(currentMonthId)).length;
-  }, [filteredResidents, disbursedMonths]);
 
   const totalNominalDisbursed = useMemo(() => {
     return filteredResidents.reduce((acc, r) => {
@@ -2089,53 +2084,8 @@ const MONTHS_LIST = [
             </div>
           </div>
 
-          {/* Quick Filter Tabs & Summary Calculation Banner */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-3 border-t border-gray-100 dark:border-slate-800">
-            {/* Quick Tabs */}
-            <div className="flex flex-wrap items-center gap-1 bg-gray-100/80 dark:bg-slate-800/80 p-1 rounded-xl border border-gray-200/50 dark:border-slate-700/50 self-start">
-              <button
-                onClick={() => setSalurFilter('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  salurFilter === 'all'
-                    ? 'bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
-                }`}
-              >
-                Semua ({filteredResidents.length})
-              </button>
-              <button
-                onClick={() => setSalurFilter('pending_month')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  salurFilter === 'pending_month'
-                    ? 'bg-amber-500 text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
-                }`}
-              >
-                Belum Salur ({MONTHS_LIST[new Date().getMonth()].label})
-              </button>
-              <button
-                onClick={() => setSalurFilter('disbursed_month')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  salurFilter === 'disbursed_month'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
-                }`}
-              >
-                Sudah Salur ({MONTHS_LIST[new Date().getMonth()].label}: {disbursedThisMonthCount})
-              </button>
-              <button
-                onClick={() => setSalurFilter('lunas')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  salurFilter === 'lunas'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 dark:text-slate-400'
-                }`}
-              >
-                Lunas 12 Bln
-              </button>
-            </div>
-
-            {/* Total Nominal Summary */}
+          {/* Quick Summary Banner */}
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
             <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 px-4 py-2 rounded-xl text-emerald-900 dark:text-emerald-200">
               <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <span className="text-xs font-bold">Total Dana Salur:</span>
