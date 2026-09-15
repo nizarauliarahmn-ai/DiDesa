@@ -400,23 +400,24 @@ const MONTHS_LIST = [
 
   // Compute stats dynamically
   const stats = useMemo(() => {
-    const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
+    const isAllYears = filterYear === "Semua Tahun";
+    const yearFilter = isAllYears ? null : Number(filterYear);
     
     const programCounts: Record<string, number> = {};
     // Count from bansos_recipients (all statuses for uniquePrograms)
     bansosData
-      .filter(b => b.tahun === yearFilter)
+      .filter(b => isAllYears || b.tahun === yearFilter)
       .forEach(b => {
         programCounts[b.program_id] = (programCounts[b.program_id] || 0) + 1;
       });
 
-    const yearStr = yearFilter.toString();
+    const yearStr = yearFilter?.toString();
     residents.forEach(r => {
       const aids = getActiveAidPrograms(r, filterYear);
       aids.forEach((aid: string) => {
         const match = aid.match(/^(.+?)\s*\(\d{4}\)$/);
         const progName = match ? match[1].trim() : aid.trim();
-        if (aid.includes(`(${yearStr})`) || !aid.match(/\(\d{4}\)$/)) {
+        if (!yearStr || aid.includes(`(${yearStr})`) || !aid.match(/\(\d{4}\)$/)) {
           programCounts[progName] = (programCounts[progName] || 0) + 1;
         }
       });
@@ -438,10 +439,12 @@ const MONTHS_LIST = [
   const filteredResidents = useMemo(() => {
     let list = residents;
 
+    const isAllYears = filterYear === "Semua Tahun";
+    const yearFilter = isAllYears ? null : Number(filterYear);
+
     // Status Tab Filter (Usulan / Aktif / Pernah Mendapat)
-    const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
     const niksByStatus = bansosData
-      .filter(b => b.program_id === selectedProgram && b.status === activeStatusTab && b.tahun === yearFilter)
+      .filter(b => b.program_id === selectedProgram && b.status === activeStatusTab && (isAllYears || b.tahun === yearFilter))
       .map(b => b.resident_id);
     const uniqueNiksByStatus = new Set(niksByStatus);
 
@@ -452,10 +455,9 @@ const MONTHS_LIST = [
       if (showOverlapOnly) {
         list = stats.overlaps;
       } else {
-        // Gabungkan: NIK dari bansosData (aktif) + NIK dari residents.active_aids (legacy)
         const niksFromBansos = new Set(
           bansosData
-            .filter(b => b.program_id === selectedProgram && b.status === 'aktif' && b.tahun === yearFilter)
+            .filter(b => b.program_id === selectedProgram && b.status === 'aktif' && (isAllYears || b.tahun === yearFilter))
             .map(b => b.resident_id)
         );
         const niksFromActiveAids = new Set(
@@ -463,7 +465,6 @@ const MONTHS_LIST = [
             .filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith(selectedProgram)))
             .map(r => r.nik)
         );
-        // Union: gabungkan keduanya
         const allNiks = new Set([...niksFromBansos, ...niksFromActiveAids]);
         list = residents.filter(r => allNiks.has(r.nik));
       }
