@@ -403,8 +403,9 @@ const MONTHS_LIST = [
     const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
     
     const programCounts: Record<string, number> = {};
+    // Count from bansos_recipients (all statuses for uniquePrograms)
     bansosData
-      .filter(b => b.status === 'aktif' && b.tahun === yearFilter)
+      .filter(b => b.tahun === yearFilter)
       .forEach(b => {
         programCounts[b.program_id] = (programCounts[b.program_id] || 0) + 1;
       });
