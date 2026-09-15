@@ -2125,18 +2125,6 @@ const MONTHS_LIST = [
             </div>
             
             <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
-              <select
-                value={filterYear}
-                onChange={(e) => setFilterYear(e.target.value)}
-                className="px-3.5 py-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-gray-700 dark:text-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none shadow-sm"
-              >
-                <option value="Semua Tahun">Semua Tahun</option>
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-              </select>
-
               <button
                 onClick={() => {
                   setSelectedPrintResident(null);
@@ -2147,14 +2135,6 @@ const MONTHS_LIST = [
               >
                 <Printer className="w-3.5 h-3.5" />
                 Cetak & Laporan
-              </button>
-
-              <button
-                onClick={() => setShowBaModal(true)}
-                className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl border border-indigo-200 transition-all flex items-center gap-1.5 whitespace-nowrap active:scale-95 shadow-sm"
-              >
-                <Download className="w-3.5 h-3.5" />
-                BA Musdes
               </button>
 
               <div className="relative flex-1 sm:w-[220px]">
