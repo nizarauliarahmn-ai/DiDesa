@@ -918,25 +918,23 @@ const MONTHS_LIST = [
   // === HAPUS DARI DAFTAR: Hapus dari bansos_recipients + bersihkan residents.active_aids ===
   const handleHapusDariDaftar = (nik: string, programName: string) => {
     const targetResident = residents.find(r => r.nik === nik);
-    if (!targetResident) return;
+    const orphanEntry = bansosData.find(b => b.resident_id === nik && b.program_id === programName);
+    const displayName = targetResident?.name || orphanEntry?.nama || nik;
 
     showConfirm(
       "Hapus dari Daftar Bantuan",
-      `Hapus ${targetResident.name} dari daftar penerima "${programName}"?\n\nData penduduk TIDAK akan berubah. Ini hanya menghapus dari daftar bantuan saja.`,
+      `Hapus ${displayName} dari daftar penerima "${programName}"?\n\nData penduduk TIDAK akan berubah. Ini hanya menghapus dari daftar bantuan saja.`,
       async () => {
         try {
           if (!tenantId) throw new Error("Tenant ID tidak ditemukan");
 
-          // 1. Trigger animasi fade-out
           setRemovingNiks(prev => new Set([...prev, nik]));
 
-          // Tunggu animasi selesai (300ms)
           await new Promise(resolve => setTimeout(resolve, 300));
 
           const yearNum = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
-          const yearStr = yearNum.toString();
 
-          // 2. Hapus dari bansos_recipients (sistem baru)
+          // 1. Hapus dari bansos_recipients
           const { error: delErr } = await supabase
             .from('bansos_recipients')
             .delete()
@@ -947,26 +945,29 @@ const MONTHS_LIST = [
 
           if (delErr) throw delErr;
 
-          // 3. Bersihkan dari residents.active_aids (sistem lama)
-          const currentAids = targetResident.activeAids || [];
-          const updatedAids = currentAids.filter((aid: string) => {
-            const match = aid.match(/^(.+?)\s*\(\d{4}\)$/);
-            const aidProgName = match ? match[1].trim() : aid.trim();
-            const aidYear = match ? match[2] : null;
-            if (aidProgName === programName) {
-              if (aidYear === yearStr || !aidYear) return false;
+          // 2. Bersihkan dari residents.active_aids (hanya jika resident ada di residents)
+          if (targetResident) {
+            const yearStr = yearNum.toString();
+            const currentAids = targetResident.activeAids || [];
+            const updatedAids = currentAids.filter((aid: string) => {
+              const match = aid.match(/^(.+?)\s*\(\d{4}\)$/);
+              const aidProgName = match ? match[1].trim() : aid.trim();
+              const aidYear = match ? match[2] : null;
+              if (aidProgName === programName) {
+                if (aidYear === yearStr || !aidYear) return false;
+              }
+              return true;
+            });
+
+            if (updatedAids.length !== currentAids.length) {
+              await supabase
+                .from('residents')
+                .update({ active_aids: updatedAids })
+                .eq('nik', nik)
+                .eq('tenant_id', tenantId);
+
+              setResidents(prev => prev.map(r => r.nik === nik ? { ...r, activeAids: updatedAids } : r));
             }
-            return true;
-          });
-
-          if (updatedAids.length !== currentAids.length) {
-            await supabase
-              .from('residents')
-              .update({ active_aids: updatedAids })
-              .eq('nik', nik)
-              .eq('tenant_id', tenantId);
-
-            setResidents(prev => prev.map(r => r.nik === nik ? { ...r, activeAids: updatedAids } : r));
           }
 
           // 4. Update local bansosData
@@ -975,7 +976,7 @@ const MONTHS_LIST = [
           // 5. Hapus dari removingNiks
           setRemovingNiks(prev => { const next = new Set(prev); next.delete(nik); return next; });
 
-          showToast(`${targetResident.name} berhasil dihapus dari daftar "${programName}".`, "success");
+          showToast(`${displayName} berhasil dihapus dari daftar "${programName}".`, "success");
         } catch (err: any) {
           // Rollback animasi jika gagal
           setRemovingNiks(prev => { const next = new Set(prev); next.delete(nik); return next; });
