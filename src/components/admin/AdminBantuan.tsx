@@ -396,7 +396,6 @@ const MONTHS_LIST = [
   const stats = useMemo(() => {
     const yearFilter = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
     
-    // Hitung jumlah aktif per program dari DUA sumber
     const programCounts: Record<string, number> = {};
     bansosData
       .filter(b => b.status === 'aktif' && b.tahun === yearFilter)
@@ -416,17 +415,14 @@ const MONTHS_LIST = [
       });
     });
 
-    // Unique programs untuk dropdown
     const uniquePrograms = Object.keys(programCounts).sort();
-
-    // Jumlah penerima untuk program + tahun yang dipilih
     const selectedCount = programCounts[selectedProgram] || 0;
-
     const overlapResidents = residents.filter(r => getActiveAidPrograms(r, filterYear).length > 1);
     
     return {
       selectedCount,
       uniquePrograms,
+      programCounts,
       overlaps: overlapResidents
     };
   }, [residents, filterYear, bansosData, selectedProgram]);
@@ -492,6 +488,13 @@ const MONTHS_LIST = [
 
     return list;
   }, [residents, selectedProgram, showOverlapOnly, debouncedSearchQuery, stats.overlaps, salurFilter, disbursedMonths, sortField, sortDirection, filterYear, bansosData, activeStatusTab]);
+
+  // Auto-select first program if selectedProgram is not in the list
+  useEffect(() => {
+    if (stats.uniquePrograms.length > 0 && !stats.uniquePrograms.includes(selectedProgram)) {
+      setSelectedProgram(stats.uniquePrograms[0]);
+    }
+  }, [stats.uniquePrograms]);
 
   // Reset pagination & selection when primary filters change
   useEffect(() => {
@@ -1958,9 +1961,13 @@ const MONTHS_LIST = [
             onChange={(e) => { setSelectedProgram(e.target.value); setShowOverlapOnly(false); }}
             className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer truncate"
           >
-            {uniquePrograms.map(p => (
-              <option key={p} value={p}>{p}</option>
-            ))}
+            {stats.uniquePrograms.length === 0 ? (
+              <option value="">— Belum ada data —</option>
+            ) : (
+              stats.uniquePrograms.map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))
+            )}
           </select>
         </div>
 
