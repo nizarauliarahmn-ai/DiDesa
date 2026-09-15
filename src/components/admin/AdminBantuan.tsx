@@ -193,7 +193,7 @@ const MONTHS_LIST = [
   const [criteriaChecked, setCriteriaChecked] = useState<Record<string, boolean>>({});
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [formYear, setFormYear] = useState(new Date().getFullYear().toString());
-  const [filterYear, setFilterYear] = useState("Semua Tahun");
+  const [filterYear, setFilterYear] = useState(new Date().getFullYear().toString());
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [selectedResidentDetailModal, setSelectedResidentDetailModal] = useState<any | null>(null);
 
@@ -1998,27 +1998,7 @@ const MONTHS_LIST = [
 
       {/* Program Overview Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Pilih Tahun */}
-        <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl flex flex-col gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
-              <Calendar className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
-            </div>
-            <p className="text-[11px] font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Tahun</p>
-          </div>
-          <select
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
-          >
-            <option value="Semua Tahun">Semua Tahun</option>
-            {Array.from({ length: 7 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Card 2: Pilih Program */}
+        {/* Card 1: Pilih Program */}
         <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl flex flex-col gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
@@ -2038,6 +2018,26 @@ const MONTHS_LIST = [
                 <option key={p} value={p}>{p}</option>
               ))
             )}
+          </select>
+        </div>
+
+        {/* Card 2: Pilih Tahun */}
+        <div className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 rounded-2xl flex flex-col gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
+              <Calendar className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <p className="text-[11px] font-extrabold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Tahun</p>
+          </div>
+          <select
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 text-sm font-bold text-gray-800 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 transition-all cursor-pointer"
+          >
+            <option value="Semua Tahun">Semua Tahun</option>
+            {Array.from({ length: 7 }, (_, i) => new Date().getFullYear() - 3 + i).map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
           </select>
         </div>
 
@@ -2120,7 +2120,7 @@ const MONTHS_LIST = [
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-3">
               <h4 className="font-extrabold text-lg text-gray-900 dark:text-white">
-                {showOverlapOnly ? "Tumpang Tindih (Penerima Ganda)" : `Penerima ${selectedProgram}`}
+                {showOverlapOnly ? "Tumpang Tindih (Penerima Ganda)" : `Penerima ${selectedProgram} — ${filterYear === "Semua Tahun" ? "Semua Tahun" : filterYear}`}
               </h4>
             </div>
             
