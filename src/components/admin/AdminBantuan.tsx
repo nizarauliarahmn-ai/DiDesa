@@ -1963,6 +1963,7 @@ const MONTHS_LIST = [
                 <div className="mt-2">
                   <p className="text-[11px] text-gray-500 dark:text-slate-400 font-bold uppercase tracking-wider truncate" title={programName}>{shortName}</p>
                   <h4 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-0.5">{count} <span className="text-xs font-semibold text-gray-500 dark:text-slate-400">Penerima</span></h4>
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Rp {(count * programAmountVal).toLocaleString('id-ID')}</p>
                 </div>
               </div>
             );
@@ -2081,18 +2082,6 @@ const MONTHS_LIST = [
                 />
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
-            </div>
-          </div>
-
-          {/* Quick Summary Banner */}
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
-            <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 px-4 py-2 rounded-xl text-emerald-900 dark:text-emerald-200">
-              <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="text-xs font-bold">Total Dana Salur:</span>
-              <span className="text-sm font-extrabold font-mono text-emerald-700 dark:text-emerald-300">
-                Rp {totalNominalDisbursed.toLocaleString('id-ID')}
-              </span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 italic">(@Rp {programAmountVal.toLocaleString('id-ID')})</span>
             </div>
           </div>
         </div>
