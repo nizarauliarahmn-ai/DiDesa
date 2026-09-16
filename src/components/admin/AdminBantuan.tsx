@@ -120,6 +120,8 @@ const MONTHS_LIST = [
   { id: 'Des', label: 'Des', fullName: 'Desember' }
 ];
 
+const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
+
   // Monthly Disbursement State (Nik -> Array of Month IDs e.g. ['Jan', 'Feb', 'Mar'])
   const [disbursedMonths, setDisbursedMonths] = useState<Record<string, string[]>>(() => {
     try {
@@ -2375,47 +2377,53 @@ const MONTHS_LIST = [
                             </div>
                           )}
 
-                          {/* 12-Month Salur Status Summary & Month Chips */}
+                          {/* Salur Status */}
                           <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-1.5">
-                              <span className={`px-2 py-0.5 rounded-md font-extrabold text-[10px] border shadow-2xs ${
-                                (disbursedMonths[resident.nik] || []).length === 12
-                                  ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-200'
-                                  : (disbursedMonths[resident.nik] || []).length > 0
-                                  ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200'
-                                  : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-200'
-                              }`}>
-                                {(disbursedMonths[resident.nik] || []).length} / 12 Bln
+                            {MONTHLY_PROGRAMS.includes(selectedProgram) ? (
+                              <>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`px-2 py-0.5 rounded-md font-extrabold text-[10px] border shadow-2xs ${
+                                    (disbursedMonths[resident.nik] || []).length === 12
+                                      ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-200'
+                                      : (disbursedMonths[resident.nik] || []).length > 0
+                                      ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200'
+                                      : 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-200'
+                                  }`}>
+                                    {(disbursedMonths[resident.nik] || []).length} / 12 Bln
+                                  </span>
+                                  <span className="text-[10px] font-bold text-gray-500 font-mono">
+                                    Rp {(((disbursedMonths[resident.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
+                                  </span>
+                                </div>
+                                <div className="flex flex-wrap gap-0.5 max-w-[210px]">
+                                  {MONTHS_LIST.map((m, idx) => {
+                                    const isDisbursed = (disbursedMonths[resident.nik] || []).includes(m.id);
+                                    const isCurrentMonth = idx === new Date().getMonth();
+                                    return (
+                                      <button
+                                        key={m.id}
+                                        type="button"
+                                        onClick={() => handleToggleMonth(resident.nik, m.id)}
+                                        title={`${m.fullName}: ${isDisbursed ? 'Sudah Salur ✓' : 'Belum Salur'}`}
+                                        className={`w-5 h-4.5 rounded text-[8px] font-black transition-all border flex items-center justify-center cursor-pointer active:scale-90 ${
+                                          isDisbursed
+                                            ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
+                                            : isCurrentMonth
+                                            ? 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200'
+                                            : 'bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 border-gray-200 dark:border-slate-700 hover:bg-emerald-100 hover:text-emerald-700'
+                                        }`}
+                                      >
+                                        {m.label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-md font-bold text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 whitespace-nowrap">
+                                Aktif
                               </span>
-                              <span className="text-[10px] font-bold text-gray-500 font-mono">
-                                Rp {(((disbursedMonths[resident.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
-                              </span>
-                            </div>
-
-                            {/* 12 Interactive Month Chips */}
-                            <div className="flex flex-wrap gap-0.5 max-w-[210px]">
-                              {MONTHS_LIST.map((m, idx) => {
-                                const isDisbursed = (disbursedMonths[resident.nik] || []).includes(m.id);
-                                const isCurrentMonth = idx === new Date().getMonth();
-                                return (
-                                  <button
-                                    key={m.id}
-                                    type="button"
-                                    onClick={() => handleToggleMonth(resident.nik, m.id)}
-                                    title={`${m.fullName}: ${isDisbursed ? 'Sudah Salur ✓' : 'Belum Salur'}`}
-                                    className={`w-5 h-4.5 rounded text-[8px] font-black transition-all border flex items-center justify-center cursor-pointer active:scale-90 ${
-                                      isDisbursed
-                                        ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
-                                        : isCurrentMonth
-                                        ? 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200'
-                                        : 'bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 border-gray-200 dark:border-slate-700 hover:bg-emerald-100 hover:text-emerald-700'
-                                    }`}
-                                  >
-                                    {m.label}
-                                  </button>
-                                );
-                              })}
-                            </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -2982,67 +2990,72 @@ const MONTHS_LIST = [
               </div>
 
               {/* Status Penyaluran */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Penyaluran</label>
-                  <span className="text-[10px] font-bold text-gray-500 font-mono">{(disbursedMonths[selectedResidentDetailModal.nik] || []).length}/12 bln</span>
-                </div>
+              {MONTHLY_PROGRAMS.includes(selectedProgram) ? (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Penyaluran</label>
+                    <span className="text-[10px] font-bold text-gray-500 font-mono">{(disbursedMonths[selectedResidentDetailModal.nik] || []).length}/12 bln</span>
+                  </div>
 
-                {/* 12 Bulan Grid */}
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
-                  {MONTHS_LIST.map((m, idx) => {
-                    const isDisbursed = (disbursedMonths[selectedResidentDetailModal.nik] || []).includes(m.id);
-                    const isCurrentMonth = idx === new Date().getMonth();
-                    return (
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-1.5">
+                    {MONTHS_LIST.map((m, idx) => {
+                      const isDisbursed = (disbursedMonths[selectedResidentDetailModal.nik] || []).includes(m.id);
+                      const isCurrentMonth = idx === new Date().getMonth();
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => handleToggleMonth(selectedResidentDetailModal.nik, m.id)}
+                          className={`py-2 px-1 rounded-lg text-[10px] font-bold border transition-all flex flex-col items-center gap-0.5 cursor-pointer active:scale-95 ${
+                            isDisbursed
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : isCurrentMonth
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-gray-50 text-gray-400 border-gray-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-600'
+                          }`}
+                        >
+                          <span>{m.id}</span>
+                          <span className="text-[8px] opacity-70">{isDisbursed ? '✓' : isCurrentMonth ? '•' : '–'}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <span className="text-xs font-bold text-gray-500">
+                      Rp {(((disbursedMonths[selectedResidentDetailModal.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
+                    </span>
+                    <div className="flex items-center gap-1">
                       <button
-                        key={m.id}
                         type="button"
-                        onClick={() => handleToggleMonth(selectedResidentDetailModal.nik, m.id)}
-                        className={`py-2 px-1 rounded-lg text-[10px] font-bold border transition-all flex flex-col items-center gap-0.5 cursor-pointer active:scale-95 ${
-                          isDisbursed
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : isCurrentMonth
-                            ? 'bg-amber-50 text-amber-700 border-amber-200'
-                            : 'bg-gray-50 text-gray-400 border-gray-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-600'
-                        }`}
+                        onClick={() => handleSetMonthsUntil(selectedResidentDetailModal.nik, new Date().getMonth())}
+                        className="px-2 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors cursor-pointer"
                       >
-                        <span>{m.id}</span>
-                        <span className="text-[8px] opacity-70">{isDisbursed ? '✓' : isCurrentMonth ? '•' : '–'}</span>
+                        Salur s.d. {MONTHS_LIST[new Date().getMonth()].id}
                       </button>
-                    );
-                  })}
-                </div>
-
-                {/* Summary */}
-                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100 dark:border-slate-800">
-                  <span className="text-xs font-bold text-gray-500">
-                    Rp {(((disbursedMonths[selectedResidentDetailModal.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleSetMonthsUntil(selectedResidentDetailModal.nik, new Date().getMonth())}
-                      className="px-2 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors cursor-pointer"
-                    >
-                      Salur s.d. {MONTHS_LIST[new Date().getMonth()].id}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSetAll12Months(selectedResidentDetailModal.nik)}
-                      className="px-2 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 rounded-md transition-colors cursor-pointer"
-                    >
-                      Lunas
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleResetMonths(selectedResidentDetailModal.nik)}
-                      className="px-2 py-1 text-[10px] font-bold text-gray-400 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
-                    >
-                      Reset
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSetAll12Months(selectedResidentDetailModal.nik)}
+                        className="px-2 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 rounded-md transition-colors cursor-pointer"
+                      >
+                        Lunas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleResetMonths(selectedResidentDetailModal.nik)}
+                        className="px-2 py-1 text-[10px] font-bold text-gray-400 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
+                  <span className="px-2.5 py-1 rounded-md font-bold text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200">Aktif</span>
+                </div>
+              )}
 
               {/* Aksi */}
               <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100 dark:border-slate-800">
