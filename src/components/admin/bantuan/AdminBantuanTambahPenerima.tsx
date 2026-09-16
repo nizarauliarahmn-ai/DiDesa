@@ -718,50 +718,7 @@ export default function AdminBantuanTambahPenerima({
         </div>
 
         {/* Tab Content */}
-        <div className="px-6 pb-6 space-y-4 max-h-[55vh] overflow-y-auto">
-          {/* ── Keterangan & Foto (opsional) ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Keterangan (opsional)</label>
-              <textarea
-                value={keterangan}
-                onChange={(e) => setKeterangan(e.target.value)}
-                placeholder="Catatan tambahan untuk penerima ini..."
-                rows={2}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all resize-none"
-              />
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Foto (opsional)</label>
-              <input
-                ref={photoInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoSelect}
-                className="hidden"
-              />
-              {photoPreview ? (
-                <div className="relative w-full h-20 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (photoInputRef.current) photoInputRef.current.value = ''; }}
-                    className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => photoInputRef.current?.click()}
-                  className="w-full h-20 rounded-lg border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-emerald-400 flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer"
-                >
-                  <Camera className="w-4 h-4 text-gray-400" />
-                  <span className="text-[10px] font-bold text-gray-400">Klik untuk foto</span>
-                </button>
-              )}
-            </div>
-          </div>
-
+        <div className="px-6 pb-6 space-y-3 max-h-[55vh] overflow-y-auto">
           {/* ─── TAB 1: MANUAL ─── */}
           {tab === 'manual' && (
             <>
@@ -953,6 +910,52 @@ export default function AdminBantuanTambahPenerima({
           )}
           </div>
         </>
+        )}
+
+        {/* ── Detail Tambahan (collapsible) ── */}
+        {!confirming && pendingRows.length > 0 && (
+          <div className="px-6 pb-4">
+            <details className="group">
+              <summary className="flex items-center gap-2 cursor-pointer text-[10px] font-bold text-gray-400 uppercase tracking-wider hover:text-gray-600 select-none">
+                <span className="group-open:rotate-90 transition-transform text-gray-300">▸</span>
+                Detail Tambahan
+                {(keterangan || photoPreview) && (
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 text-[9px]">isi</span>
+                )}
+              </summary>
+              <div className="mt-3 grid grid-cols-[1fr_auto] gap-3 items-start">
+                <textarea
+                  value={keterangan}
+                  onChange={(e) => setKeterangan(e.target.value)}
+                  placeholder="Catatan untuk penerima..."
+                  rows={2}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all resize-none"
+                />
+                <div className="flex flex-col items-center gap-1">
+                  <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
+                  {photoPreview ? (
+                    <div className="relative">
+                      <img src={photoPreview} alt="Foto" className="w-14 h-14 rounded-lg object-cover border border-gray-200" />
+                      <button
+                        onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (photoInputRef.current) photoInputRef.current.value = ''; }}
+                        className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full text-white flex items-center justify-center hover:bg-red-600"
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => photoInputRef.current?.click()}
+                      className="w-14 h-14 rounded-lg border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-emerald-400 flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer"
+                    >
+                      <Camera className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="text-[8px] font-bold text-gray-400">Foto</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </details>
+          </div>
         )}
 
         {/* Footer — minimal */}
