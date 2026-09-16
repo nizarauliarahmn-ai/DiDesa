@@ -396,7 +396,6 @@ export default function AdminBantuanTambahPenerima({
 
           if (existing) {
             currentAids = Array.isArray(existing.activeAids) ? existing.activeAids : [];
-            // Update active_aids HANYA jika status aktif dan aidTag belum ada
             if (initialStatus === 'aktif' && !currentAids.includes(aidTag)) {
               await supabase
                 .from('residents')
@@ -405,7 +404,6 @@ export default function AdminBantuanTambahPenerima({
                 .eq('tenant_id', tenantId);
             }
           } else {
-            // Warga baru → insert ke residents
             const newAids = initialStatus === 'aktif' ? [aidTag] : [];
             const { data: inserted, error: insertErr } = await supabase
               .from('residents')
@@ -419,11 +417,12 @@ export default function AdminBantuanTambahPenerima({
               }])
               .select()
               .maybeSingle();
-            if (insertErr) throw insertErr;
             if (inserted) created++;
+            if (insertErr) {
+              console.error(`Gagal insert residents NIK ${row.nik}:`, insertErr.message);
+            }
           }
 
-          // Insert ke bansos_recipients — cek duplikat dulu
           const { data: existingBan } = await supabase
             .from('bansos_recipients')
             .select('id')
@@ -434,7 +433,6 @@ export default function AdminBantuanTambahPenerima({
             .maybeSingle();
 
           if (!existingBan) {
-            // Upload foto jika ada
             let photoUrl: string | null = null;
             if (photoFile) {
               const fileExt = photoFile.name.split('.').pop() || 'jpg';

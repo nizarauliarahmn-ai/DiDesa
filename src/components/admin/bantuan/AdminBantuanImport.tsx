@@ -146,8 +146,11 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
               active_aids: [aidToSave]
             };
             const { error: insertErr } = await supabase.from('residents').insert([newResident]);
-            if (insertErr) throw insertErr;
-            newResidentCount++;
+            if (insertErr) {
+              console.error(`Gagal insert residents NIK ${row.nik}:`, insertErr.message);
+            } else {
+              newResidentCount++;
+            }
           }
 
           const { data: existingBan } = await supabase
