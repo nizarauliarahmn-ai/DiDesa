@@ -2231,7 +2231,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-50/90 dark:bg-slate-800/90 border-b border-gray-100 dark:border-slate-800 text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">
               <tr>
-                <th className="px-4 py-3.5 text-center w-12">
+                <th className="px-3 py-2 text-center w-10">
                   <input
                     type="checkbox"
                     checked={paginatedResidents.length > 0 && paginatedResidents.every(r => selectedNiks.includes(r.nik))}
@@ -2239,27 +2239,27 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                     className="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
                   />
                 </th>
-                <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('nik')}>
+                <th className="px-3 py-2 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('nik')}>
                   <div className="flex items-center gap-1.5">
                     NIK / WARGA
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
-                <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('rtRw')}>
+                <th className="px-3 py-2 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('rtRw')}>
                   <div className="flex items-center gap-1.5">
                     RT / RW
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
-                <th className="px-4 py-3.5 text-center">TAHUN</th>
-                <th className="px-5 py-3.5">BANTUAN LAINNYA</th>
-                <th className="px-5 py-3.5 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
+                <th className="px-3 py-2 text-center">TAHUN</th>
+                <th className="px-3 py-2">BANTUAN LAINNYA</th>
+                <th className="px-3 py-2 cursor-pointer hover:text-emerald-700 transition-colors" onClick={() => handleSort('status')}>
                   <div className="flex items-center gap-1.5">
                     STATUS & PENYALURAN
                     <ArrowUpDown className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                 </th>
-                <th className="px-5 py-3.5 text-center">AKSI</th>
+                <th className="px-3 py-2 text-center">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
@@ -2301,7 +2301,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       } ${removingNiks.has(resident.nik) ? 'opacity-0 scale-95 -translate-x-4 bg-red-50/50' : ''}`}
                     >
                       {/* Checkbox Column */}
-                      <td className="px-4 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-3 py-2 text-center" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -2317,7 +2317,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       </td>
 
                       {/* Resident Info Column */}
-                      <td className="px-5 py-4 whitespace-nowrap">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <div>
                           <p className="font-extrabold text-sm text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
                             {resident.name}
@@ -2338,21 +2338,21 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       </td>
 
                       {/* Address Column */}
-                      <td className="px-5 py-4 text-xs font-semibold text-gray-600 dark:text-slate-300 whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 whitespace-nowrap">
                         <span className="bg-gray-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-gray-200 dark:border-slate-700 whitespace-nowrap inline-block font-mono text-[11px]">
                           RT {resident.rt || "-"} / RW {resident.rw || "-"}
                         </span>
                       </td>
 
                       {/* Year Column */}
-                      <td className="px-4 py-4 text-xs font-bold font-mono text-center whitespace-nowrap">
+                      <td className="px-3 py-2 text-xs font-bold font-mono text-center whitespace-nowrap">
                         <span className="px-2.5 py-1 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 rounded-lg">
                           {aidYear}
                         </span>
                       </td>
 
                       {/* Other Aids Column */}
-                      <td className="px-5 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-3 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-col gap-1.5 items-start">
                           {otherAids.length > 0 ? (
                             <div className="flex flex-wrap gap-1 max-w-[200px]">
@@ -2373,7 +2373,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       </td>
 
                       {/* Status & Disburse Toggle Column */}
-                      <td className="px-5 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-3 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <div className="flex flex-col gap-1.5 items-start">
                           {isOverlap && (
                             <div className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-red-100 text-red-700 rounded-full font-bold text-[10px] border border-red-200 whitespace-nowrap">
@@ -2440,7 +2440,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       </td>
 
                       {/* Single Action Column */}
-                      <td className="px-5 py-4 text-center whitespace-nowrap">
+                      <td className="px-3 py-2 text-center whitespace-nowrap">
                         {showOverlapOnly ? (
                           <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider whitespace-nowrap">Kelola via Tab Utama</p>
                         ) : activeStatusTab === 'usulan' ? (
