@@ -83,6 +83,12 @@ export default function AdminBantuanTambahPenerima({
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
+  // ── Keterangan & Foto ──
+  const [keterangan, setKeterangan] = useState('');
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
   // ── Tab 1: Manual ──
   const [manualQuery, setManualQuery] = useState("");
   const [selectedNiks, setSelectedNiks] = useState<RecipientRow[]>([]);
@@ -113,6 +119,19 @@ export default function AdminBantuanTambahPenerima({
   }, []);
 
   useEffect(() => () => stopCamera(), [stopCamera]);
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showToast("Ukuran foto maksimal 2MB.", "error");
+      return;
+    }
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (cameraOn && videoRef.current && streamRef.current) {
@@ -415,6 +434,20 @@ export default function AdminBantuanTambahPenerima({
             .maybeSingle();
 
           if (!existingBan) {
+            // Upload foto jika ada
+            let photoUrl: string | null = null;
+            if (photoFile) {
+              const fileExt = photoFile.name.split('.').pop() || 'jpg';
+              const filePath = `bansos/${tenantId}/${row.nik}_${Date.now()}.${fileExt}`;
+              const { data: uploadData, error: uploadErr } = await supabase.storage
+                .from('bansos-photos')
+                .upload(filePath, photoFile);
+              if (!uploadErr && uploadData) {
+                const { data: urlData } = supabase.storage.from('bansos-photos').getPublicUrl(uploadData.path);
+                photoUrl = urlData.publicUrl;
+              }
+            }
+
             const { error: banErr } = await supabase.from('bansos_recipients').insert({
               tenant_id: tenantId,
               program_id: program,
@@ -424,6 +457,8 @@ export default function AdminBantuanTambahPenerima({
               tahun_mulai: Number(year),
               status: initialStatus,
               source,
+              keterangan: keterangan || null,
+              photo_url: photoUrl,
               created_at: new Date().toISOString()
             });
             if (banErr) throw banErr;
@@ -656,6 +691,22 @@ export default function AdminBantuanTambahPenerima({
                   ))}
                 </select>
               </div>
+
+              {/* Keterangan */}
+              {keterangan && (
+                <div className="p-2 bg-gray-50 dark:bg-slate-800/50 rounded-lg">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">Keterangan</p>
+                  <p className="text-xs text-gray-700 dark:text-slate-300 mt-0.5">{keterangan}</p>
+                </div>
+              )}
+
+              {/* Foto */}
+              {photoPreview && (
+                <div className="flex items-center gap-2">
+                  <img src={photoPreview} alt="Foto Penerima" className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
+                  <span className="text-[10px] font-bold text-gray-500">Foto penerima terlampir</span>
+                </div>
+              )}
             </div>
           ) : (
           <>
@@ -668,6 +719,49 @@ export default function AdminBantuanTambahPenerima({
 
         {/* Tab Content */}
         <div className="px-6 pb-6 space-y-4 max-h-[55vh] overflow-y-auto">
+          {/* ── Keterangan & Foto (opsional) ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Keterangan (opsional)</label>
+              <textarea
+                value={keterangan}
+                onChange={(e) => setKeterangan(e.target.value)}
+                placeholder="Catatan tambahan untuk penerima ini..."
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 transition-all resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Foto (opsional)</label>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoSelect}
+                className="hidden"
+              />
+              {photoPreview ? (
+                <div className="relative w-full h-20 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+                  <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+                  <button
+                    onClick={() => { setPhotoFile(null); setPhotoPreview(null); if (photoInputRef.current) photoInputRef.current.value = ''; }}
+                    className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => photoInputRef.current?.click()}
+                  className="w-full h-20 rounded-lg border-2 border-dashed border-gray-200 dark:border-slate-700 hover:border-emerald-400 flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer"
+                >
+                  <Camera className="w-4 h-4 text-gray-400" />
+                  <span className="text-[10px] font-bold text-gray-400">Klik untuk foto</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* ─── TAB 1: MANUAL ─── */}
           {tab === 'manual' && (
             <>
