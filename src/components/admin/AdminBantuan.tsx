@@ -469,7 +469,12 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
           rw: '',
           activeAids: [],
           is_deleted: 0,
-          isOrphan: true
+          isOrphan: true,
+          keterangan: b.keterangan || '',
+          photo_url: b.photo_url || '',
+          bansosId: b.id,
+          bansosStatus: b.status,
+          bansosTahun: b.tahun
         }));
       list = [...matched, ...orphanEntries];
     } else {
@@ -2995,8 +3000,33 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                 </select>
               </div>
 
-              {/* Status Penyaluran */}
-              {MONTHLY_PROGRAMS.includes(selectedProgram) ? (
+              {/* Info Usulan: Keterangan & Foto */}
+              {(selectedResidentDetailModal.bansosStatus === 'usulan' || (!selectedResidentDetailModal.isOrphan && activeStatusTab === 'usulan')) && (() => {
+                const bansosRecord = bansosData.find(b => 
+                  b.resident_id === selectedResidentDetailModal.nik && 
+                  b.program_id === selectedProgram && 
+                  b.status === 'usulan'
+                );
+                const ket = selectedResidentDetailModal.keterangan || bansosRecord?.keterangan || '';
+                const photo = selectedResidentDetailModal.photo_url || bansosRecord?.photo_url || '';
+                if (!ket && !photo) return null;
+                return (
+                  <div className="flex gap-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                    {photo && (
+                      <img src={photo} alt="Foto" className="w-16 h-16 rounded-lg object-cover border border-amber-200 flex-shrink-0" />
+                    )}
+                    {ket && (
+                      <div>
+                        <p className="text-[10px] font-bold text-amber-700 uppercase">Keterangan</p>
+                        <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5">{ket}</p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Status Penyaluran — Sembunyikan grid untuk usulan */}
+              {activeStatusTab !== 'usulan' && MONTHLY_PROGRAMS.includes(selectedProgram) ? (
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Penyaluran</label>
@@ -3072,40 +3102,68 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
               )}
 
               {/* Aksi */}
-              <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100 dark:border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedPrintResident(selectedResidentDetailModal);
-                    setPrintDocType('slip_warga');
-                    setShowPrintModal(true);
-                  }}
-                  className="px-3 py-1.5 text-[10px] font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <Printer className="w-3 h-3" /> Cetak Slip
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
-                    handleSingleRollforward(selectedResidentDetailModal, nextYr);
-                  }}
-                  className="px-3 py-1.5 text-[10px] font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <Calendar className="w-3 h-3" /> Teruskan ke {filterYear !== "Semua Tahun" ? parseInt(filterYear) + 1 : new Date().getFullYear() + 1}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedNiks([selectedResidentDetailModal.nik]);
-                    setSelectedResidentDetailModal(null);
-                    setShowBulkStopModal(true);
-                  }}
-                  className="px-3 py-1.5 text-[10px] font-bold text-red-500 border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <Ban className="w-3 h-3" /> Hentikan
-                </button>
-              </div>
+              {activeStatusTab === 'usulan' ? (
+                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const yearNum = filterYear !== "Semua Tahun" ? Number(filterYear) : new Date().getFullYear();
+                      const record = bansosData.find(b => b.resident_id === selectedResidentDetailModal.nik && b.program_id === selectedProgram && b.status === 'usulan' && b.tahun === yearNum);
+                      if (record) handleApproveBansos(record.id, selectedResidentDetailModal.nik, selectedProgram, yearNum);
+                      else showToast("Data usulan tidak ditemukan", "error");
+                      setSelectedResidentDetailModal(null);
+                    }}
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs active:scale-95 transition-all shadow-sm inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Setujui
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleHapusDariDaftar(selectedResidentDetailModal.nik, selectedProgram);
+                      setSelectedResidentDetailModal(null);
+                    }}
+                    className="px-3 py-1.5 text-red-500 border border-red-200 hover:bg-red-50 rounded-lg font-bold text-xs transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-3 h-3" /> Hapus
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedPrintResident(selectedResidentDetailModal);
+                      setPrintDocType('slip_warga');
+                      setShowPrintModal(true);
+                    }}
+                    className="px-3 py-1.5 text-[10px] font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <Printer className="w-3 h-3" /> Cetak Slip
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextYr = filterYear !== "Semua Tahun" ? (parseInt(filterYear) + 1).toString() : (new Date().getFullYear() + 1).toString();
+                      handleSingleRollforward(selectedResidentDetailModal, nextYr);
+                    }}
+                    className="px-3 py-1.5 text-[10px] font-bold text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <Calendar className="w-3 h-3" /> Teruskan ke {filterYear !== "Semua Tahun" ? parseInt(filterYear) + 1 : new Date().getFullYear() + 1}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedNiks([selectedResidentDetailModal.nik]);
+                      setSelectedResidentDetailModal(null);
+                      setShowBulkStopModal(true);
+                    }}
+                    className="px-3 py-1.5 text-[10px] font-bold text-red-500 border border-red-200 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <Ban className="w-3 h-3" /> Hentikan
+                  </button>
+                </div>
+              )}
 
             </div>
 

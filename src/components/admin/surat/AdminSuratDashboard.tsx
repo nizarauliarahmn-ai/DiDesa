@@ -1,7 +1,7 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
-  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen, MessageCircle
+  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen, MessageCircle, ClipboardCheck
 } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, cancelLetterHistoryAsync, deleteSuratSmart } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
@@ -12,6 +12,7 @@ import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import TTESignatureBox from './TTESignatureBox';
 import WANumberInputModal from '../../common/WANumberInputModal';
 import { buildSuratSelesaiMessage, getResidentWaPhone, openFreeWhatsAppMessage } from '../../../utils/waFreeEngine';
+import AdminSuratCatatLuar from './AdminSuratCatatLuar';
 
 const getFullLetterName = (jenis: string): string => {
   const mapping: Record<string, string> = {
@@ -107,6 +108,7 @@ export default function AdminSuratDashboard({
   const [printStartDate, setPrintStartDate] = useState('');
   const [printEndDate, setPrintEndDate] = useState('');
   const [showQuickActions, setShowQuickActions] = useState(false);
+  const [showCatatLuar, setShowCatatLuar] = useState(false);
   const quickActionRef = useRef<HTMLDivElement>(null);
 
   // Kop Surat Settings State for dynamic printing header
@@ -1180,6 +1182,18 @@ export default function AdminSuratDashboard({
                     <span className="block text-xs text-slate-500 mt-0.5">Input entri kehadiran tamu baru</span>
                   </span>
                 </button>
+                <button
+                  onClick={() => { setShowQuickActions(false); setShowCatatLuar(true); }}
+                  className="w-full p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-3 cursor-pointer text-left"
+                >
+                  <span className="p-2 rounded-lg bg-amber-50 border border-amber-100">
+                    <ClipboardCheck className="w-5 h-5 text-amber-600" />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-medium text-slate-800">Catat Surat Luar</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">Pencatatan surat fisik di luar web</span>
+                  </span>
+                </button>
               </div>
             )}
           </div>
@@ -1751,6 +1765,14 @@ export default function AdminSuratDashboard({
         residentNik={waTargetSurat?.nik}
         message={waInputMessage}
       />
+
+      {/* Modal Catat Surat Luar */}
+      {showCatatLuar && (
+        <AdminSuratCatatLuar
+          onClose={() => setShowCatatLuar(false)}
+          onSuccess={() => fetchLetterHistoryAsync().then(setSuratList)}
+        />
+      )}
 
     </div>
   );
