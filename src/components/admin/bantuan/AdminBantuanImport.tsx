@@ -172,9 +172,10 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
               created_at: new Date().toISOString()
             });
             if (banErr) throw banErr;
+            successCount++;
+          } else {
+            failedCount++;
           }
-
-          successCount++;
         } catch (e) {
           console.error("Gagal memproses NIK:", row.nik, e);
           failedCount++;
@@ -332,7 +333,7 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
               <p className="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-lg mx-auto">
                 Berhasil mensinkronkan <strong>{result.success}</strong> data penerima {program} tahun {year}.
                 {result.newResidents > 0 && <span> Termasuk <strong>{result.newResidents}</strong> penduduk baru yang ditambahkan otomatis.</span>}
-                {result.failed > 0 && <span className="text-red-500 block mt-2">Gagal memproses {result.failed} baris (cek konsol/log).</span>}
+                {result.failed > 0 && <span className="text-amber-600 block mt-2">{result.failed} data sudah ada sebelumnya (duplikat, tidak ditambahkan ulang).</span>}
               </p>
               <button 
                 onClick={onClose}

@@ -427,9 +427,10 @@ export default function AdminBantuanTambahPenerima({
               created_at: new Date().toISOString()
             });
             if (banErr) throw banErr;
+            added++;
+          } else {
+            skipped++;
           }
-
-          added++;
         } catch (err: any) {
           console.error(`Gagal simpan NIK ${row.nik}:`, err.message);
           skipped++;
@@ -437,7 +438,7 @@ export default function AdminBantuanTambahPenerima({
       }
 
       showToast(
-        `Berhasil: ${added} penerima ditambahkan.${created > 0 ? ` ${created} warga baru.` : ''}${skipped > 0 ? ` ${skipped} gagal.` : ''}`,
+        `Berhasil: ${added} penerima baru.${created > 0 ? ` ${created} warga baru.` : ''}${skipped > 0 ? ` ${skipped} sudah ada (duplikat).` : ''}`,
         added > 0 ? 'success' : 'error'
       );
       onRefresh();
