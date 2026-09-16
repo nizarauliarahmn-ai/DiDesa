@@ -1,12 +1,11 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, ShieldCheck, Phone, HandHeart, HeartHandshake, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, Phone, HandHeart, HeartHandshake, Eye } from 'lucide-react';
 import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
 import { fetchResidentLettersAsync, LetterHistory, getLetterFullData } from '../../../utils/letterHistory';
 import { getLetterClassifications } from '../../../utils/letterClassifications';
 import ConfirmModal from '../../common/ConfirmModal';
-import { QRCodeSVG } from 'qrcode.react';
 import { supabase } from '../../../utils/supabase';
 import { normalizeStatusKeberadaan } from '../../../utils/statusKeberadaan';
 
@@ -1007,9 +1006,7 @@ export default function AdminPendudukDetail({
                     IDENTITAS DIGITAL KEPENDUDUKAN
                   </span>
                 </div>
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md bg-sky-900/10 text-sky-900 dark:bg-cyan-950 dark:text-cyan-300 border border-sky-900/20 dark:border-cyan-800">
-                  e-KTP INDONESIA
-                </span>
+                
               </div>
 
               {/* Compact NIK Header Bar */}
@@ -1115,16 +1112,6 @@ export default function AdminPendudukDetail({
                     <div className="absolute inset-0 bg-blue-900/10 pointer-events-none border border-white/20 rounded-xl"></div>
                   </div>
 
-                  {/* QR Code Verifikasi */}
-                  <div className="bg-white/90 dark:bg-slate-900/90 p-2.5 rounded-xl border border-sky-300 dark:border-cyan-800 shadow-sm text-center space-y-1 w-full max-w-[140px]">
-                    <p className="text-[8px] font-extrabold text-sky-950 dark:text-cyan-300 uppercase tracking-wider flex items-center justify-center gap-1">
-                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                      VERIFIKASI DIGITAL
-                    </p>
-                    <div className="flex justify-center p-1 bg-white rounded-lg">
-                      <QRCodeSVG value={data?.nik || '6306060107770103'} size={70} />
-                    </div>
-                  </div>
                 </div>
               </div>
               </div>
