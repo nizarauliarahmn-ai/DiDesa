@@ -16,6 +16,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
   const [classifications, setClassifications] = useState<LetterClassification[]>([]);
   const [selectedKlasifikasi, setSelectedKlasifikasi] = useState('');
   const [nomorSurat, setNomorSurat] = useState('');
+  const [nomorManual, setNomorManual] = useState(false);
   const [generatingNomor, setGeneratingNomor] = useState(false);
 
   const [nik, setNik] = useState('');
@@ -40,8 +41,9 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
     }
   }, []);
 
-  // Generate nomor when classification or date changes
+  // Generate nomor when classification or date changes (skip if manual mode)
   const generateNomor = useCallback(async () => {
+    if (nomorManual) return;
     const cls = classifications.find(c => c.klasifikasi === selectedKlasifikasi);
     if (!cls) return;
     setGeneratingNomor(true);
@@ -54,7 +56,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
     } finally {
       setGeneratingNomor(false);
     }
-  }, [selectedKlasifikasi, tanggalSurat, classifications]);
+  }, [selectedKlasifikasi, tanggalSurat, classifications, nomorManual]);
 
   useEffect(() => {
     if (selectedKlasifikasi && classifications.length > 0) {
@@ -177,18 +179,45 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
             </select>
           </div>
 
-          {/* Nomor Surat (Auto-generated) */}
+          {/* Nomor Surat (Auto-generated or Custom) */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</label>
+              <button
+                type="button"
+                onClick={() => {
+                  if (nomorManual) {
+                    // Reset ke auto
+                    setNomorManual(false);
+                    generateNomor();
+                  } else {
+                    setNomorManual(true);
+                  }
+                }}
+                className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+              >
+                {nomorManual ? 'Reset ke Otomatis' : 'Isi Manual'}
+              </button>
+            </div>
             <div className="relative">
               <Hash className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={generatingNomor ? 'Generating...' : nomorSurat}
-                readOnly
-                placeholder="Otomatis..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-mono font-bold text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-800 outline-none"
-              />
+              {nomorManual ? (
+                <input
+                  type="text"
+                  value={nomorSurat}
+                  onChange={(e) => setNomorSurat(e.target.value)}
+                  placeholder="Ketik nomor surat..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-mono font-bold text-gray-900 dark:text-white bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                />
+              ) : (
+                <input
+                  type="text"
+                  value={generatingNomor ? 'Generating...' : nomorSurat}
+                  readOnly
+                  placeholder="Otomatis..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-mono font-bold text-gray-700 dark:text-slate-300 bg-gray-50 dark:bg-slate-800 outline-none"
+                />
+              )}
             </div>
           </div>
 
