@@ -1351,10 +1351,10 @@ export default function AdminSuratDashboard({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-700">
-                <th className="px-3 py-2.5 w-10 text-center print:hidden">
+                <th className="px-3 py-2 w-10 text-center print:hidden">
                   <input 
                     type="checkbox"
-                    className="rounded border-gray-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-3.5 w-3.5"
+                    className="rounded border-gray-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-4 w-4"
                     checked={filteredSurat.length > 0 && filteredSurat.every(s => selectedSuratIds.includes(s.id))}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -1367,12 +1367,12 @@ export default function AdminSuratDashboard({
                     }}
                   />
                 </th>
-                <th className="px-3 py-2.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</th>
-                <th className="px-3 py-2.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Surat</th>
-                <th className="px-3 py-2.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pemohon</th>
-                <th className="px-3 py-2.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keperluan</th>
-                <th className="px-3 py-2.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
-                <th className="px-3 py-2.5 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center print:hidden">Aksi</th>
+                <th className="px-3 py-2 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nomor Surat</th>
+                <th className="px-3 py-2 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Jenis Surat</th>
+                <th className="px-3 py-2 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pemohon</th>
+                <th className="px-3 py-2 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Keperluan</th>
+                <th className="px-3 py-2 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tanggal</th>
+                <th className="px-3 py-2 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center print:hidden">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
@@ -1381,10 +1381,10 @@ export default function AdminSuratDashboard({
                   const isCancelled = surat.status === 'Dibatalkan';
                   return (
                   <tr key={surat.id} className={`hover:bg-gray-50/80 dark:hover:bg-slate-800/50 transition-colors group ${isCancelled ? 'opacity-70 bg-gray-50 dark:bg-slate-800' : ''}`}>
-                    <td className="px-3 py-2.5 print:hidden text-center">
+                    <td className="px-3 py-2 print:hidden text-center">
                       <input 
                         type="checkbox"
-                        className="rounded border-gray-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-3.5 w-3.5"
+                        className="rounded border-gray-300 dark:border-slate-600 text-emerald-600 focus:ring-emerald-500 cursor-pointer h-4 w-4"
                         checked={selectedSuratIds.includes(surat.id)}
                         onChange={() => {
                           setSelectedSuratIds(prev => 
@@ -1395,71 +1395,71 @@ export default function AdminSuratDashboard({
                         }}
                       />
                     </td>
-                    <td className="px-3 py-2.5">
-                      <span className="text-xs font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-1.5">
+                    <td className="px-3 py-2">
+                      <span className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 transition-colors flex items-center gap-2">
                         <span className={isCancelled ? 'line-through text-gray-500 dark:text-slate-400' : 'uppercase'}>{surat.nomor.toUpperCase()}</span>
                         {isCancelled && (
-                          <span className="text-[9px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-semibold">DIBATALKAN</span>
+                          <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">DIBATALKAN</span>
                         )}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5">
-                      <div className="flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                        <span className="text-xs font-medium text-gray-700 dark:text-slate-300 truncate max-w-[180px]" title={getFullLetterName(surat.jenis)}>{getFullLetterName(surat.jenis)}</span>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-gray-400 shrink-0" />
+                        <span className="text-sm font-medium text-gray-700 dark:text-slate-300 truncate max-w-[200px]" title={getFullLetterName(surat.jenis)}>{getFullLetterName(surat.jenis)}</span>
                       </div>
                     </td>
-                    <td className="px-3 py-2.5">
-                      <span className="text-xs font-medium text-gray-900 dark:text-white truncate max-w-[160px] block" title={surat.nama}>{surat.nama}</span>
+                    <td className="px-3 py-2">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white truncate max-w-[180px] block" title={surat.nama}>{surat.nama}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-gray-700 dark:text-slate-300 max-w-[160px] truncate" title={surat.keperluan || '-'}>
+                    <td className="px-3 py-2 text-sm text-gray-700 dark:text-slate-300 max-w-[200px] truncate" title={surat.keperluan || '-'}>
                       {surat.keperluan || '-'}
                     </td>
-                    <td className="px-3 py-2.5 text-xs text-gray-500 dark:text-slate-400 whitespace-nowrap">
+                    <td className="px-3 py-2 text-sm text-gray-500 dark:text-slate-400 whitespace-nowrap">
                       {surat.tanggal}
                     </td>
-                    <td className="px-3 py-2.5 print:hidden text-center">
-                      <div className="flex items-center justify-center gap-0.5">
+                    <td className="px-3 py-2 print:hidden text-center">
+                      <div className="flex items-center justify-center gap-1">
                         <button 
                           onClick={() => handleSendWaToPemohon(surat)}
-                          className="p-1 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800 dark:hover:bg-emerald-950/40 rounded transition-colors" 
+                          className="p-1.5 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-800 dark:hover:bg-emerald-950/40 rounded-lg transition-colors" 
                           title="Kirim Notifikasi WhatsApp ke Pemohon"
                         >
-                          <MessageCircle className="w-3.5 h-3.5" />
+                          <MessageCircle className="w-4 h-4" />
                         </button>
                         <button 
                           onClick={() => setSelectedSurat(surat)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:hover:bg-blue-950/40 rounded transition-colors" 
+                          className="p-1.5 text-blue-600 hover:bg-blue-50 hover:text-blue-800 dark:hover:bg-blue-950/40 rounded-lg transition-colors" 
                           title="Lihat Hasil Cetak Pratinjau Surat"
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="w-4 h-4" />
                         </button>
 
                         {!isCancelled && (
                           <>
                             <button 
                               onClick={() => onEditLetter?.(surat)}
-                              className="p-1 text-amber-600 hover:bg-amber-50 hover:text-amber-800 rounded transition-colors" 
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 hover:text-amber-800 rounded-lg transition-colors" 
                               title="Edit Isi Surat"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
+                              <Edit2 className="w-4 h-4" />
                             </button>
                             
                             <button 
                               onClick={() => setSuratToCancel(surat)}
-                              className="p-1 text-orange-600 hover:bg-orange-50 hover:text-orange-800 rounded transition-colors" 
+                              className="p-1.5 text-orange-600 hover:bg-orange-50 hover:text-orange-800 rounded-lg transition-colors" 
                               title="Batalkan Surat"
                             >
-                              <Ban className="w-3.5 h-3.5" />
+                              <Ban className="w-4 h-4" />
                             </button>
                           </>
                         )}
                         <button 
                           onClick={() => setSuratToDelete(surat)}
-                          className="p-1 text-red-600 hover:bg-red-50 hover:text-red-800 rounded transition-colors" 
+                          className="p-1.5 text-red-600 hover:bg-red-50 hover:text-red-800 rounded-lg transition-colors" 
                           title="Hapus Surat Dari Arsip"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
