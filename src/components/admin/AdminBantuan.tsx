@@ -403,8 +403,8 @@ const MONTHS_LIST = [
     const isAllYears = filterYear === "Semua Tahun";
     const yearFilter = isAllYears ? null : Number(filterYear);
     
+    // uniquePrograms: all programs from all statuses (for dropdown)
     const programCounts: Record<string, number> = {};
-    // Count from bansos_recipients (all statuses for uniquePrograms)
     bansosData
       .filter(b => isAllYears || b.tahun === yearFilter)
       .forEach(b => {
@@ -424,7 +424,12 @@ const MONTHS_LIST = [
     });
 
     const uniquePrograms = Object.keys(programCounts).sort();
-    const selectedCount = programCounts[selectedProgram] || 0;
+
+    // selectedCount: only from bansos_recipients filtered by active status tab
+    const selectedCount = bansosData
+      .filter(b => b.program_id === selectedProgram && b.status === activeStatusTab && (isAllYears || b.tahun === yearFilter))
+      .length;
+
     const overlapResidents = residents.filter(r => getActiveAidPrograms(r, filterYear).length > 1);
     
     return {
@@ -433,7 +438,7 @@ const MONTHS_LIST = [
       programCounts,
       overlaps: overlapResidents
     };
-  }, [residents, filterYear, bansosData, selectedProgram]);
+  }, [residents, filterYear, bansosData, selectedProgram, activeStatusTab]);
 
   // Filtered list of residents based on search, selected program, salurFilter, and sort
   const filteredResidents = useMemo(() => {
