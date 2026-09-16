@@ -2420,8 +2420,14 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                                 </div>
                               </>
                             ) : (
-                              <span className="px-2.5 py-1 rounded-md font-bold text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 whitespace-nowrap">
-                                Aktif
+                              <span className={`px-2.5 py-1 rounded-md font-bold text-[10px] border whitespace-nowrap ${
+                                activeStatusTab === 'usulan'
+                                  ? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-200'
+                                  : activeStatusTab === 'pernah_mendapat'
+                                  ? 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400'
+                                  : 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200'
+                              }`}>
+                                {activeStatusTab === 'usulan' ? 'Menunggu' : activeStatusTab === 'pernah_mendapat' ? 'Selesai' : 'Aktif'}
                               </span>
                             )}
                           </div>
@@ -3053,7 +3059,15 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
               ) : (
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</label>
-                  <span className="px-2.5 py-1 rounded-md font-bold text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200">Aktif</span>
+                  <span className={`px-2.5 py-1 rounded-md font-bold text-[10px] border ${
+                    activeStatusTab === 'usulan'
+                      ? 'bg-amber-100 text-amber-800 border-amber-200'
+                      : activeStatusTab === 'pernah_mendapat'
+                      ? 'bg-gray-100 text-gray-600 border-gray-200'
+                      : 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                  }`}>
+                    {activeStatusTab === 'usulan' ? 'Menunggu' : activeStatusTab === 'pernah_mendapat' ? 'Selesai' : 'Aktif'}
+                  </span>
                 </div>
               )}
 
