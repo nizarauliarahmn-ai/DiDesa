@@ -3516,7 +3516,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                   {/* Signatures Footer */}
                   <div className="pt-6 font-sans text-xs grid grid-cols-3 gap-6 text-center break-inside-avoid">
                     <div className="space-y-14">
-                      <p className="font-bold">Mengetahui,<br />Ketua BPD {namaDesa || 'Desa'}</p>
+                      <p className="font-bold">Mengetahui,<br />Ketua BPD {villageName || 'Desa'}</p>
                       <p className="font-bold underline uppercase">{ketuaBpdName}</p>
                     </div>
                     <div className="space-y-14">
@@ -3524,7 +3524,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       <p className="font-bold underline uppercase">{kasiKesraName}</p>
                     </div>
                     <div className="space-y-14">
-                      <p className="font-bold">Disahkan Oleh,<br />Kepala Desa {namaDesa || 'Desa'}</p>
+                      <p className="font-bold">Disahkan Oleh,<br />Kepala Desa {villageName || 'Desa'}</p>
                       <p className="font-bold underline uppercase">{kadesName}</p>
                     </div>
                   </div>
