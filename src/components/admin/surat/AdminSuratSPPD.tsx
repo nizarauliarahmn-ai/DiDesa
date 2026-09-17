@@ -198,6 +198,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   }, [tanggalBerangkat, tanggalKembali]);
 
   const handlePrint = () => {
+    if (activeTab !== 'cetak') {
+      setActiveTab('cetak');
+      setTimeout(() => {
+        if (iframeRef.current && iframeRef.current.contentWindow) {
+          iframeRef.current.focus();
+          iframeRef.current.contentWindow.print();
+        }
+      }, 500);
+      return;
+    }
     if (iframeRef.current && iframeRef.current.contentWindow) {
       iframeRef.current.focus();
       iframeRef.current.contentWindow.print();
