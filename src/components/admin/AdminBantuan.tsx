@@ -224,6 +224,62 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
   const [bulkStopReason, setBulkStopReason] = useState('Meninggal Dunia');
   const [bulkStopNote, setBulkStopNote] = useState('');
 
+  // Aparatur Desa Data (for print signatures)
+  const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || '');
+  const [villageName, setVillageName] = useState(() => localStorage.getItem('village_name') || localStorage.getItem('kop_desa') || '');
+  const [bpdList, setBpdList] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem('village_bpd') || '[]'); } catch { return []; }
+  });
+  const [officers, setOfficers] = useState<any[]>(() => {
+    try { return JSON.parse(localStorage.getItem('village_officers') || '[]'); } catch { return []; }
+  });
+
+  // Load aparatur data from Supabase on mount
+  useEffect(() => {
+    const loadAparatur = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: userData } = await supabase.from('users').select('tenant_id').eq('id', user.id).single();
+        const tid = userData?.tenant_id;
+        if (!tid) return;
+        const { data } = await supabase.from('saas_settings').select('key, value').eq('tenant_id', tid);
+        if (!data) return;
+        data.forEach(item => {
+          if (item.key === 'village_bpd' && item.value) {
+            try { const v = JSON.parse(item.value); setBpdList(v); localStorage.setItem('village_bpd', item.value); } catch {}
+          }
+          if (item.key === 'village_officers' && item.value) {
+            try { const v = JSON.parse(item.value); setOfficers(v); localStorage.setItem('village_officers', item.value); } catch {}
+          }
+          if (item.key === 'kop_kades' && item.value) {
+            setNamaKades(item.value); localStorage.setItem('kop_kades', item.value);
+          }
+          if (item.key === 'village_name' && item.value) {
+            setVillageName(item.value); localStorage.setItem('village_name', item.value);
+          }
+        });
+      } catch {}
+    };
+    loadAparatur();
+  }, []);
+
+  // Resolve signature names from aparatur data
+  const ketuaBpdName = useMemo(() => {
+    const found = bpdList.find((b: any) => String(b.role || '').toLowerCase().includes('ketua'));
+    return found?.name || '( ................................ )';
+  }, [bpdList]);
+
+  const kasiKesraName = useMemo(() => {
+    const found = officers.find((o: any) => {
+      const role = String(o.role || '').toLowerCase();
+      return role.includes('kasi') && (role.includes('kesejahteraan') || role.includes('kesra') || role.includes('sosial'));
+    });
+    return found?.name || '( ................................ )';
+  }, [officers]);
+
+  const kadesName = useMemo(() => namaKades || '( ................................ )', [namaKades]);
+
   // Manual Resident Entry States
   const [isManualResident, setIsManualResident] = useState(false);
   const [manualResidentData, setManualResidentData] = useState({
@@ -556,6 +612,35 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
   }, [filteredResidents, currentPage, itemsPerPage]);
 
   const totalPages = Math.ceil(filteredResidents.length / itemsPerPage) || 1;
+
+  // Print: ALL recipients for selected program (not filtered by tab)
+  const printAllResidents = useMemo(() => {
+    const isAllYears = filterYear === "Semua Tahun";
+    const yearFilter = isAllYears ? null : Number(filterYear);
+    const niksFromBansos = new Set(
+      bansosData
+        .filter(b => b.program_id === selectedProgram && (isAllYears || b.tahun === yearFilter))
+        .map(b => b.resident_id)
+    );
+    const niksFromActiveAids = new Set(
+      residents
+        .filter(r => getActiveAidPrograms(r, filterYear).some((a: string) => a.startsWith(selectedProgram)))
+        .map(r => r.nik)
+    );
+    const allNiks = new Set([...niksFromBansos, ...niksFromActiveAids]);
+    const matched = residents.filter(r => allNiks.has(r.nik));
+    const matchedNiks = new Set(matched.map(r => r.nik));
+    const orphanEntries = bansosData
+      .filter(b => b.program_id === selectedProgram && (isAllYears || b.tahun === yearFilter) && !matchedNiks.has(b.resident_id))
+      .map(b => ({
+        nik: b.resident_id,
+        name: b.nama || 'Data Usulan',
+        rt: '',
+        rw: '',
+        isOrphan: true
+      }));
+    return [...matched, ...orphanEntries];
+  }, [residents, bansosData, selectedProgram, filterYear]);
 
   // Calculate Nominal Amount Disbursed
   const programAmountVal = useMemo(() => {
@@ -3359,7 +3444,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
               {/* Document KOP Header */}
               <div className="text-center border-b-4 border-double border-gray-900 pb-4 mb-6 space-y-1">
                 <h2 className="text-base md:text-lg font-bold uppercase tracking-wider">PEMERINTAH KABUPATEN HULU SUNGAI SELATAN</h2>
-                <h1 className="text-xl md:text-2xl font-black uppercase tracking-wide">KECAMATAN SIMPUR — DESA WASAH HILIR</h1>
+                <h1 className="text-xl md:text-2xl font-black uppercase tracking-wide">KECAMATAN SIMPUR — DESA {(villageName || 'WASAH HILIR').toUpperCase()}</h1>
                 <p className="text-[11px] font-sans text-gray-600 italic">Jl. Wasah Hilir No. 01, Simpur, HSS, Kalimantan Selatan • Kode Pos 71261</p>
               </div>
 
@@ -3390,12 +3475,12 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredResidents.length === 0 ? (
+                        {printAllResidents.length === 0 ? (
                           <tr>
                             <td colSpan={18} className="border border-gray-900 px-3 py-4 text-center text-gray-500 italic">Tidak ada data penerima bantuan.</td>
                           </tr>
                         ) : (
-                          filteredResidents.map((res, index) => {
+                          printAllResidents.map((res, index) => {
                             const resMonths = disbursedMonths[res.nik] || [];
                             const totalMonths = resMonths.length;
                             const totalNominal = totalMonths * programAmountVal;
@@ -3435,16 +3520,16 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                   {/* Signatures Footer */}
                   <div className="pt-6 font-sans text-xs grid grid-cols-3 gap-6 text-center break-inside-avoid">
                     <div className="space-y-14">
-                      <p className="font-bold">Mengetahui,<br />Ketua BPD Wasah Hilir</p>
-                      <p className="font-bold underline uppercase">( H. AHMAD SHODIQ, S.IP )</p>
+                      <p className="font-bold">Mengetahui,<br />Ketua BPD {namaDesa || 'Desa'}</p>
+                      <p className="font-bold underline uppercase">{ketuaBpdName}</p>
                     </div>
                     <div className="space-y-14">
                       <p className="font-bold">Verifikator,<br />Kasi Kesejahteraan Desa</p>
-                      <p className="font-bold underline uppercase">( ZULKIFLI, S.SOS )</p>
+                      <p className="font-bold underline uppercase">{kasiKesraName}</p>
                     </div>
                     <div className="space-y-14">
-                      <p className="font-bold">Disahkan Oleh,<br />Kepala Desa Wasah Hilir</p>
-                      <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
+                      <p className="font-bold">Disahkan Oleh,<br />Kepala Desa {namaDesa || 'Desa'}</p>
+                      <p className="font-bold underline uppercase">{kadesName}</p>
                     </div>
                   </div>
                 </div>
@@ -3473,12 +3558,12 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredResidents.length === 0 ? (
+                      {printAllResidents.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="border border-gray-900 px-3 py-4 text-center text-gray-500 italic">Tidak ada data KPM.</td>
                         </tr>
                       ) : (
-                        filteredResidents.map((res, index) => (
+                        printAllResidents.map((res, index) => (
                           <tr key={res.nik} className="hover:bg-gray-50">
                             <td className="border border-gray-900 px-2 py-2 text-center font-bold">{index + 1}</td>
                             <td className="border border-gray-900 px-3 py-2 font-mono font-semibold">{res.nik}</td>
@@ -3496,12 +3581,12 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
 
                   <div className="pt-6 font-sans text-xs grid grid-cols-2 gap-6 text-center break-inside-avoid">
                     <div className="space-y-14">
-                      <p className="font-bold">Bendahara Desa Wasah Hilir</p>
-                      <p className="font-bold underline uppercase">( AKHMAD ZAINI )</p>
+                      <p className="font-bold">Bendahara Desa {villageName || 'Desa'}</p>
+                      <p className="font-bold underline uppercase">( ................................ )</p>
                     </div>
                     <div className="space-y-14">
-                      <p className="font-bold">Kepala Desa Wasah Hilir</p>
-                      <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
+                      <p className="font-bold">Kepala Desa {villageName || 'Desa'}</p>
+                      <p className="font-bold underline uppercase">{kadesName}</p>
                     </div>
                   </div>
                 </div>
@@ -3520,10 +3605,10 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
 
                   <div className="space-y-3 text-justify font-sans text-xs md:text-sm leading-relaxed">
                     <p>
-                      Pada hari ini <strong>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>, bertempat di Balai Desa Wasah Hilir, Kecamatan Simpur, Kabupaten Hulu Sungai Selatan, telah diselenggarakan Musyawarah Desa (Musdes) penetapan usulan calon Keluarga Penerima Manfaat (KPM) program bantuan sosial <strong>{selectedProgram}</strong>.
+                      Pada hari ini <strong>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>, bertempat di Balai Desa {villageName || 'Desa'}, Kecamatan Simpur, Kabupaten Hulu Sungai Selatan, telah diselenggarakan Musyawarah Desa (Musdes) penetapan usulan calon Keluarga Penerima Manfaat (KPM) program bantuan sosial <strong>{selectedProgram}</strong>.
                     </p>
                     <p>
-                      Berdasarkan hasil verifikasi lapangan, verifikasi kriteria kelayakan kependudukan, dan alokasi APBDesa Wasah Hilir Tahun 2026, disepakati bahwa nama-nama warga di bawah ini dinyatakan <strong>SAH dan LAYAK</strong> sebagai penerima manfaat:
+                      Berdasarkan hasil verifikasi lapangan, verifikasi kriteria kelayakan kependudukan, dan alokasi APBDesa {villageName || 'Desa'} Tahun {filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear()}, disepakati bahwa nama-nama warga di bawah ini dinyatakan <strong>SAH dan LAYAK</strong> sebagai penerima manfaat:
                     </p>
                   </div>
 
@@ -3538,12 +3623,12 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredResidents.map((res, index) => (
+                      {printAllResidents.map((res, index) => (
                         <tr key={res.nik} className="hover:bg-gray-50">
                           <td className="border border-gray-900 px-3 py-2 text-center font-bold">{index + 1}</td>
                           <td className="border border-gray-900 px-3 py-2 font-mono font-semibold">{res.nik}</td>
                           <td className="border border-gray-900 px-3 py-2 font-bold">{res.name}</td>
-                          <td className="border border-gray-900 px-3 py-2">RT {res.rt || "-"}/RW {res.rw || "-"}, Desa Wasah Hilir</td>
+                          <td className="border border-gray-900 px-3 py-2">RT {res.rt || "-"}/RW {res.rw || "-"}, Desa {villageName || 'Desa'}</td>
                           <td className="border border-gray-900 px-3 py-2 text-center font-semibold text-emerald-800">Ditetapkan Layak</td>
                         </tr>
                       ))}
@@ -3556,16 +3641,16 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
 
                   <div className="pt-6 font-sans text-xs grid grid-cols-3 gap-6 text-center break-inside-avoid">
                     <div className="space-y-14">
-                      <p className="font-bold">Ketua BPD Wasah Hilir</p>
-                      <p className="font-bold underline uppercase">( H. AHMAD SHODIQ, S.IP )</p>
+                      <p className="font-bold">Ketua BPD {villageName || 'Desa'}</p>
+                      <p className="font-bold underline uppercase">{ketuaBpdName}</p>
                     </div>
                     <div className="space-y-14">
                       <p className="font-bold">Sekretaris Desa</p>
-                      <p className="font-bold underline uppercase">( MUHAMMAD RIFQI, S.KOM )</p>
+                      <p className="font-bold underline uppercase">( ................................ )</p>
                     </div>
                     <div className="space-y-14">
-                      <p className="font-bold">Kepala Desa Wasah Hilir</p>
-                      <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
+                      <p className="font-bold">Kepala Desa {villageName || 'Desa'}</p>
+                      <p className="font-bold underline uppercase">{kadesName}</p>
                     </div>
                   </div>
                 </div>
@@ -3578,10 +3663,10 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                     <h3 className="text-base md:text-lg font-black uppercase underline tracking-wide">
                       SLIP / KUPON RESMI BUKTI PENERIMAAN BANTUAN SOSIAL
                     </h3>
-                    <p className="text-xs font-bold text-gray-700">PEMERINTAH DESA WASAH HILIR • TAHUN 2026</p>
+                    <p className="text-xs font-bold text-gray-700">PEMERINTAH DESA {villageName || 'DESA'} • TAHUN {filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear()}</p>
                   </div>
 
-                  {(selectedPrintResident ? [selectedPrintResident] : filteredResidents).slice(0, 10).map((res) => {
+                  {(selectedPrintResident ? [selectedPrintResident] : printAllResidents).slice(0, 10).map((res) => {
                     const resMonths = disbursedMonths[res.nik] || [];
                     return (
                       <div key={res.nik} className="border-2 border-dashed border-gray-800 p-4 sm:p-6 rounded-2xl space-y-4 break-inside-avoid bg-gray-50/50">
