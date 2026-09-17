@@ -234,6 +234,14 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
     try { return JSON.parse(localStorage.getItem('village_officers') || '[]'); } catch { return []; }
   });
 
+  // KOP Surat Data (for print headers)
+  const [kopKabupaten, setKopKabupaten] = useState(() => localStorage.getItem('kop_kabupaten') || 'Pemerintah Kabupaten Hulu Sungai Selatan');
+  const [kopKecamatan, setKopKecamatan] = useState(() => localStorage.getItem('kop_kecamatan') || 'Kecamatan Simpur');
+  const [kopDesa, setKopDesa] = useState(() => localStorage.getItem('kop_desa') || 'Desa Wasah Hilir');
+  const [kopAlamat, setKopAlamat] = useState(() => localStorage.getItem('kop_alamat') || '');
+  const [kopKontak, setKopKontak] = useState(() => localStorage.getItem('kop_kontak') || '');
+  const [kopLogoUrl, setKopLogoUrl] = useState(() => localStorage.getItem('kop_logo_url') || 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Lambang_Kabupaten_Hulu_Sungai_Selatan.svg/200px-Lambang_Kabupaten_Hulu_Sungai_Selatan.svg.png');
+
   // Load aparatur data from Supabase when tenantId is available
   useEffect(() => {
     if (!tenantId) return;
@@ -253,6 +261,24 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
           }
           if (item.key === 'village_name' && item.value) {
             setVillageName(item.value); localStorage.setItem('village_name', item.value);
+          }
+          if (item.key === 'kop_kabupaten' && item.value) {
+            setKopKabupaten(item.value); localStorage.setItem('kop_kabupaten', item.value);
+          }
+          if (item.key === 'kop_kecamatan' && item.value) {
+            setKopKecamatan(item.value); localStorage.setItem('kop_kecamatan', item.value);
+          }
+          if (item.key === 'kop_desa' && item.value) {
+            setKopDesa(item.value); localStorage.setItem('kop_desa', item.value);
+          }
+          if (item.key === 'kop_alamat' && item.value) {
+            setKopAlamat(item.value); localStorage.setItem('kop_alamat', item.value);
+          }
+          if (item.key === 'kop_kontak' && item.value) {
+            setKopKontak(item.value); localStorage.setItem('kop_kontak', item.value);
+          }
+          if (item.key === 'kop_logo_url' && item.value) {
+            setKopLogoUrl(item.value); localStorage.setItem('kop_logo_url', item.value);
           }
         });
       } catch {}
@@ -3438,10 +3464,29 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
             <div className="p-6 md:p-10 bg-white text-gray-900 font-sans leading-relaxed text-xs md:text-sm max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible print:p-0 print:text-black">
               
               {/* Document KOP Header */}
-              <div className="text-center border-b-4 border-double border-gray-900 pb-4 mb-6 space-y-1">
-                <h2 className="text-base md:text-lg font-bold uppercase tracking-wider">PEMERINTAH KABUPATEN HULU SUNGAI SELATAN</h2>
-                <h1 className="text-xl md:text-2xl font-black uppercase tracking-wide">KECAMATAN SIMPUR — DESA {(villageName || 'WASAH HILIR').toUpperCase()}</h1>
-                <p className="text-[11px] font-sans text-gray-600 italic">Jl. Wasah Hilir No. 01, Simpur, HSS, Kalimantan Selatan • Kode Pos 71261</p>
+              <div style={{ borderBottom: '3px solid #000', marginBottom: '16px', paddingBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                  <div style={{ width: '90px', height: '100px', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <img src={kopLogoUrl} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  </div>
+                  <div style={{ textAlign: 'center', flex: 1, paddingRight: '90px' }}>
+                    <div style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>
+                      {kopKabupaten.toUpperCase().replace(/^(PEMERINTAH\s+)?(KABUPATEN|KOTA)\s+/i, (m) => m.trim().toUpperCase())}
+                    </div>
+                    <div style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>
+                      {kopKecamatan.toUpperCase().replace(/^(KECAMATAN)\s+/i, '').trim()}
+                    </div>
+                    <div style={{ fontWeight: 900, fontSize: '26px', textTransform: 'uppercase', letterSpacing: '2px', lineHeight: '1.1', margin: '2px 0 3px 0' }}>
+                      {kopDesa.toUpperCase().replace(/^(DESA|KELURAHAN)\s+/i, '').trim()}
+                    </div>
+                    {kopAlamat && (
+                      <div style={{ fontSize: '10.5px', textTransform: 'capitalize', lineHeight: '1.15', margin: '2px 0 1px 0' }}>{kopAlamat}</div>
+                    )}
+                    {kopKontak && (
+                      <div style={{ fontSize: '10.5px', lineHeight: '1.15', margin: '1px 0 0 0' }}>{kopKontak}</div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* MODE 1: Rekapitulasi 12 Bulan (Jan - Des) */}
@@ -3594,14 +3639,14 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                   <div className="text-center space-y-1">
                     <h3 className="text-base md:text-lg font-bold uppercase underline tracking-wide">BERITA ACARA MUSYAWARAH DESA</h3>
                     <p className="text-xs font-sans font-bold text-gray-700">
-                      PENETAPAN KELUARGA PENERIMA MANFAAT (KPM) PROGRAM {selectedProgram.toUpperCase()} TAHUN 2026
+                      PENETAPAN KELUARGA PENERIMA MANFAAT (KPM) PROGRAM {selectedProgram.toUpperCase()} TAHUN {filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear()}
                     </p>
                     <p className="text-xs font-sans text-gray-500">Nomor: 140 / BA-MUSDES / {new Date().getFullYear()}</p>
                   </div>
 
                   <div className="space-y-3 text-justify font-sans text-xs md:text-sm leading-relaxed">
                     <p>
-                      Pada hari ini <strong>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>, bertempat di Balai Desa {villageName || 'Desa'}, Kecamatan Simpur, Kabupaten Hulu Sungai Selatan, telah diselenggarakan Musyawarah Desa (Musdes) penetapan usulan calon Keluarga Penerima Manfaat (KPM) program bantuan sosial <strong>{selectedProgram}</strong>.
+                      Pada hari ini <strong>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>, bertempat di Balai Desa {villageName || 'Desa'}, {kopKecamatan}, Kabupaten {kopKabupaten.replace(/^(pemerintah\s+)?(kabupaten|kota)\s+/i, '').trim()}, telah diselenggarakan Musyawarah Desa (Musdes) penetapan usulan calon Keluarga Penerima Manfaat (KPM) program bantuan sosial <strong>{selectedProgram}</strong>.
                     </p>
                     <p>
                       Berdasarkan hasil verifikasi lapangan, verifikasi kriteria kelayakan kependudukan, dan alokasi APBDesa {villageName || 'Desa'} Tahun {filterYear !== "Semua Tahun" ? filterYear : new Date().getFullYear()}, disepakati bahwa nama-nama warga di bawah ini dinyatakan <strong>SAH dan LAYAK</strong> sebagai penerima manfaat:
