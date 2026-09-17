@@ -165,7 +165,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     const activeKades = localStorage.getItem('kop_kades');
     const found = officersList.find((o: any) => o.name === activeKades);
     setNipKades(found?.nip || '');
-    setIncludeCamat(false);
 
     if (editData?.nomorSurat) {
       setNomorSurat(editData.nomorSurat);
