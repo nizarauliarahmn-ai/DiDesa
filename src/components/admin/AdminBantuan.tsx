@@ -2400,7 +2400,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                                     Rp {(((disbursedMonths[resident.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
                                   </span>
                                 </div>
-                                <div className="flex flex-wrap gap-0.5 max-w-[210px]">
+                                <div className="flex flex-wrap gap-[1px] max-w-[200px]">
                                   {MONTHS_LIST.map((m, idx) => {
                                     const isDisbursed = (disbursedMonths[resident.nik] || []).includes(m.id);
                                     const isCurrentMonth = idx === new Date().getMonth();
@@ -2410,7 +2410,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                                         type="button"
                                         onClick={() => handleToggleMonth(resident.nik, m.id)}
                                         title={`${m.fullName}: ${isDisbursed ? 'Sudah Salur ✓' : 'Belum Salur'}`}
-                                        className={`w-5 h-4.5 rounded text-[8px] font-black transition-all border flex items-center justify-center cursor-pointer active:scale-90 ${
+                                        className={`w-4 h-3.5 rounded text-[7px] font-black transition-all border flex items-center justify-center cursor-pointer active:scale-90 ${
                                           isDisbursed
                                             ? 'bg-emerald-600 text-white border-emerald-700 hover:bg-emerald-700'
                                             : isCurrentMonth
