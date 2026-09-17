@@ -805,7 +805,45 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           onSave={handleRecord}
           isSaving={isSaving}
           printLabel="Cetak Surat"
-        />
+        >
+          {/* Document selector in header */}
+          <div className="flex items-center gap-1 pl-3 border-l border-slate-200 dark:border-slate-700 overflow-x-auto">
+            <button
+              onClick={() => setPrintLayout('surattugas')}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+                printLayout === 'surattugas'
+                  ? 'bg-emerald-500 text-white shadow-sm'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <FileText size={12} /> S. Tugas
+            </button>
+            {pelaksanaList.map((p, idx) => (
+              <React.Fragment key={`hdr-${p.id}`}>
+                <button
+                  onClick={() => setPrintLayout(`sppd-${p.id}`)}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+                    printLayout === `sppd-${p.id}`
+                      ? 'bg-emerald-500 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <Printer size={12} /> {p.nama ? p.nama.split(' ')[0] : `P${idx + 1}`}
+                </button>
+                <button
+                  onClick={() => setPrintLayout(`laporan-${p.id}`)}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+                    printLayout === `laporan-${p.id}`
+                      ? 'bg-emerald-500 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <FileText size={12} /> Lap.
+                </button>
+              </React.Fragment>
+            ))}
+          </div>
+        </SuratEditorHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Form Column */}
@@ -1233,59 +1271,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 <div className="w-px h-4 bg-slate-200 mx-0.5"></div>
                 <button onClick={() => setZoomLevel(0.45)} className="text-[10px] font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 px-1.5">Reset</button>
               </div>
-              <button
-                onClick={handlePrint}
-                disabled={!nomorSurat}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-              >
-                <Printer size={13} /> Cetak
-              </button>
-            </div>
-          </div>
-
-          {/* Document selector */}
-          <div className="px-3 py-2 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 overflow-x-auto">
-            <div className="flex flex-col gap-1.5">
-              {/* Surat Tugas */}
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 w-16 shrink-0 uppercase">S. Tugas</span>
-                <button
-                  onClick={() => setPrintLayout('surattugas')}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
-                    printLayout === 'surattugas'
-                      ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
-                      : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300'
-                  }`}
-                >
-                  <FileText size={12} /> Surat Tugas
-                </button>
-              </div>
-              {/* SPPD per pelaksana */}
-              {pelaksanaList.map((p, idx) => (
-                <div key={`sel-${p.id}`} className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 w-16 shrink-0 uppercase">SPPD {idx + 1}</span>
-                  <button
-                    onClick={() => setPrintLayout(`sppd-${p.id}`)}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
-                      printLayout === `sppd-${p.id}`
-                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
-                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300'
-                    }`}
-                  >
-                    <Printer size={12} /> {p.nama ? p.nama.split(' ')[0] : `P${idx + 1}`}
-                  </button>
-                  <button
-                    onClick={() => setPrintLayout(`laporan-${p.id}`)}
-                    className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all border ${
-                      printLayout === `laporan-${p.id}`
-                        ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm'
-                        : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:border-emerald-300'
-                    }`}
-                  >
-                    <FileText size={12} /> Laporan
-                  </button>
-                </div>
-              ))}
             </div>
           </div>
 
