@@ -3471,13 +3471,13 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                   </div>
                   <div style={{ textAlign: 'center', flex: 1, paddingRight: '90px' }}>
                     <div style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>
-                      {kopKabupaten.toUpperCase().replace(/^(PEMERINTAH\s+)?(KABUPATEN|KOTA)\s+/i, (m) => m.trim().toUpperCase())}
+                      {kopKabupaten.toUpperCase()}
                     </div>
                     <div style={{ fontWeight: 700, fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px', lineHeight: '1.1', margin: '0 0 2px 0' }}>
-                      {kopKecamatan.toUpperCase().replace(/^(KECAMATAN)\s+/i, '').trim()}
+                      {kopKecamatan.toUpperCase()}
                     </div>
                     <div style={{ fontWeight: 900, fontSize: '26px', textTransform: 'uppercase', letterSpacing: '2px', lineHeight: '1.1', margin: '2px 0 3px 0' }}>
-                      {kopDesa.toUpperCase().replace(/^(DESA|KELURAHAN)\s+/i, '').trim()}
+                      {kopDesa.toUpperCase()}
                     </div>
                     {kopAlamat && (
                       <div style={{ fontSize: '10.5px', textTransform: 'capitalize', lineHeight: '1.15', margin: '2px 0 1px 0' }}>{kopAlamat}</div>
