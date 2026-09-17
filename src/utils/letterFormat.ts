@@ -26,18 +26,18 @@ export const generateKopSuratHTML = (options: KopSuratOptions = {}) => {
 
   return `
 <!-- KOP SURAT -->
-<div style="border-bottom:3px solid #000;margin-bottom:12px;font-family:${font};">
-  <div style="display:flex;align-items:flex-start;padding-bottom:6px;margin-bottom:1px;">
+<div style="border-bottom:3px solid #000;margin-bottom:10px;font-family:${font};">
+  <div style="display:flex;align-items:flex-start;padding-bottom:4px;margin-bottom:0;">
     <div style="display:flex;width:100%;align-items:center;">
-      <div style="width:90px;height:100px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:15px;">
+      <div style="width:80px;height:90px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:12px;">
         <img src="${logoUrl}" style="width:100%;height:100%;object-fit:contain;" />
       </div>
-      <div style="text-align:center;flex:1;padding-right:90px;">
-        <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">PEMERINTAH KABUPATEN ${kabupaten.toUpperCase()}</div>
-        <div style="font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:0 0 2px 0;">KECAMATAN ${kecamatan.toUpperCase()}</div>
-        <div style="font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:2px;line-height:1.1;margin:2px 0 3px 0;">DESA ${desa.toUpperCase()}</div>
-        <div style="font-size:10.5px;margin-top:4px;text-transform:capitalize;line-height:1.15;margin:2px 0 1px 0;">${alamat}</div>
-        <div style="font-size:10.5px;line-height:1.15;margin:1px 0 0 0;">${kontak}</div>
+      <div style="text-align:center;flex:1;padding-right:80px;">
+        <div style="font-weight:bold;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.1;margin:0 0 1px 0;">PEMERINTAH KABUPATEN ${kabupaten.toUpperCase()}</div>
+        <div style="font-weight:bold;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;line-height:1.1;margin:0 0 1px 0;">KECAMATAN ${kecamatan.toUpperCase()}</div>
+        <div style="font-weight:900;font-size:22px;text-transform:uppercase;letter-spacing:1px;line-height:1.1;margin:2px 0 2px 0;">DESA ${desa.toUpperCase()}</div>
+        <div style="font-size:9.5px;margin-top:2px;text-transform:capitalize;line-height:1.1;margin:1px 0 0 0;">${alamat}</div>
+        <div style="font-size:9.5px;line-height:1.1;margin:1px 0 0 0;">${kontak}</div>
       </div>
     </div>
   </div>
