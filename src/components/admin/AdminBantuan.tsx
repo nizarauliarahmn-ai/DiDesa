@@ -2915,8 +2915,8 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
 
       {/* Modal Berita Acara Musdes */}
       {showBaModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 my-8 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto print:p-0 print:bg-white print:static">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 my-8 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:w-full print:max-w-none print:rounded-none">
             <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 print:hidden">
               <div className="flex items-center gap-2">
                 <FileText className="w-6 h-6 text-indigo-600" />
@@ -2938,7 +2938,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
               </div>
             </div>
 
-            <div className="p-8 md:p-12 space-y-8 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-serif leading-relaxed text-sm print:p-0 print:text-black">
+            <div className="printable-area p-8 md:p-12 space-y-8 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-serif leading-relaxed text-sm print:p-0 print:text-black">
               {/* KOP Desa Header */}
               <div className="text-center border-b-4 border-double border-gray-900 dark:border-white pb-6 space-y-1">
                 <h2 className="text-xl font-bold uppercase tracking-wider">PEMERINTAH KABUPATEN BOGOR</h2>
@@ -3461,7 +3461,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
             </div>
 
             {/* Printable Document Body Area */}
-            <div className="p-6 md:p-10 bg-white text-gray-900 font-sans leading-relaxed text-xs md:text-sm max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible print:p-0 print:text-black">
+            <div className="printable-area p-6 md:p-10 bg-white text-gray-900 font-sans leading-relaxed text-xs md:text-sm max-h-[75vh] overflow-y-auto print:max-h-none print:overflow-visible print:p-0 print:text-black">
               
               {/* Document KOP Header */}
               <div style={{ borderBottom: '3px solid #000', marginBottom: '16px', paddingBottom: '8px' }}>
