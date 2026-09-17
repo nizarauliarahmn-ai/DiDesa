@@ -2986,19 +2986,76 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
             {/* Content */}
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
 
-              {/* Program */}
-              <div>
-                <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Program</label>
-                <select
-                  value={selectedProgram}
-                  onChange={(e) => setSelectedProgram(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  {stats.uniquePrograms.map(p => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </select>
-              </div>
+              {/* Program Aktif & Pernah Mendapat */}
+              {(() => {
+                const nik = selectedResidentDetailModal.nik;
+                const residentBansos = bansosData.filter(b => b.resident_id === nik);
+                const aktifPrograms = residentBansos.filter(b => b.status === 'aktif');
+                const pernahPrograms = residentBansos.filter(b => b.status === 'pernah_mendapat');
+                const usulanPrograms = residentBansos.filter(b => b.status === 'usulan');
+                return (
+                  <div className="space-y-2">
+                    {aktifPrograms.length > 0 && (
+                      <div>
+                        <label className="block text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Aktif Diterima</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {aktifPrograms.map(b => (
+                            <span
+                              key={b.program_id}
+                              onClick={() => setSelectedProgram(b.program_id)}
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border cursor-pointer transition-all ${
+                                selectedProgram === b.program_id
+                                  ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
+                                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 hover:bg-emerald-100'
+                              }`}
+                            >
+                              {b.program_id}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {pernahPrograms.length > 0 && (
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pernah Menerima</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {pernahPrograms.map(b => (
+                            <span
+                              key={b.program_id}
+                              className="px-2.5 py-1 rounded-lg text-[10px] font-bold border bg-gray-50 text-gray-400 border-gray-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700 line-through"
+                            >
+                              {b.program_id}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {usulanPrograms.length > 0 && (
+                      <div>
+                        <label className="block text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Menunggu Persetujuan</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {usulanPrograms.map(b => (
+                            <span
+                              key={b.program_id}
+                              onClick={() => setSelectedProgram(b.program_id)}
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border cursor-pointer transition-all ${
+                                selectedProgram === b.program_id
+                                  ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 hover:bg-amber-100'
+                              }`}
+                            >
+                              {b.program_id}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {aktifPrograms.length === 0 && pernahPrograms.length === 0 && usulanPrograms.length === 0 && (
+                      <div className="text-[10px] text-gray-400 italic">Belum terdaftar di program bantuan apapun.</div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Info Usulan: Keterangan & Foto */}
               {(selectedResidentDetailModal.bansosStatus === 'usulan' || (!selectedResidentDetailModal.isOrphan && activeStatusTab === 'usulan')) && (() => {
