@@ -69,7 +69,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [isSaving, setIsSaving] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [zoomLevel, setZoomLevel] = useState(0.8);
+  const [zoomLevel, setZoomLevel] = useState(0.45);
   const [officers, setOfficers] = useState<any[]>([]);
 
   // Desa Settings
@@ -1231,7 +1231,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 <span className="text-[11px] font-mono font-bold text-slate-600 dark:text-slate-400 px-1.5 w-10 text-center">{Math.round(zoomLevel * 100)}%</span>
                 <button onClick={() => setZoomLevel(z => Math.min(2.0, z + 0.1))} className="p-1 text-gray-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"><ZoomIn size={14} /></button>
                 <div className="w-px h-4 bg-slate-200 mx-0.5"></div>
-                <button onClick={() => setZoomLevel(0.8)} className="text-[10px] font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 px-1.5">Reset</button>
+                <button onClick={() => setZoomLevel(0.45)} className="text-[10px] font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 px-1.5">Reset</button>
               </div>
               <button
                 onClick={handlePrint}
