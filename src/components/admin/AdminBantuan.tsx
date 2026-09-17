@@ -234,16 +234,12 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
     try { return JSON.parse(localStorage.getItem('village_officers') || '[]'); } catch { return []; }
   });
 
-  // Load aparatur data from Supabase on mount
+  // Load aparatur data from Supabase when tenantId is available
   useEffect(() => {
+    if (!tenantId) return;
     const loadAparatur = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-        const { data: userData } = await supabase.from('users').select('tenant_id').eq('id', user.id).single();
-        const tid = userData?.tenant_id;
-        if (!tid) return;
-        const { data } = await supabase.from('saas_settings').select('key, value').eq('tenant_id', tid);
+        const { data } = await supabase.from('saas_settings').select('key, value').eq('tenant_id', tenantId);
         if (!data) return;
         data.forEach(item => {
           if (item.key === 'village_bpd' && item.value) {
@@ -262,7 +258,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
       } catch {}
     };
     loadAparatur();
-  }, []);
+  }, [tenantId]);
 
   // Resolve signature names from aparatur data
   const ketuaBpdName = useMemo(() => {
