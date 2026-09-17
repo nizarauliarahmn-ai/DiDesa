@@ -2400,7 +2400,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                                     Rp {(((disbursedMonths[resident.nik] || []).length * programAmountVal)).toLocaleString('id-ID')}
                                   </span>
                                 </div>
-                                <div className="flex flex-wrap gap-[1px] max-w-[200px]">
+                                <div className="flex flex-wrap gap-[1px]">
                                   {MONTHS_LIST.map((m, idx) => {
                                     const isDisbursed = (disbursedMonths[resident.nik] || []).includes(m.id);
                                     const isCurrentMonth = idx === new Date().getMonth();
