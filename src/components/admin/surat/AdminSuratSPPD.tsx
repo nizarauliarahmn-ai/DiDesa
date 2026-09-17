@@ -82,7 +82,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || '');
   const [roleKades, setRoleKades] = useState('Kepala Desa');
   const [nipKades, setNipKades] = useState('');
-  const [includeCamat, setIncludeCamat] = useState(false);
+  const [useEsignature, setUseEsignature] = useState(true);
 
   // SPPD State
   const classifications = getLetterClassifications();
@@ -780,7 +780,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
               <div class="mb-10 text-justify leading-relaxed">Demikian surat tugas ini untuk dilaksanakan sebagaimana mestinya.</div>
 
-              ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, includeCamat, true, nomorSurat)}
+              ${getPrintSignatureHTML(desaName, currentDateFormatted(), namaKades, roleKades, nipKades, false, true, nomorSurat, useEsignature)}
             </div>
             <div style="position:absolute;bottom:8mm;left:15mm;right:15mm;width:calc(100% - 30mm);">
                 ${SAAS_CONFIG.globalFooterHTML}
@@ -1204,11 +1204,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             </div>
           </div>
           
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 mb-6">
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider">Pengaturan Tanda Tangan</h3>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm dark:shadow-none border border-amber-200 dark:border-amber-800/40 mb-6">
+            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500"></span> Pejabat Penandatangan
+            </h3>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Pejabat Penandatangan</label>
+              <div className="p-4 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-800/30">
+                <label className="block text-xs font-bold text-amber-700 dark:text-amber-400 mb-1.5 uppercase tracking-wider">Nama Pejabat</label>
                 <select
                   value={namaKades}
                   onChange={(e) => {
@@ -1219,35 +1221,37 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                       setNipKades(selected.nip || '');
                     }
                   }}
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none dark:bg-slate-800"
+                  className="w-full px-4 py-2.5 rounded-xl border border-amber-200 dark:border-amber-700 focus:ring-2 focus:ring-amber-500 outline-none dark:bg-slate-800 bg-white text-sm"
                 >
                   {officers.length > 0 ? (
                     officers.map((officer: any, idx: number) => (
-                      <option key={idx} value={officer.name}>{officer.name} - {officer.role}</option>
+                      <option key={idx} value={officer.name}>{officer.name} ({officer.role})</option>
                     ))
                   ) : (
-                    <option value={namaKades}>{namaKades} - {roleKades}</option>
+                    <option value={namaKades}>{namaKades} ({roleKades})</option>
                   )}
                 </select>
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  Jika memilih selain Kepala Desa, sistem akan otomatis menambahkan keterangan <strong>"A.n. Kepala Desa,"</strong>.
-                </p>
               </div>
-              
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <label className="flex items-start gap-3 cursor-pointer p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl transition-colors">
-                  <input 
-                    type="checkbox"
-                    checked={includeCamat}
-                    onChange={(e) => setIncludeCamat(e.target.checked)}
-                    className="w-5 h-5 mt-0.5 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500"
-                  />
-                  <div>
-                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tambahkan Kolom Mengetahui Camat</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Gunakan format 2 tanda tangan pada Surat Tugas (Camat di sebelah kiri)</div>
+
+              <div className="mt-4 pt-4 border-t border-amber-100 dark:border-amber-800/30 space-y-3">
+                <label className="flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800/40 rounded-xl cursor-pointer hover:bg-amber-50/50 transition-all">
+                  <div className="space-y-0.5 pr-4">
+                    <div className="font-bold text-slate-800 dark:text-slate-100 text-sm">Tanda Tangan Elektronik (TTE / QR Code)</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Tampilkan QR Code verifikasi dokumen resmi pada hasil cetak</div>
+                  </div>
+                  <div className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input 
+                      type="checkbox" 
+                      checked={useEsignature} 
+                      onChange={(e) => setUseEsignature(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-emerald-600"></div>
                   </div>
                 </label>
               </div>
+
+              <p className="text-xs text-amber-600 dark:text-amber-400 italic mt-2">* Nama dan jabatan pejabat dapat diatur secara permanen melalui Menu Pengaturan.</p>
             </div>
           </div>
 
