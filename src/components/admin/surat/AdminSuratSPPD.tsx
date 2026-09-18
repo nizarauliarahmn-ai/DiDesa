@@ -243,7 +243,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         tanggal: isBackdate ? new Date(tanggalSurat).toISOString() : new Date().toISOString(),
         status: 'Selesai' as const,
         keperluan: maksudPerjalanan || 'Perjalanan Dinas',
-        formData: formDataPayload
+        data: formDataPayload
       };
 
       if (editLetterId) {
