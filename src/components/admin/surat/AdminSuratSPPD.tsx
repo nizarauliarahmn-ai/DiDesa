@@ -820,9 +820,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           <div className="flex items-center gap-1 pl-3 border-l border-slate-200 dark:border-slate-700 overflow-x-auto">
             <button
               onClick={() => setPrintLayout('surattugas')}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap h-8 ${
                 printLayout === 'surattugas'
-                  ? 'bg-emerald-500 text-white shadow-sm'
+                  ? 'bg-slate-700 dark:bg-slate-500 text-white shadow-sm'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
@@ -832,9 +832,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               <React.Fragment key={`hdr-${p.id}`}>
                 <button
                   onClick={() => setPrintLayout(`sppd-${p.id}`)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap h-8 ${
                     printLayout === `sppd-${p.id}`
-                      ? 'bg-emerald-500 text-white shadow-sm'
+                      ? 'bg-slate-700 dark:bg-slate-500 text-white shadow-sm'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -842,9 +842,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 </button>
                 <button
                   onClick={() => setPrintLayout(`laporan-${p.id}`)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap h-8 ${
                     printLayout === `laporan-${p.id}`
-                      ? 'bg-emerald-500 text-white shadow-sm'
+                      ? 'bg-slate-700 dark:bg-slate-500 text-white shadow-sm'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
@@ -854,7 +854,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             ))}
             <button
               onClick={handlePrintAll}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap bg-amber-500 text-white shadow-sm hover:bg-amber-600"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap h-8 bg-emerald-600 text-white shadow-sm hover:bg-emerald-500"
             >
               <Printer size={12} /> Cetak Semua
             </button>
