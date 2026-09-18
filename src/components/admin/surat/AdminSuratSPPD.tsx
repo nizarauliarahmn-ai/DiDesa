@@ -202,6 +202,18 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     }
   };
 
+  const handlePrintAll = () => {
+    const savedLayout = printLayout;
+    setPrintLayout('semua');
+    setTimeout(() => {
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        iframeRef.current.focus();
+        iframeRef.current.contentWindow.print();
+      }
+      setTimeout(() => setPrintLayout(savedLayout), 500);
+    }, 300);
+  };
+
   const handleRecord = () => {
     if (!nomorSurat) {
       showToast('Nomor surat wajib diisi', 'error');
@@ -410,7 +422,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
 
     const generatePage2And3 = (participant: any) => `
           <!-- HALAMAN 2: VISUM SPPD (LANDSCAPE) -->
-          <div class="page-landscape page-sppd bg-white shadow-lg mx-auto" style="${printLayout !== `sppd-${participant.groupId}` ? 'display: none;' : ''}">
+          <div class="page-landscape page-sppd bg-white shadow-lg mx-auto" style="${printLayout !== `sppd-${participant.groupId}` && printLayout !== 'semua' ? 'display: none;' : ''}">
             <div class="flex gap-4 h-full">
               <!-- Kiri -->
               <div class="w-[53%] pr-4">
@@ -664,7 +676,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <!-- HALAMAN 3: LEMBAR LAPORAN -->
-          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout !== `laporan-${participant.groupId}` ? 'display: none;' : ''}">
+          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout !== `laporan-${participant.groupId}` && printLayout !== 'semua' ? 'display: none;' : ''}">
             <div class="text-[14px] text-black pt-12">
               <div class="text-center mb-10">
                 <h6 class="font-bold uppercase text-[16px]">LAPORAN PERJALANAN DINAS</h6>
@@ -725,6 +737,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
               ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
               ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
+              ${printLayout === 'semua' ? `@page { size: A4; margin: 0; }` : ''}
               .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
@@ -732,7 +745,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         <body>
 
           <!-- HALAMAN 1: SURAT TUGAS -->
-          <div class="page-a4 page-spt bg-white shadow-lg mx-auto" style="${printLayout !== 'surattugas' ? 'display: none;' : ''}">
+          <div class="page-a4 page-spt bg-white shadow-lg mx-auto" style="${printLayout !== 'surattugas' && printLayout !== 'semua' ? 'display: none;' : ''}">
             ${kopSuratHTML}
             
             <div class="text-[14px] text-black">
@@ -841,6 +854,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                 </button>
               </React.Fragment>
             ))}
+            <button
+              onClick={handlePrintAll}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap bg-amber-500 text-white shadow-sm hover:bg-amber-600"
+            >
+              <Printer size={12} /> Cetak Semua
+            </button>
           </div>
         </SuratEditorHeader>
 
