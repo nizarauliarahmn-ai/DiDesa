@@ -9,6 +9,7 @@ import ToastContainer from './components/common/ToastContainer';
 import WaNotificationManager from './components/common/WaNotificationManager';
 import { GlobalUpdateNotifier } from './components/GlobalUpdateNotifier';
 import PageTransition from './components/common/PageTransition';
+import TabErrorBoundary from './components/common/TabErrorBoundary';
 import Login from './components/Login';
 const TrialRegistration = React.lazy(() => import('./components/TrialRegistration'));
 import TenantNotFound from './components/TenantNotFound';
@@ -709,9 +710,9 @@ export default function App() {
                 {adminTab === 'kepuasan' && <AdminKepuasan />}
                 {adminTab === 'buku_tamu' && <AdminBukuTamu />}
                 {adminTab === 'usulan_desa' && <AdminUsulanDesa />}
-                {adminTab === 'rpjmdesa' && <AdminRPJMDesa />}
-                {adminTab === 'rkpdesa' && <AdminRKPDesa />}
-                {adminTab === 'apbdesa' && <AdminAPBDesa />}
+                {adminTab === 'rpjmdesa' && <TabErrorBoundary tabKey="rpjmdesa"><AdminRPJMDesa /></TabErrorBoundary>}
+                {adminTab === 'rkpdesa' && <TabErrorBoundary tabKey="rkpdesa"><AdminRKPDesa /></TabErrorBoundary>}
+                {adminTab === 'apbdesa' && <TabErrorBoundary tabKey="apbdesa"><AdminAPBDesa /></TabErrorBoundary>}
                 {adminTab === 'berita' && (
                   <AdminBerita 
                     searchQuery={globalSearch}
