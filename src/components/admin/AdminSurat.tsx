@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminSuratDashboard from './surat/AdminSuratDashboard';
 import AdminSuratInbox from './surat/AdminSuratInbox';
 import AdminSuratBuat from './surat/AdminSuratBuat';
+import AdminSuratBatch from './surat/AdminSuratBatch';
 import AdminSuratPenomoran from './surat/AdminSuratPenomoran';
 import AdminSuratNikah from './surat/AdminSuratNikah';
 import AdminSuratSKTM from './surat/AdminSuratSKTM';
@@ -37,7 +38,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'penomoran' | 'custom' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'skaw' | 'master_template'>(() => {
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'batch' | 'penomoran' | 'custom' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'skaw' | 'master_template'>(() => {
     // Dukungan deep-link: /?admin_tab=surat&surat_form=skn langsung membuka form tertentu.
     // Memakai singkatan surat resmi, dengan alias tab lama untuk kompatibilitas.
     const suratFormAlias: Record<string, any> = {
@@ -222,6 +223,7 @@ export default function AdminSurat({
         {activeTab === 'dashboard' && (
           <AdminSuratDashboard 
             onBuatSurat={() => changeTab('buat')} 
+            onOpenBatch={() => changeTab('batch')}
             onEditLetter={handleEditLetter}
             onOpenTambahTamu={() => setShowTambahTamu(true)}
             onOpenTambahPermohonan={() => setShowTambahPermohonan(true)}
@@ -266,6 +268,9 @@ export default function AdminSurat({
             editLetterId={editLetterId}
             onBack={() => changeTab(returnTab)} 
           />
+        )}
+        {activeTab === 'batch' && (
+          <AdminSuratBatch onBack={() => changeTab(returnTab)} />
         )}
         {activeTab === 'nikah' && (
           <AdminSuratNikah 

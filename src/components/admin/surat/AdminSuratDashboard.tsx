@@ -1,7 +1,7 @@
 import { fetchResidentsCached } from '../../../utils/apiCache';
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import {
-  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen, MessageCircle, ClipboardCheck
+  Plus, Search, Filter, FilterX, FileText, Eye, Printer, Download, Trash2, X, ZoomIn, ZoomOut, Edit2, Ban, ChevronDown, Inbox, BookOpen, MessageCircle, ClipboardCheck, Users
 } from 'lucide-react';
 import { fetchLetterHistoryAsync, LetterHistory, cancelLetterHistoryAsync, deleteSuratSmart } from '../../../utils/letterHistory';
 import { useReactToPrint } from 'react-to-print';
@@ -54,6 +54,7 @@ const getFullLetterName = (jenis: string): string => {
 
 interface AdminSuratDashboardProps {
   onBuatSurat: () => void;
+  onOpenBatch?: () => void;
   onEditLetter?: (letter: LetterHistory) => void;
   onOpenTambahTamu?: () => void;
   onOpenTambahPermohonan?: () => void;
@@ -64,6 +65,7 @@ interface AdminSuratDashboardProps {
 
 export default function AdminSuratDashboard({ 
   onBuatSurat,
+  onOpenBatch,
   onEditLetter,
   onOpenTambahTamu,
   onOpenTambahPermohonan,
@@ -1156,6 +1158,18 @@ export default function AdminSuratDashboard({
                   <span>
                     <span className="block text-sm font-medium text-slate-800">Buat Surat Langsung</span>
                     <span className="block text-xs text-slate-500 mt-0.5">Buka katalog template surat resmi</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => { setShowQuickActions(false); onOpenBatch?.(); }}
+                  className="w-full p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-3 cursor-pointer text-left"
+                >
+                  <span className="p-2 rounded-lg bg-amber-50 border border-amber-100">
+                    <Users className="w-5 h-5 text-amber-600" />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-medium text-slate-800">Buat Surat Masal</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">SKTM / SKU / Domisili untuk banyak warga sekaligus</span>
                   </span>
                 </button>
                 <button
