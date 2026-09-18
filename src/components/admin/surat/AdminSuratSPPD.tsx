@@ -813,10 +813,8 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           template={getLetterHeaderTemplate('SPPD', { kode: '094', jenis: 'Surat Perjalanan Dinas', deskripsi: 'Surat Perintah & Perjalanan Dinas (SPPD)', nomorSurat: nomorSurat })}
           icon={<Plane className="w-5 h-5" />}
           onBack={onBack}
-          onPrint={handlePrint}
           onSave={handleRecord}
           isSaving={isSaving}
-          printLabel="Cetak Surat"
         >
           {/* Document selector in header */}
           <div className="flex items-center gap-1 pl-3 border-l border-slate-200 dark:border-slate-700 overflow-x-auto">
