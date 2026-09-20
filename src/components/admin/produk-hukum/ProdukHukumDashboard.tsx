@@ -28,6 +28,16 @@ const KATEGORI_LABELS: Record<string, string> = {
   piagam: 'Piagam',
 };
 
+const KATEGORI_SUBTITLES: Record<string, string> = {
+  sk_kades: 'Surat Keputusan Kepala Desa',
+  perdes: 'Peraturan Desa',
+  perkades: 'Peraturan Kepala Desa',
+  mou_pks: 'Memorandum of Understanding / Perjanjian Kerja Sama',
+  skb: 'Surat Keputusan Bersama',
+  berita_acara: 'Berita Acara',
+  piagam: 'Piagam',
+};
+
 const KATEGORI_ICONS: Record<string, LucideIcon> = {
   sk_kades: FileCheck,
   perdes: Scale,
@@ -158,6 +168,7 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
                 <ChevronRight size={14} className="text-gray-400" />
               </div>
               <p className="text-sm font-bold text-gray-900 dark:text-white">{kat.label}</p>
+              <p className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 leading-tight">{KATEGORI_SUBTITLES[kat.key]}</p>
               <div className="flex items-baseline gap-2 mt-2">
                 <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400 leading-none">{kat.count}</span>
                 <span className="text-[10px] text-gray-500 dark:text-slate-400">dokumen</span>
