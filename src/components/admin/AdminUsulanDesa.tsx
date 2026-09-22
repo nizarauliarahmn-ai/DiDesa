@@ -860,7 +860,7 @@ ${rowsHtml}
   return (
     <div className="pb-24 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Usulan Desa</h2>
         </div>
