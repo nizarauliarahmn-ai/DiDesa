@@ -3,7 +3,7 @@ import {
   Search, PlusCircle, Edit2, Trash2, Image as ImageIcon, FolderOpen,
   ListChecks, AlertTriangle, Layers, Upload, X, Loader2, Link2, MapPin, User,
   CircleDollarSign, HeartHandshake, CheckCircle2, Ban, Send, Printer, Download, Star,
-  Eye, MoreVertical, Tags, Clock
+  Eye, MoreVertical, Tags, Clock, Share2, Copy
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -783,6 +783,20 @@ ${rowsHtml}
             className="flex items-center gap-2 px-5 py-3 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none cursor-pointer"
           >
             <PlusCircle size={18} /> Tambah Usulan Baru
+          </button>
+          <button
+            onClick={() => {
+              const shareUrl = `${window.location.origin}${window.location.pathname}?tab=usulan`;
+              navigator.clipboard.writeText(shareUrl).then(() => {
+                showToast('Link halaman usulan public berhasil disalin!', 'success');
+              }).catch(() => {
+                prompt('Salin link ini:', shareUrl);
+              });
+            }}
+            className="flex items-center gap-2 px-5 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
+            title="Salin link halaman usulan public untuk dibagikan ke warga/RT/RW"
+          >
+            <Share2 size={18} /> Bagikan ke Publik
           </button>
         </div>
       </div>

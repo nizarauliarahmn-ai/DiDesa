@@ -67,6 +67,7 @@ const ResidentDashboard = React.lazy(() => import('./components/portal/ResidentD
 const PublicSkKades = React.lazy(() => import('./components/portal/PublicSkKades'));
 const PublicPerdes = React.lazy(() => import('./components/portal/PublicPerdes'));
 const PublicBeritaAcara = React.lazy(() => import('./components/portal/PublicBeritaAcara'));
+const PublicUsulanPortal = React.lazy(() => import('./components/portal/PublicUsulanPortal'));
 
 // Lazy-loaded dashboard components
 const TransparansiDana = React.lazy(() => import('./components/dashboard/TransparansiDana'));
@@ -579,6 +580,9 @@ export default function App() {
   }
   if (tabParam === 'kios_kepuasan') {
     return <><PublicKiosKepuasan /><ToastContainer /></>;
+  }
+  if (tabParam === 'usulan') {
+    return <><Suspense fallback={<LazyLoader />}><PublicUsulanPortal /></Suspense><ToastContainer /></>;
   }
   if (tabParam === 'verifikasi' || tabParam === 'verifikasi_surat' || urlParams.get('no') || urlParams.get('verify') || window.location.pathname.includes('/verifikasi')) {
     return <><PublicVerifikasiSurat /><ToastContainer /></>;
