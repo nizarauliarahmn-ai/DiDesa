@@ -8,6 +8,7 @@ import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import YearFilter from './YearFilter';
 
 export interface RPJMDesa {
   id: string;
@@ -58,7 +59,7 @@ export default function AdminRPJMDesa() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterKategori, setFilterKategori] = useState('Semua Kategori');
   const [filterStatus, setFilterStatus] = useState('Semua Status');
-  const [filterYear, setFilterYear] = useState('Semua Tahun');
+  const [filterYear, setFilterYear] = useState(String(new Date().getFullYear()));
   const [showModal, setShowModal] = useState(false);
   const [editItem, setEditItem] = useState<RPJMDesa | null>(null);
   const [detailTarget, setDetailTarget] = useState<RPJMDesa | null>(null);

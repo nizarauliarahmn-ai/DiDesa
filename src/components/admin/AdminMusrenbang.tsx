@@ -4,6 +4,7 @@ import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import YearFilter from './YearFilter';
 
 interface UsulanMusrenbang {
   id: string;
@@ -25,6 +26,7 @@ export default function AdminMusrenbang() {
   const [list, setList] = useState<UsulanMusrenbang[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('Semua');
+  const [filterYear, setFilterYear] = useState(String(new Date().getFullYear()));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadData(); }, []);
@@ -54,8 +56,14 @@ export default function AdminMusrenbang() {
     if (filterStatus !== 'Semua') {
       result = result.filter(u => u.status_terakomodir === filterStatus);
     }
+    if (filterYear !== 'Semua Tahun') {
+      const y = Number(filterYear);
+      result = result.filter(u =>
+        (u.diteruskan_tags || []).some((t: string) => t.toLowerCase().includes('musrenbang') && t.includes(String(y)))
+      );
+    }
     return result;
-  }, [list, searchQuery, filterStatus]);
+  }, [list, searchQuery, filterStatus, filterYear]);
 
   const exportExcel = () => {
     if (filtered.length === 0) { showToast('Tidak ada data untuk di-export', 'error'); return; }
@@ -164,6 +172,7 @@ th{background:#f0f0f0;font-weight:bold}
             className="w-full pl-10 pr-4 h-10 border border-gray-200 dark:border-slate-700 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
           />
         </div>
+        <YearFilter value={filterYear} onChange={setFilterYear} />
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}

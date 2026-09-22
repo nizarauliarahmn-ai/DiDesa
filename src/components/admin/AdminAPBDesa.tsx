@@ -8,6 +8,7 @@ import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import YearFilter from './YearFilter';
 
 export interface APBDesa {
   id: string;
@@ -155,7 +156,7 @@ export default function AdminAPBDesa() {
   const [filterKategori, setFilterKategori] = useState('Semua Kategori');
   const [filterJenis, setFilterJenis] = useState('Semua Jenis');
   const [filterHighlight, setFilterHighlight] = useState('Semua Status');
-  const [filterYear, setFilterYear] = useState('Semua Tahun');
+  const [filterYear, setFilterYear] = useState(String(new Date().getFullYear()));
   const [showModal, setShowModal] = useState(false);
   const [showPencairanModal, setShowPencairanModal] = useState<APBDesa | null>(null);
   const [editItem, setEditItem] = useState<APBDesa | null>(null);
