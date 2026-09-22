@@ -394,58 +394,47 @@ export default function AdminBukuTamu() {
     <div className="animate-in fade-in duration-300">
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 rounded-xl bg-emerald-700 flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Buku Tamu Digital</h2>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-slate-400 ml-13">
-            {fmtDate(new Date().toISOString())} &bull;
-            <span className="font-bold text-emerald-700 ml-1">{todayCount} tamu aktif</span>
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Buku Tamu Digital</h2>
         </div>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setShowPrintReportModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
-            <Printer className="w-4 h-4" />
-            Cetak
+            <Printer className="w-4 h-4" /> Cetak
           </button>
           <button
             onClick={() => setShowPrintQR(true)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gray-900 dark:bg-slate-700 text-white text-sm font-bold rounded-xl hover:bg-gray-800 transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
-            <QrCode className="w-4 h-4" />
-            Cetak QR Kiosk
+            <QrCode className="w-4 h-4" /> QR Kiosk
           </button>
+          <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
           <button
             onClick={() => { setForm({ nik: '', nama: '', alamat: '', instansi: '', keperluan: KEPERLUAN_OPTIONS[0] }); setShowModal(true); }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-800 transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
-            Tambah Tamu
+            <Plus className="w-4 h-4" /> Tambah Tamu
           </button>
         </div>
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Total Hari Ini', value: todayCount, color: 'emerald', icon: <BookOpen className="w-5 h-5" /> },
-          { label: 'Sedang Hadir', value: entries.filter(e => e.status === 'hadir').length, color: 'blue', icon: <LogIn className="w-5 h-5" /> },
-          { label: 'Selesai', value: entries.filter(e => e.status === 'selesai').length, color: 'gray', icon: <CheckCircle2 className="w-5 h-5" /> },
-          { label: 'Urusan Surat', value: entries.filter(e => e.keperluan && e.keperluan.toLowerCase().includes('surat')).length, color: 'amber', icon: <Building2 className="w-5 h-5" /> },
-        ].map(({ label, value, color, icon }) => (
-          <div key={label} className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none">
-            <div className={`w-8 h-8 rounded-lg bg-${color}-50 dark:bg-${color}-900/20 flex items-center justify-center text-${color}-600 dark:text-${color}-400 mb-2`}>
-              {icon}
+          { label: 'Hari Ini', value: todayCount, icon: <BookOpen className="w-4 h-4" /> },
+          { label: 'Hadir', value: entries.filter(e => e.status === 'hadir').length, icon: <LogIn className="w-4 h-4" /> },
+          { label: 'Selesai', value: entries.filter(e => e.status === 'selesai').length, icon: <CheckCircle2 className="w-4 h-4" /> },
+          { label: 'Urusan Surat', value: entries.filter(e => e.keperluan && e.keperluan.toLowerCase().includes('surat')).length, icon: <Building2 className="w-4 h-4" /> },
+        ].map(({ label, value, icon }) => (
+          <div key={label} className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center">{icon}</span>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
             </div>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
-            <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">{label}</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">{label}</p>
           </div>
         ))}
       </div>
