@@ -161,6 +161,11 @@ export default function AdminUsulanDesa() {
   const [apbdesaYearMap, setApbdesaYearMap] = useState<Record<string, string>>({}); // usulan_id → tahun
   const [hasPencairanSet, setHasPencairanSet] = useState<Set<string>>(new Set()); // usulan_ids that have pencairan
 
+  // Public submissions (from masyarakat / aparatur)
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(true);
+  const [showSubmissions, setShowSubmissions] = useState(false);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -262,7 +267,76 @@ export default function AdminUsulanDesa() {
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); loadSubmissions(); }, []);
+
+  const loadSubmissions = async () => {
+    setLoadingSubmissions(true);
+    try {
+      const tenantId = await resolveCurrentTenant();
+      let builder = supabase.from('usulan_submissions').select('*').order('created_at', { ascending: false });
+      if (tenantId) builder = builder.eq('tenant_id', tenantId);
+      const { data, error } = await builder;
+      if (error) throw error;
+      setSubmissions(data || []);
+    } catch (e) {
+      console.warn('Gagal memuat submissions:', e);
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
+  const handleReviewSubmission = async (id: string, status: 'disetujui' | 'ditolak', adminNote: string) => {
+    try {
+      const { error } = await supabase.from('usulan_submissions').update({ status, admin_note: adminNote || null, reviewed_at: new Date().toISOString() }).eq('id', id);
+      if (error) throw error;
+
+      // If approved and it's a new proposal, create the actual usulan_desas entry
+      const sub = submissions.find(s => s.id === id);
+      if (status === 'disetujui' && sub?.type === 'usulan_baru') {
+        const tenantId = await resolveCurrentTenant();
+        if (tenantId) {
+          const kodePrefix = `U-${new Date().getFullYear()}`;
+          const { data: countData } = await supabase.from('usulan_desas').select('kode_usulan').like('kode_usulan', `${kodePrefix}%`);
+          const nextNum = (countData?.length || 0) + 1;
+          const kodeBaru = `${kodePrefix}-${String(nextNum).padStart(3, '0')}`;
+          await supabase.from('usulan_desas').insert({
+            tenant_id: tenantId,
+            kode_usulan: kodeBaru,
+            uraian_usulan: sub.uraian_usulan,
+            kategori: sub.kategori || 'Infrastruktur',
+            lokasi_rt_rw: sub.lokasi_rt_rw || '',
+            pengusul: sub.pengusul,
+            status_terakomodir: 'Belum',
+            pipeline_status: 'Diajukan',
+            keterangan: `[Diajukan warga via publik] ${sub.catatan || ''}`,
+          });
+        }
+      }
+
+      // If approved and it's a correction, update the existing usulan
+      if (status === 'disetujui' && sub?.type === 'perbaikan' && sub?.usulan_id) {
+        const fieldMap: Record<string, string> = {
+          uraian_usulan: 'uraian_usulan',
+          lokasi_rt_rw: 'lokasi_rt_rw',
+          pengusul: 'pengusul',
+          kategori: 'kategori',
+          keterangan: 'keterangan',
+        };
+        const dbField = fieldMap[sub.field_yang_diperbaiki];
+        if (dbField) {
+          const updatePayload: Record<string, any> = { [dbField]: sub.field_yang_diperbaiki === 'anggaran' ? Number(sub.nilai_baru) : sub.nilai_baru };
+          await supabase.from('usulan_desas').update(updatePayload).eq('id', sub.usulan_id);
+        }
+      }
+
+      showToast(`Submission ${status === 'disetujui' ? 'disetujui' : 'ditolak'}!`, 'success');
+      loadSubmissions();
+      loadData();
+    } catch (e) {
+      console.error(e);
+      showToast('Gagal memproses submission', 'error');
+    }
+  };
 
   const yearsFromData = useMemo(() => {
     const years = new Set<string>();
@@ -835,6 +909,89 @@ ${rowsHtml}
           <p className="text-xs font-bold text-gray-500 dark:text-slate-400 mt-1">Diteruskan ke Musrenbang</p>
         </div>
       </div>
+
+      {/* Submissions Panel */}
+      {submissions.some(s => s.status === 'pending') && (
+        <div className="bg-amber-50 dark:bg-amber-950/20 border-2 border-amber-200 dark:border-amber-800 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/40 rounded-lg flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-amber-800 dark:text-amber-200">Usulan dari Masyarakat</h3>
+                <p className="text-xs text-amber-600 dark:text-amber-400">{submissions.filter(s => s.status === 'pending').length} menunggu review</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowSubmissions(!showSubmissions)}
+              className="text-xs font-bold text-amber-700 dark:text-amber-300 hover:underline"
+            >
+              {showSubmissions ? 'Tutup' : 'Tampilkan'}
+            </button>
+          </div>
+
+          {showSubmissions && (
+            <div className="space-y-3">
+              {submissions.filter(s => s.status === 'pending').map(sub => (
+                <div key={sub.id} className="bg-white dark:bg-slate-900 border border-amber-100 dark:border-amber-800/40 rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          sub.type === 'perbaikan' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                        }`}>
+                          {sub.type === 'perbaikan' ? 'Perbaikan' : 'Usulan Baru'}
+                        </span>
+                        <span className="text-[10px] text-slate-400">{new Date(sub.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+
+                      {sub.type === 'perbaikan' ? (
+                        <div className="text-sm">
+                          <p className="font-semibold text-slate-800 dark:text-white">Perbaikan: <span className="text-blue-600">{sub.field_yang_diperbaiki}</span></p>
+                          <p className="text-xs text-slate-500 mt-1">
+                            Nilai baru: <span className="font-medium text-slate-700 dark:text-slate-300">"{sub.nilai_baru}"</span>
+                          </p>
+                          {sub.catatan && <p className="text-xs text-slate-400 mt-1">Catatan: {sub.catatan}</p>}
+                        </div>
+                      ) : (
+                        <div className="text-sm">
+                          <p className="font-semibold text-slate-800 dark:text-white">{sub.uraian_usulan}</p>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                            <span>{sub.kategori}</span>
+                            {sub.lokasi_rt_rw && <span>· {sub.lokasi_rt_rw}</span>}
+                          </div>
+                          {sub.catatan && <p className="text-xs text-slate-400 mt-1">Catatan: {sub.catatan}</p>}
+                        </div>
+                      )}
+
+                      <p className="text-[11px] text-slate-400 mt-1.5">Oleh: <span className="font-medium text-slate-600">{sub.pengusul}</span> {sub.pengusul_kontak && <span>({sub.pengusul_kontak})</span>}</p>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        onClick={() => handleReviewSubmission(sub.id, 'disetujui', 'Disetujui oleh admin')}
+                        className="px-3 py-1.5 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-colors"
+                      >
+                        Setujui
+                      </button>
+                      <button
+                        onClick={() => {
+                          const note = prompt('Alasan penolakan (opsional):');
+                          handleReviewSubmission(sub.id, 'ditolak', note || '');
+                        }}
+                        className="px-3 py-1.5 bg-white dark:bg-slate-800 text-rose-600 text-xs font-bold rounded-lg border border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors"
+                      >
+                        Tolak
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Filter & Search Bar */}
       <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-slate-800 p-4 shadow-sm dark:shadow-none flex flex-col lg:flex-row gap-3">

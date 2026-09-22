@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   ArrowLeft, Search, MapPin, Calendar, Tag, CheckCircle2, Clock, Ban,
-  ChevronRight, Eye, Building2, Home, Users, FileText, Landmark, TrendingUp,
-  Share2, Copy, Check, Filter, X
+  ChevronRight, Building2, Home, Users, FileText, Landmark, TrendingUp,
+  Share2, Check, Filter, X, Edit3, Plus, Send, Loader2, AlertTriangle
 } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -55,6 +55,16 @@ const KATEGORI_COLORS: Record<string, string> = {
   'Pemberdayaan': 'bg-amber-100 text-amber-700 border-amber-200',
 };
 
+const PERBAIKAN_FIELDS = [
+  { value: 'uraian_usulan', label: 'Uraian / Nama Usulan' },
+  { value: 'lokasi_rt_rw', label: 'Lokasi / Alamat' },
+  { value: 'pengusul', label: 'Nama Pengusul' },
+  { value: 'kategori', label: 'Kategori' },
+  { value: 'keterangan', label: 'Keterangan' },
+  { value: 'anggaran', label: 'Anggaran' },
+  { value: 'lainnya', label: 'Lainnya (isi di kolom catatan)' },
+];
+
 const formatRupiah = (val?: number) => {
   if (!val) return '-';
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
@@ -69,6 +79,24 @@ export default function PublicUsulanPortal() {
   const [filterPipeline, setFilterPipeline] = useState('semua');
   const [selectedUsulan, setSelectedUsulan] = useState<UsulanDesa | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const [showPerbaikanForm, setShowPerbaikanForm] = useState(false);
+  const [showUsulanBaruForm, setShowUsulanBaruForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const [perbaikanField, setPerbaikanField] = useState('uraian_usulan');
+  const [perbaikanNilaiBaru, setPerbaikanNilaiBaru] = useState('');
+  const [perbaikanCatatan, setPerbaikanCatatan] = useState('');
+  const [perbaikanNama, setPerbaikanNama] = useState('');
+  const [perbaikanKontak, setPerbaikanKontak] = useState('');
+
+  const [baruUraian, setBaruUraian] = useState('');
+  const [baruKategori, setBaruKategori] = useState('Infrastruktur');
+  const [baruLokasi, setBaruLokasi] = useState('');
+  const [baruPengusul, setBaruPengusul] = useState('');
+  const [baruKontak, setBaruKontak] = useState('');
+  const [baruKeterangan, setBaruKeterangan] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -103,7 +131,7 @@ export default function PublicUsulanPortal() {
 
   const filtered = useMemo(() => {
     return usulanList.filter(u => {
-      const matchSearch = !searchQuery || 
+      const matchSearch = !searchQuery ||
         u.uraian_usulan.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.kode_usulan.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (u.pengusul && u.pengusul.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -126,9 +154,7 @@ export default function PublicUsulanPortal() {
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {
-      prompt('Salin link ini:', url);
-    });
+    }).catch(() => { prompt('Salin link ini:', url); });
   };
 
   const handleShareSingle = (u: UsulanDesa) => {
@@ -136,12 +162,84 @@ export default function PublicUsulanPortal() {
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {
-      prompt('Salin link ini:', url);
-    });
+    }).catch(() => { prompt('Salin link ini:', url); });
   };
 
   const pipelineIndex = (stage: string) => PIPELINE_STAGES.indexOf(stage);
+
+  const resetPerbaikanForm = () => {
+    setPerbaikanField('uraian_usulan');
+    setPerbaikanNilaiBaru('');
+    setPerbaikanCatatan('');
+    setPerbaikanNama('');
+    setPerbaikanKontak('');
+    setSubmitSuccess(false);
+  };
+
+  const resetBaruForm = () => {
+    setBaruUraian('');
+    setBaruKategori('Infrastruktur');
+    setBaruLokasi('');
+    setBaruPengusul('');
+    setBaruKontak('');
+    setBaruKeterangan('');
+    setSubmitSuccess(false);
+  };
+
+  const submitPerbaikan = async () => {
+    if (!perbaikanNama.trim() || !perbaikanNilaiBaru.trim() || !selectedUsulan) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('usulan_submissions').insert({
+        tenant_id: selectedUsulan.tenant_id,
+        type: 'perbaikan',
+        usulan_id: selectedUsulan.id,
+        uraian_usulan: selectedUsulan.uraian_usulan,
+        kategori: selectedUsulan.kategori,
+        lokasi_rt_rw: selectedUsulan.lokasi_rt_rw,
+        pengusul: perbaikanNama.trim(),
+        pengusul_kontak: perbaikanKontak.trim() || null,
+        field_yang_diperbaiki: perbaikanField,
+        nilai_baru: perbaikanNilaiBaru.trim(),
+        catatan: perbaikanCatatan.trim() || null,
+        status: 'pending',
+      });
+      if (error) throw error;
+      setSubmitSuccess(true);
+    } catch (e) {
+      console.error(e);
+      alert('Gagal mengirim. Silakan coba lagi.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const submitUsulanBaru = async () => {
+    if (!baruUraian.trim() || !baruPengusul.trim()) return;
+    setSubmitting(true);
+    try {
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) throw new Error('Tenant not found');
+      const { error } = await supabase.from('usulan_submissions').insert({
+        tenant_id: tenantId,
+        type: 'usulan_baru',
+        uraian_usulan: baruUraian.trim(),
+        kategori: baruKategori,
+        lokasi_rt_rw: baruLokasi.trim() || null,
+        pengusul: baruPengusul.trim(),
+        pengusul_kontak: baruKontak.trim() || null,
+        catatan: baruKeterangan.trim() || null,
+        status: 'pending',
+      });
+      if (error) throw error;
+      setSubmitSuccess(true);
+    } catch (e) {
+      console.error(e);
+      alert('Gagal mengirim. Silakan coba lagi.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -154,7 +252,7 @@ export default function PublicUsulanPortal() {
     );
   }
 
-  // Detail view
+  // ===== DETAIL VIEW =====
   if (selectedUsulan) {
     const u = selectedUsulan;
     const currentIdx = pipelineIndex(u.pipeline_status);
@@ -164,6 +262,8 @@ export default function PublicUsulanPortal() {
           <button
             onClick={() => {
               setSelectedUsulan(null);
+              setShowPerbaikanForm(false);
+              resetPerbaikanForm();
               const cleanUrl = window.location.pathname + '?tab=usulan';
               window.history.replaceState({}, '', cleanUrl);
             }}
@@ -182,13 +282,22 @@ export default function PublicUsulanPortal() {
                   </span>
                   <h1 className="text-xl font-bold text-white leading-snug">{u.uraian_usulan}</h1>
                 </div>
-                <button
-                  onClick={() => handleShareSingle(u)}
-                  className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-colors"
-                  title="Bagikan link"
-                >
-                  {copied ? <Check className="w-5 h-5" /> : <Share2 className="w-5 h-5" />}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleShareSingle(u)}
+                    className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-colors"
+                    title="Bagikan link"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => { setShowPerbaikanForm(!showPerbaikanForm); resetPerbaikanForm(); }}
+                    className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg transition-colors text-sm font-medium"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    Usulkan Perbaikan
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -219,6 +328,131 @@ export default function PublicUsulanPortal() {
                   })}
                 </div>
               </div>
+
+              {/* Perbaikan Form */}
+              {showPerbaikanForm && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+                  {submitSuccess ? (
+                    <div className="text-center py-4">
+                      <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Check className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <h3 className="font-bold text-emerald-800 mb-1">Perbaikan Terkirim!</h3>
+                      <p className="text-sm text-emerald-600">Admin akan segera meninjau usulan perbaikan Anda.</p>
+                      <button
+                        onClick={() => { setShowPerbaikanForm(false); resetPerbaikanForm(); }}
+                        className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700"
+                      >
+                        Tutup
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 mb-4">
+                        <AlertTriangle className="w-5 h-5 text-amber-600" />
+                        <h3 className="font-bold text-amber-800">Usulkan Perbaikan</h3>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1">Nama Lengkap *</label>
+                          <input
+                            type="text"
+                            value={perbaikanNama}
+                            onChange={e => setPerbaikanNama(e.target.value)}
+                            placeholder="Masukkan nama Anda"
+                            className="w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-500 mb-1">No. HP / WhatsApp</label>
+                          <input
+                            type="text"
+                            value={perbaikanKontak}
+                            onChange={e => setPerbaikanKontak(e.target.value)}
+                            placeholder="08xxx"
+                            className="w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Bagian yang Perlu Diperbaiki *</label>
+                        <select
+                          value={perbaikanField}
+                          onChange={e => setPerbaikanField(e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                        >
+                          {PERBAIKAN_FIELDS.map(f => (
+                            <option key={f.value} value={f.value}>{f.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-500 mb-1">
+                          Nilai yang Benar *
+                          {perbaikanField !== 'lainnya' && (
+                            <span className="text-slate-400 font-normal ml-1">
+                              (saat ini: "{u[perbaikanField as keyof UsulanDesa] || '-' || 'kosong'}")
+                            </span>
+                          )}
+                        </label>
+                        {perbaikanField === 'kategori' ? (
+                          <select
+                            value={perbaikanNilaiBaru}
+                            onChange={e => setPerbaikanNilaiBaru(e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                          >
+                            <option value="">Pilih kategori...</option>
+                            <option value="Infrastruktur">Infrastruktur</option>
+                            <option value="Ekonomi">Ekonomi</option>
+                            <option value="Sosial/Kesehatan">Sosial/Kesehatan</option>
+                            <option value="Pemerintahan">Pemerintahan</option>
+                            <option value="Pemberdayaan">Pemberdayaan</option>
+                          </select>
+                        ) : (
+                          <input
+                            type={perbaikanField === 'anggaran' ? 'number' : 'text'}
+                            value={perbaikanNilaiBaru}
+                            onChange={e => setPerbaikanNilaiBaru(e.target.value)}
+                            placeholder={perbaikanField === 'anggaran' ? '50000000' : 'Tuliskan nilai yang benar...'}
+                            className="w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30"
+                          />
+                        )}
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="block text-xs font-bold text-slate-500 mb-1">Catatan Tambahan</label>
+                        <textarea
+                          value={perbaikanCatatan}
+                          onChange={e => setPerbaikanCatatan(e.target.value)}
+                          placeholder="Jelaskan alasan perbaikan (misal: ada salah ketik nama jalan)"
+                          rows={2}
+                          className="w-full px-3 py-2 bg-white border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/30 resize-none"
+                        />
+                      </div>
+
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => { setShowPerbaikanForm(false); resetPerbaikanForm(); }}
+                          className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          onClick={submitPerbaikan}
+                          disabled={submitting || !perbaikanNama.trim() || !perbaikanNilaiBaru.trim()}
+                          className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-xl hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                          Kirim Perbaikan
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Info Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -262,12 +496,8 @@ export default function PublicUsulanPortal() {
                 <div>
                   <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Foto</h3>
                   <div className="flex gap-3">
-                    {u.foto_url && (
-                      <img src={u.foto_url} alt="Foto Usulan" className="w-32 h-32 object-cover rounded-xl border border-slate-200" />
-                    )}
-                    {u.foto_progress_url && (
-                      <img src={u.foto_progress_url} alt="Foto Progress" className="w-32 h-32 object-cover rounded-xl border border-slate-200" />
-                    )}
+                    {u.foto_url && <img src={u.foto_url} alt="Foto Usulan" className="w-32 h-32 object-cover rounded-xl border border-slate-200" />}
+                    {u.foto_progress_url && <img src={u.foto_progress_url} alt="Foto Progress" className="w-32 h-32 object-cover rounded-xl border border-slate-200" />}
                   </div>
                 </div>
               )}
@@ -275,7 +505,6 @@ export default function PublicUsulanPortal() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="text-center py-6 text-xs text-slate-400">
           {villageName && <span className="font-medium text-slate-500">{villageName} — </span>}
           <span>Sistem Informasi Desa · </span>
@@ -285,30 +514,165 @@ export default function PublicUsulanPortal() {
     );
   }
 
-  // List view
+  // ===== LIST VIEW =====
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-green-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-emerald-600 to-green-600">
         <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               {villageName && <p className="text-emerald-100 text-sm font-medium mb-1">{villageName}</p>}
               <h1 className="text-2xl md:text-3xl font-bold text-white">Daftar Usulan Desa</h1>
               <p className="text-emerald-100 text-sm mt-1">Pantau progress usulan pembangunan desa secara transparan</p>
             </div>
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2.5 rounded-xl transition-colors text-sm font-medium"
-            >
-              {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-              {copied ? 'Tersalin!' : 'Bagikan'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setShowUsulanBaruForm(!showUsulanBaruForm); resetBaruForm(); }}
+                className="flex items-center gap-2 bg-white text-emerald-700 hover:bg-emerald-50 px-4 py-2.5 rounded-xl transition-colors text-sm font-bold shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Usulkan Usulan Baru
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2.5 rounded-xl transition-colors text-sm font-medium"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+                {copied ? 'Tersalin!' : 'Bagikan'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Usulan Baru Form */}
+        {showUsulanBaruForm && (
+          <div className="bg-white border-2 border-emerald-200 rounded-2xl p-6 mb-6 shadow-lg">
+            {submitSuccess ? (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Check className="w-7 h-7 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-emerald-800 text-lg mb-1">Usulan Terkirim!</h3>
+                <p className="text-sm text-emerald-600 mb-4">Usulan Anda berhasil dikirim. Admin akan segera meninjau dan memproses.</p>
+                <button
+                  onClick={() => { setShowUsulanBaruForm(false); resetBaruForm(); }}
+                  className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700"
+                >
+                  Tutup
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-emerald-100 rounded-xl">
+                      <Plus className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-800">Usulkan Usulan Baru</h3>
+                      <p className="text-xs text-slate-400">Sampaikan usulan pembangunan desa Anda</p>
+                    </div>
+                  </div>
+                  <button onClick={() => { setShowUsulanBaruForm(false); resetBaruForm(); }} className="p-1 hover:bg-slate-100 rounded-lg">
+                    <X className="w-5 h-5 text-slate-400" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Nama Pengusul *</label>
+                    <input
+                      type="text"
+                      value={baruPengusul}
+                      onChange={e => setBaruPengusul(e.target.value)}
+                      placeholder="Nama lengkap Anda"
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">No. HP / WhatsApp</label>
+                    <input
+                      type="text"
+                      value={baruKontak}
+                      onChange={e => setBaruKontak(e.target.value)}
+                      placeholder="08xxx (opsional)"
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Uraian Usulan *</label>
+                  <input
+                    type="text"
+                    value={baruUraian}
+                    onChange={e => setBaruUraian(e.target.value)}
+                    placeholder="Contoh: Pemasangan PJU di Jl. Mawar RT 03"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Kategori</label>
+                    <select
+                      value={baruKategori}
+                      onChange={e => setBaruKategori(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                    >
+                      <option value="Infrastruktur">Infrastruktur</option>
+                      <option value="Ekonomi">Ekonomi</option>
+                      <option value="Sosial/Kesehatan">Sosial / Kesehatan</option>
+                      <option value="Pemerintahan">Pemerintahan</option>
+                      <option value="Pemberdayaan">Pemberdayaan</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 mb-1">Lokasi / Alamat</label>
+                    <input
+                      type="text"
+                      value={baruLokasi}
+                      onChange={e => setBaruLokasi(e.target.value)}
+                      placeholder="RT 03 / RW 05 (opsional)"
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-5">
+                  <label className="block text-xs font-bold text-slate-500 mb-1">Keterangan / Detail Tambahan</label>
+                  <textarea
+                    value={baruKeterangan}
+                    onChange={e => setBaruKeterangan(e.target.value)}
+                    placeholder="Jelaskan detail usulan Anda (opsional)"
+                    rows={2}
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 resize-none"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => { setShowUsulanBaruForm(false); resetBaruForm(); }}
+                    className="px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={submitUsulanBaru}
+                    disabled={submitting || !baruUraian.trim() || !baruPengusul.trim()}
+                    className="flex items-center gap-1.5 px-5 py-2.5 bg-emerald-600 text-white text-sm font-bold rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                  >
+                    {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    Kirim Usulan
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <SummaryCard icon={<FileText className="w-5 h-5 text-emerald-500" />} value={summaryStats.total} label="Total Usulan" bg="bg-emerald-50" border="border-emerald-100" />
@@ -335,11 +699,8 @@ export default function PublicUsulanPortal() {
                 </button>
               )}
             </div>
-            <select
-              value={filterKategori}
-              onChange={e => setFilterKategori(e.target.value)}
-              className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-            >
+            <select value={filterKategori} onChange={e => setFilterKategori(e.target.value)}
+              className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
               <option value="semua">Semua Kategori</option>
               <option value="Infrastruktur">Infrastruktur</option>
               <option value="Ekonomi">Ekonomi</option>
@@ -347,11 +708,8 @@ export default function PublicUsulanPortal() {
               <option value="Pemerintahan">Pemerintahan</option>
               <option value="Pemberdayaan">Pemberdayaan</option>
             </select>
-            <select
-              value={filterPipeline}
-              onChange={e => setFilterPipeline(e.target.value)}
-              className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-            >
+            <select value={filterPipeline} onChange={e => setFilterPipeline(e.target.value)}
+              className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
               <option value="semua">Semua Pipeline</option>
               {PIPELINE_STAGES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -360,12 +718,8 @@ export default function PublicUsulanPortal() {
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
               <Filter className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-xs text-slate-400">{filtered.length} dari {usulanList.length} usulan ditampilkan</span>
-              <button
-                onClick={() => { setSearchQuery(''); setFilterKategori('semua'); setFilterPipeline('semua'); }}
-                className="text-xs text-emerald-600 hover:underline ml-auto"
-              >
-                Reset Filter
-              </button>
+              <button onClick={() => { setSearchQuery(''); setFilterKategori('semua'); setFilterPipeline('semua'); }}
+                className="text-xs text-emerald-600 hover:underline ml-auto">Reset Filter</button>
             </div>
           )}
         </div>
@@ -393,7 +747,6 @@ export default function PublicUsulanPortal() {
                   className="bg-white rounded-xl border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer p-4 group"
                 >
                   <div className="flex items-start gap-4">
-                    {/* Left: Kode */}
                     <div className="flex-shrink-0 text-center min-w-[80px]">
                       <span className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-2 py-1 rounded-lg">
                         {u.kode_usulan}
@@ -402,8 +755,6 @@ export default function PublicUsulanPortal() {
                         {new Date(u.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
                       </p>
                     </div>
-
-                    {/* Center: Content */}
                     <div className="flex-1 min-w-0">
                       <h3 className="text-sm font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors truncate">
                         {u.uraian_usulan}
@@ -423,26 +774,20 @@ export default function PublicUsulanPortal() {
                           </span>
                         )}
                       </div>
-                      {/* Mini pipeline bar */}
                       <div className="flex items-center gap-0.5 mt-2.5">
                         {PIPELINE_STAGES.map((stage, i) => {
                           const isActive = i <= currentIdx && u.pipeline_status !== 'Ditolak';
                           const isCurrent = stage === u.pipeline_status;
                           const c = PIPELINE_COLORS[stage];
                           return (
-                            <div
-                              key={stage}
-                              className={`h-1.5 flex-1 rounded-full transition-all ${
-                                isCurrent ? c.dot : isActive ? `${c.dot} opacity-60` : 'bg-slate-200'
-                              }`}
+                            <div key={stage}
+                              className={`h-1.5 flex-1 rounded-full transition-all ${isCurrent ? c.dot : isActive ? `${c.dot} opacity-60` : 'bg-slate-200'}`}
                               title={stage}
                             />
                           );
                         })}
                       </div>
                     </div>
-
-                    {/* Right: Status */}
                     <div className="flex-shrink-0 text-right flex items-center gap-3">
                       <div>
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border ${colors.bg} ${colors.text} ${colors.border}`}>
@@ -467,7 +812,6 @@ export default function PublicUsulanPortal() {
         )}
       </div>
 
-      {/* Footer */}
       <div className="text-center py-8 text-xs text-slate-400">
         {villageName && <span className="font-medium text-slate-500">{villageName} — </span>}
         <span>Sistem Informasi Desa · </span>
@@ -492,9 +836,7 @@ function InfoCard({ icon, label, value, valueClassName = '' }: { icon: React.Rea
 function SummaryCard({ icon, value, label, bg, border }: { icon: React.ReactNode; value: number; label: string; bg: string; border: string }) {
   return (
     <div className={`${bg} ${border} border rounded-xl p-4`}>
-      <div className="flex items-center gap-2 mb-2">
-        {icon}
-      </div>
+      <div className="flex items-center gap-2 mb-2">{icon}</div>
       <p className="text-2xl font-bold text-slate-800">{value}</p>
       <p className="text-xs text-slate-500 mt-0.5">{label}</p>
     </div>
