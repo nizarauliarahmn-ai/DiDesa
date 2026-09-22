@@ -38,6 +38,7 @@ const AdminUsulanDesa = React.lazy(() => import('./components/admin/AdminUsulanD
 const AdminRPJMDesa = React.lazy(() => import('./components/admin/AdminRPJMDesa'));
 const AdminRKPDesa = React.lazy(() => import('./components/admin/AdminRKPDesa'));
 const AdminAPBDesa = React.lazy(() => import('./components/admin/AdminAPBDesa'));
+const AdminMusrenbang = React.lazy(() => import('./components/admin/AdminMusrenbang'));
 const AdminBerita = React.lazy(() => import('./components/admin/AdminBerita'));
 const AdminSaaSLogs = React.lazy(() => import('./components/admin/AdminSaaSLogs'));
 const AdminSaaSLeads = React.lazy(() => import('./components/admin/AdminSaaSLeads'));
@@ -717,6 +718,7 @@ export default function App() {
                 {adminTab === 'rpjmdesa' && <TabErrorBoundary tabKey="rpjmdesa"><AdminRPJMDesa /></TabErrorBoundary>}
                 {adminTab === 'rkpdesa' && <TabErrorBoundary tabKey="rkpdesa"><AdminRKPDesa /></TabErrorBoundary>}
                 {adminTab === 'apbdesa' && <TabErrorBoundary tabKey="apbdesa"><AdminAPBDesa /></TabErrorBoundary>}
+                {adminTab === 'musrenbang' && <TabErrorBoundary tabKey="musrenbang"><AdminMusrenbang /></TabErrorBoundary>}
                 {adminTab === 'berita' && (
                   <AdminBerita 
                     searchQuery={globalSearch}
