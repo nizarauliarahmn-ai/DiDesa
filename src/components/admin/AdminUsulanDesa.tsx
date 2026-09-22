@@ -168,6 +168,7 @@ export default function AdminUsulanDesa() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(true);
   const [showSubmissions, setShowSubmissions] = useState(false);
+  const [submissionUsulanMap, setSubmissionUsulanMap] = useState<Record<string, UsulanDesa>>({});
 
   const loadData = async () => {
     setLoading(true);
@@ -281,6 +282,17 @@ export default function AdminUsulanDesa() {
       const { data, error } = await builder;
       if (error) throw error;
       setSubmissions(data || []);
+
+      // Fetch related usulan data for corrections to show old values
+      const usulanIds = (data || []).filter((s: any) => s.type === 'perbaikan' && s.usulan_id).map((s: any) => s.usulan_id);
+      if (usulanIds.length > 0) {
+        const { data: usulanData } = await supabase.from('usulan_desas').select('*').in('id', usulanIds);
+        if (usulanData) {
+          const map: Record<string, UsulanDesa> = {};
+          usulanData.forEach((u: any) => { map[u.id] = u as UsulanDesa; });
+          setSubmissionUsulanMap(map);
+        }
+      }
     } catch (e) {
       console.warn('Gagal memuat submissions:', e);
     } finally {
@@ -968,11 +980,27 @@ ${rowsHtml}
 
                       {sub.type === 'perbaikan' ? (
                         <div className="text-sm">
-                          <p className="font-semibold text-slate-800 dark:text-white">Perbaikan: <span className="text-blue-600">{sub.field_yang_diperbaiki}</span></p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Nilai baru: <span className="font-medium text-slate-700 dark:text-slate-300">"{sub.nilai_baru}"</span>
+                          <p className="font-semibold text-slate-800 dark:text-white">
+                            Perbaikan: <span className="text-blue-600">{sub.field_yang_diperbaiki === 'lainnya' ? 'Lainnya' : sub.field_yang_diperbaiki}</span>
                           </p>
-                          {sub.catatan && <p className="text-xs text-slate-400 mt-1">Catatan: {sub.catatan}</p>}
+                          {/* Show old value vs new value */}
+                          {sub.usulan_id && submissionUsulanMap[sub.usulan_id] && (
+                            <div className="mt-2 bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-100 dark:border-slate-700">
+                              <div className="flex items-center gap-2 text-xs">
+                                <span className="text-red-500 line-through break-words">
+                                  {submissionUsulanMap[sub.usulan_id][sub.field_yang_diperbaiki as keyof UsulanDesa] as string || '(kosong)'}
+                                </span>
+                                <span className="text-slate-400">→</span>
+                                <span className="text-emerald-600 font-bold break-words">{sub.nilai_baru}</span>
+                              </div>
+                            </div>
+                          )}
+                          {!sub.usulan_id && (
+                            <p className="text-xs text-slate-500 mt-1">
+                              Nilai baru: <span className="font-medium text-emerald-600">"{sub.nilai_baru}"</span>
+                            </p>
+                          )}
+                          {sub.catatan && <p className="text-xs text-slate-400 mt-1 italic">"{sub.catatan}"</p>}
                         </div>
                       ) : (
                         <div className="text-sm">
