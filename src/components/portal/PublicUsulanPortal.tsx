@@ -79,6 +79,7 @@ export default function PublicUsulanPortal() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterKategori, setFilterKategori] = useState('semua');
   const [filterPipeline, setFilterPipeline] = useState('semua');
+  const [filterTahun, setFilterTahun] = useState('semua');
   const [selectedUsulan, setSelectedUsulan] = useState<UsulanDesa | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -139,9 +140,12 @@ export default function PublicUsulanPortal() {
         (u.pengusul && u.pengusul.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchKategori = filterKategori === 'semua' || u.kategori === filterKategori;
       const matchPipeline = filterPipeline === 'semua' || u.pipeline_status === filterPipeline;
-      return matchSearch && matchKategori && matchPipeline;
+      // Year filter: extract year from kode_usulan (U-YYYY-XXX) or created_at
+      const tahunUsulan = (u.kode_usulan || '').match(/U-(\d{4})-/)?.[1] || String(new Date(u.created_at).getFullYear());
+      const matchTahun = filterTahun === 'semua' || tahunUsulan === filterTahun;
+      return matchSearch && matchKategori && matchPipeline && matchTahun;
     });
-  }, [usulanList, searchQuery, filterKategori, filterPipeline]);
+  }, [usulanList, searchQuery, filterKategori, filterPipeline, filterTahun]);
 
   const summaryStats = useMemo(() => {
     const total = usulanList.length;
@@ -149,6 +153,16 @@ export default function PublicUsulanPortal() {
     const terakomodir = total - belum;
     const selesai = usulanList.filter(u => u.pipeline_status === 'Selesai').length;
     return { total, belum, terakomodir, selesai };
+  }, [usulanList]);
+
+  const tahunOptions = useMemo(() => {
+    const tahunSet = new Set<string>();
+    usulanList.forEach(u => {
+      const match = (u.kode_usulan || '').match(/U-(\d{4})-/);
+      if (match) tahunSet.add(match[1]);
+      else tahunSet.add(String(new Date(u.created_at).getFullYear()));
+    });
+    return Array.from(tahunSet).sort().reverse();
   }, [usulanList]);
 
   const handleShare = () => {
@@ -725,12 +739,17 @@ export default function PublicUsulanPortal() {
               <option value="semua">Semua Pipeline</option>
               {PIPELINE_STAGES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
+            <select value={filterTahun} onChange={e => setFilterTahun(e.target.value)}
+              className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30">
+              <option value="semua">Semua Tahun</option>
+              {tahunOptions.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
           </div>
-          {(filterKategori !== 'semua' || filterPipeline !== 'semua' || searchQuery) && (
+          {(filterKategori !== 'semua' || filterPipeline !== 'semua' || filterTahun !== 'semua' || searchQuery) && (
             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
               <Filter className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-xs text-slate-400">{filtered.length} dari {usulanList.length} usulan ditampilkan</span>
-              <button onClick={() => { setSearchQuery(''); setFilterKategori('semua'); setFilterPipeline('semua'); }}
+              <button onClick={() => { setSearchQuery(''); setFilterKategori('semua'); setFilterPipeline('semua'); setFilterTahun('semua'); }}
                 className="text-xs text-emerald-600 hover:underline ml-auto">Reset Filter</button>
             </div>
           )}
