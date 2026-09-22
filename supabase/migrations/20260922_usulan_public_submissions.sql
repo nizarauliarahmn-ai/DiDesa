@@ -37,14 +37,14 @@ CREATE POLICY "Publik bisa submit usulan"
   TO anon
   WITH CHECK (true);
 
--- Policy: authenticated (admin) bisa baca semua
-CREATE POLICY "Admin bisa baca submissions"
+-- Policy: admin (anon) bisa baca semua
+CREATE POLICY "Bisa baca submissions"
   ON usulan_submissions FOR SELECT
-  TO authenticated
+  TO anon, authenticated
   USING (true);
 
--- Policy: authenticated (admin) bisa update (approve/reject)
-CREATE POLICY "Admin bisa update submissions"
+-- Policy: admin (anon) bisa update (approve/reject)
+CREATE POLICY "Bisa update submissions"
   ON usulan_submissions FOR UPDATE
-  TO authenticated
+  TO anon, authenticated
   USING (true);
