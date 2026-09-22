@@ -758,69 +758,73 @@ export default function PublicUsulanPortal() {
                   }}
                   className="bg-white rounded-xl border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer p-4 group"
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 text-center min-w-[80px]">
-                      <span className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-2 py-1 rounded-lg">
+                  {/* Top: Kode + Pipeline Badge */}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-2 py-1 rounded-lg whitespace-nowrap">
                         {u.kode_usulan}
                       </span>
-                      <p className="text-[10px] text-slate-400 mt-1">
+                      <span className="text-[10px] text-slate-400">
                         {new Date(u.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
-                      </p>
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors truncate">
-                        {u.uraian_usulan}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${KATEGORI_COLORS[u.kategori] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                          {KATEGORI_ICONS[u.kategori]} {u.kategori}
-                        </span>
-                        {u.lokasi_rt_rw && (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-                            <MapPin className="w-3 h-3" /> {u.lokasi_rt_rw}
-                          </span>
-                        )}
-                        {u.pengusul && (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-                            <Users className="w-3 h-3" /> {u.pengusul}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-0.5 mt-2.5">
-                        {PIPELINE_STAGES.map((stage, i) => {
-                          const isActive = i <= currentIdx && u.pipeline_status !== 'Ditolak';
-                          const isCurrent = stage === u.pipeline_status;
-                          const c = PIPELINE_COLORS[stage];
-                          return (
-                            <div key={stage}
-                              className={`h-1.5 flex-1 rounded-full transition-all ${isCurrent ? c.dot : isActive ? `${c.dot} opacity-60` : 'bg-slate-200'}`}
-                              title={stage}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 text-right flex items-center gap-3">
-                      <div>
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border ${colors.bg} ${colors.text} ${colors.border}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`}></span>
-                          {u.pipeline_status === 'RPJMDesa' || u.pipeline_status === 'RKPDesa' || u.pipeline_status === 'APBDesa'
-                            ? `${u.pipeline_status}${u.pipeline_year ? ' ' + u.pipeline_year : ''}`
-                            : u.pipeline_status}
-                        </span>
-                        {u.pipeline_status === 'Dikerjakan' && u.dinas_penanggung_jawab && (
-                          <p className="text-[9px] text-orange-600 font-semibold mt-0.5 truncate max-w-[120px]" title={u.dinas_penanggung_jawab}>{u.dinas_penanggung_jawab}</p>
-                        )}
-                        <p className="text-[10px] text-slate-400 mt-1">{formatRupiah(u.anggaran)}</p>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border whitespace-nowrap ${colors.bg} ${colors.text} ${colors.border}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`}></span>
+                        {u.pipeline_status === 'RPJMDesa' || u.pipeline_status === 'RKPDesa' || u.pipeline_status === 'APBDesa'
+                          ? `${u.pipeline_status}${u.pipeline_year ? ' ' + u.pipeline_year : ''}`
+                          : u.pipeline_status}
+                      </span>
                       <button
                         onClick={(e) => { e.stopPropagation(); handleShareSingle(u); }}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-slate-100 transition-all"
+                        className="p-1.5 rounded-lg hover:bg-slate-100 transition-all"
                         title="Bagikan"
                       >
                         <Share2 className="w-3.5 h-3.5 text-slate-400" />
                       </button>
                     </div>
+                  </div>
+
+                  {/* Uraian */}
+                  <h3 className="text-sm font-semibold text-slate-800 group-hover:text-emerald-700 transition-colors leading-snug">
+                    {u.uraian_usulan}
+                  </h3>
+
+                  {/* Kategori + Lokasi + Pengusul */}
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${KATEGORI_COLORS[u.kategori] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                      {KATEGORI_ICONS[u.kategori]} {u.kategori}
+                    </span>
+                    {u.lokasi_rt_rw && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+                        <MapPin className="w-3 h-3" /> {u.lokasi_rt_rw}
+                      </span>
+                    )}
+                    {u.pengusul && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+                        <Users className="w-3 h-3" /> {u.pengusul}
+                      </span>
+                    )}
+                    {u.pipeline_status === 'Dikerjakan' && u.dinas_penanggung_jawab && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-orange-600 font-semibold">
+                        <Building2 className="w-3 h-3" /> {u.dinas_penanggung_jawab}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Pipeline progress bar */}
+                  <div className="flex items-center gap-0.5 mt-3">
+                    {PIPELINE_STAGES.map((stage, i) => {
+                      const isActive = i <= currentIdx && u.pipeline_status !== 'Ditolak';
+                      const isCurrent = stage === u.pipeline_status;
+                      const c = PIPELINE_COLORS[stage];
+                      return (
+                        <div key={stage}
+                          className={`h-1.5 flex-1 rounded-full transition-all ${isCurrent ? c.dot : isActive ? `${c.dot} opacity-60` : 'bg-slate-200'}`}
+                          title={stage}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               );
