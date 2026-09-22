@@ -909,37 +909,34 @@ ${rowsHtml}
       </div>
 
       {/* Overview Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 shadow-sm dark:shadow-none">
-          <div className="flex items-center justify-between">
-            <span className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center"><ListChecks className="w-5 h-5" /></span>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><ListChecks className="w-4 h-4" /></span>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricTotal}</p>
           </div>
-          <p className="text-3xl font-black text-gray-900 dark:text-white mt-3">{metricTotal}</p>
-          <p className="text-xs font-bold text-gray-500 dark:text-slate-400 mt-1">Total Usulan</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">Total Usulan</p>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 shadow-sm dark:shadow-none">
-          <div className="flex items-center justify-between">
-            <span className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 flex items-center justify-center"><AlertTriangle className="w-5 h-5" /></span>
-            <span className="text-[10px] font-black bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 px-2 py-1 rounded-full">Belum Terakomodir</span>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><AlertTriangle className="w-4 h-4" /></span>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricBelum}</p>
           </div>
-          <p className="text-3xl font-black text-gray-900 dark:text-white mt-3">{metricBelum}</p>
-          <p className="text-xs font-bold text-gray-500 dark:text-slate-400 mt-1">Menunggu Akomodasi</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">Belum Terakomodir</p>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 shadow-sm dark:shadow-none">
-          <div className="flex items-center justify-between">
-            <span className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 flex items-center justify-center"><Layers className="w-5 h-5" /></span>
-            <span className="text-[10px] font-black bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 px-2 py-1 rounded-full">RKPDes</span>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><Layers className="w-4 h-4" /></span>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricRkpdes}</p>
           </div>
-          <p className="text-3xl font-black text-gray-900 dark:text-white mt-3">{metricRkpdes}</p>
-          <p className="text-xs font-bold text-gray-500 dark:text-slate-400 mt-1">Masuk RKPDes</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">Masuk RKPDes</p>
         </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 p-5 shadow-sm dark:shadow-none">
-          <div className="flex items-center justify-between">
-            <span className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 flex items-center justify-center"><HeartHandshake className="w-5 h-5" /></span>
-            <span className="text-[10px] font-black bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 px-2 py-1 rounded-full">Musrenbang</span>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><HeartHandshake className="w-4 h-4" /></span>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricMusrenbang}</p>
           </div>
-          <p className="text-3xl font-black text-gray-900 dark:text-white mt-3">{metricMusrenbang}</p>
-          <p className="text-xs font-bold text-gray-500 dark:text-slate-400 mt-1">Diteruskan ke Musrenbang</p>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">Musrenbang</p>
         </div>
       </div>
 
