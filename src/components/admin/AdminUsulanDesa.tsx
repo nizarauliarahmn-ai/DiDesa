@@ -42,12 +42,12 @@ const STATUS_TERAKOMODIR_OPTIONS = ['Belum', 'Desa 2026', 'Desa 2027', 'Kab 2026
 const TAG_OPTIONS = ['RKPDes 2026', 'RKPDes 2027', 'Musrenbang 2026', 'Musrenbang 2027'];
 const PRIORITAS_OPTIONS = [1, 2, 3, 4, 5];
 
-const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RKPDesa', 'RPJMDesa', 'APBDesa', 'Dikerjakan', 'Selesai'];
+const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RPJMDesa', 'RKPDesa', 'APBDesa', 'Dikerjakan', 'Selesai'];
 const PIPELINE_COLORS: Record<string, { bg: string; text: string; border: string; icon: string }> = {
   'Diajukan': { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-300', icon: 'bg-gray-400' },
   'Musrenbang': { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', icon: 'bg-blue-400' },
-  'RKPDesa': { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-200', icon: 'bg-indigo-400' },
-  'RPJMDesa': { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200', icon: 'bg-violet-400' },
+  'RPJMDesa': { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-200', icon: 'bg-indigo-400' },
+  'RKPDesa': { bg: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200', icon: 'bg-violet-400' },
   'APBDesa': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', icon: 'bg-amber-400' },
   'Dikerjakan': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', icon: 'bg-orange-400' },
   'Selesai': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', icon: 'bg-emerald-500' },
