@@ -169,6 +169,7 @@ export default function AdminUsulanDesa() {
   const [loadingSubmissions, setLoadingSubmissions] = useState(true);
   const [showSubmissions, setShowSubmissions] = useState(false);
   const [submissionUsulanMap, setSubmissionUsulanMap] = useState<Record<string, UsulanDesa>>({});
+  const [editedValues, setEditedValues] = useState<Record<string, string>>({});
 
   const loadData = async () => {
     setLoading(true);
@@ -339,7 +340,9 @@ export default function AdminUsulanDesa() {
         };
         const dbField = fieldMap[sub.field_yang_diperbaiki];
         if (dbField) {
-          const updatePayload: Record<string, any> = { [dbField]: sub.field_yang_diperbaiki === 'anggaran' ? Number(sub.nilai_baru) : sub.nilai_baru };
+          // Use edited value if admin changed it, otherwise use original submission value
+          const finalValue = editedValues[id] !== undefined ? editedValues[id] : sub.nilai_baru;
+          const updatePayload: Record<string, any> = { [dbField]: sub.field_yang_diperbaiki === 'anggaran' ? Number(finalValue) : finalValue };
           await supabase.from('usulan_desas').update(updatePayload).eq('id', sub.usulan_id);
         }
       }
@@ -983,15 +986,23 @@ ${rowsHtml}
                           <p className="font-semibold text-slate-800 dark:text-white">
                             Perbaikan: <span className="text-blue-600">{sub.field_yang_diperbaiki === 'lainnya' ? 'Lainnya' : sub.field_yang_diperbaiki}</span>
                           </p>
-                          {/* Show old value vs new value */}
+                          {/* Show old value vs editable new value */}
                           {sub.usulan_id && submissionUsulanMap[sub.usulan_id] && (
-                            <div className="mt-2 bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-100 dark:border-slate-700">
-                              <div className="flex items-center gap-2 text-xs">
-                                <span className="text-red-500 line-through break-words">
+                            <div className="mt-2 space-y-2">
+                              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-2.5 border border-slate-100 dark:border-slate-700">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">Nilai Lama:</span>
+                                <p className="text-xs text-red-500 line-through mt-0.5">
                                   {submissionUsulanMap[sub.usulan_id][sub.field_yang_diperbaiki as keyof UsulanDesa] as string || '(kosong)'}
-                                </span>
-                                <span className="text-slate-400">→</span>
-                                <span className="text-emerald-600 font-bold break-words">{sub.nilai_baru}</span>
+                                </p>
+                              </div>
+                              <div>
+                                <span className="text-[10px] font-bold text-emerald-600 uppercase">Nilai Baru (bisa diedit admin):</span>
+                                <input
+                                  type={sub.field_yang_diperbaiki === 'anggaran' ? 'number' : 'text'}
+                                  value={editedValues[sub.id] !== undefined ? editedValues[sub.id] : sub.nilai_baru}
+                                  onChange={e => setEditedValues(prev => ({ ...prev, [sub.id]: e.target.value }))}
+                                  className="w-full mt-1 px-2.5 py-1.5 bg-white dark:bg-slate-900 border-2 border-emerald-300 dark:border-emerald-700 rounded-lg text-xs font-bold text-emerald-700 dark:text-emerald-300 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                                />
                               </div>
                             </div>
                           )}
