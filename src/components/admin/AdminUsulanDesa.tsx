@@ -25,6 +25,8 @@ export interface UsulanDesa {
   diteruskan_tags?: string[] | null;
   status_terakomodir: string;
   pipeline_status: string;
+  pipeline_year?: string | null;
+  dinas_penanggung_jawab?: string | null;
   skala_prioritas?: number | null;
   keterangan?: string | null;
   foto_url?: string | null;
@@ -122,11 +124,12 @@ export default function AdminUsulanDesa() {
 
   // Pipeline workflow state
   const [pipelineTarget, setPipelineTarget] = useState<UsulanDesa | null>(null);
-  const [pipelineAction, setPipelineAction] = useState<null | 'rkpdes' | 'musrenbang' | 'status'>(null);
+  const [pipelineAction, setPipelineAction] = useState<null | 'rkpdes' | 'musrenbang' | 'rpjmdesa' | 'apbdesa' | 'dikerjakan' | 'status'>(null);
   const [pipelineYear, setPipelineYear] = useState(String(new Date().getFullYear()));
   const [pipelinePriority, setPipelinePriority] = useState('');
   const [pipelineStatus, setPipelineStatus] = useState('Belum');
   const [pipelineSaving, setPipelineSaving] = useState(false);
+  const [pipelineDinas, setPipelineDinas] = useState('');
 
   // Import state
   const [showImportModal, setShowImportModal] = useState(false);
@@ -607,12 +610,13 @@ export default function AdminUsulanDesa() {
   };
 
   // ── Pipeline Workflow Actions ──
-  const openPipeline = (u: UsulanDesa, action: 'rkpdes' | 'musrenbang' | 'status') => {
+  const openPipeline = (u: UsulanDesa, action: 'rkpdes' | 'musrenbang' | 'rpjmdesa' | 'apbdesa' | 'dikerjakan' | 'status') => {
     setPipelineTarget(u);
     setPipelineAction(action);
-    setPipelineYear(String(new Date().getFullYear()));
+    setPipelineYear(u.pipeline_year || String(new Date().getFullYear()));
     setPipelinePriority(u.skala_prioritas != null ? String(u.skala_prioritas) : '');
     setPipelineStatus(u.status_terakomodir);
+    setPipelineDinas(u.dinas_penanggung_jawab || '');
   };
 
   const savePipeline = async () => {
@@ -621,26 +625,42 @@ export default function AdminUsulanDesa() {
     try {
       const tags = [...(pipelineTarget.diteruskan_tags || [])];
       let status = pipelineTarget.status_terakomodir;
+      let newPipelineStatus = pipelineTarget.pipeline_status;
       const payload: Record<string, any> = {};
 
       if (pipelineAction === 'rkpdes') {
         const tag = `RKPDes ${pipelineYear}`;
         if (!tags.some(t => (t || '').toLowerCase().includes('rkpdes'))) tags.push(tag);
         payload.diteruskan_tags = tags;
+        newPipelineStatus = 'RKPDesa';
+        payload.pipeline_year = pipelineYear;
       } else if (pipelineAction === 'musrenbang') {
         const tag = `Musrenbang ${pipelineYear}`;
         if (!tags.some(t => (t || '').toLowerCase().includes('musrenbang'))) tags.push(tag);
         payload.diteruskan_tags = tags;
         payload.skala_prioritas = pipelinePriority ? parseInt(pipelinePriority, 10) : null;
+        newPipelineStatus = 'Musrenbang';
+        payload.pipeline_year = pipelineYear;
+      } else if (pipelineAction === 'rpjmdesa') {
+        newPipelineStatus = 'RPJMDesa';
+        payload.pipeline_year = pipelineYear;
+      } else if (pipelineAction === 'apbdesa') {
+        newPipelineStatus = 'APBDesa';
+        payload.pipeline_year = pipelineYear;
+      } else if (pipelineAction === 'dikerjakan') {
+        newPipelineStatus = 'Dikerjakan';
+        payload.dinas_penanggung_jawab = pipelineDinas.trim() || null;
       } else if (pipelineAction === 'status') {
         status = pipelineStatus;
         payload.status_terakomodir = status;
       }
 
+      payload.pipeline_status = newPipelineStatus;
+
       const { error } = await supabase.from('usulan_desas').update(payload).eq('id', pipelineTarget.id);
       if (error) throw error;
 
-      const label = pipelineAction === 'rkpdes' ? 'Tarik ke RKPDes' : pipelineAction === 'musrenbang' ? 'Usulkan ke Musrenbang' : 'Status Terakomodir';
+      const label = pipelineAction === 'rkpdes' ? 'Tarik ke RKPDes' : pipelineAction === 'musrenbang' ? 'Usulkan ke Musrenbang' : pipelineAction === 'rpjmdesa' ? 'Masuk RPJMDesa' : pipelineAction === 'apbdesa' ? 'Masuk APBDesa' : pipelineAction === 'dikerjakan' ? 'Dikerjakan' : 'Status Terakomodir';
       showToast(`${label} berhasil disimpan untuk ${pipelineTarget.kode_usulan}.`, 'success');
       setPipelineTarget(null);
       setPipelineAction(null);
@@ -1154,14 +1174,25 @@ ${rowsHtml}
                           'Selesai': 'bg-emerald-50 text-emerald-700 border-emerald-200',
                           'Ditolak': 'bg-rose-50 text-rose-700 border-rose-200',
                         };
-                        const displayLabel = ps === 'APBDesa' && apbdesaYearMap[u.id]
+                        const displayLabel = (ps === 'APBDesa' && apbdesaYearMap[u.id])
                           ? `APBDesa ${apbdesaYearMap[u.id]}`
-                          : ps;
+                          : (ps === 'RPJMDesa' || ps === 'RKPDesa' || ps === 'APBDesa') && u.pipeline_year
+                            ? `${ps} ${u.pipeline_year}`
+                            : ps === 'Dikerjakan' && u.dinas_penanggung_jawab
+                              ? `Dikerjakan`
+                              : ps;
                         return (
-                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${psColors[ps] || psColors['Diajukan']}`}>
-                            {ps === 'Selesai' ? <CheckCircle2 className="w-2.5 h-2.5" /> : ps === 'Ditolak' ? <Ban className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
-                            {displayLabel}
-                          </span>
+                          <div className="flex flex-col gap-0.5">
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${psColors[ps] || psColors['Diajukan']}`}>
+                              {ps === 'Selesai' ? <CheckCircle2 className="w-2.5 h-2.5" /> : ps === 'Ditolak' ? <Ban className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
+                              {displayLabel}
+                            </span>
+                            {ps === 'Dikerjakan' && u.dinas_penanggung_jawab && (
+                              <span className="text-[8px] text-orange-600 dark:text-orange-400 font-semibold truncate max-w-[120px]" title={u.dinas_penanggung_jawab}>
+                                {u.dinas_penanggung_jawab}
+                              </span>
+                            )}
+                          </div>
                         );
                       })()}
                     </td>
@@ -1228,9 +1259,13 @@ ${rowsHtml}
                             <>
                               <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }} />
                               <div className="absolute right-0 top-full z-50 mt-1 w-56 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5" onClick={(e) => e.stopPropagation()}>
-                                <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="Tarik ke RKPDes" onClick={() => { setOpenMenuId(null); openPipeline(u, 'rkpdes'); }} />
                                 <DropdownItem icon={Star} color="text-blue-600 dark:text-blue-400" label="Usulkan ke Musrenbang" onClick={() => { setOpenMenuId(null); openPipeline(u, 'musrenbang'); }} />
-                                <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Ubah Status Terakomodir" onClick={() => { setOpenMenuId(null); openPipeline(u, 'status'); }} />
+                                <DropdownItem icon={Layers} color="text-indigo-600 dark:text-indigo-400" label="Masuk RPJMDesa" onClick={() => { setOpenMenuId(null); openPipeline(u, 'rpjmdesa'); }} />
+                                <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="Tarik ke RKPDes" onClick={() => { setOpenMenuId(null); openPipeline(u, 'rkpdes'); }} />
+                                <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Masuk APBDesa" onClick={() => { setOpenMenuId(null); openPipeline(u, 'apbdesa'); }} />
+                                <DropdownItem icon={AlertTriangle} color="text-orange-600 dark:text-orange-400" label="Dikerjakan" onClick={() => { setOpenMenuId(null); openPipeline(u, 'dikerjakan'); }} />
+                                <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
+                                <DropdownItem icon={CircleDollarSign} color="text-emerald-600 dark:text-emerald-400" label="Ubah Status Terakomodir" onClick={() => { setOpenMenuId(null); openPipeline(u, 'status'); }} />
                                 <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
                                 <DropdownItem icon={Trash2} color="text-rose-600 dark:text-rose-400" label="Hapus Usulan" onClick={() => { setOpenMenuId(null); handleDelete(u); }} />
                               </div>
@@ -1463,7 +1498,7 @@ ${rowsHtml}
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">
-                {pipelineAction === 'rkpdes' ? 'Tarik ke RKPDes' : pipelineAction === 'musrenbang' ? 'Usulkan ke Musrenbang' : 'Ubah Status Terakomodir'}
+                {pipelineAction === 'rkpdes' ? 'Tarik ke RKPDes' : pipelineAction === 'musrenbang' ? 'Usulkan ke Musrenbang' : pipelineAction === 'rpjmdesa' ? 'Masuk RPJMDesa' : pipelineAction === 'apbdesa' ? 'Masuk APBDesa' : pipelineAction === 'dikerjakan' ? 'Dikerjakan oleh Dinas' : 'Ubah Status Terakomodir'}
               </h3>
               <button onClick={() => setPipelineTarget(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
                 <X className="w-5 h-5" />
@@ -1475,22 +1510,21 @@ ${rowsHtml}
                 <p className="text-sm font-bold text-gray-800 dark:text-slate-100 mt-1">{pipelineTarget.uraian_usulan}</p>
               </div>
 
-              {pipelineAction !== 'status' && (
+              {/* Year selection for pipeline stages that need it */}
+              {pipelineAction !== 'status' && pipelineAction !== 'dikerjakan' && (
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Tahun {pipelineAction === 'rkpdes' ? 'RKPDes' : 'Musrenbang'}
+                    Tahun Anggaran
                   </label>
                   <div className="flex gap-2">
-                    {[String(new Date().getFullYear()), String(new Date().getFullYear() + 1)].map(y => (
+                    {[String(new Date().getFullYear() - 1), String(new Date().getFullYear()), String(new Date().getFullYear() + 1)].map(y => (
                       <button
                         key={y}
                         type="button"
                         onClick={() => setPipelineYear(y)}
                         className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-black border transition-all cursor-pointer ${
                           pipelineYear === y
-                            ? pipelineAction === 'rkpdes'
-                              ? 'bg-purple-600 text-white border-purple-600'
-                              : 'bg-blue-600 text-white border-blue-600'
+                            ? 'bg-emerald-600 text-white border-emerald-600'
                             : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
                         }`}
                       >
@@ -1520,6 +1554,19 @@ ${rowsHtml}
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {pipelineAction === 'dikerjakan' && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Dinas / OPD Penanggung Jawab</label>
+                  <input
+                    type="text"
+                    value={pipelineDinas}
+                    onChange={e => setPipelineDinas(e.target.value)}
+                    placeholder="Contoh: Dinas PUTR, Dinas PUPR, Bappeda..."
+                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  />
                 </div>
               )}
 

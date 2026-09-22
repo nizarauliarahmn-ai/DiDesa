@@ -18,6 +18,8 @@ interface UsulanDesa {
   diteruskan_tags?: string[] | null;
   status_terakomodir: string;
   pipeline_status: string;
+  pipeline_year?: string | null;
+  dinas_penanggung_jawab?: string | null;
   skala_prioritas?: number | null;
   keterangan?: string | null;
   foto_url?: string | null;
@@ -310,6 +312,9 @@ export default function PublicUsulanPortal() {
                     const isCompleted = i <= currentIdx && u.pipeline_status !== 'Ditolak';
                     const isCurrent = stage === u.pipeline_status;
                     const colors = PIPELINE_COLORS[stage];
+                    const stageLabel = isCurrent && u.pipeline_year && (stage === 'RPJMDesa' || stage === 'RKPDesa' || stage === 'APBDesa')
+                      ? `${stage} ${u.pipeline_year}`
+                      : stage;
                     return (
                       <React.Fragment key={stage}>
                         <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
@@ -318,7 +323,7 @@ export default function PublicUsulanPortal() {
                           'bg-slate-50 text-slate-400 border-slate-200'
                         }`}>
                           <span className={`w-2 h-2 rounded-full ${isCurrent || isCompleted ? colors.dot : 'bg-slate-300'}`}></span>
-                          {stage}
+                          {stageLabel}
                         </div>
                         {i < PIPELINE_STAGES.length - 1 && (
                           <ChevronRight className={`w-3 h-3 ${i < currentIdx ? 'text-emerald-400' : 'text-slate-300'}`} />
@@ -327,6 +332,13 @@ export default function PublicUsulanPortal() {
                     );
                   })}
                 </div>
+                {/* Show dinas info when dikerjakan */}
+                {u.pipeline_status === 'Dikerjakan' && u.dinas_penanggung_jawab && (
+                  <div className="mt-3 flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-xl px-3 py-2">
+                    <Building2 className="w-4 h-4 text-orange-500" />
+                    <span className="text-xs text-orange-700 font-semibold">Dinas/OPD: {u.dinas_penanggung_jawab}</span>
+                  </div>
+                )}
               </div>
 
               {/* Perbaikan Form */}
@@ -792,8 +804,13 @@ export default function PublicUsulanPortal() {
                       <div>
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border ${colors.bg} ${colors.text} ${colors.border}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`}></span>
-                          {u.pipeline_status}
+                          {u.pipeline_status === 'RPJMDesa' || u.pipeline_status === 'RKPDesa' || u.pipeline_status === 'APBDesa'
+                            ? `${u.pipeline_status}${u.pipeline_year ? ' ' + u.pipeline_year : ''}`
+                            : u.pipeline_status}
                         </span>
+                        {u.pipeline_status === 'Dikerjakan' && u.dinas_penanggung_jawab && (
+                          <p className="text-[9px] text-orange-600 font-semibold mt-0.5 truncate max-w-[120px]" title={u.dinas_penanggung_jawab}>{u.dinas_penanggung_jawab}</p>
+                        )}
                         <p className="text-[10px] text-slate-400 mt-1">{formatRupiah(u.anggaran)}</p>
                       </div>
                       <button
