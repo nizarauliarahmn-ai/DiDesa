@@ -422,7 +422,7 @@ export default function AdminBukuTamu() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         {[
           { label: 'Hari Ini', value: todayCount, icon: <BookOpen className="w-4 h-4" /> },
           { label: 'Hadir', value: entries.filter(e => e.status === 'hadir').length, icon: <LogIn className="w-4 h-4" /> },

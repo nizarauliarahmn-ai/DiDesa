@@ -909,7 +909,7 @@ ${rowsHtml}
       </div>
 
       {/* Overview Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
             <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><ListChecks className="w-4 h-4" /></span>
