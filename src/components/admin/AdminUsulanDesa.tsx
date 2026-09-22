@@ -862,50 +862,48 @@ ${rowsHtml}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Usulan Desa</h2>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Master data usulan pembangunan — RKPDes, Musrenbang, dan penyerapan kabupaten</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Usulan Desa</h2>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-2 px-4 py-3 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 font-bold rounded-xl hover:bg-sky-100 dark:hover:bg-sky-900 transition-colors border border-sky-200 dark:border-sky-800 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             title="Impor data dari file Excel/CSV"
           >
-            <Upload size={18} /> Impor dari Excel/CSV
+            <Upload size={14} /> Impor
           </button>
           <button
             onClick={exportExcel}
-            className="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors border border-gray-200 dark:border-slate-700 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             title="Unduh data terfilter sebagai Excel"
           >
-            <Download size={18} /> Export Excel
+            <Download size={14} /> Export
           </button>
           <button
             onClick={exportPrintMusrenbang}
-            className="flex items-center gap-2 px-5 py-3 bg-blue-700 text-white font-bold rounded-xl hover:bg-blue-800 transition-colors shadow-sm dark:shadow-none cursor-pointer"
-            title="Cetak daftar usulan Musrenbang dalam A4 landscape"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Cetak daftar usulan Musrenbang"
           >
-            <Printer size={18} /> Cetak Musrenbang
+            <Printer size={14} /> Cetak
           </button>
-          <button
-            onClick={openNewModal}
-            className="flex items-center gap-2 px-5 py-3 bg-emerald-700 text-white font-bold rounded-xl hover:bg-emerald-800 transition-colors shadow-sm dark:shadow-none cursor-pointer"
-          >
-            <PlusCircle size={18} /> Tambah Usulan Baru
-          </button>
+          <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
           <button
             onClick={() => {
               const shareUrl = `${window.location.origin}${window.location.pathname}?tab=usulan`;
               navigator.clipboard.writeText(shareUrl).then(() => {
-                showToast('Link halaman usulan public berhasil disalin!', 'success');
-              }).catch(() => {
-                prompt('Salin link ini:', shareUrl);
-              });
+                showToast('Link berhasil disalin!', 'success');
+              }).catch(() => { prompt('Salin link ini:', shareUrl); });
             }}
-            className="flex items-center gap-2 px-5 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer"
-            title="Salin link halaman usulan public untuk dibagikan ke warga/RT/RW"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Salin link halaman publik"
           >
-            <Share2 size={18} /> Bagikan ke Publik
+            <Share2 size={14} /> Bagikan
+          </button>
+          <button
+            onClick={openNewModal}
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            <PlusCircle size={14} /> Tambah Usulan
           </button>
         </div>
       </div>
