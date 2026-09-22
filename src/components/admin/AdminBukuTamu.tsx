@@ -391,10 +391,10 @@ export default function AdminBukuTamu() {
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
-    <div className="animate-in fade-in duration-300">
+    <div className="animate-in fade-in duration-300 space-y-5">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Buku Tamu Digital</h2>
         </div>
@@ -422,7 +422,7 @@ export default function AdminBukuTamu() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Hari Ini', value: todayCount, icon: <BookOpen className="w-4 h-4" /> },
           { label: 'Hadir', value: entries.filter(e => e.status === 'hadir').length, icon: <LogIn className="w-4 h-4" /> },
@@ -440,7 +440,7 @@ export default function AdminBukuTamu() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none mb-4 p-4 flex flex-col sm:flex-row items-center gap-3">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none p-4 flex flex-col sm:flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
