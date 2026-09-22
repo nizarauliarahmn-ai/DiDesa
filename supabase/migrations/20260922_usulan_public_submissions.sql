@@ -28,22 +28,25 @@ CREATE TABLE IF NOT EXISTS usulan_submissions (
 CREATE INDEX IF NOT EXISTS idx_usulan_submissions_tenant ON usulan_submissions (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_usulan_submissions_status ON usulan_submissions (tenant_id, status);
 
--- RLS: anon bisa INSERT (publik), hanya authenticated yang bisa SELECT/UPDATE
+-- RLS: anon bisa INSERT (publik), anon+authenticated bisa SELECT/UPDATE (admin)
 ALTER TABLE usulan_submissions ENABLE ROW LEVEL SECURITY;
 
 -- Policy: publik bisa insert (submit usulan/perbaikan)
+DROP POLICY IF EXISTS "Publik bisa submit usulan" ON usulan_submissions;
 CREATE POLICY "Publik bisa submit usulan"
   ON usulan_submissions FOR INSERT
   TO anon
   WITH CHECK (true);
 
--- Policy: admin (anon) bisa baca semua
+-- Policy: admin bisa baca semua
+DROP POLICY IF EXISTS "Bisa baca submissions" ON usulan_submissions;
 CREATE POLICY "Bisa baca submissions"
   ON usulan_submissions FOR SELECT
   TO anon, authenticated
   USING (true);
 
--- Policy: admin (anon) bisa update (approve/reject)
+-- Policy: admin bisa update (approve/reject)
+DROP POLICY IF EXISTS "Bisa update submissions" ON usulan_submissions;
 CREATE POLICY "Bisa update submissions"
   ON usulan_submissions FOR UPDATE
   TO anon, authenticated
