@@ -3,7 +3,7 @@ import {
   Search, PlusCircle, Edit2, Trash2, Image as ImageIcon, FolderOpen,
   ListChecks, AlertTriangle, Layers, Upload, X, Loader2, Link2, MapPin, User,
   CircleDollarSign, HeartHandshake, CheckCircle2, Ban, Send, Printer, Download, Star,
-  Eye, MoreVertical, Tags, Clock, Share2, Copy
+  Eye, MoreVertical, Tags, Clock, Share2, Copy, Building
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -24,6 +24,9 @@ export interface UsulanDesa {
   pengusul?: string | null;
   diteruskan_tags?: string[] | null;
   status_terakomodir: string;
+  terakomodir_detail?: string | null;
+  terakomodir_dinas?: string | null;
+  terakomodir_tahun?: string | null;
   pipeline_status: string;
   pipeline_year?: string | null;
   dinas_penanggung_jawab?: string | null;
@@ -40,11 +43,11 @@ export interface UsulanDesa {
 }
 
 const KATEGORI_OPTIONS = ['Infrastruktur', 'Ekonomi', 'Sosial/Kesehatan', 'Pemerintahan', 'Pemberdayaan'];
-const STATUS_TERAKOMODIR_OPTIONS = ['Belum', 'Desa 2026', 'Desa 2027', 'Kab 2026', 'Kab 2027', 'Ditolak'];
-const TAG_OPTIONS = ['RKPDes 2026', 'RKPDes 2027', 'Musrenbang 2026', 'Musrenbang 2027'];
+const STATUS_TERAKOMODIR_OPTIONS = ['Belum', 'Desa 2026', 'Desa 2027', 'Dinas 2026', 'Dinas 2027', 'Ditolak'];
+const TAG_OPTIONS = ['Musrenbang 2026', 'Musrenbang 2027', 'RPJMDesa 2026', 'RPJMDesa 2027', 'RKPDes 2026', 'RKPDes 2027'];
 const PRIORITAS_OPTIONS = [1, 2, 3, 4, 5];
 
-const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RPJMDesa', 'RKPDesa', 'APBDesa', 'Dikerjakan', 'Selesai'];
+const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RPJMDesa', 'RKPDesa', 'APBDesa'];
 const PIPELINE_COLORS: Record<string, { bg: string; text: string; border: string; icon: string }> = {
   'Diajukan': { bg: 'bg-gray-100', text: 'text-gray-600', border: 'border-gray-300', icon: 'bg-gray-400' },
   'Musrenbang': { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', icon: 'bg-blue-400' },
@@ -122,14 +125,24 @@ export default function AdminUsulanDesa() {
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
-  // Pipeline workflow state
-  const [pipelineTarget, setPipelineTarget] = useState<UsulanDesa | null>(null);
-  const [pipelineAction, setPipelineAction] = useState<null | 'rkpdes' | 'musrenbang' | 'rpjmdesa' | 'apbdesa' | 'dikerjakan' | 'status'>(null);
-  const [pipelineYear, setPipelineYear] = useState(String(new Date().getFullYear()));
-  const [pipelinePriority, setPipelinePriority] = useState('');
-  const [pipelineStatus, setPipelineStatus] = useState('Belum');
-  const [pipelineSaving, setPipelineSaving] = useState(false);
-  const [pipelineDinas, setPipelineDinas] = useState('');
+  // ── Diteruskan ke Dokumen Perencanaan Modal ──
+  const [diteruskanTarget, setDiteruskanTarget] = useState<UsulanDesa | null>(null);
+  const [diteruskanType, setDiteruskanType] = useState<'musrenbang' | 'rpjmdesa' | 'rkpdes' | null>(null);
+  const [diteruskanYear, setDiteruskanYear] = useState(String(new Date().getFullYear()));
+  const [diteruskanSaving, setDiteruskanSaving] = useState(false);
+
+  // ── Masuk APBDesa Modal ──
+  const [apbdesaTarget, setApbdesaTarget] = useState<UsulanDesa | null>(null);
+  const [apbdesaYear, setApbdesaYear] = useState(String(new Date().getFullYear()));
+  const [apbdesaSaving, setApbdesaSaving] = useState(false);
+
+  // ── Tandai Terakomodir Modal ──
+  const [terakomodirTarget, setTerakomodirTarget] = useState<UsulanDesa | null>(null);
+  const [terakomodirPihak, setTerakomodirPihak] = useState<'desa' | 'dinas' | null>(null);
+  const [terakomodirTahun, setTerakomodirTahun] = useState(String(new Date().getFullYear()));
+  const [terakomodirDinas, setTerakomodirDinas] = useState('');
+  const [terakomodirDetail, setTerakomodirDetail] = useState('');
+  const [terakomodirSaving, setTerakomodirSaving] = useState(false);
 
   // Import state
   const [showImportModal, setShowImportModal] = useState(false);
@@ -152,6 +165,9 @@ export default function AdminUsulanDesa() {
     pengusul: '',
     diteruskan_tags: [] as string[],
     status_terakomodir: 'Belum',
+    terakomodir_detail: '',
+    terakomodir_dinas: '',
+    terakomodir_tahun: '',
     skala_prioritas: '' as string,
     keterangan: '',
     foto_url: '',
@@ -411,8 +427,10 @@ export default function AdminUsulanDesa() {
   // ── Metrics ──
   const metricTotal = list.length;
   const metricBelum = list.filter(u => u.status_terakomodir === 'Belum').length;
+  const metricTerakomodir = list.filter(u => u.status_terakomodir !== 'Belum' && u.status_terakomodir !== 'Ditolak').length;
   const metricRkpdes = list.filter(u => (u.diteruskan_tags || []).some(t => (t || '').toLowerCase().includes('rkpdes'))).length;
   const metricMusrenbang = list.filter(u => (u.diteruskan_tags || []).some(t => (t || '').toLowerCase().includes('musrenbang'))).length;
+  const metricRpjmdesa = list.filter(u => (u.diteruskan_tags || []).some(t => (t || '').toLowerCase().includes('rpjmdesa'))).length;
 
   const kodeSektorColor = (kategori: string) => {
     switch (kategori) {
@@ -429,7 +447,7 @@ export default function AdminUsulanDesa() {
     if (status === 'Belum') return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800';
     if (status === 'Ditolak') return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
     if (status.toLowerCase().startsWith('desa')) return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800';
-    if (status.toLowerCase().startsWith('kab')) return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800';
+    if (status.toLowerCase().startsWith('dinas')) return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800';
     return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
   };
 
@@ -437,6 +455,7 @@ export default function AdminUsulanDesa() {
     const t = (tag || '').toLowerCase();
     if (t.includes('rkpdes')) return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800';
     if (t.includes('musrenbang')) return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800';
+    if (t.includes('rpjmdesa')) return 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800';
     return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
   };
 
@@ -450,6 +469,9 @@ export default function AdminUsulanDesa() {
       pengusul: '',
       diteruskan_tags: [] as string[],
       status_terakomodir: 'Belum',
+      terakomodir_detail: '',
+      terakomodir_dinas: '',
+      terakomodir_tahun: '',
       skala_prioritas: '',
       keterangan: '',
       foto_url: '',
@@ -470,6 +492,9 @@ export default function AdminUsulanDesa() {
       pengusul: u.pengusul || '',
       diteruskan_tags: [...(u.diteruskan_tags || [])],
       status_terakomodir: u.status_terakomodir,
+      terakomodir_detail: u.terakomodir_detail || '',
+      terakomodir_dinas: u.terakomodir_dinas || '',
+      terakomodir_tahun: u.terakomodir_tahun || '',
       skala_prioritas: u.skala_prioritas != null ? String(u.skala_prioritas) : '',
       keterangan: u.keterangan || '',
       foto_url: u.foto_url || '',
@@ -567,6 +592,9 @@ export default function AdminUsulanDesa() {
         pengusul: form.pengusul.trim() || null,
         diteruskan_tags: form.diteruskan_tags,
         status_terakomodir: form.status_terakomodir,
+        terakomodir_detail: form.terakomodir_detail || null,
+        terakomodir_dinas: form.terakomodir_dinas || null,
+        terakomodir_tahun: form.terakomodir_tahun || null,
         skala_prioritas: form.skala_prioritas ? parseInt(form.skala_prioritas, 10) : null,
         keterangan: form.keterangan.trim() || null,
         foto_url: form.foto_url || null,
@@ -624,67 +652,114 @@ export default function AdminUsulanDesa() {
     });
   };
 
-  // ── Pipeline Workflow Actions ──
-  const openPipeline = (u: UsulanDesa, action: 'rkpdes' | 'musrenbang' | 'rpjmdesa' | 'apbdesa' | 'dikerjakan' | 'status') => {
-    setPipelineTarget(u);
-    setPipelineAction(action);
-    setPipelineYear(u.pipeline_year || String(new Date().getFullYear()));
-    setPipelinePriority(u.skala_prioritas != null ? String(u.skala_prioritas) : '');
-    setPipelineStatus(u.status_terakomodir);
-    setPipelineDinas(u.dinas_penanggung_jawab || '');
+  // ── 1. Diteruskan ke Dokumen Perencanaan ──
+  const openDiteruskan = (u: UsulanDesa, type: 'musrenbang' | 'rpjmdesa' | 'rkpdes') => {
+    setDiteruskanTarget(u);
+    setDiteruskanType(type);
+    setDiteruskanYear(u.pipeline_year || String(new Date().getFullYear()));
   };
 
-  const savePipeline = async () => {
-    if (!pipelineTarget) return;
-    setPipelineSaving(true);
+  const saveDiteruskan = async () => {
+    if (!diteruskanTarget || !diteruskanType) return;
+    setDiteruskanSaving(true);
     try {
-      const tags = [...(pipelineTarget.diteruskan_tags || [])];
-      let status = pipelineTarget.status_terakomodir;
-      let newPipelineStatus = pipelineTarget.pipeline_status;
-      const payload: Record<string, any> = {};
+      const tags = [...(diteruskanTarget.diteruskan_tags || [])];
+      const typeLabel = diteruskanType === 'musrenbang' ? 'Musrenbang' : diteruskanType === 'rpjmdesa' ? 'RPJMDesa' : 'RKPDes';
+      const tag = `${typeLabel} ${diteruskanYear}`;
+      if (!tags.some(t => (t || '').toLowerCase().includes(typeLabel.toLowerCase()))) tags.push(tag);
 
-      if (pipelineAction === 'rkpdes') {
-        const tag = `RKPDes ${pipelineYear}`;
-        if (!tags.some(t => (t || '').toLowerCase().includes('rkpdes'))) tags.push(tag);
-        payload.diteruskan_tags = tags;
-        newPipelineStatus = 'RKPDesa';
-        payload.pipeline_year = pipelineYear;
-      } else if (pipelineAction === 'musrenbang') {
-        const tag = `Musrenbang ${pipelineYear}`;
-        if (!tags.some(t => (t || '').toLowerCase().includes('musrenbang'))) tags.push(tag);
-        payload.diteruskan_tags = tags;
-        payload.skala_prioritas = pipelinePriority ? parseInt(pipelinePriority, 10) : null;
-        newPipelineStatus = 'Musrenbang';
-        payload.pipeline_year = pipelineYear;
-      } else if (pipelineAction === 'rpjmdesa') {
-        newPipelineStatus = 'RPJMDesa';
-        payload.pipeline_year = pipelineYear;
-      } else if (pipelineAction === 'apbdesa') {
-        newPipelineStatus = 'APBDesa';
-        payload.pipeline_year = pipelineYear;
-      } else if (pipelineAction === 'dikerjakan') {
-        newPipelineStatus = 'Dikerjakan';
-        payload.dinas_penanggung_jawab = pipelineDinas.trim() || null;
-      } else if (pipelineAction === 'status') {
-        status = pipelineStatus;
-        payload.status_terakomodir = status;
-      }
+      let newPipelineStatus = diteruskanTarget.pipeline_status;
+      if (diteruskanType === 'musrenbang') newPipelineStatus = 'Musrenbang';
+      else if (diteruskanType === 'rpjmdesa') newPipelineStatus = 'RPJMDesa';
+      else if (diteruskanType === 'rkpdes') newPipelineStatus = 'RKPDesa';
 
-      payload.pipeline_status = newPipelineStatus;
+      const payload: Record<string, any> = {
+        diteruskan_tags: tags,
+        pipeline_status: newPipelineStatus,
+        pipeline_year: diteruskanYear,
+      };
 
-      const { error } = await supabase.from('usulan_desas').update(payload).eq('id', pipelineTarget.id);
+      const { error } = await supabase.from('usulan_desas').update(payload).eq('id', diteruskanTarget.id);
       if (error) throw error;
 
-      const label = pipelineAction === 'rkpdes' ? 'Tarik ke RKPDes' : pipelineAction === 'musrenbang' ? 'Usulkan ke Musrenbang' : pipelineAction === 'rpjmdesa' ? 'Masuk RPJMDesa' : pipelineAction === 'apbdesa' ? 'Masuk APBDesa' : pipelineAction === 'dikerjakan' ? 'Dikerjakan' : 'Status Terakomodir';
-      showToast(`${label} berhasil disimpan untuk ${pipelineTarget.kode_usulan}.`, 'success');
-      setPipelineTarget(null);
-      setPipelineAction(null);
+      showToast(`Usulan diteruskan ke ${typeLabel} ${diteruskanYear}.`, 'success');
+      setDiteruskanTarget(null);
+      setDiteruskanType(null);
       loadData();
     } catch (e: any) {
-      console.error('Pipeline update error:', e);
-      showToast(e?.message || 'Gagal menyimpan aksi pipeline.', 'error');
+      console.error('Diteruskan update error:', e);
+      showToast(e?.message || 'Gagal menyimpan.', 'error');
     } finally {
-      setPipelineSaving(false);
+      setDiteruskanSaving(false);
+    }
+  };
+
+  // ── 2. Masuk APBDesa ──
+  const openApbdesa = (u: UsulanDesa) => {
+    // Validasi: harus sudah punya tag RKPDes
+    const hasRkpdes = (u.diteruskan_tags || []).some(t => (t || '').toLowerCase().includes('rkpdes'));
+    if (!hasRkpdes) {
+      showToast('Usulan harus sudah masuk RKPDes terlebih dahulu sebelum ke APBDesa.', 'error');
+      return;
+    }
+    setApbdesaTarget(u);
+    setApbdesaYear(u.pipeline_year || String(new Date().getFullYear()));
+  };
+
+  const saveApbdesa = async () => {
+    if (!apbdesaTarget) return;
+    setApbdesaSaving(true);
+    try {
+      const payload: Record<string, any> = {
+        pipeline_status: 'APBDesa',
+        pipeline_year: apbdesaYear,
+      };
+      const { error } = await supabase.from('usulan_desas').update(payload).eq('id', apbdesaTarget.id);
+      if (error) throw error;
+
+      showToast(`Usulan masuk APBDesa ${apbdesaYear}.`, 'success');
+      setApbdesaTarget(null);
+      loadData();
+    } catch (e: any) {
+      console.error('APBDesa update error:', e);
+      showToast(e?.message || 'Gagal menyimpan.', 'error');
+    } finally {
+      setApbdesaSaving(false);
+    }
+  };
+
+  // ── 3. Tandai Terakomodir ──
+  const openTerakomodir = (u: UsulanDesa) => {
+    setTerakomodirTarget(u);
+    setTerakomodirPihak(null);
+    setTerakomodirTahun(String(new Date().getFullYear()));
+    setTerakomodirDinas('');
+    setTerakomodirDetail('');
+  };
+
+  const saveTerakomodir = async () => {
+    if (!terakomodirTarget || !terakomodirPihak) return;
+    setTerakomodirSaving(true);
+    try {
+      const status = terakomodirPihak === 'desa' ? `Desa ${terakomodirTahun}` : `Dinas ${terakomodirTahun}`;
+      const payload: Record<string, any> = {
+        status_terakomodir: status,
+        terakomodir_tahun: terakomodirTahun,
+        terakomodir_dinas: terakomodirPihak === 'dinas' ? terakomodirDinas.trim() || null : null,
+        terakomodir_detail: terakomodirDetail.trim() || null,
+      };
+      const { error } = await supabase.from('usulan_desas').update(payload).eq('id', terakomodirTarget.id);
+      if (error) throw error;
+
+      showToast(`Usulan ditandai terakomodir oleh ${terakomodirPihak === 'desa' ? 'Desa' : 'Dinas'} ${terakomodirTahun}.`, 'success');
+      setTerakomodirTarget(null);
+      setTerakomodirPihak(null);
+      loadData();
+    } catch (e: any) {
+      console.error('Terakomodir update error:', e);
+      showToast(e?.message || 'Gagal menyimpan.', 'error');
+    } finally {
+      setTerakomodirSaving(false);
     }
   };
 
@@ -762,7 +837,12 @@ export default function AdminUsulanDesa() {
       'Lokasi RT/RW': u.lokasi_rt_rw || '',
       'Pengusul': u.pengusul || '',
       'Diteruskan': (u.diteruskan_tags || []).join('; '),
-      'Status Terakomodir': u.status_terakomodir,
+      'Status Akomodasi': u.status_terakomodir,
+      'Detail Realisasi': u.terakomodir_detail || '',
+      'Dinas': u.terakomodir_dinas || '',
+      'Tahun Akomodasi': u.terakomodir_tahun || '',
+      'Tahap Perencanaan': u.pipeline_status,
+      'Tahun Pipeline': u.pipeline_year || '',
       'Skala Prioritas': u.skala_prioritas ?? '',
       'Keterangan': u.keterangan || '',
     }));
@@ -909,7 +989,7 @@ ${rowsHtml}
       </div>
 
       {/* Overview Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-5">
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
             <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><ListChecks className="w-4 h-4" /></span>
@@ -926,17 +1006,31 @@ ${rowsHtml}
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><Layers className="w-4 h-4" /></span>
+            <span className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"><CheckCircle2 className="w-4 h-4" /></span>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricTerakomodir}</p>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">Sudah Terakomodir</p>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center"><Layers className="w-4 h-4" /></span>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricRkpdes}</p>
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">Masuk RKPDes</p>
         </div>
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center"><HeartHandshake className="w-4 h-4" /></span>
+            <span className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center"><HeartHandshake className="w-4 h-4" /></span>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricMusrenbang}</p>
           </div>
           <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">Musrenbang</p>
+        </div>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"><Layers className="w-4 h-4" /></span>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{metricRpjmdesa}</p>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-slate-400 mt-2 ml-11">RPJMDesa</p>
         </div>
       </div>
 
@@ -1103,9 +1197,9 @@ ${rowsHtml}
                 <th className="min-w-[120px] px-3 py-3 whitespace-nowrap shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">ID Usulan</th>
                 <th className="min-w-[280px] max-w-[480px] px-4 py-3 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Uraian Usulan &amp; Lokasi</th>
                 <th className="min-w-[100px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Sektor</th>
-                <th className="min-w-[120px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Diteruskan</th>
-                <th className="min-w-[100px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Pipeline</th>
-                <th className="min-w-[110px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Terakomodir</th>
+                <th className="min-w-[140px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Termasuk di Dokumen</th>
+                <th className="min-w-[120px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Tahap Perencanaan</th>
+                <th className="min-w-[130px] px-3 py-3 whitespace-nowrap text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status Akomodasi</th>
                 <th className="min-w-[80px] px-3 py-3 whitespace-nowrap text-center text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Prioritas</th>
                 <th className="min-w-[60px] px-3 py-3 whitespace-nowrap text-center text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Foto</th>
                 <th className="min-w-[80px] px-3 py-3 whitespace-nowrap text-right shrink-0 text-[11px] font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Aksi</th>
@@ -1195,7 +1289,7 @@ ${rowsHtml}
                         </div>
                       )}
                     </td>
-                    <td className="min-w-[100px] px-3 py-3 whitespace-nowrap">
+                    <td className="min-w-[120px] px-3 py-3 whitespace-nowrap">
                       {(() => {
                         const ps = u.pipeline_status || 'Diajukan';
                         const psColors: Record<string, string> = {
@@ -1204,41 +1298,42 @@ ${rowsHtml}
                           'RKPDesa': 'bg-indigo-50 text-indigo-600 border-indigo-200',
                           'RPJMDesa': 'bg-violet-50 text-violet-600 border-violet-200',
                           'APBDesa': 'bg-amber-50 text-amber-700 border-amber-200',
-                          'Dikerjakan': 'bg-orange-50 text-orange-700 border-orange-200',
-                          'Selesai': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                          'Ditolak': 'bg-rose-50 text-rose-700 border-rose-200',
                         };
-                        const displayLabel = (ps === 'APBDesa' && apbdesaYearMap[u.id])
-                          ? `APBDesa ${apbdesaYearMap[u.id]}`
-                          : (ps === 'RPJMDesa' || ps === 'RKPDesa' || ps === 'APBDesa') && u.pipeline_year
+                        const displayLabel = (ps === 'APBDesa' && u.pipeline_year)
+                          ? `APBDesa ${u.pipeline_year}`
+                          : (ps === 'RPJMDesa' || ps === 'RKPDesa' || ps === 'Musrenbang' || ps === 'APBDesa') && u.pipeline_year
                             ? `${ps} ${u.pipeline_year}`
-                            : ps === 'Dikerjakan' && u.dinas_penanggung_jawab
-                              ? `Dikerjakan`
-                              : ps;
+                            : ps;
                         return (
-                          <div className="flex flex-col gap-0.5">
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${psColors[ps] || psColors['Diajukan']}`}>
-                              {ps === 'Selesai' ? <CheckCircle2 className="w-2.5 h-2.5" /> : ps === 'Ditolak' ? <Ban className="w-2.5 h-2.5" /> : <Clock className="w-2.5 h-2.5" />}
-                              {displayLabel}
-                            </span>
-                            {ps === 'Dikerjakan' && u.dinas_penanggung_jawab && (
-                              <span className="text-[8px] text-orange-600 dark:text-orange-400 font-semibold truncate max-w-[120px]" title={u.dinas_penanggung_jawab}>
-                                {u.dinas_penanggung_jawab}
-                              </span>
-                            )}
-                          </div>
+                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${psColors[ps] || psColors['Diajukan']}`}>
+                            {ps === 'Diajukan' ? <Clock className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5" />}
+                            {displayLabel}
+                          </span>
                         );
                       })()}
                     </td>
-                    <td className="min-w-[110px] px-3 py-3 whitespace-nowrap">
+                    <td className="min-w-[130px] px-3 py-3 whitespace-nowrap">
                       {(() => {
-                        const isSelesai = hasPencairanSet.has(u.id);
-                        const displayStatus = isSelesai ? 'Selesai' : u.status_terakomodir;
+                        const status = u.status_terakomodir || 'Belum';
+                        const badgeClass = statusTerakomodirBadge(status);
+                        const icon = status === 'Belum' ? <AlertTriangle className="w-2.5 h-2.5" /> : status === 'Ditolak' ? <Ban className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5" />;
+                        const extraInfo = (status.startsWith('Desa') || status.startsWith('Dinas')) && u.terakomodir_tahun
+                          ? ` ${u.terakomodir_tahun}`
+                          : '';
+                        const dinasInfo = status.startsWith('Dinas') && u.terakomodir_dinas
+                          ? ` — ${u.terakomodir_dinas}`
+                          : '';
+                        const detailInfo = u.terakomodir_detail
+                          ? <span className="text-[8px] text-slate-500 dark:text-slate-400 truncate max-w-[150px]" title={u.terakomodir_detail}>{u.terakomodir_detail}</span>
+                          : null;
                         return (
-                          <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${isSelesai ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : statusTerakomodirBadge(displayStatus)}`}>
-                            {isSelesai ? <CheckCircle2 className="w-2.5 h-2.5" /> : displayStatus === 'Belum' ? <AlertTriangle className="w-2.5 h-2.5" /> : displayStatus === 'Ditolak' ? <Ban className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5" />}
-                            {displayStatus}
-                          </span>
+                          <div className="flex flex-col gap-0.5">
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold border whitespace-nowrap ${badgeClass}`}>
+                              {icon}
+                              {status}{extraInfo}{dinasInfo}
+                            </span>
+                            {detailInfo}
+                          </div>
                         );
                       })()}
                     </td>
@@ -1289,22 +1384,31 @@ ${rowsHtml}
                           >
                             <MoreVertical className="w-3.5 h-3.5" />
                           </button>
-                          {openMenuId === u.id && (
-                            <>
-                              <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }} />
-                              <div className="absolute right-0 top-full z-50 mt-1 w-56 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5" onClick={(e) => e.stopPropagation()}>
-                                <DropdownItem icon={Star} color="text-blue-600 dark:text-blue-400" label="Usulkan ke Musrenbang" onClick={() => { setOpenMenuId(null); openPipeline(u, 'musrenbang'); }} />
-                                <DropdownItem icon={Layers} color="text-indigo-600 dark:text-indigo-400" label="Masuk RPJMDesa" onClick={() => { setOpenMenuId(null); openPipeline(u, 'rpjmdesa'); }} />
-                                <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="Tarik ke RKPDes" onClick={() => { setOpenMenuId(null); openPipeline(u, 'rkpdes'); }} />
-                                <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Masuk APBDesa" onClick={() => { setOpenMenuId(null); openPipeline(u, 'apbdesa'); }} />
-                                <DropdownItem icon={AlertTriangle} color="text-orange-600 dark:text-orange-400" label="Dikerjakan" onClick={() => { setOpenMenuId(null); openPipeline(u, 'dikerjakan'); }} />
-                                <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
-                                <DropdownItem icon={CircleDollarSign} color="text-emerald-600 dark:text-emerald-400" label="Ubah Status Terakomodir" onClick={() => { setOpenMenuId(null); openPipeline(u, 'status'); }} />
-                                <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
-                                <DropdownItem icon={Trash2} color="text-rose-600 dark:text-rose-400" label="Hapus Usulan" onClick={() => { setOpenMenuId(null); handleDelete(u); }} />
-                              </div>
-                            </>
-                          )}
+{openMenuId === u.id && (
+                              <>
+                                <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }} />
+                                <div className="absolute right-0 top-full z-50 mt-1 w-60 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5" onClick={(e) => e.stopPropagation()}>
+                                  <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider border-b border-gray-100 dark:border-slate-800">
+                                    Diteruskan ke Dokumen Perencanaan
+                                  </div>
+                                  <DropdownItem icon={Star} color="text-blue-600 dark:text-blue-400" label="Musrenbang" onClick={() => { setOpenMenuId(null); openDiteruskan(u, 'musrenbang'); }} />
+                                  <DropdownItem icon={Layers} color="text-indigo-600 dark:text-indigo-400" label="RPJMDesa" onClick={() => { setOpenMenuId(null); openDiteruskan(u, 'rpjmdesa'); }} />
+                                  <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="RKPDes" onClick={() => { setOpenMenuId(null); openDiteruskan(u, 'rkpdes'); }} />
+                                  <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
+                                  <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider border-b border-gray-100 dark:border-slate-800">
+                                    Tahap Eksekusi
+                                  </div>
+                                  <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Masuk APBDesa" onClick={() => { setOpenMenuId(null); openApbdesa(u); }} />
+                                  <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
+                                  <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider border-b border-gray-100 dark:border-slate-800">
+                                    Status Akomodasi
+                                  </div>
+                                  <DropdownItem icon={CheckCircle2} color="text-emerald-600 dark:text-emerald-400" label="Tandai Terakomodir" onClick={() => { setOpenMenuId(null); openTerakomodir(u); }} />
+                                  <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
+                                  <DropdownItem icon={Trash2} color="text-rose-600 dark:text-rose-400" label="Hapus Usulan" onClick={() => { setOpenMenuId(null); handleDelete(u); }} />
+                                </div>
+                              </>
+                            )}
                         </div>
                       </div>
                     </td>
@@ -1526,50 +1630,47 @@ ${rowsHtml}
         </div>
       )}
 
-      {/* Pipeline Workflow Modal */}
-      {pipelineTarget && pipelineAction && (
+      {/* 1. Diteruskan ke Dokumen Perencanaan Modal */}
+      {diteruskanTarget && diteruskanType && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">
-                {pipelineAction === 'rkpdes' ? 'Tarik ke RKPDes' : pipelineAction === 'musrenbang' ? 'Usulkan ke Musrenbang' : pipelineAction === 'rpjmdesa' ? 'Masuk RPJMDesa' : pipelineAction === 'apbdesa' ? 'Masuk APBDesa' : pipelineAction === 'dikerjakan' ? 'Dikerjakan oleh Dinas' : 'Ubah Status Terakomodir'}
+                Diteruskan ke {diteruskanType === 'musrenbang' ? 'Musrenbang' : diteruskanType === 'rpjmdesa' ? 'RPJMDesa' : 'RKPDes'}
               </h3>
-              <button onClick={() => setPipelineTarget(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+              <button onClick={() => { setDiteruskanTarget(null); setDiteruskanType(null); }} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="px-6 py-5 space-y-4">
               <div className="bg-gray-50 dark:bg-slate-800 rounded-xl p-3">
-                <p className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-300">{pipelineTarget.kode_usulan}</p>
-                <p className="text-sm font-bold text-gray-800 dark:text-slate-100 mt-1">{pipelineTarget.uraian_usulan}</p>
+                <p className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-300">{diteruskanTarget.kode_usulan}</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-slate-100 mt-1">{diteruskanTarget.uraian_usulan}</p>
               </div>
 
-              {/* Year selection for pipeline stages that need it */}
-              {pipelineAction !== 'status' && pipelineAction !== 'dikerjakan' && (
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
-                    Tahun Anggaran
-                  </label>
-                  <div className="flex gap-2">
-                    {[String(new Date().getFullYear() - 1), String(new Date().getFullYear()), String(new Date().getFullYear() + 1)].map(y => (
-                      <button
-                        key={y}
-                        type="button"
-                        onClick={() => setPipelineYear(y)}
-                        className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-black border transition-all cursor-pointer ${
-                          pipelineYear === y
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
-                        }`}
-                      >
-                        {y}
-                      </button>
-                    ))}
-                  </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                  Tahun Anggaran
+                </label>
+                <div className="flex gap-2">
+                  {[String(new Date().getFullYear() - 1), String(new Date().getFullYear()), String(new Date().getFullYear() + 1)].map(y => (
+                    <button
+                      key={y}
+                      type="button"
+                      onClick={() => setDiteruskanYear(y)}
+                      className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-black border transition-all cursor-pointer ${
+                        diteruskanYear === y
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {y}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {pipelineAction === 'musrenbang' && (
+              {diteruskanType === 'musrenbang' && (
                 <div>
                   <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Skala Prioritas</label>
                   <div className="flex gap-2 flex-wrap">
@@ -1591,59 +1692,200 @@ ${rowsHtml}
                 </div>
               )}
 
-              {pipelineAction === 'dikerjakan' && (
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Dinas / OPD Penanggung Jawab</label>
-                  <input
-                    type="text"
-                    value={pipelineDinas}
-                    onChange={e => setPipelineDinas(e.target.value)}
-                    placeholder="Contoh: Dinas PUTR, Dinas PUPR, Bappeda..."
-                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                  />
-                </div>
-              )}
-
-              {pipelineAction === 'status' && (
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Status Terakomodir</label>
-                  <div className="flex flex-col gap-2">
-                    {STATUS_TERAKOMODIR_OPTIONS.map(s => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setPipelineStatus(s)}
-                        className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold border transition-all cursor-pointer ${
-                          pipelineStatus === s
-                            ? 'bg-emerald-600 text-white border-emerald-600'
-                            : 'bg-white dark:bg-slate-900 text-gray-600 dark:text-slate-300 border-gray-200 dark:border-slate-700'
-                        }`}
-                      >
-                        {s}
-                        {pipelineStatus === s && <CheckCircle2 className="w-4 h-4" />}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {pipelineAction === 'musrenbang' && !pipelinePriority && (
+              {!pipelinePriority && diteruskanType === 'musrenbang' && (
                 <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Pilih skala prioritas terlebih dahulu.</p>
               )}
             </div>
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-800">
               <button
-                onClick={() => setPipelineTarget(null)}
+                onClick={() => { setDiteruskanTarget(null); setDiteruskanType(null); }}
                 className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               >
                 Batal
               </button>
               <button
-                onClick={savePipeline}
-                disabled={pipelineSaving || (pipelineAction === 'musrenbang' && !pipelinePriority)}
+                onClick={saveDiteruskan}
+                disabled={diteruskanSaving || (diteruskanType === 'musrenbang' && !pipelinePriority)}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-50 cursor-pointer"
               >
-                {pipelineSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                {diteruskanSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Masuk APBDesa Modal */}
+      {apbdesaTarget && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">Masuk APBDesa</h3>
+              <button onClick={() => setApbdesaTarget(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div className="bg-gray-50 dark:bg-slate-800 rounded-xl p-3">
+                <p className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-300">{apbdesaTarget.kode_usulan}</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-slate-100 mt-1">{apbdesaTarget.uraian_usulan}</p>
+              </div>
+
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+                <p className="text-xs text-amber-800 dark:text-amber-300 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Usulan harus sudah masuk RKPDes terlebih dahulu. Tag RKPDes akan tetap dipertahankan.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                  Tahun APBDesa
+                </label>
+                <div className="flex gap-2">
+                  {[String(new Date().getFullYear() - 1), String(new Date().getFullYear()), String(new Date().getFullYear() + 1)].map(y => (
+                    <button
+                      key={y}
+                      type="button"
+                      onClick={() => setApbdesaYear(y)}
+                      className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-black border transition-all cursor-pointer ${
+                        apbdesaYear === y
+                          ? 'bg-amber-600 text-white border-amber-600'
+                          : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {y}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-800">
+              <button
+                onClick={() => setApbdesaTarget(null)}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={saveApbdesa}
+                disabled={apbdesaSaving}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-amber-700 hover:bg-amber-800 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {apbdesaSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Tandai Terakomodir Modal */}
+      {terakomodirTarget && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">Tandai Terakomodir</h3>
+              <button onClick={() => { setTerakomodirTarget(null); setTerakomodirPihak(null); }} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div className="bg-gray-50 dark:bg-slate-800 rounded-xl p-3">
+                <p className="text-xs font-mono font-black text-emerald-700 dark:text-emerald-300">{terakomodirTarget.kode_usulan}</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-slate-100 mt-1">{terakomodirTarget.uraian_usulan}</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Diakomodir Oleh</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTerakomodirPihak('desa')}
+                    className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-black border transition-all cursor-pointer ${
+                      terakomodirPihak === 'desa'
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" /> Desa (APBDesa)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTerakomodirPihak('dinas')}
+                    className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-black border transition-all cursor-pointer ${
+                      terakomodirPihak === 'dinas'
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <Building className="w-4 h-4" /> Dinas / OPD
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Tahun Akomodasi</label>
+                <div className="flex gap-2">
+                  {[String(new Date().getFullYear() - 1), String(new Date().getFullYear()), String(new Date().getFullYear() + 1)].map(y => (
+                    <button
+                      key={y}
+                      type="button"
+                      onClick={() => setTerakomodirTahun(y)}
+                      className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-black border transition-all cursor-pointer ${
+                        terakomodirTahun === y
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 border-gray-200 dark:border-slate-700'
+                      }`}
+                    >
+                      {y}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {terakomodirPihak === 'dinas' && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Nama Dinas / OPD</label>
+                  <input
+                    type="text"
+                    value={terakomodirDinas}
+                    onChange={e => setTerakomodirDinas(e.target.value)}
+                    placeholder="Contoh: Dinas PUTR, Dinas PUPR, Bappeda, Dinas Kesehatan..."
+                    className="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">Detail Realisasi <span className="text-rose-500">*</span></label>
+                <textarea
+                  value={terakomodirDetail}
+                  onChange={e => setTerakomodirDetail(e.target.value)}
+                  rows={3}
+                  placeholder="Contoh: Usulan pengaspalan → direalisasikan pengurukan batu & talud. Dana APBDesa 2026."
+                  className="w-full px-3.5 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white dark:bg-slate-900 resize-none"
+                />
+              </div>
+
+              {!terakomodirDetail && (
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-semibold">Detail realisasi wajib diisi.</p>
+              )}
+            </div>
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 dark:border-slate-800">
+              <button
+                onClick={() => { setTerakomodirTarget(null); setTerakomodirPihak(null); }}
+                className="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-600 dark:text-slate-300 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                onClick={saveTerakomodir}
+                disabled={terakomodirSaving || !terakomodirDetail || (terakomodirPihak === 'dinas' && !terakomodirDinas.trim())}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-emerald-700 hover:bg-emerald-800 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {terakomodirSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                 Simpan
               </button>
             </div>
