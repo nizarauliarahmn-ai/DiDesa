@@ -157,6 +157,10 @@ export default function AdminKepuasan() {
     }
   };
 
+  const avgRataRata = data.length > 0
+    ? (data.reduce((sum, d) => sum + d.rata_rata, 0) / data.length).toFixed(1)
+    : '0';
+
   const avgPerAspect = (aspect: string) => {
     const vals = data.map((d) => d.ratings?.[aspect]).filter(Boolean) as number[];
     return vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '0';
