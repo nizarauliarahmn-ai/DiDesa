@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Search, Filter, CheckCircle, Clock, TrendingUp, Users, BarChart3 } from 'lucide-react';
+import { Star, Search, Filter, CheckCircle, Clock, TrendingUp, Users, BarChart3, Edit2, Trash2, X, Loader2, Save, RotateCcw } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { showToast } from '../../utils/toast';
 
 interface KepuasanRecord {
   id: string;
@@ -33,6 +34,14 @@ export default function AdminKepuasan() {
   const [filter, setFilter] = useState('Semua');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Edit/Delete state
+  const [editingRow, setEditingRow] = useState<KepuasanRecord | null>(null);
+  const [editRatings, setEditRatings] = useState<Record<string, number>>({});
+  const [editUlasan, setEditUlasan] = useState('');
+  const [editSaving, setEditSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -62,9 +71,91 @@ export default function AdminKepuasan() {
     fetchData();
   }, []);
 
-  const avgRataRata = data.length > 0
-    ? (data.reduce((sum, d) => sum + d.rata_rata, 0) / data.length).toFixed(1)
-    : '0';
+  // Save updated data to saas_settings
+  const saveData = async (updatedData: KepuasanRecord[]) => {
+    try {
+      const tenantId = await resolveCurrentTenant();
+      if (!tenantId) return false;
+      
+      const { error } = await supabase
+        .from('saas_settings')
+        .upsert({
+          tenant_id: tenantId,
+          key: 'kepuasan_data',
+          value: JSON.stringify(updatedData),
+          updated_at: new Date().toISOString(),
+        });
+      
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error('Gagal menyimpan data kepuasan:', err);
+      return false;
+    }
+  };
+
+  const handleEdit = (row: KepuasanRecord) => {
+    setEditingRow(row);
+    setEditRatings(row.ratings || {});
+    setEditUlasan(row.ulasan || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRow) return;
+    setEditSaving(true);
+    try {
+      const rata_rata = Object.values(editRatings).length > 0
+        ? Object.values(editRatings).reduce((a, b) => a + b, 0) / Object.values(editRatings).length
+        : 0;
+      
+      const updatedData = data.map(d => 
+        d.id === editingRow.id 
+          ? { ...d, ratings: editRatings, ulasan: editUlasan || null, rata_rata }
+          : d
+      );
+      
+      const success = await saveData(updatedData);
+      if (success) {
+        setData(updatedData);
+        showToast('Data kepuasan berhasil diperbarui.', 'success');
+        setEditingRow(null);
+      } else {
+        showToast('Gagal menyimpan perubahan.', 'error');
+      }
+    } catch (err) {
+      console.error('Edit error:', err);
+      showToast('Terjadi kesalahan.', 'error');
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingRow(null);
+    setEditRatings({});
+    setEditUlasan('');
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Hapus data kepuasan ini? Tindakan ini tidak dapat dibatalkan.')) return;
+    setDeleteLoading(true);
+    try {
+      const updatedData = data.filter(d => d.id !== id);
+      const success = await saveData(updatedData);
+      if (success) {
+        setData(updatedData);
+        showToast('Data kepuasan berhasil dihapus.', 'success');
+      } else {
+        showToast('Gagal menghapus data.', 'error');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      showToast('Terjadi kesalahan.', 'error');
+    } finally {
+      setDeleteLoading(false);
+      setDeletingId(null);
+    }
+  };
 
   const avgPerAspect = (aspect: string) => {
     const vals = data.map((d) => d.ratings?.[aspect]).filter(Boolean) as number[];
@@ -149,43 +240,184 @@ export default function AdminKepuasan() {
                 <th className="px-6 py-4">Keseluruhan</th>
                 <th className="px-6 py-4">Rata-rata</th>
                 <th className="px-6 py-4">Ulasan</th>
+                <th className="px-6 py-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center">
+                  <td colSpan={8} className="px-6 py-12 text-center">
                     <div className="w-8 h-8 border-2 border-emerald-200 border-t-emerald-600 rounded-full animate-spin mx-auto" />
                     <p className="text-xs text-gray-400 mt-3 font-bold">Memuat data...</p>
                   </td>
                 </tr>
               ) : filtered.length > 0 ? (
-                filtered.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="px-6 py-4 text-xs font-bold text-gray-500 whitespace-nowrap">
-                      {new Date(row.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </td>
-                    <td className="px-6 py-4">{renderStars(row.ratings?.kecepatan || 0)}</td>
-                    <td className="px-6 py-4">{renderStars(row.ratings?.keramahan || 0)}</td>
-                    <td className="px-6 py-4">{renderStars(row.ratings?.kemudahan || 0)}</td>
-                    <td className="px-6 py-4">{renderStars(row.ratings?.kepuasan || 0)}</td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold ${
-                        row.rata_rata >= 4 ? 'bg-emerald-50 text-emerald-700' :
-                        row.rata_rata >= 3 ? 'bg-amber-50 text-amber-700' :
-                        'bg-rose-50 text-rose-700'
-                      }`}>
-                        {row.rata_rata.toFixed(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-gray-500 max-w-[200px] truncate">
-                      {row.ulasan || <span className="text-gray-300 italic">—</span>}
-                    </td>
-                  </tr>
-                ))
+                filtered.map((row) => {
+                  const isEditing = editingRow?.id === row.id;
+                  return (
+                    <tr key={row.id} className={`transition-colors ${isEditing ? 'bg-emerald-50/50 dark:bg-emerald-950/20' : 'hover:bg-gray-50/50 dark:hover:bg-slate-800/50'}`}>
+                      <td className="px-6 py-4 text-xs font-bold text-gray-500 whitespace-nowrap">
+                        {new Date(row.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      {isEditing ? (
+                        <>
+                          <td className="px-6 py-2">
+                            <div className="flex gap-1">
+                              {[1,2,3,4,5].map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => setEditRatings(prev => ({ ...prev, kecepatan: s }))}
+                                  className={`w-5 h-5 rounded transition-colors ${
+                                    (editRatings.kecepatan || row.ratings?.kecepatan || 0) >= s
+                                      ? 'fill-amber-400 text-amber-400'
+                                      : 'fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700'
+                                  }`}
+                                >
+                                  <Star className="w-5 h-5" />
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-2">
+                            <div className="flex gap-1">
+                              {[1,2,3,4,5].map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => setEditRatings(prev => ({ ...prev, keramahan: s }))}
+                                  className={`w-5 h-5 rounded transition-colors ${
+                                    (editRatings.keramahan || row.ratings?.keramahan || 0) >= s
+                                      ? 'fill-amber-400 text-amber-400'
+                                      : 'fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700'
+                                  }`}
+                                >
+                                  <Star className="w-5 h-5" />
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-2">
+                            <div className="flex gap-1">
+                              {[1,2,3,4,5].map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => setEditRatings(prev => ({ ...prev, kemudahan: s }))}
+                                  className={`w-5 h-5 rounded transition-colors ${
+                                    (editRatings.kemudahan || row.ratings?.kemudahan || 0) >= s
+                                      ? 'fill-amber-400 text-amber-400'
+                                      : 'fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700'
+                                  }`}
+                                >
+                                  <Star className="w-5 h-5" />
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-2">
+                            <div className="flex gap-1">
+                              {[1,2,3,4,5].map(s => (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => setEditRatings(prev => ({ ...prev, kepuasan: s }))}
+                                  className={`w-5 h-5 rounded transition-colors ${
+                                    (editRatings.kepuasan || row.ratings?.kepuasan || 0) >= s
+                                      ? 'fill-amber-400 text-amber-400'
+                                      : 'fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700'
+                                  }`}
+                                >
+                                  <Star className="w-5 h-5" />
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold ${
+                              (Object.values(editRatings).reduce((a,b)=>a+b,0) / Object.values(editRatings).length || 0) >= 4 ? 'bg-emerald-50 text-emerald-700' :
+                              (Object.values(editRatings).reduce((a,b)=>a+b,0) / Object.values(editRatings).length || 0) >= 3 ? 'bg-amber-50 text-amber-700' :
+                              'bg-rose-50 text-rose-700'
+                            }`}>
+                              {(Object.values(editRatings).length > 0
+                                ? (Object.values(editRatings).reduce((a,b)=>a+b,0) / Object.values(editRatings).length).toFixed(1)
+                                : row.rata_rata.toFixed(1))}
+                            </span>
+                          </td>
+                          <td className="px-6 py-2">
+                            <input
+                              type="text"
+                              value={editUlasan}
+                              onChange={e => setEditUlasan(e.target.value)}
+                              placeholder="Ulasan opsional"
+                              className="w-full px-2 py-1.5 text-xs border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 focus:ring-1 focus:ring-emerald-500 outline-none"
+                            />
+                          </td>
+                          <td className="px-6 py-2 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                onClick={handleSaveEdit}
+                                disabled={editSaving}
+                                className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
+                                title="Simpan"
+                              >
+                                {editSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                              </button>
+                              <button
+                                onClick={handleCancelEdit}
+                                className="p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                                title="Batal"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </>
+                      ) : (
+                        <>
+                          <td className="px-6 py-4">{renderStars(row.ratings?.kecepatan || 0)}</td>
+                          <td className="px-6 py-4">{renderStars(row.ratings?.keramahan || 0)}</td>
+                          <td className="px-6 py-4">{renderStars(row.ratings?.kemudahan || 0)}</td>
+                          <td className="px-6 py-4">{renderStars(row.ratings?.kepuasan || 0)}</td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold ${
+                              row.rata_rata >= 4 ? 'bg-emerald-50 text-emerald-700' :
+                              row.rata_rata >= 3 ? 'bg-amber-50 text-amber-700' :
+                              'bg-rose-50 text-rose-700'
+                            }`}>
+                              {row.rata_rata.toFixed(1)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-xs text-gray-500 max-w-[200px] truncate">
+                            {row.ulasan || <span className="text-gray-300 italic">—</span>}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-1">
+                              <button
+                                onClick={() => handleEdit(row)}
+                                className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                                title="Edit"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => { setDeletingId(row.id); handleDelete(row.id); }}
+                                disabled={deleteLoading && deletingId === row.id}
+                                className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-900/30 transition-colors"
+                                title="Hapus"
+                              >
+                                {deleteLoading && deletingId === row.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                              </button>
+                            </div>
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-400 text-xs font-bold">
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-400 text-xs font-bold">
                     Belum ada data indeks kepuasan.
                   </td>
                 </tr>
