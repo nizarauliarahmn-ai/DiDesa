@@ -594,6 +594,56 @@ export default function AdminAPBDesa() {
     showToast('Berhasil diexport', 'success');
   };
 
+  const handleExportCSV = () => {
+    const rows = filtered.map(r =>
+      `${r.kode_apbdesa},"${r.nama_kegiatan}","${r.kategori}","${r.lokasi || ''}",${r.anggaran},${r.tahapan_pencairan},${r.total_pencairan || 0}`
+    );
+    const csv = ['Kode,Nama Kegiatan,Kategori,Lokasi,Anggaran,Tahapan,Total Pencairan', ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `APBDesa_${currentYear}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV berhasil diunduh.', 'success');
+  };
+
+  const handleExportPDF = () => {
+    const rowsHtml = filtered.map((r, i) => `
+      <tr>
+        <td style="text-align:center">${i + 1}</td>
+        <td>${r.kode_apbdesa}</td>
+        <td>${r.nama_kegiatan}</td>
+        <td>${r.kategori}</td>
+        <td>${r.lokasi || '-'}</td>
+        <td style="text-align:right">${r.anggaran}</td>
+        <td>${r.tahapan_pencairan}</td>
+        <td style="text-align:right">${r.total_pencairan || 0}</td>
+      </tr>
+    `).join('');
+    const doc = `<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8"/><title>APBDesa ${currentYear}</title>
+<style>
+@page{size:A4 landscape;margin:15mm}*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px}
+h1{text-align:center;font-size:16px;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{border:1px solid #333;padding:6px 8px;font-size:10px}
+th{background:#f0f0f0;font-weight:bold}
+@media print{body{padding:0}}
+</style></head><body>
+<h1>DAFTAR APBDesa ${currentYear}</h1>
+<table><thead><tr>
+<th style="width:40px">No</th><th>Kode</th><th>Kegiatan</th><th>Kategori</th>
+<th>Lokasi</th><th style="width:80px">Anggaran</th><th>Tahapan</th><th style="width:80px">Pencairan</th>
+</tr></thead><tbody>${rowsHtml}</tbody></table>
+<script>window.onload=function(){window.print()}</script>
+</body></html>`;
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(doc); w.document.close(); }
+  };
+
   const PencairanBadge = ({ item }: { item: APBDesa }) => {
     const total = item.total_pencairan || 0;
     const pct = item.anggaran > 0 ? Math.round((total / item.anggaran) * 100) : 0;
@@ -743,8 +793,14 @@ export default function AdminAPBDesa() {
           <button onClick={() => setDenseMode(v => !v)} className={`px-3 py-2 border rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${denseMode ? 'border-gray-900 dark:border-white bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
             <List size={12} /> {denseMode ? 'Normal' : 'Compact'}
           </button>
-          <button onClick={handleExport} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
-            <Download size={12} /> Export
+          <button onClick={handleExport} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5" title="Excel (.xlsx)">
+            <Download size={12} /> Excel
+          </button>
+          <button onClick={handleExportCSV} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5" title="CSV (.csv)">
+            CSV
+          </button>
+          <button onClick={handleExportPDF} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5" title="PDF (cetak)">
+            <FileText size={12} /> PDF
           </button>
         </div>
       </div>
