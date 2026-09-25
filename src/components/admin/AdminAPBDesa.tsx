@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
-  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square, SlidersHorizontal, List,
-  FileText, DollarSign, LayoutGrid
+  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square, SlidersHorizontal,
+  FileText, FileSpreadsheet, DollarSign, LayoutGrid
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -173,6 +173,7 @@ export default function AdminAPBDesa() {
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [denseMode, setDenseMode] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [showFilterPopover, setShowFilterPopover] = useState(false);
   const filterPopoverRef = useRef<HTMLDivElement>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -790,18 +791,28 @@ th{background:#f0f0f0;font-weight:bold}
               </div>
             )}
           </div>
-          <button onClick={() => setDenseMode(v => !v)} className={`px-3 py-2 border rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${denseMode ? 'border-gray-900 dark:border-white bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800'}`}>
-            <List size={12} /> {denseMode ? 'Normal' : 'Compact'}
-          </button>
-          <button onClick={handleExport} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5" title="Excel (.xlsx)">
-            <Download size={12} /> Excel
-          </button>
-          <button onClick={handleExportCSV} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5" title="CSV (.csv)">
-            CSV
-          </button>
-          <button onClick={handleExportPDF} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5" title="PDF (cetak)">
-            <FileText size={12} /> PDF
-          </button>
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
+              <Download size={12} /> Export
+            </button>
+            {showExportMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+                <div className="absolute right-0 top-full z-50 mt-1 w-32 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 shadow-xl py-1" onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => { handleExport(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                    <Download size={14} /> Excel
+                  </button>
+                  <button onClick={() => { handleExportCSV(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                    <FileSpreadsheet size={14} /> CSV
+                  </button>
+                  <button onClick={() => { handleExportPDF(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                    <FileText size={14} /> PDF
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
