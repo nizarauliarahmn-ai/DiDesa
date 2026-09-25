@@ -632,17 +632,18 @@ export default function AdminAPBDesa() {
 @page{size:A4 landscape;margin:15mm}*{box-sizing:border-box}
 body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px}
 h1{text-align:center;font-size:16px;margin-bottom:4px}
-table{width:100%;border-collapse:collapse;margin-top:12px;table-layout:fixed}
-th,td{border:1px solid #333;padding:6px 8px;font-size:10px;word-wrap:break-word}
+table{width:100%;border-collapse:collapse;margin-top:12px;table-layout:auto}
+th,td{border:1px solid #333;padding:6px 8px;font-size:10px;overflow:hidden;text-overflow:ellipsis}
 th{background:#f0f0f0;font-weight:bold}
 tfoot td{border-top:2px solid #333;font-weight:bold;background:#f9f9f9}
-td:nth-child(7),td:nth-child(9){white-space:nowrap}
+th:nth-child(2),td:nth-child(2){max-width:80px;white-space:nowrap}
+th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowrap}
 @media print{body{padding:0}}
 </style></head><body>
 <h1>DAFTAR APBDesa ${currentYear}</h1>
 <table><thead><tr>
-<th style="width:30px">No</th><th style="width:70px">Kode</th><th style="width:150px">Kegiatan</th><th>Kategori</th>
-<th>Lokasi</th><th style="width:80px">Sumber</th><th style="width:100px">Anggaran</th><th>Tahapan</th><th style="width:100px">Pencairan</th>
+<th style="width:30px">No</th><th style="width:80px">Kode</th><th style="width:200px">Kegiatan</th><th>Kategori</th>
+<th>Lokasi</th><th style="width:80px">Sumber</th><th style="width:110px">Anggaran</th><th>Tahapan</th><th style="width:110px">Pencairan</th>
 </tr></thead><tbody>${rowsHtml}
 <tfoot><tr>
 <td colspan="8" style="text-align:right">Total Pencairan:</td>
