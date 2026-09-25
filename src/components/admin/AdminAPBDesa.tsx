@@ -620,9 +620,9 @@ export default function AdminAPBDesa() {
         <td>${r.nama_kegiatan}</td>
         <td>${r.kategori}</td>
         <td>${r.lokasi || '-'}</td>
-        <td style="text-align:right">${fmtRp(r.anggaran)}</td>
+        <td style="text-align:right;white-space:nowrap">${fmtRp(r.anggaran)}</td>
         <td>${r.tahapan_pencairan}</td>
-        <td style="text-align:right">${fmtRp(r.total_pencairan || 0)}</td>
+        <td style="text-align:right;white-space:nowrap">${fmtRp(r.total_pencairan || 0)}</td>
       </tr>
     `).join('');
     const doc = `<!DOCTYPE html>
@@ -631,16 +631,17 @@ export default function AdminAPBDesa() {
 @page{size:A4 landscape;margin:15mm}*{box-sizing:border-box}
 body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px}
 h1{text-align:center;font-size:16px;margin-bottom:4px}
-table{width:100%;border-collapse:collapse;margin-top:12px}
-th,td{border:1px solid #333;padding:6px 8px;font-size:10px}
+table{width:100%;border-collapse:collapse;margin-top:12px;table-layout:fixed}
+th,td{border:1px solid #333;padding:6px 8px;font-size:10px;word-wrap:break-word}
 th{background:#f0f0f0;font-weight:bold}
 tfoot td{border-top:2px solid #333;font-weight:bold;background:#f9f9f9}
+td:nth-child(6),td:nth-child(8){white-space:nowrap}
 @media print{body{padding:0}}
 </style></head><body>
 <h1>DAFTAR APBDesa ${currentYear}</h1>
 <table><thead><tr>
 <th style="width:40px">No</th><th>Kode</th><th>Kegiatan</th><th>Kategori</th>
-<th>Lokasi</th><th style="width:80px">Anggaran</th><th>Tahapan</th><th style="width:80px">Pencairan</th>
+<th>Lokasi</th><th style="width:100px">Anggaran</th><th>Tahapan</th><th style="width:100px">Pencairan</th>
 </tr></thead><tbody>${rowsHtml}
 <tfoot><tr>
 <td colspan="7" style="text-align:right">Total Pencairan:</td>
