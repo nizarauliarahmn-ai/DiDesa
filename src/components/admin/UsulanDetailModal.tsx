@@ -1,21 +1,19 @@
 import React from 'react';
 import {
   X, MapPin, User, FolderOpen, AlertTriangle, CheckCircle2, Ban,
-  Layers, Link2, CalendarDays, Edit2, FileText, Clock, Camera
+  Layers, Link2, CalendarDays, Edit2, FileText, Clock, Camera, Building
 } from 'lucide-react';
 import type { UsulanDesa } from './AdminUsulanDesa';
 import { findSimilarUsulan, tokenOverlapSimilarity } from '../../utils/similarity';
 
-const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RKPDesa', 'RPJMDesa', 'APBDesa', 'Dikerjakan', 'Selesai'];
+const PIPELINE_STAGES = ['Diajukan', 'Musrenbang', 'RPJMDesa', 'RKPDesa', 'APBDesa'];
 
 const PIPELINE_CONFIG: Record<string, { bg: string; text: string; active: string; icon: string }> = {
   'Diajukan': { bg: 'bg-gray-100', text: 'text-gray-500', active: 'bg-gray-400', icon: 'bg-gray-400' },
   'Musrenbang': { bg: 'bg-blue-50', text: 'text-blue-600', active: 'bg-blue-500', icon: 'bg-blue-400' },
-  'RKPDesa': { bg: 'bg-indigo-50', text: 'text-indigo-600', active: 'bg-indigo-500', icon: 'bg-indigo-400' },
   'RPJMDesa': { bg: 'bg-violet-50', text: 'text-violet-600', active: 'bg-violet-500', icon: 'bg-violet-400' },
+  'RKPDesa': { bg: 'bg-indigo-50', text: 'text-indigo-600', active: 'bg-indigo-500', icon: 'bg-indigo-400' },
   'APBDesa': { bg: 'bg-amber-50', text: 'text-amber-700', active: 'bg-amber-500', icon: 'bg-amber-400' },
-  'Dikerjakan': { bg: 'bg-orange-50', text: 'text-orange-700', active: 'bg-orange-500', icon: 'bg-orange-400' },
-  'Selesai': { bg: 'bg-emerald-50', text: 'text-emerald-700', active: 'bg-emerald-500', icon: 'bg-emerald-500' },
 };
 
 interface Props {
@@ -33,7 +31,16 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
     const t = (tag || '').toLowerCase();
     if (t.includes('rkpdes')) return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800';
     if (t.includes('musrenbang')) return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800';
+    if (t.includes('rpjmdesa')) return 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800';
     return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
+  };
+
+  const statusTerakomodirBadge = (status: string) => {
+    if (status === 'Belum') return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800';
+    if (status === 'Ditolak') return 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
+    if (status.toLowerCase().startsWith('desa')) return 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800';
+    if (status.toLowerCase().startsWith('dinas')) return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800';
+    return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
   };
 
   return (
@@ -87,22 +94,14 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
           {/* Status badges */}
           <div className="flex flex-wrap items-center gap-2">
             <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
-              usulan.pipeline_status === 'Selesai'
-                ? 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-                : usulan.pipeline_status === 'Ditolak'
-                  ? 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                  : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
+              usulan.pipeline_status === 'Ditolak'
+                ? 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800'
             }`}>
-              {usulan.pipeline_status === 'Selesai' ? <CheckCircle2 className="w-3 h-3" /> : usulan.pipeline_status === 'Ditolak' ? <Ban className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+              {usulan.pipeline_status === 'Ditolak' ? <Ban className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
               {usulan.pipeline_status || 'Diajukan'}
             </span>
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${
-              usulan.status_terakomodir === 'Belum'
-                ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800'
-                : usulan.status_terakomodir === 'Ditolak'
-                  ? 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
-                  : 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
-            }`}>
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border ${statusTerakomodirBadge(usulan.status_terakomodir)}`}>
               {usulan.status_terakomodir === 'Belum' ? <AlertTriangle className="w-3 h-3" /> : usulan.status_terakomodir === 'Ditolak' ? <Ban className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
               {usulan.status_terakomodir}
             </span>
@@ -117,6 +116,32 @@ export default function UsulanDetailModal({ usulan, allUsulan, onClose, onEdit }
               </span>
             )}
           </div>
+
+          {/* Detail Terakomodir */}
+          {(usulan.status_terakomodir !== 'Belum' && usulan.status_terakomodir !== 'Ditolak') && (
+            <div className="mt-3 p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Detail Akomodasi
+              </p>
+              <div className="mt-2 space-y-1.5 text-sm">
+                {usulan.terakomodir_tahun && (
+                  <p className="flex items-center gap-1">
+                    <CalendarDays className="w-3.5 h-3.5 text-emerald-600" /> Tahun: <span className="font-bold">{usulan.terakomodir_tahun}</span>
+                  </p>
+                )}
+                {usulan.terakomodir_dinas && (
+                  <p className="flex items-center gap-1">
+                    <Building className="w-3.5 h-3.5 text-blue-600" /> Dinas: <span className="font-bold">{usulan.terakomodir_dinas}</span>
+                  </p>
+                )}
+                {usulan.terakomodir_detail && (
+                  <p className="flex items-start gap-1">
+                    <FileText className="w-3.5 h-3.5 text-emerald-600 mt-0.5" /> Realisasi: <span className="font-medium">{usulan.terakomodir_detail}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Pipeline Status */}
           <div>

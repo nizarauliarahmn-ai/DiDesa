@@ -103,7 +103,6 @@ export default function AdminSuratDashboard({
   const [waInputMessage, setWaInputMessage] = useState('');
   const [selectedSuratIds, setSelectedSuratIds] = useState<string[]>([]);
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
-  const [useEsignature, setUseEsignature] = useState<boolean>(true);
   const [zoomLevel, setZoomLevel] = useState(0.65);
   const [isPrintingTable, setIsPrintingTable] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -449,24 +448,6 @@ export default function AdminSuratDashboard({
         </div>
       );
     } else {
-      if (useEsignature) {
-        const tenantId = getActiveTenantIdSync();
-        const verifyUrl = typeof window !== 'undefined' ? `${window.location.origin}/?tab=verifikasi&t_id=${encodeURIComponent(tenantId)}&id=${surat.id}` : `https://sistemdidesa.id/?tab=verifikasi&t_id=${encodeURIComponent(tenantId)}&id=${surat.id}`;
-        return (
-          <div className="mt-8 flex justify-end text-black">
-            <div className="text-right">
-              <TTESignatureBox
-                dateStr={`${sig.cleanDesaName}, ${tglFormatted}`}
-                officerTitle={sig.rightRole.replace(/\n/g, ' ')}
-                officerName={namaPejabat}
-                nip={nipPejabat !== '-' ? nipPejabat : undefined}
-                verifyUrl={verifyUrl}
-              />
-            </div>
-          </div>
-        );
-      }
-
       return (
         <div className="mt-8 flex justify-end text-black">
           {rightSideJSX}
@@ -1584,24 +1565,6 @@ export default function AdminSuratDashboard({
                   <div>
                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Metadata Surat</h4>
                     
-                    {/* TTE Toggle Option */}
-                    <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700 mb-4">
-                      <label className="flex items-start gap-2.5 cursor-pointer text-xs font-bold text-slate-800 dark:text-slate-200">
-                        <input 
-                          type="checkbox" 
-                          checked={useEsignature} 
-                          onChange={(e) => setUseEsignature(e.target.checked)} 
-                          className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 mt-0.5" 
-                        />
-                        <div>
-                          <span className="block">Tanda Tangan Elektronik (TTE)</span>
-                          <span className="text-[10px] font-normal text-slate-500 dark:text-slate-400 block mt-0.5">
-                            Sertakan QR Code verifikasi resmi pada cetakan surat.
-                          </span>
-                        </div>
-                      </label>
-                    </div>
-
                     <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
                       <div>
                         <span className="text-gray-400 block text-xs">Nomor Surat</span>
