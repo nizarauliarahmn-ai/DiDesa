@@ -633,10 +633,11 @@ export default function AdminAPBDesa() {
 body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px}
 h1{text-align:center;font-size:16px;margin-bottom:4px}
 table{width:100%;border-collapse:collapse;margin-top:12px;table-layout:auto}
-th,td{border:1px solid #333;padding:6px 8px;font-size:10px;overflow:hidden;text-overflow:ellipsis}
+th,td{border:1px solid #333;padding:6px 8px;font-size:10px;word-wrap:break-word}
 th{background:#f0f0f0;font-weight:bold}
 tfoot td{border-top:2px solid #333;font-weight:bold;background:#f9f9f9}
-th:nth-child(2),td:nth-child(2){max-width:80px;white-space:nowrap}
+td:nth-child(3){overflow:hidden;text-overflow:ellipsis}
+th:nth-child(2),td:nth-child(2){white-space:nowrap;min-width:80px}
 th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowrap}
 @media print{body{padding:0}}
 </style></head><body>
