@@ -71,6 +71,7 @@ export default function AdminRPJMDesa() {
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const [forwardCount, setForwardCount] = useState({ toRkp: 0, toApb: 0 });
   const filterPopoverRef = useRef<HTMLDivElement>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({
@@ -108,6 +109,16 @@ export default function AdminRPJMDesa() {
 
     const { data } = await supabase.from('rpjmdesa').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false });
     if (data) setList(data as RPJMDesa[]);
+    // Hitung terusan pipeline: RPJM → RKP → APB
+    const { data: rkpLinks } = await supabase.from('rkpdesa').select('id,rpjmdesa_id').eq('tenant_id', tenantId);
+    const { data: apbLinks } = await supabase.from('apbdesa').select('rkpdesa_id').eq('tenant_id', tenantId);
+    const rkpByRpjm = new Map<string, string>();
+    (rkpLinks || []).forEach((r: any) => { if (r.rpjmdesa_id) rkpByRpjm.set(r.id, r.rpjmdesa_id); });
+    const rkpWithApb = new Set((apbLinks || []).map((a: any) => a.rkpdesa_id).filter(Boolean));
+    setForwardCount({
+      toRkp: new Set(rkpByRpjm.values()).size,
+      toApb: new Set([...rkpWithApb].map(id => rkpByRpjm.get(id)).filter(Boolean)).size,
+    });
     setLoading(false);
   };
 
@@ -428,9 +439,9 @@ th{background:#f0f0f0;font-weight:bold}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { icon: <FileText size={16} className="text-emerald-600" />, bg: 'bg-emerald-50', value: metrics.total, label: 'Total Program' },
-          { icon: <Target size={16} className="text-blue-600" />, bg: 'bg-blue-50', value: metrics.berlangsung, label: 'Berlangsung' },
+          { icon: <Target size={16} className="text-blue-600" />, bg: 'bg-blue-50', value: forwardCount.toRkp, label: 'Diteruskan ke RKPDesa' },
           { icon: <DollarSign size={16} className="text-purple-600" />, bg: 'bg-purple-50', value: formatRp(metrics.totalAnggaran), label: 'Total Anggaran' },
-          { icon: <LayoutGrid size={16} className="text-amber-600" />, bg: 'bg-amber-50', value: metrics.kategoriAktif, label: 'Kategori Aktif' },
+          { icon: <LayoutGrid size={16} className="text-amber-600" />, bg: 'bg-amber-50', value: forwardCount.toApb, label: 'Sampai ke APBDesa' },
         ].map((m, i) => (
           <div key={i} className="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-xl px-4 py-3 flex items-center gap-3">
             <div className={`w-8 h-8 ${m.bg} rounded-lg flex items-center justify-center shrink-0`}>{m.icon}</div>

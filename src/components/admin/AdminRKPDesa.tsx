@@ -74,6 +74,7 @@ export default function AdminRKPDesa() {
   const [showMassEdit, setShowMassEdit] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const [forwardToApb, setForwardToApb] = useState(0);
   const filterPopoverRef = useRef<HTMLDivElement>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [massEditForm, setMassEditForm] = useState({
@@ -121,6 +122,9 @@ export default function AdminRKPDesa() {
         items.forEach(i => { i.rpjmdesa_nama = rpjmMap.get(i.rpjmdesa_id!) || null; });
         setList(items);
       }
+      // Hitung terusan pipeline: RKP → APB
+      const { data: apbLinks } = await supabase.from('apbdesa').select('rkpdesa_id').eq('tenant_id', tenantId);
+      setForwardToApb(new Set((apbLinks || []).map((a: any) => a.rkpdesa_id).filter(Boolean)).size);
       setLoading(false);
     } catch (err: any) {
       showToast('Error RKPDesa: ' + (err.message || err), 'error');
@@ -420,7 +424,7 @@ th{background:#f0f0f0;font-weight:bold}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { icon: <FileText size={16} className="text-emerald-600" />, bg: 'bg-emerald-50', value: metrics.total, label: 'Total Kegiatan' },
-          { icon: <ClipboardList size={16} className="text-blue-600" />, bg: 'bg-blue-50', value: metrics.berlangsung, label: 'Berlangsung' },
+          { icon: <ClipboardList size={16} className="text-blue-600" />, bg: 'bg-blue-50', value: forwardToApb, label: 'Diteruskan ke APBDesa' },
           { icon: <DollarSign size={16} className="text-purple-600" />, bg: 'bg-purple-50', value: formatRp(metrics.totalAnggaran), label: 'Total Anggaran' },
           { icon: <LayoutGrid size={16} className="text-amber-600" />, bg: 'bg-amber-50', value: metrics.kategoriAktif, label: 'Kategori Aktif' },
         ].map((m, i) => (
