@@ -510,57 +510,60 @@ export default function AdminPengaturan() {
                   </div>
                   <input type="file" id="banner-upload" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files && e.target.files[0]) handleImageUpload(e.target.files[0], setWelcomeBannerUrl); }} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input 
                     type="text" 
                     value={welcomeBannerUrl}
                     onChange={(e) => setWelcomeBannerUrl(e.target.value)}
                     placeholder="URL Gambar (Unsplash, dll)"
-                    className="col-span-1 md:col-span-3 px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-xs outline-none focus:border-emerald-500"
+                    spellCheck={false}
+                    className="col-span-1 sm:col-span-2 w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-slate-700 text-xs outline-none focus:border-emerald-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
                   />
-                  <div className="col-span-1 flex items-center gap-2 text-xs">
-                    <label className="text-gray-500 dark:text-slate-400 font-bold">Posisi Y (%):</label>
-                    <input type="range" min="0" max="100" value={welcomeBannerYOffset} onChange={(e) => setWelcomeBannerYOffset(e.target.value)} className="flex-1" />
+                  <div className="col-span-1 flex items-center gap-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2">
+                    <label className="text-gray-500 dark:text-slate-400 font-bold whitespace-nowrap">Posisi Y</label>
+                    <input type="range" min="0" max="100" value={welcomeBannerYOffset} onChange={(e) => setWelcomeBannerYOffset(e.target.value)} className="flex-1 min-w-0" />
+                    <span className="w-10 shrink-0 text-right font-bold text-gray-700 dark:text-slate-200 tabular-nums">{welcomeBannerYOffset}%</span>
                   </div>
-                  <div className="col-span-1 flex items-center gap-2 text-xs">
-                    <label className="text-gray-500 dark:text-slate-400 font-bold">Zoom (%):</label>
-                    <input type="range" min="100" max="200" value={welcomeBannerZoom} onChange={(e) => setWelcomeBannerZoom(e.target.value)} className="flex-1" />
-              </div>
+                  <div className="col-span-1 flex items-center gap-2 text-xs bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2">
+                    <label className="text-gray-500 dark:text-slate-400 font-bold whitespace-nowrap">Zoom</label>
+                    <input type="range" min="100" max="200" value={welcomeBannerZoom} onChange={(e) => setWelcomeBannerZoom(e.target.value)} className="flex-1 min-w-0" />
+                    <span className="w-10 shrink-0 text-right font-bold text-gray-700 dark:text-slate-200 tabular-nums">{welcomeBannerZoom}%</span>
+                  </div>
 
               {/* Profil Desa - Geografi */}
               <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-700/50">
                 <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Profil Desa (Data Geografi)</p>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Luas Wilayah (km²)</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="space-y-1.5 min-w-0">
+                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Luas Wilayah (km²)</label>
                     <input type="text" value={luasWilayah} onChange={e => setLuasWilayah(e.target.value)} placeholder="cth: 4.5" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Ketinggian (mdpl)</label>
+                  <div className="space-y-1.5 min-w-0">
+                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Ketinggian (mdpl)</label>
                     <input type="text" value={ketinggian} onChange={e => setKetinggian(e.target.value)} placeholder="cth: 45" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Topografi</label>
+                  <div className="space-y-1.5 min-w-0">
+                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Topografi</label>
                     <input type="text" value={topografi} onChange={e => setTopografi(e.target.value)} placeholder="cth: Dataran Rendah" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Utara</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5 min-w-0">
+                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Utara</label>
                     <input type="text" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} placeholder="cth: Desa Sukamaju" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Selatan</label>
+                  <div className="space-y-1.5 min-w-0">
+                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Selatan</label>
                     <input type="text" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} placeholder="cth: Desa Baru" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Timur</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1.5 min-w-0">
+                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Timur</label>
                     <input type="text" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} placeholder="cth: Sungai Barito" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Barat</label>
+                  <div className="space-y-1.5 min-w-0">
+                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Barat</label>
                     <input type="text" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} placeholder="cth: Hutan Lindung" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
