@@ -340,21 +340,17 @@ export default function AdminRKPDesa() {
   const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="pb-24 space-y-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
-            <ClipboardList className="w-4 h-4 text-blue-600" />
-          </div>
-          <h1 className="text-lg font-black text-gray-900 dark:text-white">RKPDesa</h1>
-        </div>
-        <div className="flex gap-2">
+    <div className="space-y-5 pb-10">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">RKPDesa</h2>
+        <div className="flex items-center gap-2">
           <button onClick={() => { loadRpjm(importYear); setShowFromRpjm(true); }}
-            className="px-3 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 flex items-center gap-1.5">
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
             <Link2 size={14} /> Tarik dari RPJMDesa
           </button>
           <button onClick={() => { resetForm(); setEditItem(null); setShowModal(true); }}
-            className="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 flex items-center gap-1.5">
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer">
             <PlusCircle size={14} /> Tambah Baru
           </button>
         </div>
