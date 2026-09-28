@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
-  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square, SlidersHorizontal,
-  FileText, FileSpreadsheet, DollarSign, LayoutGrid
+  Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square, SlidersHorizontal, List,
+  FileText, FileSpreadsheet, DollarSign, LayoutGrid, Share2
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -657,6 +657,13 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
     if (w) { w.document.write(doc); w.document.close(); }
   };
 
+  const handleShare = () => {
+    const shareUrl = `${window.location.origin}/?mode=admin&admin_tab=apbdesa`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Link berhasil disalin!', 'success');
+    }).catch(() => { prompt('Salin link ini:', shareUrl); });
+  };
+
   const PencairanBadge = ({ item }: { item: APBDesa }) => {
     const total = item.total_pencairan || 0;
     const pct = item.anggaran > 0 ? Math.round((total / item.anggaran) * 100) : 0;
@@ -708,10 +715,40 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => { loadRkp(importYear); setShowFromRkp(true); }}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-            <Link2 size={14} /> Tarik dari RKPDesa
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Tarik dari RKPDesa">
+            <Link2 size={14} /> Tarik
           </button>
+          {/* Export Dropdown */}
+          <div className="relative">
+            <button onClick={() => setShowExportMenu(!showExportMenu)}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              title="Unduh data terfilter">
+              <Download size={14} /> Export
+            </button>
+            {showExportMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+                <div className="absolute right-0 top-full z-50 mt-1 w-32 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 shadow-xl py-1" onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => { handleExport(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                    <Download size={14} /> Excel
+                  </button>
+                  <button onClick={() => { handleExportCSV(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                    <FileSpreadsheet size={14} /> CSV
+                  </button>
+                  <button onClick={() => { handleExportPDF(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                    <FileText size={14} /> PDF
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
           <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
+          <button onClick={handleShare}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Salin link halaman APBDesa">
+            <Share2 size={14} /> Bagikan
+          </button>
           <button onClick={() => { resetForm(); setEditItem(null); setShowModal(true); }}
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer">
             <PlusCircle size={14} /> Tambah Baru
@@ -800,28 +837,6 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
                   Reset Filter
                 </button>
               </div>
-            )}
-          </div>
-          {/* Export Dropdown */}
-          <div className="relative">
-            <button onClick={() => setShowExportMenu(!showExportMenu)} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
-              <Download size={12} /> Export
-            </button>
-            {showExportMenu && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
-                <div className="absolute right-0 top-full z-50 mt-1 w-32 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 shadow-xl py-1" onClick={(e) => e.stopPropagation()}>
-                  <button onClick={() => { handleExport(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-                    <Download size={14} /> Excel
-                  </button>
-                  <button onClick={() => { handleExportCSV(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-                    <FileSpreadsheet size={14} /> CSV
-                  </button>
-                  <button onClick={() => { handleExportPDF(); setShowExportMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-                    <FileText size={14} /> PDF
-                  </button>
-                </div>
-              </>
             )}
           </div>
         </div>

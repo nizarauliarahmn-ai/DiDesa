@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Star, Printer, Download, CheckCircle2, ExternalLink } from 'lucide-react';
+import { Search, Star, Printer, Download, CheckCircle2, ExternalLink, Share2, PlusCircle } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
@@ -22,7 +22,7 @@ interface UsulanMusrenbang {
   created_at: string;
 }
 
-export default function AdminMusrenbang() {
+export default function AdminMusrenbang({ onGoToUsulan }: { onGoToUsulan?: () => void }) {
   const [list, setList] = useState<UsulanMusrenbang[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('Semua');
@@ -120,6 +120,13 @@ th{background:#f0f0f0;font-weight:bold}
     if (w) { w.document.write(doc); w.document.close(); }
   };
 
+  const handleShare = () => {
+    const shareUrl = `${window.location.origin}/?mode=admin&admin_tab=musrenbang`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Link berhasil disalin!', 'success');
+    }).catch(() => { prompt('Salin link ini:', shareUrl); });
+  };
+
   return (
     <div className="pb-24 space-y-6">
       {/* Header */}
@@ -133,6 +140,15 @@ th{background:#f0f0f0;font-weight:bold}
           </button>
           <button onClick={exportPrint} className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
             <Printer size={14} /> Cetak
+          </button>
+          <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
+          <button onClick={handleShare} className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Salin link halaman Musrenbang">
+            <Share2 size={14} /> Bagikan
+          </button>
+          <button onClick={onGoToUsulan} className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer"
+            title="Kelola usulan di halaman Usulan Desa">
+            <PlusCircle size={14} /> Tambah di Usulan
           </button>
         </div>
       </div>

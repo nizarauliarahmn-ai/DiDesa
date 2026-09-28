@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, Target, AlertTriangle, X, Loader2,
   MapPin, Link2, CheckCircle2, Ban, Printer, Download, Eye, Star, Filter, ListChecks, Square, SlidersHorizontal,
-  FileText, DollarSign, LayoutGrid
+  FileText, DollarSign, LayoutGrid, Share2
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -345,6 +345,49 @@ export default function AdminRPJMDesa() {
     showToast('Berhasil diexport', 'success');
   };
 
+  const handlePrint = () => {
+    if (filtered.length === 0) { showToast('Tidak ada data untuk dicetak', 'error'); return; }
+    const fmtRp = (n: number) => `Rp. ${(n || 0).toLocaleString('id-ID')}`;
+    const rowsHtml = filtered.map((r, i) => `
+      <tr>
+        <td style="text-align:center">${i + 1}</td>
+        <td style="white-space:nowrap">${r.kode_rpjmdesa}</td>
+        <td>${r.nama_program}</td>
+        <td>${r.kategori}</td>
+        <td style="text-align:center;white-space:nowrap">${r.tahun_awal}-${r.tahun_akhir}</td>
+        <td style="text-align:right;white-space:nowrap">${fmtRp(r.anggaran_estimasi)}</td>
+        <td style="text-align:center">${r.status}</td>
+      </tr>
+    `).join('');
+    const doc = `<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8"/><title>RPJMDesa</title>
+<style>
+@page{size:A4 landscape;margin:15mm}*{box-sizing:border-box}
+body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px}
+h1{text-align:center;font-size:16px;margin-bottom:4px}
+table{width:100%;border-collapse:collapse;margin-top:12px;table-layout:auto}
+th,td{border:1px solid #333;padding:6px 8px;font-size:10px;word-wrap:break-word}
+th{background:#f0f0f0;font-weight:bold}
+@media print{body{padding:0}}
+</style></head><body>
+<h1>DAFTAR RPJMDesa</h1>
+<table><thead><tr>
+<th style="width:30px">No</th><th>Kode</th><th>Nama Program</th><th>Kategori</th>
+<th>Tahun</th><th>Estimasi Anggaran</th><th>Status</th>
+</tr></thead><tbody>${rowsHtml}</tbody></table>
+<script>window.onload=function(){window.print()}</script>
+</body></html>`;
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(doc); w.document.close(); }
+  };
+
+  const handleShare = () => {
+    const shareUrl = `${window.location.origin}/?mode=admin&admin_tab=rpjmdesa`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Link berhasil disalin!', 'success');
+    }).catch(() => { prompt('Salin link ini:', shareUrl); });
+  };
+
   const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
   return (
@@ -357,9 +400,24 @@ export default function AdminRPJMDesa() {
         <div className="flex items-center gap-2">
           <button onClick={() => { loadUsulan(); setShowFromUsulan(true); }}
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-            <Link2 size={14} /> Tarik dari Usulan
+            <Link2 size={14} /> Tarik
+          </button>
+          <button onClick={handleExport}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Unduh data terfilter sebagai Excel">
+            <Download size={14} /> Export
+          </button>
+          <button onClick={handlePrint}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Cetak daftar RPJMDesa">
+            <Printer size={14} /> Cetak
           </button>
           <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
+          <button onClick={handleShare}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Salin link halaman RPJMDesa">
+            <Share2 size={14} /> Bagikan
+          </button>
           <button onClick={() => { resetForm(); setEditItem(null); setShowModal(true); }}
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer">
             <PlusCircle size={14} /> Tambah Baru
@@ -437,9 +495,6 @@ export default function AdminRPJMDesa() {
               </div>
             )}
           </div>
-          <button onClick={handleExport} className="px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 flex items-center gap-1.5">
-            <Download size={12} /> Export
-          </button>
         </div>
       </div>
 

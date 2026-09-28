@@ -553,6 +553,16 @@ export default function App() {
     );
   }
 
+  // Route /admin/musrenbang → redirect ke mode admin + tab musrenbang
+  if (window.location.pathname.includes('/admin/musrenbang') && !urlParams.get('admin_tab')) {
+    window.location.replace('/?mode=admin&admin_tab=musrenbang');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
+
   // Remote KTP Scanner (Tablet Desa) — route /kiosk/scan
   if (window.location.pathname.includes('/kiosk/scan')) {
     return <><KioskKtpScanner /><ToastContainer /></>;
@@ -718,7 +728,7 @@ export default function App() {
                 {adminTab === 'rpjmdesa' && <TabErrorBoundary tabKey="rpjmdesa"><AdminRPJMDesa /></TabErrorBoundary>}
                 {adminTab === 'rkpdesa' && <TabErrorBoundary tabKey="rkpdesa"><AdminRKPDesa /></TabErrorBoundary>}
                 {adminTab === 'apbdesa' && <TabErrorBoundary tabKey="apbdesa"><AdminAPBDesa /></TabErrorBoundary>}
-                {adminTab === 'musrenbang' && <TabErrorBoundary tabKey="musrenbang"><AdminMusrenbang /></TabErrorBoundary>}
+                {adminTab === 'musrenbang' && <TabErrorBoundary tabKey="musrenbang"><AdminMusrenbang onGoToUsulan={() => setAdminTab('usulan_desa')} /></TabErrorBoundary>}
                 {adminTab === 'berita' && (
                   <AdminBerita 
                     searchQuery={globalSearch}
