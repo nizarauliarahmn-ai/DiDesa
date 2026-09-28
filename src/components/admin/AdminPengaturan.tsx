@@ -530,44 +530,7 @@ export default function AdminPengaturan() {
                     <span className="w-10 shrink-0 text-right font-bold text-gray-700 dark:text-slate-200 tabular-nums">{welcomeBannerZoom}%</span>
                   </div>
 
-              {/* Profil Desa - Geografi */}
-              <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-slate-700/50">
-                <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Profil Desa (Data Geografi)</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1.5 min-w-0">
-                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Luas Wilayah (km²)</label>
-                    <input type="text" value={luasWilayah} onChange={e => setLuasWilayah(e.target.value)} placeholder="cth: 4.5" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
-                  </div>
-                  <div className="space-y-1.5 min-w-0">
-                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Ketinggian (mdpl)</label>
-                    <input type="text" value={ketinggian} onChange={e => setKetinggian(e.target.value)} placeholder="cth: 45" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
-                  </div>
-                  <div className="space-y-1.5 min-w-0">
-                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Topografi</label>
-                    <input type="text" value={topografi} onChange={e => setTopografi(e.target.value)} placeholder="cth: Dataran Rendah" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5 min-w-0">
-                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Utara</label>
-                    <input type="text" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} placeholder="cth: Desa Sukamaju" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
-                  </div>
-                  <div className="space-y-1.5 min-w-0">
-                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Selatan</label>
-                    <input type="text" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} placeholder="cth: Desa Baru" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1.5 min-w-0">
-                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Timur</label>
-                    <input type="text" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} placeholder="cth: Sungai Barito" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
-                  </div>
-                  <div className="space-y-1.5 min-w-0">
-                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Barat</label>
-                    <input type="text" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} placeholder="cth: Hutan Lindung" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
-                  </div>
-                </div>
-              </div>
+
             </div>
               </div>
             </div>
@@ -729,6 +692,50 @@ export default function AdminPengaturan() {
                   <span className={`text-xs font-bold ${appTheme === 'dark' ? 'text-emerald-700' : 'text-gray-500 dark:text-slate-400'}`}>Mode Gelap</span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Profil Desa - Geografi */}
+      <div className="mt-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="p-5 border-b border-gray-50 bg-gray-50/50 dark:bg-slate-800/50">
+          <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-emerald-600" />
+            Profil Desa (Data Geografi)
+          </h3>
+        </div>
+        <div className="p-6 space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1.5 min-w-0">
+              <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Luas Wilayah (km²)</label>
+              <input type="text" value={luasWilayah} onChange={e => setLuasWilayah(e.target.value)} placeholder="cth: 4.5" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Ketinggian (mdpl)</label>
+              <input type="text" value={ketinggian} onChange={e => setKetinggian(e.target.value)} placeholder="cth: 45" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Topografi</label>
+              <input type="text" value={topografi} onChange={e => setTopografi(e.target.value)} placeholder="cth: Dataran Rendah" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5 min-w-0">
+              <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Utara</label>
+              <input type="text" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} placeholder="cth: Desa Sukamaju" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Selatan</label>
+              <input type="text" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} placeholder="cth: Desa Baru" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Timur</label>
+              <input type="text" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} placeholder="cth: Sungai Barito" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
+            </div>
+            <div className="space-y-1.5 min-w-0">
+              <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Barat</label>
+              <input type="text" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} placeholder="cth: Hutan Lindung" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
             </div>
           </div>
         </div>
