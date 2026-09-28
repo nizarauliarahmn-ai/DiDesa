@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Search, PlusCircle, Edit2, Trash2, BarChart3, X, Link2,
   Download, AlertTriangle, CheckCircle2, Clock, Camera, Image as ImageIcon, Loader2, MapPin, ListChecks, Square, SlidersHorizontal, List,
-  FileText, FileSpreadsheet, DollarSign, LayoutGrid, Share2
+  FileText, FileSpreadsheet, DollarSign, LayoutGrid, Share2, Printer
 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
@@ -743,6 +743,11 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
               </>
             )}
           </div>
+          <button onClick={handleExportPDF}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Cetak daftar APBDesa (PDF)">
+            <Printer size={14} /> Cetak
+          </button>
           <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
           <button onClick={handleShare}
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
