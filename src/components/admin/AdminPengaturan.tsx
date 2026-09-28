@@ -535,35 +535,35 @@ export default function AdminPengaturan() {
                 <p className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Profil Desa (Data Geografi)</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="space-y-1.5 min-w-0">
-                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Luas Wilayah (km²)</label>
+                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Luas Wilayah (km²)</label>
                     <input type="text" value={luasWilayah} onChange={e => setLuasWilayah(e.target.value)} placeholder="cth: 4.5" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                   <div className="space-y-1.5 min-w-0">
-                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Ketinggian (mdpl)</label>
+                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Ketinggian (mdpl)</label>
                     <input type="text" value={ketinggian} onChange={e => setKetinggian(e.target.value)} placeholder="cth: 45" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                   <div className="space-y-1.5 min-w-0">
-                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Topografi</label>
+                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Topografi</label>
                     <input type="text" value={topografi} onChange={e => setTopografi(e.target.value)} placeholder="cth: Dataran Rendah" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   <div className="space-y-1.5 min-w-0">
-                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Utara</label>
+                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Utara</label>
                     <input type="text" value={batasUtara} onChange={e => setBatasUtara(e.target.value)} placeholder="cth: Desa Sukamaju" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                   <div className="space-y-1.5 min-w-0">
-                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Selatan</label>
+                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Selatan</label>
                     <input type="text" value={batasSelatan} onChange={e => setBatasSelatan(e.target.value)} placeholder="cth: Desa Baru" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   <div className="space-y-1.5 min-w-0">
-                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Timur</label>
+                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Timur</label>
                     <input type="text" value={batasTimur} onChange={e => setBatasTimur(e.target.value)} placeholder="cth: Sungai Barito" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                   <div className="space-y-1.5 min-w-0">
-                    <label className="block truncate text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Batas Barat</label>
+                    <label className="block text-xs font-extrabold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1 leading-tight">Batas Barat</label>
                     <input type="text" value={batasBarat} onChange={e => setBatasBarat(e.target.value)} placeholder="cth: Hutan Lindung" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none text-sm text-gray-900 dark:text-white font-bold transition-all bg-gray-50 dark:bg-slate-800 focus:bg-white" />
                   </div>
                 </div>
