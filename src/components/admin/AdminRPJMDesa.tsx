@@ -348,15 +348,18 @@ export default function AdminRPJMDesa() {
   const formatRp = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
 
   return (
-    <div className="space-y-5 pb-10">
+    <div className="pb-24 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">RPJMDesa</h2>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">RPJMDesa</h2>
+        </div>
         <div className="flex items-center gap-2">
           <button onClick={() => { loadUsulan(); setShowFromUsulan(true); }}
             className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
             <Link2 size={14} /> Tarik dari Usulan
           </button>
+          <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
           <button onClick={() => { resetForm(); setEditItem(null); setShowModal(true); }}
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer">
             <PlusCircle size={14} /> Tambah Baru
