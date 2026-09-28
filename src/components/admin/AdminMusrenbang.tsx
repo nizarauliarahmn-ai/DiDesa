@@ -121,7 +121,7 @@ th{background:#f0f0f0;font-weight:bold}
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 pb-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Musrenbang</h2>
