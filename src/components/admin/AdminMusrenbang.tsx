@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Star, Printer, Download, CheckCircle2, ExternalLink, Share2, PlusCircle } from 'lucide-react';
+import { Search, Star, Printer, Download, CheckCircle2, ExternalLink, Share2, PlusCircle, Calendar, X, Loader2 } from 'lucide-react';
 import { utils, writeFile } from 'xlsx';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
@@ -28,6 +28,9 @@ export default function AdminMusrenbang({ onGoToUsulan }: { onGoToUsulan?: () =>
   const [filterStatus, setFilterStatus] = useState('Semua');
   const [filterYear, setFilterYear] = useState(String(new Date().getFullYear()));
   const [loading, setLoading] = useState(true);
+  const [teruskanTarget, setTeruskanTarget] = useState<UsulanMusrenbang | null>(null);
+  const [teruskanYear, setTeruskanYear] = useState('');
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => { loadData(); }, []);
 
@@ -41,6 +44,41 @@ export default function AdminMusrenbang({ onGoToUsulan }: { onGoToUsulan?: () =>
     );
     setList(musrenbangList as UsulanMusrenbang[]);
     setLoading(false);
+  };
+
+  // Tahun-tahun Musrenbang yang sudah ditempel pada satu usulan
+  const musrenbangYears = (u: UsulanMusrenbang): number[] =>
+    (u.diteruskan_tags || [])
+      .map(t => { const m = String(t || '').match(/musrenbang\s*(\d{4})/i); return m ? Number(m[1]) : null; })
+      .filter((y): y is number => y !== null);
+
+  // Tahun berikutnya = max tag + 1 (fallback: tahun filter / tahun berjalan)
+  const nextYearFor = (u: UsulanMusrenbang): number => {
+    const ys = musrenbangYears(u);
+    if (ys.length > 0) return Math.max(...ys) + 1;
+    if (filterYear !== 'Semua Tahun' && !isNaN(Number(filterYear))) return Number(filterYear) + 1;
+    return new Date().getFullYear() + 1;
+  };
+
+  const saveTeruskan = async (target: UsulanMusrenbang, year: string) => {
+    if (!year) { showToast('Pilih tahun Musrenbang terlebih dahulu.', 'error'); return; }
+    setSavingId(target.id);
+    try {
+      const tag = `Musrenbang ${year}`;
+      const tags = [...(target.diteruskan_tags || [])];
+      if (!tags.includes(tag)) tags.push(tag);
+      const payload: Record<string, any> = { diteruskan_tags: tags, pipeline_status: 'Musrenbang', pipeline_year: year };
+      const { error } = await supabase.from('usulan_desas').update(payload).eq('id', target.id);
+      if (error) throw error;
+      showToast(`Usulan diteruskan ke Musrenbang ${year}.`, 'success');
+      setTeruskanTarget(null);
+      await loadData();
+    } catch (e: any) {
+      console.error('Teruskan Musrenbang error:', e);
+      showToast(e?.message || 'Gagal meneruskan usulan.', 'error');
+    } finally {
+      setSavingId(null);
+    }
   };
 
   const filtered = useMemo(() => {
@@ -214,13 +252,14 @@ th{background:#f0f0f0;font-weight:bold}
               <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase hidden lg:table-cell">Lokasi</th>
               <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase hidden lg:table-cell">Pengusul</th>
               <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase">Status</th>
+              <th className="px-4 py-3 text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
             {loading ? (
-              <tr><td colSpan={7} className="px-4 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
+              <tr><td colSpan={8} className="px-4 py-12 text-center text-sm text-gray-400">Memuat data...</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-16 text-center text-sm text-gray-400">
+              <tr><td colSpan={8} className="px-4 py-16 text-center text-sm text-gray-400">
                 {list.length === 0 ? 'Belum ada usulan ber-tag Musrenbang.' : 'Tidak ada hasil yang cocok.'}
               </td></tr>
             ) : filtered.map((u, i) => (
@@ -241,11 +280,70 @@ th{background:#f0f0f0;font-weight:bold}
                     {u.status_terakomodir || 'Belum'}
                   </span>
                 </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+                    <button
+                      onClick={() => saveTeruskan(u, String(nextYearFor(u)))}
+                      disabled={savingId === u.id}
+                      className="px-3 py-1.5 text-[11px] font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 cursor-pointer"
+                      title={`Teruskan ke Musrenbang ${nextYearFor(u)}`}
+                    >
+                      {savingId === u.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : `Ke ${nextYearFor(u)}`}
+                    </button>
+                    <button
+                      onClick={() => { setTeruskanTarget(u); setTeruskanYear(String(nextYearFor(u))); }}
+                      className="p-1.5 rounded-lg border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                      title="Pilih tahun Musrenbang"
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Modal pilih tahun Musrenbang */}
+      {teruskanTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-gray-900/50" onClick={() => setTeruskanTarget(null)} />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-xl w-full max-w-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">Teruskan ke Musrenbang</h3>
+              <button onClick={() => setTeruskanTarget(null)} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs font-mono font-bold text-gray-500 dark:text-slate-400">{teruskanTarget.kode_usulan}</p>
+            <p className="text-sm font-bold text-gray-800 dark:text-slate-100 mt-1 mb-4">{teruskanTarget.uraian_usulan}</p>
+            <label className="block text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Tahun Musrenbang</label>
+            <select
+              value={teruskanYear}
+              onChange={e => setTeruskanYear(e.target.value)}
+              className="w-full h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-lg text-sm font-bold bg-white dark:bg-slate-900 text-gray-900 dark:text-white outline-none focus:border-emerald-500"
+            >
+              {Array.from({ length: 9 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
+                <option key={y} value={y}>{y}{musrenbangYears(teruskanTarget).includes(y) ? ' (sudah)' : ''}</option>
+              ))}
+            </select>
+            <div className="flex justify-end gap-2 mt-5">
+              <button onClick={() => setTeruskanTarget(null)} className="px-4 py-2 text-xs font-bold text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer">
+                Batal
+              </button>
+              <button
+                onClick={() => saveTeruskan(teruskanTarget, teruskanYear)}
+                disabled={savingId === teruskanTarget.id}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                {savingId === teruskanTarget.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
