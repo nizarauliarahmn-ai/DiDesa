@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, Phone, HandHeart, HeartHandshake, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
 import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
@@ -233,6 +233,7 @@ export default function AdminPendudukDetail({
   const [isScrolled, setIsScrolled] = useState(false);
   const [viewMode, setViewMode] = useState<'ektp' | 'grid'>('ektp');
   const [detailTab, setDetailTab] = useState(0);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showAidModal, setShowAidModal] = useState(false);
   const [selectedNewProgram, setSelectedNewProgram] = useState("BLT Dana Desa");
   const [selectedNewYear, setSelectedNewYear] = useState(new Date().getFullYear().toString());
@@ -762,7 +763,7 @@ export default function AdminPendudukDetail({
             {data?.photo ? (
               <img src={data.photo} alt={data.name} className={`border-2 border-white shadow-md object-cover transition-all ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`} />
             ) : (
-              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all bg-slate-400 dark:bg-slate-600 ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
+              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'} ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
                 <User className={isScrolled ? 'w-5 h-5' : 'w-8 h-8'} fill="currentColor" />
               </div>
             )}
@@ -908,41 +909,53 @@ export default function AdminPendudukDetail({
             </>
           ) : (
             <>
-          <button 
-            onClick={() => setIsPrinting(true)}
-            className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
-            title="Cetak Profil"
-          >
-            <Printer className="w-4 h-4" />
-            <span className={isScrolled ? 'hidden' : ''}>Cetak</span>
-          </button>
           {!isPending ? (
             <>
-              <button 
-                onClick={() => {
-                  if (onSetPresetResident && onNavigateToTab) {
-                    onSetPresetResident(data);
-                    onNavigateToTab('surat');
-                  }
-                }}
-                className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
-                title="Buat Surat"
-              >
-                <FileText className="w-4 h-4" />
-                <span className={isScrolled ? 'hidden' : ''}>Surat</span>
-              </button>
               <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
                 <Edit2 className="w-4 h-4" />
                 <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
               </button>
-              <button onClick={handleMoveResident} className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Mutasi Warga">
-                <ArrowRightLeft className="w-4 h-4" />
-                <span className={isScrolled ? 'hidden' : ''}>Mutasi</span>
-              </button>
-              <button onClick={handleDeleteResident} className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Pindah ke Tong Sampah">
-                <Trash2 className="w-4 h-4" />
-                <span className={isScrolled ? 'hidden' : ''}>Hapus</span>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowMoreMenu(v => !v)}
+                  className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center text-xs font-bold ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}
+                  title="Aksi lainnya"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+                {showMoreMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
+                    <div className="absolute right-0 top-full z-50 mt-1.5 w-48 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 shadow-xl py-1.5">
+                      <button
+                        onClick={() => { setShowMoreMenu(false); setIsPrinting(true); }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      >
+                        <Printer className="w-4 h-4" /> Cetak Profil
+                      </button>
+                      <button
+                        onClick={() => { setShowMoreMenu(false); if (onSetPresetResident && onNavigateToTab) { onSetPresetResident(data); onNavigateToTab('surat'); } }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      >
+                        <FileText className="w-4 h-4" /> Buat Surat
+                      </button>
+                      <button
+                        onClick={() => { setShowMoreMenu(false); handleMoveResident(); }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      >
+                        <ArrowRightLeft className="w-4 h-4" /> Mutasi Warga
+                      </button>
+                      <div className="my-1 border-t border-gray-100 dark:border-slate-800" />
+                      <button
+                        onClick={() => { setShowMoreMenu(false); handleDeleteResident(); }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer text-left"
+                      >
+                        <Trash2 className="w-4 h-4" /> Hapus
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </>
           ) : (
             <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
