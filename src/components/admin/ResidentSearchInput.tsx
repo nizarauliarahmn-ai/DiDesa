@@ -44,6 +44,7 @@ export default function ResidentSearchInput({
   const [searchQuery, setSearchQuery] = useState(initialText);
   const [results, setResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [manual, setManual] = useState(initialManual);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -51,8 +52,9 @@ export default function ResidentSearchInput({
   const runSearch = (query: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const q = query.trim();
-    if (q.length < 2 || manual) {
+    if (q.length < 1 || manual) {
       setResults([]);
+      setSearchError(null);
       setOpen(false);
       return;
     }
@@ -91,13 +93,16 @@ export default function ResidentSearchInput({
         if (error) {
           console.error(`Error searching residents (${logLabel}):`, error);
           setResults([]);
+          setSearchError(error.message || 'Gagal membaca data penduduk.');
         } else {
+          setSearchError(null);
           setResults((data || []).filter((r: any) => String(r.is_deleted) !== '1' && r.is_deleted !== true));
         }
         setSearching(false);
-      } catch (e) {
+      } catch (e: any) {
         console.error(`Error searching residents (${logLabel}):`, e);
         setResults([]);
+        setSearchError(e?.message || 'Gagal membaca data penduduk.');
         setSearching(false);
       }
     }, 300);
@@ -120,6 +125,7 @@ export default function ResidentSearchInput({
   const handleSelect = (resident: any) => {
     setSearchQuery(resident.name || '');
     setResults([]);
+    setSearchError(null);
     setOpen(false);
     setManual(false);
     onManualChange?.(false);
@@ -172,7 +178,7 @@ export default function ResidentSearchInput({
                     runSearch(v);
                   }}
                   onKeyDown={handleScannerKeyDown}
-                  onFocus={() => { if (searchQuery.trim().length >= 2) setOpen(true); }}
+                  onFocus={() => { if (searchQuery.trim().length >= 1) setOpen(true); }}
                   placeholder="Cari warga berdasarkan Nama / NIK..."
                 />
               </div>
@@ -205,6 +211,10 @@ export default function ResidentSearchInput({
             {searching ? (
               <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400 flex items-center gap-2">
                 <RefreshCw size={14} className="animate-spin" /> Mencari data warga...
+              </div>
+            ) : searchError ? (
+              <div className="px-4 py-3 text-sm text-rose-600 dark:text-rose-400">
+                Gagal mencari: {searchError}
               </div>
             ) : results.length === 0 ? (
               <div className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400">
