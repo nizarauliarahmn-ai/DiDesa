@@ -612,6 +612,8 @@ export default function AdminAPBDesa() {
 
   const handleExportPDF = () => {
     const totalPencairan = filtered.reduce((sum, r) => sum + (r.total_pencairan || 0), 0);
+    const namaDesa = (localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Wasah Hilir').replace(/^(desa)\s+/i, '').trim();
+    const namaKec = (localStorage.getItem('kop_kecamatan') || localStorage.getItem('village_kecamatan') || 'Simpur').replace(/^(kecamatan)\s+/i, '').trim();
     const fmtRp = (n: number) => `Rp. ${(n || 0).toLocaleString('id-ID')}`;
     const rowsHtml = filtered.map((r, i) => `
       <tr>
@@ -631,7 +633,8 @@ export default function AdminAPBDesa() {
 <style>
 @page{size:A4 landscape;margin:15mm}*{box-sizing:border-box}
 body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px}
-h1{text-align:center;font-size:16px;margin-bottom:4px}
+h1{text-align:center;font-size:16px;margin-bottom:2px}
+.sub{text-align:center;font-size:12px;font-weight:bold;margin:0 0 4px}
 table{width:100%;border-collapse:collapse;margin-top:12px;table-layout:auto}
 th,td{border:1px solid #333;padding:6px 8px;font-size:10px;word-wrap:break-word}
 th{background:#f0f0f0;font-weight:bold}
@@ -642,6 +645,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
 @media print{body{padding:0}}
 </style></head><body>
 <h1>DAFTAR APBDesa ${currentYear}</h1>
+<p class="sub">DESA ${namaDesa.toUpperCase()} &mdash; KECAMATAN ${namaKec.toUpperCase()}</p>
 <table><thead><tr>
 <th style="width:30px">No</th><th style="width:80px">Kode</th><th style="width:200px">Kegiatan</th><th>Kategori</th>
 <th>Lokasi</th><th style="width:80px">Sumber</th><th style="width:110px">Anggaran</th><th>Tahapan</th><th style="width:110px">Pencairan</th>
