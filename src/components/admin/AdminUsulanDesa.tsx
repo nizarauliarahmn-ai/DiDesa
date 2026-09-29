@@ -847,6 +847,7 @@ export default function AdminUsulanDesa() {
       'Keterangan': u.keterangan || '',
     }));
     const ws = utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 14 }, { wch: 50 }, { wch: 18 }, { wch: 14 }, { wch: 20 }, { wch: 25 }, { wch: 18 }, { wch: 30 }, { wch: 20 }, { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 10 }, { wch: 30 }];
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'Usulan Desa');
     writeFile(wb, `usulan-desa-${new Date().toISOString().slice(0, 10)}.xlsx`);

@@ -589,6 +589,7 @@ export default function AdminAPBDesa() {
       'Cara Pengadaan': hitungCaraPengadaan(r.anggaran, r.fisik_non_fisik, r.total_pencairan)
     }));
     const ws = utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 14 }, { wch: 45 }, { wch: 18 }, { wch: 22 }, { wch: 18 }, { wch: 16 }, { wch: 18 }, { wch: 12 }, { wch: 8 }, { wch: 22 }];
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'APBDesa');
     writeFile(wb, `APBDesa_${currentYear}.xlsx`);

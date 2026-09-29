@@ -116,6 +116,7 @@ export default function AdminMusrenbang({ onGoToUsulan }: { onGoToUsulan?: () =>
       'Status Akomodir': u.status_terakomodir || '',
     }));
     const ws = utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 5 }, { wch: 14 }, { wch: 50 }, { wch: 18 }, { wch: 18 }, { wch: 20 }, { wch: 25 }, { wch: 16 }];
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'Musrenbang');
     writeFile(wb, `usulan-musrenbang-${new Date().toISOString().slice(0, 10)}.xlsx`);

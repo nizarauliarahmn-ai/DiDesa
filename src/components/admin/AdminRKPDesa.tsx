@@ -335,6 +335,7 @@ export default function AdminRKPDesa() {
       'Sumber Data': r.sumber_data, Keterangan: r.keterangan || ''
     }));
     const ws = utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 14 }, { wch: 45 }, { wch: 18 }, { wch: 22 }, { wch: 10 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 14 }, { wch: 30 }];
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'RKPDesa');
     writeFile(wb, `RKPDesa_${currentYear}.xlsx`);

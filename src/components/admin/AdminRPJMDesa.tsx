@@ -350,6 +350,7 @@ export default function AdminRPJMDesa() {
       Prioritas: r.skala_prioritas, Status: r.status, Keterangan: r.keterangan || ''
     }));
     const ws = utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 14 }, { wch: 45 }, { wch: 18 }, { wch: 22 }, { wch: 12 }, { wch: 18 }, { wch: 10 }, { wch: 12 }, { wch: 30 }];
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'RPJMDesa');
     writeFile(wb, `RPJMDesa_${new Date().getFullYear()}.xlsx`);
