@@ -1197,11 +1197,7 @@ export default function AdminPendudukDetail({
                       <p className="text-xs text-gray-500 dark:text-slate-400">Ringkasan identitas kependudukan</p>
                     </div>
                   </div>
-                  {data?.nik && (
-                    <span className="font-mono text-xs font-bold text-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-lg">
-                      NIK: {data.nik}
-                    </span>
-                  )}
+
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -1249,24 +1245,6 @@ export default function AdminPendudukDetail({
                     </div>
                   </div>
 
-                  {/* Kontak WhatsApp */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <Phone className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">No. WhatsApp</p>
-                      {isEditMode ? (
-                        <div className="mt-1">
-                          <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} label="No. WhatsApp" />
-                        </div>
-                      ) : (
-                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 font-mono">
-                          {renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}
-                        </p>
-                      )}
-                    </div>
-                  </div>
 
                   {/* Gelar */}
                   <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
@@ -1304,24 +1282,6 @@ export default function AdminPendudukDetail({
                     </div>
                   </div>
 
-                  {/* Domisili */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <MapPin className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
-                      {isEditMode ? (
-                        <div className="mt-1">
-<EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} label="Status Domisili" />
-                        </div>
-                      ) : (
-                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
-                          {renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}
-                        </p>
-                      )}
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -1380,10 +1340,6 @@ export default function AdminPendudukDetail({
                         </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 pt-1">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>{data?.domicileStatus || 'Sesuai KTP & Domisili Terdaftar'}</span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1418,7 +1374,7 @@ export default function AdminPendudukDetail({
                 Buatkan Surat untuk Warga Ini
               </button>
               {data?.nik && (
-                <p className="text-[10px] text-emerald-100/70 mt-2.5 text-center font-mono">NIK warga akan terisi otomatis • NIK: {data.nik}</p>
+                <p className="text-[10px] text-emerald-100/70 mt-2.5 text-center font-mono">NIK warga akan terisi otomatis</p>
               )}
             </div>
 
@@ -1721,21 +1677,6 @@ export default function AdminPendudukDetail({
                   </div>
                 </div>
 
-                <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 flex items-center justify-center shrink-0 mt-0.5">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Domisili</p>
-                    {isEditMode ? (
-                      <div className="mt-1">
-                        <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} label="Status Domisili" />
-                      </div>
-                    ) : (
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</p>
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
 
