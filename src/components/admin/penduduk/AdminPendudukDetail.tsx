@@ -1733,8 +1733,6 @@ export default function AdminPendudukDetail({
 
       {/* ===== TAB 3: Riwayat Surat ===== */}
       {detailTab === 2 && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
-          <div className="lg:col-span-8">
         <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
           <div className="flex items-center gap-3 mb-6 border-b border-gray-100 dark:border-slate-800 pb-4">
             <div className="flex items-center gap-3">
@@ -1797,38 +1795,6 @@ export default function AdminPendudukDetail({
               <p className="text-sm text-gray-400 italic">Belum ada riwayat surat untuk warga ini.</p>
             </div>
           )}
-          </div>
-          </div>
-          <div className="lg:col-span-4 space-y-6">
-            {/* Panel Akses Cepat Surat */}
-            <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-2xl p-5 text-white shadow-lg dark:shadow-none shadow-emerald-900/20 relative overflow-hidden">
-              <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm">Akses Cepat Surat</h4>
-                  <p className="text-[11px] text-emerald-100/80">Terbitkan surat untuk warga ini</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => {
-                  if (onSetPresetResident && onNavigateToTab) {
-                    onSetPresetResident(data);
-                    onNavigateToTab('surat');
-                  }
-                }}
-                className="w-full mt-3 px-4 py-3 rounded-xl bg-white text-emerald-800 font-black text-sm hover:bg-emerald-50 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md"
-              >
-                <Plus className="w-4 h-4" />
-                Buatkan Surat untuk Warga Ini
-              </button>
-              {data?.nik && (
-                <p className="text-[10px] text-emerald-100/70 mt-2.5 text-center font-mono">NIK warga akan terisi otomatis</p>
-              )}
-            </div>
-          </div>
         </div>
       )}
 
