@@ -124,6 +124,8 @@ export default function AdminMusrenbang({ onGoToUsulan }: { onGoToUsulan?: () =>
 
   const exportPrint = () => {
     const tahun = new Date().getFullYear();
+    const namaDesa = (localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Wasah Hilir').replace(/^(desa)\s+/i, '').trim();
+    const namaKec = (localStorage.getItem('kop_kecamatan') || localStorage.getItem('village_kecamatan') || 'Simpur').replace(/^(kecamatan)\s+/i, '').trim();
     const rowsHtml = filtered.map((u, i) => `
       <tr>
         <td style="text-align:center">${i + 1}</td>
@@ -141,13 +143,15 @@ export default function AdminMusrenbang({ onGoToUsulan }: { onGoToUsulan?: () =>
 <style>
 @page{size:A4 landscape;margin:15mm}*{box-sizing:border-box}
 body{font-family:Arial,sans-serif;font-size:11px;margin:0;padding:20px}
-h1{text-align:center;font-size:16px;margin-bottom:4px}
+h1{text-align:center;font-size:16px;margin-bottom:2px}
+.sub{text-align:center;font-size:12px;font-weight:bold;margin:0 0 4px}
 table{width:100%;border-collapse:collapse;margin-top:12px}
 th,td{border:1px solid #333;padding:6px 8px;font-size:10px}
 th{background:#f0f0f0;font-weight:bold}
 @media print{body{padding:0}}
 </style></head><body>
 <h1>DAFTAR USULAN MUSRENBANG DESA ${tahun}</h1>
+<p class="sub">DESA ${namaDesa.toUpperCase()} &mdash; KECAMATAN ${namaKec.toUpperCase()}</p>
 <table><thead><tr>
 <th style="width:40px">No</th><th>Kode</th><th>Uraian</th><th>Kategori</th>
 <th>Lokasi</th><th>Pengusul</th><th style="width:40px">Prioritas</th><th>Status</th>
