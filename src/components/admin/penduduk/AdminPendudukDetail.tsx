@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
 import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
@@ -234,6 +234,23 @@ export default function AdminPendudukDetail({
   const [viewMode, setViewMode] = useState<'ektp' | 'grid'>('ektp');
   const [detailTab, setDetailTab] = useState(0);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const moreBtnRef = useRef<HTMLButtonElement | null>(null);
+  const [morePos, setMorePos] = useState<{ top: number; left: number } | null>(null);
+  const openMoreMenu = () => {
+    const r = moreBtnRef.current?.getBoundingClientRect();
+    if (r) setMorePos({ top: r.bottom + 6, left: Math.max(8, r.right - 192) });
+    setShowMoreMenu(true);
+  };
+  useEffect(() => {
+    if (!showMoreMenu) return;
+    const close = () => setShowMoreMenu(false);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
+  }, [showMoreMenu]);
   const [showAidModal, setShowAidModal] = useState(false);
   const [selectedNewProgram, setSelectedNewProgram] = useState("BLT Dana Desa");
   const [selectedNewYear, setSelectedNewYear] = useState(new Date().getFullYear().toString());
@@ -917,44 +934,13 @@ export default function AdminPendudukDetail({
               </button>
               <div className="relative">
                 <button
-                  onClick={() => setShowMoreMenu(v => !v)}
+                  ref={moreBtnRef}
+                  onClick={openMoreMenu}
                   className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center text-xs font-bold ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}
                   title="Aksi lainnya"
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </button>
-                {showMoreMenu && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowMoreMenu(false)} />
-                    <div className="absolute right-0 top-full z-50 mt-1.5 w-48 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 shadow-xl py-1.5">
-                      <button
-                        onClick={() => { setShowMoreMenu(false); setIsPrinting(true); }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
-                      >
-                        <Printer className="w-4 h-4" /> Cetak Profil
-                      </button>
-                      <button
-                        onClick={() => { setShowMoreMenu(false); if (onSetPresetResident && onNavigateToTab) { onSetPresetResident(data); onNavigateToTab('surat'); } }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
-                      >
-                        <FileText className="w-4 h-4" /> Buat Surat
-                      </button>
-                      <button
-                        onClick={() => { setShowMoreMenu(false); handleMoveResident(); }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
-                      >
-                        <ArrowRightLeft className="w-4 h-4" /> Mutasi Warga
-                      </button>
-                      <div className="my-1 border-t border-gray-100 dark:border-slate-800" />
-                      <button
-                        onClick={() => { setShowMoreMenu(false); handleDeleteResident(); }}
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer text-left"
-                      >
-                        <Trash2 className="w-4 h-4" /> Hapus
-                      </button>
-                    </div>
-                  </>
-                )}
               </div>
             </>
           ) : (
@@ -994,6 +980,43 @@ export default function AdminPendudukDetail({
           </div>
         </div>
       </div>
+
+      {/* Overlay menu aksi (di luar sticky overflow-hidden agar tidak terpotong) */}
+      {showMoreMenu && morePos && (
+        <>
+          <div className="fixed inset-0 z-[90]" onClick={() => setShowMoreMenu(false)} />
+          <div
+            style={{ top: morePos.top, left: morePos.left }}
+            className="fixed z-[100] w-48 bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 shadow-xl py-1.5"
+          >
+            <button
+              onClick={() => { setShowMoreMenu(false); setIsPrinting(true); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+            >
+              <Printer className="w-4 h-4" /> Cetak Profil
+            </button>
+            <button
+              onClick={() => { setShowMoreMenu(false); if (onSetPresetResident && onNavigateToTab) { onSetPresetResident(data); onNavigateToTab('surat'); } }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+            >
+              <FileText className="w-4 h-4" /> Buat Surat
+            </button>
+            <button
+              onClick={() => { setShowMoreMenu(false); handleMoveResident(); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+            >
+              <ArrowRightLeft className="w-4 h-4" /> Mutasi Warga
+            </button>
+            <div className="my-1 border-t border-gray-100 dark:border-slate-800" />
+            <button
+              onClick={() => { setShowMoreMenu(false); handleDeleteResident(); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer text-left"
+            >
+              <Trash2 className="w-4 h-4" /> Hapus
+            </button>
+          </div>
+        </>
+      )}
 
       {/* ===== TAB 1: Profil & Kependudukan ===== */}
       {detailTab === 0 && (
