@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, RefreshCw, Printer, MapPin, MessageCircle, IdCard, BadgeCheck, User } from 'lucide-react';
+import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck, Award, RefreshCw, Printer, MapPin, MessageCircle, IdCard, BadgeCheck, User, Calendar } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
@@ -23,6 +23,8 @@ interface Officer {
   phone?: string;
   status?: string;
   period?: string;
+  periodStart?: number;
+  periodEnd?: number;
 }
 
 interface RtRwItem extends Officer {
@@ -31,7 +33,7 @@ interface RtRwItem extends Officer {
 
 // Kolom yang sah (valid) pada objek aparatur — hanya field ini yang boleh masuk
 // ke saas_settings (value JSON) saat insert/update.
-const OFFICER_VALID_FIELDS = ['name', 'role', 'nip', 'residentId', 'nik', 'gender', 'birthPlace', 'birthDate', 'address', 'rtRw', 'photo', 'phone', 'status', 'period'];
+const OFFICER_VALID_FIELDS = ['name', 'role', 'nip', 'residentId', 'nik', 'gender', 'birthPlace', 'birthDate', 'address', 'rtRw', 'photo', 'phone', 'status', 'period', 'periodStart', 'periodEnd'];
 
 function sanitizeOfficer(raw: Officer): Officer {
   const clean: Officer = { name: String(raw.name || '').trim().toUpperCase(), role: raw.role || '' };
@@ -43,6 +45,62 @@ function sanitizeOfficer(raw: Officer): Officer {
     }
   }
   return clean;
+}
+
+// ===== ARSIP MASA JABATAN =====
+// Masa jabatan terstruktur (periodStart/periodEnd) + fallback parse teks `period`
+// lama ("2021 - 2027") agar arsip bisa menjawab "siapa menjabat tahun X".
+const toYearNumber = (v: any): number | null => {
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (v !== undefined && v !== null && String(v).trim() !== '' && !isNaN(Number(v))) return Number(v);
+  return null;
+};
+
+function parsePeriodYears(period?: string): { start: number | null; end: number | null } {
+  if (!period) return { start: null, end: null };
+  const years = (String(period).match(/\b(19|20)\d{2}\b/g) || []).map(Number);
+  const openEnded = /sekaran|aktif|active|present|now|sampai|sd\.?$/i.test(String(period));
+  return { start: years[0] ?? null, end: openEnded ? null : (years[1] ?? (years.length === 1 ? null : null)) };
+}
+
+function getTenure(o: Officer): { start: number | null; end: number | null } {
+  const start = toYearNumber((o as any).periodStart) ?? parsePeriodYears(o.period).start;
+  const parsedEnd = parsePeriodYears(o.period).end;
+  const end = toYearNumber((o as any).periodEnd) ?? parsedEnd;
+  return { start, end };
+}
+
+/** true = menjabat, false = tidak, null = periode tidak diketahui */
+function servesInYear(o: Officer, year: number): boolean | null {
+  const { start, end } = getTenure(o);
+  if (start == null && end == null) return null;
+  if (start != null && year < start) return false;
+  if (end != null && year > end) return false;
+  return true;
+}
+
+function formatTenure(o: Officer): string {
+  const s = toYearNumber((o as any).periodStart);
+  if (s != null) {
+    const e = toYearNumber((o as any).periodEnd);
+    return `${s}–${e ?? 'Sekarang'}`;
+  }
+  return o.period || '';
+}
+
+/** Susun teks `period` dari tahun terstruktur; bersihkan teks auto lama bila tahun dikosongkan. */
+function composePeriod(form: Officer): Officer {
+  const next: Officer = { ...form };
+  if (toYearNumber(next.periodStart) != null) {
+    const s = toYearNumber(next.periodStart)!;
+    const e = toYearNumber(next.periodEnd);
+    next.periodStart = s;
+    next.periodEnd = e ?? undefined;
+    next.period = `${s}–${e ?? 'Sekarang'}`;
+  } else if (next.period && /^\d{4}\s*[–—-]\s*(\d{4}|Sekarang)$/.test(next.period)) {
+    delete next.period;
+  }
+  return next;
 }
 
 export default function AdminAparatur() {
@@ -74,6 +132,9 @@ export default function AdminAparatur() {
   const [modalCategory, setModalCategory] = useState<'perangkat' | 'bpd' | 'lpm'>('perangkat');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [officerForm, setOfficerForm] = useState<Officer>({ name: '', role: '', nip: '-' });
+
+  // Arsip Masa Jabatan — filter tahun untuk menjawab "siapa menjabat tahun X"
+  const [archiveYear, setArchiveYear] = useState<string>('Semua');
 
   // Hybrid Search & Auto-Fill ditangani komponen reusable <ResidentSearchInput />
   // (query .ilike ke tabel residents, isolasi tenant_id, toggle manual).
@@ -438,7 +499,7 @@ export default function AdminAparatur() {
   };
 
   const handleSaveModal = () => {
-    const sanitized = sanitizeOfficer(officerForm);
+    const sanitized = sanitizeOfficer(composePeriod(officerForm));
     if (!sanitized.name.trim()) {
       showToast('Nama lengkap wajib diisi!', 'error');
       return;
@@ -476,7 +537,7 @@ export default function AdminAparatur() {
       showToast(kind === 'rt' ? 'Nomor RT dan Nama Ketua RT wajib diisi!' : 'Nomor RW dan Nama Ketua RW wajib diisi!', 'error');
       return;
     }
-    const clean: RtRwItem = { ...sanitizeOfficer(form) as RtRwItem, no: form.no.trim() };
+    const clean: RtRwItem = { ...sanitizeOfficer(composePeriod(form)) as RtRwItem, no: form.no.trim() };
     if (kind === 'rt') {
       setRtList(prev => [...prev, clean]);
       setRtForm({ no: '', name: '', role: 'Ketua RT', nip: '-' });
@@ -567,6 +628,31 @@ export default function AdminAparatur() {
     );
   }
 
+  // ===== Turunan filter arsip (non-hook, dihitung tiap render; list kecil) =====
+  const matchArchiveYear = (o: Officer) => archiveYear === 'Semua' ? true : servesInYear(o, Number(archiveYear)) === true;
+  const visibleOfficers = officers.filter(matchArchiveYear);
+  const visibleBpd = bpdList.filter(matchArchiveYear);
+  const visibleLpm = lpmList.filter(matchArchiveYear);
+  const visibleRt = rtList.filter(matchArchiveYear);
+  const visibleRw = rwList.filter(matchArchiveYear);
+  const allAparatur: Officer[] = [...officers, ...bpdList, ...lpmList, ...rtList, ...rwList];
+  const hiddenUnknownCount = archiveYear === 'Semua' ? 0 : allAparatur.filter(o => servesInYear(o, Number(archiveYear)) === null).length;
+  const yearOptions: number[] = (() => {
+    const curY = new Date().getFullYear();
+    const found: number[] = [];
+    allAparatur.forEach(o => {
+      const t = getTenure(o);
+      if (t.start) found.push(t.start);
+      if (t.end) found.push(t.end);
+    });
+    let minY = Math.min(curY - 5, ...found);
+    let maxY = Math.max(curY + 5, ...found);
+    if (maxY - minY > 80) minY = maxY - 80;
+    const arr: number[] = [];
+    for (let y = maxY; y >= minY; y--) arr.push(y);
+    return arr;
+  })();
+
   return (
     <div className="pt-6 pb-24 animate-in fade-in duration-300">
       {/* HEADER BAR */}
@@ -608,6 +694,32 @@ export default function AdminAparatur() {
         </div>
       </div>
 
+      {/* ARSIP MASA JABATAN */}
+      <div className="mb-6 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <span className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center shrink-0"><Calendar className="w-4 h-4" /></span>
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-gray-900 dark:text-white">Arsip Masa Jabatan</p>
+            <p className="text-xs text-gray-500 dark:text-slate-400 truncate">Pilih tahun untuk melihat siapa yang menjabat — Perangkat, BPD, LPM, RT & RW.</p>
+          </div>
+        </div>
+        <select
+          value={archiveYear}
+          onChange={e => setArchiveYear(e.target.value)}
+          className="h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-xl text-sm font-bold bg-white dark:bg-slate-900 text-gray-900 dark:text-white outline-none focus:border-emerald-500 shrink-0"
+          title="Filter tahun masa jabatan"
+        >
+          <option value="Semua">Semua Periode</option>
+          {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+      {archiveYear !== 'Semua' && (
+        <p className="text-xs text-gray-500 dark:text-slate-400 -mt-3 mb-6">
+          Menampilkan yang menjabat tahun <span className="font-bold text-gray-700 dark:text-slate-200">{archiveYear}</span>
+          {hiddenUnknownCount > 0 && <span> • {hiddenUnknownCount} data tanpa periode disembunyikan</span>}
+        </p>
+      )}
+
       <div className="space-y-8">
         
         {/* === SECTION 1: PERANGKAT DESA === */}
@@ -629,7 +741,7 @@ export default function AdminAparatur() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {officers.map((officer, index) => (
+            {officers.map((officer, index) => matchArchiveYear(officer) && (
               <div key={index} className="p-4 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-800 hover:border-emerald-200 transition-all group relative">
                 <div className="pr-12 flex items-start gap-3">
                   <OfficerAvatar officer={officer} colorClass="bg-emerald-500" />
@@ -692,6 +804,11 @@ export default function AdminAparatur() {
                 Belum ada data perangkat desa. Klik tombol di atas untuk menambah.
               </div>
             )}
+            {officers.length > 0 && visibleOfficers.length === 0 && (
+              <div className="col-span-full p-6 text-center text-gray-400 text-sm border border-dashed rounded-xl">
+                Tidak ada perangkat desa yang menjabat tahun {archiveYear}.
+              </div>
+            )}
           </div>
         </div>
 
@@ -714,7 +831,7 @@ export default function AdminAparatur() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {bpdList.map((bpd, index) => (
+            {bpdList.map((bpd, index) => matchArchiveYear(bpd) && (
               <div key={index} className="p-4 bg-indigo-50/50 dark:bg-slate-800/60 rounded-xl border border-indigo-100 dark:border-slate-800 hover:border-indigo-300 transition-all group relative">
                 <div className="pr-12 flex items-start gap-3">
                   <OfficerAvatar officer={bpd} colorClass="bg-indigo-500" />
@@ -765,6 +882,11 @@ export default function AdminAparatur() {
                 Belum ada pengurus BPD terdaftar. Klik "+ Tambah Anggota BPD" untuk memasukkan data.
               </div>
             )}
+            {bpdList.length > 0 && visibleBpd.length === 0 && (
+              <div className="col-span-full p-6 text-center text-gray-400 text-sm border border-dashed rounded-xl">
+                Tidak ada anggota BPD yang menjabat tahun {archiveYear}.
+              </div>
+            )}
           </div>
         </div>
 
@@ -787,7 +909,7 @@ export default function AdminAparatur() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {lpmList.map((lpm, index) => (
+            {lpmList.map((lpm, index) => matchArchiveYear(lpm) && (
               <div key={index} className="p-4 bg-amber-50/40 dark:bg-slate-800/60 rounded-xl border border-amber-100 dark:border-slate-800 hover:border-amber-300 transition-all group relative">
                 <div className="pr-12 flex items-start gap-3">
                   <OfficerAvatar officer={lpm} colorClass="bg-amber-500" />
@@ -838,6 +960,11 @@ export default function AdminAparatur() {
                 Belum ada pengurus LPM terdaftar. Klik "+ Tambah Pengurus LPM" untuk memasukkan data.
               </div>
             )}
+            {lpmList.length > 0 && visibleLpm.length === 0 && (
+              <div className="col-span-full p-6 text-center text-gray-400 text-sm border border-dashed rounded-xl">
+                Tidak ada pengurus LPM yang menjabat tahun {archiveYear}.
+              </div>
+            )}
           </div>
         </div>
 
@@ -855,7 +982,7 @@ export default function AdminAparatur() {
               <div className="space-y-3">
                 <p className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider border-b pb-2">Ketua RT</p>
                 <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
-                  {rtList.map((rt, idx) => (
+                  {rtList.map((rt, idx) => matchArchiveYear(rt) && (
                     <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm gap-2">
                       <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
                         <span className="font-bold text-gray-700 dark:text-slate-300 shrink-0">RT {rt.no}</span>
@@ -865,6 +992,7 @@ export default function AdminAparatur() {
                         <span className="min-w-0 flex-1">
                           <span className="text-gray-900 dark:text-white font-bold truncate block uppercase">{rt.name}</span>
                           {rt.nik && <span className="text-[10px] text-gray-500 dark:text-slate-400 font-mono block truncate">NIK. {rt.nik}</span>}
+                          {formatTenure(rt) && <span className="text-[10px] text-gray-500 dark:text-slate-400 block truncate">Masa: {formatTenure(rt)}</span>}
                         </span>
                         {toWaLink(rt.phone) && (
                           <a
@@ -885,6 +1013,7 @@ export default function AdminAparatur() {
                     </div>
                   ))}
                   {rtList.length === 0 && <p className="text-xs text-gray-400 italic">Belum ada data RT.</p>}
+                  {rtList.length > 0 && visibleRt.length === 0 && <p className="text-xs text-gray-400 italic">Tidak ada Ketua RT yang menjabat tahun {archiveYear}.</p>}
                 </div>
                 <div className="border border-dashed border-gray-200 dark:border-slate-700 rounded-xl p-3 space-y-2">
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -896,6 +1025,10 @@ export default function AdminAparatur() {
                     >
                       {rtForm.no || rtForm.name ? 'Simpan Ketua RT' : '+ Tambah Ketua RT'}
                     </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="number" min="1900" max="2100" placeholder="Mulai" title="Tahun mulai masa jabatan" value={rtForm.periodStart ?? ''} onChange={e => setRtForm(p => ({...p, periodStart: e.target.value === '' ? undefined : Number(e.target.value)}))} className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
+                    <input type="number" min="1900" max="2100" placeholder="Selesai (kosong = aktif)" title="Tahun selesai masa jabatan — kosongkan bila masih aktif" value={rtForm.periodEnd ?? ''} onChange={e => setRtForm(p => ({...p, periodEnd: e.target.value === '' ? undefined : Number(e.target.value)}))} className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-emerald-500 outline-none" />
                   </div>
                   <ResidentSearchInput
                     tenantId={tenantId}
@@ -914,7 +1047,7 @@ export default function AdminAparatur() {
               <div className="space-y-3">
                 <p className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider border-b pb-2">Ketua RW</p>
                 <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
-                  {rwList.map((rw, idx) => (
+                  {rwList.map((rw, idx) => matchArchiveYear(rw) && (
                     <div key={idx} className="flex items-center justify-between bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-800 px-3 py-2 rounded-xl text-sm gap-2">
                       <div className="flex items-center gap-2.5 overflow-hidden min-w-0">
                         <span className="font-bold text-gray-700 dark:text-slate-300 shrink-0">RW {rw.no}</span>
@@ -924,6 +1057,7 @@ export default function AdminAparatur() {
                         <span className="min-w-0 flex-1">
                           <span className="text-gray-900 dark:text-white font-bold truncate block uppercase">{rw.name}</span>
                           {rw.nik && <span className="text-[10px] text-gray-500 dark:text-slate-400 font-mono block truncate">NIK. {rw.nik}</span>}
+                          {formatTenure(rw) && <span className="text-[10px] text-gray-500 dark:text-slate-400 block truncate">Masa: {formatTenure(rw)}</span>}
                         </span>
                         {toWaLink(rw.phone) && (
                           <a
@@ -944,6 +1078,7 @@ export default function AdminAparatur() {
                     </div>
                   ))}
                   {rwList.length === 0 && <p className="text-xs text-gray-400 italic">Belum ada data RW.</p>}
+                  {rwList.length > 0 && visibleRw.length === 0 && <p className="text-xs text-gray-400 italic">Tidak ada Ketua RW yang menjabat tahun {archiveYear}.</p>}
                 </div>
                 <div className="border border-dashed border-gray-200 dark:border-slate-700 rounded-xl p-3 space-y-2">
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -955,6 +1090,10 @@ export default function AdminAparatur() {
                     >
                       {rwForm.no || rwForm.name ? 'Simpan Ketua RW' : '+ Tambah Ketua RW'}
                     </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="number" min="1900" max="2100" placeholder="Mulai" title="Tahun mulai masa jabatan" value={rwForm.periodStart ?? ''} onChange={e => setRwForm(p => ({...p, periodStart: e.target.value === '' ? undefined : Number(e.target.value)}))} className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-indigo-500 outline-none" />
+                    <input type="number" min="1900" max="2100" placeholder="Selesai (kosong = aktif)" title="Tahun selesai masa jabatan — kosongkan bila masih aktif" value={rwForm.periodEnd ?? ''} onChange={e => setRwForm(p => ({...p, periodEnd: e.target.value === '' ? undefined : Number(e.target.value)}))} className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-slate-700 rounded-lg focus:border-indigo-500 outline-none" />
                   </div>
                   <ResidentSearchInput
                     tenantId={tenantId}
@@ -1143,7 +1282,7 @@ export default function AdminAparatur() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Status</label>
                   <input 
@@ -1155,13 +1294,27 @@ export default function AdminAparatur() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Periode / Masa Jabatan</label>
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Mulai (Tahun)</label>
                   <input 
-                    type="text" 
+                    type="number" 
+                    min="1900"
+                    max="2100"
                     className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
-                    value={officerForm.period || ''} 
-                    onChange={e => setOfficerForm({ ...officerForm, period: e.target.value })} 
-                    placeholder="Contoh: 2021 - 2027" 
+                    value={officerForm.periodStart ?? ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, periodStart: e.target.value === '' ? undefined : Number(e.target.value) })} 
+                    placeholder="Contoh: 2022" 
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Selesai (Tahun)</label>
+                  <input 
+                    type="number" 
+                    min="1900"
+                    max="2100"
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500" 
+                    value={officerForm.periodEnd ?? ''} 
+                    onChange={e => setOfficerForm({ ...officerForm, periodEnd: e.target.value === '' ? undefined : Number(e.target.value) })} 
+                    placeholder="Kosong = masih aktif" 
                   />
                 </div>
               </div>
