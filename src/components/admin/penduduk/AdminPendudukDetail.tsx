@@ -762,7 +762,7 @@ export default function AdminPendudukDetail({
             {data?.photo ? (
               <img src={data.photo} alt={data.name} className={`border-2 border-white shadow-md object-cover transition-all ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`} />
             ) : (
-              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-emerald-500 to-emerald-600'} ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
+              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all bg-slate-400 dark:bg-slate-600 ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
                 <User className={isScrolled ? 'w-5 h-5' : 'w-8 h-8'} fill="currentColor" />
               </div>
             )}
@@ -789,58 +789,58 @@ export default function AdminPendudukDetail({
                 const keberadaan = normalizeStatusKeberadaan(data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').toLowerCase();
                 if (keberadaan.includes('meninggal') || keberadaan === 'mati' || keberadaan === 'wafat') {
                   return (
-                    <span className="bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                    <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
                       Meninggal
                     </span>
                   );
                 }
                 if (keberadaan.includes('pindah') || keberadaan.includes('mutasi')) {
                   return (
-                    <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
                       {keberadaan.includes('mutasi') ? 'Mutasi' : 'Pindah'}
                     </span>
                   );
                 }
                 if (keberadaan === 'sementara') {
                   return (
-                    <span className="bg-sky-100 dark:bg-sky-950/80 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                    <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
                       Sementara
                     </span>
                   );
                 }
                 if (keberadaan === 'ganda') {
                   return (
-                    <span className="bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                    <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
                       Ganda
                     </span>
                   );
                 }
                 if (keberadaan === 'pending_approval' || keberadaan === 'pending') {
                   return (
-                    <span className="bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                    <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-ping"></span>
                       Pending
                     </span>
                   );
                 }
                 return (
-                  <span className="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black flex items-center gap-1 shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
                     Tetap
                   </span>
                 );
               })()}
               {data?.maritalStatus && (
-                <span className="bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm">
+                <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm">
                   {data.maritalStatus}
                 </span>
               )}
               {data?.familyRelation && (
-                <span className="bg-violet-100 dark:bg-violet-950/80 text-violet-800 dark:text-violet-300 border border-violet-200 dark:border-violet-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm">
+                <span className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm">
                   {data.familyRelation}
                 </span>
               )}
@@ -850,8 +850,8 @@ export default function AdminPendudukDetail({
                 const age = birthYear ? Math.max(0, currentYear - birthYear) : (data?.age || 0);
                 const isLansia = age >= 60;
                 return isLansia ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200/80 flex items-center gap-1">
-                    <span>🧓</span> Lansia
+                  <span className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-black bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 shadow-sm">
+                    Lansia
                   </span>
                 ) : null;
               })()}
@@ -859,15 +859,15 @@ export default function AdminPendudukDetail({
                 <span
                   key={`${j.lembaga}-${j.label}-${i}`}
                   title={`${j.label} — ${j.lembaga}${j.tenureText ? ` • Masa ${j.tenureText}` : ''}${j.active === true ? ' • Aktif' : j.active === false ? ' • Selesai' : ''}`}
-                  className="bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm max-w-full truncate"
+                  className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm max-w-full truncate"
                 >
-                  🏛 {j.label}{j.tenureText ? ` • ${j.tenureText}` : ''}
+                  {j.label}{j.tenureText ? ` • ${j.tenureText}` : ''}
                 </span>
               ))}
               {jabatanList.length > 2 && (
                 <span
                   title={jabatanList.slice(2).map(j => `${j.label}${j.tenureText ? ` (${j.tenureText})` : ''}`).join(', ')}
-                  className="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm"
+                  className="bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm"
                 >
                   +{jabatanList.length - 2} Jabatan
                 </span>
@@ -910,7 +910,7 @@ export default function AdminPendudukDetail({
             <>
           <button 
             onClick={() => setIsPrinting(true)}
-            className={`rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 transition-all flex items-center gap-2 text-xs font-bold border border-emerald-100 dark:border-emerald-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+            className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
             title="Cetak Profil"
           >
             <Printer className="w-4 h-4" />
@@ -925,27 +925,27 @@ export default function AdminPendudukDetail({
                     onNavigateToTab('surat');
                   }
                 }}
-                className={`rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/50 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-400 transition-all flex items-center gap-2 text-xs font-bold border border-blue-100 dark:border-blue-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+                className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
                 title="Buat Surat"
               >
                 <FileText className="w-4 h-4" />
                 <span className={isScrolled ? 'hidden' : ''}>Surat</span>
               </button>
-              <button onClick={startEditMode} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+              <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
                 <Edit2 className="w-4 h-4" />
                 <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
               </button>
-              <button onClick={handleMoveResident} className={`rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-400 transition-all flex items-center gap-2 text-xs font-bold border border-amber-100 dark:border-amber-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Mutasi Warga">
+              <button onClick={handleMoveResident} className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Mutasi Warga">
                 <ArrowRightLeft className="w-4 h-4" />
                 <span className={isScrolled ? 'hidden' : ''}>Mutasi</span>
               </button>
-              <button onClick={handleDeleteResident} className={`rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-400 transition-all flex items-center gap-2 text-xs font-bold border border-rose-100 dark:border-rose-800 ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Pindah ke Tong Sampah">
+              <button onClick={handleDeleteResident} className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-xs font-bold ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Pindah ke Tong Sampah">
                 <Trash2 className="w-4 h-4" />
                 <span className={isScrolled ? 'hidden' : ''}>Hapus</span>
               </button>
             </>
           ) : (
-            <button onClick={startEditMode} className={`rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+            <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
               <Edit2 className="w-4 h-4" />
               <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
             </button>
