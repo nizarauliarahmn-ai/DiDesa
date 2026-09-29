@@ -127,7 +127,7 @@ export default function AdminSuratSKL({
   const [namaPejabat, setNamaPejabat] = useState(resolveKadesName() || '');
   const [jabatanPejabat, setJabatanPejabat] = useState('Kepala Desa');
   const [includeCamat, setIncludeCamat] = useState(false);
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
   
   // Kop Settings
   const namaDesa = localStorage.getItem('kop_desa') || 'Ketupat';

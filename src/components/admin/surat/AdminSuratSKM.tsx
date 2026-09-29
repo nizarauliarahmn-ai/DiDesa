@@ -83,7 +83,7 @@ export default function AdminSuratSKM({
   const [selectedChild, setSelectedChild] = useState<Resident | null>(null);
   const [showRiwayat, setShowRiwayat] = useState(false);
   const [riwayat, setRiwayat] = useState<any[]>([]);
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
 
   // Prefill in edit mode
   useEffect(() => {

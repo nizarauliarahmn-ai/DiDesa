@@ -60,7 +60,7 @@ export default function AdminSuratBatch({ onBack }: { onBack: () => void }) {
   const [commonTanggal, setCommonTanggal] = useState(new Date().toISOString().split('T')[0]);
   const [commonPejabat, setCommonPejabat] = useState(() => localStorage.getItem('kop_kades') || '');
   const [commonJabatan, setCommonJabatan] = useState('Kepala Desa');
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
   const [residents, setResidents] = useState<any[]>([]);
   const [officers, setOfficers] = useState<any[]>([]);
   const [showResidentSearch, setShowResidentSearch] = useState<string | null>(null);

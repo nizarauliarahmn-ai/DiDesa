@@ -206,7 +206,7 @@ export default function AdminSuratNikah({
     saksi3Nama: '',
     saksi3Sebagai: '',
   });
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
 
   const STEPS = [
     { n: 1, label: 'Mempelai (Warga Desa)' },

@@ -196,7 +196,7 @@ export default function AdminSuratUndangan({
   // Format peran penandatangan konsisten dengan SKTM (a.n. bila bukan Kepala Desa)
   const roleDisplayText = resolveSignatureRoleText(pejabatNama, pejabatJabatan);
   const [pejabatNip, setPejabatNip] = useState(() => localStorage.getItem('kades_nip') || '-');
-  const [isTTE, setIsTTE] = useState<boolean>(true);
+  const [isTTE, setIsTTE] = useState<boolean>(false);
   const [includeCamat, setIncludeCamat] = useState<boolean>(editData?.includeCamat || false);
 
   // UI States (SKTM Live Engine Defaults)

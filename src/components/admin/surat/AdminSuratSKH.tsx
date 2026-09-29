@@ -77,7 +77,7 @@ export default function AdminSuratSKH({
   const [loading, setLoading] = useState(false);
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddInitialData, setQuickAddInitialData] = useState<{nik?: string, name?: string}>({});
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

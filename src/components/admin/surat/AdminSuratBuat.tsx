@@ -139,7 +139,7 @@ export default function AdminSuratBuat({ onBack, presetResident, onOpenNikah, on
   const [namaKades, setNamaKades] = useState(() => resolveKadesName());
   const [roleKades, setRoleKades] = useState(() => resolveKadesOfficer()?.role || 'Kepala Desa');
   const [includeCamat, setIncludeCamat] = useState(false);
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
   const [nipKades, setNipKades] = useState(() => resolveKadesOfficer()?.nip || '-');
 
   const [officersList, setOfficersList] = useState<any[]>(() => getOfficerOptions());

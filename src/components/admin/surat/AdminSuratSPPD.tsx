@@ -82,7 +82,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const [namaKades, setNamaKades] = useState(() => localStorage.getItem('kop_kades') || '');
   const [roleKades, setRoleKades] = useState('Kepala Desa');
   const [nipKades, setNipKades] = useState('');
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
 
   // SPPD State
   const classifications = getLetterClassifications();

@@ -86,7 +86,7 @@ export default function AdminSuratSKAW({
   }, [presetResident]);
 
   const [loading, setLoading] = useState(false);
-  const [useEsignature, setUseEsignature] = useState(true);
+  const [useEsignature, setUseEsignature] = useState(false);
   const [success, setSuccess] = useState(false);
   const [residents, setResidents] = useState<Resident[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
