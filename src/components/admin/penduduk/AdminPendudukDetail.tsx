@@ -8,6 +8,7 @@ import { getLetterClassifications } from '../../../utils/letterClassifications';
 import ConfirmModal from '../../common/ConfirmModal';
 import { supabase } from '../../../utils/supabase';
 import { normalizeStatusKeberadaan } from '../../../utils/statusKeberadaan';
+import { loadAparaturLists, findPositionsByNik, PositionEntry } from '../../../utils/aparaturPositions';
 
 interface AdminPendudukDetailProps {
   onBack: () => void;
@@ -243,6 +244,19 @@ export default function AdminPendudukDetail({
   const [editFormData, setEditFormData] = useState<any>({});
   const [fatherManual, setFatherManual] = useState(false);
   const [motherManual, setMotherManual] = useState(false);
+
+  // Riwayat jabatan dari data Aparatur/BPD/LPM/RT/RW (cocok via NIK)
+  const [jabatanList, setJabatanList] = useState<PositionEntry[]>([]);
+  useEffect(() => {
+    if (!data?.nik) { setJabatanList([]); return; }
+    let cancelled = false;
+    (async () => {
+      const tid = data?.tenant_id || data?.tenantId || null;
+      const lists = await loadAparaturLists(tid);
+      if (!cancelled) setJabatanList(findPositionsByNik(String(data.nik), lists));
+    })();
+    return () => { cancelled = true; };
+  }, [data?.nik, data?.tenant_id, data?.tenantId]);
 
   const startEditMode = () => {
     // Sanitasi status_keberadaan: nilai legacy ('Belum Kawin', 'Kawin', 'Aktif', dll)
@@ -841,6 +855,23 @@ export default function AdminPendudukDetail({
                   </span>
                 ) : null;
               })()}
+              {jabatanList.slice(0, 2).map((j, i) => (
+                <span
+                  key={`${j.lembaga}-${j.label}-${i}`}
+                  title={`${j.label} — ${j.lembaga}${j.tenureText ? ` • Masa ${j.tenureText}` : ''}${j.active === true ? ' • Aktif' : j.active === false ? ' • Selesai' : ''}`}
+                  className="bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm max-w-full truncate"
+                >
+                  🏛 {j.label}{j.tenureText ? ` • ${j.tenureText}` : ''}
+                </span>
+              ))}
+              {jabatanList.length > 2 && (
+                <span
+                  title={jabatanList.slice(2).map(j => `${j.label}${j.tenureText ? ` (${j.tenureText})` : ''}`).join(', ')}
+                  className="bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider font-black shadow-sm"
+                >
+                  +{jabatanList.length - 2} Jabatan
+                </span>
+              )}
             </div>
             <div className={`flex items-center gap-2 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400">

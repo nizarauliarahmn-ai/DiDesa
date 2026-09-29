@@ -3,6 +3,7 @@ import { Users, Edit3, Save, Check, X, Building2, UserCheck, Trash2, ShieldCheck
 import { showToast } from '../../utils/toast';
 import { supabase } from '../../utils/supabase';
 import { resolveCurrentTenant } from '../../utils/tenantResolver';
+import { getTenure, servesInYear, formatTenure, composePeriod } from '../../utils/tenure';
 import { generateKopSuratHTML } from '../../utils/letterFormat';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 import ResidentSearchInput from './ResidentSearchInput';
@@ -47,61 +48,7 @@ function sanitizeOfficer(raw: Officer): Officer {
   return clean;
 }
 
-// ===== ARSIP MASA JABATAN =====
-// Masa jabatan terstruktur (periodStart/periodEnd) + fallback parse teks `period`
-// lama ("2021 - 2027") agar arsip bisa menjawab "siapa menjabat tahun X".
-const toYearNumber = (v: any): number | null => {
-  if (typeof v === 'number' && Number.isFinite(v)) return v;
-  if (v !== undefined && v !== null && String(v).trim() !== '' && !isNaN(Number(v))) return Number(v);
-  return null;
-};
 
-function parsePeriodYears(period?: string): { start: number | null; end: number | null } {
-  if (!period) return { start: null, end: null };
-  const years = (String(period).match(/\b(19|20)\d{2}\b/g) || []).map(Number);
-  const openEnded = /sekaran|aktif|active|present|now|sampai|sd\.?$/i.test(String(period));
-  return { start: years[0] ?? null, end: openEnded ? null : (years[1] ?? (years.length === 1 ? null : null)) };
-}
-
-function getTenure(o: Officer): { start: number | null; end: number | null } {
-  const start = toYearNumber((o as any).periodStart) ?? parsePeriodYears(o.period).start;
-  const parsedEnd = parsePeriodYears(o.period).end;
-  const end = toYearNumber((o as any).periodEnd) ?? parsedEnd;
-  return { start, end };
-}
-
-/** true = menjabat, false = tidak, null = periode tidak diketahui */
-function servesInYear(o: Officer, year: number): boolean | null {
-  const { start, end } = getTenure(o);
-  if (start == null && end == null) return null;
-  if (start != null && year < start) return false;
-  if (end != null && year > end) return false;
-  return true;
-}
-
-function formatTenure(o: Officer): string {
-  const s = toYearNumber((o as any).periodStart);
-  if (s != null) {
-    const e = toYearNumber((o as any).periodEnd);
-    return `${s}–${e ?? 'Sekarang'}`;
-  }
-  return o.period || '';
-}
-
-/** Susun teks `period` dari tahun terstruktur; bersihkan teks auto lama bila tahun dikosongkan. */
-function composePeriod(form: Officer): Officer {
-  const next: Officer = { ...form };
-  if (toYearNumber(next.periodStart) != null) {
-    const s = toYearNumber(next.periodStart)!;
-    const e = toYearNumber(next.periodEnd);
-    next.periodStart = s;
-    next.periodEnd = e ?? undefined;
-    next.period = `${s}–${e ?? 'Sekarang'}`;
-  } else if (next.period && /^\d{4}\s*[–—-]\s*(\d{4}|Sekarang)$/.test(next.period)) {
-    delete next.period;
-  }
-  return next;
-}
 
 export default function AdminAparatur() {
   const [authUser, setAuthUser] = useState<{ role: string; isImpersonated?: boolean } | null>(null);
