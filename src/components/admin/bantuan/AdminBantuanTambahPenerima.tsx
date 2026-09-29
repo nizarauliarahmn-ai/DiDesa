@@ -21,6 +21,7 @@ interface AdminBantuanTambahPenerimaProps {
   onRefresh: () => void;
   existingResidents: any[];
   initialProgram?: string;
+  initialNik?: string | null;
 }
 
 const PROGRAM_OPTIONS = [
@@ -73,7 +74,8 @@ export default function AdminBantuanTambahPenerima({
   onClose,
   onRefresh,
   existingResidents,
-  initialProgram = "BLT Dana Desa"
+  initialProgram = "BLT Dana Desa",
+  initialNik = null
 }: AdminBantuanTambahPenerimaProps) {
   const [tab, setTab] = useState<TabId>('manual');
   const [program, setProgram] = useState(initialProgram);
@@ -170,6 +172,16 @@ export default function AdminBantuanTambahPenerima({
   const lookupResident = useCallback((nik: string) => {
     return existingResidents.find(r => r.nik === nik && r.is_deleted !== 1) || null;
   }, [existingResidents]);
+
+  // Preselect dari Detail Penduduk ("Usulkan ke Bantuan") — menunggu data warga termuat
+  useEffect(() => {
+    if (!initialNik || selectedNiks.some(r => r.nik === initialNik)) return;
+    const found = lookupResident(initialNik);
+    if (found) {
+      setSelectedNiks(prev => prev.some(r => r.nik === initialNik) ? prev : [...prev, { nik: found.nik, name: found.name, registered: true }]);
+      showToast(`✓ ${found.name} siap diusulkan.`, 'success');
+    }
+  }, [initialNik, existingResidents, selectedNiks, lookupResident]);
 
   // USB Barcode / QR Scanner: NIK 16 digit terdeteksi → auto-pilih warga tanpa tombol cari
   const { handleKeyDown: handleManualScannerKeyDown } = useUsbScanner({

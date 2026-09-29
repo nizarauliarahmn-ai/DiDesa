@@ -45,13 +45,17 @@ export default function AdminBantuan({
   setSearchQuery: externalSetSearchQuery,
   debouncedSearchQuery: externalDebouncedSearchQuery,
   onNavigateToTab,
-  onSetPresetResidentNik
+  onSetPresetResidentNik,
+  presetBantuanNik,
+  onClearPresetBantuanNik
 }: {
   searchQuery?: string;
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
   onNavigateToTab?: (tab: string) => void;
   onSetPresetResidentNik?: (nik: string) => void;
+  presetBantuanNik?: string | null;
+  onClearPresetBantuanNik?: () => void;
 } = {}) {
   const [residents, setResidents] = useState<any[]>([]);
   const [dbEngine, setDbEngine] = useState<string>("Loading...");
@@ -105,6 +109,16 @@ export default function AdminBantuan({
   const [showModal, setShowModal] = useState(false);
   const [showBaModal, setShowBaModal] = useState(false);
   const [showTambahPenerima, setShowTambahPenerima] = useState(false);
+
+  // Usulan dari Detail Penduduk — buka modal Tambah Penerima dengan NIK terisi
+  const [incomingNik, setIncomingNik] = useState<string | null>(null);
+  useEffect(() => {
+    if (presetBantuanNik) {
+      setIncomingNik(presetBantuanNik);
+      setShowTambahPenerima(true);
+      onClearPresetBantuanNik?.();
+    }
+  }, [presetBantuanNik]);
 const MONTHS_LIST = [
   { id: 'Jan', label: 'Jan', fullName: 'Januari' },
   { id: 'Feb', label: 'Feb', fullName: 'Februari' },
@@ -3046,10 +3060,11 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
       {/* 3-Tab Tambah Penerima (Manual / Import File / Scan Kamera) */}
       {showTambahPenerima && (
         <AdminBantuanTambahPenerima
-          onClose={() => setShowTambahPenerima(false)}
+          onClose={() => { setShowTambahPenerima(false); setIncomingNik(null); }}
           onRefresh={fetchData}
           existingResidents={residents}
           initialProgram={selectedProgram}
+          initialNik={incomingNik}
         />
       )}
 

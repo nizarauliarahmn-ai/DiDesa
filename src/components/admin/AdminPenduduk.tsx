@@ -21,6 +21,7 @@ export default function AdminPenduduk({
   onSetPresetResident,
   presetResidentNik,
   onClearPresetResidentNik,
+  onSetPresetBantuanNik,
   searchQuery: externalSearchQuery,
   setSearchQuery: externalSetSearchQuery,
   debouncedSearchQuery: externalDebouncedSearchQuery
@@ -29,6 +30,7 @@ export default function AdminPenduduk({
   onSetPresetResident?: (resident: any) => void;
   presetResidentNik?: string | null;
   onClearPresetResidentNik?: () => void;
+  onSetPresetBantuanNik?: (nik: string) => void;
   searchQuery?: string;
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
@@ -735,6 +737,7 @@ export default function AdminPenduduk({
         }}
         onNavigateToTab={onNavigateToTab}
         onSetPresetResident={onSetPresetResident}
+        onSetPresetBantuanNik={onSetPresetBantuanNik}
       />
     );
   }

@@ -19,6 +19,7 @@ interface AdminPendudukDetailProps {
   onUpdateResident?: (updatedResident: any) => void;
   onNavigateToTab?: (tab: string) => void;
   onSetPresetResident?: (resident: any) => void;
+  onSetPresetBantuanNik?: (nik: string) => void;
 }
 
 const AID_PROGRAM_NOMINAL: Record<string, string> = {
@@ -227,7 +228,8 @@ export default function AdminPendudukDetail({
   onSelectResident,
   onUpdateResident,
   onNavigateToTab,
-  onSetPresetResident
+  onSetPresetResident,
+  onSetPresetBantuanNik
 }: AdminPendudukDetailProps) {
   const [isPrinting, setIsPrinting] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -1001,12 +1003,25 @@ export default function AdminPendudukDetail({
             >
               <FileText className="w-4 h-4" /> Buat Surat
             </button>
-            <button
-              onClick={() => { setShowMoreMenu(false); handleMoveResident(); }}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
-            >
-              <ArrowRightLeft className="w-4 h-4" /> Mutasi Warga
-            </button>
+                      <button
+                        onClick={() => { setShowMoreMenu(false); handleMoveResident(); }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      >
+                        <ArrowRightLeft className="w-4 h-4" /> Mutasi Warga
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowMoreMenu(false);
+                          if (!data?.nik) { showToast('NIK warga tidak tersedia.', 'error'); return; }
+                          if (onSetPresetBantuanNik && onNavigateToTab) {
+                            onSetPresetBantuanNik(String(data.nik));
+                            onNavigateToTab('bantuan');
+                          }
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left"
+                      >
+                        <HandHeart className="w-4 h-4" /> Usulkan ke Bantuan
+                      </button>
             <div className="my-1 border-t border-gray-100 dark:border-slate-800" />
             <button
               onClick={() => { setShowMoreMenu(false); handleDeleteResident(); }}

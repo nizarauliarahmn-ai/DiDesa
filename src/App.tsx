@@ -248,6 +248,7 @@ export default function App() {
   const [adminTab, setAdminTab] = useUrlSync<string>('admin_tab', 'dashboard');
   const [presetResident, setPresetResident] = useState<any>(null);
   const [presetResidentNik, setPresetResidentNik] = useState<string | null>(null);
+  const [presetBantuanNik, setPresetBantuanNik] = useState<string | null>(null);
   const [globalSearch, setGlobalSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -695,6 +696,7 @@ export default function App() {
                     onSetPresetResident={setPresetResident}
                     presetResidentNik={presetResidentNik}
                     onClearPresetResidentNik={() => setPresetResidentNik(null)}
+                    onSetPresetBantuanNik={setPresetBantuanNik}
                   />
                 )}
                 {adminTab === 'surat' && (
@@ -713,6 +715,8 @@ export default function App() {
                     debouncedSearchQuery={debouncedSearch}
                     onNavigateToTab={setAdminTab}
                     onSetPresetResidentNik={setPresetResidentNik}
+                    presetBantuanNik={presetBantuanNik}
+                    onClearPresetBantuanNik={() => setPresetBantuanNik(null)}
                   />
                 )}
                 {adminTab === 'aspirasi' && (
