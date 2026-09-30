@@ -1,11 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import { Search, ExternalLink, ChevronDown, Building2, ClipboardList } from 'lucide-react';
+import React, { useState, useMemo, useRef } from 'react';
+import { Search, ExternalLink, ChevronDown, ChevronLeft, ChevronRight, Building2, ClipboardList } from 'lucide-react';
 import { LAYANAN_PUBLIK, KATEGORI_LAYANAN } from '../../data/layananPublik';
 
 export default function PublicLayanan({ embedded = false }: { embedded?: boolean }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterKategori, setFilterKategori] = useState<(typeof KATEGORI_LAYANAN)[number]>('Semua');
   const [openId, setOpenId] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const scrollRow = (dir: number) => {
+    const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.8), behavior: 'smooth' });
+  };
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -23,7 +28,7 @@ export default function PublicLayanan({ embedded = false }: { embedded?: boolean
 
   return (
     <div className={embedded ? 'pb-2' : 'min-h-screen bg-gray-50 dark:bg-slate-950 pb-24'}>
-      <div className={`max-w-5xl mx-auto px-4 ${embedded ? '' : 'pt-10'}`}>
+      <div className={embedded ? 'w-full' : 'max-w-5xl mx-auto px-4 pt-10'}>
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <span className="w-10 h-10 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center">
@@ -64,16 +69,34 @@ export default function PublicLayanan({ embedded = false }: { embedded?: boolean
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 dark:text-slate-400 mt-3">
-          {filtered.length} layanan{filterKategori !== 'Semua' ? ` • ${filterKategori}` : ''} • Syarat bersifat umum, konfirmasi ke perangkat desa
-        </p>
+        <div className="flex items-center justify-between gap-2 mt-3">
+          <p className="text-xs text-gray-500 dark:text-slate-400">
+            {filtered.length} layanan{filterKategori !== 'Semua' ? ` • ${filterKategori}` : ''} • Syarat bersifat umum, konfirmasi ke perangkat desa
+          </p>
+          <div className="flex gap-1.5 shrink-0">
+            <button
+              onClick={() => scrollRow(-1)}
+              className="w-8 h-8 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Geser kiri"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button
+              onClick={() => scrollRow(1)}
+              className="w-8 h-8 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              title="Geser kanan"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+        <div ref={scrollRef} className="flex gap-3 mt-4 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
           {filtered.map(l => {
             const open = openId === l.id;
             return (
-              <div key={l.id} className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+              <div key={l.id} className="w-[85%] sm:w-80 shrink-0 snap-start bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
                 <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
                   {l.kementerian}
                 </span>
