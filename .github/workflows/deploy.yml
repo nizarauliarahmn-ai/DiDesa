@@ -1,0 +1,26 @@
+name: Deploy to production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull, build & restart over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            cd "${{ secrets.PROJECT_DIR }}"
+            git pull origin main
+            npm ci
+            npm run build
+            bash -c "${{ secrets.RESTART_CMD }}"
+            echo "DEPLOY_OK $(date -u +%FT%TZ)"
