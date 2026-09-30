@@ -3,7 +3,7 @@
 // harus disuntik di server. Hanya berjalan untuk path '/' (lihat matcher);
 // request lain terus tanpa disentuh. Pola data sama dengan server.ts (self-host).
 
-import { next, rewrite } from "@vercel/functions";
+import { next } from "@vercel/functions";
 
 const SUPABASE_URL = "https://rmrctorxzprrmshorcut.supabase.co";
 // Public anon key — sama persis dengan yang dikirim di bundle frontend.
@@ -125,10 +125,11 @@ export default async function middleware(request: Request) {
       if (!sm || !sDocId) return next();
       const ua = request.headers.get("user-agent") || "";
       if (!BOT_UA.test(ua)) {
+        // Manusia: redirect (bukan rewrite) agar URL ?tab= terbaca SPA client-side.
         const dest = new URL(url.origin + "/");
         dest.searchParams.set("tab", sm.tab);
         dest.searchParams.set(sm.idParam, sDocId);
-        return rewrite(dest);
+        return Response.redirect(dest, 302);
       }
       try {
         const parts = url.hostname.split(".");
