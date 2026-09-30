@@ -30,8 +30,8 @@ export default function PublicLayanan({ embedded = false }: { embedded?: boolean
             <Building2 size={20} />
           </span>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Pusat Layanan</h1>
-            <p className="text-sm text-gray-500 dark:text-slate-400">Layanan kementerian & desa dalam satu tempat</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Pusat Layanan Eksternal</h1>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Layanan kementerian & lembaga luar desa dalam satu tempat</p>
           </div>
         </div>
 

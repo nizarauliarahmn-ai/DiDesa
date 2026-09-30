@@ -41,23 +41,8 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
         <ServiceCards />
       </div>
 
-      {/* 3. Pusat Layanan Kementerian & Desa */}
+      {/* 3. Pusat Layanan Eksternal */}
       <div id="section-pusat-layanan" className="scroll-mt-24 space-y-6">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
-          variants={fadeUp}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-2.5 h-8 bg-blue-600 rounded-full"></div>
-            <div>
-              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Pusat Layanan</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Layanan kementerian & desa dalam satu tempat — syarat dan tautan resmi</p>
-            </div>
-          </div>
-        </motion.div>
         <motion.div
           initial="hidden"
           whileInView="visible"
