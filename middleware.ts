@@ -106,68 +106,84 @@ export default async function middleware(request: Request) {
       return next();
     }
 
-    // Resolve tenant dari subdomain (cermin tenantResolver + server.ts).
-    const parts = url.hostname.split(".");
-    let targetDomain = "";
-    if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
-      targetDomain = parts[0];
-    }
-    let tenantId = "";
-    if (targetDomain) {
-      const orVal = encodeURIComponent(
-        `(domain.ilike.${targetDomain},domain.ilike.${targetDomain}.*)`
+    // Jalur asli memakai single-exit agar tahap kegagalan terlacak.
+    let stage = "init";
+    try {
+      stage = "tenant";
+      // Resolve tenant dari subdomain (cermin tenantResolver + server.ts).
+      const parts = url.hostname.split(".");
+      let targetDomain = "";
+      if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
+        targetDomain = parts[0];
+      }
+      let tenantId = "";
+      if (targetDomain) {
+        const orVal = encodeURIComponent(
+          `(domain.ilike.${targetDomain},domain.ilike.${targetDomain}.*)`
+        );
+        const tenants = await sbGet(`tenants?select=id&or=${orVal}`);
+        if (Array.isArray(tenants) && tenants[0]?.id) tenantId = tenants[0].id;
+      }
+      if (!tenantId) {
+        stage = "no-tenant";
+        throw new Error("no-tenant");
+      }
+
+      let title = "";
+      let description = "";
+      let image = "";
+
+      stage = "fetch-doc";
+      if (isNews) {
+        const rows: any = await sbGet(
+          `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.didesa_news_list`
+        );
+        const list = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : [];
+        const item = (Array.isArray(list) ? list : []).find((n: any) => n.id === newsId);
+        if (!item) {
+          stage = "item-not-found";
+          throw new Error("item-not-found");
+        }
+        title = item.title || "Berita Desa";
+        description = item.excerpt || String(item.fullContent || "").substring(0, 160) || "";
+        image = item.image || "";
+      } else if (def) {
+        const docId = url.searchParams.get(def.idParam) || "";
+        const rows: any = await sbGet(
+          `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.produk_hukum_data`
+        );
+        const all = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : {};
+        const items = all[def.docKey] || [];
+        const item = items.find((i: any) => i.id === docId);
+        if (!item) {
+          stage = "item-not-found";
+          throw new Error("item-not-found");
+        }
+        title = `${def.shortLabel} - ${item.uraian || def.fallbackTitle}`;
+        description = [
+          item.no ? `Nomor: ${item.no}` : "",
+          item.tahun ? `Tahun: ${item.tahun}` : "",
+          item.tanggal ? `Tanggal: ${item.tanggal}` : "",
+          item.jenisDokumen ? `Jenis: ${item.jenisDokumen}` : "",
+          item.ketLain ? String(item.ketLain).substring(0, 120) : "",
+        ]
+          .filter(Boolean)
+          .join(" • ");
+      }
+
+      stage = "desa-name";
+      let desaName = "Desa";
+      const nameRows: any = await sbGet(
+        `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.kop_desa`
       );
-      const tenants = await sbGet(`tenants?select=id&or=${orVal}`);
-      if (Array.isArray(tenants) && tenants[0]?.id) tenantId = tenants[0].id;
-    }
-    if (!tenantId) return next();
+      if (Array.isArray(nameRows) && nameRows[0]?.value) {
+        desaName = String(nameRows[0].value).replace(/^(desa)\s+/i, "").trim() || desaName;
+      }
 
-    let title = "";
-    let description = "";
-    let image = "";
-
-    if (isNews) {
-      const rows: any = await sbGet(
-        `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.didesa_news_list`
-      );
-      const list = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : [];
-      const item = (Array.isArray(list) ? list : []).find((n: any) => n.id === newsId);
-      if (!item) return next();
-      title = item.title || "Berita Desa";
-      description = item.excerpt || String(item.fullContent || "").substring(0, 160) || "";
-      image = item.image || "";
-    } else if (def) {
-      const docId = url.searchParams.get(def.idParam) || "";
-      const rows: any = await sbGet(
-        `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.produk_hukum_data`
-      );
-      const all = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : {};
-      const items = all[def.docKey] || [];
-      const item = items.find((i: any) => i.id === docId);
-      if (!item) return next();
-      title = `${def.shortLabel} - ${item.uraian || def.fallbackTitle}`;
-      description = [
-        item.no ? `Nomor: ${item.no}` : "",
-        item.tahun ? `Tahun: ${item.tahun}` : "",
-        item.tanggal ? `Tanggal: ${item.tanggal}` : "",
-        item.jenisDokumen ? `Jenis: ${item.jenisDokumen}` : "",
-        item.ketLain ? String(item.ketLain).substring(0, 120) : "",
-      ]
-        .filter(Boolean)
-        .join(" • ");
-    }
-
-    let desaName = "Desa";
-    const nameRows: any = await sbGet(
-      `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.kop_desa`
-    );
-    if (Array.isArray(nameRows) && nameRows[0]?.value) {
-      desaName = String(nameRows[0].value).replace(/^(desa)\s+/i, "").trim() || desaName;
-    }
-
-    const origin = url.origin;
-    const imageUrl = image || `${origin}/logo.jpg`;
-    const ogTags = `
+      stage = "build-tags";
+      const origin = url.origin;
+      const imageUrl = image || `${origin}/logo.jpg`;
+      const ogTags = `
     <meta property="og:type" content="article" />
     <meta property="og:title" content="${esc(title)}" />
     <meta property="og:description" content="${esc(description).replace(/\n/g, " ").substring(0, 200)}" />
@@ -181,17 +197,43 @@ export default async function middleware(request: Request) {
     <meta name="twitter:image" content="${esc(imageUrl)}" />
     <title>${esc(title)} - ${esc(desaName)}</title>`;
 
-    const indexRes = await fetch(`${origin}/`, {
-      headers: { [BYPASS_HEADER]: "1" },
-    });
-    if (!indexRes.ok) return next();
-    const html = await indexRes.text();
-    if (!html.includes("</head>")) return next();
+      stage = "fetch-index";
+      const indexRes = await fetch(`${origin}/`, {
+        headers: { [BYPASS_HEADER]: "1" },
+      });
+      if (!indexRes.ok) {
+        stage = `index-bad-status-${indexRes.status}`;
+        throw new Error(stage);
+      }
+      const html = await indexRes.text();
+      if (!html.includes("</head>")) {
+        stage = "index-no-head";
+        throw new Error(stage);
+      }
 
-    return new Response(html.replace("</head>", `${ogTags}\n  </head>`), {
-      status: 200,
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
+      stage = "done";
+      return new Response(html.replace("</head>", () => `${ogTags}\n  </head>`), {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    } catch (e: any) {
+      // Fallback: tetap sajikan halaman normal + komentar tahap kegagalan (tak terlihat pengunjung).
+      try {
+        const indexRes = await fetch(`${url.origin}/`, {
+          headers: { [BYPASS_HEADER]: "1" },
+        });
+        const html = await indexRes.text();
+        const failHtml = html.includes("</head>")
+          ? html.replace("</head>", `<!-- og-mw: failed at ${stage} -->\n  </head>`)
+          : html;
+        return new Response(failHtml, {
+          status: 200,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+      } catch {
+        return next();
+      }
+    }
   } catch {
     return next();
   }
