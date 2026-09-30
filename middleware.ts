@@ -55,6 +55,31 @@ export default async function middleware(request: Request) {
     const tab = url.searchParams.get("tab") || "";
     const newsId = url.searchParams.get("id") || "";
 
+    // Diagnosis sementara: ?ogdebug=1 mengembalikan JSON tahapan middleware.
+    if (url.searchParams.get("ogdebug") === "1") {
+      const dbg: Record<string, any> = { mw: "alive", tab, newsId };
+      try {
+        const parts = url.hostname.split(".");
+        dbg.hostParts = parts;
+        let targetDomain = "";
+        if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
+          targetDomain = parts[0];
+        }
+        dbg.targetDomain = targetDomain;
+        if (targetDomain) {
+          const orVal = encodeURIComponent(
+            `(domain.ilike.${targetDomain},domain.ilike.${targetDomain}.*)`
+          );
+          const tenants = await sbGet(`tenants?select=id&or=${orVal}`);
+          dbg.tenantsRaw = Array.isArray(tenants) ? tenants.length : tenants;
+          if (Array.isArray(tenants) && tenants[0]?.id) dbg.tenantId = tenants[0].id;
+        }
+      } catch (e: any) {
+        dbg.error = String(e?.message || e);
+      }
+      return Response.json(dbg);
+    }
+
     const def = SHARE_DEFS.find(
       (d) => tab === d.tab && !!url.searchParams.get(d.idParam)
     );
