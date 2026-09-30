@@ -274,7 +274,7 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   };
 
   const handleShare = (item: ProdukHukumItem) => {
-    const shareUrl = `${window.location.origin}/?tab=berita_acara&ba_id=${item.id}`;
+    const shareUrl = `${window.location.origin}/s/ba/${item.id}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
       showToast('Link sharing berhasil disalin ke clipboard!', 'success');
     }).catch(() => {

@@ -352,7 +352,7 @@ export default function ProdukHukumPerdes({ onBack }: PerdesProps) {
   };
 
   const handleShare = (item: ProdukHukumItem) => {
-    const shareUrl = `${window.location.origin}/?tab=perdes&perdes_id=${item.id}`;
+    const shareUrl = `${window.location.origin}/s/perdes/${item.id}`;
     navigator.clipboard.writeText(shareUrl).then(() => {
       showToast('Link sharing berhasil disalin ke clipboard!', 'success');
     }).catch(() => {

@@ -3,7 +3,7 @@
 // harus disuntik di server. Hanya berjalan untuk path '/' (lihat matcher);
 // request lain terus tanpa disentuh. Pola data sama dengan server.ts (self-host).
 
-import { next } from "@vercel/functions";
+import { next, rewrite } from "@vercel/functions";
 
 const SUPABASE_URL = "https://rmrctorxzprrmshorcut.supabase.co";
 // Public anon key — sama persis dengan yang dikirim di bundle frontend.
@@ -14,8 +14,11 @@ const BYPASS_HEADER = "x-og-internal";
 
 export const config = {
   runtime: "nodejs",
-  matcher: "/",
+  matcher: ["/", "/s/:path*"],
 };
+
+const BOT_UA =
+  /whatsapp|telegram|facebookexternalhit|facebot|twitterbot|linkedinbot|slackbot|discordbot|line|viber|skype|vkshare|pinterest|redditbot|applebot|bingpreview|duckduckbot|yandex|baidu/i;
 
 interface ShareDef {
   tab: string;
@@ -102,6 +105,101 @@ export default async function middleware(request: Request) {
       (d) => tab === d.tab && !!url.searchParams.get(d.idParam)
     );
     const isNews = !def && !!newsId && newsId.startsWith("n-");
+
+    // Jalur /s/<tipe>/<id> — matcher path eksplisit agar bot & manusia
+    // ditangani deterministik (bot: HTML injeksi OG; manusia: rewrite ke SPA).
+    const segs = url.pathname.split("/").filter(Boolean);
+    if (segs[0] === "s" && segs.length >= 3) {
+      const sMap: Record<string, ShareDef> = {
+        perdes: { tab: "perdes", idParam: "perdes_id", docKey: "perdes", shortLabel: "Perdes", fallbackTitle: "Peraturan Desa" },
+        sk: { tab: "sk_kades", idParam: "sk_id", docKey: "sk_kades", shortLabel: "SK Kades", fallbackTitle: "Surat Keputusan" },
+        ba: { tab: "berita_acara", idParam: "ba_id", docKey: "berita_acara", shortLabel: "Berita Acara", fallbackTitle: "Berita Acara" },
+      };
+      const sm = sMap[segs[1]];
+      let sDocId = "";
+      try {
+        sDocId = decodeURIComponent(segs[2] || "");
+      } catch {
+        sDocId = segs[2] || "";
+      }
+      if (!sm || !sDocId) return next();
+      const ua = request.headers.get("user-agent") || "";
+      if (!BOT_UA.test(ua)) {
+        const dest = new URL(url.origin + "/");
+        dest.searchParams.set("tab", sm.tab);
+        dest.searchParams.set(sm.idParam, sDocId);
+        return rewrite(dest);
+      }
+      try {
+        const parts = url.hostname.split(".");
+        let targetDomain = "";
+        if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
+          targetDomain = parts[0];
+        }
+        let tenantId = "";
+        if (targetDomain) {
+          const orVal = encodeURIComponent(
+            `(domain.ilike.${targetDomain},domain.ilike.${targetDomain}.*)`
+          );
+          const tenants = await sbGet(`tenants?select=id&or=${orVal}`);
+          if (Array.isArray(tenants) && tenants[0]?.id) tenantId = tenants[0].id;
+        }
+        if (!tenantId) return next();
+        const rows: any = await sbGet(
+          `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.produk_hukum_data`
+        );
+        const all = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : {};
+        const items = all[sm.docKey] || [];
+        const item = items.find((i: any) => i.id === sDocId);
+        if (!item) return next();
+        const title = `${sm.shortLabel} - ${item.uraian || sm.fallbackTitle}`;
+        const description = [
+          item.no ? `Nomor: ${item.no}` : "",
+          item.tahun ? `Tahun: ${item.tahun}` : "",
+          item.tanggal ? `Tanggal: ${item.tanggal}` : "",
+          item.jenisDokumen ? `Jenis: ${item.jenisDokumen}` : "",
+          item.ketLain ? String(item.ketLain).substring(0, 120) : "",
+        ]
+          .filter(Boolean)
+          .join(" • ");
+        let desaName = "Desa";
+        const nameRows: any = await sbGet(
+          `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.kop_desa`
+        );
+        if (Array.isArray(nameRows) && nameRows[0]?.value) {
+          desaName = String(nameRows[0].value).replace(/^(desa)\s+/i, "").trim() || desaName;
+        }
+        const imageUrl = `${url.origin}/?oglogo=1`;
+        const ogTags = `
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="${esc(title)}" />
+    <meta property="og:description" content="${esc(description).replace(/\n/g, " ").substring(0, 200)}" />
+    <meta property="og:url" content="${esc(url.href)}" />
+    <meta property="og:site_name" content="${esc(desaName)}" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:image" content="${esc(imageUrl)}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${esc(title)}" />
+    <meta name="twitter:description" content="${esc(description).replace(/\n/g, " ").substring(0, 200)}" />
+    <meta name="twitter:image" content="${esc(imageUrl)}" />
+    <title>${esc(title)} - ${esc(desaName)}</title>`;
+        const indexRes = await fetch(`${url.origin}/`, {
+          headers: { [BYPASS_HEADER]: "1" },
+        });
+        if (!indexRes.ok) return next();
+        const html = await indexRes.text();
+        if (!html.includes("</head>")) return next();
+        return new Response(html.replace("</head>", () => `${ogTags}\n  </head>`), {
+          status: 200,
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "public, s-maxage=3600, max-age=0",
+          },
+        });
+      } catch {
+        return next();
+      }
+    }
     if (!def && !isNews) {
       return next();
     }
