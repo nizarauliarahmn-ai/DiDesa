@@ -6,6 +6,7 @@ import ProfilDesa from './dashboard/ProfilDesa';
 import TransparansiDana from './dashboard/TransparansiDana';
 import BeritaDesa from './dashboard/BeritaDesa';
 import AspirasiWarga from './dashboard/AspirasiWarga';
+import PublicLayanan from './portal/PublicLayanan';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -40,7 +41,35 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
         <ServiceCards />
       </div>
 
-      {/* 3. Profil & Statistik Kependudukan */}
+      {/* 3. Pusat Layanan Kementerian & Desa */}
+      <div id="section-pusat-layanan" className="scroll-mt-24 space-y-6">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-2.5 h-8 bg-blue-600 rounded-full"></div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Pusat Layanan</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Layanan kementerian & desa dalam satu tempat — syarat dan tautan resmi</p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+          variants={fadeUp}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <PublicLayanan embedded />
+        </motion.div>
+      </div>
+
+      {/* 4. Profil & Statistik Kependudukan */}
       <div id="section-profil_desa" className="scroll-mt-24 space-y-8">
         <motion.div
           initial="hidden"
@@ -77,7 +106,7 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
         </motion.div>
       </div>
 
-      {/* 4. Transparansi APBD & Keuangan Desa */}
+      {/* 5. Transparansi APBD & Keuangan Desa */}
       <div id="section-transparansi" className="scroll-mt-24 space-y-6">
         <motion.div
           initial="hidden"
@@ -90,7 +119,7 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
         </motion.div>
       </div>
 
-      {/* 5. Berita & Informasi Kegiatan Desa */}
+      {/* 6. Berita & Informasi Kegiatan Desa */}
       <div id="section-berita" className="scroll-mt-24 space-y-6">
         <motion.div
           initial="hidden"
@@ -118,7 +147,7 @@ export default function Dashboard({ setPublicTab }: { setPublicTab?: (tab: strin
         </motion.div>
       </div>
 
-      {/* 6. Aspirasi & Pengaduan Warga */}
+      {/* 7. Aspirasi & Pengaduan Warga */}
       <div id="section-aspirasi" className="scroll-mt-24 space-y-6">
         <motion.div
           initial="hidden"

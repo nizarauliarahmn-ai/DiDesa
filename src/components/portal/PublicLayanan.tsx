@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, ExternalLink, ChevronDown, Building2, ClipboardList } from 'lucide-react';
 import { LAYANAN_PUBLIK, KATEGORI_LAYANAN } from '../../data/layananPublik';
 
-export default function PublicLayanan() {
+export default function PublicLayanan({ embedded = false }: { embedded?: boolean }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterKategori, setFilterKategori] = useState<(typeof KATEGORI_LAYANAN)[number]>('Semua');
   const [openId, setOpenId] = useState<string | null>(null);
@@ -22,8 +22,8 @@ export default function PublicLayanan() {
   }, [searchQuery, filterKategori]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-24">
-      <div className="max-w-5xl mx-auto px-4 pt-10">
+    <div className={embedded ? 'pb-2' : 'min-h-screen bg-gray-50 dark:bg-slate-950 pb-24'}>
+      <div className={`max-w-5xl mx-auto px-4 ${embedded ? '' : 'pt-10'}`}>
         {/* Header */}
         <div className="flex items-center gap-3 mb-2">
           <span className="w-10 h-10 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 flex items-center justify-center">
