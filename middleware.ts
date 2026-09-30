@@ -74,6 +74,24 @@ export default async function middleware(request: Request) {
           dbg.tenantsRaw = Array.isArray(tenants) ? tenants.length : tenants;
           if (Array.isArray(tenants) && tenants[0]?.id) dbg.tenantId = tenants[0].id;
         }
+        if (dbg.tenantId) {
+          const rows: any = await sbGet(
+            `saas_settings?select=value&tenant_id=eq.${dbg.tenantId}&key=eq.produk_hukum_data`
+          );
+          dbg.settingsRows = Array.isArray(rows) ? rows.length : typeof rows;
+          const all = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : {};
+          dbg.docKeys = typeof all === "object" && all ? Object.keys(all) : null;
+          const items = all["perdes"] || [];
+          dbg.perdesCount = items.length;
+          const docId = url.searchParams.get("perdes_id") || "";
+          dbg.docId = docId;
+          dbg.itemFound = !!items.find((i: any) => i.id === docId);
+          const idxRes = await fetch(`${url.origin}/`, { headers: { [BYPASS_HEADER]: "1" } });
+          dbg.indexStatus = idxRes.status;
+          const idxText = idxRes.ok ? await idxRes.text() : "";
+          dbg.indexLen = idxText.length;
+          dbg.indexHasHead = idxText.includes("</head>");
+        }
       } catch (e: any) {
         dbg.error = String(e?.message || e);
       }
