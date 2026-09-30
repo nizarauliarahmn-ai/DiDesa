@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Search, ExternalLink, ChevronDown, ChevronLeft, ChevronRight, Building2, ClipboardList } from 'lucide-react';
-import { LAYANAN_PUBLIK, KATEGORI_LAYANAN } from '../../data/layananPublik';
+import { LAYANAN_PUBLIK, KATEGORI_LAYANAN, SYARAT_SURAT_DESA } from '../../data/layananPublik';
 
 export default function PublicLayanan({ embedded = false }: { embedded?: boolean }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -9,6 +9,11 @@ export default function PublicLayanan({ embedded = false }: { embedded?: boolean
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const scrollRow = (dir: number) => {
     const el = scrollRef.current;
+    if (el) el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.8), behavior: 'smooth' });
+  };
+  const suratRef = useRef<HTMLDivElement | null>(null);
+  const scrollSurat = (dir: number) => {
+    const el = suratRef.current;
     if (el) el.scrollBy({ left: dir * Math.max(280, el.clientWidth * 0.8), behavior: 'smooth' });
   };
 
@@ -25,6 +30,14 @@ export default function PublicLayanan({ embedded = false }: { embedded?: boolean
       );
     });
   }, [searchQuery, filterKategori]);
+
+  const suratFiltered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return SYARAT_SURAT_DESA;
+    return SYARAT_SURAT_DESA.filter(s =>
+      s.nama.toLowerCase().includes(q) || s.kode.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
 
   return (
     <div className={embedded ? 'pb-2' : 'min-h-screen bg-gray-50 dark:bg-slate-950 pb-24'}>
@@ -145,6 +158,58 @@ export default function PublicLayanan({ embedded = false }: { embedded?: boolean
 
         {filtered.length === 0 && (
           <p className="text-center text-sm text-gray-400 mt-12">Tidak ada layanan yang cocok.</p>
+        )}
+
+        {/* Syarat Surat Desa */}
+        {suratFiltered.length > 0 && (
+          <>
+            <div className="flex items-center justify-between gap-2 mt-8">
+              <div>
+                <h2 className="text-base font-bold text-gray-900 dark:text-white">Syarat Surat Desa</h2>
+                <p className="text-xs text-gray-500 dark:text-slate-400">Dokumen yang perlu disiapkan sebelum mengajukan surat</p>
+              </div>
+              <div className="flex gap-1.5 shrink-0">
+                <button
+                  onClick={() => scrollSurat(-1)}
+                  className="w-8 h-8 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Geser kiri"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => scrollSurat(1)}
+                  className="w-8 h-8 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Geser kanan"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+            <div ref={suratRef} className="flex gap-3 mt-3 overflow-x-auto snap-x snap-mandatory pb-2 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+              {suratFiltered.map(s => (
+                <div key={s.id} className="w-[85%] sm:w-72 shrink-0 snap-start bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">
+                    {s.kode}
+                  </span>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white mt-2">{s.nama}</h3>
+                  <ul className="mt-2.5 space-y-1.5">
+                    {s.syarat.map((r, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-gray-600 dark:text-slate-300">
+                        <span className="w-4 h-4 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">{i + 1}</span>
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href="?tab=kios_surat"
+                    className="inline-flex items-center gap-1 mt-3 text-xs font-bold text-gray-900 dark:text-white hover:underline"
+                  >
+                    Ajukan <ChevronRight size={14} />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

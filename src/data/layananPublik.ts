@@ -136,3 +136,75 @@ export const LAYANAN_PUBLIK: LayananPublik[] = [
     kategori: 'Layanan Desa',
   },
 ];
+/** Syarat pembuatan surat di SistemDesa — tampil di portal warga.
+ *  Bersifat umum; perangkat desa dapat meminta dokumen tambahan.
+ */
+export interface SyaratSurat {
+  id: string;
+  kode: string;
+  nama: string;
+  syarat: string[];
+}
+
+export const SYARAT_SURAT_DESA: SyaratSurat[] = [
+  {
+    id: 'sktm',
+    kode: 'SKTM',
+    nama: 'Keterangan Tidak Mampu',
+    syarat: ['KTP-el', 'Kartu Keluarga', 'Surat pengantar RT/RW'],
+  },
+  {
+    id: 'sku',
+    kode: 'SKU',
+    nama: 'Keterangan Usaha',
+    syarat: ['KTP-el', 'Kartu Keluarga', 'Surat pengantar RT/RW', 'Info jenis & alamat usaha'],
+  },
+  {
+    id: 'sdp',
+    kode: 'SDP',
+    nama: 'Keterangan Domisili',
+    syarat: ['KTP-el', 'Kartu Keluarga', 'Surat pengantar RT/RW'],
+  },
+  {
+    id: 'skum',
+    kode: 'SKUM',
+    nama: 'Keterangan Umum',
+    syarat: ['KTP-el', 'Kartu Keluarga', 'Keperluan yang jelas'],
+  },
+  {
+    id: 'skl',
+    kode: 'SKL',
+    nama: 'Keterangan Lahir',
+    syarat: ['SKL dari faskes', 'KK orang tua', 'KTP-el orang tua'],
+  },
+  {
+    id: 'skm',
+    kode: 'SKM',
+    nama: 'Keterangan Meninggal',
+    syarat: ['KTP almarhum/almarhumah', 'Kartu Keluarga', 'Surat pengantar RT/RW'],
+  },
+  {
+    id: 'skbm',
+    kode: 'SKBM',
+    nama: 'Keterangan Belum Menikah',
+    syarat: ['KTP-el', 'Kartu Keluarga', 'Surat pengantar RT/RW'],
+  },
+  {
+    id: 'skph',
+    kode: 'SKPH',
+    nama: 'Keterangan Penghasilan',
+    syarat: ['KTP-el', 'Kartu Keluarga', 'Slip gaji / keterangan RT/RW'],
+  },
+  {
+    id: 'skaw',
+    kode: 'SKAW',
+    nama: 'Keterangan Ahli Waris',
+    syarat: ['KTP para ahli waris', 'KK pewaris', 'Akta kematian pewaris', 'Surat pengantar RT/RW'],
+  },
+  {
+    id: 'nikah',
+    kode: 'NIKAH',
+    nama: 'Pengantar Nikah (N1–N4)',
+    syarat: ['KTP-el dan KK catin', 'Akta kelahiran', 'Pas foto berlatar biru', 'Surat pengantar RT/RW'],
+  },
+];
