@@ -1035,6 +1035,91 @@ async function setupVite() {
     }
   });
 
+  // Middleware: server-side OG tag injection for shared Perdes & Berita Acara links
+  // (?tab=perdes&perdes_id=xxx / ?tab=berita_acara&ba_id=xxx) — agar preview chat to-the-point.
+  app.get("*", async (req, res, next) => {
+    const tab = req.query.tab as string | undefined;
+    const perdesId = req.query.perdes_id as string | undefined;
+    const baId = req.query.ba_id as string | undefined;
+    const isPerdes = tab === "perdes" && !!perdesId;
+    const isBa = tab === "berita_acara" && !!baId;
+    if (!isPerdes && !isBa) return next();
+    const docId = (isPerdes ? perdesId : baId) as string;
+    const docKey = isPerdes ? "perdes" : "berita_acara";
+    const docLabel = isPerdes ? "Peraturan Desa" : "Berita Acara";
+
+    try {
+      const supabaseUrl = (process.env.SUPABASE_URL || "").trim();
+      const supabaseKey = (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KE || "").trim();
+      if (!supabaseUrl || !supabaseKey) return next();
+
+      const { createClient } = await import("@supabase/supabase-js");
+      const sb = createClient(supabaseUrl, supabaseKey);
+
+      const hostname = req.hostname;
+      const parts = hostname.split(".");
+      let targetDomain = "";
+      if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
+        targetDomain = parts[0];
+      }
+
+      let tenantId = "";
+      if (targetDomain) {
+        const { data: tenant } = await sb.from("tenants")
+          .select("id").or(`domain.ilike.${targetDomain},domain.ilike.${targetDomain}.%`).maybeSingle();
+        if (tenant?.id) tenantId = tenant.id;
+      }
+      if (!tenantId) return next();
+
+      const { data: setting } = await sb.from("saas_settings")
+        .select("value").eq("tenant_id", tenantId).eq("key", "produk_hukum_data").single();
+      if (!setting?.value) return next();
+
+      const all = JSON.parse(setting.value);
+      const items = all[docKey] || [];
+      const item = items.find((i: any) => i.id === docId);
+      if (!item) return next();
+
+      let desaName = "Desa";
+      const { data: nameSetting } = await sb.from("saas_settings")
+        .select("value").eq("tenant_id", tenantId).eq("key", "kop_desa").single();
+      if (nameSetting?.value) desaName = String(nameSetting.value).replace(/^(desa)\s+/i, "").trim() || desaName;
+
+      const esc = (s: any) => String(s ?? "").replace(/"/g, "&quot;");
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const idParam = isPerdes ? `perdes_id=${docId}` : `ba_id=${docId}`;
+      const shareUrl = `${baseUrl}/?tenant=${req.query.tenant || targetDomain}&tab=${tab}&${idParam}`;
+      const title = `${docLabel} - ${item.uraian || (isPerdes ? "Peraturan Desa" : "Berita Acara")}`;
+      const description = [
+        item.no ? `Nomor: ${item.no}` : "",
+        item.tahun ? `Tahun: ${item.tahun}` : "",
+        item.tanggal ? `Tanggal: ${item.tanggal}` : "",
+        item.jenisDokumen ? `Jenis: ${item.jenisDokumen}` : "",
+        item.ketLain ? String(item.ketLain).substring(0, 120) : "",
+      ].filter(Boolean).join(" • ");
+
+      const html = await getIndexHtml();
+      const ogTags = `
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="${esc(title)}" />
+    <meta property="og:description" content="${esc(description).replace(/\n/g, " ").substring(0, 200)}" />
+    <meta property="og:url" content="${shareUrl}" />
+    <meta property="og:site_name" content="${esc(desaName)}" />
+    <meta property="og:locale" content="id_ID" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="${esc(title)}" />
+    <meta name="twitter:description" content="${esc(description).replace(/\n/g, " ").substring(0, 200)}" />
+    <title>${esc(title)} - ${esc(desaName)}</title>`;
+
+      const modifiedHtml = html.replace("</head>", `${ogTags}\n  </head>`);
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      return res.send(modifiedHtml);
+    } catch (err: any) {
+      console.error("[OG Perdes/BA Middleware] Error:", err.message);
+      return next();
+    }
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
