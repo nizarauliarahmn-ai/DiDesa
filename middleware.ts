@@ -1,0 +1,155 @@
+// Vercel Routing Middleware — OG tag dinamis untuk link share dokumen.
+// Crawler chat (WhatsApp/Telegram/dll) tidak menjalankan JS, jadi tag OG
+// harus disuntik di server. Hanya berjalan untuk path '/' (lihat matcher);
+// request lain terus tanpa disentuh. Pola data sama dengan server.ts (self-host).
+
+import { next } from "@vercel/functions";
+
+const SUPABASE_URL = "https://rmrctorxzprrmshorcut.supabase.co";
+// Public anon key — sama persis dengan yang dikirim di bundle frontend.
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtcmN0b3J4enBycm1zaG9yY3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NzMwMjQsImV4cCI6MjA5OTA0OTAyNH0.Fefjmf2I6BAC-Fqwy9P8BleB25ryGy3ydV6pucxtBYA";
+
+const BYPASS_HEADER = "x-og-internal";
+
+export const config = {
+  runtime: "nodejs",
+  matcher: "/",
+};
+
+interface ShareDef {
+  tab: string;
+  idParam: string;
+  docKey: string;
+  shortLabel: string;
+  fallbackTitle: string;
+}
+
+const SHARE_DEFS: ShareDef[] = [
+  { tab: "perdes", idParam: "perdes_id", docKey: "perdes", shortLabel: "Perdes", fallbackTitle: "Peraturan Desa" },
+  { tab: "sk_kades", idParam: "sk_id", docKey: "sk_kades", shortLabel: "SK Kades", fallbackTitle: "Surat Keputusan" },
+  { tab: "berita_acara", idParam: "ba_id", docKey: "berita_acara", shortLabel: "Berita Acara", fallbackTitle: "Berita Acara" },
+];
+
+const esc = (s: any) => String(s ?? "").replace(/"/g, "&quot;");
+
+async function sbGet(path: string) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export default async function middleware(request: Request) {
+  try {
+    // Hindari loop saat mengambil index.html internal.
+    if (request.headers.get(BYPASS_HEADER)) {
+      return next();
+    }
+
+    const url = new URL(request.url);
+    const tab = url.searchParams.get("tab") || "";
+    const newsId = url.searchParams.get("id") || "";
+
+    const def = SHARE_DEFS.find(
+      (d) => tab === d.tab && !!url.searchParams.get(d.idParam)
+    );
+    const isNews = !def && !!newsId && newsId.startsWith("n-");
+    if (!def && !isNews) {
+      return next();
+    }
+
+    // Resolve tenant dari subdomain (cermin tenantResolver + server.ts).
+    const parts = url.hostname.split(".");
+    let targetDomain = "";
+    if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
+      targetDomain = parts[0];
+    }
+    let tenantId = "";
+    if (targetDomain) {
+      const orVal = encodeURIComponent(
+        `(domain.ilike.${targetDomain},domain.ilike.${targetDomain}.*)`
+      );
+      const tenants = await sbGet(`tenants?select=id&or=${orVal}`);
+      if (Array.isArray(tenants) && tenants[0]?.id) tenantId = tenants[0].id;
+    }
+    if (!tenantId) return next();
+
+    let title = "";
+    let description = "";
+    let image = "";
+
+    if (isNews) {
+      const rows: any = await sbGet(
+        `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.didesa_news_list`
+      );
+      const list = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : [];
+      const item = (Array.isArray(list) ? list : []).find((n: any) => n.id === newsId);
+      if (!item) return next();
+      title = item.title || "Berita Desa";
+      description = item.excerpt || String(item.fullContent || "").substring(0, 160) || "";
+      image = item.image || "";
+    } else if (def) {
+      const docId = url.searchParams.get(def.idParam) || "";
+      const rows: any = await sbGet(
+        `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.produk_hukum_data`
+      );
+      const all = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : {};
+      const items = all[def.docKey] || [];
+      const item = items.find((i: any) => i.id === docId);
+      if (!item) return next();
+      title = `${def.shortLabel} - ${item.uraian || def.fallbackTitle}`;
+      description = [
+        item.no ? `Nomor: ${item.no}` : "",
+        item.tahun ? `Tahun: ${item.tahun}` : "",
+        item.tanggal ? `Tanggal: ${item.tanggal}` : "",
+        item.jenisDokumen ? `Jenis: ${item.jenisDokumen}` : "",
+        item.ketLain ? String(item.ketLain).substring(0, 120) : "",
+      ]
+        .filter(Boolean)
+        .join(" • ");
+    }
+
+    let desaName = "Desa";
+    const nameRows: any = await sbGet(
+      `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.kop_desa`
+    );
+    if (Array.isArray(nameRows) && nameRows[0]?.value) {
+      desaName = String(nameRows[0].value).replace(/^(desa)\s+/i, "").trim() || desaName;
+    }
+
+    const origin = url.origin;
+    const imageUrl = image || `${origin}/logo.jpg`;
+    const ogTags = `
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="${esc(title)}" />
+    <meta property="og:description" content="${esc(description).replace(/\n/g, " ").substring(0, 200)}" />
+    <meta property="og:url" content="${esc(url.href)}" />
+    <meta property="og:site_name" content="${esc(desaName)}" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:image" content="${esc(imageUrl)}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${esc(title)}" />
+    <meta name="twitter:description" content="${esc(description).replace(/\n/g, " ").substring(0, 200)}" />
+    <meta name="twitter:image" content="${esc(imageUrl)}" />
+    <title>${esc(title)} - ${esc(desaName)}</title>`;
+
+    const indexRes = await fetch(`${origin}/`, {
+      headers: { [BYPASS_HEADER]: "1" },
+    });
+    if (!indexRes.ok) return next();
+    const html = await indexRes.text();
+    if (!html.includes("</head>")) return next();
+
+    return new Response(html.replace("</head>", `${ogTags}\n  </head>`), {
+      status: 200,
+      headers: { "Content-Type": "text/html; charset=utf-8" },
+    });
+  } catch {
+    return next();
+  }
+}
