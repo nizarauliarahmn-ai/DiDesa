@@ -55,47 +55,47 @@ export default async function middleware(request: Request) {
     const tab = url.searchParams.get("tab") || "";
     const newsId = url.searchParams.get("id") || "";
 
-    // Diagnosis sementara: ?ogdebug=1 mengembalikan JSON tahapan middleware.
-    if (url.searchParams.get("ogdebug") === "1") {
-      const dbg: Record<string, any> = { mw: "alive", tab, newsId };
+    // Logo desa per tenant untuk og:image (WhatsApp tak bisa memuat base64,
+    // jadi serve bytes-nya lewat endpoint ini). Berlaku semua tenant.
+    if (url.searchParams.get("oglogo") === "1") {
       try {
         const parts = url.hostname.split(".");
-        dbg.hostParts = parts;
         let targetDomain = "";
         if (parts.length >= 2 && parts[0] !== "www" && parts[0] !== "localhost") {
           targetDomain = parts[0];
         }
-        dbg.targetDomain = targetDomain;
+        let tenantId = "";
         if (targetDomain) {
           const orVal = encodeURIComponent(
             `(domain.ilike.${targetDomain},domain.ilike.${targetDomain}.*)`
           );
           const tenants = await sbGet(`tenants?select=id&or=${orVal}`);
-          dbg.tenantsRaw = Array.isArray(tenants) ? tenants.length : tenants;
-          if (Array.isArray(tenants) && tenants[0]?.id) dbg.tenantId = tenants[0].id;
+          if (Array.isArray(tenants) && tenants[0]?.id) tenantId = tenants[0].id;
         }
-        if (dbg.tenantId) {
-          const rows: any = await sbGet(
-            `saas_settings?select=value&tenant_id=eq.${dbg.tenantId}&key=eq.produk_hukum_data`
+        if (tenantId) {
+          const logoRows: any = await sbGet(
+            `saas_settings?select=value&tenant_id=eq.${tenantId}&key=eq.kop_logo_url`
           );
-          dbg.settingsRows = Array.isArray(rows) ? rows.length : typeof rows;
-          const all = Array.isArray(rows) && rows[0]?.value ? JSON.parse(rows[0].value) : {};
-          dbg.docKeys = typeof all === "object" && all ? Object.keys(all) : null;
-          const items = all["perdes"] || [];
-          dbg.perdesCount = items.length;
-          const docId = url.searchParams.get("perdes_id") || "";
-          dbg.docId = docId;
-          dbg.itemFound = !!items.find((i: any) => i.id === docId);
-          const idxRes = await fetch(`${url.origin}/`, { headers: { [BYPASS_HEADER]: "1" } });
-          dbg.indexStatus = idxRes.status;
-          const idxText = idxRes.ok ? await idxRes.text() : "";
-          dbg.indexLen = idxText.length;
-          dbg.indexHasHead = idxText.includes("</head>");
+          const val = Array.isArray(logoRows) && logoRows[0]?.value ? String(logoRows[0].value) : "";
+          if (/^https?:\/\//i.test(val)) {
+            return Response.redirect(val, 302);
+          }
+          const m = val.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.*)$/s);
+          if (m) {
+            const bytes = Buffer.from(m[2], "base64");
+            return new Response(bytes as any, {
+              status: 200,
+              headers: {
+                "Content-Type": m[1],
+                "Cache-Control": "public, max-age=86400",
+              },
+            });
+          }
         }
-      } catch (e: any) {
-        dbg.error = String(e?.message || e);
+      } catch {
+        // abaikan, jatuh ke logo default di bawah
       }
-      return Response.json(dbg);
+      return Response.redirect(`${url.origin}/logo.jpg`, 302);
     }
 
     const def = SHARE_DEFS.find(
@@ -181,8 +181,9 @@ export default async function middleware(request: Request) {
       }
 
       stage = "build-tags";
-      const origin = url.origin;
-      const imageUrl = image || `${origin}/logo.jpg`;
+    const origin = url.origin;
+    // Logo desa via endpoint (mendukung base64) — fallback logo platform.
+    const imageUrl = image || `${origin}/?oglogo=1`;
       const ogTags = `
     <meta property="og:type" content="article" />
     <meta property="og:title" content="${esc(title)}" />
