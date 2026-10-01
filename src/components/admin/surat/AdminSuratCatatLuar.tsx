@@ -37,6 +37,14 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
   const [sppdBerangkat, setSppdBerangkat] = useState('');
   const [sppdKembali, setSppdKembali] = useState('');
 
+  // Khusus SKAW: almarhum + pasangan + daftar ahli waris (bisa >1 orang)
+  const [skawAlmarhumNama, setSkawAlmarhumNama] = useState('');
+  const [skawAlmarhumNik, setSkawAlmarhumNik] = useState('');
+  const [skawPasanganNama, setSkawPasanganNama] = useState('');
+  const [skawPasanganNik, setSkawPasanganNik] = useState('');
+  const [skawHeirs, setSkawHeirs] = useState<Array<{ nama: string; hubungan: string; nik: string }>>([]);
+  const SKAW_HUBUNGAN = ['Anak', 'Istri', 'Suami', 'Orang Tua', 'Saudara Kandung', 'Cucu', 'Menantu', 'Lainnya'];
+
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -73,6 +81,8 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
   // Deteksi jenis SPPD dari klasifikasi terpilih
   const selectedCls = classifications.find(c => c.klasifikasi === selectedKlasifikasi);
   const isSppd = /sppd|perjalanan dinas/i.test(`${selectedCls?.jenis || ''} ${selectedCls?.klasifikasi || ''}`);
+  // Deteksi jenis SKAW (ahli waris) dari klasifikasi terpilih
+  const isSkaw = /skaw|ahli waris/i.test(`${selectedCls?.jenis || ''} ${selectedCls?.klasifikasi || ''}`);
 
   // Resident search
   const searchResidents = async (query: string) => {
@@ -114,6 +124,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
 
     const cls = classifications.find(c => c.klasifikasi === selectedKlasifikasi);
     const saveIsSppd = /sppd|perjalanan dinas/i.test(`${cls?.jenis || ''} ${cls?.klasifikasi || ''}`);
+    const saveIsSkaw = /skaw|ahli waris/i.test(`${cls?.jenis || ''} ${cls?.klasifikasi || ''}`);
 
     let payloadNama = nama.trim() || '-';
     let payloadNik: string | null = nik || null;
@@ -148,7 +159,29 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
         lamaPerjalanan: lama,
       };
     }
-    // Non-SPPD: hanya jenis + nomor yang wajib (tujuan fitur ini: nomor tercatat).
+    // Non-SPPD/SKAW: hanya jenis + nomor yang wajib (tujuan fitur ini: nomor tercatat).
+    if (saveIsSkaw) {
+      const heirs = skawHeirs
+        .filter(h => h.nama.trim())
+        .map(h => ({
+          id: crypto.randomUUID(),
+          nama: h.nama.trim().toUpperCase(),
+          hubungan: h.hubungan || 'Anak',
+          nik: h.nik.trim(),
+          ttl: '',
+          pekerjaan: '',
+        }));
+      payloadNama = skawAlmarhumNama.trim().toUpperCase() || '-';
+      payloadNik = skawAlmarhumNik || null;
+      extraData = {
+        klasifikasi: 'SKAW',
+        namaAlmarhum: skawAlmarhumNama.trim().toUpperCase(),
+        nikAlmarhum: skawAlmarhumNik,
+        namaPasangan: skawPasanganNama.trim().toUpperCase(),
+        nikPasangan: skawPasanganNik,
+        heirRows: heirs,
+      };
+    }
 
     setSaving(true);
     try {
@@ -388,6 +421,93 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
                     className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
                   />
                 </div>
+              </div>
+            </>
+          ) : isSkaw ? (
+            <>
+              {/* Almarhum */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Almarhum / Almarhumah</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={skawAlmarhumNama}
+                    onChange={(e) => setSkawAlmarhumNama(e.target.value)}
+                    placeholder="Nama almarhum..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                  />
+                  <input
+                    type="tel" data-no-cap maxLength={16}
+                    value={skawAlmarhumNik}
+                    onChange={(e) => setSkawAlmarhumNik(e.target.value.replace(/\D/g, ''))}
+                    placeholder="NIK almarhum..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-mono text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                  />
+                </div>
+              </div>
+
+              {/* Pasangan (opsional) */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pasangan <span className="normal-case font-medium text-gray-400">(opsional)</span></label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={skawPasanganNama}
+                    onChange={(e) => setSkawPasanganNama(e.target.value)}
+                    placeholder="Nama pasangan..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                  />
+                  <input
+                    type="tel" data-no-cap maxLength={16}
+                    value={skawPasanganNik}
+                    onChange={(e) => setSkawPasanganNik(e.target.value.replace(/\D/g, ''))}
+                    placeholder="NIK pasangan..."
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-mono text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                  />
+                </div>
+              </div>
+
+              {/* Ahli waris (bisa >1 orang) */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Ahli Waris <span className="normal-case font-medium text-gray-400">(bisa lebih dari 1 orang)</span></label>
+                {skawHeirs.map((h, i) => (
+                  <div key={i} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={h.nama}
+                      onChange={(e) => setSkawHeirs(prev => prev.map((x, xi) => xi === i ? { ...x, nama: e.target.value } : x))}
+                      placeholder={`Nama ahli waris ${i + 1}...`}
+                      className="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
+                    />
+                    <select
+                      value={h.hubungan}
+                      onChange={(e) => setSkawHeirs(prev => prev.map((x, xi) => xi === i ? { ...x, hubungan: e.target.value } : x))}
+                      className="w-32 px-2 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
+                    >
+                      {SKAW_HUBUNGAN.map(hb => <option key={hb} value={hb}>{hb}</option>)}
+                    </select>
+                    <input
+                      type="tel" data-no-cap maxLength={16}
+                      value={h.nik}
+                      onChange={(e) => setSkawHeirs(prev => prev.map((x, xi) => xi === i ? { ...x, nik: e.target.value.replace(/\D/g, '') } : x))}
+                      placeholder="NIK"
+                      className="w-36 px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-mono text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
+                    />
+                    <button
+                      onClick={() => setSkawHeirs(prev => prev.filter((_, xi) => xi !== i))}
+                      className="px-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors"
+                      title="Hapus ahli waris"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setSkawHeirs(prev => [...prev, { nama: '', hubungan: 'Anak', nik: '' }])}
+                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Tambah ahli waris
+                </button>
               </div>
             </>
           ) : (
