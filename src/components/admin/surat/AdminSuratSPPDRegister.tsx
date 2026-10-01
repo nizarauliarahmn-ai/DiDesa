@@ -64,14 +64,16 @@ const fmtTgl = (iso: string) => {
   if (isNaN(d.getTime())) return iso;
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 };
-const monthOf = (iso: string, fallback: string) => {
-  const src = iso || fallback || '';
-  const m = src.match(/^(\d{4}-\d{2})/);
-  if (m) return m[1];
-  const d = new Date(src);
-  if (isNaN(d.getTime())) return '';
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+const toDateOnly = (s: string): number | null => {
+  if (!s) return null;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return Number(m[1]) * 10000 + Number(m[2]) * 100 + Number(m[3]);
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return null;
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
 };
+const rowDateNum = (r: { tglBerangkat: string; tglSurat: string }) =>
+  toDateOnly(r.tglBerangkat) ?? toDateOnly(r.tglSurat);
 
 function expandTrips(letters: LetterHistory[]): TripRow[] {
   const rows: TripRow[] = [];
@@ -111,7 +113,8 @@ export default function AdminSuratSPPDRegister({ onBack, onBuatSPPD }: { onBack:
   const [letters, setLetters] = useState<LetterHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [qNama, setQNama] = useState('');
-  const [qBulan, setQBulan] = useState('');
+  const [qDari, setQDari] = useState('');
+  const [qSampai, setQSampai] = useState('');
   const [qSpj, setQSpj] = useState<'semua' | 'layak' | 'belum'>('semua');
   const [spjTarget, setSpjTarget] = useState<TripRow | null>(null);
   const [spjDraft, setSpjDraft] = useState<Record<SpjKey, SpjState>>(emptySpj());
@@ -161,17 +164,21 @@ export default function AdminSuratSPPDRegister({ onBack, onBuatSPPD }: { onBack:
 
   const filtered = useMemo(() => {
     const q = qNama.trim().toUpperCase();
+    const dari = qDari ? toDateOnly(qDari) : null;
+    const sampai = qSampai ? toDateOnly(qSampai) : null;
     return rows.filter(r => {
       if (q && !(r.nama.includes(q) || (r.nip || '').toUpperCase().includes(q))) return false;
-      if (qBulan) {
-        const m = monthOf(r.tglBerangkat, r.tglSurat);
-        if (m !== qBulan) return false;
+      if (dari !== null || sampai !== null) {
+        const t = rowDateNum(r);
+        if (t === null) return false;
+        if (dari !== null && t < dari) return false;
+        if (sampai !== null && t > sampai) return false;
       }
       if (qSpj === 'layak' && !isLayakCair(r)) return false;
       if (qSpj === 'belum' && isLayakCair(r)) return false;
       return true;
     });
-  }, [rows, qNama, qBulan, qSpj, letters]);
+  }, [rows, qNama, qDari, qSampai, qSpj]);
 
   const totalNominal = useMemo(() => filtered.reduce((s, r) => s + r.cair.reduce((a, c) => a + (Number(c.nominal) || 0), 0), 0), [filtered]);
   const layakCount = useMemo(() => filtered.filter(isLayakCair).length, [filtered]);
@@ -350,13 +357,32 @@ tfoot td { border-top: 2px solid #333; font-weight: bold; background: #f9f9f9; }
             className="w-full pl-10 pr-4 h-10 border border-gray-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:border-emerald-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
           />
         </div>
-        <input
-          type="month"
-          value={qBulan}
-          onChange={e => setQBulan(e.target.value)}
-          title="Filter bulan berangkat"
-          className="h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white outline-none focus:border-emerald-500"
-        />
+        <div className="flex items-center gap-1.5">
+          <input
+            type="date"
+            value={qDari}
+            onChange={e => setQDari(e.target.value)}
+            title="Dari tanggal"
+            className="h-10 px-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 text-gray-900 dark:text-white outline-none focus:border-emerald-500"
+          />
+          <span className="text-[11px] font-bold text-gray-400 shrink-0">s/d</span>
+          <input
+            type="date"
+            value={qSampai}
+            onChange={e => setQSampai(e.target.value)}
+            title="Sampai tanggal"
+            className="h-10 px-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-900 text-gray-900 dark:text-white outline-none focus:border-emerald-500"
+          />
+          {(qDari || qSampai) && (
+            <button
+              onClick={() => { setQDari(''); setQSampai(''); }}
+              title="Hapus filter tanggal"
+              className="h-10 w-10 shrink-0 flex items-center justify-center border border-gray-200 dark:border-slate-700 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
         <select
           value={qSpj}
           onChange={e => setQSpj(e.target.value as any)}
