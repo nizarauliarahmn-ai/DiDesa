@@ -394,7 +394,7 @@ export default function AdminSurat({
           </>
         )}
         {activeTab === 'sppd_register' && (
-          <AdminSuratSPPDRegister onBack={() => changeTab('sppd')} />
+          <AdminSuratSPPDRegister onBack={() => changeTab('dashboard')} onBuatSPPD={() => changeTab('sppd')} />
         )}
         {activeTab === 'undangan' && (
           <AdminSuratUndangan 

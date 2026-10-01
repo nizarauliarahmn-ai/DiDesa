@@ -104,7 +104,7 @@ function expandTrips(letters: LetterHistory[]): TripRow[] {
   return rows;
 }
 
-export default function AdminSuratSPPDRegister({ onBack }: { onBack: () => void }) {
+export default function AdminSuratSPPDRegister({ onBack, onBuatSPPD }: { onBack: () => void; onBuatSPPD: () => void }) {
   const [letters, setLetters] = useState<LetterHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [qNama, setQNama] = useState('');
@@ -216,12 +216,20 @@ export default function AdminSuratSPPDRegister({ onBack }: { onBack: () => void 
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Buku Register SPPD</h2>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Siapa — kemana — apa • berapa kali • total • kelayakan cair (SPJ)</p>
         </div>
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer self-start md:self-auto"
-        >
-          <ArrowLeft size={14} /> Kembali
-        </button>
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          >
+            <ArrowLeft size={14} /> Kembali
+          </button>
+          <button
+            onClick={onBuatSPPD}
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            <Plus size={14} /> Buat SPPD
+          </button>
+        </div>
       </div>
 
       {/* Ringkasan */}
@@ -250,7 +258,7 @@ export default function AdminSuratSPPDRegister({ onBack }: { onBack: () => void 
             type="text"
             value={qNama}
             onChange={e => setQNama(e.target.value)}
-            placeholder="Cari nama / NIP pelaksana... (mis. SI A)"
+            placeholder="Cari nama / NIP pelaksana..."
             className="w-full pl-10 pr-4 h-10 border border-gray-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:border-emerald-500 bg-white dark:bg-slate-900 text-gray-900 dark:text-white"
           />
         </div>
