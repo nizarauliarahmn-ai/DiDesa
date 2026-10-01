@@ -84,9 +84,11 @@ function formatDateDisplay(dateStr: string): string {
 
 interface BeritaAcaraProps {
   onBack: () => void;
+  openDocId?: string | null;
+  onConsumeOpenDocId?: () => void;
 }
 
-export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
+export default function ProdukHukumBeritaAcara({ onBack, openDocId, onConsumeOpenDocId }: BeritaAcaraProps) {
   const [items, setItems] = useState<ProdukHukumItem[]>(loadData);
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,7 +99,19 @@ export default function ProdukHukumBeritaAcara({ onBack }: BeritaAcaraProps) {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<ProdukHukumItem | null>(null);
+  const [editingItem, setEditingItem] = 
+useState<ProdukHukumItem | null>(null);
+
+  // Deep-link dari pencarian global: buka modal detail dokumen langsung
+  useEffect(() => {
+    if (!openDocId) return;
+    const found = items.find(i => i.id === openDocId);
+    if (found) {
+      setEditingItem(found);
+      setShowModal(true);
+      onConsumeOpenDocId?.();
+    }
+  }, [openDocId, items]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);

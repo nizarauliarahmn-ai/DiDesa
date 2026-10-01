@@ -155,16 +155,18 @@ export default function AdminHeader({
             try {
               const phRaw = byKey['produk_hukum_data'];
               const ph = typeof phRaw === 'string' ? JSON.parse(phRaw) : (phRaw || {});
-              const pushHukum = (arr: any, kind: string) => (Array.isArray(arr) ? arr : []).forEach((d: any) => {
+              const pushHukum = (arr: any, kind: string, kindKey: string) => (Array.isArray(arr) ? arr : []).forEach((d: any) => {
                 if (d && (d.uraian || d.no)) hk.push({
                   kind,
+                  kindKey,
+                  docId: d.id,
                   title: d.uraian || `No. ${d.no || '-'}`,
                   sub: [d.no ? `No. ${d.no}` : '', d.tahun ? `Tahun ${d.tahun}` : ''].filter(Boolean).join(' • '),
                 });
               });
-              pushHukum(ph.perdes, 'Perdes');
-              pushHukum(ph.sk_kades, 'SK Kades');
-              pushHukum(ph.berita_acara, 'Berita Acara');
+              pushHukum(ph.perdes, 'Perdes', 'perdes');
+              pushHukum(ph.sk_kades, 'SK Kades', 'sk_kades');
+              pushHukum(ph.berita_acara, 'Berita Acara', 'berita_acara');
             } catch { /* abaikan data korup */ }
             setHukumList(hk);
             // Berita desa
@@ -285,6 +287,19 @@ export default function AdminHeader({
         (n.title && n.title.toLowerCase().includes(qLower))
       ).slice(0, 3)
     : [], [searchQuery, beritaList, qLower]);
+
+  // Deep-link produk hukum: buka tab + sub-tab + modal detail dokumen langsung
+  const handleHukumClick = (h: any) => {
+    try {
+      sessionStorage.setItem('open_produk_hukum', JSON.stringify({ kind: h.kindKey, docId: h.docId }));
+    } catch { /* abaikan */ }
+    if (setActiveTab) setActiveTab('produk_hukum');
+    setSearchQuery('');
+    if (setGlobalSearch) setGlobalSearch('');
+    setShowSearchDropdown(false);
+    window.dispatchEvent(new CustomEvent('open_produk_hukum'));
+    showToast(`Membuka ${h.kind}: ${h.title} ⚖️`, 'success');
+  };
 
   // Navigasi generik ke tab + teruskan token pencarian bila tab tujuan mendukungnya
   const goToTab = (tab: string, token?: string, toastMsg?: string) => {
@@ -1029,7 +1044,7 @@ export default function AdminHeader({
                     {filteredHukum.map((h, i) => (
                       <button
                         key={`${h.kind}-${i}`}
-                        onClick={() => goToTab('produk_hukum', undefined, `Membuka ${h.kind}: ${h.title} ⚖️`)}
+                        onClick={() => handleHukumClick(h)}
                         className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
                       >
                         <div className="flex items-center gap-2 min-w-0">
