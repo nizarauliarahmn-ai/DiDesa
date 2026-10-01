@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Search, X, CheckCircle2, Plus, Lock, Banknote } from 'lucide-react';
+import { ArrowLeft, Search, X, CheckCircle2, Plus, Lock, Banknote, Download, Printer } from 'lucide-react';
+import { utils, writeFile } from 'xlsx';
 import { fetchLetterHistoryAsync, updateLetterHistoryAsync, LetterHistory } from '../../../utils/letterHistory';
 import { showToast } from '../../../utils/toast';
 
@@ -32,6 +33,7 @@ interface TripRow {
   maksud: string;
   tglBerangkat: string;
   tglKembali: string;
+  tglSurat: string;
   spj: Record<SpjKey, SpjState>;
   cair: CairItem[];
 }
@@ -96,6 +98,7 @@ function expandTrips(letters: LetterHistory[]): TripRow[] {
         maksud: String(d.maksudPerjalanan || l.keperluan || '-'),
         tglBerangkat: String(d.tanggalBerangkat || ''),
         tglKembali: String(d.tanggalKembali || ''),
+        tglSurat: String(l.tanggal || ''),
         spj: normSpj(entry.spj),
         cair: Array.isArray(entry.cair) ? entry.cair : [],
       });
@@ -161,7 +164,7 @@ export default function AdminSuratSPPDRegister({ onBack, onBuatSPPD }: { onBack:
     return rows.filter(r => {
       if (q && !(r.nama.includes(q) || (r.nip || '').toUpperCase().includes(q))) return false;
       if (qBulan) {
-        const m = monthOf(r.tglBerangkat, (letters.find(l => l.id === r.letterId)?.tanggal || ''));
+        const m = monthOf(r.tglBerangkat, r.tglSurat);
         if (m !== qBulan) return false;
       }
       if (qSpj === 'layak' && !isLayakCair(r)) return false;
@@ -173,6 +176,76 @@ export default function AdminSuratSPPDRegister({ onBack, onBuatSPPD }: { onBack:
   const totalNominal = useMemo(() => filtered.reduce((s, r) => s + r.cair.reduce((a, c) => a + (Number(c.nominal) || 0), 0), 0), [filtered]);
   const layakCount = useMemo(() => filtered.filter(isLayakCair).length, [filtered]);
   const cairCount = useMemo(() => filtered.reduce((s, r) => s + r.cair.length, 0), [filtered]);
+
+  const periodeText = (r: TripRow) =>
+    r.tglBerangkat ? (fmtTgl(r.tglBerangkat) + (r.tglKembali ? ` - ${fmtTgl(r.tglKembali)}` : '')) : (r.tglSurat || '-');
+  const spjText = (r: TripRow) =>
+    `${spjOkCount(r.spj)}/${SPJ_ITEMS.length}${isLayakCair(r) ? ' Layak Cair' : ''}`;
+  const cairText = (r: TripRow) =>
+    `${r.cair.length}x • ${fmtRp(r.cair.reduce((a, c) => a + (Number(c.nominal) || 0), 0))}`;
+
+  const exportExcel = () => {
+    if (filtered.length === 0) { showToast('Tidak ada data untuk di-export.', 'error'); return; }
+    const rows = filtered.map((r, i) => ({
+      'No': i + 1,
+      'Nama Pelaksana': r.nama,
+      'NIP': r.nip || '-',
+      'No. SPPD': r.nomor,
+      'Tujuan': r.tujuan,
+      'Maksud': r.maksud,
+      'Periode': periodeText(r),
+      'SPJ': spjText(r),
+      'Pencairan': cairText(r),
+    }));
+    const ws = utils.json_to_sheet(rows);
+    ws['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 40 }, { wch: 22 }, { wch: 16 }, { wch: 22 }];
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Register SPPD');
+    writeFile(wb, `register-sppd-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    showToast('File Excel berhasil diunduh.', 'success');
+  };
+
+  const exportPrint = () => {
+    if (filtered.length === 0) { showToast('Tidak ada data untuk dicetak.', 'error'); return; }
+    const namaDesa = (localStorage.getItem('kop_desa') || localStorage.getItem('village_name') || 'Wasah Hilir').replace(/^(desa)\s+/i, '').trim();
+    const namaKec = (localStorage.getItem('kop_kecamatan') || localStorage.getItem('village_kecamatan') || 'Simpur').replace(/^(kecamatan)\s+/i, '').trim();
+    const rowsHtml = filtered.map((r, i) => `
+      <tr>
+        <td style="text-align:center">${i + 1}</td>
+        <td><b>${r.nama}</b>${r.nip ? `<br><span style="font-size:9px">${r.nip}</span>` : ''}</td>
+        <td style="white-space:nowrap">${r.nomor}</td>
+        <td>${r.tujuan}<br><span style="font-size:9px;color:#555">${r.maksud}</span></td>
+        <td style="white-space:nowrap">${periodeText(r)}</td>
+        <td style="text-align:center">${spjOkCount(r.spj)}/${SPJ_ITEMS.length}${isLayakCair(r) ? ' ✓' : ''}</td>
+        <td style="text-align:right;white-space:nowrap">${cairText(r)}</td>
+      </tr>
+    `).join('');
+    const doc = `<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8" /><title>Buku Register SPPD</title>
+<style>
+@page { size: A4 landscape; margin: 15mm; } * { box-sizing: border-box; }
+body { font-family: Arial, sans-serif; font-size: 11px; margin: 0; padding: 20px; }
+h1 { text-align: center; font-size: 16px; margin-bottom: 2px; }
+.sub { text-align: center; font-size: 12px; font-weight: bold; margin: 0 0 2px; }
+.sum { text-align: center; font-size: 10px; margin: 0 0 4px; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; table-layout: auto; }
+th, td { border: 1px solid #333; padding: 6px 8px; font-size: 10px; }
+th { background: #f0f0f0; font-weight: bold; }
+tfoot td { border-top: 2px solid #333; font-weight: bold; background: #f9f9f9; }
+@media print { body { padding: 0; } }
+</style></head><body>
+<h1>BUKU REGISTER SPPD</h1>
+<p class="sub">DESA ${namaDesa.toUpperCase()} &mdash; KECAMATAN ${namaKec.toUpperCase()}</p>
+<p class="sum">Total ${filtered.length} perjalanan • ${cairCount} kali pencairan • ${fmtRp(totalNominal)}</p>
+<table><thead><tr>
+<th style="width:30px">No</th><th>Pelaksana</th><th>No. SPPD</th><th>Tujuan / Maksud</th>
+<th>Periode</th><th>SPJ</th><th>Pencairan</th>
+</tr></thead><tbody>${rowsHtml}</tbody></table>
+<script>window.onload = function () { window.print(); };</script>
+</body></html>`;
+    const w = window.open('', '_blank');
+    if (w) { w.document.write(doc); w.document.close(); }
+  };
 
   const openSpj = (row: TripRow) => {
     setSpjTarget(row);
@@ -217,6 +290,21 @@ export default function AdminSuratSPPDRegister({ onBack, onBuatSPPD }: { onBack:
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Siapa — kemana — apa • berapa kali • total • kelayakan cair (SPJ)</p>
         </div>
         <div className="flex items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={exportExcel}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Unduh data tampil sebagai Excel"
+          >
+            <Download size={14} /> Export
+          </button>
+          <button
+            onClick={exportPrint}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            title="Cetak register tampil sebagai PDF"
+          >
+            <Printer size={14} /> Cetak
+          </button>
+          <div className="w-px h-6 bg-gray-200 dark:bg-slate-700" />
           <button
             onClick={onBack}
             className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
@@ -319,8 +407,8 @@ export default function AdminSuratSPPDRegister({ onBack, onBuatSPPD }: { onBack:
                       <p className="text-[11px] text-gray-500 dark:text-slate-400 truncate" title={r.maksud}>{r.maksud}</p>
                     </td>
                     <td className="px-4 py-3 text-xs text-gray-600 dark:text-slate-300 whitespace-nowrap">
-                      {r.tglBerangkat ? fmtTgl(r.tglBerangkat) : '-'}
-                      {r.tglKembali ? ` – ${fmtTgl(r.tglKembali)}` : ''}
+                      {r.tglBerangkat ? fmtTgl(r.tglBerangkat) : (r.tglSurat || '-')}
+                      {r.tglBerangkat && r.tglKembali ? ` – ${fmtTgl(r.tglKembali)}` : ''}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full border ${layak
