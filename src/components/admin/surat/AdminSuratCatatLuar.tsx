@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, FileText, Search, CheckCircle2, Loader2, User, Calendar, Hash } from 'lucide-react';
+import { X, FileText, Search, CheckCircle2, Loader2, User, Calendar, Hash, Plus } from 'lucide-react';
 import { supabase } from '../../../utils/supabase';
 import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import { showToast } from '../../../utils/toast';
@@ -30,6 +30,12 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
   });
   const [keperluan, setKeperluan] = useState('');
   const [keterangan, setKeterangan] = useState('');
+
+  // Khusus SPPD: 1 nomor bisa untuk >1 pelaksana + tujuan + rentang tanggal
+  const [sppdPelaksana, setSppdPelaksana] = useState<Array<{ nama: string; nip: string }>>([]);
+  const [sppdTujuan, setSppdTujuan] = useState('');
+  const [sppdBerangkat, setSppdBerangkat] = useState('');
+  const [sppdKembali, setSppdKembali] = useState('');
 
   const [saving, setSaving] = useState(false);
 
@@ -64,6 +70,10 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
     }
   }, [selectedKlasifikasi, tanggalSurat, generateNomor, classifications]);
 
+  // Deteksi jenis SPPD dari klasifikasi terpilih
+  const selectedCls = classifications.find(c => c.klasifikasi === selectedKlasifikasi);
+  const isSppd = /sppd|perjalanan dinas/i.test(`${selectedCls?.jenis || ''} ${selectedCls?.klasifikasi || ''}`);
+
   // Resident search
   const searchResidents = async (query: string) => {
     if (!query || query.trim().length < 3) { setResidentSuggestions([]); return; }
@@ -83,8 +93,17 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
   };
 
   const pickResident = (r: any) => {
-    setNik(r.nik || '');
-    setNama(r.name || '');
+    if (isSppd) {
+      const nip = r.nik || '';
+      setSppdPelaksana(prev => {
+        if (nip && prev.some(p => p.nip === nip)) return prev;
+        if (!nip && prev.some(p => p.nama === (r.name || ''))) return prev;
+        return [...prev, { nama: r.name || '', nip }];
+      });
+    } else {
+      setNik(r.nik || '');
+      setNama(r.name || '');
+    }
     setResidentSuggestions([]);
     setLookupQuery('');
   };
@@ -92,21 +111,62 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
   const handleSave = async () => {
     if (!selectedKlasifikasi) { showToast('Jenis surat wajib dipilih.', 'error'); return; }
     if (!nomorSurat.trim()) { showToast('Nomor surat belum digenerate.', 'error'); return; }
-    if (!nama.trim()) { showToast('Nama pemohon wajib diisi.', 'error'); return; }
-    if (!keperluan.trim()) { showToast('Keperluan wajib diisi.', 'error'); return; }
+
+    const cls = classifications.find(c => c.klasifikasi === selectedKlasifikasi);
+    const saveIsSppd = /sppd|perjalanan dinas/i.test(`${cls?.jenis || ''} ${cls?.klasifikasi || ''}`);
+
+    let payloadNama = nama.trim();
+    let payloadNik: string | null = nik || null;
+    let extraData: any = {};
+
+    if (saveIsSppd) {
+      const validPel = sppdPelaksana.filter(p => p.nama.trim());
+      if (validPel.length === 0) { showToast('Minimal 1 pelaksana perjalanan wajib diisi.', 'error'); return; }
+      if (!sppdTujuan.trim()) { showToast('Tempat tujuan wajib diisi.', 'error'); return; }
+      if (!sppdBerangkat) { showToast('Tanggal berangkat wajib diisi.', 'error'); return; }
+      if (!keperluan.trim()) { showToast('Maksud perjalanan wajib diisi.', 'error'); return; }
+      const plist = validPel.map(p => ({
+        id: crypto.randomUUID(),
+        nama: p.nama.trim().toUpperCase(),
+        nip: p.nip.trim(),
+        pangkat: '',
+        jabatan: '',
+        pengikutList: [],
+      }));
+      let lama = '';
+      const t1 = new Date(sppdBerangkat).getTime();
+      const t2 = sppdKembali ? new Date(sppdKembali).getTime() : t1;
+      if (!isNaN(t1) && !isNaN(t2)) lama = `${Math.max(1, Math.round((t2 - t1) / 86400000) + 1)} Hari`;
+      payloadNama = plist[0].nama;
+      payloadNik = plist[0].nip || null;
+      extraData = {
+        klasifikasi: 'SPPD',
+        pemohon: plist[0].nama,
+        nikPemohon: plist[0].nip || '-',
+        pelaksanaList: plist,
+        maksudPerjalanan: keperluan.trim(),
+        tempatTujuan: sppdTujuan.trim(),
+        tempatBerangkat: localStorage.getItem('kop_desa') || '',
+        tanggalBerangkat: sppdBerangkat,
+        tanggalKembali: sppdKembali,
+        lamaPerjalanan: lama,
+      };
+    } else {
+      if (!nama.trim()) { showToast('Nama pemohon wajib diisi.', 'error'); return; }
+      if (!keperluan.trim()) { showToast('Keperluan wajib diisi.', 'error'); return; }
+    }
 
     setSaving(true);
     try {
       const tenantId = await resolveCurrentTenant();
       if (!tenantId) { showToast('Tenant tidak ditemukan.', 'error'); setSaving(false); return; }
 
-      const cls = classifications.find(c => c.klasifikasi === selectedKlasifikasi);
       const insertData: any = {
         tenant_id: tenantId,
         nomor: normalizeNomorSurat(nomorSurat),
         jenis_surat: cls?.jenis || selectedKlasifikasi,
-        nik: nik || null,
-        nama: nama,
+        nik: payloadNik,
+        nama: payloadNama,
         keterangan: keperluan,
         status: 'Selesai',
         data: {
@@ -114,7 +174,8 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
           catatanLuar: true,
           tanggalSurat: tanggalSurat,
           namaPejabat: '',
-          jabatanPejabat: ''
+          jabatanPejabat: '',
+          ...extraData,
         }
       };
 
@@ -235,6 +296,108 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
             </div>
           </div>
 
+          {isSppd ? (
+            <>
+              {/* Pelaksana (bisa >1 orang) */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pelaksana Perjalanan <span className="text-red-500">*</span> <span className="normal-case font-medium text-gray-400">(bisa lebih dari 1 orang)</span></label>
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={lookupQuery}
+                    onChange={(e) => { setLookupQuery(e.target.value); searchResidents(e.target.value); }}
+                    placeholder="Ketik NIK atau nama → klik untuk tambah..."
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                  />
+                  {residentSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-10 overflow-hidden">
+                      {residentSuggestions.map((r, i) => (
+                        <button
+                          key={i}
+                          onClick={() => pickResident(r)}
+                          className="w-full text-left px-3 py-2.5 hover:bg-emerald-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2"
+                        >
+                          <User className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <div className="min-w-0">
+                            <div className="text-sm font-bold text-gray-800 dark:text-slate-100 truncate">{r.name}</div>
+                            <div className="text-[11px] text-gray-400 font-mono">NIK: {r.nik}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {sppdPelaksana.map((p, i) => (
+                  <div key={i} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={p.nama}
+                      onChange={(e) => setSppdPelaksana(prev => prev.map((x, xi) => xi === i ? { ...x, nama: e.target.value } : x))}
+                      placeholder={`Nama pelaksana ${i + 1}...`}
+                      className="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
+                    />
+                    <input
+                      type="text"
+                      value={p.nip}
+                      onChange={(e) => setSppdPelaksana(prev => prev.map((x, xi) => xi === i ? { ...x, nip: e.target.value } : x))}
+                      placeholder="NIP / NIK"
+                      className="w-36 px-3 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-mono text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
+                    />
+                    <button
+                      onClick={() => setSppdPelaksana(prev => prev.filter((_, xi) => xi !== i))}
+                      className="px-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors"
+                      title="Hapus pelaksana"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => setSppdPelaksana(prev => [...prev, { nama: '', nip: '' }])}
+                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Tambah manual
+                </button>
+              </div>
+
+              {/* Tujuan */}
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tempat Tujuan <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  value={sppdTujuan}
+                  onChange={(e) => setSppdTujuan(e.target.value)}
+                  placeholder="Contoh: Dinas PMD Kab. Hulu Sungai Selatan"
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
+                />
+              </div>
+
+              {/* Rentang tanggal */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tgl Berangkat <span className="text-red-500">*</span></label>
+                  <input
+                    type="date"
+                    value={sppdBerangkat}
+                    onChange={(e) => setSppdBerangkat(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tgl Kembali</label>
+                  <input
+                    type="date"
+                    value={sppdKembali}
+                    min={sppdBerangkat || undefined}
+                    onChange={(e) => setSppdKembali(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 outline-none bg-white dark:bg-slate-900"
+                  />
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
           {/* Pencarian Warga */}
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Cari Warga (NIK / Nama)</label>
@@ -290,15 +453,17 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
             />
           </div>
+            </>
+          )}
 
-          {/* Keperluan */}
+          {/* Keperluan / Maksud Perjalanan */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Keperluan <span className="text-red-500">*</span></label>
+            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">{isSppd ? 'Maksud Perjalanan' : 'Keperluan'} <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={keperluan}
               onChange={(e) => setKeperluan(e.target.value)}
-              placeholder="Contoh: Pengurusan Tanah, Persyaratan Nikah..."
+              placeholder={isSppd ? 'Contoh: Mengikuti rapat koordinasi...' : 'Contoh: Pengurusan Tanah, Persyaratan Nikah...'}
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-gray-900 dark:text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all bg-white dark:bg-slate-900"
             />
           </div>
