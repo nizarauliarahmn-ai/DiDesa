@@ -6,6 +6,7 @@ import { resolveCurrentTenant } from '../../../utils/tenantResolver';
 import * as XLSX from 'xlsx';
 import ImportModal from './ImportModal';
 import DocumentViewerModal from './DocumentViewerModal';
+import ProdukHukumDetailModal from './ProdukHukumDetailModal';
 import DocumentUpload from './DocumentUpload';
 
 interface ProdukHukumItem {
@@ -113,14 +114,14 @@ export default function ProdukHukumSK({ onBack, openDocId, onConsumeOpenDocId }:
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingItem, setEditingItem] = 
 useState<ProdukHukumItem | null>(null);
+  const [viewItem, setViewItem] = useState<ProdukHukumItem | null>(null);
 
-  // Deep-link dari pencarian global: buka modal detail dokumen langsung
+  // Deep-link dari pencarian global: buka modal lihat detail langsung
   useEffect(() => {
     if (!openDocId) return;
     const found = items.find(i => i.id === openDocId);
     if (found) {
-      setEditingItem(found);
-      setShowModal(true);
+      setViewItem(found);
       onConsumeOpenDocId?.();
     }
   }, [openDocId, items]);
@@ -682,12 +683,10 @@ useState<ProdukHukumItem | null>(null);
                     </td>
                     <td className="px-2 py-2 sticky right-0 bg-white dark:bg-slate-900 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)] dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center justify-center gap-0.5">
-                        {item.documentData && (
-                          <button onClick={() => { setViewerData({ data: item.documentData, name: item.documentName }); setShowViewer(true); }}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Lihat Dokumen">
-                            <Eye size={14} />
-                          </button>
-                        )}
+                        <button onClick={() => setViewItem(item)}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors" title="Lihat">
+                          <Eye size={14} />
+                        </button>
                         <button onClick={() => { setEditingItem(item); setShowModal(true); }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" title="Edit">
                           <Edit3 size={14} />
@@ -759,6 +758,16 @@ useState<ProdukHukumItem | null>(null);
 
       {showModal && (
         <ModalSK item={editingItem} items={items} onSave={handleSave} onClose={() => { setShowModal(false); setEditingItem(null); }} />
+      )}
+      {viewItem && (
+        <ProdukHukumDetailModal
+          item={viewItem}
+          kindLabel="SK Kades"
+          onClose={() => setViewItem(null)}
+          onEdit={(it) => { setViewItem(null); setEditingItem(it); setShowModal(true); }}
+          onShare={(it) => handleShare(it)}
+          onViewDocument={(data, name) => { setViewItem(null); setViewerData({ data, name }); setShowViewer(true); }}
+        />
       )}
 
       <ImportModal
