@@ -115,16 +115,12 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
     const cls = classifications.find(c => c.klasifikasi === selectedKlasifikasi);
     const saveIsSppd = /sppd|perjalanan dinas/i.test(`${cls?.jenis || ''} ${cls?.klasifikasi || ''}`);
 
-    let payloadNama = nama.trim();
+    let payloadNama = nama.trim() || '-';
     let payloadNik: string | null = nik || null;
     let extraData: any = {};
 
     if (saveIsSppd) {
       const validPel = sppdPelaksana.filter(p => p.nama.trim());
-      if (validPel.length === 0) { showToast('Minimal 1 pelaksana perjalanan wajib diisi.', 'error'); return; }
-      if (!sppdTujuan.trim()) { showToast('Tempat tujuan wajib diisi.', 'error'); return; }
-      if (!sppdBerangkat) { showToast('Tanggal berangkat wajib diisi.', 'error'); return; }
-      if (!keperluan.trim()) { showToast('Maksud perjalanan wajib diisi.', 'error'); return; }
       const plist = validPel.map(p => ({
         id: crypto.randomUUID(),
         nama: p.nama.trim().toUpperCase(),
@@ -136,13 +132,13 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
       let lama = '';
       const t1 = new Date(sppdBerangkat).getTime();
       const t2 = sppdKembali ? new Date(sppdKembali).getTime() : t1;
-      if (!isNaN(t1) && !isNaN(t2)) lama = `${Math.max(1, Math.round((t2 - t1) / 86400000) + 1)} Hari`;
-      payloadNama = plist[0].nama;
-      payloadNik = plist[0].nip || null;
+      if (sppdBerangkat && !isNaN(t1) && !isNaN(t2)) lama = `${Math.max(1, Math.round((t2 - t1) / 86400000) + 1)} Hari`;
+      payloadNama = plist[0]?.nama || '-';
+      payloadNik = plist[0]?.nip || null;
       extraData = {
         klasifikasi: 'SPPD',
-        pemohon: plist[0].nama,
-        nikPemohon: plist[0].nip || '-',
+        pemohon: plist[0]?.nama || '-',
+        nikPemohon: plist[0]?.nip || '-',
         pelaksanaList: plist,
         maksudPerjalanan: keperluan.trim(),
         tempatTujuan: sppdTujuan.trim(),
@@ -151,10 +147,8 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
         tanggalKembali: sppdKembali,
         lamaPerjalanan: lama,
       };
-    } else {
-      if (!nama.trim()) { showToast('Nama pemohon wajib diisi.', 'error'); return; }
-      if (!keperluan.trim()) { showToast('Keperluan wajib diisi.', 'error'); return; }
     }
+    // Non-SPPD: hanya jenis + nomor yang wajib (tujuan fitur ini: nomor tercatat).
 
     setSaving(true);
     try {
@@ -221,12 +215,12 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
         {/* Content */}
         <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-300 p-3 rounded-xl text-sm border border-amber-200 dark:border-amber-800">
-            Catat surat fisik yang dibuat di luar sistem. Surat akan mendapat nomor otomatis dan masuk ke arsip.
+            Catat surat fisik yang dibuat di luar sistem. Cukup pastikan nomor tercatat — field lain opsional, boleh dilengkapi menyusul.
           </div>
 
           {/* Jenis Surat */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Jenis Surat <span className="text-red-500">*</span></label>
+            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Jenis Surat</label>
             <select
               value={selectedKlasifikasi}
               onChange={(e) => setSelectedKlasifikasi(e.target.value)}
@@ -300,7 +294,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
             <>
               {/* Pelaksana (bisa >1 orang) */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pelaksana Perjalanan <span className="text-red-500">*</span> <span className="normal-case font-medium text-gray-400">(bisa lebih dari 1 orang)</span></label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Pelaksana Perjalanan <span className="normal-case font-medium text-gray-400">(bisa lebih dari 1 orang)</span></label>
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
@@ -363,7 +357,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
 
               {/* Tujuan */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tempat Tujuan <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tempat Tujuan</label>
                 <input
                   type="text"
                   value={sppdTujuan}
@@ -376,7 +370,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
               {/* Rentang tanggal */}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tgl Berangkat <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Tgl Berangkat</label>
                   <input
                     type="date"
                     value={sppdBerangkat}
@@ -444,7 +438,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
 
           {/* Nama Pemohon */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Pemohon <span className="text-red-500">*</span></label>
+            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">Nama Pemohon</label>
             <input
               type="text"
               value={nama}
@@ -458,7 +452,7 @@ export default function AdminSuratCatatLuar({ onClose, onSuccess }: Props) {
 
           {/* Keperluan / Maksud Perjalanan */}
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">{isSppd ? 'Maksud Perjalanan' : 'Keperluan'} <span className="text-red-500">*</span></label>
+            <label className="text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider">{isSppd ? 'Maksud Perjalanan' : 'Keperluan'}</label>
             <input
               type="text"
               value={keperluan}
