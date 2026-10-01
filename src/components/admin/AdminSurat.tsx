@@ -225,6 +225,7 @@ export default function AdminSurat({
           <AdminSuratDashboard 
             onBuatSurat={() => changeTab('buat')} 
             onOpenBatch={() => changeTab('batch')}
+            onOpenSPPDRegister={() => changeTab('sppd_register')}
             onEditLetter={handleEditLetter}
             onOpenTambahTamu={() => setShowTambahTamu(true)}
             onOpenTambahPermohonan={() => setShowTambahPermohonan(true)}

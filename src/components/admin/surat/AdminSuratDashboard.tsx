@@ -55,6 +55,7 @@ const getFullLetterName = (jenis: string): string => {
 interface AdminSuratDashboardProps {
   onBuatSurat: () => void;
   onOpenBatch?: () => void;
+  onOpenSPPDRegister?: () => void;
   onEditLetter?: (letter: LetterHistory) => void;
   onOpenTambahTamu?: () => void;
   onOpenTambahPermohonan?: () => void;
@@ -66,6 +67,7 @@ interface AdminSuratDashboardProps {
 export default function AdminSuratDashboard({ 
   onBuatSurat,
   onOpenBatch,
+  onOpenSPPDRegister,
   onEditLetter,
   onOpenTambahTamu,
   onOpenTambahPermohonan,
@@ -1151,6 +1153,18 @@ export default function AdminSuratDashboard({
                   <span>
                     <span className="block text-sm font-medium text-slate-800">Buat Surat Masal</span>
                     <span className="block text-xs text-slate-500 mt-0.5">SKTM / SKU / Domisili untuk banyak warga sekaligus</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => { setShowQuickActions(false); onOpenSPPDRegister?.(); }}
+                  className="w-full p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-3 cursor-pointer text-left"
+                >
+                  <span className="p-2 rounded-lg bg-slate-100 border border-slate-200">
+                    <ClipboardCheck className="w-5 h-5 text-slate-600" />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-medium text-slate-800">Buku Register SPPD</span>
+                    <span className="block text-xs text-slate-500 mt-0.5">Perjalanan, pencairan & kelengkapan SPJ</span>
                   </span>
                 </button>
                 <button
