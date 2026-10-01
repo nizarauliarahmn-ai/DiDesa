@@ -18,6 +18,7 @@ import AdminSuratSKAW from './surat/AdminSuratSKAW';
 import AdminSuratSDU from './surat/AdminSuratSDU';
 import AdminSuratSPT from './surat/AdminSuratSPPD';
 import AdminSuratSPPD from './surat/AdminSuratSPPD';
+import AdminSuratSPPDRegister from './surat/AdminSuratSPPDRegister';
 import AdminSuratSKKT from './surat/AdminSuratSKKT';
 import AdminSuratUndangan from './surat/AdminSuratUndangan';
 import CustomLetterEditor from './surat/CustomLetterEditor';
@@ -38,7 +39,7 @@ export default function AdminSurat({
   setSearchQuery?: (val: string) => void;
   debouncedSearchQuery?: string;
 }) {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'batch' | 'penomoran' | 'custom' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'skkt' | 'undangan' | 'skaw' | 'master_template'>(() => {
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'inbox' | 'buat' | 'batch' | 'penomoran' | 'custom' | 'nikah' | 'sktm' | 'skbm' | 'skh' | 'skl' | 'skm' | 'sku' | 'skph' | 'skd' | 'skp' | 'sdu' | 'spt' | 'sppd' | 'sppd_register' | 'skkt' | 'undangan' | 'skaw' | 'master_template'>(() => {
     // Dukungan deep-link: /?admin_tab=surat&surat_form=skn langsung membuka form tertentu.
     // Memakai singkatan surat resmi, dengan alias tab lama untuk kompatibilitas.
     const suratFormAlias: Record<string, any> = {
@@ -375,11 +376,24 @@ export default function AdminSurat({
           />
         )}
         {activeTab === 'sppd' && (
-          <AdminSuratSPPD 
-            editData={editData}
-            editLetterId={editLetterId}
-            onBack={() => changeTab(returnTab)} 
-          />
+          <>
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={() => changeTab('sppd_register')}
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-gray-900 dark:bg-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                📖 Buku Register SPPD
+              </button>
+            </div>
+            <AdminSuratSPPD 
+              editData={editData}
+              editLetterId={editLetterId}
+              onBack={() => changeTab(returnTab)} 
+            />
+          </>
+        )}
+        {activeTab === 'sppd_register' && (
+          <AdminSuratSPPDRegister onBack={() => changeTab('sppd')} />
         )}
         {activeTab === 'undangan' && (
           <AdminSuratUndangan 
