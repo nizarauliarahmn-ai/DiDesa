@@ -7,6 +7,16 @@ import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { fetchSaaSTenantRequests } from '../../utils/saasLeads';
 import { fetchBugReportsOnline } from '../../utils/bugReportService';
 
+// Parse aman nilai JSON (kolom value saas_settings bisa string/object/array)
+const parseJsonArr = (v: any): any[] => {
+  try {
+    const p = typeof v === 'string' ? JSON.parse(v) : v;
+    return Array.isArray(p) ? p : [];
+  } catch {
+    return [];
+  }
+};
+
 export default function AdminHeader({ 
   setActiveTab, 
   globalSearch = '', 
@@ -61,6 +71,14 @@ export default function AdminHeader({
   const [suratList, setSuratList] = useState<any[]>([]);
   const [aspirasiList, setAspirasiList] = useState<any[]>([]);
   const [apbdesaList, setApbdesaList] = useState<any[]>([]);
+  const [bansosList, setBansosList] = useState<any[]>([]);
+  const [usulanList, setUsulanList] = useState<any[]>([]);
+  const [rpjmList, setRpjmList] = useState<any[]>([]);
+  const [rkpList, setRkpList] = useState<any[]>([]);
+  const [guestList, setGuestList] = useState<any[]>([]);
+  const [aparaturList, setAparaturList] = useState<any[]>([]);
+  const [hukumList, setHukumList] = useState<any[]>([]);
+  const [beritaList, setBeritaList] = useState<any[]>([]);
   const [loadingResidents, setLoadingResidents] = useState(false);
   const [hasLoadedResidents, setHasLoadedResidents] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -95,7 +113,13 @@ export default function AdminHeader({
           supabase.from('surat').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(200),
           supabase.from('aspirasi').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(100),
           supabase.from('apbdesa').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(100),
-        ]).then(([residentsRes, suratRes, aspirasiRes, apbdesaRes]) => {
+          supabase.from('bansos_recipients').select('id,nama,program_id,tahun,status,resident_id').eq('tenant_id', tenantId).limit(300),
+          supabase.from('usulan_desas').select('id,kode_usulan,uraian_usulan,kategori').eq('tenant_id', tenantId).limit(200),
+          supabase.from('rpjmdesa').select('id,kode_rpjmdesa,nama_program').eq('tenant_id', tenantId).limit(100),
+          supabase.from('rkpdesa').select('id,kode_rkpdesa,nama_kegiatan').eq('tenant_id', tenantId).limit(100),
+          supabase.from('guest_book').select('id,nama,keperluan').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(100),
+          supabase.from('saas_settings').select('key,value').eq('tenant_id', tenantId).in('key', ['village_officers', 'village_bpd', 'village_lpm', 'village_rt_list', 'village_rw_list', 'produk_hukum_data', 'didesa_news_list']),
+        ]).then(([residentsRes, suratRes, aspirasiRes, apbdesaRes, bansosRes, usulanRes, rpjmRes, rkpRes, guestRes, settingsRes]) => {
           if (residentsRes.data) {
             const formatted = residentsRes.data.map(r => ({ ...r, noKk: r.no_kk }));
             setResidents(formatted.filter(r => r.is_deleted !== 1));
@@ -103,6 +127,49 @@ export default function AdminHeader({
           if (suratRes.data) setSuratList(suratRes.data);
           if (aspirasiRes.data) setAspirasiList(aspirasiRes.data);
           if (apbdesaRes.data) setApbdesaList(apbdesaRes.data);
+          if (bansosRes.data) setBansosList(bansosRes.data);
+          if (usulanRes.data) setUsulanList(usulanRes.data);
+          if (rpjmRes.data) setRpjmList(rpjmRes.data);
+          if (rkpRes.data) setRkpList(rkpRes.data);
+          if (guestRes.data) setGuestList(guestRes.data);
+          if (settingsRes.data) {
+            const byKey: Record<string, any> = {};
+            settingsRes.data.forEach((row: any) => { byKey[row.key] = row.value; });
+            // Aparatur & lembaga (officers/bpd/lpm/rt/rw)
+            const ap: any[] = [];
+            const pushOff = (arr: any[], kind: string) => arr.forEach((o: any) => {
+              if (o && o.name) ap.push({ kind, name: o.name, sub: o.role || kind });
+            });
+            pushOff(parseJsonArr(byKey['village_officers']), 'Perangkat');
+            pushOff(parseJsonArr(byKey['village_bpd']), 'BPD');
+            pushOff(parseJsonArr(byKey['village_lpm']), 'LPM');
+            parseJsonArr(byKey['village_rt_list']).forEach((o: any) => {
+              if (o && o.name) ap.push({ kind: 'Ketua RT', name: o.name, sub: `RT ${o.no || '-'}` });
+            });
+            parseJsonArr(byKey['village_rw_list']).forEach((o: any) => {
+              if (o && o.name) ap.push({ kind: 'Ketua RW', name: o.name, sub: `RW ${o.no || '-'}` });
+            });
+            setAparaturList(ap);
+            // Produk hukum (perdes/sk/berita acara)
+            const hk: any[] = [];
+            try {
+              const phRaw = byKey['produk_hukum_data'];
+              const ph = typeof phRaw === 'string' ? JSON.parse(phRaw) : (phRaw || {});
+              const pushHukum = (arr: any, kind: string) => (Array.isArray(arr) ? arr : []).forEach((d: any) => {
+                if (d && (d.uraian || d.no)) hk.push({
+                  kind,
+                  title: d.uraian || `No. ${d.no || '-'}`,
+                  sub: [d.no ? `No. ${d.no}` : '', d.tahun ? `Tahun ${d.tahun}` : ''].filter(Boolean).join(' • '),
+                });
+              });
+              pushHukum(ph.perdes, 'Perdes');
+              pushHukum(ph.sk_kades, 'SK Kades');
+              pushHukum(ph.berita_acara, 'Berita Acara');
+            } catch { /* abaikan data korup */ }
+            setHukumList(hk);
+            // Berita desa
+            setBeritaList(parseJsonArr(byKey['didesa_news_list']).filter((n: any) => n && n.title).map((n: any) => ({ title: n.title })));
+          }
           setHasLoadedResidents(true);
           setLoadingResidents(false);
         });
@@ -159,6 +226,79 @@ export default function AdminHeader({
         (a.kode_apbdesa && a.kode_apbdesa.toLowerCase().includes(searchQuery.toLowerCase()))
       ).slice(0, 3)
     : [], [searchQuery, apbdesaList]);
+
+  const qLower = searchQuery.trim().toLowerCase();
+  const filteredBansos = useMemo(() => searchQuery.trim().length >= 2
+    ? bansosList.filter(b =>
+        (b.nama && b.nama.toLowerCase().includes(qLower)) ||
+        (b.program_id && b.program_id.toLowerCase().includes(qLower)) ||
+        (b.resident_id && String(b.resident_id).includes(searchQuery.trim()))
+      ).slice(0, 3)
+    : [], [searchQuery, bansosList, qLower]);
+
+  const filteredUsulan = useMemo(() => searchQuery.trim().length >= 2
+    ? usulanList.filter(u =>
+        (u.kode_usulan && u.kode_usulan.toLowerCase().includes(qLower)) ||
+        (u.uraian_usulan && u.uraian_usulan.toLowerCase().includes(qLower))
+      ).slice(0, 3)
+    : [], [searchQuery, usulanList, qLower]);
+
+  const filteredRpjm = useMemo(() => searchQuery.trim().length >= 2
+    ? rpjmList.filter(r =>
+        (r.kode_rpjmdesa && r.kode_rpjmdesa.toLowerCase().includes(qLower)) ||
+        (r.nama_program && r.nama_program.toLowerCase().includes(qLower))
+      ).slice(0, 3)
+    : [], [searchQuery, rpjmList, qLower]);
+
+  const filteredRkp = useMemo(() => searchQuery.trim().length >= 2
+    ? rkpList.filter(r =>
+        (r.kode_rkpdesa && r.kode_rkpdesa.toLowerCase().includes(qLower)) ||
+        (r.nama_kegiatan && r.nama_kegiatan.toLowerCase().includes(qLower))
+      ).slice(0, 3)
+    : [], [searchQuery, rkpList, qLower]);
+
+  const filteredGuest = useMemo(() => searchQuery.trim().length >= 2
+    ? guestList.filter(g =>
+        (g.nama && g.nama.toLowerCase().includes(qLower)) ||
+        (g.keperluan && g.keperluan.toLowerCase().includes(qLower))
+      ).slice(0, 3)
+    : [], [searchQuery, guestList, qLower]);
+
+  const filteredAparatur = useMemo(() => searchQuery.trim().length >= 2
+    ? aparaturList.filter(a =>
+        (a.name && a.name.toLowerCase().includes(qLower)) ||
+        (a.sub && a.sub.toLowerCase().includes(qLower)) ||
+        (a.kind && a.kind.toLowerCase().includes(qLower))
+      ).slice(0, 4)
+    : [], [searchQuery, aparaturList, qLower]);
+
+  const filteredHukum = useMemo(() => searchQuery.trim().length >= 2
+    ? hukumList.filter(h =>
+        (h.title && h.title.toLowerCase().includes(qLower)) ||
+        (h.sub && h.sub.toLowerCase().includes(qLower)) ||
+        (h.kind && h.kind.toLowerCase().includes(qLower))
+      ).slice(0, 3)
+    : [], [searchQuery, hukumList, qLower]);
+
+  const filteredBerita = useMemo(() => searchQuery.trim().length >= 2
+    ? beritaList.filter(n =>
+        (n.title && n.title.toLowerCase().includes(qLower))
+      ).slice(0, 3)
+    : [], [searchQuery, beritaList, qLower]);
+
+  // Navigasi generik ke tab + teruskan token pencarian bila tab tujuan mendukungnya
+  const goToTab = (tab: string, token?: string, toastMsg?: string) => {
+    if (setActiveTab) setActiveTab(tab);
+    if (token && setGlobalSearch) {
+      setGlobalSearch(token);
+      setSearchQuery(token);
+    } else {
+      setSearchQuery('');
+      if (setGlobalSearch) setGlobalSearch('');
+    }
+    setShowSearchDropdown(false);
+    if (toastMsg) showToast(toastMsg, 'success');
+  };
 
   const handleQuickLinkClick = (tab: string) => {
     if (setActiveTab) setActiveTab(tab);
@@ -598,7 +738,7 @@ export default function AdminHeader({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input 
             type="text" 
-            placeholder="Cari penduduk, surat, aspirasi, anggaran..." 
+            placeholder="Cari apa saja: penduduk, surat, bansos, usulan..." 
             value={searchQuery}
             onChange={(e) => {
               const val = e.target.value;
@@ -623,11 +763,11 @@ export default function AdminHeader({
               </div>
 
               {/* Empty state */}
-              {filteredQuickLinks.length === 0 && filteredResidents.length === 0 && filteredNotifications.length === 0 && filteredSurat.length === 0 && filteredAspirasi.length === 0 && filteredApbdesa.length === 0 && (
+              {filteredQuickLinks.length === 0 && filteredResidents.length === 0 && filteredNotifications.length === 0 && filteredSurat.length === 0 && filteredAspirasi.length === 0 && filteredApbdesa.length === 0 && filteredBansos.length === 0 && filteredUsulan.length === 0 && filteredRpjm.length === 0 && filteredRkp.length === 0 && filteredGuest.length === 0 && filteredAparatur.length === 0 && filteredHukum.length === 0 && filteredBerita.length === 0 && (
                 <div className="p-6 text-center text-gray-400">
                   <Search className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                   <p className="text-xs">Tidak ada hasil untuk "{searchQuery}"</p>
-                  <p className="text-[10px] text-gray-400 mt-1">Ketik nama penduduk, NIK, surat, aspirasi, atau menu</p>
+                  <p className="text-[10px] text-gray-400 mt-1">Ketik nama, NIK, surat, bansos, usulan, atau menu</p>
                 </div>
               )}
 
@@ -756,6 +896,106 @@ export default function AdminHeader({
                 </div>
               )}
 
+              {/* Bansos matches */}
+              {filteredBansos.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Bantuan Sosial</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredBansos.map(b => (
+                      <button
+                        key={b.id}
+                        onClick={() => goToTab('bantuan', b.nama, `Membuka bantuan: ${b.program_id} 🎁`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-amber-100 text-amber-800 font-bold text-[9px] flex-shrink-0">🎁</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100">{b.nama}</div>
+                            <div className="text-[10px] text-gray-400">{b.program_id} • {b.tahun} • {b.status}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-amber-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Usulan matches */}
+              {filteredUsulan.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Usulan Desa</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredUsulan.map(u => (
+                      <button
+                        key={u.id}
+                        onClick={() => goToTab('usulan_desa', undefined, `Membuka usulan ${u.kode_usulan} 📝`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-sky-100 text-sky-800 font-bold text-[9px] flex-shrink-0">📝</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100 truncate">{u.uraian_usulan}</div>
+                            <div className="text-[10px] text-gray-400">{u.kode_usulan}{u.kategori ? ` • ${u.kategori}` : ''}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-sky-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* RPJMDesa matches */}
+              {filteredRpjm.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">RPJMDesa</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredRpjm.map(r => (
+                      <button
+                        key={r.id}
+                        onClick={() => goToTab('rpjmdesa', undefined, `Membuka RPJMDesa: ${r.nama_program} 🗂️`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-violet-100 text-violet-800 font-bold text-[9px] flex-shrink-0">🗂️</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100 truncate">{r.nama_program}</div>
+                            <div className="text-[10px] text-gray-400">{r.kode_rpjmdesa}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-violet-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* RKPDesa matches */}
+              {filteredRkp.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">RKPDesa</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredRkp.map(r => (
+                      <button
+                        key={r.id}
+                        onClick={() => goToTab('rkpdesa', undefined, `Membuka RKPDesa: ${r.nama_kegiatan} 📋`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-teal-100 text-teal-800 font-bold text-[9px] flex-shrink-0">📋</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100 truncate">{r.nama_kegiatan}</div>
+                            <div className="text-[10px] text-gray-400">{r.kode_rkpdesa}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-teal-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* APBDesa matches */}
               {filteredApbdesa.length > 0 && (
                 <div className="p-2">
@@ -775,6 +1015,105 @@ export default function AdminHeader({
                           </div>
                         </div>
                         <span className="text-[9px] text-emerald-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Produk Hukum matches */}
+              {filteredHukum.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Produk Hukum</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredHukum.map((h, i) => (
+                      <button
+                        key={`${h.kind}-${i}`}
+                        onClick={() => goToTab('produk_hukum', undefined, `Membuka ${h.kind}: ${h.title} ⚖️`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-stone-100 text-stone-800 font-bold text-[9px] flex-shrink-0">⚖️</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100 truncate">{h.title}</div>
+                            <div className="text-[10px] text-gray-400">{h.kind}{h.sub ? ` • ${h.sub}` : ''}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-stone-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Aparatur matches */}
+              {filteredAparatur.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Aparatur & Lembaga</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredAparatur.map((a, i) => (
+                      <button
+                        key={`${a.kind}-${a.name}-${i}`}
+                        onClick={() => goToTab('aparatur', undefined, `Membuka aparatur: ${a.name} 👥`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-cyan-100 text-cyan-800 font-bold text-[9px] flex-shrink-0">👥</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100">{a.name}</div>
+                            <div className="text-[10px] text-gray-400">{a.kind}{a.sub ? ` • ${a.sub}` : ''}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-cyan-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Buku Tamu matches */}
+              {filteredGuest.length > 0 && (
+                <div className="p-2 border-b border-gray-50">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Buku Tamu</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredGuest.map(g => (
+                      <button
+                        key={g.id}
+                        onClick={() => goToTab('buku_tamu', undefined, `Membuka buku tamu: ${g.nama} 📖`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-orange-100 text-orange-800 font-bold text-[9px] flex-shrink-0">📖</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100">{g.nama}</div>
+                            <div className="text-[10px] text-gray-400 truncate">{g.keperluan || '-'}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-orange-600 font-bold">Buka</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Berita matches */}
+              {filteredBerita.length > 0 && (
+                <div className="p-2">
+                  <div className="px-2.5 py-1 text-[9px] font-extrabold tracking-wider text-gray-400 uppercase">Berita Desa</div>
+                  <div className="mt-1 space-y-0.5">
+                    {filteredBerita.map((n, i) => (
+                      <button
+                        key={`${n.title}-${i}`}
+                        onClick={() => goToTab('berita', n.title, `Membuka berita: ${n.title} 📰`)}
+                        className="w-full text-left px-2.5 py-1.5 rounded-xl text-xs text-gray-700 dark:text-slate-300 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="p-1 rounded bg-lime-100 text-lime-800 font-bold text-[9px] flex-shrink-0">📰</div>
+                          <div className="truncate">
+                            <div className="font-bold text-gray-800 dark:text-slate-100 truncate">{n.title}</div>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-lime-600 font-bold">Buka</span>
                       </button>
                     ))}
                   </div>
