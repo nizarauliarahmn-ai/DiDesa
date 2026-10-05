@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Arsip lokal (jangan commit)
+*.tar.gz
+*.zip
