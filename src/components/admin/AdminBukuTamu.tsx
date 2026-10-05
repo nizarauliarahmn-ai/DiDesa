@@ -8,7 +8,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useReactToPrint } from 'react-to-print';
 import {
   BookOpen, Plus, QrCode, Search, Printer, Download,
-  LogIn, Building2, CheckCircle2, X, Trash2, Send, Eye, Pencil
+  Building2, X, Trash2, Send, Eye, Pencil, CalendarDays, Calendar
 } from 'lucide-react';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
 
@@ -425,8 +425,8 @@ export default function AdminBukuTamu() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Hari Ini', value: todayCount, icon: <BookOpen className="w-4 h-4" /> },
-          { label: 'Hadir', value: entries.filter(e => e.status === 'hadir').length, icon: <LogIn className="w-4 h-4" /> },
-          { label: 'Selesai', value: entries.filter(e => e.status === 'selesai').length, icon: <CheckCircle2 className="w-4 h-4" /> },
+          { label: 'Bulan Ini', value: entries.filter(e => e.tanggal_masuk && e.tanggal_masuk.startsWith(todayStr.slice(0, 7))).length, icon: <CalendarDays className="w-4 h-4" /> },
+          { label: 'Tahun Ini', value: entries.filter(e => e.tanggal_masuk && e.tanggal_masuk.startsWith(todayStr.slice(0, 4))).length, icon: <Calendar className="w-4 h-4" /> },
           { label: 'Urusan Surat', value: entries.filter(e => e.keperluan && e.keperluan.toLowerCase().includes('surat')).length, icon: <Building2 className="w-4 h-4" /> },
         ].map(({ label, value, icon }) => (
           <div key={label} className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
