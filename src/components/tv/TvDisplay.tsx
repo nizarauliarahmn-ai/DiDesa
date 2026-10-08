@@ -142,9 +142,8 @@ export default function TvDisplay() {
 
       {/* Zona bawah: running text */}
       <div className="h-20 shrink-0 bg-green-700 text-white flex items-center overflow-hidden">
-        <div className="flex w-max whitespace-nowrap animate-[tv-ticker_25s_linear_infinite]">
+        <div className="w-max whitespace-nowrap animate-[tv-ticker_25s_linear_infinite]">
           <span className="text-2xl font-bold px-8">{cfg.tickerText || 'Area Running Text Pengumuman Desa'}</span>
-          <span className="text-2xl font-bold px-8" aria-hidden="true">{cfg.tickerText || 'Area Running Text Pengumuman Desa'}</span>
         </div>
       </div>
     </div>

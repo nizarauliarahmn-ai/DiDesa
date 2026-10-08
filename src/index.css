@@ -339,9 +339,9 @@ textarea.focus-green:focus {
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
 }
 
-/* DiDesa TV ticker */
+/* DiDesa TV ticker — masuk dari tepi kanan, keluar tepi kiri */
 @keyframes tv-ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
 }
 
