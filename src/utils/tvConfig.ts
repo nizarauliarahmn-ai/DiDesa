@@ -115,22 +115,26 @@ export async function saveTvConfig(cfg: TvConfig): Promise<{ ok: boolean; messag
   }
 }
 
-/** Statistik otomatis dari database desa (tanpa isi manual). */
+/** Statistik otomatis dari database desa (tanpa isi manual).
+ *  Tahan macet: tiap query dibatasi timeout & hasil parsial tetap tampil. */
+const withTimeout = <T,>(p: Promise<T>, ms = 15000): Promise<T | null> =>
+  Promise.race([p, new Promise<null>(resolve => setTimeout(() => resolve(null), ms))]);
+
 export async function loadTvAutoStats(): Promise<{ label: string; value: string }[]> {
   const fallback = (label: string) => ({ label, value: '-' });
   const stats = [fallback('Total Penduduk'), fallback('Surat Terbit'), fallback('Penerima Bansos'), fallback('Pengumuman')];
   try {
-    const tenantId = await resolveCurrentTenant();
+    const tenantId = await withTimeout(resolveCurrentTenant(), 10000);
     if (!tenantId) return stats;
     const [res, sur, ban, news] = await Promise.all([
-      supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).or('is_deleted.is.null,is_deleted.neq.1'),
-      supabase.from('surat').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId),
-      supabase.from('bansos_recipients').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId),
-      supabase.from('saas_settings').select('value').eq('tenant_id', tenantId).eq('key', 'didesa_news_list').maybeSingle(),
+      withTimeout(supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).or('is_deleted.is.null,is_deleted.neq.1')),
+      withTimeout(supabase.from('surat').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId)),
+      withTimeout(supabase.from('bansos_recipients').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId)),
+      withTimeout(supabase.from('saas_settings').select('value').eq('tenant_id', tenantId).eq('key', 'didesa_news_list').maybeSingle()),
     ]);
-    if (typeof res.count === 'number') stats[0].value = res.count.toLocaleString('id-ID');
-    if (typeof sur.count === 'number') stats[1].value = sur.count.toLocaleString('id-ID');
-    if (typeof ban.count === 'number') stats[2].value = ban.count.toLocaleString('id-ID');
+    if (res && typeof res.count === 'number') stats[0].value = res.count.toLocaleString('id-ID');
+    if (sur && typeof sur.count === 'number') stats[1].value = sur.count.toLocaleString('id-ID');
+    if (ban && typeof ban.count === 'number') stats[2].value = ban.count.toLocaleString('id-ID');
     try {
       const raw = (news as any)?.value;
       const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
