@@ -116,9 +116,14 @@ export async function saveTvConfig(cfg: TvConfig): Promise<{ ok: boolean; messag
 }
 
 /** Statistik otomatis dari database desa (tanpa isi manual).
- *  Tahan macet: tiap query dibatasi timeout & hasil parsial tetap tampil. */
+ *  Sengaja memakai select baris biasa (jalur yang sama dengan halaman
+ *  Penduduk — terbukti jalan), bukan head-count. Tahan macet: timeout per
+ *  query + tiap query gagal mandiri (parsial tetap tampil). */
 const withTimeout = <T,>(p: Promise<T>, ms = 15000): Promise<T | null> =>
   Promise.race([p, new Promise<null>(resolve => setTimeout(() => resolve(null), ms))]);
+
+const safeQuery = <T,>(p: Promise<T>): Promise<T | null> =>
+  withTimeout(p.then(v => v, () => null));
 
 export async function loadTvAutoStats(): Promise<{ label: string; value: string }[]> {
   const fallback = (label: string) => ({ label, value: '-' });
@@ -127,16 +132,23 @@ export async function loadTvAutoStats(): Promise<{ label: string; value: string 
     const tenantId = await withTimeout(resolveCurrentTenant(), 10000);
     if (!tenantId) return stats;
     const [res, sur, ban, news] = await Promise.all([
-      withTimeout(supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).or('is_deleted.is.null,is_deleted.neq.1')),
-      withTimeout(supabase.from('surat').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId)),
-      withTimeout(supabase.from('bansos_recipients').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId)),
-      withTimeout(supabase.from('saas_settings').select('value').eq('tenant_id', tenantId).eq('key', 'didesa_news_list').maybeSingle()),
+      safeQuery(supabase.from('residents').select('nik,is_deleted').eq('tenant_id', tenantId).limit(10000)),
+      safeQuery(supabase.from('surat').select('id').eq('tenant_id', tenantId).limit(10000)),
+      safeQuery(supabase.from('bansos_recipients').select('id').eq('tenant_id', tenantId).limit(10000)),
+      safeQuery(supabase.from('saas_settings').select('value').eq('tenant_id', tenantId).eq('key', 'didesa_news_list').maybeSingle()),
     ]);
-    if (res && typeof res.count === 'number') stats[0].value = res.count.toLocaleString('id-ID');
-    if (sur && typeof sur.count === 'number') stats[1].value = sur.count.toLocaleString('id-ID');
-    if (ban && typeof ban.count === 'number') stats[2].value = ban.count.toLocaleString('id-ID');
+    if (res && Array.isArray((res as any).data)) {
+      const rows = (res as any).data as any[];
+      stats[0].value = rows.filter(r => r && r.is_deleted !== 1 && r.is_deleted !== '1').length.toLocaleString('id-ID');
+    }
+    if (sur && Array.isArray((sur as any).data)) {
+      stats[1].value = ((sur as any).data as any[]).length.toLocaleString('id-ID');
+    }
+    if (ban && Array.isArray((ban as any).data)) {
+      stats[2].value = ((ban as any).data as any[]).length.toLocaleString('id-ID');
+    }
     try {
-      const raw = (news as any)?.value;
+      const raw = (news as any)?.data?.value;
       const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
       if (Array.isArray(list)) stats[3].value = list.length.toLocaleString('id-ID');
     } catch { /* abaikan */ }
