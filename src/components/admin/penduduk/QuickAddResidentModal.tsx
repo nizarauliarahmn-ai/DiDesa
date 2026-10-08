@@ -276,6 +276,7 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
                 Keluarga dengan No. KK ini sudah terdaftar di database. Pastikan NIK yang Anda masukkan adalah benar anggota dari keluarga ini dan tentukan Status Hubungan Keluarga yang sesuai.
               </p>
               <div className="text-[11px] bg-white dark:bg-slate-800 p-2 rounded border border-blue-100 dark:border-blue-800 max-h-24 overflow-y-auto">
+                <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <tbody>
                     {familyMembers.map((m, idx) => (
@@ -286,6 +287,7 @@ export default function QuickAddResidentModal({ isOpen, onClose, onSuccess, init
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}

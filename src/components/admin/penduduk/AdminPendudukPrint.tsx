@@ -268,6 +268,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
 
               const renderMiniTable = (membersList: any[]) => (
                 <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg shadow-sm">
+                  <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
                       <tr>
@@ -286,6 +287,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               );
 
@@ -314,6 +316,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                   <span className="material-symbols-outlined text-base">family_history</span> Hubungan Keluarga
                 </h5>
                 <div className="overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg mt-1">
+                  <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead className="bg-gray-100 dark:bg-slate-800">
                       <tr>
@@ -334,6 +337,7 @@ export default function AdminPendudukPrint({ onBack, data, familyMembers = [], r
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               </div>
             );

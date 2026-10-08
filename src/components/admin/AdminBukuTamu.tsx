@@ -478,6 +478,7 @@ export default function AdminBukuTamu() {
 
       {/* Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-gray-50 dark:bg-slate-800 border-b border-gray-100 dark:border-slate-700">
             <tr>
@@ -560,6 +561,7 @@ export default function AdminBukuTamu() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Add Guest Modal (Broadcast) */}

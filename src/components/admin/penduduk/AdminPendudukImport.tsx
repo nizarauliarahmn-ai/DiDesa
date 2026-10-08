@@ -786,6 +786,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
               </div>
 
               <div className="border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden max-h-[350px] overflow-y-auto shadow-sm dark:shadow-none">
+                <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-extrabold text-xs tracking-wider border-b border-slate-100 dark:border-slate-800">
                     <tr>
@@ -833,6 +834,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                     })}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               <div className="flex justify-between items-center pt-2">
@@ -895,6 +897,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                   Pratinjau Data Mapped (Maksimal 10 Baris Pertama)
                 </div>
                 <div className="max-h-[250px] overflow-y-auto">
+                  <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50/50 text-slate-500 dark:text-slate-400 text-[10px] font-extrabold tracking-wider border-b border-slate-100 dark:border-slate-800 sticky top-0">
                       <tr>
@@ -939,6 +942,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
                       )}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               </div>
 

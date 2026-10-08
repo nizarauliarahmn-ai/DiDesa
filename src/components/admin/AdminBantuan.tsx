@@ -3602,6 +3602,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                     <p className="text-[11px] text-gray-500 font-mono">Pagu per KPM: Rp {programAmountVal.toLocaleString('id-ID')}</p>
                   </div>
 
+                  <div className="overflow-x-auto">
                   <table className="w-full border-collapse border border-gray-900 text-xs">
                     <thead>
                       <tr className="bg-gray-100 text-center font-black">
@@ -3634,6 +3635,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       )}
                     </tbody>
                   </table>
+                  </div>
 
                   <div className="pt-6 font-sans text-xs grid grid-cols-2 gap-6 text-center break-inside-avoid">
                     <div className="space-y-14">
@@ -3668,6 +3670,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                     </p>
                   </div>
 
+                  <div className="overflow-x-auto">
                   <table className="w-full border-collapse border border-gray-900 text-xs">
                     <thead>
                       <tr className="bg-gray-100 text-center font-bold">
@@ -3690,6 +3693,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                       ))}
                     </tbody>
                   </table>
+                  </div>
 
                   <p className="font-sans text-xs md:text-sm text-justify">
                     Demikian Berita Acara Musdes ini dibuat dan disahkan secara terbuka untuk dipergunakan sebagaimana mestinya.

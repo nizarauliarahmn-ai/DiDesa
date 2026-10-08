@@ -345,3 +345,33 @@ textarea.focus-green:focus {
   100% { transform: translateX(-100%); }
 }
 
+/* ===== Optimasi Mobile (semua halaman) ===== */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* iOS/Android: cegah zoom otomatis saat fokus input/select/textarea */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Navigasi bawah mobile: hormati safe-area (notch/home indicator) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Gulir horizontal tabel/toolbar: halus di sentuhan */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Cetak: konten yang digulir horizontal harus tercetak penuh, tanpa terpotong */
+@media print {
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+}
+

@@ -247,6 +247,7 @@ th{background:#f0f0f0;font-weight:bold}
 
       {/* Table */}
       <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
             <tr>
@@ -308,6 +309,7 @@ th{background:#f0f0f0;font-weight:bold}
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Modal pilih tahun Musrenbang */}

@@ -189,7 +189,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
       </td>
     );
     if (sigLayout === 'kades_only') {
-      return <div style={{ marginTop: '16px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{kadesCell('100%')}</tr></tbody></table></div>;
+      return <div style={{ marginTop: '16px' }}><div className="overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{kadesCell('100%')}</tr></tbody></table></div></div>;
     }
     const buildLeft = () => {
       switch (sigLayout) {
@@ -198,6 +198,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
         case 'kades_rw': return sigCell('Ketua RW', rwName);
         case 'kades_rw_rt': return (
           <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0 }}>
+            <div className="overflow-x-auto">
             <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>
               <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
                 <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
@@ -210,10 +211,12 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                 <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{rtName || '................................'}</p>
               </td>
             </tr></tbody></table>
+            </div>
           </td>
         );
         case 'custom': return (
           <td style={{ width: '50%', verticalAlign: 'top', border: 'none', padding: 0 }}>
+            <div className="overflow-x-auto">
             <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>
               {custom1Label && <td style={{ width: custom2Label ? '50%' : '100%', verticalAlign: 'top', border: 'none', padding: 0, textAlign: 'center' }}>
                 <p style={{ margin: '0 0 4px 0' }}>Mengetahui,</p>
@@ -226,12 +229,13 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
                 <p style={{ margin: '2px 0 0 0', fontSize: '10pt' }}>{custom2Name || '................................'}</p>
               </td>}
             </tr></tbody></table>
+            </div>
           </td>
         );
         default: return null;
       }
     };
-    return <div style={{ marginTop: '16px' }}><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{buildLeft()}{kadesCell()}</tr></tbody></table></div>;
+    return <div style={{ marginTop: '16px' }}><div className="overflow-x-auto"><table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}><tbody><tr>{buildLeft()}{kadesCell()}</tr></tbody></table></div></div>;
   };
 
   const handlePrint = () => {

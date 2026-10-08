@@ -643,6 +643,7 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2">
                       Yang bertanda tangan di bawah ini Kepala {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')} Kabupaten {kabupatenName.replace(/^(kabupaten|kota)\s+/i, '')}, menerangkan dengan sebenarnya bahwa :
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>Nama Lengkap</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{name}</strong></td></tr>
@@ -655,10 +656,12 @@ export default function AdminSuratDashboard({
                         <tr><td style={{verticalAlign: 'top'}}>Alamat</td><td style={{verticalAlign: 'top'}}>:</td><td>{address} {rtRw}<br/>Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')}</td></tr>
                       </tbody>
                     </table>
+                    </div>
                     
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Berdasarkan keterangan yang bersangkutan, bahwa telah kehilangan surat / barang berharga berupa:
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>Barang yang Hilang</td><td style={{width: '3%'}}>:</td><td><strong>{sd.barangHilang || '-'}</strong></td></tr>
@@ -667,6 +670,7 @@ export default function AdminSuratDashboard({
                         <tr><td style={{verticalAlign: 'top'}}>Keterangan</td><td style={{verticalAlign: 'top'}}>:</td><td>{sd.keteranganKehilangan || '-'}</td></tr>
                       </tbody>
                     </table>
+                    </div>
                     
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Surat Keterangan ini dibuat untuk <strong>{surat.keperluan || '-'}</strong>.
@@ -681,6 +685,7 @@ export default function AdminSuratDashboard({
               
 
               const DataPenduduk = () => (
+                <div className="overflow-x-auto">
                 <table className="w-[calc(100%-40px)] border-collapse mb-4 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                   <tbody>
                     <tr><td style={{width: '30%'}}>Nama Lengkap</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{name}</strong></td></tr>
@@ -693,6 +698,7 @@ export default function AdminSuratDashboard({
                     <tr><td style={{verticalAlign: 'top'}}>Alamat</td><td style={{verticalAlign: 'top'}}>:</td><td>{address} {rtRw}<br/>Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')}</td></tr>
                   </tbody>
                 </table>
+                </div>
               );
 
               const pembuka = (
@@ -718,6 +724,7 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2">
                       Menerangkan bahwa:
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-4 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>a. Nama</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{name}</strong></td></tr>
@@ -732,6 +739,7 @@ export default function AdminSuratDashboard({
                         <tr><td style={{verticalAlign: 'top'}}>j. Alamat Sekarang</td><td style={{verticalAlign: 'top'}}>:</td><td>{sd.alamatSekarang || '-'} RT.{sd.rtSekarang || '-'} RW.{sd.rwSekarang || '-'}<br/>Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')}</td></tr>
                       </tbody>
                     </table>
+                    </div>
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Berdasarkan surat pernyataan dan keterangan yang dibuat oleh yang bersangkutan, nama tersebut di atas menyatakan dengan sadar bahwa ia memang berstatus <strong className="uppercase">DOMISILI {sd.sifatDomisili || '-'}</strong> di alamat sekarang tersebut.
                     </p>
@@ -747,6 +755,7 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Bahwa nama tersebut di atas terhitung mulai tanggal <strong>{fmtDate(sd.tanggalPindah)}</strong> mengajukan permohonan pindah domisili dengan rincian sebagai berikut:
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>Alamat Tujuan Pindah</td><td style={{width: '3%'}}>:</td><td>{sd.alamatTujuan || '-'}</td></tr>
@@ -759,6 +768,7 @@ export default function AdminSuratDashboard({
                         <tr><td>Jml Keluarga Pindah</td><td>:</td><td>{sd.jumlahKeluargaPindah || '0'} Orang</td></tr>
                       </tbody>
                     </table>
+                    </div>
                     {penutup(surat.keperluan, 'Pengantar Pindah')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
                   </>
@@ -771,6 +781,7 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Nama tersebut di atas adalah benar-benar penduduk Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')}, yang mana berdasarkan laporan dan kesaksian dari pihak keluarga, yang bersangkutan telah meninggal dunia pada:
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>Hari</td><td style={{width: '3%'}}>:</td><td>{sd.hariMeninggal || '-'}</td></tr>
@@ -780,6 +791,7 @@ export default function AdminSuratDashboard({
                         <tr><td>Penyebab Kematian</td><td>:</td><td>{sd.penyebabMeninggal || '-'}</td></tr>
                       </tbody>
                     </table>
+                    </div>
                     {penutup(surat.keperluan, 'Kematian')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
                   </>
@@ -805,12 +817,14 @@ export default function AdminSuratDashboard({
                       Nama tersebut di atas adalah benar-benar warga / penduduk yang berdomisili di Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')} dan yang bersangkutan benar-benar tergolong keluarga <strong className="italic">Kurang Mampu (Miskin)</strong>.
                     </p>
                     {(sd.pekerjaan_ortu || sd.penghasilan) && (
+                      <div className="overflow-x-auto">
                       <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                         <tbody>
                           {sd.pekerjaan_ortu && <tr><td style={{width: '40%'}}>Pekerjaan Orang Tua / Wali</td><td style={{width: '3%'}}>:</td><td>{sd.pekerjaan_ortu}</td></tr>}
                           {sd.penghasilan && <tr><td>Rata-rata Penghasilan</td><td>:</td><td>Rp {Number(sd.penghasilan).toLocaleString('id-ID')}</td></tr>}
                         </tbody>
                       </table>
+                      </div>
                     )}
                     {penutup(surat.keperluan, 'Tidak Mampu')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
@@ -824,6 +838,7 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Adalah benar nama tersebut di atas merupakan warga kami yang berdomisili sah di Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')}, dan berdasarkan peninjauan kami memang benar memiliki dan aktif mengelola unit usaha perorangan mandiri dengan rincian detail sebagai berikut :
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>Nama Usaha / Toko</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{sd.usahaName || 'WARUNG / TOKO PERORANGAN'}</strong></td></tr>
@@ -834,6 +849,7 @@ export default function AdminSuratDashboard({
                         {sd.usahaOmzet && <tr><td>Estimasi Omset Bulanan</td><td>:</td><td>{sd.usahaOmzet}</td></tr>}
                       </tbody>
                     </table>
+                    </div>
                     {penutup(surat.keperluan, 'Usaha')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
                   </>
@@ -871,6 +887,7 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Nama tersebut di atas adalah benar-benar penduduk Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')}, yang mana yang bersangkutan mengajukan permohonan pindah domisili dengan rincian sebagai berikut:
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>Tanggal Pindah</td><td style={{width: '3%'}}>:</td><td>{fmtDate(sd.tanggalPindah)}</td></tr>
@@ -878,6 +895,7 @@ export default function AdminSuratDashboard({
                         <tr><td style={{verticalAlign: 'top'}}>Alamat Tujuan</td><td style={{verticalAlign: 'top'}}>:</td><td>{sd.alamatTujuan || '-'} RT.{sd.rtTujuan || '-'} RW.{sd.rwTujuan || '-'}<br/>Desa {sd.desaTujuan || '-'} Kecamatan {sd.kecamatanTujuan || '-'}<br/>Kab. {sd.kabupatenTujuan || '-'} Prov. {sd.provinsiTujuan || '-'}</td></tr>
                       </tbody>
                     </table>
+                    </div>
                     {penutup(surat.keperluan, 'Pengantar Pindah')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}
                   </>
@@ -900,6 +918,7 @@ export default function AdminSuratDashboard({
                     <p className="text-justify leading-relaxed indent-8 mb-2">
                       Yang bertanda tangan di bawah ini Kepala {desaName.replace(/desa|kelurahan/gi, '').trim()} Kecamatan {kecamatanName.replace(/^kecamatan\s+/i, '')} Kabupaten {kabupatenName.replace(/^(kabupaten|kota)\s+/i, '')}, menerangkan dengan sebenarnya bahwa:
                     </p>
+                    <div className="overflow-x-auto">
                     <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                       <tbody>
                         <tr><td style={{width: '30%'}}>Nama Lengkap</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{name}</strong></td></tr>
@@ -912,10 +931,12 @@ export default function AdminSuratDashboard({
                         <tr><td>Alamat</td><td>:</td><td>{address}</td></tr>
                       </tbody>
                     </table>
+                    </div>
                     <p className="text-justify leading-relaxed indent-8 mb-2 mt-4">
                       Orang tersebut di atas adalah benar-benar warga Desa {desaName.replace(/desa|kelurahan/gi, '').trim()} yang hendak mengurus <strong>Persyaratan Pernikahan / Pengantar Nikah</strong>{sd.namaPasangan ? ` dengan pasangan bernama:` : '.'}
                     </p>
                     {sd.namaPasangan && (
+                      <div className="overflow-x-auto">
                       <table className="w-[calc(100%-40px)] border-collapse mb-2 ml-10 text-[14px]" style={{lineHeight: 1.3}}>
                         <tbody>
                           <tr><td style={{width: '30%'}}>Nama Pasangan</td><td style={{width: '3%'}}>:</td><td><strong className="uppercase">{sd.namaPasangan}</strong></td></tr>
@@ -923,6 +944,7 @@ export default function AdminSuratDashboard({
                           {sd.tanggalNikah && <tr><td>Rencana Tgl Nikah</td><td>:</td><td>{fmtDate(sd.tanggalNikah)}</td></tr>}
                         </tbody>
                       </table>
+                      </div>
                     )}
                     {penutup(surat.keperluan || 'Persyaratan Nikah', 'Pengantar Nikah')}
                     {renderReactSignature(desaName, surat.tanggal, namaKades, 'Kepala Desa', (() => { try { const ol = JSON.parse(localStorage.getItem('village_officers') || '[]'); return ol.find((o: any) => o.name === namaKades)?.nip || '-'; } catch(e) { return '-'; } })(), sd.includeCamat)}

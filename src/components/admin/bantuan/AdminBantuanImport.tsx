@@ -277,6 +277,7 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
               </div>
 
               <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden max-h-64 overflow-y-auto">
+                <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-800 sticky top-0">
                     <tr>
@@ -306,6 +307,7 @@ export default function AdminBantuanImport({ onClose, onRefresh, existingResiden
                     })}
                   </tbody>
                 </table>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">

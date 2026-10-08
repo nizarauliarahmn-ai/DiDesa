@@ -799,6 +799,7 @@ export default function AdminPengaturan() {
             </p>
           ) : (
             <div className="border border-gray-100 dark:border-slate-800 rounded-xl overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-gray-50 dark:bg-slate-800">
@@ -872,6 +873,7 @@ export default function AdminPengaturan() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>

@@ -1182,6 +1182,7 @@ ${rowsHtml}
 
       {/* Spreadsheet Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm dark:shadow-none">
+        <div className="overflow-x-auto">
         <table className="w-full text-left min-w-[1100px]">
           <thead className="sticky top-[140px] z-20 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
             <tr className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/90 dark:bg-slate-800/90 backdrop-blur-xl">
@@ -1418,6 +1419,7 @@ ${rowsHtml}
               })}
             </tbody>
           </table>
+          </div>
         {!loading && filtered.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 text-xs text-gray-500 dark:text-slate-400 font-semibold">
             Menampilkan {filtered.length} dari {list.length} usulan{selectedIds.size > 0 && <span className="text-emerald-600 dark:text-emerald-400"> · {selectedIds.size} terpilih</span>}

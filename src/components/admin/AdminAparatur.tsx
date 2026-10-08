@@ -1294,6 +1294,7 @@ export default function AdminAparatur() {
             <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
               I. PEMERINTAH & PERANGKAT DESA
             </h3>
+            <div className="overflow-x-auto">
             <table className="aparatur-detail w-full border-collapse border border-black">
               <thead>
                 <tr className="bg-gray-100 font-bold">
@@ -1328,6 +1329,7 @@ export default function AdminAparatur() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* 2. TABLE BPD */}
@@ -1335,6 +1337,7 @@ export default function AdminAparatur() {
             <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
               II. BADAN PERMUSYAWARATAN DESA (BPD)
             </h3>
+            <div className="overflow-x-auto">
             <table className="aparatur-detail w-full border-collapse border border-black">
               <thead>
                 <tr className="bg-gray-100 font-bold">
@@ -1369,6 +1372,7 @@ export default function AdminAparatur() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* 3. TABLE LPM */}
@@ -1376,6 +1380,7 @@ export default function AdminAparatur() {
             <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
               III. LEMBAGA PEMBERDAYAAN MASYARAKAT (LPM)
             </h3>
+            <div className="overflow-x-auto">
             <table className="aparatur-detail w-full border-collapse border border-black">
               <thead>
                 <tr className="bg-gray-100 font-bold">
@@ -1410,6 +1415,7 @@ export default function AdminAparatur() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* 4. TABLE RT & RW */}
@@ -1418,6 +1424,7 @@ export default function AdminAparatur() {
               <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
                 IV. DAFTAR KETUA RT
               </h3>
+              <div className="overflow-x-auto">
               <table className="aparatur-detail w-full border-collapse border border-black">
                 <thead>
                   <tr className="bg-gray-100 font-bold">
@@ -1452,12 +1459,14 @@ export default function AdminAparatur() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
 
             <div>
               <h3 className="font-bold text-[11pt] uppercase mb-2 border-b border-black pb-1">
                 V. DAFTAR KETUA RW
               </h3>
+              <div className="overflow-x-auto">
               <table className="aparatur-detail w-full border-collapse border border-black">
                 <thead>
                   <tr className="bg-gray-100 font-bold">
@@ -1492,6 +1501,7 @@ export default function AdminAparatur() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
 
