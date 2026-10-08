@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Users, FileText, Megaphone } from 'lucide-react';
-import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud } from '../../utils/tvConfig';
+import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, loadTvAutoStats, youtubeId } from '../../utils/tvConfig';
 
 /**
  * DiDesa TV — layar ruang tunggu (Digital Signage), 10-foot UI.
@@ -9,10 +9,19 @@ import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud } fro
  */
 const STAT_ICONS = [Users, FileText, Megaphone];
 
+// Slideshow bawaan bila admin belum mengisi media (tanpa jaringan).
+const PLACEHOLDERS = [
+  { title: 'Selamat Datang', sub: 'Kantor Desa melayani dengan sepenuh hati', bg: 'from-emerald-700 to-teal-900' },
+  { title: 'Pelayanan Administrasi', sub: 'Surat keterangan, domisili, usaha, dan lainnya', bg: 'from-slate-800 to-slate-950' },
+  { title: 'Transparansi Dana Desa', sub: 'Setiap rupiah tercatat dan terlaporkan', bg: 'from-teal-800 to-emerald-950' },
+];
+
 export default function TvDisplay() {
   const [now, setNow] = useState(() => new Date());
   const [cfg, setCfg] = useState<TvConfig>(DEFAULT_TV_CONFIG);
   const [slideIdx, setSlideIdx] = useState(0);
+  const [phIdx, setPhIdx] = useState(0);
+  const [autoStats, setAutoStats] = useState<{ label: string; value: string }[] | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -25,6 +34,8 @@ export default function TvDisplay() {
     const load = async () => {
       const cloud = await loadTvConfigCloud();
       if (alive && cloud) setCfg(cloud);
+      const auto = await loadTvAutoStats();
+      if (alive) setAutoStats(auto);
     };
     setCfg(loadTvConfigLocal());
     load();
@@ -34,10 +45,11 @@ export default function TvDisplay() {
 
   const slides = cfg.slides;
   const active = slides.length > 0 ? slides[slideIdx % slides.length] : null;
+  const activeYoutubeId = active?.type === 'youtube' ? youtubeId(active.url) : null;
 
-  // Gambar berpindah tiap `durasi` detik; video pindah saat selesai.
+  // Gambar & YouTube berpindah tiap `durasi` detik; video pindah saat selesai.
   useEffect(() => {
-    if (!active || active.type !== 'image') return;
+    if (!active || active.type === 'video') return;
     const t = setTimeout(() => {
       setSlideIdx(i => (slides.length > 0 ? (i + 1) % slides.length : 0));
     }, Math.max(3, active.durasi) * 1000);
@@ -47,9 +59,17 @@ export default function TvDisplay() {
     setSlideIdx(i => (slides.length > 0 ? (i + 1) % slides.length : 0));
   };
 
+  // Placeholder berputar bila belum ada media.
+  useEffect(() => {
+    if (slides.length > 0) return;
+    const t = setInterval(() => setPhIdx(i => (i + 1) % PLACEHOLDERS.length), 8000);
+    return () => clearInterval(t);
+  }, [slides.length]);
+
   const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
   const tanggal = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  const stats = cfg.showStats ? cfg.stats : [];
+  const stats = cfg.showStats ? (autoStats || cfg.stats) : [];
+  const ph = PLACEHOLDERS[phIdx % PLACEHOLDERS.length];
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col select-none">
@@ -58,9 +78,10 @@ export default function TvDisplay() {
         {/* Kiri: Main Media */}
         <div className="flex-[7] bg-slate-900 flex items-center justify-center overflow-hidden">
           {!active ? (
-            <p className="text-slate-400 text-3xl font-bold text-center px-8">
-              Area Pemutar Video / Slideshow Desa
-            </p>
+            <div key={phIdx} className={`w-full h-full bg-gradient-to-br ${ph.bg} flex flex-col items-center justify-center text-center px-12`}>
+              <p className="text-white text-6xl font-black tracking-tight">{ph.title}</p>
+              <p className="text-slate-200 text-2xl font-semibold mt-4">{ph.sub}</p>
+            </div>
           ) : active.type === 'video' ? (
             <video
               key={active.id}
@@ -72,10 +93,19 @@ export default function TvDisplay() {
               onError={nextSlide}
               className="w-full h-full object-cover"
             />
+          ) : active.type === 'youtube' && activeYoutubeId ? (
+            <iframe
+              key={active.id}
+              src={`https://www.youtube-nocookie.com/embed/${activeYoutubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${activeYoutubeId}&rel=0`}
+              title="Video Desa"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              className="w-full h-full"
+            />
           ) : (
             <img
-              key={active.id}
-              src={active.url}
+              key={active?.id}
+              src={active?.url}
               alt=""
               onError={nextSlide}
               className="w-full h-full object-cover"

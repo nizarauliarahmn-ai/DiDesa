@@ -4,8 +4,8 @@ import { resolveCurrentTenant } from './tenantResolver';
 export interface TvSlide {
   id: string;
   url: string;
-  type: 'image' | 'video';
-  durasi: number; // detik, untuk gambar
+  type: 'image' | 'video' | 'youtube';
+  durasi: number; // detik, untuk gambar & YouTube
 }
 
 export interface TvConfig {
@@ -28,10 +28,17 @@ export const DEFAULT_TV_CONFIG: TvConfig = {
   ],
 };
 
-export function detectSlideType(url: string): 'image' | 'video' {
+export function detectSlideType(url: string): 'image' | 'video' | 'youtube' {
   const clean = url.split('?')[0].toLowerCase();
   if (/\.(mp4|webm|ogg|mov|m4v)$/.test(clean)) return 'video';
+  if (/youtu\.be|youtube\.com/.test(url.toLowerCase())) return 'youtube';
   return 'image';
+}
+
+/** Ambil ID video dari berbagai format URL YouTube. */
+export function youtubeId(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
 }
 
 export function newSlideId(): string {
@@ -46,8 +53,8 @@ function sanitize(cfg: any): TvConfig {
           .map((s: any) => ({
             id: String(s.id || newSlideId()),
             url: s.url.trim(),
-            type: s.type === 'video' ? 'video' : 'image',
-            durasi: Math.min(120, Math.max(3, Number(s.durasi) || 8)),
+            type: s.type === 'video' || s.type === 'youtube' ? s.type : 'image',
+            durasi: Math.min(300, Math.max(3, Number(s.durasi) || 8)),
           }))
       : [],
     tickerText: typeof cfg?.tickerText === 'string' && cfg.tickerText.trim()
@@ -106,4 +113,29 @@ export async function saveTvConfig(cfg: TvConfig): Promise<{ ok: boolean; messag
   } catch (e: any) {
     return { ok: true, message: `Tersimpan lokal, sinkron cloud gagal (${e?.message || 'koneksi'}).` };
   }
+}
+
+/** Statistik otomatis dari database desa (tanpa isi manual). */
+export async function loadTvAutoStats(): Promise<{ label: string; value: string }[]> {
+  const fallback = (label: string) => ({ label, value: '-' });
+  const stats = [fallback('Total Penduduk'), fallback('Surat Terbit'), fallback('Penerima Bansos'), fallback('Pengumuman')];
+  try {
+    const tenantId = await resolveCurrentTenant();
+    if (!tenantId) return stats;
+    const [res, sur, ban, news] = await Promise.all([
+      supabase.from('residents').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).or('is_deleted.is.null,is_deleted.neq.1'),
+      supabase.from('surat').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId),
+      supabase.from('bansos_recipients').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId),
+      supabase.from('saas_settings').select('value').eq('tenant_id', tenantId).eq('key', 'didesa_news_list').maybeSingle(),
+    ]);
+    if (typeof res.count === 'number') stats[0].value = res.count.toLocaleString('id-ID');
+    if (typeof sur.count === 'number') stats[1].value = sur.count.toLocaleString('id-ID');
+    if (typeof ban.count === 'number') stats[2].value = ban.count.toLocaleString('id-ID');
+    try {
+      const raw = (news as any)?.value;
+      const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (Array.isArray(list)) stats[3].value = list.length.toLocaleString('id-ID');
+    } catch { /* abaikan */ }
+  } catch { /* abaikan, pakai fallback '-' */ }
+  return stats;
 }

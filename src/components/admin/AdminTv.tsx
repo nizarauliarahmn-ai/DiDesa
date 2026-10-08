@@ -14,6 +14,7 @@ export default function AdminTv() {
   const [saving, setSaving] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [newDurasi, setNewDurasi] = useState(8);
+  const [autoStats, setAutoStats] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -21,6 +22,7 @@ export default function AdminTv() {
       const cloud = await loadTvConfigCloud();
       if (cloud) setCfg(cloud);
       setLoading(false);
+      setAutoStats(await loadTvAutoStats());
     })();
   }, []);
 
@@ -95,7 +97,7 @@ export default function AdminTv() {
           <MonitorPlay size={16} className="text-gray-500" />
           <h3 className="text-sm font-bold text-gray-900 dark:text-white">Slideshow Media</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">Tempel URL gambar (JPG/PNG) atau video (MP4/WebM). Video diputar bersuara-senyap otomatis.</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">Tempel URL gambar (JPG/PNG), video (MP4/WebM), atau <span className="font-bold">link YouTube</span> (watch / youtu.be / shorts). Video & YouTube diputar bersuara-senyap otomatis.</p>
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <input
             type="text"
@@ -133,13 +135,15 @@ export default function AdminTv() {
               <div key={s.id} className="flex items-center gap-2 border border-gray-200 dark:border-slate-700 rounded-lg p-2">
                 {s.type === 'image' ? (
                   <img src={s.url} alt="" className="w-14 h-10 object-cover rounded-md bg-gray-100 shrink-0" onError={e => { (e.target as HTMLImageElement).style.opacity = '0.2'; }} />
+                ) : s.type === 'youtube' ? (
+                  <span className="w-14 h-10 rounded-md bg-red-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">YT</span>
                 ) : (
                   <span className="w-14 h-10 rounded-md bg-gray-900 text-white flex items-center justify-center text-[10px] font-bold shrink-0">VIDEO</span>
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-gray-800 dark:text-slate-100 truncate">{s.url}</p>
                   <p className="text-[11px] text-gray-400">
-                    {i + 1}. {s.type === 'image' ? `Gambar • ${s.durasi} dtk` : 'Video • s/d selesai'}
+                    {i + 1}. {s.type === 'image' ? `Gambar • ${s.durasi} dtk` : s.type === 'youtube' ? `YouTube • ${s.durasi} dtk` : 'Video • s/d selesai'}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -188,34 +192,21 @@ export default function AdminTv() {
           </button>
         </div>
         {cfg.showStats && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {cfg.stats.map((s, i) => (
-              <div key={i} className="flex gap-2">
-                <input
-                  type="text"
-                  value={s.label}
-                  onChange={e => {
-                    const stats = [...cfg.stats];
-                    stats[i] = { ...stats[i], label: e.target.value };
-                    setCfg({ ...cfg, stats });
-                  }}
-                  placeholder="Label"
-                  className={inputCls}
-                />
-                <input
-                  type="text"
-                  value={s.value}
-                  onChange={e => {
-                    const stats = [...cfg.stats];
-                    stats[i] = { ...stats[i], value: e.target.value };
-                    setCfg({ ...cfg, stats });
-                  }}
-                  placeholder="Nilai"
-                  className={`${inputCls} w-24`}
-                />
-              </div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {autoStats.length === 0 ? (
+              <p className="text-xs text-gray-400 col-span-full">Menghitung statistik desa...</p>
+            ) : (
+              autoStats.map((s, i) => (
+                <div key={i} className="border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5">
+                  <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{s.value}</p>
+                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">{s.label}</p>
+                </div>
+              ))
+            )}
           </div>
+        )}
+        {!cfg.showStats && (
+          <p className="text-xs text-gray-400">Statistik disembunyikan dari layar TV.</p>
         )}
       </div>
     </div>
