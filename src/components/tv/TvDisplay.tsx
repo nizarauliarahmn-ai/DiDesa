@@ -204,9 +204,9 @@ export default function TvDisplay() {
         {/* Kanan: Widget Info */}
         <div className="flex-[3] bg-white shadow-xl p-8 flex flex-col justify-center gap-6 min-w-0">
           <div>
-            <p className="text-slate-500 text-xl font-bold uppercase tracking-widest">Jam Digital</p>
-            <p className="text-slate-900 text-6xl font-black tabular-nums tracking-tight">{jam}</p>
-            <p className="text-slate-700 text-2xl font-bold mt-2">{tanggal}</p>
+            <p className="text-slate-500 text-2xl font-bold uppercase tracking-widest">Jam Digital</p>
+            <p className="text-slate-900 text-[clamp(4rem,4.8vw,7rem)] font-black tabular-nums tracking-tighter leading-none">{jam}</p>
+            <p className="text-slate-700 text-2xl font-bold mt-3">{tanggal}</p>
           </div>
           {stats.length > 0 && (
             <div className="space-y-3">
