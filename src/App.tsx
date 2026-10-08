@@ -58,6 +58,7 @@ const PrintQRKiosk = React.lazy(() => import('./components/admin/PrintQRKiosk'))
 const PublicBukuTamu = React.lazy(() => import('./components/PublicBukuTamu'));
 const PublicVerifikasiSurat = React.lazy(() => import('./components/PublicVerifikasiSurat'));
 const PublicKiosPortal = React.lazy(() => import('./components/PublicKiosPortal'));
+const TvDisplay = React.lazy(() => import('./components/tv/TvDisplay'));
 const PublicKiosSurat = React.lazy(() => import('./components/PublicKiosSurat'));
 const PublicKiosAspirasi = React.lazy(() => import('./components/PublicKiosAspirasi'));
 const PublicKiosKepuasan = React.lazy(() => import('./components/PublicKiosKepuasan'));
@@ -580,6 +581,9 @@ export default function App() {
   }
   if (tabParam === 'kios') {
     return <><PublicKiosPortal /><ToastContainer /></>;
+  }
+  if (tabParam === 'tv') {
+    return <><Suspense fallback={null}><TvDisplay /></Suspense></>;
   }
   if (tabParam === 'buku_tamu') {
     return <><PublicBukuTamu /><ToastContainer /></>;

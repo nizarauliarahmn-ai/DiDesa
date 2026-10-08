@@ -338,3 +338,10 @@ textarea.focus-green:focus {
   border-color: #10b981 !important;
   box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15) !important;
 }
+
+/* DiDesa TV ticker */
+@keyframes tv-ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
