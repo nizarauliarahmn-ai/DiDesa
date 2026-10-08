@@ -40,6 +40,7 @@ const AdminRKPDesa = React.lazy(() => import('./components/admin/AdminRKPDesa'))
 const AdminAPBDesa = React.lazy(() => import('./components/admin/AdminAPBDesa'));
 const AdminMusrenbang = React.lazy(() => import('./components/admin/AdminMusrenbang'));
 const AdminBerita = React.lazy(() => import('./components/admin/AdminBerita'));
+const AdminTv = React.lazy(() => import('./components/admin/AdminTv'));
 const AdminSaaSLogs = React.lazy(() => import('./components/admin/AdminSaaSLogs'));
 const AdminSaaSLeads = React.lazy(() => import('./components/admin/AdminSaaSLeads'));
 const AdminGlobalBranding = React.lazy(() => import('./components/admin/AdminGlobalBranding'));
@@ -745,6 +746,7 @@ export default function App() {
                   />
                 )}
                 {adminTab === 'panduan' && <AdminPanduan />}
+                {adminTab === 'tv' && <TabErrorBoundary tabKey="tv"><AdminTv /></TabErrorBoundary>}
                 {adminTab === 'panduan_cms' && user.role === 'saas_admin' && <AdminSaaSPanduanCMS />}
 
                 {adminTab === 'tenants' && user.role === 'saas_admin' && <AdminTenants />}

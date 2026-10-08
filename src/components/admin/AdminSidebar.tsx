@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3, Clock, Star } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3, Clock, Star, Tv } from 'lucide-react';
 import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
@@ -426,6 +426,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
             <NavItem collapsed={isCollapsed} icon={<MessageSquareText size={18} />} label="Aspirasi Warga" active={activeTab === 'aspirasi'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('aspirasi'); markTabAsRead('aspirasi'); }} badgeCount={activeTab === 'aspirasi' ? 0 : unreadAspirasiCount} />
             <NavItem collapsed={isCollapsed} icon={<ThumbsUp size={18} />} label="Indeks Kepuasan" active={activeTab === 'kepuasan'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('kepuasan'); markTabAsRead('kepuasan'); }} badgeCount={activeTab === 'kepuasan' ? 0 : unreadKepuasanCount} />
             <NavItem collapsed={isCollapsed} icon={<Newspaper size={18} />} label="Berita & Pengumuman" active={activeTab === 'berita'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('berita'); }} />
+            <NavItem collapsed={isCollapsed} icon={<Tv size={18} />} label="Layar TV" active={activeTab === 'tv'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('tv'); }} />
               <NavItem collapsed={isCollapsed} icon={<BookOpen size={18} />} label="Buku Tamu Digital" active={activeTab === 'buku_tamu'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('buku_tamu'); markTabAsRead('buku_tamu'); }} badgeCount={activeTab === 'buku_tamu' ? 0 : unreadBukuTamuCount} />
             <NavItem collapsed={isCollapsed} icon={<ListChecks size={18} />} label="Usulan Desa" active={activeTab === 'usulan_desa'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('usulan_desa'); markTabAsRead('usulan_desa'); }} badgeCount={activeTab === 'usulan_desa' ? 0 : unreadUsulanCount} />
             {!isCollapsed && <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mt-3 mb-0.5 px-3">Perencanaan</p>}
