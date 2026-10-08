@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Users, FileText, Megaphone } from 'lucide-react';
 import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, loadTvAutoStats, youtubeId, loadStatsCache, saveStatsCache } from '../../utils/tvConfig';
 
@@ -15,6 +15,26 @@ const PLACEHOLDERS = [
   { title: 'Pelayanan Administrasi', sub: 'Surat keterangan, domisili, usaha, dan lainnya', bg: 'from-slate-800 to-slate-950' },
   { title: 'Transparansi Dana Desa', sub: 'Setiap rupiah tercatat dan terlaporkan', bg: 'from-teal-800 to-emerald-950' },
 ];
+
+/** Muat YouTube IFrame API sekali per halaman. false bila gagal (offline/dsb). */
+let ytApiPromise: Promise<boolean> | null = null;
+function loadYtApi(): Promise<boolean> {
+  const w = window as any;
+  if (w.YT?.Player) return Promise.resolve(true);
+  if (!ytApiPromise) {
+    ytApiPromise = new Promise<boolean>(resolve => {
+      const prev = w.onYouTubeIframeAPIReady;
+      w.onYouTubeIframeAPIReady = () => { try { prev?.(); } catch { /* abaikan */ } resolve(true); };
+      const s = document.createElement('script');
+      s.src = 'https://www.youtube.com/iframe_api';
+      s.onerror = () => resolve(false);
+      document.head.appendChild(s);
+      // Jangan tunggu selamanya — 10 dtk lalu anggap gagal.
+      setTimeout(() => resolve(!!w.YT?.Player), 10000);
+    });
+  }
+  return ytApiPromise;
+}
 
 export default function TvDisplay() {
   const [now, setNow] = useState(() => new Date());
@@ -50,18 +70,78 @@ export default function TvDisplay() {
   const slides = cfg.slides;
   const active = slides.length > 0 ? slides[slideIdx % slides.length] : null;
   const activeYoutubeId = active?.type === 'youtube' ? youtubeId(active.url) : null;
+  const [ytFallback, setYtFallback] = useState(false);
+  const ytBoxRef = useRef<HTMLDivElement>(null);
 
-  // Gambar & YouTube berpindah tiap `durasi` detik; video pindah saat selesai.
+  const nextSlide = () => {
+    setSlideIdx(i => (slides.length > 0 ? (i + 1) % slides.length : 0));
+  };
+
+  // Gambar: berpindah tiap `durasi` detik. Video MP4: pindah saat selesai.
   useEffect(() => {
-    if (!active || active.type === 'video') return;
+    if (!active || active.type !== 'image') return;
     const t = setTimeout(() => {
       setSlideIdx(i => (slides.length > 0 ? (i + 1) % slides.length : 0));
     }, Math.max(3, active.durasi) * 1000);
     return () => clearTimeout(t);
-  }, [slideIdx, slides, active]);
-  const nextSlide = () => {
-    setSlideIdx(i => (slides.length > 0 ? (i + 1) % slides.length : 0));
-  };
+    // Dep pada id/durasi (stabil) — poll config 60 dtk tak boleh me-reset timer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.id, active?.durasi, slides.length]);
+
+  // YouTube: berpindah saat video HABIS (event ENDED via IFrame API),
+  // tidak dibatasi durasi. Bila API tak termuat → fallback iframe loop + durasi.
+  useEffect(() => {
+    if (!active || active.type !== 'youtube') return;
+    const vid = activeYoutubeId;
+    let cancelled = false;
+    let advanced = false;
+    let player: any = null;
+    let timer: any = null;
+    const advance = () => { if (!cancelled && !advanced) { advanced = true; nextSlide(); } };
+    const durasiMs = Math.max(3, active.durasi) * 1000;
+
+    if (vid && !ytFallback && ytBoxRef.current) {
+      loadYtApi().then(ok => {
+        if (cancelled) return;
+        if (!ok || !ytBoxRef.current) { setYtFallback(true); return; }
+        const inner = document.createElement('div');
+        inner.style.width = '100%';
+        inner.style.height = '100%';
+        ytBoxRef.current.appendChild(inner);
+        try {
+          player = new (window as any).YT.Player(inner, {
+            videoId: vid,
+            host: 'https://www.youtube-nocookie.com',
+            playerVars: { autoplay: 1, mute: 1, controls: 0, rel: 0, modestbranding: 1, iv_load_policy: 3, playsinline: 1 },
+            events: {
+              onReady: (e: any) => { try { e.target.mute(); e.target.playVideo(); } catch { /* abaikan */ } },
+              onStateChange: (e: any) => {
+                const ENDED = (window as any).YT?.PlayerState?.ENDED ?? 0;
+                if (e.data === ENDED) advance();
+              },
+              // Video tak bisa diputar (diblokir/URL mati) — jangan macet slideshow.
+              onError: () => { if (!timer) timer = setTimeout(advance, 3000); },
+            },
+          });
+        } catch { setYtFallback(true); }
+      });
+    } else if (vid && ytFallback) {
+      // Fallback: iframe loop biasa — maju setelah `durasi` detik.
+      timer = setTimeout(advance, durasiMs);
+    } else if (!vid) {
+      // URL tak valid — <img> onError yang memajukan; durasi sebagai jaga-jaga.
+      timer = setTimeout(advance, durasiMs);
+    }
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      try { player?.destroy?.(); } catch { /* abaikan */ }
+      try { if (ytBoxRef.current) ytBoxRef.current.innerHTML = ''; } catch { /* abaikan */ }
+    };
+    // Dep pada id (stabil) — poll config 60 dtk tak boleh me-restart player.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.id, activeYoutubeId, ytFallback, slides.length]);
 
   // Placeholder berputar bila belum ada media.
   useEffect(() => {
@@ -98,14 +178,18 @@ export default function TvDisplay() {
               className="w-full h-full object-cover"
             />
           ) : active.type === 'youtube' && activeYoutubeId ? (
-            <iframe
-              key={active.id}
-              src={`https://www.youtube-nocookie.com/embed/${activeYoutubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${activeYoutubeId}&rel=0`}
-              title="Video Desa"
-              allow="autoplay; encrypted-media"
-              allowFullScreen
-              className="w-full h-full"
-            />
+            ytFallback ? (
+              <iframe
+                key={active.id}
+                src={`https://www.youtube-nocookie.com/embed/${activeYoutubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${activeYoutubeId}&rel=0`}
+                title="Video Desa"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            ) : (
+              <div ref={ytBoxRef} className="w-full h-full" />
+            )
           ) : (
             <img
               key={active?.id}

@@ -116,7 +116,7 @@ export default function AdminTv() {
           <MonitorPlay size={16} className="text-gray-500" />
           <h3 className="text-sm font-bold text-gray-900 dark:text-white">Slideshow Media</h3>
         </div>
-        <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">Tempel URL gambar (JPG/PNG), video (MP4/WebM), atau <span className="font-bold">link YouTube</span> (watch / youtu.be / shorts). Video & YouTube diputar bersuara-senyap otomatis.</p>
+        <p className="text-xs text-gray-500 dark:text-slate-400 mb-4">Tempel URL gambar (JPG/PNG), video (MP4/WebM), atau <span className="font-bold">link YouTube</span> (watch / youtu.be / shorts). Video MP4 & YouTube diputar senyap sampai selesai, lalu slideshow pindah otomatis.</p>
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <input
             type="text"
@@ -133,8 +133,11 @@ export default function AdminTv() {
               max={120}
               value={newDurasi}
               onChange={e => setNewDurasi(Number(e.target.value))}
-              title="Durasi tampil gambar (detik)"
-              className={`${inputCls} w-24`}
+              disabled={!!newUrl.trim() && detectSlideType(newUrl.trim()) !== 'image'}
+              title={!!newUrl.trim() && detectSlideType(newUrl.trim()) !== 'image'
+                ? 'Video/YouTube diputar sampai selesai — durasi tidak dipakai'
+                : 'Durasi tampil gambar (detik)'}
+              className={`${inputCls} w-24 disabled:opacity-40`}
             />
             <button
               onClick={addSlide}
@@ -162,7 +165,7 @@ export default function AdminTv() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-gray-800 dark:text-slate-100 truncate">{s.url}</p>
                   <p className="text-[11px] text-gray-400">
-                    {i + 1}. {s.type === 'image' ? `Gambar • ${s.durasi} dtk` : s.type === 'youtube' ? `YouTube • ${s.durasi} dtk` : 'Video • s/d selesai'}
+                    {i + 1}. {s.type === 'image' ? `Gambar • ${s.durasi} dtk` : s.type === 'youtube' ? 'YouTube • s/d selesai' : 'Video • s/d selesai'}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
