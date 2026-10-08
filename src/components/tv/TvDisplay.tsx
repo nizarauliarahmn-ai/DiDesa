@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Users, FileText, Megaphone } from 'lucide-react';
-import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, loadTvAutoStats, youtubeId } from '../../utils/tvConfig';
+import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, loadTvAutoStats, youtubeId, loadStatsCache, saveStatsCache } from '../../utils/tvConfig';
 
 /**
  * DiDesa TV — layar ruang tunggu (Digital Signage), 10-foot UI.
@@ -21,7 +21,7 @@ export default function TvDisplay() {
   const [cfg, setCfg] = useState<TvConfig>(DEFAULT_TV_CONFIG);
   const [slideIdx, setSlideIdx] = useState(0);
   const [phIdx, setPhIdx] = useState(0);
-  const [autoStats, setAutoStats] = useState<{ label: string; value: string }[] | null>(null);
+  const [autoStats, setAutoStats] = useState<{ label: string; value: string }[] | null>(() => loadStatsCache());
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000);
@@ -29,13 +29,17 @@ export default function TvDisplay() {
   }, []);
 
   // Muat config: lokal dulu (cepat), lalu cloud; poll tiap 60 dtk.
+  // Config & statistik diambil PARALEL — statistik tidak menunggu config.
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      const cloud = await loadTvConfigCloud();
-      if (alive && cloud) setCfg(cloud);
-      const auto = await loadTvAutoStats();
-      if (alive) setAutoStats(auto);
+      const [cloud, auto] = await Promise.all([loadTvConfigCloud(), loadTvAutoStats()]);
+      if (!alive) return;
+      if (cloud) setCfg(cloud);
+      if (auto.some(s => s.value !== '-')) {
+        setAutoStats(auto);
+        saveStatsCache(auto);
+      }
     };
     setCfg(loadTvConfigLocal());
     load();

@@ -1,51 +1,52 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, ChevronUp, ChevronDown, MonitorPlay, Save, ExternalLink } from 'lucide-react';
 import { showToast } from '../../utils/toast';
 import {
   TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud,
   saveTvConfig, detectSlideType, newSlideId,
+  loadTvAutoStats, loadStatsCache, saveStatsCache,
 } from '../../utils/tvConfig';
 
 const inputCls = 'w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:border-gray-400 bg-white dark:bg-slate-900 text-gray-900 dark:text-white';
+const retryCls = 'text-xs font-bold text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer shrink-0';
+
+type StatsPhase = 'loading' | 'ready' | 'error';
 
 export default function AdminTv() {
   const [cfg, setCfg] = useState<TvConfig>(DEFAULT_TV_CONFIG);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [newDurasi, setNewDurasi] = useState(8);
-  const [autoStats, setAutoStats] = useState<{ label: string; value: string }[]>([]);
+  const [autoStats, setAutoStats] = useState<{ label: string; value: string }[]>(() => loadStatsCache() ?? []);
+  const [statsPhase, setStatsPhase] = useState<StatsPhase>('loading');
+  const [statsStage, setStatsStage] = useState('Menyiapkan');
+  const [statsElapsed, setStatsElapsed] = useState(0);
+  const statsRunRef = useRef(0);
 
-  const reloadStats = async () => {
-    setAutoStats(await loadTvAutoStats());
+  const runStats = async () => {
+    const runId = ++statsRunRef.current;
+    setStatsPhase('loading');
+    setStatsStage('Menyiapkan');
+    setStatsElapsed(0);
+    const stats = await loadTvAutoStats(s => { if (statsRunRef.current === runId) setStatsStage(s); });
+    if (statsRunRef.current !== runId) return;
+    setAutoStats(stats);
+    if (stats.every(s => s.value === '-')) {
+      setStatsPhase('error');
+    } else {
+      saveStatsCache(stats);
+      setStatsPhase('ready');
+    }
   };
 
   useEffect(() => {
-    let cancelled = false;
-    // Jaring pengaman terakhir: apa pun yang terjadi, loading max 20 detik.
-    const fallbackTimer = setTimeout(() => {
-      if (!cancelled) {
-        setAutoStats(prev => prev.length > 0 ? prev : [
-          { label: 'Total Penduduk', value: '-' },
-          { label: 'Surat Terbit', value: '-' },
-          { label: 'Penerima Bansos', value: '-' },
-          { label: 'Pengumuman', value: '-' },
-        ]);
-      }
-    }, 20000);
-    (async () => {
-      setCfg(loadTvConfigLocal());
-      const cloud = await loadTvConfigCloud();
-      if (cancelled) return;
-      if (cloud) setCfg(cloud);
-      setLoading(false);
-      const stats = await loadTvAutoStats();
-      if (!cancelled) {
-        setAutoStats(stats);
-        clearTimeout(fallbackTimer);
-      }
-    })();
-    return () => { cancelled = true; clearTimeout(fallbackTimer); };
+    let alive = true;
+    // Tampil lokal dulu — halaman tidak menunggu cloud.
+    setCfg(loadTvConfigLocal());
+    loadTvConfigCloud().then(cloud => { if (alive && cloud) setCfg(cloud); });
+    runStats();
+    const tick = setInterval(() => { if (alive) setStatsElapsed(e => e + 1); }, 1000);
+    return () => { alive = false; clearInterval(tick); };
   }, []);
 
   const addSlide = () => {
@@ -81,10 +82,6 @@ export default function AdminTv() {
     setSaving(false);
     showToast(res.message, res.ok ? 'success' : 'error');
   };
-
-  if (loading) {
-    return <p className="text-sm text-gray-400 py-8 text-center">Memuat konfigurasi TV...</p>;
-  }
 
   return (
     <div className="pb-24 space-y-5">
@@ -214,23 +211,39 @@ export default function AdminTv() {
           </button>
         </div>
         {cfg.showStats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {autoStats.length === 0 ? (
-              <div className="col-span-full flex items-center justify-between gap-2">
-                <p className="text-xs text-gray-400">Menghitung statistik desa...</p>
-                <button onClick={reloadStats} className="text-xs font-bold text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer shrink-0">
-                  Muat ulang
-                </button>
-              </div>
-            ) : (
-                autoStats.map((s, i) => (
+          <div className="space-y-3">
+            {autoStats.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {autoStats.map((s, i) => (
                   <div key={i} className="border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5">
                     <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{s.value}</p>
                     <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">{s.label}</p>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
+            {autoStats.length === 0 && statsPhase === 'loading' && (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-gray-400">Menghitung statistik desa — {statsStage}... ({statsElapsed} dtk)</p>
+                <button onClick={runStats} className={retryCls}>Ulangi</button>
+              </div>
+            )}
+            {autoStats.length === 0 && statsPhase === 'error' && (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-amber-600 dark:text-amber-400">Statistik gagal dimuat — {statsStage}.</p>
+                <button onClick={runStats} className={retryCls}>Coba lagi</button>
+              </div>
+            )}
+            {autoStats.length > 0 && statsPhase === 'loading' && (
+              <p className="text-[11px] text-gray-400">Memperbarui — {statsStage}... ({statsElapsed} dtk)</p>
+            )}
+            {autoStats.length > 0 && statsPhase === 'error' && (
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] text-amber-600 dark:text-amber-400">Pembaruan gagal — {statsStage}.</p>
+                <button onClick={runStats} className={retryCls}>Coba lagi</button>
+              </div>
+            )}
+          </div>
         )}
         {!cfg.showStats && (
           <p className="text-xs text-gray-400">Statistik disembunyikan dari layar TV.</p>
