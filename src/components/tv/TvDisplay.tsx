@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Users, FileText, Megaphone } from 'lucide-react';
+import { Users, FileText, Mars, Venus } from 'lucide-react';
 import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, loadTvAutoStats, youtubeId, loadStatsCache, saveStatsCache } from '../../utils/tvConfig';
 
 /**
@@ -7,7 +7,7 @@ import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, load
  * Mandiri & fullscreen: tanpa Sidebar/Navbar/Footer. Rasio 16:9, no-scroll.
  * Konten diatur admin di menu Layar TV (tersimpan cloud, refresh tiap 60 dtk).
  */
-const STAT_ICONS = [Users, FileText, Megaphone];
+const STAT_ICONS = [Users, Mars, Venus, FileText];
 
 // Slideshow bawaan bila admin belum mengisi media (tanpa jaringan).
 const PLACEHOLDERS = [

@@ -23,8 +23,9 @@ export const DEFAULT_TV_CONFIG: TvConfig = {
   showStats: true,
   stats: [
     { label: 'Total Penduduk', value: '-' },
+    { label: 'Laki-laki', value: '-' },
+    { label: 'Perempuan', value: '-' },
     { label: 'Surat Terbit', value: '-' },
-    { label: 'Pengumuman', value: '-' },
   ],
 };
 
@@ -147,7 +148,7 @@ export function saveStatsCache(stats: { label: string; value: string }[]): void 
 export async function loadTvAutoStats(onStage?: (s: string) => void): Promise<{ label: string; value: string }[]> {
   const stage = (s: string) => { console.log('[TVStats]', s); onStage?.(s); };
   const fallback = (label: string) => ({ label, value: '-' });
-  const stats = [fallback('Total Penduduk'), fallback('Surat Terbit'), fallback('Penerima Bansos'), fallback('Pengumuman')];
+  const stats = [fallback('Total Penduduk'), fallback('Laki-laki'), fallback('Perempuan'), fallback('Surat Terbit')];
   const start = Date.now();
   const hardDeadline = start + 13000;
 
@@ -156,13 +157,9 @@ export async function loadTvAutoStats(onStage?: (s: string) => void): Promise<{ 
       stage('Memeriksa data desa');
       const tenantId = await withTimeout(resolveCurrentTenant(), 6000);
       if (!tenantId) { stage('tenant tidak terdeteksi'); return; }
-      stage('Mengambil data surat & bantuan');
-      const [sur, ban, news] = await Promise.all([
-        safeQuery(supabase.from('surat').select('id').eq('tenant_id', tenantId).limit(10000)),
-        safeQuery(supabase.from('bansos_recipients').select('id').eq('tenant_id', tenantId).limit(10000)),
-        safeQuery(supabase.from('saas_settings').select('value').eq('tenant_id', tenantId).eq('key', 'didesa_news_list').maybeSingle()),
-      ]);
-      // Total Penduduk = replika persis kartu Total halaman Penduduk:
+      stage('Mengambil data surat');
+      const surP = safeQuery(supabase.from('surat').select('id').eq('tenant_id', tenantId).limit(10000));
+      // Penduduk = replika persis kartu halaman Penduduk:
       // paginasi 1000 + buang is_deleted/archived + buang Pindah/Meninggal.
       try {
         const rows: any[] = [];
@@ -171,7 +168,7 @@ export async function loadTvAutoStats(onStage?: (s: string) => void): Promise<{ 
           if (Date.now() > hardDeadline) break;
           stage(`Menghitung penduduk (hal. ${page + 1})`);
           const r: any = await withTimeout(
-            supabase.from('residents').select('status,is_deleted').eq('tenant_id', tenantId).order('nik', { ascending: false }).range(page * pageSize, (page + 1) * pageSize - 1)
+            supabase.from('residents').select('status,is_deleted,gender').eq('tenant_id', tenantId).order('nik', { ascending: false }).range(page * pageSize, (page + 1) * pageSize - 1)
           );
           const data = r?.data;
           if (!Array.isArray(data) || data.length === 0) break;
@@ -180,25 +177,21 @@ export async function loadTvAutoStats(onStage?: (s: string) => void): Promise<{ 
         }
         if (rows.length > 0) {
           const s = (x: any) => String(x?.status || 'Aktif').toLowerCase();
-          const n = rows.filter(x =>
+          const aktif = rows.filter(x =>
             String(x?.is_deleted) !== '1' && x?.is_deleted !== true &&
             s(x) !== 'archived' && s(x) !== 'deleted' &&
             !s(x).includes('pindah') && !s(x).includes('meninggal') && s(x) !== 'mati'
-          ).length;
-          stats[0].value = n.toLocaleString('id-ID');
+          );
+          const g = (x: any) => String(x?.gender || '').toLowerCase();
+          stats[0].value = aktif.length.toLocaleString('id-ID');
+          stats[1].value = aktif.filter(x => ['laki-laki', 'laki', 'l'].includes(g(x))).length.toLocaleString('id-ID');
+          stats[2].value = aktif.filter(x => ['perempuan', 'p', 'wanita'].includes(g(x))).length.toLocaleString('id-ID');
         }
       } catch { /* abaikan, pakai fallback '-' */ }
+      const sur = await surP;
       if (sur && Array.isArray((sur as any).data)) {
-        stats[1].value = ((sur as any).data as any[]).length.toLocaleString('id-ID');
+        stats[3].value = ((sur as any).data as any[]).length.toLocaleString('id-ID');
       }
-      if (ban && Array.isArray((ban as any).data)) {
-        stats[2].value = ((ban as any).data as any[]).length.toLocaleString('id-ID');
-      }
-      try {
-        const raw = (news as any)?.data?.value;
-        const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
-        if (Array.isArray(list)) stats[3].value = list.length.toLocaleString('id-ID');
-      } catch { /* abaikan */ }
       stage('Selesai');
     } catch (e: any) {
       stage(`gagal (${e?.message || 'kesalahan'})`);
