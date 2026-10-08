@@ -16,14 +16,36 @@ export default function AdminTv() {
   const [newDurasi, setNewDurasi] = useState(8);
   const [autoStats, setAutoStats] = useState<{ label: string; value: string }[]>([]);
 
+  const reloadStats = async () => {
+    setAutoStats(await loadTvAutoStats());
+  };
+
   useEffect(() => {
+    let cancelled = false;
+    // Jaring pengaman terakhir: apa pun yang terjadi, loading max 20 detik.
+    const fallbackTimer = setTimeout(() => {
+      if (!cancelled) {
+        setAutoStats(prev => prev.length > 0 ? prev : [
+          { label: 'Total Penduduk', value: '-' },
+          { label: 'Surat Terbit', value: '-' },
+          { label: 'Penerima Bansos', value: '-' },
+          { label: 'Pengumuman', value: '-' },
+        ]);
+      }
+    }, 20000);
     (async () => {
       setCfg(loadTvConfigLocal());
       const cloud = await loadTvConfigCloud();
+      if (cancelled) return;
       if (cloud) setCfg(cloud);
       setLoading(false);
-      setAutoStats(await loadTvAutoStats());
+      const stats = await loadTvAutoStats();
+      if (!cancelled) {
+        setAutoStats(stats);
+        clearTimeout(fallbackTimer);
+      }
     })();
+    return () => { cancelled = true; clearTimeout(fallbackTimer); };
   }, []);
 
   const addSlide = () => {
@@ -194,16 +216,21 @@ export default function AdminTv() {
         {cfg.showStats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {autoStats.length === 0 ? (
-              <p className="text-xs text-gray-400 col-span-full">Menghitung statistik desa...</p>
+              <div className="col-span-full flex items-center justify-between gap-2">
+                <p className="text-xs text-gray-400">Menghitung statistik desa...</p>
+                <button onClick={reloadStats} className="text-xs font-bold text-gray-700 dark:text-slate-200 border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer shrink-0">
+                  Muat ulang
+                </button>
+              </div>
             ) : (
-              autoStats.map((s, i) => (
-                <div key={i} className="border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5">
-                  <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{s.value}</p>
-                  <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">{s.label}</p>
-                </div>
-              ))
-            )}
-          </div>
+                autoStats.map((s, i) => (
+                  <div key={i} className="border border-gray-200 dark:border-slate-700 rounded-lg px-3 py-2.5">
+                    <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{s.value}</p>
+                    <p className="text-[11px] text-gray-500 dark:text-slate-400 mt-0.5">{s.label}</p>
+                  </div>
+                ))
+              )}
+            </div>
         )}
         {!cfg.showStats && (
           <p className="text-xs text-gray-400">Statistik disembunyikan dari layar TV.</p>
