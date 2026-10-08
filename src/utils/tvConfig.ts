@@ -131,16 +131,35 @@ export async function loadTvAutoStats(): Promise<{ label: string; value: string 
   try {
     const tenantId = await withTimeout(resolveCurrentTenant(), 10000);
     if (!tenantId) return stats;
-    const [res, sur, ban, news] = await Promise.all([
-      safeQuery(supabase.from('residents').select('nik,is_deleted').eq('tenant_id', tenantId).limit(10000)),
+    const [sur, ban, news] = await Promise.all([
       safeQuery(supabase.from('surat').select('id').eq('tenant_id', tenantId).limit(10000)),
       safeQuery(supabase.from('bansos_recipients').select('id').eq('tenant_id', tenantId).limit(10000)),
       safeQuery(supabase.from('saas_settings').select('value').eq('tenant_id', tenantId).eq('key', 'didesa_news_list').maybeSingle()),
     ]);
-    if (res && Array.isArray((res as any).data)) {
-      const rows = (res as any).data as any[];
-      stats[0].value = rows.filter(r => r && r.is_deleted !== 1 && r.is_deleted !== '1').length.toLocaleString('id-ID');
-    }
+    // Total Penduduk = replika persis kartu Total halaman Penduduk:
+    // paginasi 1000 + buang is_deleted/archived + buang Pindah/Meninggal.
+    try {
+      const rows: any[] = [];
+      const pageSize = 1000;
+      for (let page = 0; page < 20; page++) {
+        const r: any = await withTimeout(
+          supabase.from('residents').select('status,is_deleted').eq('tenant_id', tenantId).order('nik', { ascending: false }).range(page * pageSize, (page + 1) * pageSize - 1)
+        );
+        const data = r?.data;
+        if (!Array.isArray(data) || data.length === 0) break;
+        rows.push(...data);
+        if (data.length < pageSize) break;
+      }
+      if (rows.length > 0) {
+        const s = (x: any) => String(x?.status || 'Aktif').toLowerCase();
+        const n = rows.filter(x =>
+          String(x?.is_deleted) !== '1' && x?.is_deleted !== true &&
+          s(x) !== 'archived' && s(x) !== 'deleted' &&
+          !s(x).includes('pindah') && !s(x).includes('meninggal') && s(x) !== 'mati'
+        ).length;
+        stats[0].value = n.toLocaleString('id-ID');
+      }
+    } catch { /* abaikan, pakai fallback '-' */ }
     if (sur && Array.isArray((sur as any).data)) {
       stats[1].value = ((sur as any).data as any[]).length.toLocaleString('id-ID');
     }
