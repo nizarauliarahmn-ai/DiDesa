@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<title>DiDesa TV</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #f1f5f9; }
+  body { font-family: "Segoe UI", Roboto, Arial, sans-serif; display: flex; flex-direction: column; }
+
+  .top { flex: 1; display: flex; min-height: 0; }
+
+  .media { position: relative; flex: 7; background: #0f172a; overflow: hidden; }
+  .media img, .media video, .media iframe {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    border: 0; object-fit: cover;
+  }
+  .ph { position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: none; align-items: center; justify-content: center; text-align: center; padding: 0 8%; }
+  .ph.on { display: flex; }
+  .ph1 { background: linear-gradient(135deg, #047857, #134e4a); }
+  .ph2 { background: linear-gradient(135deg, #1e293b, #020617); }
+  .ph3 { background: linear-gradient(135deg, #0f766e, #052e16); }
+  .ph h1 { color: #fff; font-size: 72px; font-weight: 900; margin: 0; letter-spacing: -0.02em; }
+  .ph p { color: #e2e8f0; font-size: 28px; font-weight: 600; margin: 16px 0 0 0; }
+
+  .panel { flex: 3; background: #fff; padding: 32px; display: flex; flex-direction: column;
+    justify-content: center; min-width: 0; overflow: hidden; }
+  .cap { color: #64748b; font-size: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .clock { color: #0f172a; font-size: 72px; font-size: clamp(64px, 4.8vw, 112px); font-weight: 900;
+    letter-spacing: -0.02em; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .date { color: #334155; font-size: 24px; font-weight: 700; margin-top: 12px; }
+  .statBlock { margin-top: 28px; }
+
+  .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px;
+    padding: 14px 20px; margin-bottom: 12px; display: flex; align-items: center; }
+  .card:last-child { margin-bottom: 0; }
+  .card svg { width: 34px; height: 34px; color: #94a3b8; flex: none; margin-right: 16px; }
+  .card .val { color: #0f172a; font-size: 30px; font-weight: 900; line-height: 1; white-space: nowrap; }
+  .card .lbl { color: #64748b; font-size: 20px; font-weight: 600; margin-top: 5px; white-space: nowrap; }
+
+  .ticker { height: 80px; flex: none; background: #15803d; color: #fff; display: flex; align-items: center; overflow: hidden; }
+  .ticker .tw { white-space: nowrap; display: inline-block; animation: tv-ticker 25s linear infinite;
+    font-size: 24px; font-weight: 700; padding: 0 32px; }
+  @keyframes tv-ticker { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+
+  #bootErr { position: absolute; top: 0; left: 0; right: 0; z-index: 50; background: #7f1d1d; color: #fff;
+    font-size: 16px; padding: 8px 16px; display: none; }
+</style>
+</head>
+<body>
+  <div id="bootErr"></div>
+  <div class="top">
+    <div class="media" id="media">
+      <div class="ph on ph1" id="ph">
+        <div><h1 id="phT">Selamat Datang</h1><p id="phS">Kantor Desa melayani dengan sepenuh hati</p></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div>
+        <div class="cap">Jam Digital</div>
+        <div class="clock" id="jam">--:--:--</div>
+        <div class="date" id="tanggal"></div>
+      </div>
+      <div class="statBlock" id="statBlock">
+        <div class="cap">Statistik Desa</div>
+        <div id="stats"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ticker"><div class="tw" id="tickerTw"><span id="tickerText">Selamat datang di Kantor Desa</span></div></div>
+
+<script>
+/* DiDesa TV — halaman statis vanilla ES5, tanpa React/bundle modern.
+   Dirancang untuk browser TV/STB lama yang tidak menjalankan app utama. */
+(function () {
+  'use strict';
+  var SUPA = 'https://rmrctorxzprrmshorcut.supabase.co';
+  var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJtcmN0b3J4enBycm1zaG9yY3V0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NzMwMjQsImV4cCI6MjA5OTA0OTAyNH0.Fefjmf2I6BAC-Fqwy9P8BleB25ryGy3ydV6pucxtBYA';
+  var TV_KEY = 'village_tv_config';
+  var DEFAULT_TICKER = 'Selamat datang di Kantor Desa';
+  var PH = [
+    { t: 'Selamat Datang', s: 'Kantor Desa melayani dengan sepenuh hati', c: 'ph1' },
+    { t: 'Pelayanan Administrasi', s: 'Surat keterangan, domisili, usaha, dan lainnya', c: 'ph2' },
+    { t: 'Transparansi Dana Desa', s: 'Setiap rupiah tercatat dan terlaporkan', c: 'ph3' }
+  ];
+  var ICONS = [
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.4-3.2 2.8-5 5.5-5s5.1 1.8 5.5 5"/><circle cx="17" cy="9.5" r="2.3"/><path d="M15.7 14.4c2.6.5 4 2 4.3 4.6"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="14" r="5"/><path d="M14.2 9.8 20 4M15.5 4H20v4.5"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="9" r="5"/><path d="M12 14v7M9 18h6"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h7.5l4 4v13h-11.5z"/><path d="M14 3.5v4h4"/><path d="M9 12h6M9 15.5h6"/></svg>'
+  ];
+
+  var state = { tenant: null, cfgRaw: '', slides: [], idx: 0, slideTimer: null, phIdx: 0, phTimer: null, ytTried: '' };
+  var mediaEl = document.getElementById('media');
+  var phEl = document.getElementById('ph');
+
+  function el(id) { return document.getElementById(id); }
+  function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function showErr(msg) { var b = el('bootErr'); if (msg) { b.innerHTML = ''; b.appendChild(document.createTextNode(msg)); b.style.display = 'block'; } }
+
+  /* ---- XHR (kompatibel browser lama; tanpa fetch/Promise) ---- */
+  function api(path, cb) {
+    try {
+      var x = new XMLHttpRequest();
+      x.open('GET', SUPA + path, true);
+      x.setRequestHeader('apikey', ANON);
+      x.setRequestHeader('Authorization', 'Bearer ' + ANON);
+      x.setRequestHeader('Accept', 'application/json');
+      x.timeout = 15000;
+      x.onload = function () {
+        if (x.status >= 200 && x.status < 300) {
+          var d = null;
+          try { d = JSON.parse(x.responseText); } catch (e) { d = null; }
+          cb(null, d);
+        } else { cb('HTTP ' + x.status, null); }
+      };
+      x.onerror = function () { cb('gagal jaringan', null); };
+      x.ontimeout = function () { cb('waktu habis', null); };
+      x.send();
+    } catch (e) { cb(String(e && e.message || e), null); }
+  }
+
+  /* ---- Normalisasi link Google Drive → gambar langsung ---- */
+  function normalizeUrl(u) {
+    if (!u) return u;
+    u = String(u).replace(/^\s+|\s+$/g, '');
+    if (!/drive\.google\.com/i.test(u)) return u;
+    var mf = u.match(/\/file\/d\/([^\/?#]+)/);
+    var mi = u.match(/[?&]id=([^&#]+)/);
+    var id = (mf && mf[1]) || (mi && mi[1]);
+    if (id) return 'https://drive.google.com/thumbnail?id=' + id + '&sz=w1920';
+    return u;
+  }
+  function driveAlt(url) {
+    var t = url.match(/drive\.google\.com\/thumbnail\?id=([^&]+)/);
+    if (t && t[1]) return 'https://lh3.googleusercontent.com/d/' + t[1] + '=w1920';
+    var l = url.match(/lh3\.googleusercontent\.com\/d\/([^?=]+)/);
+    if (l && l[1]) return 'https://drive.google.com/thumbnail?id=' + l[1] + '&sz=w1920';
+    return null;
+  }
+  function ytId(url) {
+    var m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : null;
+  }
+  function slideType(url) {
+    var clean = url.split('?')[0].toLowerCase();
+    if (/\.(mp4|webm|ogg|mov|m4v)$/.test(clean)) return 'video';
+    if (/youtu\.be|youtube\.com/i.test(url)) return 'youtube';
+    return 'image';
+  }
+
+  /* ---- Resolusi tenant dari hostname (sama seperti app utama) ---- */
+  function resolveTenant(cb) {
+    var q = window.location.search || '';
+    var mt = q.match(/[?&]t_id=([^&]+)/);
+    if (mt && mt[1]) { cb(decodeURIComponent(mt[1])); return; }
+    var host = window.location.hostname;
+    var parts = host.split('.');
+    var slug = '';
+    if (parts.length >= 2) {
+      var p0 = parts[0].toLowerCase();
+      if (p0 !== 'www' && p0 !== 'localhost' && p0 !== 'didesa' && p0 !== 'dev' && p0 !== 'staging' && p0 !== 'preview' && p0 !== 'saas') slug = p0;
+    }
+    var mq = q.match(/[?&]tenant=([^&]+)/);
+    if (!slug && mq && mq[1]) { slug = decodeURIComponent(mq[1]).split('.')[0]; }
+    if (slug) {
+      var or = encodeURIComponent('(domain.ilike.' + slug + ',domain.ilike.' + slug + '.%)');
+      api('/rest/v1/tenants?select=id&or=' + or + '&limit=1', function (err, rows) {
+        if (!err && rows && rows.length && rows[0].id) { cb(rows[0].id); return; }
+        var cached = lsGet('didesa_active_tenant_id');
+        cb(cached || null);
+      });
+      return;
+    }
+    cb(lsGet('didesa_active_tenant_id') || null);
+  }
+
+  /* ---- Statistik: replika filter halaman Penduduk + Surat Terbit ---- */
+  function defaultStats() {
+    return [
+      { label: 'Total Penduduk', value: '-' },
+      { label: 'Laki-laki', value: '-' },
+      { label: 'Perempuan', value: '-' },
+      { label: 'Surat Terbit', value: '-' }
+    ];
+  }
+  function isActive(x) {
+    var s = String((x && x.status) || 'Aktif').toLowerCase();
+    var del = x && x.is_deleted;
+    return String(del) !== '1' && del !== true &&
+      s !== 'archived' && s !== 'deleted' &&
+      s.indexOf('pindah') < 0 && s.indexOf('meninggal') < 0 && s !== 'mati';
+  }
+  function loadStats(cb) {
+    if (!state.tenant) { cb(defaultStats()); return; }
+    var tid = state.tenant;
+    var rows = [];
+    var page = 0;
+    function finish() {
+      var stats = defaultStats();
+      var i, laki = 0, perempuan = 0, n = 0, g;
+      for (i = 0; i < rows.length; i++) {
+        if (!isActive(rows[i])) continue;
+        n++;
+        g = String((rows[i] && rows[i].gender) || '').toLowerCase();
+        if (g === 'laki-laki' || g === 'laki' || g === 'l') laki++;
+        else if (g === 'perempuan' || g === 'p' || g === 'wanita') perempuan++;
+      }
+      if (n > 0) {
+        stats[0].value = String(n);
+        stats[1].value = String(laki);
+        stats[2].value = String(perempuan);
+      }
+      api('/rest/v1/surat?select=id&tenant_id=eq.' + tid + '&limit=10000', function (err, data) {
+        if (!err && data && data.length) stats[3].value = String(data.length);
+        cb(stats);
+      });
+    }
+    function nextPage() {
+      if (page >= 20) { finish(); return; }
+      api('/rest/v1/residents?select=status,is_deleted,gender&tenant_id=eq.' + tid +
+        '&order=nik.desc&limit=1000&offset=' + (page * 1000), function (err, data) {
+        if (err || !data || !data.length) { finish(); return; }
+        rows = rows.concat(data);
+        page++;
+        if (data.length < 1000) finish(); else nextPage();
+      });
+    }
+    nextPage();
+  }
+  function renderStats(stats) {
+    var box = el('stats');
+    box.innerHTML = '';
+    for (var i = 0; i < stats.length; i++) {
+      var c = document.createElement('div');
+      c.className = 'card';
+      c.innerHTML = ICONS[i % ICONS.length];
+      var w = document.createElement('div');
+      var v = document.createElement('div');
+      v.className = 'val';
+      v.appendChild(document.createTextNode(stats[i].value || '-'));
+      var l = document.createElement('div');
+      l.className = 'lbl';
+      l.appendChild(document.createTextNode(stats[i].label));
+      w.appendChild(v); w.appendChild(l);
+      c.appendChild(w);
+      box.appendChild(c);
+    }
+  }
+
+  /* ---- Jam digital ---- */
+  function tickJam() {
+    var d = new Date();
+    var jam = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
+    var tgl = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    el('jam').innerHTML = '';
+    el('jam').appendChild(document.createTextNode(jam));
+    el('tanggal').innerHTML = '';
+    el('tanggal').appendChild(document.createTextNode(tgl));
+  }
+
+  /* ---- Placeholder (bila belum ada media) ---- */
+  function startPlaceholder() {
+    stopSlide();
+    if (state.phTimer) return;
+    showPlaceholder(0);
+    state.phTimer = setInterval(function () {
+      state.phIdx = (state.phIdx + 1) % PH.length;
+      showPlaceholder(state.phIdx);
+    }, 8000);
+  }
+  function showPlaceholder(i) {
+    var p = PH[i];
+    phEl.className = 'ph on ' + p.c;
+    el('phT').innerHTML = ''; el('phT').appendChild(document.createTextNode(p.t));
+    el('phS').innerHTML = ''; el('phS').appendChild(document.createTextNode(p.s));
+  }
+  function stopPlaceholder() {
+    if (state.phTimer) { clearInterval(state.phTimer); state.phTimer = null; }
+    phEl.className = 'ph';
+  }
+
+  /* ---- Slideshow ---- */
+  function stopSlide() {
+    if (state.slideTimer) { clearTimeout(state.slideTimer); state.slideTimer = null; }
+    var kids = mediaEl.getElementsByTagName('img');
+    var i;
+    for (i = kids.length - 1; i >= 0; i--) { if (kids[i].parentNode === mediaEl) mediaEl.removeChild(kids[i]); }
+    kids = mediaEl.getElementsByTagName('video');
+    for (i = kids.length - 1; i >= 0; i--) { if (kids[i].parentNode === mediaEl) mediaEl.removeChild(kids[i]); }
+    kids = mediaEl.getElementsByTagName('iframe');
+    for (i = kids.length - 1; i >= 0; i--) { if (kids[i].parentNode === mediaEl) mediaEl.removeChild(kids[i]); }
+  }
+  function nextSlide() {
+    if (!state.slides.length) { startPlaceholder(); return; }
+    state.idx = (state.idx + 1) % state.slides.length;
+    showSlide();
+  }
+  function showSlide() {
+    if (!state.slides.length) { startPlaceholder(); return; }
+    stopPlaceholder();
+    stopSlide();
+    var s = state.slides[state.idx % state.slides.length];
+    var url = normalizeUrl(s.url);
+    var type = s.type === 'video' || s.type === 'youtube' ? s.type : slideType(url);
+    var dur = Math.max(3, Number(s.durasi) || 8);
+    if (type === 'youtube') {
+      var vid = ytId(url);
+      if (vid) {
+        var f = document.createElement('iframe');
+        f.src = 'https://www.youtube-nocookie.com/embed/' + vid + '?autoplay=1&mute=1&controls=0&loop=1&playlist=' + vid + '&rel=0';
+        f.setAttribute('allow', 'autoplay; encrypted-media');
+        f.setAttribute('allowfullscreen', '1');
+        mediaEl.appendChild(f);
+        state.slideTimer = setTimeout(nextSlide, dur * 1000);
+        return;
+      }
+      type = 'image';
+    }
+    if (type === 'video') {
+      var v = document.createElement('video');
+      v.src = url; v.autoplay = true; v.muted = true; v.setAttribute('playsinline', '1');
+      v.onended = nextSlide;
+      v.onerror = nextSlide;
+      mediaEl.appendChild(v);
+      try { v.play(); } catch (e) { /* abaikan */ }
+      return;
+    }
+    var img = document.createElement('img');
+    img.alt = '';
+    img.tried = false;
+    img.onerror = function () {
+      if (!img.tried) {
+        var alt = driveAlt(img.src || url);
+        if (alt) { img.tried = true; img.src = alt; return; }
+      }
+      nextSlide();
+    };
+    img.src = url;
+    mediaEl.appendChild(img);
+    state.slideTimer = setTimeout(nextSlide, dur * 1000);
+  }
+
+  /* ---- Muat config TV dari cloud ---- */
+  function loadConfig(done) {
+    if (!state.tenant) { done(null); return; }
+    api('/rest/v1/saas_settings?select=value&tenant_id=eq.' + state.tenant + '&key=eq.' + TV_KEY + '&limit=1', function (err, rows) {
+      if (err || !rows || !rows.length || rows[0].value == null) { done(null); return; }
+      var raw = rows[0].value;
+      var cfg = null;
+      try { cfg = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch (e) { cfg = null; }
+      done(cfg);
+    });
+  }
+  function applyConfig(cfg) {
+    if (!cfg) return;
+    var raw = '';
+    try { raw = JSON.stringify(cfg); } catch (e) { raw = ''; }
+    var changed = raw !== state.cfgRaw;
+    state.cfgRaw = raw;
+    if (typeof cfg.tickerText === 'string' && cfg.tickerText.replace(/\s/g, '')) {
+      el('tickerText').innerHTML = '';
+      el('tickerText').appendChild(document.createTextNode(cfg.tickerText));
+    }
+    el('statBlock').style.display = (cfg.showStats === false) ? 'none' : '';
+    if (changed) {
+      state.slides = [];
+      if (cfg.slides && cfg.slides.length) {
+        for (var i = 0; i < cfg.slides.length; i++) {
+          var s = cfg.slides[i];
+          if (s && typeof s.url === 'string' && s.url.replace(/\s/g, '')) {
+            state.slides.push({
+              url: s.url,
+              type: (s.type === 'video' || s.type === 'youtube') ? s.type : slideType(s.url),
+              durasi: Math.min(300, Math.max(3, Number(s.durasi) || 8))
+            });
+          }
+        }
+      }
+      if (state.slides.length) { state.idx = 0; showSlide(); }
+      else { startPlaceholder(); }
+    }
+  }
+
+  /* ---- Boot ---- */
+  function refresh() {
+    loadConfig(applyConfig);
+    loadStats(renderStats);
+  }
+  function boot() {
+    tickJam();
+    setInterval(tickJam, 1000);
+    startPlaceholder();
+    resolveTenant(function (tid) {
+      state.tenant = tid;
+      if (!tid) { showErr('DiDesa TV: desa tidak terdeteksi dari alamat ini — cek subdomain.'); }
+      refresh();
+      setInterval(refresh, 60000);
+    });
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
