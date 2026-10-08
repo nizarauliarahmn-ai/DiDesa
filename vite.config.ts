@@ -1,11 +1,18 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import legacy from '@vitejs/plugin-legacy';
 import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      // Bundle ES5/SystemJS + polyfill untuk browser lama (TV/STB/HP lawas)
+      // yang tidak mendukung script type="module" — cegah layar kosong.
+      legacy({targets: ['defaults', 'chrome >= 60', 'android >= 7']}),
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

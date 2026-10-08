@@ -59,9 +59,40 @@
         metaTwDesc.content = description;
       })();
     </script>
+    <script>
+      // --- Diagnostik boot: bila aplikasi gagal jalan (browser TV/STB lama,
+      // JS error, dll) tampilkan keterangan di layar, bukan layar kosong. ---
+      window.__bootError = '';
+      window.addEventListener('error', function (e) {
+        if (!window.__bootError && e && e.message) window.__bootError = String(e.message);
+      }, true);
+      document.addEventListener('DOMContentLoaded', function () {
+        var root = document.getElementById('root');
+        var splash = document.getElementById('boot-splash');
+        if (!root || !splash) return;
+        // Sembunyikan splash segera begitu React tampil.
+        if (window.MutationObserver) {
+          new MutationObserver(function () {
+            if (root.childNodes.length > 0) splash.style.display = 'none';
+          }).observe(root, { childList: true });
+        }
+        // Cadangan: 5 detik tanpa konten = gagal → tampilkan sebabnya di layar.
+        setTimeout(function () {
+          if (root.childNodes.length > 0) { splash.style.display = 'none'; return; }
+          var err = window.__bootError;
+          splash.innerHTML =
+            '<div style="text-align:center;padding:0 8vw;font-family:sans-serif;line-height:1.5">' +
+            '<p style="font-size:26px;font-weight:800;color:#0f172a">Memuat DiDesa gagal / terlalu lama</p>' +
+            (err ? '<p style="font-size:17px;color:#b91c1c;margin-top:10px;font-family:monospace;word-break:break-word">Kesalahan: ' + err.replace(/</g, '&lt;') + '</p>' : '') +
+            '<p style="font-size:16px;color:#64748b;margin-top:10px">Coba muat ulang halaman. Bila tetap gagal, browser perangkat ini kemungkinan terlalu tua — buka lewat Chrome/WebView terbaru.</p>' +
+            '</div>';
+        }, 5000);
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <div id="boot-splash" style="position:fixed;inset:0;z-index:9999;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:22px;font-weight:700;color:#334155">Memuat DiDesa&hellip;</div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
