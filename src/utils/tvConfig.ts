@@ -46,6 +46,29 @@ export function newSlideId(): string {
   return `sl_${Date.now().toString(36)}${Math.floor(Math.random() * 1e6).toString(36)}`;
 }
 
+/** Ubah share-link Google Drive menjadi URL gambar langsung yang bisa
+ *  ditampilkan <img>. Link /file/d/ID/view adalah halaman HTML (tak tampil);
+ *  ID-nya dipetakan ke endpoint thumbnail Drive (cara yang masih didukung
+ *  Google sejak matinya /uc?export=view di 2024). URL lain dibiarkan. */
+export function normalizeMediaUrl(raw: string): string {
+  const u = raw.trim();
+  if (!/drive\.google\.com/i.test(u)) return u;
+  const mFile = u.match(/\/file\/d\/([^/?#]+)/);
+  const mId = u.match(/[?&]id=([^&#]+)/);
+  const id = mFile?.[1] || mId?.[1];
+  if (id) return `https://drive.google.com/thumbnail?id=${id}&sz=w1920`;
+  return u;
+}
+
+/** Endpoint cadangan bila URL gambar Drive gagal dimuat (dan sebaliknya). */
+export function driveAltUrl(url: string): string | null {
+  const t = url.match(/drive\.google\.com\/thumbnail\?id=([^&]+)/);
+  if (t?.[1]) return `https://lh3.googleusercontent.com/d/${t[1]}=w1920`;
+  const l = url.match(/lh3\.googleusercontent\.com\/d\/([^?=]+)/);
+  if (l?.[1]) return `https://drive.google.com/thumbnail?id=${l[1]}&sz=w1920`;
+  return null;
+}
+
 function sanitize(cfg: any): TvConfig {
   return {
     slides: Array.isArray(cfg?.slides)
@@ -53,7 +76,7 @@ function sanitize(cfg: any): TvConfig {
           .filter((s: any) => s && typeof s.url === 'string' && s.url.trim())
           .map((s: any) => ({
             id: String(s.id || newSlideId()),
-            url: s.url.trim(),
+            url: normalizeMediaUrl(s.url),
             type: s.type === 'video' || s.type === 'youtube' ? s.type : 'image',
             durasi: Math.min(300, Math.max(3, Number(s.durasi) || 8)),
           }))

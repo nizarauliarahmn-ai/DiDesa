@@ -4,7 +4,7 @@ import { showToast } from '../../utils/toast';
 import {
   TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud,
   saveTvConfig, detectSlideType, newSlideId,
-  loadTvAutoStats, loadStatsCache, saveStatsCache,
+  loadTvAutoStats, loadStatsCache, saveStatsCache, normalizeMediaUrl, driveAltUrl,
 } from '../../utils/tvConfig';
 
 const inputCls = 'w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:border-gray-400 bg-white dark:bg-slate-900 text-gray-900 dark:text-white';
@@ -50,7 +50,7 @@ export default function AdminTv() {
   }, []);
 
   const addSlide = () => {
-    const url = newUrl.trim();
+    const url = normalizeMediaUrl(newUrl.trim());
     if (!url) {
       showToast('Isi URL gambar/video dulu.', 'error');
       return;
@@ -156,7 +156,17 @@ export default function AdminTv() {
             {cfg.slides.map((s, i) => (
               <div key={s.id} className="flex items-center gap-2 border border-gray-200 dark:border-slate-700 rounded-lg p-2">
                 {s.type === 'image' ? (
-                  <img src={s.url} alt="" className="w-14 h-10 object-cover rounded-md bg-gray-100 shrink-0" onError={e => { (e.target as HTMLImageElement).style.opacity = '0.2'; }} />
+                  <img
+                    src={s.url}
+                    alt=""
+                    className="w-14 h-10 object-cover rounded-md bg-gray-100 shrink-0"
+                    onError={e => {
+                      const el = e.currentTarget;
+                      const alt = driveAltUrl(el.src);
+                      if (alt && el.dataset.driveTried !== '1') { el.dataset.driveTried = '1'; el.src = alt; return; }
+                      el.style.opacity = '0.2';
+                    }}
+                  />
                 ) : s.type === 'youtube' ? (
                   <span className="w-14 h-10 rounded-md bg-red-600 text-white flex items-center justify-center text-[10px] font-bold shrink-0">YT</span>
                 ) : (

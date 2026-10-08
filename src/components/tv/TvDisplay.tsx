@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Users, FileText, Mars, Venus } from 'lucide-react';
-import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, loadTvAutoStats, youtubeId, loadStatsCache, saveStatsCache } from '../../utils/tvConfig';
+import { TvConfig, DEFAULT_TV_CONFIG, loadTvConfigLocal, loadTvConfigCloud, loadTvAutoStats, youtubeId, loadStatsCache, saveStatsCache, driveAltUrl } from '../../utils/tvConfig';
 
 /**
  * DiDesa TV — layar ruang tunggu (Digital Signage), 10-foot UI.
@@ -195,7 +195,13 @@ export default function TvDisplay() {
               key={active?.id}
               src={active?.url}
               alt=""
-              onError={nextSlide}
+              onError={e => {
+                // Gambar Drive gagal? Coba endpoint cadangan sekali, lalu lanjut slide.
+                const el = e.currentTarget;
+                const alt = driveAltUrl(el.src);
+                if (alt && el.dataset.driveTried !== '1') { el.dataset.driveTried = '1'; el.src = alt; return; }
+                nextSlide();
+              }}
               className="w-full h-full object-cover"
             />
           )}
