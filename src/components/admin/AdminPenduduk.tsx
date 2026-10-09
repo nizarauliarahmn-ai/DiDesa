@@ -1,7 +1,8 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, X, SlidersHorizontal } from 'lucide-react';
+import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, MoreVertical, X, SlidersHorizontal } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
 import AdminPendudukEdit from './penduduk/AdminPendudukEdit';
 import AdminPendudukImport from './penduduk/AdminPendudukImport';
@@ -995,6 +996,7 @@ export default function AdminPenduduk({
                     avatarColor={item.avatarColor}
                     activeAids={item.activeAids || []}
                     onEdit={(selectedItem: any) => setEditingPenduduk(selectedItem)}
+                    onView={(selectedItem: any) => setSelectedPenduduk(selectedItem)}
                     onRequestDelete={(nik: string, name: string) => handleRequestDelete(nik, name)}
                   />
                 ))
@@ -1167,7 +1169,7 @@ export default function AdminPenduduk({
 }
 
 
-const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, maritalStatus, statusColor, avatarColor, activeAids, onEdit, onRequestDelete }: any) => {
+const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, age, gender, genderColor, rtRw, status, maritalStatus, statusColor, avatarColor, activeAids, onView, onEdit, onRequestDelete }: any) => {
   const getBadgeColors = (color: string) => {
     switch (color) {
       case 'blue': return 'bg-blue-50 text-blue-700 border-blue-100';
@@ -1184,6 +1186,20 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
     gNorm === 'perempuan' || gNorm === 'p' || gNorm === 'wanita' ? 'pink' :
     gNorm === 'laki-laki' || gNorm === 'laki' || gNorm === 'l' ? 'blue' :
     genderColor;
+
+  // Menu titik-3 (aksi) — dirender via portal ke body agar tidak terpotong
+  // kontainer gulir horizontal tabel
+  const [menuPos, setMenuPos] = useState<{ x: number; y: number; top: number } | null>(null);
+  useEffect(() => {
+    if (!menuPos) return;
+    const closeMenu = () => setMenuPos(null);
+    document.addEventListener('mousedown', closeMenu);
+    document.addEventListener('scroll', closeMenu, true);
+    return () => {
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('scroll', closeMenu, true);
+    };
+  }, [menuPos]);
 
   return (
     <motion.tr data-nik={nik} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9, height: 0, transition: { duration: 0.3 } }} className="hover:bg-gray-50/80 transition-colors group cursor-pointer">
@@ -1249,17 +1265,53 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
         )}
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap sticky right-0 bg-white dark:bg-slate-900 z-10 border-l border-gray-50 shadow-[-4px_0_8px_rgba(0,0,0,0.02)] group-hover:bg-gray-50 transition-colors">
-        <div className="flex items-center justify-center gap-2">
-          <button data-action="view" className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Detail">
-            <Eye className="w-4 h-4" />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); if (onEdit) onEdit(item || { nik, name, noKk, gender, rtRw, status, age }); }} disabled={status === 'pending_approval'} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Edit">
-            <Edit2 className="w-4 h-4" />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); if (onRequestDelete) onRequestDelete(nik, name); }} disabled={status === 'pending_approval'} className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed" title="Hapus">
-            <Trash2 className="w-4 h-4" />
+        <div className="flex items-center justify-center">
+          <button
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              const rect = e.currentTarget.getBoundingClientRect();
+              setMenuPos(prev => prev ? null : { x: rect.right, y: rect.bottom, top: rect.top });
+            }}
+            className="p-1.5 text-gray-400 hover:text-gray-700 dark:text-slate-500 dark:hover:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            title="Aksi"
+          >
+            <MoreVertical className="w-4 h-4" />
           </button>
         </div>
+        {menuPos && createPortal(
+          (() => {
+            const MENU_W = 176;
+            const MENU_H = 156;
+            const left = Math.max(8, Math.min(window.innerWidth - MENU_W - 8, menuPos.x - MENU_W));
+            const top = menuPos.y + MENU_H + 8 > window.innerHeight
+              ? Math.max(8, menuPos.top - MENU_H - 6)
+              : menuPos.y + 6;
+            return (
+              <div
+                className="fixed z-[100] w-44 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-xl shadow-black/5 py-1.5"
+                style={{ left, top }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button onClick={() => { setMenuPos(null); if (onView) onView(item || { nik, name, noKk, gender, rtRw, status, age }); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/60 transition-colors whitespace-nowrap">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  Lihat Detail
+                </button>
+                <button onClick={() => { setMenuPos(null); if (onEdit) onEdit(item || { nik, name, noKk, gender, rtRw, status, age }); }} disabled={status === 'pending_approval'} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/60 transition-colors whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                  <Edit2 className="w-4 h-4 text-amber-500" />
+                  Edit
+                </button>
+                <div className="my-1.5 border-t border-gray-100 dark:border-slate-700" />
+                <button onClick={() => { setMenuPos(null); if (onRequestDelete) onRequestDelete(nik, name); }} disabled={status === 'pending_approval'} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 transition-colors whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                  <Trash2 className="w-4 h-4" />
+                  Hapus
+                </button>
+              </div>
+            );
+          })(),
+          document.body
+        )}
       </td>
     </motion.tr>
   );
