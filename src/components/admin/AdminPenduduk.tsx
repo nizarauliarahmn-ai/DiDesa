@@ -1178,6 +1178,13 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
     }
   };
 
+  // Warna badge gender mengikuti jenis kelamin: Perempuan = pink, Laki-laki = biru
+  const gNorm = String(gender || '').trim().toLowerCase();
+  const genderBadgeColor =
+    gNorm === 'perempuan' || gNorm === 'p' || gNorm === 'wanita' ? 'pink' :
+    gNorm === 'laki-laki' || gNorm === 'laki' || gNorm === 'l' ? 'blue' :
+    genderColor;
+
   return (
     <motion.tr data-nik={nik} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9, height: 0, transition: { duration: 0.3 } }} className="hover:bg-gray-50/80 transition-colors group cursor-pointer">
       <td className="px-6 py-3.5 whitespace-nowrap">
@@ -1223,7 +1230,7 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
           })()}
       </td>
       <td className="px-6 py-3.5 whitespace-nowrap">
-          <span className={`text-[10px] px-2 py-1 rounded-md font-bold border whitespace-nowrap leading-none ${getBadgeColors(genderColor)}`}>
+          <span className={`text-[10px] px-2 py-1 rounded-md font-bold border whitespace-nowrap leading-none ${getBadgeColors(genderBadgeColor)}`}>
             {gender}
           </span>
       </td>
