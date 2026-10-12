@@ -804,7 +804,7 @@ export default function AdminPendudukDetail({
                 {data?.name || "Nama Penduduk"}
               </h2>
             )}
-            <div className={`flex flex-wrap items-center gap-1.5 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
+            <div className={`flex flex-wrap items-center gap-1.5 overflow-hidden transition-all duration-300 ease-out ${isScrolled ? 'max-h-0 opacity-0 mt-0 pointer-events-none' : 'max-h-40 opacity-100 mt-1.5'}`}>
               {(() => {
                 const keberadaan = normalizeStatusKeberadaan(data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').toLowerCase();
                 if (keberadaan.includes('meninggal') || keberadaan === 'mati' || keberadaan === 'wafat') {
@@ -893,7 +893,7 @@ export default function AdminPendudukDetail({
                 </span>
               )}
             </div>
-            <div className={`flex items-center gap-2 mt-1.5 transition-all ${isScrolled ? 'hidden' : ''}`}>
+            <div className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ease-out ${isScrolled ? 'max-h-0 opacity-0 mt-0 pointer-events-none' : 'max-h-10 opacity-100 mt-1.5'}`}>
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                 NIK: {data?.nik || "-"}
               </span>
@@ -902,7 +902,7 @@ export default function AdminPendudukDetail({
         </div>
 
         {/* Sisi Kanan: Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
           {isEditMode ? (
             <>
               <span className={`flex items-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-xs font-black uppercase tracking-wider ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}>
