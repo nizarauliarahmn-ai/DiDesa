@@ -284,12 +284,12 @@ export function getGlobalBranding(
 
 /**
  * Dynamically updates the browser tab favicon to match the SaaS global logo (global_app_logo).
- * If no custom logo is uploaded in global settings, falls back to /favicon.svg.
+ * If no custom logo is uploaded in global settings, falls back to the default DiDesa icon.
  */
 export function updateDynamicFavicon(): void {
   try {
     const customLogo = localStorage.getItem('global_app_logo');
-    const targetHref = (customLogo && customLogo.trim() !== '') ? customLogo.trim() : '/favicon.svg';
+    const targetHref = (customLogo && customLogo.trim() !== '') ? customLogo.trim() : '/icons/icon-301.cc28a699.png';
 
     let faviconEl = document.querySelector<HTMLLinkElement>("link[rel='icon']") ||
                     document.querySelector<HTMLLinkElement>("link[rel='shortcut icon']");
@@ -298,7 +298,7 @@ export function updateDynamicFavicon(): void {
       if (faviconEl.href !== targetHref) {
         faviconEl.href = targetHref;
         if (!customLogo || customLogo.trim() === '') {
-          faviconEl.type = 'image/svg+xml';
+          faviconEl.type = 'image/png';
         } else {
           faviconEl.removeAttribute('type');
         }
