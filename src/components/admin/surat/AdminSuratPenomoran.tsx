@@ -681,8 +681,8 @@ return (
     {/* Request SaaS Modal */}
     {showModal && (
       <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-          <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+          <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between shrink-0">
             <h3 className="font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
               <FileText className="w-5 h-5 text-blue-600" />
               Minta Tambah Surat
@@ -695,7 +695,7 @@ return (
             </button>
           </div>
 
-          <form onSubmit={handleSaaSSubmit} className="p-6 space-y-4">
+          <form onSubmit={handleSaaSSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 uppercase tracking-wider mb-2">
                 Nama Lengkap Surat <span className="text-red-500">*</span>

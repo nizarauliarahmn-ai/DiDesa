@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Search, PlusCircle, Edit2, Trash2, Image as ImageIcon, FolderOpen,
   ListChecks, AlertTriangle, Layers, Upload, X, Loader2, Link2, MapPin, User,
@@ -150,6 +151,7 @@ export default function AdminUsulanDesa() {
   // Bulk selection & detail/similarity state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{ x: number; y: number; top: number } | null>(null);
   const [detailTarget, setDetailTarget] = useState<UsulanDesa | null>(null);
   const [similarTarget, setSimilarTarget] = useState<UsulanDesa | null>(null);
   const [bulkStatusOpen, setBulkStatusOpen] = useState(false);
@@ -1380,36 +1382,51 @@ ${rowsHtml}
                         </button>
                         <div className="relative">
                           <button
-                            onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === u.id ? null : u.id); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (openMenuId === u.id) { setOpenMenuId(null); setMenuPos(null); }
+                              else { const rect = e.currentTarget.getBoundingClientRect(); setMenuPos({ x: rect.right, y: rect.bottom, top: rect.top }); setOpenMenuId(u.id); }
+                            }}
                             title="Aksi lainnya"
                             className={`p-1.5 rounded-lg transition-colors cursor-pointer ${openMenuId === u.id ? 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300' : 'text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800'}`}
                           >
                             <MoreVertical className="w-3.5 h-3.5" />
                           </button>
-{openMenuId === u.id && (
-                              <>
-                                <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }} />
-                                <div className="absolute right-0 top-full z-50 mt-1 w-60 bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5" onClick={(e) => e.stopPropagation()}>
+{openMenuId === u.id && menuPos && createPortal(
+                              (() => {
+                                const MENU_W = 240;
+                                const MENU_H = 344;
+                                const left = Math.max(8, Math.min(window.innerWidth - MENU_W - 8, menuPos.x - MENU_W));
+                                const top = menuPos.y + MENU_H + 8 > window.innerHeight
+                                  ? Math.max(8, menuPos.top - MENU_H - 6)
+                                  : menuPos.y + 6;
+                                return (
+                                <>
+                                <div className="fixed inset-0 z-[90]" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); setMenuPos(null); }} />
+                                <div className="fixed z-[95] w-60 max-w-[calc(100vw-16px)] max-h-[70vh] overflow-y-auto bg-white dark:bg-slate-900 rounded-xl border border-gray-100 dark:border-slate-800 shadow-xl py-1.5" style={{ left, top }} onClick={(e) => e.stopPropagation()}>
                                   <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider border-b border-gray-100 dark:border-slate-800">
                                     Diteruskan ke Dokumen Perencanaan
                                   </div>
-                                  <DropdownItem icon={Star} color="text-blue-600 dark:text-blue-400" label="Musrenbang" onClick={() => { setOpenMenuId(null); openDiteruskan(u, 'musrenbang'); }} />
-                                  <DropdownItem icon={Layers} color="text-indigo-600 dark:text-indigo-400" label="RPJMDesa" onClick={() => { setOpenMenuId(null); openDiteruskan(u, 'rpjmdesa'); }} />
-                                  <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="RKPDes" onClick={() => { setOpenMenuId(null); openDiteruskan(u, 'rkpdes'); }} />
+                                  <DropdownItem icon={Star} color="text-blue-600 dark:text-blue-400" label="Musrenbang" onClick={() => { setOpenMenuId(null); setMenuPos(null); openDiteruskan(u, 'musrenbang'); }} />
+                                  <DropdownItem icon={Layers} color="text-indigo-600 dark:text-indigo-400" label="RPJMDesa" onClick={() => { setOpenMenuId(null); setMenuPos(null); openDiteruskan(u, 'rpjmdesa'); }} />
+                                  <DropdownItem icon={Send} color="text-purple-600 dark:text-purple-400" label="RKPDes" onClick={() => { setOpenMenuId(null); setMenuPos(null); openDiteruskan(u, 'rkpdes'); }} />
                                   <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
                                   <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider border-b border-gray-100 dark:border-slate-800">
                                     Tahap Eksekusi
                                   </div>
-                                  <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Masuk APBDesa" onClick={() => { setOpenMenuId(null); openApbdesa(u); }} />
+                                  <DropdownItem icon={CircleDollarSign} color="text-amber-600 dark:text-amber-400" label="Masuk APBDesa" onClick={() => { setOpenMenuId(null); setMenuPos(null); openApbdesa(u); }} />
                                   <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
                                   <div className="px-3 py-1.5 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider border-b border-gray-100 dark:border-slate-800">
                                     Status Akomodasi
                                   </div>
-                                  <DropdownItem icon={CheckCircle2} color="text-emerald-600 dark:text-emerald-400" label="Tandai Terakomodir" onClick={() => { setOpenMenuId(null); openTerakomodir(u); }} />
+                                  <DropdownItem icon={CheckCircle2} color="text-emerald-600 dark:text-emerald-400" label="Tandai Terakomodir" onClick={() => { setOpenMenuId(null); setMenuPos(null); openTerakomodir(u); }} />
                                   <div className="my-1 border-t border-gray-50 dark:border-slate-800" />
-                                  <DropdownItem icon={Trash2} color="text-rose-600 dark:text-rose-400" label="Hapus Usulan" onClick={() => { setOpenMenuId(null); handleDelete(u); }} />
+                                  <DropdownItem icon={Trash2} color="text-rose-600 dark:text-rose-400" label="Hapus Usulan" onClick={() => { setOpenMenuId(null); setMenuPos(null); handleDelete(u); }} />
                                 </div>
-                              </>
+                                </>
+                                );
+                              })(),
+                              document.body
                             )}
                         </div>
                       </div>
@@ -1636,7 +1653,7 @@ ${rowsHtml}
       {/* 1. Diteruskan ke Dokumen Perencanaan Modal */}
       {diteruskanTarget && diteruskanType && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">
                 Diteruskan ke {diteruskanType === 'musrenbang' ? 'Musrenbang' : diteruskanType === 'rpjmdesa' ? 'RPJMDesa' : 'RKPDes'}
@@ -1722,7 +1739,7 @@ ${rowsHtml}
       {/* 2. Masuk APBDesa Modal */}
       {apbdesaTarget && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">Masuk APBDesa</h3>
               <button onClick={() => setApbdesaTarget(null)} className="p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
@@ -1899,7 +1916,7 @@ ${rowsHtml}
       {/* Bulk Status Modal */}
       {bulkStatusOpen && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
               <h3 className="text-lg font-black text-gray-900 dark:text-white flex items-center gap-2">
                 <Tags className="w-5 h-5 text-sky-600 dark:text-sky-400" /> Ubah Status Masal

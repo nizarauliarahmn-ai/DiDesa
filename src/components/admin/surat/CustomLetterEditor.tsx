@@ -324,7 +324,7 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
         <div className="relative">
           <TB icon={<Table className="w-4 h-4" />} title="Tabel" onClick={() => setShowTableGrid(!showTableGrid)} />
           {showTableGrid && (
-            <div className={`${horiz ? 'absolute top-full left-0 mt-1' : 'absolute left-full top-0 ml-2'} bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 z-50`}>
+            <div className="absolute top-full left-0 mt-1 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-3 z-50">
               <p className="text-[10px] font-bold text-gray-500 dark:text-slate-400 mb-2">Ukuran Tabel</p>
               <div className="grid grid-cols-5 gap-1 mb-2">
                 {Array(5).fill(0).map((_, r) => Array(5).fill(0).map((_, c) => (
@@ -467,12 +467,12 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
       <TemplatePickerModal isOpen={showPicker} onClose={() => {}} onSelect={handleSelectTemplate} />
       {!showPicker && (
         <>
-          <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-3 shadow-sm mb-3 flex-shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-5 py-3 shadow-sm mb-3 flex-shrink-0">
             <div className="flex items-center gap-3">
               <button onClick={onBack} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"><ArrowLeft className="w-5 h-5 text-gray-500" /></button>
-              <input type="text" value={letterTitle} onChange={e => setLetterTitle(e.target.value)} placeholder="Judul Surat" className="text-lg font-bold text-gray-900 dark:text-white bg-transparent border-none outline-none placeholder:text-gray-300 dark:placeholder:text-slate-600 w-72" />
+              <input type="text" value={letterTitle} onChange={e => setLetterTitle(e.target.value)} placeholder="Judul Surat" className="text-lg font-bold text-gray-900 dark:text-white bg-transparent border-none outline-none placeholder:text-gray-300 dark:placeholder:text-slate-600 w-full min-w-0 lg:w-72" />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <button onClick={toggleToolbarPos} title={toolbarPos === 'left' ? 'Toolbar di Atas' : 'Toolbar di Samping'} className="p-2 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
                 {toolbarPos === 'left' ? <PanelTop className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
               </button>
@@ -483,8 +483,8 @@ export default function CustomLetterEditor({ onBack }: { onBack: () => void }) {
           </div>
 
           {toolbarPos === 'left' ? (
-            <div className="flex gap-4 flex-1 min-h-0">
-              <div className="w-72 flex-shrink-0 flex flex-col gap-3 overflow-y-auto">
+            <div className="flex flex-col lg:flex-row gap-4 flex-1 min-h-0">
+              <div className="w-full lg:w-72 lg:flex-shrink-0 flex flex-col gap-3 overflow-y-auto">
                 <MetaFields />
                 <div className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 px-2 py-2 shadow-sm flex flex-col gap-0.5 sticky top-0">
                   {renderToolbar(false)}

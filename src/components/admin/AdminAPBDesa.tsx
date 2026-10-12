@@ -1050,7 +1050,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
                   )}
 
                   {/* Grid Info */}
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                       <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Kategori</p>
                       <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{kategoriNorm(detailTarget.kategori)}</p>
@@ -1097,7 +1097,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
                   {/* Detail Kegiatan Section */}
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Detail Kegiatan</p>
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
                       <div>
                         <p className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest">Jenis Belanja</p>
                         <p className="text-sm text-gray-900 dark:text-white mt-1">{detailTarget.jenis_belanja || '-'}</p>
@@ -1330,7 +1330,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
                 )}
                 <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-3">
                   <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Catat Pencairan Baru</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jumlah (Rp)</label>
                       <div className="relative">
@@ -1436,7 +1436,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
               <div className="border-t border-gray-200 dark:border-slate-700" />
 
               {/* 2-column grid: checkbox fields */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="flex items-center gap-2 text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 cursor-pointer">
                     <input type="checkbox" checked={massEditForm.applyKategori} onChange={e => setMassEditForm({ ...massEditForm, applyKategori: e.target.checked })} className="accent-gray-900 dark:accent-white rounded" />
@@ -1529,7 +1529,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
               {/* TPK Fields */}
               <div>
                 <p className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-3">Tim Pelaksana Kegiatan (TPK)</p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 cursor-pointer">
                       <input type="checkbox" checked={massEditForm.applyKetuaTpk} onChange={e => setMassEditForm({ ...massEditForm, applyKetuaTpk: e.target.checked })} className="accent-gray-900 dark:accent-white rounded" />
@@ -1623,7 +1623,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
                 <input value={form.nama_kegiatan} onChange={e => setForm({ ...form, nama_kegiatan: e.target.value })}
                   className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Kategori</label>
                   <select value={form.kategori} onChange={e => setForm({ ...form, kategori: e.target.value })}
@@ -1682,7 +1682,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
                   {officers.map(o => <option key={o.name} value={o.name}>{o.name} — {o.role}</option>)}
                 </select>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Ketua TPK</label>
                   <input value={form.ketua_tpk} onChange={e => setForm({ ...form, ketua_tpk: e.target.value })}
@@ -1699,7 +1699,7 @@ th:nth-child(7),td:nth-child(7),th:nth-child(9),td:nth-child(9){white-space:nowr
                     className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900" placeholder="Anggota" />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Jenis Kegiatan</label>
                   <select value={form.jenis_kegiatan} onChange={e => setForm({ ...form, jenis_kegiatan: e.target.value })}

@@ -197,8 +197,8 @@ export default function AdminGlobalUpdates() {
       {/* Create Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 shrink-0">
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Buat Pengumuman Update</h3>
                 <p className="text-xs text-gray-500 dark:text-slate-400 font-medium">Luncurkan info fitur baru ke seluruh ekosistem DiDesa</p>
@@ -210,8 +210,8 @@ export default function AdminGlobalUpdates() {
                 <Trash2 size={20} className="rotate-45" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-1.5">
                   <label className="block text-sm font-bold text-gray-700 dark:text-slate-300">Judul Pembaruan</label>
                   <input 
@@ -238,7 +238,7 @@ export default function AdminGlobalUpdates() {
 
               <div className="space-y-1.5">
                 <label className="block text-sm font-bold text-gray-700 dark:text-slate-300">Tipe Pembaruan</label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {(['feature', 'fix', 'improvement'] as const).map((type) => (
                     <button
                       key={type}

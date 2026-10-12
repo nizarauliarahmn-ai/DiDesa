@@ -391,13 +391,13 @@ export const GlobalBugReportButton: React.FC = () => {
               transition={{ duration: 0.2 }}
             />
             <motion.div
-              className="fixed bottom-24 right-6 z-[110] flex items-end justify-end p-0 origin-bottom-right"
+              className="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 z-[110] flex items-end justify-end p-0 origin-bottom-right"
               initial={{ opacity: 0, scale: 0.95, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
             >
-              <div className="bg-white dark:bg-slate-900 rounded-3xl w-[380px] sm:w-[420px] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[75vh] min-h-[500px] overflow-hidden shadow-emerald-900/20">
+              <div className="bg-white dark:bg-slate-900 rounded-3xl w-full sm:w-[420px] shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[75vh] overflow-hidden shadow-emerald-900/20">
             
             {/* Header */}
             <div className="p-5 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-900 text-white flex items-center justify-between relative overflow-hidden shrink-0">

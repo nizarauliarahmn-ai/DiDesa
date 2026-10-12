@@ -1604,7 +1604,7 @@ export default function AdminSuratUndangan({
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowSavePresetModal(false)}
           />
-          <div className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 p-6 z-10">
+          <div className="relative bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-100 dark:border-slate-800 p-6 z-10">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 Simpan Daftar sebagai Preset

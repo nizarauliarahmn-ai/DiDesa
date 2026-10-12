@@ -550,7 +550,7 @@ tfoot td { border-top: 2px solid #333; font-weight: bold; background: #f9f9f9; }
                 ))}
               </div>
             )}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="col-span-1">
                 <label className="block text-[11px] font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Tanggal</label>
                 <input type="date" value={cairTgl} onChange={e => setCairTgl(e.target.value)} className="w-full h-10 px-3 border border-gray-200 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white outline-none" />

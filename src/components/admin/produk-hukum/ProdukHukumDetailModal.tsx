@@ -70,8 +70,8 @@ export default function ProdukHukumDetailModal({ item, kindLabel, onClose, onEdi
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-gray-900/50" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-xl w-full max-w-lg overflow-hidden">
-        <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-100 dark:border-slate-800">
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="flex items-start justify-between gap-3 p-5 border-b border-gray-100 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <span className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 flex items-center justify-center shrink-0">
               <FileText className="w-5 h-5" />
@@ -90,7 +90,7 @@ export default function ProdukHukumDetailModal({ item, kindLabel, onClose, onEdi
           </button>
         </div>
 
-        <div className="p-5">
+        <div className="flex-1 overflow-y-auto p-5">
           <dl className="divide-y divide-gray-100 dark:divide-slate-800">
             {rows.map(([label, value]) => (
               <div key={label} className="flex items-start justify-between gap-4 py-2">
@@ -119,7 +119,7 @@ export default function ProdukHukumDetailModal({ item, kindLabel, onClose, onEdi
           </dl>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 px-5 py-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/40">
+        <div className="flex flex-wrap items-center justify-end gap-2 px-5 py-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50/60 dark:bg-slate-800/40 shrink-0">
           {item.documentData && (
             <>
               <button

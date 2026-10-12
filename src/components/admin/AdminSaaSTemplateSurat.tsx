@@ -513,8 +513,8 @@ export default function AdminSaaSTemplateSurat() {
       {/* Modal Tambah/Edit */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 shrink-0">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                 {editingId ? 'Edit Template Surat' : 'Tambah Template Surat'}
               </h3>
@@ -526,7 +526,7 @@ export default function AdminSaaSTemplateSurat() {
               </button>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider ml-1">Jenis Surat Lengkap</label>
                 <input 

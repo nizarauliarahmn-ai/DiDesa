@@ -688,7 +688,7 @@ export default function AdminPendudukImport({ onClose, onRefresh }: AdminPendudu
 
         {/* Steps Progress Indicator */}
         {step < 4 && (
-          <div className="px-8 py-3 border-b border-slate-50 bg-white dark:bg-slate-900 grid grid-cols-3 text-xs font-bold text-slate-400">
+          <div className="px-4 sm:px-8 py-3 border-b border-slate-50 bg-white dark:bg-slate-900 grid grid-cols-3 text-xs font-bold text-slate-400">
             <div className={`flex items-center gap-2 ${step >= 1 ? 'text-emerald-700' : ''}`}>
               <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-emerald-700 text-white font-black' : step > 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-slate-800'}`}>1</span>
               <span>Unggah File / Tempel</span>

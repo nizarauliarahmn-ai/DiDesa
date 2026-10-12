@@ -490,7 +490,7 @@ export const AdminSaaSBugReports: React.FC = () => {
             {/* Body */}
             <div ref={chatBodyRef} className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Reporter Information Card */}
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-4 text-xs">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
                   <span className="text-slate-400 text-[10px] uppercase font-bold block mb-1">Instansi Desa</span>
                   <span className="font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -577,7 +577,7 @@ export const AdminSaaSBugReports: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Ubah Status Tiket Penanganan:
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => handleUpdateStatus('Menunggu')}

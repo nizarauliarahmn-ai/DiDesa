@@ -96,9 +96,9 @@ export default function TemplatePickerModal({ isOpen, onClose, onSelect }: Templ
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 w-full max-w-2xl mx-4 overflow-hidden">
-        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 w-full max-w-2xl my-auto overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-xl font-black text-gray-900 dark:text-white">Pilih Template Surat</h2>
             <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Pilih template untuk memulai, atau mulai dengan dokumen kosong.</p>
@@ -107,7 +107,7 @@ export default function TemplatePickerModal({ isOpen, onClose, onSelect }: Templ
             <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
-        <div className="p-6 grid grid-cols-2 gap-4">
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto">
           {LETTER_TEMPLATES.map((tpl) => (
             <button
               key={tpl.id}

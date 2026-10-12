@@ -658,7 +658,7 @@ th{background:#f0f0f0;font-weight:bold}
                 <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Nama Program</p>
                 <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.nama_program}</p>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Kategori</p>
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${kategoriColor(detailTarget.kategori)}`}>{detailTarget.kategori}</span>
@@ -668,7 +668,7 @@ th{background:#f0f0f0;font-weight:bold}
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border mt-1 ${statusColor(detailTarget.status)}`}>{detailTarget.status}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Lokasi</p>
                   <p className="text-sm text-gray-700 dark:text-slate-300 mt-1 flex items-center gap-1"><MapPin size={12} /> {detailTarget.lokasi || '-'}</p>
@@ -678,7 +678,7 @@ th{background:#f0f0f0;font-weight:bold}
                   <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{detailTarget.tahun_awal} - {detailTarget.tahun_akhir}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Anggaran Estimasi</p>
                   <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-1">{formatRp(detailTarget.anggaran_estimasi)}</p>
@@ -740,7 +740,7 @@ th{background:#f0f0f0;font-weight:bold}
                 <input value={form.nama_program} onChange={e => setForm({ ...form, nama_program: e.target.value })}
                   className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Kategori</label>
                   <select value={form.kategori} onChange={e => setForm({ ...form, kategori: e.target.value })}
@@ -761,7 +761,7 @@ th{background:#f0f0f0;font-weight:bold}
                 <input value={form.lokasi} onChange={e => setForm({ ...form, lokasi: e.target.value })}
                   className="w-full border border-gray-300 dark:border-slate-600 rounded-xl p-3 text-sm font-medium bg-white dark:bg-slate-900 focus:ring-2 focus:ring-purple-500 outline-none" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-gray-700 dark:text-slate-300 mb-1 block">Tahun Awal</label>
                   <input type="number" value={form.tahun_awal} onChange={e => setForm({ ...form, tahun_awal: parseInt(e.target.value) || new Date().getFullYear() })}

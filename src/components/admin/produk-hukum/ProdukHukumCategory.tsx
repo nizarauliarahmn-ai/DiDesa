@@ -619,7 +619,7 @@ function ModalCategory({ item, items, jenisOptions, label, onSave, onClose }: {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Tahun <span className="text-red-500">*</span></label>
               <input type="number" value={tahun} onChange={(e) => handleTahunChange(e.target.value)} min="1900" max="2100"
@@ -636,7 +636,7 @@ function ModalCategory({ item, items, jenisOptions, label, onSave, onClose }: {
             <input type="text" value={uraian} onChange={(e) => setUraian(e.target.value)} placeholder={`cth: ${label} ...`}
               className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Tanggal</label>
               <input type="text" value={tanggal} onChange={(e) => setTanggal(e.target.value)} placeholder="cth: Senin, 30 Desember 2024"
@@ -657,7 +657,7 @@ function ModalCategory({ item, items, jenisOptions, label, onSave, onClose }: {
               </select>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Keterangan Arsip</label>
               <select value={ketArsip} onChange={(e) => setKetArsip(e.target.value)}

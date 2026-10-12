@@ -476,9 +476,9 @@ export default function PetaWilayah() {
 
       {/* MODAL TAMBAH TITIK MANUAL HASIL KLIK PETA */}
       {pendingClickCoords && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 animate-in zoom-in-95 duration-200">
-            <div className="p-5 border-b border-gray-100 dark:border-slate-800 bg-emerald-50/50 dark:bg-emerald-950/30 flex justify-between items-center">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200 my-auto">
+            <div className="p-5 border-b border-gray-100 dark:border-slate-800 bg-emerald-50/50 dark:bg-emerald-950/30 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center">
                   <MapPin className="w-5 h-5" />
@@ -496,11 +496,11 @@ export default function PetaWilayah() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {/* Category Selection */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1.5">Kategori Penanda</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
                     { id: 'bansos', label: '🔴 Penerima Bansos' },
                     { id: 'lansia', label: '🟡 Lansia Tunggal' },
@@ -510,7 +510,7 @@ export default function PetaWilayah() {
                       key={cat.id}
                       type="button"
                       onClick={() => setPinForm({ ...pinForm, category: cat.id as any })}
-                      className={`p-2 rounded-xl text-xs font-bold border transition-all text-center whitespace-nowrap cursor-pointer ${
+                      className={`p-2 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
                         pinForm.category === cat.id
                           ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
                           : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
@@ -583,7 +583,7 @@ export default function PetaWilayah() {
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
+            <div className="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3 shrink-0">
               <button
                 onClick={() => setPendingClickCoords(null)}
                 className="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-100 rounded-xl"

@@ -179,8 +179,8 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
             {/* Saran Fitur Modal */}
             {isModalOpen && createPortal(
               <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-                <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-white/20 animate-in fade-in zoom-in duration-300">
-                  <div className="bg-emerald-700 p-6 text-white flex justify-between items-center">
+                <div className="bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-white/20 flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-300">
+                  <div className="bg-emerald-700 p-6 text-white flex justify-between items-center shrink-0">
                     <div>
                        <h3 className="text-xl font-bold">Kirim Saran & Kritik</h3>
                        <p className="text-emerald-100 text-xs mt-1">Bantu kami mengembangkan {globalName} lebih baik.</p>
@@ -189,7 +189,7 @@ export default function Footer({ isAdmin = false }: { isAdmin?: boolean }) {
                        <CloseIcon size={20} />
                      </button>
                    </div>
-                   <form onSubmit={handleSubmitFeedback} className="p-6 space-y-4">
+                    <form onSubmit={handleSubmitFeedback} className="flex-1 overflow-y-auto p-6 space-y-4">
                      <div className="space-y-2">
                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Nama Anda (Opsional)</label>
                        <input 

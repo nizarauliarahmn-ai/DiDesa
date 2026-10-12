@@ -301,7 +301,7 @@ export default function ResidentDashboard({ onLogout }: { onLogout: () => void }
                     <h3 className="text-sm font-bold">Edit Profil</h3>
                     <button onClick={handleSaveProfil} disabled={submitting} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 disabled:opacity-50">{submitting ? 'Menyimpan...' : 'Simpan'}</button>
                   </div>
-                  <div className="p-4 space-y-3">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     {[
                       { label: 'Nama Lengkap', key: 'name', type: 'text', required: true },
                       { label: 'No. WhatsApp', key: 'no_whatsapp', type: 'tel', placeholder: '08xxxxxxxxxx' },
@@ -358,13 +358,13 @@ export default function ResidentDashboard({ onLogout }: { onLogout: () => void }
             ))}
             {showFormBantuan && (
               <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-                <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
-                  <div className="border-b border-slate-100 px-4 py-3 flex items-center justify-between rounded-t-2xl">
+                <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+                  <div className="border-b border-slate-100 px-4 py-3 flex items-center justify-between rounded-t-2xl shrink-0">
                     <button onClick={() => setShowFormBantuan(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
                     <h3 className="text-sm font-bold">Usulan Bantuan</h3>
                     <div className="w-6" />
                   </div>
-                  <div className="p-4 space-y-3">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-500 mb-1">Program Bantuan *</label>
                       <select value={bantuanForm.program_id} onChange={e => setBantuanForm(p => ({ ...p, program_id: e.target.value }))}
@@ -418,13 +418,13 @@ export default function ResidentDashboard({ onLogout }: { onLogout: () => void }
             ))}
             {showFormSurat && (
               <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-                <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
-                  <div className="border-b border-slate-100 px-4 py-3 flex items-center justify-between rounded-t-2xl">
+                <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+                  <div className="border-b border-slate-100 px-4 py-3 flex items-center justify-between rounded-t-2xl shrink-0">
                     <button onClick={() => setShowFormSurat(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
                     <h3 className="text-sm font-bold">Permohonan Surat</h3>
                     <div className="w-6" />
                   </div>
-                  <div className="p-4 space-y-3">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-500 mb-1">Jenis Surat *</label>
                       <select value={suratForm.jenis_surat} onChange={e => setSuratForm(p => ({ ...p, jenis_surat: e.target.value }))}
@@ -483,13 +483,13 @@ export default function ResidentDashboard({ onLogout }: { onLogout: () => void }
             ))}
             {showFormAspirasi && (
               <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-                <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
-                  <div className="border-b border-slate-100 px-4 py-3 flex items-center justify-between rounded-t-2xl">
+                <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+                  <div className="border-b border-slate-100 px-4 py-3 flex items-center justify-between rounded-t-2xl shrink-0">
                     <button onClick={() => setShowFormAspirasi(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
                     <h3 className="text-sm font-bold">Kirim Aspirasi</h3>
                     <div className="w-6" />
                   </div>
-                  <div className="p-4 space-y-3">
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3">
                     <div>
                       <label className="block text-[11px] font-bold text-slate-500 mb-1">Kategori *</label>
                       <select value={aspirasiForm.kategori} onChange={e => setAspirasiForm(p => ({ ...p, kategori: e.target.value }))}

@@ -52,11 +52,11 @@ export const GlobalUpdatePopup: React.FC<Props> = ({ update, globalName, globalC
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-slate-800"
+        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh]"
       >
         {/* Header */}
         <div
-          className="relative p-6 text-white"
+          className="relative p-6 text-white shrink-0"
           style={{ background: `linear-gradient(135deg, ${globalColor}, ${globalColor}dd)` }}
         >
           <button
@@ -103,7 +103,7 @@ export const GlobalUpdatePopup: React.FC<Props> = ({ update, globalName, globalC
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between">
+        <div className="p-6 bg-gray-50 dark:bg-slate-800 border-t border-gray-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 sm:justify-between shrink-0">
           <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3">
             <button
               onClick={onSeeAllUpdates}

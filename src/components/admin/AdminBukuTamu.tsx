@@ -566,8 +566,8 @@ export default function AdminBukuTamu() {
 
       {/* Add Guest Modal (Broadcast) */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-lg my-auto shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                 {editId ? <Pencil className="w-5 h-5 text-amber-600" /> : <Send className="w-5 h-5 text-emerald-700" />}
@@ -678,8 +678,8 @@ export default function AdminBukuTamu() {
 
       {/* Print QR Kiosk Modal */}
       {showPrintQR && (
-        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-sm my-auto shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                 <QrCode className="w-5 h-5 text-emerald-700" />
@@ -749,8 +749,8 @@ export default function AdminBukuTamu() {
 
       {/* Modal Filter Tanggal Cetak Laporan */}
       {showPrintReportModal && (
-        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95">
+        <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md my-auto shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden animate-in zoom-in-95">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                 <Printer className="w-5 h-5 text-emerald-700" />
@@ -809,8 +809,8 @@ export default function AdminBukuTamu() {
 
       {/* Modal Detail Tamu */}
       {viewEntry && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md my-auto shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800">
               <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                 <Eye className="w-5 h-5 text-blue-600" />

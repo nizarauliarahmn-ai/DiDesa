@@ -2217,7 +2217,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
       )}
 
       {/* Status Tabs: Usulan / Penerima Aktif / Pernah Mendapat */}
-      <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-slate-800 rounded-2xl">
+      <div className="flex items-center gap-2 p-1 bg-gray-100 dark:bg-slate-800 rounded-2xl overflow-x-auto">
         {([
           { key: 'aktif' as const, label: 'Penerima Aktif', icon: <CheckCircle2 size={14} />, color: 'emerald' },
           { key: 'usulan' as const, label: 'Usulan', icon: <Award size={14} />, color: 'amber' },
@@ -2229,7 +2229,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
             <button
               key={tab.key}
               onClick={() => { setActiveStatusTab(tab.key); setShowOverlapOnly(false); }}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex-1 justify-center ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex-1 justify-center whitespace-nowrap ${
                 isActive
                   ? `bg-white dark:bg-slate-900 text-gray-900 dark:text-white shadow-sm`
                   : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
@@ -2799,8 +2799,8 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
       {/* Modal Tambah Penerima */}
       {showModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300 ease-out">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-6 flex justify-between items-center border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="p-6 flex justify-between items-center border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 shrink-0">
               <h3 className="font-bold text-xl text-emerald-800">Tambah Penerima Bantuan</h3>
               <button 
                 onClick={() => setShowModal(false)}
@@ -2810,7 +2810,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
               </button>
             </div>
             
-            <div className="p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Program Name Badge */}
               <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl flex justify-between items-center border border-emerald-100">
                 <span className="text-xs font-bold uppercase tracking-wider">Program Sasaran:</span>

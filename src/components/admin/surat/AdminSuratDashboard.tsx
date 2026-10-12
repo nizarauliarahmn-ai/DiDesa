@@ -1152,7 +1152,7 @@ export default function AdminSuratDashboard({
             </button>
 
             {showQuickActions && (
-              <div className="absolute right-0 top-full mt-2 w-72 shadow-lg border border-slate-100 rounded-xl bg-white p-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] max-h-[60vh] overflow-y-auto shadow-lg border border-slate-100 rounded-xl bg-white p-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                 <button
                   onClick={() => { setShowQuickActions(false); onBuatSurat(); }}
                   className="w-full p-2.5 hover:bg-slate-50 rounded-xl transition-colors flex items-center gap-3 cursor-pointer text-left"
@@ -1304,14 +1304,14 @@ export default function AdminSuratDashboard({
 
       {showPrintModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between shrink-0">
               <h3 className="font-bold text-gray-900 dark:text-white">Cetak Daftar Arsip</h3>
               <button onClick={() => setShowPrintModal(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
               <div>
                 <label className="text-sm font-bold text-gray-700 dark:text-slate-300 block mb-1.5">Dari Tanggal</label>
                 <input type="date" value={printStartDate} onChange={(e) => setPrintStartDate(e.target.value)} className="w-full px-4 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500" />
@@ -1534,9 +1534,9 @@ export default function AdminSuratDashboard({
             </div>
 
              {/* Content & Sidebar */}
-            <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
+            <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
               {/* Paper Preview Area */}
-              <div className="flex-1 bg-gray-200/80 dark:bg-slate-900/80 p-6 overflow-auto no-scrollbar flex justify-center items-start min-h-[400px] relative">
+              <div className="flex-1 bg-gray-200/80 dark:bg-slate-900/80 p-6 overflow-auto no-scrollbar flex justify-center items-start md:min-h-[400px] relative">
                 {/* Floating Document Zoom Controls */}
                 <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border border-gray-200 dark:border-slate-700 shadow-lg dark:shadow-none rounded-xl p-1.5 flex items-center gap-1 z-30">
                   <button 

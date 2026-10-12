@@ -1,5 +1,6 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '../../utils/supabase';
 import { 
   Database, Plus, Search, Server, Activity, MoreVertical, 
@@ -54,6 +55,7 @@ export default function AdminTenants() {
   const [showRowPasswords, setShowRowPasswords] = useState<Record<string, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{ x: number; y: number; top: number } | null>(null);
 
   // Reset password state
   const [resetTenant, setResetTenant] = useState<any>(null);
@@ -952,46 +954,63 @@ export default function AdminTenants() {
                             {/* Dropdown Toggle */}
                             <div className="relative">
                               <button 
-                                onClick={() => setActiveDropdownId(activeDropdownId === tenant.id ? null : tenant.id)}
+                                onClick={(e) => {
+                                  if (activeDropdownId === tenant.id) { setActiveDropdownId(null); setMenuPos(null); }
+                                  else { const rect = e.currentTarget.getBoundingClientRect(); setMenuPos({ x: rect.right, y: rect.bottom, top: rect.top }); setActiveDropdownId(tenant.id); }
+                                }}
                                 className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                               >
                                 <MoreVertical size={14} />
                               </button>
 
-                              {activeDropdownId === tenant.id && (
-                                <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl z-50 py-1 px-1.5 flex items-center gap-1 animate-in fade-in slide-in-from-right-2 duration-150">
+                              {activeDropdownId === tenant.id && menuPos && createPortal(
+                                (() => {
+                                  const MENU_W = 392;
+                                  const MENU_H = 44;
+                                  const left = Math.max(8, Math.min(window.innerWidth - MENU_W - 8, menuPos.x - MENU_W));
+                                  const top = menuPos.y + MENU_H + 8 > window.innerHeight
+                                    ? Math.max(8, menuPos.top - MENU_H - 6)
+                                    : menuPos.y + 6;
+                                  return (
+                                <>
+                                <div className="fixed inset-0 z-[90]" onClick={() => { setActiveDropdownId(null); setMenuPos(null); }} />
+                                <div className="fixed z-[95] max-w-[calc(100vw-16px)] bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl py-1 px-1.5 flex flex-wrap items-center gap-1 animate-in fade-in duration-150" style={{ left, top }}>
                                   <button
-                                    onClick={() => handleOpenEditModal(tenant)}
+                                    onClick={() => { handleOpenEditModal(tenant); setActiveDropdownId(null); setMenuPos(null); }}
                                     className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-emerald-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
                                     <Edit2 size={13} className="text-gray-400" />
                                     <span>Edit</span>
                                   </button>
-                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
+                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800 hidden sm:block"></div>
                                   <button
-                                    onClick={() => handlePrint(tenant.nama_desa)}
+                                    onClick={() => { handlePrint(tenant.nama_desa); setActiveDropdownId(null); setMenuPos(null); }}
                                     className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-blue-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
                                     <Printer size={13} className="text-gray-400" />
                                     <span>Cetak Kredensial</span>
                                   </button>
-                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
+                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800 hidden sm:block"></div>
                                   <button
-                                    onClick={() => openResetModal(tenant)}
+                                    onClick={() => { openResetModal(tenant); setActiveDropdownId(null); setMenuPos(null); }}
                                     className="px-2.5 py-1.5 text-xs font-bold text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-rose-600 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
                                     <Key size={13} className="text-gray-400" />
                                     <span>Reset Sandi</span>
                                   </button>
-                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800"></div>
+                                  <div className="w-[1px] h-4 bg-gray-100 dark:bg-slate-800 hidden sm:block"></div>
                                   <button
-                                    onClick={() => handleDeleteTenant(tenant)}
+                                    onClick={() => { handleDeleteTenant(tenant); setActiveDropdownId(null); setMenuPos(null); }}
                                     className="px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-1.5 rounded-lg whitespace-nowrap"
                                   >
                                     <Trash2 size={13} />
                                     <span>Hapus</span>
                                   </button>
                                 </div>
+                                </>
+                                  );
+                                })(),
+                                document.body
                               )}
                             </div>
                           </div>
@@ -1261,8 +1280,8 @@ export default function AdminTenants() {
       {/* RESET PASSWORD MODAL */}
       {resetTenant && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 shrink-0">
               <div>
                 <h3 className="font-extrabold text-gray-900 dark:text-white text-lg flex items-center gap-2">
                   <Key className="text-rose-600" />
@@ -1275,7 +1294,7 @@ export default function AdminTenants() {
               </button>
             </div>
 
-            <form onSubmit={handleResetPassword} className="p-6 space-y-5">
+            <form onSubmit={handleResetPassword} className="flex-1 overflow-y-auto p-6 space-y-5">
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-slate-400 mb-1">Akun yang Direset</label>
                 <div className="grid grid-cols-2 gap-2">
