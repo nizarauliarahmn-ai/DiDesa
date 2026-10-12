@@ -794,8 +794,8 @@ export default function AdminPendudukDetail({
                 <span className="font-bold text-slate-900 dark:text-white text-base truncate uppercase">
                   {data?.name || "Nama Penduduk"}
                 </span>
-                <span className="text-slate-300 dark:text-slate-600">•</span>
-                <span className="text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md shrink-0">
+                <span className="text-slate-300 dark:text-slate-600 hidden sm:inline">•</span>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md shrink-0 hidden sm:inline">
                   NIK: {data?.nik || "-"}
                 </span>
               </div>
@@ -902,7 +902,7 @@ export default function AdminPendudukDetail({
         </div>
 
         {/* Sisi Kanan: Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+        <div className={`flex flex-wrap items-center gap-2 shrink-0 justify-end ${!isScrolled ? 'w-full sm:w-auto' : ''}`}>
           {isEditMode ? (
             <>
               <span className={`flex items-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-xs font-black uppercase tracking-wider ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}>
