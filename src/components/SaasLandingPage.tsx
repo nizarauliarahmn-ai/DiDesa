@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin, Zap, Wallet, Layers, LineChart } from 'lucide-react';
+import { ArrowRight, ShieldCheck, PieChart, FileText, Smartphone, CheckCircle2, Globe, Building2, ChevronRight, LayoutDashboard, Search, X, ExternalLink, MapPin, Zap, Wallet, Layers, LineChart, Menu } from 'lucide-react';
 import { supabase } from '../utils/supabase';
 import UserPlaceholder from './common/UserPlaceholder';
 
@@ -42,6 +42,7 @@ function getKabupatenName(tenant: any): string {
 export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLoginClick?: () => void; onTrialClick?: () => void }) {
   const [globalColor, setGlobalColor] = useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = useState(() => localStorage.getItem('global_app_logo') || '');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalPhone, setGlobalPhone] = useState(() => localStorage.getItem('global_footer_phone') || '+6281346867519');
 
   // Modal & Tenants state
@@ -153,7 +154,7 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
             </span>
           </div>
           
-          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600 dark:text-slate-300">
+          <div className="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-600 dark:text-slate-300">
             <a href="#fitur" className="hover:text-emerald-600 transition-colors">Fitur</a>
             <a href="#keunggulan" className="hover:text-emerald-600 transition-colors">Keunggulan</a>
             <a href="#desa-terdaftar" className="hover:text-emerald-600 transition-colors">Desa Terdaftar</a>
@@ -177,8 +178,31 @@ export default function SaasLandingPage({ onLoginClick, onTrialClick }: { onLogi
             >
               Login Sistem <ArrowRight size={16} />
             </button>
+            <button
+              onClick={() => setMobileMenuOpen(v => !v)}
+              aria-label="Buka menu navigasi"
+              className="lg:hidden p-2.5 -mr-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu Panel */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200/60 dark:border-slate-800/60 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-6 py-4">
+            <div className="flex flex-col gap-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
+              <a href="#fitur" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-gray-100 dark:border-slate-800/60 hover:text-emerald-600 transition-colors">Fitur</a>
+              <a href="#keunggulan" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-gray-100 dark:border-slate-800/60 hover:text-emerald-600 transition-colors">Keunggulan</a>
+              <a href="#desa-terdaftar" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-gray-100 dark:border-slate-800/60 hover:text-emerald-600 transition-colors">Desa Terdaftar</a>
+              <a href="#integrasi" onClick={() => setMobileMenuOpen(false)} className="py-2.5 border-b border-gray-100 dark:border-slate-800/60 hover:text-emerald-600 transition-colors">Integrasi</a>
+              <a href="/affiliator" onClick={() => setMobileMenuOpen(false)} className="py-2.5 flex items-center gap-2 hover:text-emerald-600 transition-colors">
+                Program Afiliasi
+                <span className="text-[9px] font-black uppercase tracking-wider bg-amber-400 text-amber-900 px-1.5 py-0.5 rounded-full">Komisi</span>
+              </a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}

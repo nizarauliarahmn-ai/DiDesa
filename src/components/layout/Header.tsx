@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Globe, LogOut, LogIn, Users, ChevronDown } from 'lucide-react';
+import { Globe, LogOut, LogIn, Users, ChevronDown, Menu, X } from 'lucide-react';
 import { getFormattedDate } from '../../utils/dateHelper';
 
 export default function Header({ 
@@ -25,6 +25,7 @@ export default function Header({
   const [globalColor, setGlobalColor] = React.useState(() => localStorage.getItem('global_app_color') || '#047857');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -98,7 +99,7 @@ export default function Header({
       
       {/* Desktop Horizontal Navigation Bar */}
       {setActiveTab && (
-        <nav className="hidden xl:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-6">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -117,8 +118,18 @@ export default function Header({
           })}
         </nav>
       )}
-      
-      <div className="flex items-center gap-2 shrink-0">
+
+      <div className="flex items-center gap-2 shrink-0 relative">
+        {setActiveTab && (
+          <button
+            onClick={() => setMobileNavOpen(v => !v)}
+            aria-label="Buka menu navigasi"
+            className="lg:hidden p-2.5 -mr-1 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        )}
+
         <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 hidden 2xl:block font-mono">
           {getFormattedDate()}
         </span>
@@ -179,6 +190,31 @@ export default function Header({
           >
             <LogOut size={16} />
           </button>
+        )}
+
+        {/* Mobile Nav Dropdown */}
+        {mobileNavOpen && setActiveTab && (
+          <>
+            <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setMobileNavOpen(false)} />
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-1.5 z-50">
+              {navItems.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => { setMobileNavOpen(false); handleNavClick(item.id); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
+                      isActive
+                        ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </header>
