@@ -61,6 +61,8 @@ export default function AdminHeader({
     const newTheme = appTheme === 'light' ? 'dark' : 'light';
     setAppTheme(newTheme);
     localStorage.setItem('app_theme', newTheme);
+    // Tandai bahwa user secara eksplisit memilih tema — sync cloud tidak boleh menimpanya
+    localStorage.setItem('app_theme_manual', '1');
     window.dispatchEvent(new Event('app_theme_updated'));
   };
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);

@@ -489,6 +489,7 @@ export default function App() {
       'village_officers',
       'village_welcome_banner_url',
       'app_theme',
+      'app_theme_manual',
       'local_residents',
       'didesa_feedbacks',
       'didesa_aspirasi_data',

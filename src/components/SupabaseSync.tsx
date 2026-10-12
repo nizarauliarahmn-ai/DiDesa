@@ -2,6 +2,15 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { resolveCurrentTenant } from '../utils/tenantResolver';
 
+// Key yang merupakan preferensi personal user — tidak boleh ditimpa sync cloud
+// setelah user memilihnya secara eksplisit (ditandai *_manual di localStorage).
+function shouldApplyCloudValue(key: string): boolean {
+  if (key === 'app_theme') {
+    return localStorage.getItem('app_theme_manual') !== '1';
+  }
+  return true;
+}
+
 export function SupabaseSync() {
   const [tenantId, setTenantId] = useState<string | null>(null);
 
@@ -43,6 +52,7 @@ export function SupabaseSync() {
         if (data && data.length > 0 && isMounted) {
           let changed = false;
           data.forEach((row) => {
+            if (!shouldApplyCloudValue(row.key)) return;
             if (localStorage.getItem(row.key) !== row.value) {
               localStorage.setItem(row.key, row.value);
               changed = true;
@@ -102,7 +112,7 @@ export function SupabaseSync() {
         },
         (payload) => {
           const newRow = payload.new as { key: string; value: string };
-          if (newRow && newRow.key) {
+          if (newRow && newRow.key && shouldApplyCloudValue(newRow.key)) {
             const currentVal = localStorage.getItem(newRow.key);
             if (currentVal !== newRow.value) {
               localStorage.setItem(newRow.key, newRow.value);

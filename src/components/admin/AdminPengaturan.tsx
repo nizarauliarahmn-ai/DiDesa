@@ -119,6 +119,8 @@ export default function AdminPengaturan() {
   const handleThemeChange = (theme: string) => {
     setAppTheme(theme);
     localStorage.setItem('app_theme', theme);
+    // Tandai pilihan eksplisit user agar sync cloud tidak menimpanya
+    localStorage.setItem('app_theme_manual', '1');
     window.dispatchEvent(new Event('app_theme_updated'));
   };
 
