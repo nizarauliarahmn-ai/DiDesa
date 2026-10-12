@@ -237,6 +237,15 @@ html, body, #root {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Saat ganti tema, matikan semua transisi sesaat agar pergantian instan
+   tanpa animasi fade yang menyebabkan jitter (mis. pada search bar). */
+html.no-theme-transition,
+html.no-theme-transition *,
+html.no-theme-transition *::before,
+html.no-theme-transition *::after {
+  transition: none !important;
+}
+
 @layer components {
   .glass-card, .liquid-glass {
     background: var(--glass-bg) !important;

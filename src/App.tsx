@@ -418,11 +418,21 @@ export default function App() {
   React.useEffect(() => {
     const applyTheme = () => {
       const theme = localStorage.getItem('app_theme') || 'light';
+      // Nonaktifkan transisi CSS sesaat saat ganti tema agar pergantian instan
+      // tanpa animasi "fade" yang menyebabkan jitter pada elemen (mis. search bar).
+      const root = document.documentElement;
+      root.classList.add('no-theme-transition');
       if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
+        root.classList.add('dark');
       } else {
-        document.documentElement.classList.remove('dark');
+        root.classList.remove('dark');
       }
+      // Kembalikan transisi setelah browser selesai paint
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          root.classList.remove('no-theme-transition');
+        });
+      });
     };
     
     applyTheme();
