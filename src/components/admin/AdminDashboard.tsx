@@ -9,6 +9,7 @@ import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
 import { supabase } from '../../utils/supabase';
 import { fetchLetterHistoryAsync, LetterHistory } from '../../utils/letterHistory';
 import { getLetterClassifications } from '../../utils/letterClassifications';
+import { resolveCurrentTenant } from '../../utils/tenantResolver';
 import { showToast } from '../../utils/toast';
 
 export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: string) => void }) {
@@ -23,6 +24,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   const [letterHistory, setLetterHistory] = useState<LetterHistory[]>([]);
   const [populerSurat, setPopulerSurat] = useState<string>('-');
   const [activeServicesCount, setActiveServicesCount] = useState<number>(0);
+  const [produkHukumCount, setProdukHukumCount] = useState<number>(0);
   const [tenantStats, setTenantStats] = useState<Record<string, { pendudukCount: number, suratToday: number, totalSurat: number }>>({});
 
   useEffect(() => {
@@ -99,6 +101,42 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
     });
 
     setActiveServicesCount(getLetterClassifications().length);
+
+    // Produk Hukum (SK/Perdes): dihitung dari saas_settings per tenant + item lokal yang belum ter-sync
+    (async () => {
+      try {
+        const tid = await resolveCurrentTenant();
+        if (!tid) return;
+        const { data, error } = await supabase
+          .from('saas_settings')
+          .select('value')
+          .eq('tenant_id', tid)
+          .eq('key', 'produk_hukum_data')
+          .single();
+        if (error && (error as any).code !== 'PGRST116') {
+          console.error('[Dashboard] Gagal memuat produk hukum:', error.message);
+          return;
+        }
+        const serverAll = data?.value ? JSON.parse(data.value) : {};
+        const serverIds = new Set<string>();
+        let total = 0;
+        Object.values(serverAll).forEach((items: any) => {
+          (items || []).forEach((it: any) => { if (it?.id) serverIds.add(it.id); total++; });
+        });
+        try {
+          const raw = localStorage.getItem('produk_hukum_data');
+          if (raw) {
+            const localAll = JSON.parse(raw);
+            Object.values(localAll).forEach((items: any) => {
+              (items || []).forEach((it: any) => { if (it?.id && !serverIds.has(it.id)) total++; });
+            });
+          }
+        } catch {}
+        setProdukHukumCount(total);
+      } catch (e) {
+        console.error('[Dashboard] Produk hukum count error:', e);
+      }
+    })();
 
     fetchResidentsCached()
       .then(res => { if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`); return res.json(); })
@@ -597,7 +635,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Produk Hukum (SK/Perdes)</p>
             </div>
             <div className="flex items-baseline gap-2">
-              <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={0} /></h3>
+              <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={produkHukumCount} /></h3>
               <span className="text-sm font-bold text-gray-400">Dokumen</span>
             </div>
           </div>
