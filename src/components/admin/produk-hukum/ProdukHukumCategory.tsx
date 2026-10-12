@@ -394,7 +394,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
             <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{items.length} dokumen</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => setShowImportModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors shadow-sm dark:shadow-none">
             <Upload size={18} />
@@ -443,7 +443,7 @@ export default function ProdukHukumCategory({ kategori, onBack }: CategoryProps)
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data {label}</h3>
             <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Tambahkan data secara manual atau import dari file</p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button onClick={() => setShowImportModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-colors">
                 <Upload size={16} /> Import

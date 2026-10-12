@@ -508,7 +508,7 @@ useState<ProdukHukumItem | null>(null);
             <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Peraturan Desa ({items.length} dokumen)</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {selectedIds.size > 0 && (
             <button
               onClick={() => setShowBulkDeleteConfirm(true)}
@@ -592,7 +592,7 @@ useState<ProdukHukumItem | null>(null);
             </div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Belum ada data Perdes</h3>
             <p className="text-sm text-gray-500 dark:text-slate-400 mb-4">Tambahkan data secara manual atau import dari file</p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button onClick={handleDownloadTemplate}
                 className="flex items-center gap-2 px-4 py-2 bg-cyan-600 text-white text-sm font-bold rounded-xl hover:bg-cyan-700 transition-colors">
                 <Download size={16} /> Template
@@ -712,7 +712,7 @@ useState<ProdukHukumItem | null>(null);
         )}
         {filteredItems.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span>Menampilkan {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, itemsWithNumbers.length)} dari {itemsWithNumbers.length} data</span>
               <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
                 className="px-2 py-1 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500">
