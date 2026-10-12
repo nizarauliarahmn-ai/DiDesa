@@ -3,6 +3,13 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Matikan scroll anchoring — mencegah loop "buka tutup" pada header sticky
+   yang berubah tinggi (browser menyesuaikan scroll → ambang terlewati → toggle). */
+*, *::before, *::after {
+  overflow-anchor: none;
+}
+
+
 @theme {
   /* Brand Green (Emerald Override) */
   --color-emerald-50: #ebf6f1;

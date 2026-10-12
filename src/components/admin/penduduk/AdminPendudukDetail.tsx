@@ -773,17 +773,17 @@ export default function AdminPendudukDetail({
         <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <button 
             onClick={onBack}
-            className={`flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-700 ${isScrolled ? 'w-10 h-10' : 'w-11 h-11'}`}
+            className={`flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-300 ease-out text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-700 ${isScrolled ? 'w-10 h-10' : 'w-11 h-11'}`}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
           <div className="relative shrink-0">
             {data?.photo ? (
-              <img src={data.photo} alt={data.name} className={`border-2 border-white shadow-md object-cover transition-all ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`} />
+              <img src={data.photo} alt={data.name} className={`border-2 border-white shadow-md object-cover transition-all duration-300 ease-out ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`} />
             ) : (
-              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'} ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
-                <User className={isScrolled ? 'w-5 h-5' : 'w-8 h-8'} fill="currentColor" />
+              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all duration-300 ease-out ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'} ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
+                <User className={`transition-all duration-300 ease-out ${isScrolled ? 'w-5 h-5' : 'w-8 h-8'}`} fill="currentColor" />
               </div>
             )}
           </div>
@@ -905,40 +905,40 @@ export default function AdminPendudukDetail({
         <div className={`flex flex-wrap items-center gap-2 shrink-0 justify-end ${!isScrolled ? 'w-full sm:w-auto' : ''}`}>
           {isEditMode ? (
             <>
-              <span className={`flex items-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-xs font-black uppercase tracking-wider ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}>
+              <span className={`flex items-center gap-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 text-xs font-black uppercase tracking-wider transition-all duration-300 ease-out ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}>
                 <Edit2 className="w-4 h-4" />
                 Mode Edit Aktif
               </span>
               <button
                 onClick={handleSaveEdit}
-                className={`rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+                className={`rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
                 title="Simpan Perubahan"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span className={isScrolled ? 'hidden' : ''}>Simpan Perubahan</span>
+                <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Simpan Perubahan</span>
               </button>
               <button
                 onClick={cancelEditMode}
-                className={`rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+                className={`rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
                 title="Batal"
               >
                 <X className="w-4 h-4" />
-                <span className={isScrolled ? 'hidden' : ''}>Batal</span>
+                <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Batal</span>
               </button>
             </>
           ) : (
             <>
           {!isPending ? (
             <>
-              <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+              <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
                 <Edit2 className="w-4 h-4" />
-                <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
+                <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Edit Data</span>
               </button>
               <div className="relative">
                 <button
                   ref={moreBtnRef}
                   onClick={openMoreMenu}
-                  className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center text-xs font-bold ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}
+                  className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300 ease-out flex items-center justify-center text-xs font-bold ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}
                   title="Aksi lainnya"
                 >
                   <MoreHorizontal className="w-4 h-4" />
@@ -946,9 +946,9 @@ export default function AdminPendudukDetail({
               </div>
             </>
           ) : (
-            <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all flex items-center gap-2 text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+            <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
               <Edit2 className="w-4 h-4" />
-              <span className={isScrolled ? 'hidden' : ''}>Edit Data</span>
+              <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Edit Data</span>
             </button>
           )}
             </>
