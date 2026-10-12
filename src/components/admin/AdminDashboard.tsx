@@ -2,7 +2,7 @@ import NumberCounter from '../common/NumberCounter';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Users, FileText, MessageSquare, TrendingUp, PenTool, Loader2, Building2, BarChart3, Clock, UserCheck, MessageCircle } from 'lucide-react';
+import { Users, User, FileText, MessageSquare, TrendingUp, PenTool, Loader2, Building2, BarChart3, Clock, UserCheck, MessageCircle } from 'lucide-react';
 import { getAspirasi } from '../../utils/aspirasiData';
 import { fetchFeedbacksAsync, Feedback } from '../../utils/feedbackData';
 import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
@@ -164,6 +164,9 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   }, []);
 
   const totalResidents = residents.length;
+  const genderKey = (r: any) => String(r.gender || '').trim().toLowerCase();
+  const lakiCount = residents.filter(r => ['laki-laki', 'laki', 'l'].includes(genderKey(r))).length;
+  const perempuanCount = residents.filter(r => ['perempuan', 'p', 'wanita'].includes(genderKey(r))).length;
   
   // Job Distribution mapping
   const jobCounts: { [key: string]: number } = {};
@@ -569,10 +572,15 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
               <span className="text-white font-extrabold text-sm"><NumberCounter end={totalResidents} /></span>
               <span className="text-emerald-200/90 text-xs font-bold">Warga</span>
             </button>
-            <button onClick={() => setActiveTab?.('surat')} className="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md rounded-full pl-3 pr-4 py-2.5 transition-colors cursor-pointer">
-              <FileText className="w-4 h-4 text-amber-300" />
-              <span className="text-white font-extrabold text-sm"><NumberCounter end={letterHistory.length} /></span>
-              <span className="text-amber-200/90 text-xs font-bold">Surat Selesai</span>
+            <button onClick={() => setActiveTab?.('penduduk')} className="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md rounded-full pl-3 pr-4 py-2.5 transition-colors cursor-pointer">
+              <User className="w-4 h-4 text-blue-300" />
+              <span className="text-white font-extrabold text-sm"><NumberCounter end={lakiCount} /></span>
+              <span className="text-blue-200/90 text-xs font-bold">Laki-laki</span>
+            </button>
+            <button onClick={() => setActiveTab?.('penduduk')} className="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md rounded-full pl-3 pr-4 py-2.5 transition-colors cursor-pointer">
+              <User className="w-4 h-4 text-pink-300" />
+              <span className="text-white font-extrabold text-sm"><NumberCounter end={perempuanCount} /></span>
+              <span className="text-pink-200/90 text-xs font-bold">Perempuan</span>
             </button>
           </div>
         </div>
