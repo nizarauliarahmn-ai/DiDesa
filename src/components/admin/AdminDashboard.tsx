@@ -580,29 +580,18 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             </div>
           </div>
 
-          {/* Live Hero Metrics Widget */}
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-3 sm:gap-4 shrink-0 w-full lg:w-72">
-            <div onClick={() => setActiveTab?.('penduduk')} className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-colors">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shrink-0">
-                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black text-emerald-200 uppercase tracking-widest">Total Warga</p>
-                <h4 className="text-xl sm:text-2xl font-extrabold text-white"><NumberCounter end={totalResidents} /></h4>
-                <p className="text-[9px] text-emerald-300/80 font-bold">Terdata Aktif</p>
-              </div>
-            </div>
-
-            <div onClick={() => setActiveTab?.('surat')} className="bg-white/10 dark:bg-slate-900/60 border border-white/15 dark:border-slate-800 backdrop-blur-md rounded-2xl p-4 sm:p-5 flex items-center gap-4 cursor-pointer hover:bg-white/20 transition-colors">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 shrink-0">
-                <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] font-black text-amber-200 uppercase tracking-widest">Surat Selesai</p>
-                <h4 className="text-xl sm:text-2xl font-extrabold text-white"><NumberCounter end={letterHistory.length} /></h4>
-                <p className="text-[9px] text-amber-300/80 font-bold">Terverifikasi</p>
-              </div>
-            </div>
+          {/* Live Hero Metrics — badge ringkas */}
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <button onClick={() => setActiveTab?.('penduduk')} className="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md rounded-full pl-3 pr-4 py-2.5 transition-colors cursor-pointer">
+              <Users className="w-4 h-4 text-emerald-300" />
+              <span className="text-white font-extrabold text-sm"><NumberCounter end={totalResidents} /></span>
+              <span className="text-emerald-200/90 text-xs font-bold">Warga</span>
+            </button>
+            <button onClick={() => setActiveTab?.('surat')} className="flex items-center gap-2.5 bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md rounded-full pl-3 pr-4 py-2.5 transition-colors cursor-pointer">
+              <FileText className="w-4 h-4 text-amber-300" />
+              <span className="text-white font-extrabold text-sm"><NumberCounter end={letterHistory.length} /></span>
+              <span className="text-amber-200/90 text-xs font-bold">Surat Selesai</span>
+            </button>
           </div>
         </div>
       </div>
