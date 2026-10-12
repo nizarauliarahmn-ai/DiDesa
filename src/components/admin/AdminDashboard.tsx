@@ -560,24 +560,6 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             <p className="text-sm sm:text-base text-emerald-100/90 leading-relaxed max-w-xl font-medium">
               Kelola layanan surat, data kependudukan, dan aspirasi warga secara terpadu, cepat, dan transparan dari satu dasbor operasional.
             </p>
-
-            {/* Quick Action Buttons Grid */}
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <button
-                onClick={() => setActiveTab?.('surat')}
-                className="w-full sm:w-auto px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-emerald-900/40 hover:shadow-emerald-400/30 transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-              >
-                <FileText className="w-4 h-4" />
-                <span>Buat Surat Baru</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab?.('pengaturan')}
-                className="w-full sm:w-auto px-4 py-3 bg-white/5 hover:bg-white/15 text-emerald-100 border border-white/10 rounded-xl font-bold text-xs sm:text-sm backdrop-blur-md transition-all flex items-center justify-center gap-2 active:scale-95 cursor-pointer"
-              >
-                <span>Pengaturan Desa</span>
-              </button>
-            </div>
           </div>
 
           {/* Live Hero Metrics — badge ringkas */}
