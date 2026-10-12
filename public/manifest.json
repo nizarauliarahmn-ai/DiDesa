@@ -18,6 +18,12 @@
       "purpose": "any"
     },
     {
+      "src": "/icons/icon-301.png",
+      "sizes": "301x301",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",

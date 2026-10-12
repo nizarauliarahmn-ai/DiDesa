@@ -3,7 +3,7 @@
    - Navigasi (HTML): network-first, fallback ke cache '/' saat offline.
    - Aset ber-hash (js/css/img): stale-while-revalidate (cepat + selalu update).
    - Cross-origin (Supabase, Google Fonts, dsb): tidak diintercept. */
-const CACHE = 'didesa-v2';
+const CACHE = 'didesa-v3';
 const SHELL = '/';
 
 self.addEventListener('install', (event) => {
