@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LayoutDashboard, Users, FileText, Gift, Settings, Building2, LogOut, ShieldCheck, Database, MessageSquareText, Camera, BookOpen, Newspaper, Bug, Handshake, ListChecks, PanelLeftClose, PanelLeftOpen, Scale, FileSignature, BookOpenCheck, ThumbsUp, Target, ClipboardList, BarChart3, Clock, Star, Tv } from 'lucide-react';
-import { X } from 'lucide-react';
 import { fetchFeedbacksAsync, getFeedbackReadState } from '../../utils/feedbackData';
 import { fetchBugReportsOnline, getBugReportReadState } from '../../utils/bugReportService';
 import { fetchSaaSTenantRequests, getLeadReadState, getApprovalReadState } from '../../utils/saasLeads';
@@ -379,11 +378,6 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsMobileMenuOpen?.(false)} />
       )}
       <aside className={`print:hidden fixed inset-y-0 left-0 z-[70] w-72 bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 flex-col h-full shadow-sm dark:shadow-none transition-all duration-300 ease-in-out lg:relative lg:z-auto lg:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}>
-        {isMobileMenuOpen && (
-          <button onClick={() => setIsMobileMenuOpen?.(false)} className="absolute top-4 right-4 p-2 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg lg:hidden">
-            <X size={18} />
-          </button>
-        )}
 
       {/* Brand */}
       <div className={`${isCollapsed ? 'p-4 flex flex-col items-center gap-3' : 'p-6 flex items-center gap-4'} mb-4`}>
@@ -406,8 +400,8 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
           </div>
         )}
         <button
-          onClick={toggleSidebar}
-          title={isCollapsed ? 'Perluas Sidebar' : 'Lipat Sidebar'}
+          onClick={() => { if (isMobileMenuOpen) { setIsMobileMenuOpen?.(false); } else { toggleSidebar(); } }}
+          title={isMobileMenuOpen ? 'Tutup Menu' : (isCollapsed ? 'Perluas Sidebar' : 'Lipat Sidebar')}
           className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50/80 dark:hover:bg-slate-800 transition-all border border-transparent hover:border-emerald-200/60 dark:hover:border-emerald-500/30 active:scale-95"
         >
           {isCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
