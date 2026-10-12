@@ -200,6 +200,15 @@ export default function App() {
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showTrialRegistration, setShowTrialRegistration] = useState(false);
 
+  // Scrollbar area konten utama admin: hanya muncul sesaat saat digulir
+  const [isMainScrolling, setIsMainScrolling] = useState(false);
+  const mainScrollTimer = React.useRef<number | undefined>(undefined);
+  const handleMainScroll = () => {
+    setIsMainScrolling(true);
+    window.clearTimeout(mainScrollTimer.current);
+    mainScrollTimer.current = window.setTimeout(() => setIsMainScrolling(false), 800);
+  };
+
   const [view, setView] = useUrlSync<'public' | 'admin'>('mode', 'public', () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('mode') === 'admin') {
@@ -679,7 +688,7 @@ export default function App() {
       <div className="flex h-screen bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-sans overflow-hidden print:h-auto print:overflow-visible print:block">
         <AdminSidebar setView={setView} activeTab={adminTab} setActiveTab={setAdminTab} onLogout={handleLogout} isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
         <div className="flex-1 h-screen overflow-hidden relative transition-all duration-300 ease-in-out print:h-auto print:overflow-visible print:block">
-          <main className="h-full overflow-y-auto bg-slate-50 dark:bg-slate-800 scroll-smooth print:h-auto print:overflow-visible print:block">
+          <main onScroll={handleMainScroll} className={`h-full overflow-y-auto bg-slate-50 dark:bg-slate-800 scroll-smooth print:h-auto print:overflow-visible print:block scroll-autohide ${isMainScrolling ? 'is-scrolling' : ''}`}>
             <AdminHeader 
               setActiveTab={setAdminTab} 
               globalSearch={globalSearch} 

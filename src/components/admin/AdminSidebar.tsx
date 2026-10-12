@@ -415,7 +415,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       </div>
 
       {/* Nav Links */}
-      <nav onScroll={handleNavScroll} className={`flex-1 px-3 py-4 space-y-0.5 overflow-y-auto sidebar-scroll ${isNavScrolling ? 'is-scrolling' : ''}`}>
+      <nav onScroll={handleNavScroll} className={`flex-1 px-3 py-4 space-y-0.5 overflow-y-auto scroll-autohide ${isNavScrolling ? 'is-scrolling' : ''}`}>
         {authUser?.role !== 'saas_admin' ? (
           <>
             <NavItem id="tour-dashboard" collapsed={isCollapsed} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
