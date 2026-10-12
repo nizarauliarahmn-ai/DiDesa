@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, CreditCard, Grid, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
 import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
@@ -233,7 +233,6 @@ export default function AdminPendudukDetail({
 }: AdminPendudukDetailProps) {
   const [isPrinting, setIsPrinting] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [viewMode, setViewMode] = useState<'ektp' | 'grid'>('ektp');
   const [detailTab, setDetailTab] = useState(0);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const moreBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -1039,166 +1038,6 @@ export default function AdminPendudukDetail({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
           {/* KOLOM KIRI UTAMA */}
           <div className="lg:col-span-8 space-y-6">
-            {/* Format Tampilan Switcher Header */}
-            <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-400 flex items-center justify-center shrink-0">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 dark:text-white text-base">Format Identitas Penduduk</h3>
-                  <p className="text-xs text-gray-500 dark:text-slate-400">Pilih antara format Kartu e-KTP Digital atau Ringkasan Atribut</p>
-                </div>
-              </div>
-              <div className="flex items-center bg-gray-100 dark:bg-slate-800 p-1 rounded-xl border border-gray-200 dark:border-slate-700 self-start sm:self-auto">
-                <button
-                  onClick={() => setViewMode('ektp')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                    viewMode === 'ektp'
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  <CreditCard className="w-4 h-4" />
-                  Tampilan Kartu e-KTP
-                </button>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                    viewMode === 'grid'
-                      ? 'bg-emerald-700 text-white shadow-sm'
-                      : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Grid className="w-4 h-4" />
-                  Tampilan Atribut
-                </button>
-              </div>
-            </div>
-
-          {viewMode === 'ektp' ? (
-            /* Kartu e-KTP Digital — di atas latar biru lembut */
-            <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6">
-              <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-sky-100 to-indigo-100 dark:from-slate-950 dark:via-blue-950 dark:to-slate-900 rounded-2xl p-5 sm:p-6 border-2 border-sky-300 dark:border-cyan-500/40 shadow-sm space-y-4 text-gray-900 dark:text-white">
-              {/* Sleek Minimalist Top Header (Kop Removed as requested) */}
-              <div className="flex items-center justify-between pb-3 border-b border-sky-900/15 dark:border-cyan-500/20">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span className="text-xs font-black tracking-widest uppercase text-sky-950 dark:text-cyan-200">
-                    IDENTITAS DIGITAL KEPENDUDUKAN
-                  </span>
-                </div>
-                
-              </div>
-
-              {/* Compact NIK Header Bar */}
-              <div className="flex items-center justify-between bg-sky-900/90 dark:bg-cyan-950/90 text-white px-4 sm:px-5 py-2 rounded-xl border border-sky-700 dark:border-cyan-700/60 shadow-inner">
-                <span className="text-[11px] font-bold text-sky-200 dark:text-cyan-300 uppercase tracking-widest">NIK</span>
-                <span className="font-mono text-base sm:text-lg font-black tracking-widest text-emerald-300 dark:text-emerald-400">{data?.nik || '-'}</span>
-              </div>
-
-              {/* High-Density Compact e-KTP Field Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-5 relative z-10">
-                {/* Ultra-Dense Field Values List */}
-                <div className="md:col-span-8 space-y-1 text-xs font-semibold">
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Nama</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-black text-xs sm:text-sm text-gray-900 dark:text-white uppercase tracking-wide">{data?.name || '-'}</span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Tempat/Tgl Lahir</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">
-                      {data?.birthPlace || '-'}{data?.birthDate ? `, ${data.birthDate}` : ''} {data?.age ? `(${data.age} THN)` : ''}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Jenis Kelamin</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs flex items-center justify-between">
-                      <span>{data?.gender || '-'}</span>
-                      <span className="font-bold text-sky-950 dark:text-slate-400 text-[10px]">GOL. DARAH: <strong className="text-rose-600 dark:text-rose-400 font-extrabold">{renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}</strong></span>
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Alamat Jalan</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.address || '-'}</span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">RT/RW & Desa</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs flex items-center gap-1.5 flex-wrap">
-                      <span className="font-mono bg-sky-900/10 dark:bg-cyan-950 px-1.5 py-0.5 rounded text-[11px] font-black text-sky-950 dark:text-cyan-300">
-                        RT {data?.rt || '-'} / RW {data?.rw || '-'}
-                      </span>
-                      <span className="text-sky-400">•</span>
-                      <span>DESA {data?.desa || '-'}</span>
-                      {data?.dusun && (
-                        <>
-                          <span className="text-sky-400">•</span>
-                          <span>{data.dusun}</span>
-                        </>
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Agama</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.religion || '-'}</span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Status Perkawinan</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.maritalStatus || '-'}</span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Pekerjaan</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5 border-b border-sky-900/10 dark:border-slate-800">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Kewarganegaraan</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-bold text-gray-900 dark:text-white uppercase text-xs">{data?.citizenship || 'WNI'}</span>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 py-0.5">
-                    <span className="col-span-4 uppercase font-extrabold text-[11px] text-sky-950 dark:text-slate-400">Berlaku Hingga</span>
-                    <span className="col-span-1">:</span>
-                    <span className="col-span-7 font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-wider text-xs">SEUMUR HIDUP</span>
-                  </div>
-                </div>
-
-                {/* Photo & QR Column - Compact */}
-                <div className="md:col-span-4 flex flex-col items-center justify-between space-y-3">
-                  {/* Pasfoto */}
-                  <div className="w-32 h-40 rounded-xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-md relative group bg-gradient-to-b from-blue-600 to-blue-800 shrink-0">
-                    {data?.photo ? (
-                      <img src={data.photo} alt={data.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className={`w-full h-full flex flex-col items-center justify-center text-white ${data?.gender === 'Perempuan' ? 'bg-gradient-to-b from-pink-500 to-pink-700' : 'bg-gradient-to-b from-blue-600 to-blue-800'}`}>
-                        <User className="w-16 h-16 opacity-90" fill="currentColor" />
-                        <span className="text-[9px] font-bold tracking-wider mt-1 uppercase">PASFOTO</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-blue-900/10 pointer-events-none border border-white/20 rounded-xl"></div>
-                  </div>
-
-                </div>
-              </div>
-              </div>
-            </div>
-          ) : (
             <>
               {/* Biodata Ringkasan Individu */}
               <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800">
@@ -1359,7 +1198,6 @@ export default function AdminPendudukDetail({
                 </div>
               </div>
             </>
-          )}
           </div>
 
           {/* KOLOM KANAN SIDEBAR */}
