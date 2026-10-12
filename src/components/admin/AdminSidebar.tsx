@@ -69,7 +69,16 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
   const [unreadKepuasanCount, setUnreadKepuasanCount] = useState(0);
   const [unreadBukuTamuCount, setUnreadBukuTamuCount] = useState(0);
   const [unreadUsulanCount, setUnreadUsulanCount] = useState(0);
-  
+
+  // Scrollbar sidebar: hanya tampil sesaat saat nav digulir
+  const [isNavScrolling, setIsNavScrolling] = useState(false);
+  const navScrollTimer = React.useRef<number | undefined>(undefined);
+  const handleNavScroll = () => {
+    setIsNavScrolling(true);
+    window.clearTimeout(navScrollTimer.current);
+    navScrollTimer.current = window.setTimeout(() => setIsNavScrolling(false), 800);
+  };
+
   // Global Branding
   const [globalName, setGlobalName] = React.useState(() => localStorage.getItem('global_app_name') || 'DiDesa');
   const [globalLogo, setGlobalLogo] = React.useState(() => localStorage.getItem('global_app_logo') || '');
@@ -406,7 +415,7 @@ export default function AdminSidebar({ setView, activeTab, setActiveTab, onLogou
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+      <nav onScroll={handleNavScroll} className={`flex-1 px-3 py-4 space-y-0.5 overflow-y-auto sidebar-scroll ${isNavScrolling ? 'is-scrolling' : ''}`}>
         {authUser?.role !== 'saas_admin' ? (
           <>
             <NavItem id="tour-dashboard" collapsed={isCollapsed} icon={<LayoutDashboard size={18} />} label="Dashboard" active={activeTab === 'dashboard'} onClick={() => { setIsMobileMenuOpen?.(false); setActiveTab('dashboard'); }} />
