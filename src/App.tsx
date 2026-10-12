@@ -346,6 +346,10 @@ export default function App() {
             if (row.value !== null && row.value !== undefined && row.value !== '') {
               // Skip kop_desa — handled separately with DiDesa prefix below
               if (row.key !== 'kop_desa') {
+                // Hormati pilihan tema manual user — sync cloud tidak boleh menimpanya
+                if (row.key === 'app_theme' && localStorage.getItem('app_theme_manual') === '1') {
+                  return;
+                }
                 localStorage.setItem(row.key, row.value);
               }
             }

@@ -89,7 +89,10 @@ export default function AdminPengaturan() {
           set('village_aspirasi_banner_url', setAspirasiBannerUrl);
           set('village_aspirasi_banner_y_offset', setAspirasiBannerYOffset);
           set('village_aspirasi_banner_zoom', setAspirasiBannerZoom);
-          set('app_theme', setAppTheme);
+          // Hormati pilihan tema manual user — jangan timpa dari cloud
+          if (localStorage.getItem('app_theme_manual') !== '1') {
+            set('app_theme', setAppTheme);
+          }
           set('village_letter_font', setLetterFont);
           set('village_luas_wilayah', setLuasWilayah);
           set('village_ketinggian', setKetinggian);
