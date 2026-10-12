@@ -781,70 +781,71 @@ function AddEditModal({ item, onSave, onClose, getNoUrut }: {
   const isNeedsReview = item?.needsReview;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-xl">
-        <div className="flex items-center justify-between mb-6">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-[5vh] sm:pt-[10vh] p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
           <div>
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-              {item ? 'Edit Berita Acara' : 'Tambah Berita Acara'}
-            </h3>
-            {isNeedsReview && (
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">{item ? 'Edit' : 'Tambah'} Berita Acara</h3>
+            {isNeedsReview ? (
               <p className="text-xs text-amber-600 mt-0.5">Baris ini perlu diperbaiki: No atau Tahun kosong</p>
+            ) : (
+              <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Lengkapi data berikut</p>
             )}
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800">
-            <X size={20} className="text-gray-400" />
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-gray-600 transition-colors">
+            <X size={18} />
           </button>
         </div>
-        <div className="space-y-4">
+        <div className="p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">Tahun <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Tahun <span className="text-red-500">*</span></label>
               <input type="text" value={tahun} onChange={(e) => setTahun(e.target.value)}
                 placeholder="Contoh: 2025"
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${!tahun ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-slate-700'}`} />
+                className={`w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${!tahun ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-slate-700'}`} />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-1">No</label>
-              <input type="number" value={no} onChange={(e) => setNo(e.target.value)}
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Nomor Urut</label>
+              <input type="number" value={no} onChange={(e) => setNo(e.target.value)} min="1"
                 placeholder={tahun ? `Otomatis: ${autoNo}` : 'Isi Tahun dulu'}
-                className={`w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${!no ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-slate-700'}`} />
+                className={`w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 ${!no ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20' : 'border-gray-200 dark:border-slate-700'}`} />
               {!no && tahun && (
                 <p className="text-[10px] text-amber-600 mt-1">Kosongkan untuk nomor otomatis: <strong>{autoNo}</strong></p>
               )}
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Uraian <span className="text-red-500">*</span></label>
-            <input type="text" value={uraian} onChange={(e) => setUraian(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
+            <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Uraian <span className="text-red-500">*</span></label>
+            <input type="text" value={uraian} onChange={(e) => setUraian(e.target.value)} placeholder="cth: BA Penetapan APBDesa 2026"
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Tanggal</label>
+              <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)}
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Keterangan</label>
+              <input type="text" value={ketLain} onChange={(e) => setKetLain(e.target.value)} placeholder="Catatan tambahan (opsional)"
+                className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
+            </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Tanggal</label>
-            <input type="date" value={tanggal} onChange={(e) => setTanggal(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
+            <label className="block text-xs font-bold text-gray-600 dark:text-slate-400 mb-1.5">Link File (Google Drive / URL)</label>
+            <input type="url" value={linkFile} onChange={(e) => setLinkFile(e.target.value)} placeholder="https://drive.google.com/..."
+              className="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 dark:text-white" />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Keterangan</label>
-            <input type="text" value={ketLain} onChange={(e) => setKetLain(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
+          <div className="flex gap-2 pt-2">
+            <button onClick={onClose}
+              className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors text-sm">
+              Batal
+            </button>
+            <button onClick={handleSubmit}
+              className="flex-1 px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors text-sm">
+              {item ? 'Simpan Perubahan' : 'Tambah Data'}
+            </button>
           </div>
-          <div>
-            <label className="block text-xs font-bold text-gray-500 mb-1">Link File</label>
-            <input type="url" value={linkFile} onChange={(e) => setLinkFile(e.target.value)}
-              placeholder="https://..."
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40" />
-          </div>
-        </div>
-        <div className="flex gap-2 justify-end mt-6">
-          <button onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800 font-semibold transition-colors">
-            Batal
-          </button>
-          <button onClick={handleSubmit}
-            className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors">
-            {item ? 'Simpan Perubahan' : 'Tambah'}
-          </button>
         </div>
       </div>
     </div>
