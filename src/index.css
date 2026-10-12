@@ -373,5 +373,9 @@ html {
   .overflow-x-auto {
     overflow: visible !important;
   }
+  /* Sticky tidak boleh membeku di posisi scroll saat mencetak */
+  .sticky {
+    position: static !important;
+  }
 }
 

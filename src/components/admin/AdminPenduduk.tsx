@@ -71,6 +71,35 @@ export default function AdminPenduduk({
   const itemsPerPage = 10;
   const [villageName, setVillageName] = useState('Desa');
 
+  // Sticky bertingkat: header halaman -> baris pencarian -> header tabel.
+  // Tinggi diukur dinamis (header bisa wrap di layar kecil) agar selalu rapat.
+  const pageHeaderRef = useRef<HTMLDivElement>(null);
+  const searchRowRef = useRef<HTMLDivElement>(null);
+  const [stickyOffsets, setStickyOffsets] = useState({ search: 180, thead: 260, wide: true });
+  useEffect(() => {
+    const update = () => {
+      const headerH = pageHeaderRef.current?.offsetHeight || 120;
+      const searchH = searchRowRef.current?.offsetHeight || 64;
+      const wide = window.matchMedia('(min-width: 1280px)').matches;
+      setStickyOffsets({
+        search: 64 + headerH,
+        thead: wide ? 64 + headerH + searchH : 0,
+        wide,
+      });
+    };
+    update();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : null;
+    if (ro) {
+      if (pageHeaderRef.current) ro.observe(pageHeaderRef.current);
+      if (searchRowRef.current) ro.observe(searchRowRef.current);
+    }
+    window.addEventListener('resize', update);
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [editingPenduduk, showArchive, selectedPenduduk]);
+
   useEffect(() => {
     const branding = localStorage.getItem('global_branding');
     if (branding) {
@@ -748,9 +777,9 @@ export default function AdminPenduduk({
   }
 
   return (
-    <div className="pb-24 space-y-4">
+    <div className="pb-24">
       {/* Page Header */}
-      <div className="sticky top-16 z-40 bg-slate-50 dark:bg-slate-800 pb-6 -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div ref={pageHeaderRef} className="sticky top-16 z-50 bg-slate-50 dark:bg-slate-800 pb-6 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
           <nav className="flex text-xs text-gray-500 dark:text-slate-400 mb-2 gap-2 font-medium">
             <span>Dashboard</span>
@@ -821,7 +850,7 @@ export default function AdminPenduduk({
       </div>
 
       {/* Stats Overview - clickable, triggers table filter */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-4">
         {statCardData.map((card) => (
           <button
             key={card.label}
@@ -842,7 +871,8 @@ export default function AdminPenduduk({
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 p-4">
+      <div ref={searchRowRef} className="sticky z-40 bg-slate-50 dark:bg-slate-800 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8" style={{ top: stickyOffsets.search }}>
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 p-4">
         <div className="flex items-center gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -921,22 +951,23 @@ export default function AdminPenduduk({
             <Download size={12} /> Export
           </button>
         </div>
+        </div>
       </div>
 
       {/* Data Table */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50/80 border-b border-gray-100 dark:border-slate-800">
+      <div className="mt-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden xl:overflow-visible">
+        <div className="overflow-x-auto xl:overflow-x-visible">
+          <table className="w-full text-left border-collapse" style={{ '--thead-top': `${stickyOffsets.thead}px` } as React.CSSProperties}>
+            <thead className="border-b border-gray-100 dark:border-slate-800">
               <tr>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">NIK / No. KK</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Nama Lengkap / KK</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Gender</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Umur</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">RT/RW</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Bantuan Aktif</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center whitespace-nowrap sticky right-0 bg-gray-50 dark:bg-slate-800 z-10 shadow-[-4px_0_8px_rgba(0,0,0,0.02)] border-l border-gray-100 dark:border-slate-800">Aksi</th>
+              <th className="sticky top-[var(--thead-top)] z-20 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 rounded-tl-2xl shadow-[inset_0_-1px_0_#f1f5f6] dark:shadow-[inset_0_-1px_0_#1e293b]">NIK / No. KK</th>
+              <th className="sticky top-[var(--thead-top)] z-20 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 shadow-[inset_0_-1px_0_#f1f5f6] dark:shadow-[inset_0_-1px_0_#1e293b]">Nama Lengkap / KK</th>
+              <th className="sticky top-[var(--thead-top)] z-20 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 shadow-[inset_0_-1px_0_#f1f5f6] dark:shadow-[inset_0_-1px_0_#1e293b]">Status</th>
+              <th className="sticky top-[var(--thead-top)] z-20 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 shadow-[inset_0_-1px_0_#f1f5f6] dark:shadow-[inset_0_-1px_0_#1e293b]">Gender</th>
+              <th className="sticky top-[var(--thead-top)] z-20 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 shadow-[inset_0_-1px_0_#f1f5f6] dark:shadow-[inset_0_-1px_0_#1e293b]">Umur</th>
+              <th className="sticky top-[var(--thead-top)] z-20 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap bg-gray-50 dark:bg-slate-800 shadow-[inset_0_-1px_0_#f1f5f6] dark:shadow-[inset_0_-1px_0_#1e293b]">RT/RW</th>
+              <th className="sticky top-[var(--thead-top)] z-20 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell bg-gray-50 dark:bg-slate-800 shadow-[inset_0_-1px_0_#f1f5f6] dark:shadow-[inset_0_-1px_0_#1e293b]">Bantuan Aktif</th>
+              <th className="sticky top-[var(--thead-top)] right-0 z-30 px-6 py-4 text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider text-center whitespace-nowrap bg-gray-50 dark:bg-slate-800 rounded-tr-2xl shadow-[-4px_0_8px_rgba(0,0,0,0.02),inset_0_-1px_0_#f1f5f6] dark:shadow-[-4px_0_8px_rgba(0,0,0,0.02),inset_0_-1px_0_#1e293b] border-l border-gray-100 dark:border-slate-800">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100" onClick={(e) => {
