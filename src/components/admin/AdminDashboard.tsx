@@ -2,7 +2,7 @@ import NumberCounter from '../common/NumberCounter';
 import { fetchResidentsCached } from '../../utils/apiCache';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Users, FileText, MessageSquare, TrendingUp, PenTool, Loader2, Building2, BarChart3, Clock, CheckCircle2, MessageCircle } from 'lucide-react';
+import { Users, FileText, MessageSquare, TrendingUp, PenTool, Loader2, Building2, BarChart3, Clock, UserCheck, MessageCircle } from 'lucide-react';
 import { getAspirasi } from '../../utils/aspirasiData';
 import { fetchFeedbacksAsync, Feedback } from '../../utils/feedbackData';
 import { fetchSaaSLogs, SaaSLog } from '../../utils/saasLogs';
@@ -25,6 +25,7 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
   const [populerSurat, setPopulerSurat] = useState<string>('-');
   const [activeServicesCount, setActiveServicesCount] = useState<number>(0);
   const [produkHukumCount, setProdukHukumCount] = useState<number>(0);
+  const [bukuTamuTahunIni, setBukuTamuTahunIni] = useState<number>(0);
   const [tenantStats, setTenantStats] = useState<Record<string, { pendudukCount: number, suratToday: number, totalSurat: number }>>({});
 
   useEffect(() => {
@@ -133,6 +134,16 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
           }
         } catch {}
         setProdukHukumCount(total);
+
+        // Buku Tamu Digital: jumlah kunjungan tahun berjalan
+        const year = new Date().getFullYear();
+        const { count, error: guestErr } = await supabase
+          .from('guest_book')
+          .select('id', { count: 'exact', head: true })
+          .eq('tenant_id', tid)
+          .gte('tanggal_masuk', `${year}-01-01`)
+          .lt('tanggal_masuk', `${year + 1}-01-01`);
+        if (!guestErr && count != null) setBukuTamuTahunIni(count);
       } catch (e) {
         console.error('[Dashboard] Produk hukum count error:', e);
       }
@@ -653,14 +664,17 @@ export default function AdminDashboard({ setActiveTab }: { setActiveTab?: (tab: 
             </div>
           </div>
 
-          <div onClick={() => setActiveTab?.('aspirasi')} className="standard-card p-6 border-l-4 border-secondary cursor-pointer hover:shadow-md transition-all">
+          <div onClick={() => setActiveTab?.('buku_tamu')} className="standard-card p-6 border-l-4 border-sky-500 cursor-pointer hover:shadow-md transition-all">
             <div className="flex items-center gap-4 mb-4">
-              <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-700">
-                <CheckCircle2 className="w-5 h-5" />
+              <div className="w-10 h-10 bg-sky-100 rounded-lg flex items-center justify-center text-sky-700">
+                <UserCheck className="w-5 h-5" />
               </div>
-              <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Aspirasi Selesai</p>
+              <p className="text-gray-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Buku Tamu Digital</p>
             </div>
-            <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={aspirasiSelesai} /></h3>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-5xl font-extrabold text-gray-900 dark:text-white tracking-tighter"><NumberCounter end={bukuTamuTahunIni} /></h3>
+              <span className="text-sm font-bold text-gray-400">Kunjungan {new Date().getFullYear()}</span>
+            </div>
           </div>
 
           <div onClick={() => setActiveTab?.('surat')} className="standard-card p-6 border-l-4 border-gray-400 cursor-pointer hover:shadow-md transition-all">
