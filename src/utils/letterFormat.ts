@@ -18,7 +18,7 @@ export const generateKopSuratHTML = (options: KopSuratOptions = {}) => {
   const kecamatan = rawKec.replace(/^(kecamatan)\s+/i, '').trim();
 
   const rawDesa = options.desa || localStorage.getItem('kop_desa') || 'Wasah Hilir';
-  const desa = rawDesa.replace(/^(desa|kelurahan)\s+/i, '').trim();
+  const desa = rawDesa.replace(/^(didesa|desa|kelurahan)\s+/i, '').trim();
 
   const alamat = options.alamat || localStorage.getItem('kop_alamat') || '';
   const kontak = options.kontak || localStorage.getItem('kop_kontak') || '';
