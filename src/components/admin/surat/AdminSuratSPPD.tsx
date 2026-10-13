@@ -209,7 +209,14 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   const handlePrintAll = () => {
     // Generate HTML for 'semua' layout (all pages including landscape SPPD)
     const html = generateHTML('semua');
-    const win = window.open('', '_blank');
+    // Buka window berukuran A4 landscape (297mm x 210mm @96dpi = 1123 x 794 px).
+    // Chrome print dialog graphical cenderung memakai ukuran window sebagai
+    // dasar orientasi halaman, jadi window landscape memastikan halaman landscape.
+    const win = window.open(
+      '',
+      '_blank',
+      'width=1123,height=794,menubar=no,toolbar=no,location=no,status=no,scrollbars=no'
+    );
     if (!win) {
       showToast('Popup diblokir oleh browser. Izinkan popup untuk mencetak.', 'error');
       return;
@@ -217,7 +224,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     win.document.open();
     win.document.write(html);
     win.document.close();
-    
+
     const tryPrint = () => {
       if (win.document.readyState === 'complete') {
         try {
@@ -751,17 +758,26 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             
             @media print {
               body { background: white; overflow: visible; margin: 0; padding: 0; }
-              .page-a4 { width: 100% !important; min-height: 297mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
-              .page-landscape { width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
-
-              
-              ${effectiveLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
-              ${effectiveLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
-              ${effectiveLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
-              ${effectiveLayout === 'semua' ? `@page { size: A4; margin: 0; }` : ''}
-              @page sppd-landscape { size: A4 landscape; margin: 0; }
-              .page-landscape { page: sppd-landscape; }
               .nomor-surat-cetak { text-transform: uppercase !important; }
+
+              ${effectiveLayout === 'semua' ? `
+                /* Default HALAMAN LANDSCAPE - Chrome print dialog menghormati @page default,
+                   tetapi TIDAK menghormati named page untuk mixed orientation.
+                   Strategi: default landscape (SPPD dijamin landscape),
+                   halaman portrait diberi named page sebagai bonus (bila didukung). */
+                @page { size: A4 landscape; margin: 0; }
+                @page portrait-page { size: A4 portrait; margin: 0; }
+                .page-a4 { page: portrait-page; width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
+                .page-landscape { width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
+              ` : `
+                .page-a4 { width: 100% !important; min-height: 297mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
+                .page-landscape { width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
+                ${effectiveLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
+                ${effectiveLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
+                ${effectiveLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
+                @page sppd-landscape { size: A4 landscape; margin: 0; }
+                .page-landscape { page: sppd-landscape; }
+              `}
             }
           </style>
         </head>
