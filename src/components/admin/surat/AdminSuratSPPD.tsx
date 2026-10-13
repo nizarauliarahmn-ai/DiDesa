@@ -202,17 +202,70 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     }
   };
 
-  const handlePrintAll = () => {
-    const savedLayout = printLayout;
-    setPrintLayout('semua');
-    setTimeout(() => {
-      if (iframeRef.current && iframeRef.current.contentWindow) {
-        iframeRef.current.focus();
-        iframeRef.current.contentWindow.print();
-      }
-      setTimeout(() => setPrintLayout(savedLayout), 500);
-    }, 300);
+  // --- Cetak Semua (global) ---------------------------------------------
+  // srcDoc iframe harus reload penuh (termasuk CDN Tailwind/font) agar CSS
+  // @page landscape untuk halaman SPPD ikut terbawa. Timeout buta 300ms lama
+  // seringkali memanggil print() sebelum iframe selesai reload, sehingga
+  // dokumen lama (portrait) yang tercetak. Sekarang: tunggu onLoad + verifikasi.
+  const pendingPrintAllRef = useRef(false);
+  const savedLayoutForPrintRef = useRef<string | null>(null);
+  const printRetryRef = useRef<number | null>(null);
+
+  const attemptPendingPrintAll = () => {
+    if (!pendingPrintAllRef.current) return;
+    const iframe = iframeRef.current;
+    if (!iframe || !iframe.contentWindow) {
+      pendingPrintAllRef.current = false;
+      return;
+    }
+    // Verifikasi iframe sudah ber-layout 'semua' (halaman laporan tampil)
+    const laporan = iframe.contentDocument?.querySelector('.page-laporan') as HTMLElement | null;
+    const ready = !!laporan && laporan.style.display !== 'none';
+    if (!ready) {
+      printRetryRef.current = window.setTimeout(attemptPendingPrintAll, 400);
+      return;
+    }
+    pendingPrintAllRef.current = false;
+    if (printRetryRef.current) {
+      window.clearTimeout(printRetryRef.current);
+      printRetryRef.current = null;
+    }
+    iframe.focus();
+    iframe.contentWindow.print();
+    // Kembalikan selector dokumen ke layout semula setelah dialog ditutup
+    const saved = savedLayoutForPrintRef.current;
+    savedLayoutForPrintRef.current = null;
+    if (saved && saved !== 'semua') setPrintLayout(saved);
   };
+
+  const handleIframeLoad = () => {
+    if (pendingPrintAllRef.current) attemptPendingPrintAll();
+  };
+
+  const handlePrintAll = () => {
+    if (printRetryRef.current) {
+      window.clearTimeout(printRetryRef.current);
+      printRetryRef.current = null;
+    }
+    if (printLayout === 'semua') {
+      pendingPrintAllRef.current = true;
+      attemptPendingPrintAll();
+      return;
+    }
+    savedLayoutForPrintRef.current = printLayout;
+    pendingPrintAllRef.current = true;
+    setPrintLayout('semua');
+    // Kick-off pertama; bila belum siap akan di-reschedule sampai onLoad selesai
+    attemptPendingPrintAll();
+  };
+
+  // Bersihkan timer retry saat komponen dilepas agar tidak bocor
+  useEffect(() => {
+    return () => {
+      if (printRetryRef.current) window.clearTimeout(printRetryRef.current);
+      pendingPrintAllRef.current = false;
+    };
+  }, []);
 
   const handleRecord = () => {
     if (!nomorSurat) {
@@ -737,7 +790,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
               ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
               ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
-              ${printLayout === 'semua' ? `@page { size: A4; margin: 0; } @page sppd-landscape { size: A4 landscape; margin: 0; } .page-landscape { page: sppd-landscape; }` : ''}
+              ${printLayout === 'semua' ? `@page { size: A4; margin: 0; }` : ''}
+              @page sppd-landscape { size: A4 landscape; margin: 0; }
+              .page-landscape { page: sppd-landscape; }
               .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
@@ -1302,6 +1357,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.2s ease', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <iframe
                 ref={iframeRef}
+                onLoad={handleIframeLoad}
                 scrolling="no"
                 className="pointer-events-none"
                 style={{
