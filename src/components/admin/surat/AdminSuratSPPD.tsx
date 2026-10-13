@@ -203,69 +203,35 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   };
 
   // --- Cetak Semua (global) ---------------------------------------------
-  // srcDoc iframe harus reload penuh (termasuk CDN Tailwind/font) agar CSS
-  // @page landscape untuk halaman SPPD ikut terbawa. Timeout buta 300ms lama
-  // seringkali memanggil print() sebelum iframe selesai reload, sehingga
-  // dokumen lama (portrait) yang tercetak. Sekarang: tunggu onLoad + verifikasi.
-  const pendingPrintAllRef = useRef(false);
-  const savedLayoutForPrintRef = useRef<string | null>(null);
-  const printRetryRef = useRef<number | null>(null);
-
-  const attemptPendingPrintAll = () => {
-    if (!pendingPrintAllRef.current) return;
-    const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentWindow) {
-      pendingPrintAllRef.current = false;
-      return;
-    }
-    // Verifikasi iframe sudah ber-layout 'semua' (halaman laporan tampil)
-    const laporan = iframe.contentDocument?.querySelector('.page-laporan') as HTMLElement | null;
-    const ready = !!laporan && laporan.style.display !== 'none';
-    if (!ready) {
-      printRetryRef.current = window.setTimeout(attemptPendingPrintAll, 400);
-      return;
-    }
-    pendingPrintAllRef.current = false;
-    if (printRetryRef.current) {
-      window.clearTimeout(printRetryRef.current);
-      printRetryRef.current = null;
-    }
-    iframe.focus();
-    iframe.contentWindow.print();
-    // Kembalikan selector dokumen ke layout semula setelah dialog ditutup
-    const saved = savedLayoutForPrintRef.current;
-    savedLayoutForPrintRef.current = null;
-    if (saved && saved !== 'semua') setPrintLayout(saved);
-  };
-
-  const handleIframeLoad = () => {
-    if (pendingPrintAllRef.current) attemptPendingPrintAll();
-  };
+  // Print via window.open (top-level document) untuk memastikan @page landscape
+  // dihormati (iframe print context sering mengabaikan named pages).
 
   const handlePrintAll = () => {
-    if (printRetryRef.current) {
-      window.clearTimeout(printRetryRef.current);
-      printRetryRef.current = null;
-    }
-    if (printLayout === 'semua') {
-      pendingPrintAllRef.current = true;
-      attemptPendingPrintAll();
+    // Generate HTML for 'semua' layout (all pages including landscape SPPD)
+    const html = generateHTML('semua');
+    const win = window.open('', '_blank');
+    if (!win) {
+      showToast('Popup diblokir oleh browser. Izinkan popup untuk mencetak.', 'error');
       return;
     }
-    savedLayoutForPrintRef.current = printLayout;
-    pendingPrintAllRef.current = true;
-    setPrintLayout('semua');
-    // Kick-off pertama; bila belum siap akan di-reschedule sampai onLoad selesai
-    attemptPendingPrintAll();
-  };
-
-  // Bersihkan timer retry saat komponen dilepas agar tidak bocor
-  useEffect(() => {
-    return () => {
-      if (printRetryRef.current) window.clearTimeout(printRetryRef.current);
-      pendingPrintAllRef.current = false;
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+    
+    const tryPrint = () => {
+      if (win.document.readyState === 'complete') {
+        try {
+          win.focus();
+          win.print();
+        } catch {
+          showToast('Gagal memanggil dialog cetak', 'error');
+        }
+      } else {
+        setTimeout(tryPrint, 100);
+      }
     };
-  }, []);
+    tryPrint();
+  };
 
   const handleRecord = () => {
     if (!nomorSurat) {
@@ -448,7 +414,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   };
 
-  const generateHTML = () => {
+  const generateHTML = (layout?: 'surattugas' | `sppd-${string}` | `laporan-${string}` | 'semua') => {
     const activeKabupaten = localStorage.getItem('kop_kabupaten') || 'Hulu Sungai Selatan';
     const activeKecamatan = localStorage.getItem('kop_kecamatan') || 'Simpur';
     const activeDesa = localStorage.getItem('kop_desa') || 'Wasah Hilir';
@@ -473,9 +439,11 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       }))
     ]); // Do not filter empty names so blank forms can be printed
 
+    const effectiveLayout = layout ?? printLayout;
+
     const generatePage2And3 = (participant: any) => `
           <!-- HALAMAN 2: VISUM SPPD (LANDSCAPE) -->
-          <div class="page-landscape page-sppd bg-white shadow-lg mx-auto" style="${printLayout !== `sppd-${participant.groupId}` && printLayout !== 'semua' ? 'display: none;' : ''}">
+          <div class="page-landscape page-sppd bg-white shadow-lg mx-auto" style="${effectiveLayout !== `sppd-${participant.groupId}` && effectiveLayout !== 'semua' ? 'display: none;' : ''}">
             <div class="flex gap-4 h-full">
               <!-- Kiri -->
               <div class="w-[53%] pr-4">
@@ -729,7 +697,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           </div>
 
           <!-- HALAMAN 3: LEMBAR LAPORAN -->
-          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${printLayout !== `laporan-${participant.groupId}` && printLayout !== 'semua' ? 'display: none;' : ''}">
+          <div class="page-a4 page-laporan bg-white shadow-lg mx-auto" style="${effectiveLayout !== `laporan-${participant.groupId}` && effectiveLayout !== 'semua' ? 'display: none;' : ''}">
             <div class="text-[14px] text-black pt-12">
               <div class="text-center mb-10">
                 <h6 class="font-bold uppercase text-[16px]">LAPORAN PERJALANAN DINAS</h6>
@@ -787,10 +755,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               .page-landscape { width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
 
               
-              ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
-              ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
-              ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
-              ${printLayout === 'semua' ? `@page { size: A4; margin: 0; }` : ''}
+              ${effectiveLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
+              ${effectiveLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
+              ${effectiveLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
+              ${effectiveLayout === 'semua' ? `@page { size: A4; margin: 0; }` : ''}
               @page sppd-landscape { size: A4 landscape; margin: 0; }
               .page-landscape { page: sppd-landscape; }
               .nomor-surat-cetak { text-transform: uppercase !important; }
@@ -1357,7 +1325,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             <div style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top center', transition: 'transform 0.2s ease', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <iframe
                 ref={iframeRef}
-                onLoad={handleIframeLoad}
                 scrolling="no"
                 className="pointer-events-none"
                 style={{
