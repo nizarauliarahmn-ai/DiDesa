@@ -737,7 +737,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               ${printLayout === 'surattugas' ? `@page { size: portrait; margin: 0; }` : ''}
               ${printLayout.startsWith('sppd-') ? `@page { size: landscape; margin: 0; }` : ''}
               ${printLayout.startsWith('laporan-') ? `@page { size: portrait; margin: 0; }` : ''}
-              ${printLayout === 'semua' ? `@page { size: A4; margin: 0; }` : ''}
+              ${printLayout === 'semua' ? `@page { size: A4; margin: 0; } @page sppd-landscape { size: A4 landscape; margin: 0; } .page-landscape { page: sppd-landscape; }` : ''}
               .nomor-surat-cetak { text-transform: uppercase !important; }
             }
           </style>
