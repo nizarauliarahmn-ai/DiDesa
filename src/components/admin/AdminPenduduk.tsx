@@ -68,6 +68,7 @@ export default function AdminPenduduk({
   const [showImportModal, setShowImportModal] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [jumpPage, setJumpPage] = useState('');
   const itemsPerPage = 10;
   const [villageName, setVillageName] = useState('Desa');
 
@@ -563,6 +564,14 @@ export default function AdminPenduduk({
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
 
+  const goToPage = (raw: string) => {
+    const n = Math.floor(Number(raw));
+    if (!Number.isFinite(n)) return;
+    const page = Math.min(totalPages, Math.max(1, n));
+    setCurrentPage(page);
+    setJumpPage('');
+  };
+
   const [deleteConfirmModal, setDeleteConfirmModal] = useState<{ nik: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -1051,6 +1060,30 @@ export default function AdminPenduduk({
               {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} - {Math.min(currentPage * itemsPerPage, filteredData.length)}
             </span> dari <span className="font-bold text-gray-900 dark:text-white">{filteredData.length}</span> data
           </p>
+          <div className="flex items-center gap-3">
+            <form
+              onSubmit={(e) => { e.preventDefault(); goToPage(jumpPage); }}
+              className="flex items-center gap-1.5"
+            >
+              <span className="text-xs text-gray-500 dark:text-slate-400 font-medium whitespace-nowrap">Ke Hal.</span>
+              <input
+                type="number"
+                min={1}
+                max={totalPages}
+                value={jumpPage}
+                onChange={(e) => setJumpPage(e.target.value)}
+                placeholder={`${currentPage}/${totalPages}`}
+                className="w-16 px-2 py-1.5 text-center text-sm font-semibold rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
+                aria-label="Lompat ke halaman"
+              />
+              <button
+                type="submit"
+                disabled={!jumpPage.trim()}
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white hover:bg-emerald-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Ke
+              </button>
+            </form>
           <div className="flex items-center gap-1.5">
             <button 
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -1101,6 +1134,7 @@ export default function AdminPenduduk({
             >
               <ChevronRight className="w-4 h-4" />
             </button>
+          </div>
           </div>
         </div>
       </div>
