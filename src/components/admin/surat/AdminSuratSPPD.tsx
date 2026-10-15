@@ -883,6 +883,17 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             .page-a4:last-child, .page-landscape:last-child { page-break-after: auto; }
             .print-table { width: 100%; border-collapse: collapse; font-size: 11px; line-height: 1.2; }
             .print-table th, .print-table td { border: 1px solid black; padding: 2px 4px; vertical-align: top; }
+            /* Rule dasar di atas punya spesifisitas (0,1,1) sehingga mengalahkan
+               utility Tailwind (0,1,0) seperti py-3/p-0/border-b/align-middle —
+               akibatnya baris tabel kolaps dan teks menimpa garis. Angkat kembali
+               utility yang dipakai template agar tampilan sesuai desain. */
+            .print-table .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+            .print-table .p-0 { padding: 0; }
+            .print-table .p-1 { padding: 0.25rem; }
+            .print-table .pl-2 { padding-left: 0.5rem; }
+            .print-table .align-middle { vertical-align: middle; }
+            .print-table [class~="border-b"] { border-width: 0 0 1px 0; }
+            .print-table [class~="border-r"] { border-right-width: 1px; }
             
             @media print {
               body { background: white; overflow: visible; margin: 0; padding: 0; }
