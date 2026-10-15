@@ -14,6 +14,8 @@ import { SAAS_CONFIG } from './AdminSuratMasterTemplate';
 import { getPrintSignatureHTML } from '../../../utils/signature';
 import { useDragScroll } from '../../../hooks/useDragScroll';
 import QuickAddResidentModal from '../penduduk/QuickAddResidentModal';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 // Error Boundary to catch and display any rendering errors
 class SPPDErrorBoundary extends Component<{children: React.ReactNode, onBack: () => void}, {hasError: boolean, error: any}> {
   constructor(props: any) {
@@ -67,6 +69,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   };
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [zoomLevel, setZoomLevel] = useState(0.45);
@@ -203,41 +206,94 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   };
 
   // --- Cetak Semua (global) ---------------------------------------------
-  // Print via window.open (top-level document) untuk memastikan @page landscape
-  // dihormati (iframe print context sering mengabaikan named pages).
+  // Hasilkan PDF langsung (jsPDF + html2canvas): orientasi campur per halaman
+  // (Surat Tugas & Laporan potret, SPPD landscape) dijamin benar tanpa
+  // mengandalkan dialog cetak Chrome yang bermasalah untuk mixed orientation.
 
-  const handlePrintAll = () => {
-    // Generate HTML for 'semua' layout (all pages including landscape SPPD)
-    const html = generateHTML('semua');
-    // Buka window berukuran A4 landscape (297mm x 210mm @96dpi = 1123 x 794 px).
-    // Chrome print dialog graphical cenderung memakai ukuran window sebagai
-    // dasar orientasi halaman, jadi window landscape memastikan halaman landscape.
-    const win = window.open(
-      '',
-      '_blank',
-      'width=1123,height=794,menubar=no,toolbar=no,location=no,status=no,scrollbars=no'
-    );
-    if (!win) {
-      showToast('Popup diblokir oleh browser. Izinkan popup untuk mencetak.', 'error');
-      return;
-    }
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-
-    const tryPrint = () => {
-      if (win.document.readyState === 'complete') {
-        try {
-          win.focus();
-          win.print();
-        } catch {
-          showToast('Gagal memanggil dialog cetak', 'error');
-        }
-      } else {
-        setTimeout(tryPrint, 100);
+  const waitForRenderReady = (frame: HTMLIFrameElement) => new Promise<void>((resolve) => {
+    const start = Date.now();
+    const check = () => {
+      try {
+        const doc = frame.contentDocument;
+        const win = frame.contentWindow;
+        const probe = doc?.querySelector('.flex') as HTMLElement | null;
+        // Pastikan Tailwind CDN sudah meng-inject style sebelum dirender
+        const stylesOk = !probe || !win || win.getComputedStyle(probe).display === 'flex';
+        const fontsOk = !doc?.fonts || doc.fonts.status !== 'loading';
+        if (doc?.readyState === 'complete' && stylesOk && fontsOk) { resolve(); return; }
+      } catch {
+        resolve();
+        return;
       }
+      if (Date.now() - start > 10000) { resolve(); return; }
+      setTimeout(check, 150);
     };
-    tryPrint();
+    check();
+  });
+
+  const handlePrintAll = async () => {
+    if (isExportingPdf) return;
+    setIsExportingPdf(true);
+    // Window kosong dibuka sinkron (di dalam click handler) agar tidak
+    // diblokir popup blocker; diisi blob PDF setelah render selesai.
+    const win = window.open('', '_blank', 'width=1000,height=760,menubar=no,toolbar=no');
+    const frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.style.cssText = 'position:fixed;left:-99999px;top:0;width:1400px;height:1100px;border:0;visibility:hidden;';
+    document.body.appendChild(frame);
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) throw new Error('Konteks render tidak tersedia');
+      doc.open();
+      doc.write(generateHTML('semua'));
+      doc.close();
+      const clean = doc.createElement('style');
+      clean.textContent = '.page-a4,.page-landscape{box-shadow:none!important;border-radius:0!important;margin:0!important;}';
+      doc.head.appendChild(clean);
+      await waitForRenderReady(frame);
+
+      const pages = Array.from(doc.querySelectorAll<HTMLElement>('.page-a4, .page-landscape'))
+        .filter((el) => el.style.display !== 'none');
+      if (!pages.length) throw new Error('Tidak ada halaman untuk dicetak');
+
+      let pdf: jsPDF | null = null;
+      for (const page of pages) {
+        const isLandscape = page.classList.contains('page-landscape');
+        const w = isLandscape ? 297 : 210;
+        const h = isLandscape ? 210 : 297;
+        const canvas = await html2canvas(page, {
+          scale: 2,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false
+        });
+        const imgData = canvas.toDataURL('image/png');
+        if (!pdf) {
+          pdf = new jsPDF({ orientation: isLandscape ? 'landscape' : 'portrait', unit: 'mm', format: [w, h] });
+        } else {
+          pdf.addPage([w, h], isLandscape ? 'l' : 'p');
+        }
+        pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+      }
+      if (!pdf) throw new Error('Gagal membuat PDF');
+
+      const pdfUrl = URL.createObjectURL(pdf.output('blob'));
+      const fileName = `SPPD_${(nomorSurat || 'Semua').replace(/[\\/:*?"<>|]/g, '_')}.pdf`;
+      if (win && !win.closed) {
+        win.location.href = pdfUrl;
+        win.focus();
+      } else {
+        pdf.save(fileName);
+      }
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 120000);
+      showToast(`PDF siap: ${pages.length} halaman (potret + landscape)`, 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Gagal membuat PDF Cetak Semua', 'error');
+      if (win && !win.closed) win.close();
+    } finally {
+      frame.remove();
+      setIsExportingPdf(false);
+    }
   };
 
   const handleRecord = () => {
@@ -784,7 +840,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         <body>
 
           <!-- HALAMAN 1: SURAT TUGAS -->
-          <div class="page-a4 page-spt bg-white shadow-lg mx-auto" style="${printLayout !== 'surattugas' && printLayout !== 'semua' ? 'display: none;' : ''}">
+          <div class="page-a4 page-spt bg-white shadow-lg mx-auto" style="${effectiveLayout !== 'surattugas' && effectiveLayout !== 'semua' ? 'display: none;' : ''}">
             ${kopSuratHTML}
             
             <div class="text-[14px] text-black">
@@ -893,9 +949,10 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             ))}
             <button
               onClick={handlePrintAll}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap h-8 bg-emerald-600 text-white shadow-sm hover:bg-emerald-500"
+              disabled={isExportingPdf}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap h-8 shadow-sm ${isExportingPdf ? 'bg-emerald-400 text-white cursor-wait' : 'bg-emerald-600 text-white hover:bg-emerald-500'}`}
             >
-              <Printer size={12} /> Cetak Semua
+              {isExportingPdf ? <Loader2 size={12} className="animate-spin" /> : <Printer size={12} />} {isExportingPdf ? 'Membuat PDF…' : 'Cetak Semua'}
             </button>
           </div>
         </SuratEditorHeader>
