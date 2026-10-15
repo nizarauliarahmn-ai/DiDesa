@@ -206,12 +206,9 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
   };
 
   // --- Cetak Semua (global) ---------------------------------------------
-  // 1. Buka popup lalu hasilkan PDF (jsPDF + html2canvas) sebagai fallback
-  //    orientasi yang terbukti benar (potret + landscape per halaman).
-  // 2. Isi popup dengan HTML halaman + auto window.print() → dialog cetak
-  //    Chrome terbuka langsung (teori @page tanpa size + named page).
-  // 3. Jika orientasi di dialog salah → pengguna membatalkan lalu klik
-  //    tombol "Buka PDF" di popup yang sama.
+  // Langsung ke PENAMPIL PDF (bukan dialog cetak Chrome): PDF dihasilkan
+  // via jsPDF + html2canvas sehingga orientasi campur per halaman
+  // (Surat Tugas & Laporan potret, SPPD landscape) selalu benar.
 
   const waitForRenderReady = (frame: HTMLIFrameElement) => new Promise<void>((resolve) => {
     const start = Date.now();
@@ -239,14 +236,14 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     setIsExportingPdf(true);
     // Window dibuka sinkron di dalam click handler agar tidak diblokir
     // popup blocker; awalnya diisi halaman "Menyiapkan" sementara PDF dibuat.
-    const win = window.open('', '_blank', 'width=1200,height=1150,menubar=no,toolbar=no');
+    const win = window.open('', '_blank', 'width=1100,height=850,menubar=no,toolbar=no');
     if (win && !win.closed) {
       try {
         win.document.write(
-          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Menyiapkan Cetak</title></head>' +
+          '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Menyiapkan PDF</title></head>' +
           '<body style="font-family:Arial,sans-serif;background:#f0fdf4;color:#065f46;margin:0;display:flex;align-items:center;justify-content:center;height:100vh;">' +
           '<div style="text-align:center;"><div style="font-size:20px;font-weight:700;">Menyiapkan dokumen SPPD…</div>' +
-          '<div style="font-size:14px;color:#475569;margin-top:10px;">Dialog cetak akan terbuka otomatis.</div></div>' +
+          '<div style="font-size:14px;color:#475569;margin-top:10px;">PDF akan tampil otomatis di jendela ini.</div></div>' +
           '</body></html>'
         );
         win.document.close();
@@ -257,7 +254,6 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
     frame.setAttribute('aria-hidden', 'true');
     frame.style.cssText = 'position:fixed;left:-99999px;top:0;width:1400px;height:1100px;border:0;visibility:hidden;';
     document.body.appendChild(frame);
-    let pdfUrl: string | null = null;
     try {
       const doc = frame.contentDocument;
       if (!doc) throw new Error('Konteks render tidak tersedia');
@@ -294,48 +290,20 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
       }
       if (!pdf) throw new Error('Gagal membuat PDF');
 
-      pdfUrl = URL.createObjectURL(pdf.output('blob'));
-      setTimeout(() => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, 600000);
+      const pdfUrl = URL.createObjectURL(pdf.output('blob'));
       const fileName = `SPPD_${(nomorSurat || 'Semua').replace(/[\\/:*?"<>|]/g, '_')}.pdf`;
-
       if (win && !win.closed) {
-        // --- Isi popup: halaman HTML + bar fallback + auto-print ---
-        const bar = pdfUrl
-          ? `<div class="fallback-bar" style="position:fixed;left:0;right:0;bottom:0;background:#065f46;color:#fff;padding:11px 16px;display:flex;gap:12px;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-size:13px;font-weight:600;z-index:9999;">
-              <span>Jika orientasi halaman salah: tutup dialog cetak, lalu klik</span>
-              <a href="${pdfUrl}" style="background:#fff;color:#065f46;font-weight:700;padding:7px 16px;border-radius:8px;text-decoration:none;">Buka PDF (orientasi dijamin)</a>
-            </div>`
-          : `<div class="fallback-bar" style="position:fixed;left:0;right:0;bottom:0;background:#7f1d1d;color:#fff;padding:11px 16px;text-align:center;font-family:Arial,sans-serif;font-size:13px;font-weight:600;z-index:9999;">
-              PDF gagal dibuat — gunakan Ctrl+P pada jendela ini.
-            </div>`;
-        const autoPrint =
-          '<script>(function(){var t=0;(function go(){var el=document.querySelector(".flex");' +
-          'var ok=document.readyState==="complete"&&(!el||getComputedStyle(el).display==="flex");' +
-          'if(ok){setTimeout(function(){try{window.print();}catch(e){}},300);return;}' +
-          'if(++t<80){setTimeout(go,150);}else{try{window.print();}catch(e){}}})();})();<\/script>';
-        const html = generateHTML('semua')
-          .replace('</body>', `<style>body{overflow:auto!important}</style>${bar}${autoPrint}</body>`);
-        win.document.open();
-        win.document.write(html);
-        win.document.close();
+        win.location.href = pdfUrl;
         win.focus();
-        showToast(`Dialog cetak terbuka — ${pages.length} halaman. Cek orientasi tiap lembar; jika salah, Batal lalu klik "Buka PDF".`, 'success');
-      } else if (pdfUrl) {
-        // Popup diblokir/ditutup → PDF di tab baru (alur lama).
+      } else {
         const tab = window.open(pdfUrl, '_blank');
         if (!tab) pdf.save(fileName);
-        showToast(`PDF siap: ${pages.length} halaman (potret + landscape). Ctrl+P untuk mencetak.`, 'success');
-      } else {
-        throw new Error('Gagal menyiapkan cetakan');
       }
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 600000);
+      showToast(`PDF siap: ${pages.length} halaman (potret + landscape). Tekan Ctrl+P untuk mencetak.`, 'success');
     } catch (err) {
-      if (pdfUrl && win && !win.closed) {
-        win.location.href = pdfUrl;
-        showToast(`Dialog gagal dibuka, PDF siap di jendela tersebut. Ctrl+P untuk mencetak.`, 'info');
-      } else {
-        showToast(err instanceof Error ? err.message : 'Gagal menyiapkan Cetak Semua', 'error');
-        if (win && !win.closed) win.close();
-      }
+      showToast(err instanceof Error ? err.message : 'Gagal menyiapkan Cetak Semua', 'error');
+      if (win && !win.closed) win.close();
     } finally {
       frame.remove();
       setIsExportingPdf(false);
@@ -863,16 +831,13 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               .nomor-surat-cetak { text-transform: uppercase !important; }
 
               ${effectiveLayout === 'semua' ? `
-                /* @page default TANPA size + named page per orientasi:
-                   bila Chrome menghormati named page, dialog cetak terbuka langsung
-                   dengan lembar potret & landscape campur. Bila tidak, pengguna
-                   membatalkan dialog lalu memakai tombol "Buka PDF" (fallback). */
+                /* Cetak Semua dirender langsung ke PDF (bukan dialog cetak browser);
+                   aturan print di bawah hanya cadangan bila dicetak via browser. */
                 @page { margin: 0; }
                 @page portrait-page { size: A4 portrait; margin: 0; }
                 @page landscape-page { size: A4 landscape; margin: 0; }
                 .page-a4 { page: portrait-page; width: 100% !important; min-height: 297mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
                 .page-landscape { page: landscape-page; width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
-                .fallback-bar { display: none !important; }
               ` : `
                 .page-a4 { width: 100% !important; min-height: 297mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
                 .page-landscape { width: 100% !important; min-height: 210mm !important; box-shadow: none; margin: 0; border-radius: 0; overflow: visible !important; }
@@ -1000,7 +965,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
               disabled={isExportingPdf}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all whitespace-nowrap h-8 shadow-sm ${isExportingPdf ? 'bg-emerald-400 text-white cursor-wait' : 'bg-emerald-600 text-white hover:bg-emerald-500'}`}
             >
-              {isExportingPdf ? <Loader2 size={12} className="animate-spin" /> : <Printer size={12} />} {isExportingPdf ? 'Menyiapkan cetak…' : 'Cetak Semua'}
+              {isExportingPdf ? <Loader2 size={12} className="animate-spin" /> : <Printer size={12} />} {isExportingPdf ? 'Membuat PDF…' : 'Cetak Semua'}
             </button>
           </div>
         </SuratEditorHeader>
