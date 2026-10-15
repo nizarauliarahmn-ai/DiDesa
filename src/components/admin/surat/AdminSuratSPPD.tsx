@@ -269,7 +269,35 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         .filter((el) => el.style.display !== 'none');
       if (!pages.length) throw new Error('Tidak ada halaman untuk dicetak');
 
-      let pdf: jsPDF | null = null;
+      // Cari baris putih terdekat sebagai titik pemisah lembar (hindari
+      // memotong teks/garis tabel di tengah).
+      const pickCutY = (ctx: CanvasRenderingContext2D, target: number, W: number, H: number): number => {
+        const clamp = (v: number) => Math.max(4, Math.min(H - 4, Math.round(v)));
+        const whiteFrac = (yy: number): number => {
+          const row = ctx.getImageData(0, yy, W, 1).data;
+          let n = 0; let t = 0;
+          for (let i = 0; i < row.length; i += 16) {
+            t++;
+            if (row[i] > 244 && row[i + 1] > 244 && row[i + 2] > 244) n++;
+          }
+          return n / t;
+        };
+        const t0 = clamp(target);
+        for (let d = 0; d <= 80; d++) {
+          const cands = d === 0 ? [t0] : [clamp(t0 - d), clamp(t0 + d)];
+          for (const cand of cands) {
+            if (whiteFrac(cand) >= 0.985) return cand;
+          }
+        }
+        return t0;
+      };
+
+      // Render tiap halaman → lembar PDF. Bila konten melebihi tinggi lembar,
+      // pecah kanvas menjadi beberapa lembar berurutan dengan skala proporsional
+      // (tanpa dipipihkan/di-stretch, tanpa kehilangan konten).
+      type PdfSheet = { data: string; w: number; h: number; drawH: number; landscape: boolean };
+      const sheets: PdfSheet[] = [];
+      let overflowPages = 0;
       for (const page of pages) {
         const isLandscape = page.classList.contains('page-landscape');
         const w = isLandscape ? 297 : 210;
@@ -280,13 +308,38 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
           useCORS: true,
           logging: false
         });
-        const imgData = canvas.toDataURL('image/png');
-        if (!pdf) {
-          pdf = new jsPDF({ orientation: isLandscape ? 'landscape' : 'portrait', unit: 'mm', format: [w, h] });
-        } else {
-          pdf.addPage([w, h], isLandscape ? 'l' : 'p');
+        const sliceH = (canvas.width * h) / w;
+        if (canvas.height <= sliceH * 1.02) {
+          sheets.push({ data: canvas.toDataURL('image/png'), w, h, drawH: h, landscape: isLandscape });
+          continue;
         }
-        pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+        overflowPages++;
+        const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+        let y = 0;
+        while (y < canvas.height - 4) {
+          let th = Math.min(sliceH, canvas.height - y);
+          if (y + th < canvas.height - 4) {
+            const cut = pickCutY(ctx, y + th, canvas.width, canvas.height) - y;
+            th = cut >= sliceH * 0.4 ? cut : sliceH;
+          }
+          const tile = document.createElement('canvas');
+          tile.width = canvas.width;
+          tile.height = Math.round(th);
+          tile.getContext('2d')!.drawImage(canvas, 0, y, canvas.width, th, 0, 0, canvas.width, th);
+          sheets.push({ data: tile.toDataURL('image/png'), w, h, drawH: (th / sliceH) * h, landscape: isLandscape });
+          y += th;
+        }
+      }
+      if (!sheets.length) throw new Error('Tidak ada halaman untuk dicetak');
+
+      let pdf: jsPDF | null = null;
+      for (const s of sheets) {
+        if (!pdf) {
+          pdf = new jsPDF({ orientation: s.landscape ? 'landscape' : 'portrait', unit: 'mm', format: [s.w, s.h] });
+        } else {
+          pdf.addPage([s.w, s.h], s.landscape ? 'l' : 'p');
+        }
+        pdf.addImage(s.data, 'PNG', 0, 0, s.w, s.drawH);
       }
       if (!pdf) throw new Error('Gagal membuat PDF');
 
@@ -300,7 +353,12 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
         if (!tab) pdf.save(fileName);
       }
       setTimeout(() => URL.revokeObjectURL(pdfUrl), 600000);
-      showToast(`PDF siap: ${pages.length} halaman (potret + landscape). Tekan Ctrl+P untuk mencetak.`, 'success');
+      showToast(
+        overflowPages > 0
+          ? `PDF siap: ${pages.length} halaman → ${sheets.length} lembar (konten yang melebihi 1 lembar A4 otomatis dipisah, tanpa teks terpotong). Tekan Ctrl+P untuk mencetak.`
+          : `PDF siap: ${pages.length} halaman (potret + landscape). Tekan Ctrl+P untuk mencetak.`,
+        'success'
+      );
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Gagal menyiapkan Cetak Semua', 'error');
       if (win && !win.closed) win.close();
