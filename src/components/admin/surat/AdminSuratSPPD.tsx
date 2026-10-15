@@ -703,7 +703,7 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
                   </div>
                 </div>
 
-                <table class="w-full border-collapse" style="border: 1px solid black;">
+                <table class="print-table-sppd w-full border-collapse" style="border: 1px solid black;">
                   <tbody>
                     <!-- Box II -->
                     <tr>
@@ -894,6 +894,16 @@ function AdminSuratSPPDInner({ onBack, editData, editLetterId }: { onBack: () =>
             .print-table .align-middle { vertical-align: middle; }
             .print-table [class~="border-b"] { border-width: 0 0 1px 0; }
             .print-table [class~="border-r"] { border-right-width: 1px; }
+
+            .print-table-sppd { width: 100%; border-collapse: collapse; font-size: 9px; line-height: 1.15; }
+            .print-table-sppd th, .print-table-sppd td { border: none; padding: 2px 4px; vertical-align: top; }
+            .print-table-sppd .p-1 { padding: 0.25rem; }
+            .print-table-sppd .p-0 { padding: 0; }
+            .print-table-sppd .pl-2 { padding-left: 0.5rem; }
+            .print-table-sppd .align-top { vertical-align: top; }
+            .print-table-sppd .align-middle { vertical-align: middle; }
+            .print-table-sppd [class~="border-b"] { border-width: 0 0 1px 0; }
+            .print-table-sppd [class~="border-r"] { border-right-width: 1px; }
             
             @media print {
               body { background: white; overflow: visible; margin: 0; padding: 0; }
