@@ -11,6 +11,7 @@ import {
   Building2, X, Trash2, Send, Eye, Pencil, CalendarDays, Calendar
 } from 'lucide-react';
 import { SAAS_CONFIG } from './surat/AdminSuratMasterTemplate';
+import { useHeaderCompact } from '../../hooks/useHeaderCompact';
 
 interface GuestEntry {
   id: string;
@@ -40,6 +41,7 @@ const KEPERLUAN_OPTIONS = [
 ];
 
 export default function AdminBukuTamu() {
+  const compact = useHeaderCompact();
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [entries, setEntries] = useState<GuestEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -394,9 +396,9 @@ export default function AdminBukuTamu() {
     <div className="animate-in fade-in duration-300 space-y-5">
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Buku Tamu Digital</h2>
+      <div className={`sticky top-16 z-40 bg-slate-50 dark:bg-slate-800 border-b border-slate-200/50 dark:border-slate-700/50 transition-all duration-300 ease-out -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 -mt-6 pt-6 flex flex-col md:flex-row md:items-center justify-between gap-4`}>
+        <div className="transition-all duration-300 ease-out">
+          <h2 className={`font-bold text-gray-900 dark:text-white tracking-tight transition-all duration-300 ease-out ${compact ? 'text-xl' : 'text-2xl'}`}>Buku Tamu Digital</h2>
         </div>
         <div className="flex items-center gap-2">
           <button
