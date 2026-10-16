@@ -1063,7 +1063,7 @@ export default function AdminPenduduk({
           <div className="flex items-center gap-3">
             <form
               onSubmit={(e) => { e.preventDefault(); goToPage(jumpPage); }}
-              className="flex items-center gap-1.5"
+              className="hidden sm:flex items-center gap-1.5"
             >
               <span className="text-xs text-gray-500 dark:text-slate-400 font-medium whitespace-nowrap">Ke Hal.</span>
               <input
@@ -1087,12 +1087,39 @@ export default function AdminPenduduk({
           <div className="flex items-center gap-1.5">
             <button 
               onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              className="p-2 rounded-lg border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+              className="p-3 sm:p-2 rounded-lg border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
               disabled={currentPage === 1}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            
+
+            <div className="flex sm:hidden items-center gap-1.5">
+            {(() => {
+              const mobilePages = Array.from(new Set([1, currentPage, totalPages])).sort((a, b) => a - b);
+              return mobilePages.flatMap((page, i) => {
+                const nodes: React.ReactNode[] = [];
+                if (i > 0 && page - mobilePages[i - 1] > 1) {
+                  nodes.push(<span key={`me-${page}`} className="px-1 text-gray-400 dark:text-slate-500 font-medium text-xs">…</span>);
+                }
+                nodes.push(
+                  <button
+                    key={`p-${page}`}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-bold transition-all ${
+                      currentPage === page
+                        ? "bg-emerald-700 text-white shadow-sm dark:shadow-none font-extrabold"
+                        : "hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-400 font-semibold"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                );
+                return nodes;
+              });
+            })()}
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1.5">
             {Array.from({ length: totalPages }, (_, i) => i + 1)
               .filter(page => {
                 // Show first, last, current, and pages around current
@@ -1126,10 +1153,11 @@ export default function AdminPenduduk({
                 );
                 return acc;
               }, [] as React.ReactNode[])}
+            </div>
 
             <button 
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              className="p-2 rounded-lg border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+              className="p-3 sm:p-2 rounded-lg border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
               disabled={currentPage === totalPages}
             >
               <ChevronRight className="w-4 h-4" />
