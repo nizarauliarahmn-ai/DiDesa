@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Scale, FileText, TrendingUp, Archive, ChevronRight, FileCheck, ScrollText, Handshake, ClipboardList, Award } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { useHeaderCompact } from '../../../hooks/useHeaderCompact';
 
 type SubTab = 'dashboard' | 'perdes' | 'sk_kades' | 'perkades' | 'mou_pks' | 'skb' | 'berita_acara' | 'piagam';
 
@@ -64,6 +65,7 @@ interface DashboardProps {
 
 export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
   const allData = useMemo(() => loadData(), []);
+  const compact = useHeaderCompact();
 
   const stats = useMemo(() => {
     const totalDokumen = Object.values(allData).reduce((sum, items) => sum + items.length, 0);
@@ -95,10 +97,10 @@ export default function ProdukHukumDashboard({ onNavigate }: DashboardProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Dashboard Produk Hukum</h2>
-        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">Ringkasan semua dokumen hukum desa</p>
+      {/* Header — sticky, mengecil smooth saat scroll ke bawah */}
+      <div className={`sticky top-16 z-40 bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 transition-all duration-300 ease-out -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 -mt-6 pt-6 ${compact ? 'pb-2' : 'pb-4'}`}>
+        <h2 className={`font-bold text-gray-900 dark:text-white tracking-tight transition-all duration-300 ease-out ${compact ? 'text-xl' : 'text-3xl'}`}>Dashboard Produk Hukum</h2>
+        <p className={`text-gray-500 dark:text-slate-400 mt-1 transition-all duration-300 ease-out ${compact ? 'text-xs' : 'text-sm'}`}>Ringkasan semua dokumen hukum desa</p>
       </div>
 
       {/* Summary Cards */}
