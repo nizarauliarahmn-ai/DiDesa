@@ -77,6 +77,7 @@ export default function AdminPenduduk({
   const pageHeaderRef = useRef<HTMLDivElement>(null);
   const searchRowRef = useRef<HTMLDivElement>(null);
   const [stickyOffsets, setStickyOffsets] = useState({ search: 180, thead: 260, wide: true });
+  const [headerCompact, setHeaderCompact] = useState(false);
   useEffect(() => {
     const update = () => {
       const headerH = pageHeaderRef.current?.offsetHeight || 120;
@@ -100,6 +101,26 @@ export default function AdminPenduduk({
       window.removeEventListener('resize', update);
     };
   }, [editingPenduduk, showArchive, selectedPenduduk]);
+
+  // Kecilkan judul header saat scroll ke bawah — hysteresis (kecil >60px, kembali <20px) agar tidak kecipratan buka-tutup
+  useEffect(() => {
+    const scroller = document.querySelector('main');
+    const handleScroll = () => {
+      const current = scroller ? (scroller as HTMLElement).scrollTop : window.scrollY;
+      setHeaderCompact(prev => {
+        if (!prev && current > 60) return true;
+        if (prev && current < 20) return false;
+        return prev;
+      });
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    scroller?.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      scroller?.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const branding = localStorage.getItem('global_branding');
@@ -788,15 +809,10 @@ export default function AdminPenduduk({
   return (
     <div className="pb-24">
       {/* Page Header */}
-      <div ref={pageHeaderRef} className="sticky top-16 z-50 bg-slate-50 dark:bg-slate-800 pb-6 -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-        <div>
-          <nav className="flex text-xs text-gray-500 dark:text-slate-400 mb-2 gap-2 font-medium">
-            <span>Dashboard</span>
-            <span>/</span>
-            <span className="text-emerald-700 font-bold">Penduduk</span>
-          </nav>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Daftar Penduduk</h2>
-          <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm">Kelola data informasi kependudukan {villageName}.</p>
+      <div ref={pageHeaderRef} className={`sticky top-16 z-50 bg-slate-50 dark:bg-slate-800 transition-all duration-300 ease-out ${headerCompact ? 'pb-3' : 'pb-6'} -mx-4 px-4 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6`}>
+        <div className="transition-all duration-300 ease-out">
+          <h2 className={`font-bold text-gray-900 dark:text-white tracking-tight transition-all duration-300 ease-out ${headerCompact ? 'text-xl' : 'text-3xl'}`}>Daftar Penduduk</h2>
+          <p className={`text-gray-500 dark:text-slate-400 mt-1 transition-all duration-300 ease-out ${headerCompact ? 'text-xs' : 'text-sm'}`}>Kelola data informasi kependudukan {villageName}.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
           <div className="relative flex-1 md:flex-none">
