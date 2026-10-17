@@ -418,3 +418,13 @@ html {
   background: rgba(148, 163, 184, 0.85);
 }
 
+
+/* Morph header Detail Penduduk — blur tipis saat transisi besar <-> susut */
+@keyframes morph-blur {
+  0% { filter: blur(0px); }
+  50% { filter: blur(3px); }
+  100% { filter: blur(0px); }
+}
+.morph-blur {
+  animation: morph-blur 320ms ease-out;
+}

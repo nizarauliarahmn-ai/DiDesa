@@ -238,6 +238,7 @@ export default function AdminPendudukDetail({
   const moreBtnRef = useRef<HTMLButtonElement | null>(null);
   const stickyHeaderRef = useRef<HTMLDivElement | null>(null);
   const biodataTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const morphContentRef = useRef<HTMLDivElement | null>(null);
   const [morePos, setMorePos] = useState<{ top: number; left: number } | null>(null);
   const openMoreMenu = () => {
     const r = moreBtnRef.current?.getBoundingClientRect();
@@ -457,6 +458,16 @@ export default function AdminPendudukDetail({
       document.querySelector('main')?.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Blur tipis setiap morph berubah arah (besar <-> susut): pasang ulang
+  // kelas animasi (remove -> reflow -> add) agar keyframes berjalan lagi.
+  useEffect(() => {
+    const el = morphContentRef.current;
+    if (!el) return;
+    el.classList.remove('morph-blur');
+    void el.offsetWidth;
+    el.classList.add('morph-blur');
+  }, [isScrolled]);
 
   const pickFirst = (...keys: string[]): string => {
     if (!data) return '';
@@ -787,23 +798,23 @@ export default function AdminPendudukDetail({
       {/* UNIFIED STICKY CONTAINER — Kartu Profil + Tab Navigasi */}
       <div ref={stickyHeaderRef} className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-sm transition-all duration-300 ease-out mb-6 overflow-hidden">
         {/* AREA HEADER PROFIL (MORPHING CONTENT) */}
-        <div className={`transition-none md:transition-all md:duration-300 md:ease-out px-6 ${isScrolled ? 'py-2.5 bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-700/50' : 'py-6'}`}>
+        <div ref={morphContentRef} className={`transition-all duration-300 ease-out px-6 ${isScrolled ? 'py-2.5 bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-700/50' : 'py-6'}`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
         {/* Sisi Kiri: Back + Avatar + Nama + Badges */}
         <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <button 
             onClick={onBack}
-            className={`flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-none md:transition-all md:duration-300 md:ease-out text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-700 ${isScrolled ? 'w-10 h-10' : 'w-11 h-11'}`}
+            className={`flex shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-all duration-300 ease-out text-gray-600 dark:text-slate-400 border border-gray-100 dark:border-slate-700 ${isScrolled ? 'w-10 h-10' : 'w-11 h-11'}`}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
           <div className="relative shrink-0">
             {data?.photo ? (
-              <img src={data.photo} alt={data.name} className={`border-2 border-white shadow-md object-cover transition-none md:transition-all md:duration-300 md:ease-out ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`} />
+              <img src={data.photo} alt={data.name} className={`border-2 border-white shadow-md object-cover transition-all duration-300 ease-out ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`} />
             ) : (
-              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-none md:transition-all md:duration-300 md:ease-out ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'} ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
-                <User className={`transition-none md:transition-all md:duration-300 md:ease-out ${isScrolled ? 'w-5 h-5' : 'w-8 h-8'}`} fill="currentColor" />
+              <div className={`border-2 border-white shadow-md flex items-center justify-center text-white transition-all duration-300 ease-out ${isFemale ? 'bg-gradient-to-br from-pink-400 to-pink-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'} ${isScrolled ? 'w-10 h-10 rounded-lg' : 'w-16 h-16 rounded-2xl'}`}>
+                <User className={`transition-all duration-300 ease-out ${isScrolled ? 'w-5 h-5' : 'w-8 h-8'}`} fill="currentColor" />
               </div>
             )}
           </div>
@@ -824,7 +835,7 @@ export default function AdminPendudukDetail({
                 {data?.name || "Nama Penduduk"}
               </h2>
             )}
-            <div className={`flex flex-wrap items-center gap-1.5 overflow-hidden transition-all duration-300 ease-out ${isScrolled ? 'hidden md:flex max-h-0 opacity-0 mt-0 pointer-events-none' : 'max-h-40 opacity-100 mt-1.5'}`}>
+            <div className={`flex flex-wrap items-center gap-1.5 overflow-hidden transition-all duration-300 ease-out ${isScrolled ? 'max-h-0 opacity-0 mt-0 pointer-events-none' : 'max-h-40 opacity-100 mt-1.5'}`}>
               {(() => {
                 const keberadaan = normalizeStatusKeberadaan(data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP').toLowerCase();
                 if (keberadaan.includes('meninggal') || keberadaan === 'mati' || keberadaan === 'wafat') {
@@ -913,7 +924,7 @@ export default function AdminPendudukDetail({
                 </span>
               )}
             </div>
-            <div className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ease-out ${isScrolled ? 'hidden md:flex max-h-0 opacity-0 mt-0 pointer-events-none' : 'max-h-10 opacity-100 mt-1.5'}`}>
+            <div className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ease-out ${isScrolled ? 'max-h-0 opacity-0 mt-0 pointer-events-none' : 'max-h-10 opacity-100 mt-1.5'}`}>
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                 NIK: {data?.nik || "-"}
               </span>
@@ -927,34 +938,34 @@ export default function AdminPendudukDetail({
             <>
               <button
                 onClick={handleSaveEdit}
-                className={`rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-none md:transition-all md:duration-300 md:ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+                className={`rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
                 title="Simpan Perubahan"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'hidden md:inline max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Simpan Perubahan</span>
+                <span className={`inline-block overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Simpan Perubahan</span>
               </button>
               <button
                 onClick={cancelEditMode}
-                className={`rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-none md:transition-all md:duration-300 md:ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
+                className={`rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`}
                 title="Batal"
               >
                 <X className="w-4 h-4" />
-                <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'hidden md:inline max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Batal</span>
+                <span className={`inline-block overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Batal</span>
               </button>
             </>
           ) : (
             <>
           {!isPending ? (
             <>
-              <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-none md:transition-all md:duration-300 md:ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+              <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
                 <Edit2 className="w-4 h-4" />
-                <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'hidden md:inline max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Edit Data</span>
+                <span className={`inline-block overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Edit Data</span>
               </button>
               <div className="relative">
                 <button
                   ref={moreBtnRef}
                   onClick={openMoreMenu}
-                  className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-none md:transition-all md:duration-300 md:ease-out flex items-center justify-center text-xs font-bold ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}
+                  className={`rounded-xl bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300 ease-out flex items-center justify-center text-xs font-bold ${isScrolled ? 'w-9 h-9' : 'w-10 h-10'}`}
                   title="Aksi lainnya"
                 >
                   <MoreHorizontal className="w-4 h-4" />
@@ -962,9 +973,9 @@ export default function AdminPendudukDetail({
               </div>
             </>
           ) : (
-            <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-none md:transition-all md:duration-300 md:ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
+            <button onClick={startEditMode} className={`rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold hover:bg-gray-800 dark:hover:bg-gray-100 transition-all duration-300 ease-out flex items-center text-xs shadow-sm cursor-pointer ${isScrolled ? 'px-2.5 py-2' : 'px-3.5 py-2'}`} title="Edit Data">
               <Edit2 className="w-4 h-4" />
-              <span className={`overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'hidden md:inline max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Edit Data</span>
+              <span className={`inline-block overflow-hidden whitespace-nowrap transition-all duration-300 ease-out ${isScrolled ? 'max-w-0 opacity-0 ml-0' : 'max-w-[140px] opacity-100 ml-2'}`}>Edit Data</span>
             </button>
           )}
             </>
