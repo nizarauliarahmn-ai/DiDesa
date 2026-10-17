@@ -1493,7 +1493,7 @@ export default function AdminPendudukDetail({
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className={`font-bold text-[15px] truncate ${isCurrent ? 'text-emerald-800 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors'}`}>
+                        <p className={`font-bold text-[15px] sm:truncate ${isCurrent ? 'text-emerald-800 dark:text-emerald-400' : 'text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors'}`}>
                           {member.name}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-slate-400 mt-0.5 font-medium truncate flex items-center gap-1.5">
@@ -1503,20 +1503,25 @@ export default function AdminPendudukDetail({
                           <span className="opacity-50">•</span>
                           <span className="font-mono">{member.nik}</span>
                         </p>
+                        {isCurrent && (
+                          <span className="sm:hidden inline-block mt-1.5 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold rounded-md uppercase tracking-wider border border-emerald-200 dark:border-emerald-800">
+                            Sedang Dilihat
+                          </span>
+                        )}
                       </div>
 
                       {isCurrent ? (
-                        <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-emerald-200 dark:border-emerald-800">
+                        <span className="hidden sm:inline-block px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-emerald-200 dark:border-emerald-800">
                           Sedang Dilihat
                         </span>
                       ) : isKepalaKeluarga ? (
-                        <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-blue-100 dark:border-blue-800 group-hover:hidden">
+                        <span className="hidden sm:inline-block px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded-md uppercase tracking-wider shrink-0 border border-blue-100 dark:border-blue-800 group-hover:hidden">
                           Kepala Keluarga
                         </span>
                       ) : null}
 
                       {!isCurrent && (
-                        <span className={`${isKepalaKeluarga ? 'hidden group-hover:inline-block' : 'inline-block opacity-0 group-hover:opacity-100'} text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 transition-all duration-200 translate-x-2 group-hover:translate-x-0`}>
+                        <span className={`${isKepalaKeluarga ? 'hidden group-hover:inline-block' : 'hidden sm:inline-block opacity-0 group-hover:opacity-100'} text-xs font-bold text-emerald-700 dark:text-emerald-400 shrink-0 transition-all duration-200 translate-x-2 group-hover:translate-x-0`}>
                           Lihat Profil →
                         </span>
                       )}
