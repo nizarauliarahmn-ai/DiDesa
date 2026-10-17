@@ -1085,6 +1085,53 @@ export default function AdminPendudukDetail({
                     </div>
                   )}
 
+                  {/* Status Perkawinan */}
+                  {isEditMode ? (
+                    <div className="py-3">
+                      <EditableField editing value={editFormData.maritalStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, maritalStatus: v }))} options={MARITAL_OPTIONS} label="Status Perkawinan" />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
+                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Perkawinan</p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-right">{data?.maritalStatus || "-"}</p>
+                    </div>
+                  )}
+
+                  {/* Status Kependudukan */}
+                  {isEditMode ? (
+                    <div className="py-3 flex flex-col gap-1">
+                      <label className="text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">Status Kependudukan</label>
+                      <select
+                        name="status_keberadaan"
+                        value={STATUS_KEBERADAAN_OPTIONS.some(o => o.value === editFormData.statusKeberadaan)
+                          ? editFormData.statusKeberadaan
+                          : 'TETAP'}
+                        onChange={(e) => setEditFormData(prev => ({ ...prev, statusKeberadaan: e.target.value, status: e.target.value }))}
+                        className="w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
+                      >
+                        <option value="">-- Pilih Status --</option>
+                        {STATUS_KEBERADAAN_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
+                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Status Kependudukan</p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-right">
+                        {(() => {
+                          const k = normalizeStatusKeberadaan(data?.status_keberadaan || data?.status_penduduk || data?.status || 'TETAP');
+                          const lower = k.toLowerCase();
+                          if (lower.includes('pending')) return 'Pending';
+                          if (lower.includes('archived')) return 'Archived';
+                          if (lower.includes('deleted')) return 'Deleted';
+                          const map: Record<string, string> = { TETAP: 'Tetap', SEMENTARA: 'Sementara', PINDAH: 'Pindah', MENINGGAL: 'Meninggal', GANDA: 'Ganda' };
+                          return map[k] || k;
+                        })()}
+                      </p>
+                    </div>
+                  )}
+
                   {/* Gelar */}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
                     <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Gelar</p>
@@ -1179,25 +1226,6 @@ export default function AdminPendudukDetail({
                     <EditableField editing value={editFormData.name || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, name: v }))} inputClass="uppercase" label="Nama Lengkap" />
                     <EditableField editing value={editFormData.nik || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, nik: v }))} label="NIK" />
                     <EditableField editing value={editFormData.noKk || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noKk: v }))} label="No. KK" />
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">Status Keberadaan</label>
-                        <select
-                          name="status_keberadaan"
-                          value={STATUS_KEBERADAAN_OPTIONS.some(o => o.value === editFormData.statusKeberadaan)
-                            ? editFormData.statusKeberadaan
-                            : 'TETAP'}
-                          onChange={(e) => setEditFormData(prev => ({ ...prev, statusKeberadaan: e.target.value, status: e.target.value }))}
-                          className="w-full h-8 px-2 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-xs font-semibold text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer"
-                        >
-                          <option value="">-- Pilih Status --</option>
-                          {STATUS_KEBERADAAN_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <EditableField editing value={editFormData.maritalStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, maritalStatus: v }))} options={MARITAL_OPTIONS} label="Status Perkawinan" />
-                    </div>
                     <EditableField editing value={editFormData.familyRelation || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, familyRelation: v }))} options={HUBUNGAN_OPTIONS} label="Hubungan Keluarga" />
                   </div>
                 )}
