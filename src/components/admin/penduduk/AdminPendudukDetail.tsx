@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Home, Heart, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Heart, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
 import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
@@ -1148,12 +1148,9 @@ export default function AdminPendudukDetail({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                  <div className="md:col-span-2 bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <Home className="w-4 h-4" />
-                    </div>
+                  <div className="md:col-span-2 bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
                     <div>
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Alamat Jalan / Dusun</p>
+                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Alamat Lengkap</p>
                       {isEditMode ? (
                         <div className="mt-1.5 space-y-1.5">
                           <EditableField editing value={editFormData.address || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, address: v }))} label="Alamat Jalan" />
@@ -1168,28 +1165,24 @@ export default function AdminPendudukDetail({
                     </div>
                   </div>
 
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80 flex flex-col justify-between gap-2">
-                    <div>
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Wilayah RT / RW & Desa</p>
-                      {isEditMode ? (
-                        <div className="mt-1.5 grid grid-cols-2 gap-1.5">
-                          <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} label="RT" />
-                          <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} label="RW" />
-                          <div className="col-span-2">
-                            <EditableField editing value={editFormData.desa || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, desa: v }))} label="Desa / Kelurahan" />
-                          </div>
+                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                    {isEditMode ? (
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} label="RT" />
+                        <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} label="RW" />
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">RT</p>
+                          <p className="font-mono font-bold text-gray-900 dark:text-white text-lg leading-tight mt-0.5">{data?.rt || '01'}</p>
                         </div>
-                      ) : (
-                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                          <span className="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
-                            RT {data?.rt || '01'} / RW {data?.rw || '01'}
-                          </span>
-                          <span className="font-bold text-xs bg-gray-100 text-gray-800 dark:bg-slate-800 dark:text-slate-200 px-2.5 py-1 rounded-md border border-gray-200 dark:border-slate-700">
-                            {data?.desa || 'Desa Sukamaju'}
-                          </span>
+                        <div>
+                          <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">RW</p>
+                          <p className="font-mono font-bold text-gray-900 dark:text-white text-lg leading-tight mt-0.5">{data?.rw || '01'}</p>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
