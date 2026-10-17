@@ -1310,38 +1310,46 @@ export default function AdminPendudukDetail({
                     <EditableField editing value={editFormData.familyRelation || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, familyRelation: v }))} options={HUBUNGAN_OPTIONS} label="Hubungan Keluarga" />
                   </div>
                 )}
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">No. WhatsApp</span>
-                  {isEditMode ? (
-                    <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} className="w-48 text-right" label="No. WhatsApp" />
-                  ) : (
+                {isEditMode ? (
+                  <div className="py-1.5">
+                    <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} label="No. WhatsApp" />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">No. WhatsApp</span>
                     <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">{renderValue(pickFirst('noWhatsapp', 'no_whatsapp', 'nomor_wa', 'telepon', 'hp'))}</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Status Domisili</span>
-                  {isEditMode ? (
-                    <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} className="w-48 text-right" label="Status Domisili" />
-                  ) : (
+                  </div>
+                )}
+                {isEditMode ? (
+                  <div className="py-1.5">
+                    <EditableField editing value={editFormData.domicileStatus || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, domicileStatus: v }))} options={DOMICILE_OPTIONS} label="Status Domisili" />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Status Domisili</span>
                     <span className="text-xs font-bold text-gray-900 dark:text-white">{renderValue(pickFirst('domicileStatus', 'domicile_status', 'status_domisili', 'domisili'))}</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Pendidikan</span>
-                  {isEditMode ? (
-                    <EditableField editing value={editFormData.education || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, education: v }))} options={PENDIDIKAN_OPTIONS} className="w-48 text-right" label="Pendidikan" />
-                  ) : (
+                  </div>
+                )}
+                {isEditMode ? (
+                  <div className="py-1.5">
+                    <EditableField editing value={editFormData.education || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, education: v }))} options={PENDIDIKAN_OPTIONS} label="Pendidikan" />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Pendidikan</span>
                     <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('education', 'pendidikan', 'pendidikan_terakhir', 'pendidikanTerakhir'))}</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
-                  <span className="text-xs text-gray-500 dark:text-slate-400">Pekerjaan</span>
-                  {isEditMode ? (
-                    <EditableField editing value={editFormData.job || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, job: v }))} options={PEKERJAAN_OPTIONS} className="w-48 text-right" label="Pekerjaan" />
-                  ) : (
+                  </div>
+                )}
+                {isEditMode ? (
+                  <div className="py-1.5">
+                    <EditableField editing value={editFormData.job || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, job: v }))} options={PEKERJAAN_OPTIONS} label="Pekerjaan" />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">Pekerjaan</span>
                     <span className="text-xs font-bold text-gray-900 dark:text-white text-right">{renderValue(pickFirst('job', 'pekerjaan', 'jenis_pekerjaan', 'pekerjaan_nama'))}</span>
-                  )}
-                </div>
+                  </div>
+                )}
                 <div className="p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60 text-xs">
                   <p className="text-gray-500 dark:text-slate-400 mb-1.5">Orang Tua Kandung</p>
                   {isEditMode ? (
