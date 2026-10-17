@@ -1,6 +1,5 @@
 import NumberCounter from '../common/NumberCounter';
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
 import { Download, UserPlus, Search, Filter, FilterX, Eye, Edit2, ChevronLeft, ChevronRight, Users, Heart, Zap, Trash2, Clock, AlertCircle, MoreHorizontal, MoreVertical, X, SlidersHorizontal } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import AdminPendudukDetail from './penduduk/AdminPendudukDetail';
@@ -78,6 +77,18 @@ export default function AdminPenduduk({
   const searchRowRef = useRef<HTMLDivElement>(null);
   const [stickyOffsets, setStickyOffsets] = useState({ search: 180, thead: 260, wide: true });
   const [headerCompact, setHeaderCompact] = useState(false);
+  const tableWrapRef = useRef<HTMLDivElement>(null);
+
+  // Transisi blur tipis saat berpindah halaman tabel — tanpa animasi baris
+  // (baris tukar instan) agar pagination tidak pernah berpindah tempat.
+  useEffect(() => {
+    const el = tableWrapRef.current;
+    if (!el) return;
+    el.classList.remove('page-blur');
+    void el.offsetWidth;
+    el.classList.add('page-blur');
+  }, [currentPage]);
+
   useEffect(() => {
     const update = () => {
       const headerH = pageHeaderRef.current?.offsetHeight || 120;
@@ -961,7 +972,7 @@ export default function AdminPenduduk({
 
       {/* Data Table */}
       <div className="mt-4 bg-white dark:bg-slate-900 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden xl:overflow-visible">
-        <div className="overflow-x-auto xl:overflow-x-visible">
+          <div ref={tableWrapRef} className="overflow-x-auto xl:overflow-x-visible">
           <table className="w-full text-left border-collapse" style={{ '--thead-top': `${stickyOffsets.thead}px` } as React.CSSProperties}>
             <thead className="border-b border-gray-100 dark:border-slate-800">
               <tr>
@@ -1010,9 +1021,7 @@ export default function AdminPenduduk({
                     <td className="px-6 py-4"><div className="flex gap-2 justify-center"><div className="h-8 w-8 bg-gray-200 dark:bg-slate-700 rounded-lg"></div><div className="h-8 w-8 bg-gray-200 dark:bg-slate-700 rounded-lg"></div><div className="h-8 w-8 bg-gray-200 dark:bg-slate-700 rounded-lg"></div></div></td>
                   </tr>
                 ))
-              ) : (
-                <AnimatePresence mode="popLayout">
-                {paginatedData.length > 0 ? (
+              ) : paginatedData.length > 0 ? (
                   paginatedData.map((item) => (
                     <TableRow 
                       key={item.nik}
@@ -1042,8 +1051,6 @@ export default function AdminPenduduk({
                     Tidak ada data penduduk yang sesuai dengan pencarian atau filter.
                   </td>
                 </tr>
-              )}
-                </AnimatePresence>
               )}
             </tbody>
           </table>
@@ -1291,7 +1298,7 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
   }, [menuPos]);
 
   return (
-    <motion.tr data-nik={nik} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9, height: 0, transition: { duration: 0.3 } }} className="hover:bg-gray-50/80 transition-colors group cursor-pointer">
+    <tr data-nik={nik} className="hover:bg-gray-50/80 transition-colors group cursor-pointer">
       <td className="px-6 py-3.5 whitespace-nowrap">
         <div className="flex flex-col">
           <span className="text-sm font-semibold text-gray-900 dark:text-white font-mono group-hover:text-emerald-700 transition-colors">{nik}</span>
@@ -1402,6 +1409,6 @@ const TableRow = React.memo(({ item, nik, noKk, kepalaKeluarga, initials, name, 
           document.body
         )}
       </td>
-    </motion.tr>
+    </tr>
   );
 });

@@ -439,3 +439,13 @@ html {
   -webkit-mask-image: none;
   mask-image: none;
 }
+
+/* Tabel penduduk — blur tipis saat berpindah halaman (tanpa geseran layout) */
+@keyframes page-blur {
+  0% { filter: blur(0px); }
+  35% { filter: blur(2.5px); }
+  100% { filter: blur(0px); }
+}
+.page-blur {
+  animation: page-blur 280ms ease-out;
+}
