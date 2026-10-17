@@ -2118,7 +2118,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
       <div className={`sticky top-16 z-40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl transition-all duration-300 ease-out ${compact ? 'pb-2' : 'pb-4'} -mx-4 -mt-4 px-4 pt-4 md:-mx-6 md:-mt-6 md:px-6 md:pt-6 lg:-mx-8 lg:-mt-8 lg:px-8 lg:pt-8 border-b border-slate-200/50 dark:border-slate-700/50 flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6`}>
         <div className="transition-all duration-300 ease-out">
           <h3 className={`font-bold text-gray-900 dark:text-white tracking-tight transition-all duration-300 ease-out ${compact ? 'text-xl' : 'text-3xl'}`}>Program Bantuan Aktif</h3>
-          <p className={`text-gray-500 dark:text-slate-400 mt-1 transition-all duration-300 ease-out ${compact ? 'text-xs' : 'text-base'}`}>Kelola dan validasi penerima bantuan sosial Desa Sukamaju secara langsung.</p>
+          <p className={`text-gray-500 dark:text-slate-400 mt-1 transition-all duration-300 ease-out ${compact ? 'text-xs' : 'text-base'}`}>Kelola dan validasi penerima bantuan sosial secara langsung.</p>
         </div>
         <button 
           onClick={() => {
