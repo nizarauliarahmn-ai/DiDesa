@@ -239,6 +239,16 @@ export default function AdminPendudukDetail({
   const stickyHeaderRef = useRef<HTMLDivElement | null>(null);
   const biodataTitleRef = useRef<HTMLHeadingElement | null>(null);
   const morphContentRef = useRef<HTMLDivElement | null>(null);
+  const tabRowRef = useRef<HTMLDivElement | null>(null);
+
+  // Gradasi tepi kanan baris tab (penanda bisa digeser): sembunyikan saat
+  // sudah sampai ujung kanan, tampilkan lagi saat ada konten terpotong.
+  const updateTabFade = () => {
+    const el = tabRowRef.current;
+    if (!el) return;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    el.classList.toggle('tab-fade-off', atEnd);
+  };
   const [morePos, setMorePos] = useState<{ top: number; left: number } | null>(null);
   const openMoreMenu = () => {
     const r = moreBtnRef.current?.getBoundingClientRect();
@@ -468,6 +478,12 @@ export default function AdminPendudukDetail({
     void el.offsetWidth;
     el.classList.add('morph-blur');
   }, [isScrolled]);
+
+  // Gradasi tepi tab: cek sekali saat komponen terpasang (jika muat semua, fade off)
+  useEffect(() => {
+    updateTabFade();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const pickFirst = (...keys: string[]): string => {
     if (!data) return '';
@@ -985,7 +1001,7 @@ export default function AdminPendudukDetail({
         </div>
 
         {/* AREA TAB NAVIGASI (SELALU MENEMPEL DI DASAR KONTAINER STICKY) */}
-        <div className="px-6 py-2 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700/50 flex items-center gap-2 overflow-x-auto">
+        <div ref={tabRowRef} onScroll={updateTabFade} className="tab-scroll-fade px-6 py-2 bg-slate-50/80 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-700/50 flex items-center gap-2 overflow-x-auto">
           <div className="flex gap-1.5 min-w-max">
           {DETAIL_TABS.map((tab) => {
             const Icon = tab.icon;

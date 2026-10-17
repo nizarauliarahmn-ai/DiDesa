@@ -428,3 +428,14 @@ html {
 .morph-blur {
   animation: morph-blur 320ms ease-out;
 }
+
+/* Baris tab Detail Penduduk — gradasi tipis di tepi kanan sebagai penanda
+   baris bisa digeser ke samping; disembunyikan otomatis saat di ujung kanan */
+.tab-scroll-fade {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+}
+.tab-scroll-fade.tab-fade-off {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
