@@ -8,6 +8,7 @@ import { getLetterClassifications } from '../../../utils/letterClassifications';
 import ConfirmModal from '../../common/ConfirmModal';
 import { supabase } from '../../../utils/supabase';
 import { normalizeStatusKeberadaan } from '../../../utils/statusKeberadaan';
+import { getRtRwMapping, getRwForRt } from '../../../utils/rtRwMapping';
 import { loadAparaturLists, findPositionsByNik, PositionEntry } from '../../../utils/aparaturPositions';
 
 interface AdminPendudukDetailProps {
@@ -78,6 +79,12 @@ const PENDIDIKAN_OPTIONS = [
   'Sarjana (S1)',
   'Pascasarjana (S2/S3)'
 ];
+
+// Rapikan nilai RT/RW agar konsisten "01", "02", … (angka polos di-normalisasi)
+function normalizeRtRw(v: string): string {
+  const t = (v || '').trim();
+  return /^\d+$/.test(t) ? String(parseInt(t, 10)).padStart(2, '0') : t;
+}
 
 function EditableField({
   editing,
@@ -274,6 +281,22 @@ export default function AdminPendudukDetail({
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
+
+  // Opsi dropdown RT/RW dari pemetaan desa (Pengaturan).
+  // Jika desa belum mengisi pemetaan -> array kosong -> EditableField
+  // otomatis fallback ke input teks seperti semula.
+  const rtRwOptions = useMemo(() => {
+    const empty = { rt: [] as string[], rw: [] as string[] };
+    if (!isEditMode) return empty;
+    const entries = getRtRwMapping();
+    if (!entries.length) return empty;
+    const pad = (v: string) => normalizeRtRw(v);
+    const rt = Array.from(new Set(entries.map((e) => pad(e.rt)).filter(Boolean)))
+      .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    const rw = Array.from(new Set(entries.map((e) => pad(e.rw)).filter(Boolean)))
+      .sort((a, b) => parseInt(a, 10) - parseInt(b, 10));
+    return { rt, rw };
+  }, [isEditMode]);
   const [fatherManual, setFatherManual] = useState(false);
   const [motherManual, setMotherManual] = useState(false);
 
@@ -1225,14 +1248,12 @@ export default function AdminPendudukDetail({
                   {isEditMode ? (
                     <div className="py-3 space-y-1.5">
                       <EditableField editing value={editFormData.address || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, address: v }))} label="Alamat Jalan" />
-                      <EditableField editing value={editFormData.dusun || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, dusun: v }))} label="Dusun" />
                     </div>
                   ) : (
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-3 py-3">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider sm:shrink-0">Alamat Lengkap</p>
                       <p className="font-bold text-gray-900 dark:text-white text-sm leading-snug sm:text-right">
                         {data?.address || "Belum ada alamat jalan"}
-                        {data?.dusun && <span className="text-emerald-700 dark:text-emerald-400 font-bold">, {data.dusun}</span>}
                       </p>
                     </div>
                   )}
@@ -1240,8 +1261,20 @@ export default function AdminPendudukDetail({
                   {/* RT / RW */}
                   {isEditMode ? (
                     <div className="py-3 grid grid-cols-2 gap-1.5">
-                      <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} label="RT" />
-                      <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} label="RW" />
+                      <EditableField
+                        editing
+                        value={normalizeRtRw(editFormData.rt || '')}
+                        onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v, rw: normalizeRtRw(getRwForRt(v)) || prev.rw }))}
+                        options={rtRwOptions.rt}
+                        label="RT"
+                      />
+                      <EditableField
+                        editing
+                        value={normalizeRtRw(editFormData.rw || '')}
+                        onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))}
+                        options={rtRwOptions.rw}
+                        label="RW"
+                      />
                     </div>
                   ) : (
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
