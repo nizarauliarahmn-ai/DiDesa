@@ -1050,76 +1050,66 @@ export default function AdminPendudukDetail({
 
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {/* Tempat, Tgl Lahir & Usia */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
-                    <div>
+                  {isEditMode ? (
+                    <div className="py-3 space-y-1.5">
+                      <EditableField editing value={editFormData.birthPlace || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthPlace: v }))} label="Tempat Lahir" />
+                      <EditableField editing value={editFormData.birthDate || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthDate: v }))} type="date" label="Tanggal Lahir" />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Tempat, Tgl Lahir</p>
-                      {isEditMode ? (
-                        <div className="mt-1 space-y-1.5">
-                          <EditableField editing value={editFormData.birthPlace || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthPlace: v }))} label="Tempat Lahir" />
-                          <EditableField editing value={editFormData.birthDate || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, birthDate: v }))} type="date" label="Tanggal Lahir" />
-                        </div>
-                      ) : (
-                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                        <p className="font-bold text-gray-900 dark:text-white text-sm">
                           {data?.birthPlace || "Belum diisi"}, {data?.birthDate || "-"}
                         </p>
-                      )}
-                      {data?.age && (
-                        <span className="inline-block mt-1 text-[10px] font-black bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                          {data.age} Tahun
-                        </span>
-                      )}
+                        {data?.age && (
+                          <span className="inline-block text-[10px] font-black bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                            {data.age} Tahun
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Jenis Kelamin */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
-                    <div>
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Jenis Kelamin</p>
-                      {isEditMode ? (
-                        <div className="mt-1">
-                          <EditableField editing value={editFormData.gender || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, gender: v }))} options={GENDER_OPTIONS} label="Jenis Kelamin" />
-                        </div>
-                      ) : (
-                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5">
-                          {data?.gender || "-"}
-                        </p>
-                      )}
+                  {isEditMode ? (
+                    <div className="py-3">
+                      <EditableField editing value={editFormData.gender || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, gender: v }))} options={GENDER_OPTIONS} label="Jenis Kelamin" />
                     </div>
-                  </div>
-
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
+                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Jenis Kelamin</p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-right">{data?.gender || "-"}</p>
+                    </div>
+                  )}
 
                   {/* Gelar */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
-                    <div>
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Gelar</p>
-                      <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
-                        {[data?.gelarDepan, data?.gelarBelakang].filter(Boolean).join(', ') || "-"}
-                      </p>
-                    </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
+                    <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Gelar</p>
+                    <p className="font-bold text-gray-900 dark:text-white text-sm sm:text-right">
+                      {[data?.gelarDepan, data?.gelarBelakang].filter(Boolean).join(', ') || "-"}
+                    </p>
                   </div>
 
                   {/* Agama & Golongan Darah */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
-                    <div>
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Agama / Gol. Darah</p>
-                      {isEditMode ? (
-                        <div className="mt-1 space-y-1.5">
-                          <EditableField editing value={editFormData.religion || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, religion: v }))} options={AGAMA_OPTIONS} label="Agama" />
-                          <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} label="Golongan Darah" />
-                        </div>
-                      ) : (
-                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 flex items-center gap-2">
-                          <span>{data?.religion || "-"}</span>
-                          <span className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 px-1.5 py-0.5 rounded font-black border border-rose-200 dark:border-rose-800">
-                            Gol. {renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}
-                          </span>
-                        </p>
-                      )}
+                  {isEditMode ? (
+                    <div className="py-3 space-y-1.5">
+                      <EditableField editing value={editFormData.religion || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, religion: v }))} options={AGAMA_OPTIONS} label="Agama" />
+                      <EditableField editing value={editFormData.bloodType || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, bloodType: v }))} options={GOLDAR_OPTIONS} label="Golongan Darah" />
                     </div>
-                  </div>
-
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
+                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Agama / Gol. Darah</p>
+                      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                        <p className="font-bold text-gray-900 dark:text-white text-sm">{data?.religion || "-"}</p>
+                        <span className="text-xs bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 px-1.5 py-0.5 rounded font-black border border-rose-200 dark:border-rose-800">
+                          Gol. {renderValue(pickFirst('bloodType', 'blood_type', 'golongan_darah', 'goldar'))}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1135,43 +1125,35 @@ export default function AdminPendudukDetail({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                  <div className="md:col-span-2 bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
-                    <div>
-                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Alamat Lengkap</p>
-                      {isEditMode ? (
-                        <div className="mt-1.5 space-y-1.5">
-                          <EditableField editing value={editFormData.address || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, address: v }))} label="Alamat Jalan" />
-                          <EditableField editing value={editFormData.dusun || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, dusun: v }))} label="Dusun" />
-                        </div>
-                      ) : (
-                        <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 leading-snug">
-                          {data?.address || "Belum ada alamat jalan"}
-                          {data?.dusun && <span className="text-emerald-700 dark:text-emerald-400 font-bold">, {data.dusun}</span>}
-                        </p>
-                      )}
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {/* Alamat Lengkap */}
+                  {isEditMode ? (
+                    <div className="py-3 space-y-1.5">
+                      <EditableField editing value={editFormData.address || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, address: v }))} label="Alamat Jalan" />
+                      <EditableField editing value={editFormData.dusun || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, dusun: v }))} label="Dusun" />
                     </div>
-                  </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-3 py-3">
+                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider sm:shrink-0">Alamat Lengkap</p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm leading-snug sm:text-right">
+                        {data?.address || "Belum ada alamat jalan"}
+                        {data?.dusun && <span className="text-emerald-700 dark:text-emerald-400 font-bold">, {data.dusun}</span>}
+                      </p>
+                    </div>
+                  )}
 
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/80">
-                    {isEditMode ? (
-                      <div className="grid grid-cols-2 gap-1.5">
-                        <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} label="RT" />
-                        <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} label="RW" />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">RT</p>
-                          <p className="font-mono font-bold text-gray-900 dark:text-white text-lg leading-tight mt-0.5">{data?.rt || '01'}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">RW</p>
-                          <p className="font-mono font-bold text-gray-900 dark:text-white text-lg leading-tight mt-0.5">{data?.rw || '01'}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  {/* RT / RW */}
+                  {isEditMode ? (
+                    <div className="py-3 grid grid-cols-2 gap-1.5">
+                      <EditableField editing value={editFormData.rt || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rt: v }))} label="RT" />
+                      <EditableField editing value={editFormData.rw || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, rw: v }))} label="RW" />
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-3 py-3">
+                      <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">RT / RW</p>
+                      <p className="font-mono font-bold text-gray-900 dark:text-white text-sm sm:text-right">RT {data?.rt || '01'} / RW {data?.rw || '01'}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </>
