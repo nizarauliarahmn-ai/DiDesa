@@ -32,7 +32,7 @@ const AID_PROGRAM_NOMINAL: Record<string, string> = {
 const GENDER_OPTIONS = ['Laki-laki', 'Perempuan'];
 const AGAMA_OPTIONS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
 const MARITAL_OPTIONS = ['Belum Kawin', 'Kawin', 'Cerai Hidup', 'Cerai Mati'];
-const DOMICILE_OPTIONS = ['Sesuai KTP', 'Tetap', 'Luar', 'Pindah', 'Tidak Sesuai'];
+  const DOMICILE_OPTIONS = ['Tetap', 'Sementara'];
 const STATUS_KEBERADAAN_OPTIONS = [
   { value: 'TETAP', label: 'TETAP' },
   { value: 'SEMENTARA', label: 'SEMENTARA' },
@@ -84,6 +84,15 @@ const PENDIDIKAN_OPTIONS = [
 function normalizeRtRw(v: string): string {
   const t = (v || '').trim();
   return /^\d+$/.test(t) ? String(parseInt(t, 10)).padStart(2, '0') : t;
+}
+
+// Validasi nomor WhatsApp Indonesia: 08xx/8xx dinormalkan ke 628xx,
+// sah jika hasilnya 628… dengan total 11–15 digit.
+function isValidWaNumber(v: string): boolean {
+  let d = String(v || '').replace(/\D/g, '');
+  if (d.startsWith('0')) d = '62' + d.slice(1);
+  else if (d.startsWith('8')) d = '62' + d;
+  return /^628[0-9]{8,12}$/.test(d);
 }
 
 function EditableField({
@@ -336,6 +345,11 @@ export default function AdminPendudukDetail({
   const handleSaveEdit = async () => {
     if (!data?.nik) return;
     const form = editFormData || {};
+    const waRaw = String(form.noWhatsapp ?? data?.noWhatsapp ?? '').trim();
+    if (waRaw && !isValidWaNumber(waRaw)) {
+      showToast('Nomor WhatsApp tidak valid. Contoh: 081234567890', 'error');
+      return;
+    }
     const birthYear = new Date(form.birthDate || data?.birthDate || '').getFullYear();
     const currentYear = new Date().getFullYear();
     const age = isNaN(birthYear) ? (data?.age || 30) : Math.max(0, currentYear - birthYear);
@@ -1312,7 +1326,10 @@ export default function AdminPendudukDetail({
                 )}
                 {isEditMode ? (
                   <div className="py-1.5">
-                    <EditableField editing value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} label="No. WhatsApp" />
+                    <EditableField editing type="tel" value={editFormData.noWhatsapp || ''} onChange={(v) => setEditFormData(prev => ({ ...prev, noWhatsapp: v }))} label="No. WhatsApp" />
+                    {(editFormData.noWhatsapp || '').trim() !== '' && !isValidWaNumber(editFormData.noWhatsapp) && (
+                      <p className="text-[10px] text-red-500 mt-1 font-semibold">Format tidak valid — contoh: 081234567890</p>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/60">
