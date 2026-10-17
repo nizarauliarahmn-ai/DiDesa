@@ -6,7 +6,6 @@ import {
   ShoppingBasket, 
   AlertTriangle,
   Save,
-  Download,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
@@ -109,7 +108,6 @@ export default function AdminBantuan({
   
   // Modal states
   const [showModal, setShowModal] = useState(false);
-  const [showBaModal, setShowBaModal] = useState(false);
   const [showTambahPenerima, setShowTambahPenerima] = useState(false);
 
   // Usulan dari Detail Penduduk — buka modal Tambah Penerima dengan NIK terisi
@@ -326,7 +324,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
     address: '',
     rt: '001',
     rw: '001',
-    desa: 'Sukamaju'
+    desa: villageName
   });
 
   // Custom Criteria States
@@ -1247,7 +1245,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
           address: manualResidentData.address.trim() || 'Jl. Utama Desa',
           rt: manualResidentData.rt.trim() || '001',
           rw: manualResidentData.rw.trim() || '001',
-          desa: manualResidentData.desa.trim() || 'Sukamaju',
+          desa: manualResidentData.desa.trim() || villageName,
           active_aids: [aidTag],
           is_deleted: 0
         };
@@ -1275,7 +1273,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
 
         // Reset
         setIsManualResident(false);
-        setManualResidentData({ name: '', nik: '', address: '', rt: '001', rw: '001', desa: 'Sukamaju' });
+        setManualResidentData({ name: '', nik: '', address: '', rt: '001', rw: '001', desa: villageName });
         setSelectedResidentNik("");
         setSearchResidentQuery("");
         setFormProgram("");
@@ -1634,7 +1632,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                         <p className="text-[10px] text-gray-400 font-extrabold uppercase tracking-wider">Alamat</p>
                         <p className="text-xs text-gray-600 dark:text-slate-400 font-semibold leading-relaxed">
                           {selectedResidentDetail 
-                            ? `RT ${selectedResidentDetail.rt || "-"} / RW ${selectedResidentDetail.rw || "-"}, Desa ${selectedResidentDetail.desa || "Sukamaju"}, ${selectedResidentDetail.address || ""}`
+                            ? `RT ${selectedResidentDetail.rt || "-"} / RW ${selectedResidentDetail.rw || "-"}, Desa ${selectedResidentDetail.desa || villageName || "-"}, ${selectedResidentDetail.address || ""}`
                             : "Pilih warga terlebih dahulu..."}
                         </p>
                       </div>
@@ -2896,7 +2894,7 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">ALAMAT RT / RW</label>
                       <p className="text-sm font-semibold text-gray-700 dark:text-slate-300">
-                        RT {selectedResidentDetail.rt || "-"} / RW {selectedResidentDetail.rw || "-"}, {selectedResidentDetail.desa || "Sukamaju"}, {selectedResidentDetail.address || ""}
+                        RT {selectedResidentDetail.rt || "-"} / RW {selectedResidentDetail.rw || "-"}, {selectedResidentDetail.desa || villageName || "-"}, {selectedResidentDetail.address || ""}
                       </p>
                     </div>
                     <div>
@@ -2924,115 +2922,6 @@ const MONTHLY_PROGRAMS = ['BLT Dana Desa', 'Bantuan Rastrada'];
               >
                 {isSaving ? "Menyimpan..." : "Simpan Penerima"}
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Berita Acara Musdes */}
-      {showBaModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto print:p-0 print:bg-white print:static">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800 my-8 animate-in fade-in zoom-in-95 duration-200 print:shadow-none print:border-none print:w-full print:max-w-none print:rounded-none">
-            <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-800/50 print:hidden">
-              <div className="flex items-center gap-2">
-                <FileText className="w-6 h-6 text-indigo-600" />
-                <h3 className="font-bold text-xl text-gray-900 dark:text-white">Dokumen Berita Acara Musdes</h3>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => window.print()}
-                  className="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-95"
-                >
-                  <Download className="w-4 h-4" /> Cetak Dokumen (PDF)
-                </button>
-                <button 
-                  onClick={() => setShowBaModal(false)}
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-slate-800 rounded-full text-gray-500 dark:text-slate-400 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="printable-area p-8 md:p-12 space-y-8 bg-white dark:bg-slate-900 text-gray-900 dark:text-slate-100 font-serif leading-relaxed text-sm print:p-0 print:text-black">
-              {/* KOP Desa Header */}
-              <div className="text-center border-b-4 border-double border-gray-900 dark:border-white pb-6 space-y-1">
-                <h2 className="text-xl font-bold uppercase tracking-wider">PEMERINTAH KABUPATEN BOGOR</h2>
-                <h1 className="text-2xl font-black uppercase tracking-wide">KECAMATAN CIBINONG — DESA SUKAMAJU</h1>
-                <p className="text-xs font-sans text-gray-600 dark:text-slate-400 italic">Jl. Raya Sukamaju No. 01, Kode Pos 16910 • Website: sukamaju.desa.id</p>
-              </div>
-
-              {/* Document Title */}
-              <div className="text-center space-y-1">
-                <h3 className="text-lg font-bold uppercase underline tracking-wide">BERITA ACARA MUSYAWARAH DESA</h3>
-                <p className="text-xs font-sans font-bold text-gray-700 dark:text-slate-300">
-                  PENETAPAN KELUARGA PENERIMA MANFAAT (KPM) PROGRAM {selectedProgram.toUpperCase()} TAHUN 2026
-                </p>
-                <p className="text-xs font-sans text-gray-500">Nomor: 140 / BA-MUSDES / {new Date().getFullYear()}</p>
-              </div>
-
-              {/* Preamble */}
-              <div className="space-y-3 text-justify font-sans text-xs md:text-sm">
-                <p>
-                  Pada hari ini <strong>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</strong>, bertempat di Balai Desa Sukamaju, telah diselenggarakan Musyawarah Desa (Musdes) penetapan usulan calon Keluarga Penerima Manfaat (KPM) program bantuan sosial <strong>{selectedProgram}</strong>.
-                </p>
-                <p>
-                  Berdasarkan verifikasi kriteria kelayakan dan ketersediaan anggaran desa, disepakati bahwa nama-nama warga masyarakat di bawah ini dinyatakan <strong>SAH dan LAYAK</strong> sebagai penerima bantuan:
-                </p>
-              </div>
-
-              {/* Recipients Table */}
-              <div className="overflow-x-auto font-sans">
-                <table className="w-full border-collapse border border-gray-400 text-xs">
-                  <thead>
-                    <tr className="bg-gray-100 dark:bg-slate-800 text-center font-bold">
-                      <th className="border border-gray-400 px-3 py-2 w-10">NO</th>
-                      <th className="border border-gray-400 px-3 py-2">NIK</th>
-                      <th className="border border-gray-400 px-3 py-2">NAMA LENGKAP</th>
-                      <th className="border border-gray-400 px-3 py-2">ALAMAT / RT / RW</th>
-                      <th className="border border-gray-400 px-3 py-2">STATUS KRITERIA</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredResidents.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="border border-gray-400 px-3 py-4 text-center text-gray-500 italic">Belum ada penerima bantuan yang ditetapkan dalam program ini.</td>
-                      </tr>
-                    ) : (
-                      filteredResidents.map((res, index) => (
-                        <tr key={res.nik} className="hover:bg-gray-50">
-                          <td className="border border-gray-400 px-3 py-2 text-center font-bold">{index + 1}</td>
-                          <td className="border border-gray-400 px-3 py-2 font-mono font-semibold">{res.nik}</td>
-                          <td className="border border-gray-400 px-3 py-2 font-bold">{res.name}</td>
-                          <td className="border border-gray-400 px-3 py-2">RT {res.rt || "-"} / RW {res.rw || "-"}, Desa Sukamaju</td>
-                          <td className="border border-gray-400 px-3 py-2 text-center font-semibold text-emerald-700">Terverifikasi Layak</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Closing */}
-              <p className="font-sans text-xs md:text-sm text-justify">
-                Demikian Berita Acara ini dibuat dan disahkan dengan penuh tanggung jawab untuk dipergunakan sebagaimana mestinya.
-              </p>
-
-              {/* Signatures Grid */}
-              <div className="pt-8 font-sans text-xs grid grid-cols-3 gap-6 text-center">
-                <div className="space-y-16">
-                  <p className="font-bold">Ketua BPD Sukamaju</p>
-                  <p className="font-bold underline uppercase">( H. AHMYAD SODIK, S.IP )</p>
-                </div>
-                <div className="space-y-16">
-                  <p className="font-bold">Sekretaris Desa</p>
-                  <p className="font-bold underline uppercase">( MUHAMMAD RIFQI, S.KOM )</p>
-                </div>
-                <div className="space-y-16">
-                  <p className="font-bold">Kepala Desa Sukamaju</p>
-                  <p className="font-bold underline uppercase">( DRS. H. SUKIRMAN )</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
