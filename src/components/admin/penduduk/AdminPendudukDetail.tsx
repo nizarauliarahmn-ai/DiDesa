@@ -418,9 +418,10 @@ export default function AdminPendudukDetail({
           const currentScroll = container ? container.scrollTop : window.scrollY;
 
           // Ambang Batas Ganda reaktif terhadap judul "Biodata Utama":
-          // Morph menyusut ketika judul tinggal ±12px di bawah tab bar
-          // (saat morph terbentuk judul masih terlihat), dan kembali tinggi
-          // ketika judul ≥40px di bawah tab bar atau kembali ke paling atas
+          // Morph menyusut ketika judul "Biodata Utama" tinggal ±36px di bawah
+          // tab bar (±12px kartu masih mulai di bawah tab bar — saat morph
+          // terbentuk seluruh header kartu masih terlihat), dan kembali tinggi
+          // ketika judul ≥44px di bawah tab bar atau kembali ke paling atas
           // (hysteresis anti-jitter, header selalu terbuka penuh di posisi atas).
           // Setelah morph terbentuk tidak ada yang dikunci — konten tetap
           // men-scroll bebas di bawah header seperti biasa.
@@ -429,8 +430,8 @@ export default function AdminPendudukDetail({
           if (headerEl && titleEl) {
             const gap = titleEl.getBoundingClientRect().top - headerEl.getBoundingClientRect().bottom;
             setIsScrolled((prev) => {
-              if (!prev && gap <= 12) return true;
-              if (prev && (gap >= 40 || currentScroll < 20)) return false;
+              if (!prev && gap <= 36) return true;
+              if (prev && (gap >= 44 || currentScroll < 20)) return false;
               return prev;
             });
           } else {
