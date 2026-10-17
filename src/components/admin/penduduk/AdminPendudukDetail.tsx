@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Calendar, Briefcase, GraduationCap, Heart, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Edit2, User, MapPin, Users, FileText, CheckCircle2, Plus, Trash2, X, ArrowRightLeft, ShieldAlert, Briefcase, Heart, Phone, HandHeart, HeartHandshake, MoreHorizontal, Eye } from 'lucide-react';
 import { History } from 'lucide-react';
 import AdminPendudukPrint from './AdminPendudukPrint';
 import { showToast } from '../../../utils/toast';
@@ -1052,11 +1052,8 @@ export default function AdminPendudukDetail({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
                   {/* Tempat, Tgl Lahir & Usia */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <Calendar className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
+                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                    <div>
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Tempat, Tgl Lahir</p>
                       {isEditMode ? (
                         <div className="mt-1 space-y-1.5">
@@ -1077,11 +1074,8 @@ export default function AdminPendudukDetail({
                   </div>
 
                   {/* Jenis Kelamin */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <User className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
+                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                    <div>
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Jenis Kelamin</p>
                       {isEditMode ? (
                         <div className="mt-1">
@@ -1097,11 +1091,8 @@ export default function AdminPendudukDetail({
 
 
                   {/* Gelar */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <GraduationCap className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
+                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                    <div>
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Gelar</p>
                       <p className="font-bold text-gray-900 dark:text-white text-sm mt-0.5 truncate">
                         {[data?.gelarDepan, data?.gelarBelakang].filter(Boolean).join(', ') || "-"}
@@ -1110,11 +1101,8 @@ export default function AdminPendudukDetail({
                   </div>
 
                   {/* Agama & Golongan Darah */}
-                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 flex items-center justify-center shrink-0 mt-0.5">
-                      <Heart className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
+                  <div className="bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/80">
+                    <div>
                       <p className="text-[10px] text-gray-400 dark:text-slate-400 font-bold uppercase tracking-wider">Agama / Gol. Darah</p>
                       {isEditMode ? (
                         <div className="mt-1 space-y-1.5">
