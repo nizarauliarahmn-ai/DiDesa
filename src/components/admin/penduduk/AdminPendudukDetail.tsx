@@ -236,6 +236,8 @@ export default function AdminPendudukDetail({
   const [detailTab, setDetailTab] = useState(0);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const moreBtnRef = useRef<HTMLButtonElement | null>(null);
+  const stickyHeaderRef = useRef<HTMLDivElement | null>(null);
+  const biodataTitleRef = useRef<HTMLHeadingElement | null>(null);
   const [morePos, setMorePos] = useState<{ top: number; left: number } | null>(null);
   const openMoreMenu = () => {
     const r = moreBtnRef.current?.getBoundingClientRect();
@@ -415,13 +417,29 @@ export default function AdminPendudukDetail({
           const container = document.querySelector('main');
           const currentScroll = container ? container.scrollTop : window.scrollY;
 
-          // Ambang Batas Ganda (Mencegah Jitter / Getar):
-          // Hanya mengecil jika scroll > 160px, dan hanya membesar jika scroll < 50px
-          setIsScrolled((prev) => {
-            if (!prev && currentScroll > 160) return true;
-            if (prev && currentScroll < 50) return false;
-            return prev;
-          });
+          // Ambang Batas Ganda reaktif terhadap judul "Biodata Utama":
+          // Morph menyusut ketika judul tinggal ±12px di bawah tab bar
+          // (saat morph terbentuk judul masih terlihat), dan kembali tinggi
+          // ketika judul sudah ≥90px di bawah tab bar (hysteresis anti-jitter).
+          // Setelah morph terbentuk tidak ada yang dikunci — konten tetap
+          // men-scroll bebas di bawah header seperti biasa.
+          const headerEl = stickyHeaderRef.current;
+          const titleEl = biodataTitleRef.current;
+          if (headerEl && titleEl) {
+            const gap = titleEl.getBoundingClientRect().top - headerEl.getBoundingClientRect().bottom;
+            setIsScrolled((prev) => {
+              if (!prev && gap <= 12) return true;
+              if (prev && gap >= 90) return false;
+              return prev;
+            });
+          } else {
+            // Fallback: ambang statis lama bila ref belum terpasang
+            setIsScrolled((prev) => {
+              if (!prev && currentScroll > 160) return true;
+              if (prev && currentScroll < 50) return false;
+              return prev;
+            });
+          }
 
           ticking = false;
         });
@@ -431,6 +449,7 @@ export default function AdminPendudukDetail({
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     document.querySelector('main')?.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // sinkronkan state awal (mis. posisi scroll ter-restore)
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.querySelector('main')?.removeEventListener('scroll', handleScroll);
@@ -764,7 +783,7 @@ export default function AdminPendudukDetail({
       )}
 
       {/* UNIFIED STICKY CONTAINER — Kartu Profil + Tab Navigasi */}
-      <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-sm transition-all duration-300 ease-out mb-6 overflow-hidden">
+      <div ref={stickyHeaderRef} className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-sm transition-all duration-300 ease-out mb-6 overflow-hidden">
         {/* AREA HEADER PROFIL (MORPHING CONTENT) */}
         <div className={`transition-none md:transition-all md:duration-300 md:ease-out px-6 ${isScrolled ? 'py-2.5 bg-slate-50/50 dark:bg-slate-800/40 border-b border-slate-100 dark:border-slate-700/50' : 'py-6'}`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1043,7 +1062,7 @@ export default function AdminPendudukDetail({
                       <User className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 dark:text-white text-lg">Biodata Utama</h4>
+                      <h4 ref={biodataTitleRef} className="font-bold text-gray-900 dark:text-white text-lg">Biodata Utama</h4>
                       <p className="text-xs text-gray-500 dark:text-slate-400">Ringkasan identitas kependudukan</p>
                     </div>
                   </div>
