@@ -493,15 +493,8 @@ export default function AdminPenduduk({
           matchesFilter = item.gender === 'Laki-laki';
         } else if (activeFilter === 'Perempuan') {
           matchesFilter = item.gender === 'Perempuan';
-        } else if (activeFilter === 'Anak (0-11)') {
-          const age = parseInt(item.age);
-          matchesFilter = !isNaN(age) && age >= 0 && age < 12;
-        } else if (activeFilter === 'Remaja (12-17)') {
-          const age = parseInt(item.age);
-          matchesFilter = !isNaN(age) && age >= 12 && age <= 17;
-        } else if (activeFilter === 'Dewasa (18-59)') {
-          const age = parseInt(item.age);
-          matchesFilter = !isNaN(age) && age >= 18 && age <= 59;
+        } else if (activeFilter === 'Kepala Keluarga') {
+          matchesFilter = (item.familyRelation || '').toLowerCase().trim() === 'kepala keluarga';
         } else if (activeFilter === 'Lansia') {
           matchesFilter = typeof item.age === 'number' ? item.age >= 60 : parseInt(item.age || '0') >= 60;
         } else {
@@ -741,19 +734,8 @@ export default function AdminPenduduk({
   };
   const maleCount = activeResidents.filter(r => r.gender === 'Laki-laki').length;
   const femaleCount = activeResidents.filter(r => r.gender === 'Perempuan').length;
+  const kepalaKeluargaCount = activeResidents.filter(r => (r.familyRelation || '').toLowerCase().trim() === 'kepala keluarga').length;
 
-  const childCount = activeResidents.filter(r => {
-    const age = parseInt(r.age);
-    return !isNaN(age) && age >= 0 && age < 12;
-  }).length;
-  const teenagerCount = activeResidents.filter(r => {
-    const age = parseInt(r.age);
-    return !isNaN(age) && age >= 12 && age <= 17;
-  }).length;
-  const adultCount = activeResidents.filter(r => {
-    const age = parseInt(r.age);
-    return !isNaN(age) && age >= 18 && age <= 59;
-  }).length;
   const elderlyCount = activeResidents.filter(r => {
     const age = parseInt(r.age);
     return !isNaN(age) && age >= 60;
@@ -763,9 +745,7 @@ export default function AdminPenduduk({
     { label: 'Total', value: totalCount, filter: 'Semua', active: activeFilter === 'Semua', span: 'col-span-2 md:col-span-1', emerald: true },
     { label: 'Laki-Laki', value: maleCount, filter: 'Laki-laki', active: activeFilter === 'Laki-laki', span: '', emerald: false },
     { label: 'Perempuan', value: femaleCount, filter: 'Perempuan', active: activeFilter === 'Perempuan', span: '', emerald: false },
-    { label: 'Anak (0-11)', value: childCount, filter: 'Anak (0-11)', active: activeFilter === 'Anak (0-11)', span: '', emerald: false },
-    { label: 'Remaja (12-17)', value: teenagerCount, filter: 'Remaja (12-17)', active: activeFilter === 'Remaja (12-17)', span: '', emerald: false },
-    { label: 'Dewasa (18-59)', value: adultCount, filter: 'Dewasa (18-59)', active: activeFilter === 'Dewasa (18-59)', span: '', emerald: false },
+    { label: 'Kepala Keluarga', value: kepalaKeluargaCount, filter: 'Kepala Keluarga', active: activeFilter === 'Kepala Keluarga', span: '', emerald: false },
     { label: 'Lansia (60+)', value: elderlyCount, filter: 'Lansia', active: activeFilter === 'Lansia', span: '', emerald: false },
   ];
 
@@ -875,7 +855,7 @@ export default function AdminPenduduk({
       </div>
 
       {/* Stats Overview - clickable, triggers table filter */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-3 mb-4">
         {statCardData.map((card) => (
           <button
             key={card.label}
